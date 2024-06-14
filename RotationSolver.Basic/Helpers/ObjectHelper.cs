@@ -73,6 +73,19 @@ public static class ObjectHelper
         return false;
     }
 
+    internal static unsafe bool IsOtherPlayersQuest(this GameObject obj)
+    {
+        var type = obj.GetEventType();
+        if (type == EventHandlerType.QuestBattleDirector)
+        {
+            var eventId = obj.Struct()->EventId;
+            var playerEventId = Player.GameObject->EventId.Id;
+            if (eventId.Id != 0 && eventId.Id != playerEventId) return true;
+        }
+        return false;
+    }
+
+
     internal static bool IsAttackable(this BattleChara battleChara)
     {
         //Dead.
@@ -95,6 +108,9 @@ public static class ObjectHelper
             var tarFateId = battleChara.FateId();
             if (tarFateId != 0 && tarFateId != DataCenter.FateId) return false;
         }
+
+        //Quest Target
+        if (battleChara.IsOtherPlayersQuest()) return false;
 
         if (Service.Config.AddEnemyListToHostile)
         {
