@@ -84,7 +84,7 @@ partial class NinjaRotation
 
     static partial void ModifyTrickAttackPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Suiton, StatusID.Hidden];
+        setting.StatusNeed = [StatusID.ShadowWalker, StatusID.Hidden];
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
