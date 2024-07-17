@@ -241,7 +241,7 @@ partial class SamuraiRotation
     [RotationDesc(ActionID.ThirdEyePvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (TengetsuPvE.CanUse(out act)) return true;
+        if (TengentsuPvE.CanUse(out act)) return true;
         if (ThirdEyePvE.CanUse(out act)) return true;
         return base.DefenseSingleAbility(nextGCD, out act);
     }
