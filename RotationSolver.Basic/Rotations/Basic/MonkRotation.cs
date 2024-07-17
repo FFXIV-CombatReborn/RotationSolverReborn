@@ -45,7 +45,18 @@ partial class MonkRotation
     /// </summary>
     public static int CoeurlFury => JobGauge.CoeurlFury;
     #endregion
-
+    static partial void ModifyBootshinePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => OpoOpoFury == 1;
+    }
+    static partial void ModifyTrueStrikePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => RaptorFury == 1;
+    }
+    static partial void ModifySnapPunchPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => CoeurlFury >= 1;
+    }
     static partial void ModifyLeapingOpoPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => OpoOpoFury == 1;
