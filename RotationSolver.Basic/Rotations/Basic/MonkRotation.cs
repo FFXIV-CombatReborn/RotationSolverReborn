@@ -1,4 +1,5 @@
-namespace RotationSolver.Basic.Rotations.Basic;
+﻿namespace RotationSolver.Basic.Rotations.Basic;
+
 partial class MonkRotation
 {
     /// <inheritdoc/>
@@ -24,49 +25,26 @@ partial class MonkRotation
     /// 
     /// </summary>
     public static bool HasLunar => JobGauge.Nadi.HasFlag(Nadi.LUNAR);
-
-    /// <summary>
-    /// .
-    /// </summary>
-    public static bool NoNadi => JobGauge.Nadi.HasFlag(Nadi.NONE);
-
-    /// <summary>
-    /// Gets the amount of available Opo-opo Fury stacks.
-    /// </summary>
-    public static int OpoOpoFury => JobGauge.OpoOpoFury;
-
-    /// <summary>
-    /// Gets the amount of available Raptor Fury stacks.
-    /// </summary>
-    public static int RaptorFury => JobGauge.RaptorFury;
-
-    /// <summary>
-    /// Gets the amount of available Coeurl Fury stacks.
-    /// </summary>
-    public static int CoeurlFury => JobGauge.CoeurlFury;
     #endregion
 
-    static partial void ModifyLeapingOpoPvE(ref ActionSetting setting)
+    static partial void ModifyDragonKickPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => OpoOpoFury == 1;
+        setting.StatusProvide = [StatusID.LeadenFist];
     }
-    static partial void ModifyRisingRaptorPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => RaptorFury == 1;
-    }
-    static partial void ModifyPouncingCoeurlPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => CoeurlFury >= 1;
-    }
+
     static partial void ModifyDemolishPvE(ref ActionSetting setting)
     {
+        setting.TargetStatusProvide = [StatusID.Demolish];
+        setting.CreateConfig = () => new()
+        {
+            StatusGcdCount = 3,
+        };
         setting.UnlockedByQuestID = 66103;
     }
 
     static partial void ModifySteelPeakPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InCombat && Chakra == 5;
-        setting.UnlockedByQuestID = 66094;
     }
 
     static partial void ModifyHowlingFistPvE(ref ActionSetting setting)
@@ -86,30 +64,16 @@ partial class MonkRotation
     static partial void ModifyRiddleOfEarthPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RiddleOfEarth];
-        setting.StatusProvide = [StatusID.EarthsRumination];
     }
 
     static partial void ModifyRiddleOfWindPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.WindsRumination];
         setting.CreateConfig = () => new()
         {
             TimeToKill = 10,
         };
     }
-    static partial void ModifyWindsReplyPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.WindsRumination];
-    }
-    static partial void ModifyEarthsReplyPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.EarthsRumination];
-    }
-    static partial void ModifyFiresReplyPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.FiresRumination];
-        setting.StatusProvide = [StatusID.FormlessFist];
-    }
+
     static partial void ModifyPerfectBalancePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InCombat && IsLongerThan(5);
@@ -118,7 +82,7 @@ partial class MonkRotation
 
     static partial void ModifyFormShiftPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.FormlessFist];
+        setting.StatusProvide = [StatusID.FormlessFist, StatusID.PerfectBalance];
         setting.UnlockedByQuestID = 67563;
     }
 
@@ -133,7 +97,6 @@ partial class MonkRotation
 
     static partial void ModifyRiddleOfFirePvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.FiresRumination];
         setting.CreateConfig = () => new()
         {
             TimeToKill = 10,
@@ -150,19 +113,11 @@ partial class MonkRotation
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
-    static partial void ModifyInspiritedMeditationPvE(ref ActionSetting setting)
-    {
-        setting.UnlockedByQuestID = 66599;
-    }
-    static partial void ModifySteeledMeditationPvE(ref ActionSetting setting)
-    {
-        setting.UnlockedByQuestID = 66094;
-    }
 
-    static partial void ModifyForbiddenMeditationPvE(ref ActionSetting setting)
-    {
-         setting.UnlockedByQuestID = 67564;
-    }
+    // static partial void ModifyMeditationPvE(ref ActionSetting setting)
+    // {
+    //     setting.UnlockedByQuestID = 66094;
+    // }
 
     static partial void ModifyRockbreakerPvE(ref ActionSetting setting)
     {
