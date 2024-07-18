@@ -581,8 +581,8 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthForGuard { get; set; } = 0.15f;
 
-    [UI("Prompt box color of teaching mode", Parent =nameof(TeachingMode))]
-    public Vector4 TeachingModeColor { get; set; } = new(0f, 1f, 0.8f, 1f);
+    [UI("Highlight color.", Parent =nameof(TeachingMode))]
+    public Vector4 TeachingModeColor { get; set; } = new(0f, 1f, 0f, 1f);
 
     [UI("Target color", Parent =nameof(TargetColor))]
     public Vector4 TargetColor { get; set; } = new(1f, 0.2f, 0f, 0.8f);

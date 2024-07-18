@@ -15,7 +15,6 @@ using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 using RotationSolver.Localization;
-using RotationSolver.UI;
 using RotationSolver.UI.HighlightHotbar;
 using System.Runtime.InteropServices;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
@@ -37,7 +36,7 @@ internal static class MajorUpdater
 
     private unsafe static void FrameworkUpdate(IFramework framework)
     {
-        PainterManager.HotbarIDs.Clear(); // Clears the previously highlighted action.
+        HotbarHighlight.HotbarIDs.Clear();
         RotationSolverPlugin.UpdateDisplayWindow();
         if (!IsValid)
         {
@@ -67,7 +66,7 @@ internal static class MajorUpdater
         {
             SocialUpdater.UpdateSocial();
             PreviewUpdater.UpdatePreview();
-            UpdateHighlight(); // Updates the next action to be highlighted
+            UpdateHighlight();
 
             // Just sets a local variable, I don't think this is used or needed for anything
             //if (Service.Config.TeachingMode && ActionUpdater.NextAction != null)
@@ -153,7 +152,7 @@ internal static class MajorUpdater
 
         if (nextAction is IBaseItem item)
         {
-            hotbar = new(HotbarSlotType.Item, item.ID); // TODO: Test items, might need to be changed to 'AdjustedID'
+            hotbar = new(HotbarSlotType.Item, item.ID); // TODO: Test items, might need to be changed to 'AdjustedID'.  Update: Items don't seem to work for me :(
         }
         else if (nextAction is IBaseAction baseAction)
         {
@@ -173,7 +172,7 @@ internal static class MajorUpdater
         }
         if (hotbar.HasValue)
         {
-            PainterManager.HotbarIDs.Add(hotbar.Value);
+            HotbarHighlight.HotbarIDs.Add(hotbar.Value);
         }
     }
 
@@ -258,7 +257,7 @@ internal static class MajorUpdater
             }
 
             RSCommands.UpdateRotationState();
-            PainterManager.UpdateSettings();
+            HotbarHighlight.UpdateSettings();
         }
         catch (Exception ex)
         {

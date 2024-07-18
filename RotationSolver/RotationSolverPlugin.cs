@@ -81,7 +81,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.Draw += OnDraw;
 
-        PainterManager.Init();
+        HotbarHighlight.Init();
 
         MajorUpdater.Enable();
         Watcher.Enable();
@@ -146,7 +146,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         LocalizationManager.Dispose();
         MajorUpdater.Dispose();
-        PainterManager.Dispose();
+        HotbarHighlight.Dispose();
         await OtherConfiguration.Save();
 
         ECommonsMain.Dispose();
