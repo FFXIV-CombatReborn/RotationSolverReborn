@@ -10,7 +10,7 @@ namespace RotationSolver.Basic.Configuration;
 internal partial class Configs : IPluginConfiguration
 {
     [JsonIgnore]
-    public const string 
+    public const string
         BasicTimer = "BasicTimer",
         BasicAutoSwitch = "BasicAutoSwitch",
         BasicParams = "BasicParams",
@@ -164,7 +164,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _filterStopMark = true;
 
-    [ConditionBool, UI ("Teaching mode (Requires Display UI Overlay)", Filter = UiInformation)]
+    [ConditionBool, UI ("Teaching mode", Filter = UiInformation)]
     private static readonly bool _teachingMode = false;
 
 
@@ -387,7 +387,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = AutoActionCondition, Section = 1)]
     private static readonly bool _healWhenNothingTodo = true;
 
-    [ConditionBool, UI("Only heal self When not a Healer", 
+    [ConditionBool, UI("Only heal self When not a Healer",
         Filter = HealingActionCondition, Section = 1,
         PvPFilter = JobFilterType.NoHealer, PvEFilter = JobFilterType.NoHealer)]
     private static readonly bool _onlyHealSelfWhenNoHealer = false;
@@ -438,12 +438,12 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 90, ConfigUnitType.Degree, 0.02f)]
     public float AngleOfVisionCone { get; set; } = 45;
 
-    [UI("HP for standard deviation for using AoE heal.", Description = "Basically the health difference between a single party member and the whole party, used for deciding between healing a single party member or AOE healing. Leave this alone if you don't undertand its use.", 
+    [UI("HP for standard deviation for using AoE heal.", Description = "Basically the health difference between a single party member and the whole party, used for deciding between healing a single party member or AOE healing. Leave this alone if you don't undertand its use.",
         Filter = AutoActionCondition, Section = 3)]
     [Range(0, 0.5f, ConfigUnitType.Percent, 0.02f)]
     public float HealthDifference { get; set; } = 0.25f;
 
-    [UI("Melee Range action using offset", 
+    [UI("Melee Range action using offset",
         Filter = AutoActionCondition, Section = 3,
         PvEFilter = JobFilterType.Melee, PvPFilter = JobFilterType.NoJob)]
     [Range(0, 5, ConfigUnitType.Yalms, 0.02f)]
@@ -460,7 +460,7 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthTankRatio { get; set; } = 0.4f;
 
-    [UI("Heal healer first if their HP is lower than this.", 
+    [UI("Heal healer first if their HP is lower than this.",
         Filter = HealingActionCondition, Section = 1,
         PvEFilter = JobFilterType.Healer, PvPFilter = JobFilterType.Healer)]
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
@@ -524,7 +524,7 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 0.7f, ConfigUnitType.Seconds, 0.002f)]
     public float CountDownAhead { get; set; } = 0.4f;
 
-    [UI("The size of the sector angle that can be selected as the moveable target", 
+    [UI("The size of the sector angle that can be selected as the moveable target",
         Description = "If the selection mode is based on character facing, i.e., targets within the character's viewpoint are moveable targets. \nIf the selection mode is screen-centered, i.e., targets within a sector drawn upward from the character's point are movable targets.",
         Filter = TargetConfig, Section = 2)]
     [Range(0, 90, ConfigUnitType.Degree, 0.02f)]
@@ -575,7 +575,7 @@ internal partial class Configs : IPluginConfiguration
     [JobConfig, Range(0, 0.3f, ConfigUnitType.Seconds, 0.002f)]
     public float MinUpdatingTime { get; set; } = 0.01f;
 
-    [UI("The HP for using Guard.", 
+    [UI("The HP for using Guard.",
         Filter = HealingActionCondition, Section = 3,
         PvEFilter = JobFilterType.NoJob)]
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
@@ -652,7 +652,7 @@ internal partial class Configs : IPluginConfiguration
     private readonly float _healthSingleSpell = 0.55f;
 
     [JobConfig, Range(0, 1, ConfigUnitType.Percent, 0.02f)]
-    [UI("The HP%% for tank to use invulnerability", 
+    [UI("The HP%% for tank to use invulnerability",
         Filter = AutoActionCondition, Section = 3,
         PvEFilter = JobFilterType.Tank, PvPFilter = JobFilterType.NoJob)]
     private readonly float _healthForDyingTanks = 0.15f;
@@ -663,8 +663,8 @@ internal partial class Configs : IPluginConfiguration
     private readonly float _healthForAutoDefense = 1;
 
     [JobConfig, Range(0, 1.0f, ConfigUnitType.Seconds)]
-    [UI("Action Ahead (How far in advance of GCD being available RSR will try to queue the next GCD)", 
-        Description = "This setting controls how many oGCDs RSR will try to fit in a single GCD window\nLower numbers mean more oGCDs, but potentially more GCD clipping", 
+    [UI("Action Ahead (How far in advance of GCD being available RSR will try to queue the next GCD)",
+        Description = "This setting controls how many oGCDs RSR will try to fit in a single GCD window\nLower numbers mean more oGCDs, but potentially more GCD clipping",
         Parent = nameof(OverrideActionAheadTimer))]
     private readonly float _action4head = 0.4f;
 
