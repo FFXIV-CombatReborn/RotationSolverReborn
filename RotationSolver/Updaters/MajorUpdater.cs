@@ -11,11 +11,14 @@ using ECommons.ImGuiMethods;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 using RotationSolver.Localization;
 using RotationSolver.UI;
+using RotationSolver.UI.HighlightHotbar;
 using System.Runtime.InteropServices;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
 namespace RotationSolver.Updaters;
 
@@ -34,6 +37,7 @@ internal static class MajorUpdater
 
     private unsafe static void FrameworkUpdate(IFramework framework)
     {
+        PainterManager.HotbarIDs.Clear(); // Clears the previously highlighted action.
         RotationSolverPlugin.UpdateDisplayWindow();
         if (!IsValid)
         {
@@ -63,12 +67,15 @@ internal static class MajorUpdater
         {
             SocialUpdater.UpdateSocial();
             PreviewUpdater.UpdatePreview();
+            UpdateHighlight(); // Updates the next action to be highlighted
 
-            if (Service.Config.TeachingMode && ActionUpdater.NextAction != null)
-            {
-                //Sprint action id is 3 however the id in hot bar is 4.
-                var id = ActionUpdater.NextAction.AdjustedID;
-            }
+            // Just sets a local variable, I don't think this is used or needed for anything
+            //if (Service.Config.TeachingMode && ActionUpdater.NextAction != null)
+            //{
+            //    //Sprint action id is 3 however the id in hot bar is 4.
+            //    var id = ActionUpdater.NextAction.AdjustedID;
+            //}
+
             ActionUpdater.UpdateActionInfo();
 
             var canDoAction = ActionUpdater.CanDoAction();
@@ -132,6 +139,41 @@ internal static class MajorUpdater
         if (arg1 == 3)
         {
             RotationSolverPlugin.OpenConfigWindow();
+        }
+    }
+
+    /// <summary>
+    /// <br>Updates next to-be highlighted action/item on the hotbar</br>
+    /// Returns early if <seealso cref="ActionUpdater.NextAction"/> is not an <seealso cref="IAction"/> OR if the config 'TeachingMode' is off.
+    /// </summary>
+    private static void UpdateHighlight()
+    {
+        if (!Service.Config.TeachingMode || ActionUpdater.NextAction is not IAction nextAction) return;
+        HotbarID? hotbar = null;
+
+        if (nextAction is IBaseItem item)
+        {
+            hotbar = new(HotbarSlotType.Item, item.ID); // TODO: Test items, might need to be changed to 'AdjustedID'
+        }
+        else if (nextAction is IBaseAction baseAction)
+        {
+            if (baseAction.Action.ActionCategory.Row is 10 or 11)//System Action.
+            {
+                var gAct = Svc.Data.GetExcelSheet<GeneralAction>()?.FirstOrDefault(g => g.Action.Row == baseAction.ID);
+
+                if (gAct != null)
+                {
+                    hotbar = new(HotbarSlotType.GeneralAction, gAct.RowId);
+                }
+            }
+            else
+            {
+                hotbar = new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID);
+            }
+        }
+        if (hotbar.HasValue)
+        {
+            PainterManager.HotbarIDs.Add(hotbar.Value);
         }
     }
 
@@ -216,6 +258,7 @@ internal static class MajorUpdater
             }
 
             RSCommands.UpdateRotationState();
+            PainterManager.UpdateSettings();
         }
         catch (Exception ex)
         {

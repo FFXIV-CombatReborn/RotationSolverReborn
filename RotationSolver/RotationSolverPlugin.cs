@@ -15,6 +15,7 @@ using RotationSolver.Data;
 using RotationSolver.Helpers;
 using RotationSolver.Localization;
 using RotationSolver.UI;
+using RotationSolver.UI.HighlightHotbar;
 using RotationSolver.Updaters;
 using System.Xml.Linq;
 using WelcomeWindow = RotationSolver.UI.WelcomeWindow;
@@ -80,6 +81,8 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.Draw += OnDraw;
 
+        PainterManager.Init();
+
         MajorUpdater.Enable();
         Watcher.Enable();
         OtherConfiguration.Init();
@@ -143,6 +146,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         LocalizationManager.Dispose();
         MajorUpdater.Dispose();
+        PainterManager.Dispose();
         await OtherConfiguration.Save();
 
         ECommonsMain.Dispose();
