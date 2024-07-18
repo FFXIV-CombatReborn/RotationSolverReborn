@@ -31,6 +31,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     static NextActionWindow? _nextActionWindow;
     static CooldownWindow? _cooldownWindow;
     static WelcomeWindow? _changelogWindow;
+    static OverlayWindow? _overlayWindow;
 
     static readonly List<IDisposable> _dis = [];
     public static string Name => "Rotation Solver Reborn";
@@ -69,6 +70,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         _nextActionWindow = new();
         _cooldownWindow = new();
         _changelogWindow = new();
+        _overlayWindow = new();
 
         windowSystem = new WindowSystem(Name);
         windowSystem.AddWindow(_rotationConfigWindow);
@@ -76,6 +78,8 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         windowSystem.AddWindow(_nextActionWindow);
         windowSystem.AddWindow(_cooldownWindow);
         windowSystem.AddWindow(_changelogWindow);
+        windowSystem.AddWindow(_overlayWindow);
+        Notify.Success("Overlay Window was added!");
 
         Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
@@ -146,7 +150,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         LocalizationManager.Dispose();
         MajorUpdater.Dispose();
-        HotbarHighlight.Dispose();
+        //HotbarHighlight.Dispose();
         await OtherConfiguration.Save();
 
         ECommonsMain.Dispose();
@@ -184,5 +188,6 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         _controlWindow!.IsOpen = isValid && Service.Config.ShowControlWindow;
         _cooldownWindow!.IsOpen = isValid && Service.Config.ShowCooldownWindow;
+        _overlayWindow!.IsOpen = isValid && Service.Config.TeachingMode;
     }
 }
