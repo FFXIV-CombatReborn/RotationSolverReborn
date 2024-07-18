@@ -15,7 +15,7 @@ internal static class HotbarHighlight
     public static HashSet<HotbarID> HotbarIDs => _highLight?.HotbarIDs ?? [];
     internal static readonly List<HotbarHighlightDrawing> _drawingElements = [];
     internal static IDrawing2D[] _drawingElements2D = [];
-    private static IDalamudPluginInterface? _pluginInterface;
+    //private static IDalamudPluginInterface? _pluginInterface;
 
     private static WindowSystem? windowSystem;
 
@@ -29,8 +29,8 @@ internal static class HotbarHighlight
         if (_initiated) return;
         _initiated = true;
 
-        _pluginInterface = Svc.PluginInterface;
-        _pluginInterface.Create<Service>();
+        //_pluginInterface = Svc.PluginInterface;
+        //_pluginInterface.Create<Service>();
         _highLight = new();
         UpdateSettings();
         windowSystem = new WindowSystem(_name);

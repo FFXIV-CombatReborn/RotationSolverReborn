@@ -156,13 +156,13 @@
   "ShowStateIconName": "Show RS state icon",
   "ShowBeneficialPositionsName": "Show beneficial AoE locations.",
   "SayOutStateChangedName": "Audio notification for when the status changes",
-  "ShowInfoOnDtrName": "Display plugin status on server info",
-  "ShowInfoOnToastName": "Display plugin status on toast",
+  "ShowInfoOnDtrName": "Show plugin status in server info bar.",
+  "ShowInfoOnToastName": "Display plugin status on toast popup",
   "KeyBoardNoiseName": "Simulate the effect of pressing abilities",
   "ShowTooltipsName": "Show tooltips",
   "ShowToastsAboutDoActionName": "Display do action feedback on toast",
   "HideWarningName": "Hide all warnings",
-  "ShowToggledActionInChatName": "Display toggle action feedback on chat",
+  "ShowToggledActionInChatName": "Show action toggle feedback in chat.",
   "InfoWindowBgName": "Info Window's Background",
   "DrawIconAnimationName": "Show RSR logo animation",
   "OnlyShowWithHostileOrInDutyName": "Only show these windows if there are enemies in or in duty",
@@ -466,5 +466,8 @@
   "RotationSolver.Data.UiString.ConfigWindow_Auto_HealingCondition_Description": "How RSR should use healing abilities",
   "RotationSolver.Data.UiString.ConfigWindow_About_Warnings_Time": "Warning Time",
   "RotationSolver.Data.UiString.ConfigWindow_About_Warnings_Warning": "Warning Message",
-  "RotationSolver.Data.UiString.CommandsChangeSettingsValue": "Modify {0} to {1}"
+  "RotationSolver.Data.UiString.CommandsChangeSettingsValue": "Modify {0} to {1}",
+  "UseOriginalCooldownName": "Show Original Cooldown",
+  "ShowCooldownsAlwaysName": "Always Show Cooldowns",
+  "TeachingModeColorName": "Highlight color."
 }
