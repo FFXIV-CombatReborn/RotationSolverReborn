@@ -1,8 +1,9 @@
 ﻿using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
+using RotationSolver.UI.HighlightTeachingMode;
 
-namespace RotationSolver.UI.HighlightHotbar;
+namespace RotationSolver.UI;
 
 /// <summary>
 /// Originally belonged in the XIVDrawer namespace, however we gave it its own class.
@@ -37,18 +38,18 @@ internal class OverlayWindow : Window
 
     public override void Draw()
     {
-        if (!HotbarHighlightDrawerManager.Enable || Svc.ClientState == null || Svc.ClientState.LocalPlayer == null) return;
+        if (!HotbarHighlightManager.Enable || Svc.ClientState == null || Svc.ClientState.LocalPlayer == null) return;
 
         ImGui.GetStyle().AntiAliasedFill = false;
 
         try
         {
-            if (!HotbarHighlightDrawerManager.UseTaskToAccelerate)
+            if (!HotbarHighlightManager.UseTaskToAccelerate)
             {
-                HotbarHighlightDrawerManager._drawingElements2D = HotbarHighlightDrawerManager.To2DAsync().Result;
+                HotbarHighlightManager._drawingElements2D = HotbarHighlightManager.To2DAsync().Result;
             }
 
-            foreach (var item in HotbarHighlightDrawerManager._drawingElements2D.OrderBy(drawing =>
+            foreach (var item in HotbarHighlightManager._drawingElements2D.OrderBy(drawing =>
             {
                 if (drawing is PolylineDrawing poly)
                 {

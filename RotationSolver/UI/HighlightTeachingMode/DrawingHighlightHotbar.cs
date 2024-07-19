@@ -7,19 +7,15 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Data.Files;
-using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule; 
+using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
-namespace RotationSolver.UI.HighlightHotbar;
+namespace RotationSolver.UI.HighlightTeachingMode;
 
 /// <summary>
-/// This class is grabbing the needed things related to anything outside of XIVDrawerMain like:
-/// IDrawing2D (is just an interface used to draw the 2D elements (AKA the highlight border))
-/// ImageDrawing (Is used by HotbarHighlightDrawing to fit an overlay image that fits the hotbarslot)
-/// PolylineDrawing (draws the actual borders on the overlay window)
-/// HotbarID (You'll never guess what this is for)
-/// 
+/// The hotbar highlight drawing.
 /// </summary>
-public class HotbarHighlightDrawing : IDisposable
+public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 {
     private static readonly Vector2 _uv1 = new(96 * 5 / 852f, 0),
         _uv2 = new((96 * 5 + 144) / 852f, 0.5f);
@@ -27,19 +23,31 @@ public class HotbarHighlightDrawing : IDisposable
     private static IDalamudTextureWrap? _texture = null;
 
     /// <summary>
-    /// The action ids that will be highlighted.
+    /// The action ids that 
     /// </summary>
     public HashSet<HotbarID> HotbarIDs { get; } = [];
 
     /// <summary>
     /// The color of highlight.
     /// </summary>
-    public Vector4 Color { get; set; } = Service.Config.TeachingModeColor;
+    public Vector4 Color { get; set; } = new Vector4(0.8f, 0.5f, 0.3f, 1);
 
     /// <summary>
     /// 
     /// </summary>
-    public HotbarHighlightDrawing()
+    /// <param name="color">Color</param>
+    /// <param name="ids">action ids</param>
+    public DrawingHighlightHotbar(Vector4 color, params HotbarID[] ids)
+        : this()
+    {
+        Color = color;
+        HotbarIDs = new (ids);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public DrawingHighlightHotbar()
     {
         if (_texture != null) return;
         var tex = Svc.Data?.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
@@ -54,8 +62,6 @@ public class HotbarHighlightDrawing : IDisposable
         }
 
         _texture = Svc.Texture.CreateFromRaw(RawImageSpecification.Rgba32(tex.Header.Width, tex.Header.Height), array);
-
-        HotbarHighlightDrawerManager._drawingElements.Add(this);
     }
 
     private static unsafe bool IsVisible(AtkUnitBase unit)
@@ -77,7 +83,7 @@ public class HotbarHighlightDrawing : IDisposable
         return true;
     }
 
-    private protected unsafe IEnumerable<IDrawing2D> To2D()
+    private protected override unsafe IEnumerable<IDrawing2D> To2D()
     {
         if (_texture == null) return [];
 
@@ -153,6 +159,12 @@ public class HotbarHighlightDrawing : IDisposable
         return result;
     }
 
+    /// <inheritdoc/>
+    protected override void UpdateOnFrame()
+    {
+        return;
+    }
+
     private static unsafe IEnumerable<nint> GetAddons<T>() where T : struct
     {
         if (typeof(T).GetCustomAttribute<Addon>() is not Addon on) return [];
@@ -176,29 +188,18 @@ public class HotbarHighlightDrawing : IDisposable
 
         return false;
     }
+}
 
-    private bool _disposed;
-
-    /// <summary>
-    /// If it is enabled.
-    /// </summary>
-    public virtual bool Enable { get; set; } = true;
-
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        if (_disposed) return;
-        _disposed = true;
-        HotbarHighlightDrawerManager._drawingElements.Remove(this);
-
-        GC.SuppressFinalize(this);
-    }
-
-    internal IEnumerable<IDrawing2D> To2DMain()
-    {
-        if (!Enable) return [];
-        return To2D();
-    }
+/// <summary>
+/// The Hot bar ID
+/// </summary>
+public readonly record struct HotbarID(HotbarSlotType SlotType, uint Id)
+{
+    ///// <summary>
+    ///// Convert from a action id.
+    ///// </summary>
+    ///// <param name="actionId"></param>
+    //public static implicit operator HotbarID(uint actionId) => new(HotbarSlotType.Action, actionId);
 }
 
 /// <summary>
@@ -213,7 +214,7 @@ public interface IDrawing2D
 }
 
 /// <summary>
-/// Draws the overlay image for a hotbarslot.
+/// Drawing the image.
 /// </summary>
 /// <remarks>
 /// 
@@ -295,43 +296,3 @@ public readonly struct PolylineDrawing(Vector2[] pts, uint color, float thicknes
         }
     }
 }
-
-/// <summary>
-/// The Hot bar ID
-/// </summary>
-public readonly record struct HotbarID(HotbarSlotType SlotType, uint Id) { }
-
-/// <summary>
-/// Drawing element ( Belonged in the XIVDrawer.ElementSpecial namespace same as HotbarID (not sure if needed yet, therefor we comment it out))
-/// </summary>
-//public abstract class IDrawing : BasicDrawing
-//{
-//    private protected IDrawing()
-//    {
-//        XIVDrawerMain._drawingElements.Add(this);
-//    }
-
-//    internal void UpdateOnFrameMain()
-//    {
-//        if (!Enable) return;
-//        UpdateOnFrame();
-//    }
-
-//    /// <summary>
-//    /// The things that it should update on every frame.
-//    /// </summary>
-//    protected abstract void UpdateOnFrame();
-
-//    internal IEnumerable<IDrawing2D> To2DMain()
-//    {
-//        if (!Enable) return [];
-//        return To2D();
-//    }
-
-//    private protected abstract IEnumerable<IDrawing2D> To2D();
-
-//    private protected override void AdditionalDispose()
-//    {
-//        XIVDrawerMain._drawingElements.Remove(this);
-//    }
-//}

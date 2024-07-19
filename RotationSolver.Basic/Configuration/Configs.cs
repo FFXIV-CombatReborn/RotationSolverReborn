@@ -167,9 +167,9 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI ("Teaching mode", Filter = UiInformation)]
     private static readonly bool _teachingMode = false;
 
-    [ConditionBool, UI("Use task for overlay window.",
-        Parent = nameof(TeachingMode))]
-    private static readonly bool _useTasksForOverlay = false;
+    //[ConditionBool, UI("Use task for overlay window.",
+    //    Parent = nameof(TeachingMode))]
+    //private static readonly bool _useTasksForOverlay = false;
 
     [ConditionBool, UI("Simulate the effect of pressing abilities",
         Filter =UiInformation)]

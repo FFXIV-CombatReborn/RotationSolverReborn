@@ -15,7 +15,7 @@ using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 using RotationSolver.Localization;
-using RotationSolver.UI.HighlightHotbar;
+using RotationSolver.UI.HighlightTeachingMode;
 using System.Runtime.InteropServices;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
@@ -36,7 +36,8 @@ internal static class MajorUpdater
 
     private unsafe static void FrameworkUpdate(IFramework framework)
     {
-        HotbarHighlightDrawerManager.HotbarIDs.Clear();
+        //HotbarHighlightDrawerManager.HotbarIDs.Clear();
+        HotbarHighlightManager.HotbarIDs.Clear();
         RotationSolverPlugin.UpdateDisplayWindow();
         if (!IsValid)
         {
@@ -172,7 +173,8 @@ internal static class MajorUpdater
         }
         if (hotbar.HasValue)
         {
-            HotbarHighlightDrawerManager.HotbarIDs.Add(hotbar.Value);
+            //HotbarHighlightDrawerManager.HotbarIDs.Add(hotbar.Value);
+            HotbarHighlightManager.HotbarIDs.Add(hotbar.Value);
         }
     }
 
@@ -257,7 +259,8 @@ internal static class MajorUpdater
             }
 
             RSCommands.UpdateRotationState();
-            HotbarHighlightDrawerManager.UpdateSettings();
+            //HotbarHighlightDrawerManager.UpdateSettings();
+            HotbarHighlightManager.UpdateSettings();
         }
         catch (Exception ex)
         {
