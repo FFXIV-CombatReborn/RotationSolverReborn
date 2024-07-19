@@ -7,10 +7,18 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Data.Files;
-using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule; 
 
 namespace RotationSolver.UI.HighlightHotbar;
 
+/// <summary>
+/// This class is grabbing the needed things related to anything outside of XIVDrawerMain like:
+/// IDrawing2D (is just an interface used to draw the 2D elements (AKA the highlight border))
+/// ImageDrawing (Is used by HotbarHighlightDrawing to fit an overlay image that fits the hotbarslot)
+/// PolylineDrawing (draws the actual borders on the overlay window)
+/// HotbarID (You'll never guess what this is for)
+/// 
+/// </summary>
 public class HotbarHighlightDrawing : IDisposable
 {
     private static readonly Vector2 _uv1 = new(96 * 5 / 852f, 0),
@@ -47,7 +55,7 @@ public class HotbarHighlightDrawing : IDisposable
 
         _texture = Svc.Texture.CreateFromRaw(RawImageSpecification.Rgba32(tex.Header.Width, tex.Header.Height), array);
 
-        HotbarHighlight._drawingElements.Add(this);
+        HotbarHighlightDrawerManager._drawingElements.Add(this);
     }
 
     private static unsafe bool IsVisible(AtkUnitBase unit)
@@ -181,7 +189,7 @@ public class HotbarHighlightDrawing : IDisposable
     {
         if (_disposed) return;
         _disposed = true;
-        HotbarHighlight._drawingElements.Remove(this);
+        HotbarHighlightDrawerManager._drawingElements.Remove(this);
 
         GC.SuppressFinalize(this);
     }
@@ -192,3 +200,138 @@ public class HotbarHighlightDrawing : IDisposable
         return To2D();
     }
 }
+
+/// <summary>
+/// 2D drawing element.
+/// </summary>
+public interface IDrawing2D
+{
+    /// <summary>
+    /// Draw on the <seealso cref="ImGui"/>
+    /// </summary>
+    void Draw();
+}
+
+/// <summary>
+/// Draws the overlay image for a hotbarslot.
+/// </summary>
+/// <remarks>
+/// 
+/// </remarks>
+/// <param name="texture"></param>
+/// <param name="pt1"></param>
+/// <param name="pt2"></param>
+/// <param name="col"></param>
+public readonly struct ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2, uint col = uint.MaxValue) : IDrawing2D
+{
+    private readonly IDalamudTextureWrap _texture = texture;
+    private readonly Vector2 _pt1 = pt1, _pt2 = pt2, _uv1 = default, _uv2 = Vector2.One;
+    private readonly uint _col = col;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="texture"></param>
+    /// <param name="pt1"></param>
+    /// <param name="pt2"></param>
+    /// <param name="uv1"></param>
+    /// <param name="uv2"></param>
+    /// <param name="col"></param>
+    public ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2,
+        Vector2 uv1, Vector2 uv2, uint col = uint.MaxValue)
+        : this(texture, pt1, pt2, col)
+    {
+        _uv1 = uv1;
+        _uv2 = uv2;
+    }
+
+    /// <summary>
+    /// Draw on the <seealso cref="ImGui"/>
+    /// </summary>
+    public void Draw()
+    {
+        ImGui.GetWindowDrawList().AddImage(_texture.ImGuiHandle, _pt1, _pt2, _uv1, _uv2, _col);
+    }
+}
+
+/// <summary>
+/// Polyline drawing draws the actual border lines on the overlay window.
+/// </summary>
+/// <remarks>
+/// 
+/// </remarks>
+/// <param name="pts"></param>
+/// <param name="color"></param>
+/// <param name="thickness"></param>
+public readonly struct PolylineDrawing(Vector2[] pts, uint color, float thickness) : IDrawing2D
+{
+    private readonly Vector2[] _pts = pts;
+    private readonly uint _color = color;
+    internal readonly float _thickness = thickness;
+
+    /// <summary>
+    /// Draw on the <seealso cref="ImGui"/>
+    /// </summary>
+    public void Draw()
+    {
+        if (_pts == null || _pts.Length < 2) return;
+
+        foreach (var pt in _pts)
+        {
+            ImGui.GetWindowDrawList().PathLineTo(pt);
+        }
+
+        if (_thickness == 0)
+        {
+            ImGui.GetWindowDrawList().PathFillConvex(_color);
+        }
+        else if (_thickness < 0)
+        {
+            ImGui.GetWindowDrawList().PathStroke(_color, ImDrawFlags.RoundCornersAll, -_thickness);
+        }
+        else
+        {
+            ImGui.GetWindowDrawList().PathStroke(_color, ImDrawFlags.Closed | ImDrawFlags.RoundCornersAll, _thickness);
+        }
+    }
+}
+
+/// <summary>
+/// The Hot bar ID
+/// </summary>
+public readonly record struct HotbarID(HotbarSlotType SlotType, uint Id) { }
+
+/// <summary>
+/// Drawing element ( Belonged in the XIVDrawer.ElementSpecial namespace same as HotbarID (not sure if needed yet, therefor we comment it out))
+/// </summary>
+//public abstract class IDrawing : BasicDrawing
+//{
+//    private protected IDrawing()
+//    {
+//        XIVDrawerMain._drawingElements.Add(this);
+//    }
+
+//    internal void UpdateOnFrameMain()
+//    {
+//        if (!Enable) return;
+//        UpdateOnFrame();
+//    }
+
+//    /// <summary>
+//    /// The things that it should update on every frame.
+//    /// </summary>
+//    protected abstract void UpdateOnFrame();
+
+//    internal IEnumerable<IDrawing2D> To2DMain()
+//    {
+//        if (!Enable) return [];
+//        return To2D();
+//    }
+
+//    private protected abstract IEnumerable<IDrawing2D> To2D();
+
+//    private protected override void AdditionalDispose()
+//    {
+//        XIVDrawerMain._drawingElements.Remove(this);
+//    }
+//}

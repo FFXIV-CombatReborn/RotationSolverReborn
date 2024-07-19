@@ -4,15 +4,26 @@ using ECommons.DalamudServices;
 
 namespace RotationSolver.UI.HighlightHotbar;
 
+/// <summary>
+/// Originally belonged in the XIVDrawer namespace, however we gave it its own class.
+/// Since we integrate XIVDrawer into RSR instead of using the submodule we don't have to place it in the same class as HotbarHighlightDrawerManager 
+/// </summary>
 internal class OverlayWindow : Window
 {
-    public OverlayWindow() : base(HotbarHighlight._name, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoBringToFrontOnFocus
-            | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking
-            | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoNav, true)
+    const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoBackground
+    | ImGuiWindowFlags.NoBringToFrontOnFocus
+    | ImGuiWindowFlags.NoDecoration
+    | ImGuiWindowFlags.NoDocking
+    | ImGuiWindowFlags.NoFocusOnAppearing
+    | ImGuiWindowFlags.NoInputs
+    | ImGuiWindowFlags.NoNav;
+
+    public OverlayWindow()
+        : base(nameof(OverlayWindow), BaseFlags, true)
     {
         IsOpen = true;
         AllowClickthrough = true;
-        ForceMainWindow = true;
+        RespectCloseHotkey = false;
     }
 
     public override void PreDraw()
@@ -26,18 +37,18 @@ internal class OverlayWindow : Window
 
     public override void Draw()
     {
-        if (!HotbarHighlight.Enable || Svc.ClientState == null || Svc.ClientState.LocalPlayer == null) return;
+        if (!HotbarHighlightDrawerManager.Enable || Svc.ClientState == null || Svc.ClientState.LocalPlayer == null) return;
 
         ImGui.GetStyle().AntiAliasedFill = false;
 
         try
         {
-            if (!Service.Config.UseWorkTask)
+            if (!HotbarHighlightDrawerManager.UseTaskToAccelerate)
             {
-                HotbarHighlight._drawingElements2D = HotbarHighlight.To2DAsync().Result;
+                HotbarHighlightDrawerManager._drawingElements2D = HotbarHighlightDrawerManager.To2DAsync().Result;
             }
 
-            foreach (var item in HotbarHighlight._drawingElements2D.OrderBy(drawing =>
+            foreach (var item in HotbarHighlightDrawerManager._drawingElements2D.OrderBy(drawing =>
             {
                 if (drawing is PolylineDrawing poly)
                 {
@@ -54,7 +65,7 @@ internal class OverlayWindow : Window
         }
         catch (Exception ex)
         {
-            Svc.Log.Warning(ex, $"{HotbarHighlight._name} failed to draw on Screen.");
+            Svc.Log.Warning(ex, $"{nameof(OverlayWindow)} failed to draw on Screen.");
         }
     }
 

@@ -263,7 +263,7 @@
   "StateIconSizeName": "State icon size",
   "TargetIconSizeName": "The size of the next ability that will be used icon.",
   "ShowTargetTimeToKillName": "Show the target's time to kill.",
-  "UseTasksForOverlayName": "Use tasks for making the overlay window faster.",
+  "UseTasksForOverlayName": "Use task for overlay window.",
   "RotationSolver.Data.UiString.ActionSequencer_Offset_Description": "Delay its turning.",
   "RotationSolver.Data.UiString.ConfigWindow_Actions_Copy": "Copy to Clipboard",
   "RotationSolver.Basic.Configuration.Conditions.ComboConditionType.Bool": "Boolean",

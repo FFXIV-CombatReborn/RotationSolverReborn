@@ -36,7 +36,7 @@ internal static class MajorUpdater
 
     private unsafe static void FrameworkUpdate(IFramework framework)
     {
-        HotbarHighlight.HotbarIDs.Clear();
+        HotbarHighlightDrawerManager.HotbarIDs.Clear();
         RotationSolverPlugin.UpdateDisplayWindow();
         if (!IsValid)
         {
@@ -172,7 +172,7 @@ internal static class MajorUpdater
         }
         if (hotbar.HasValue)
         {
-            HotbarHighlight.HotbarIDs.Add(hotbar.Value);
+            HotbarHighlightDrawerManager.HotbarIDs.Add(hotbar.Value);
         }
     }
 
@@ -257,7 +257,7 @@ internal static class MajorUpdater
             }
 
             RSCommands.UpdateRotationState();
-            HotbarHighlight.UpdateSettings();
+            HotbarHighlightDrawerManager.UpdateSettings();
         }
         catch (Exception ex)
         {
