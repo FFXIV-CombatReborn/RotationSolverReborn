@@ -53,13 +53,13 @@ partial class MonkRotation
 
     static partial void ModifyTrueStrikePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.RaptorForm];
+        setting.StatusNeed = [StatusID.RaptorForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.CoeurlForm];
     }
 
     static partial void ModifySnapPunchPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.CoeurlForm];
+        setting.StatusNeed = [StatusID.CoeurlForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.OpoopoForm];
     }
 
@@ -76,14 +76,14 @@ partial class MonkRotation
 
     static partial void ModifyTwinSnakesPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.RaptorForm];
+        setting.StatusNeed = [StatusID.RaptorForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.CoeurlForm];
         setting.ActionCheck = () => RaptorFury == 0;
     }
 
     static partial void ModifyArmOfTheDestroyerPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.RaptorForm];
+        setting.StatusProvide = [StatusID.RaptorForm, StatusID.PerfectBalance];
         setting.CreateConfig = () => new()
         {
             AoeCount = 2,
@@ -92,15 +92,15 @@ partial class MonkRotation
 
     static partial void ModifyDemolishPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.CoeurlForm];
+        setting.StatusNeed = [StatusID.CoeurlForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.OpoopoForm];
-        setting.ActionCheck = () => OpoOpoFury == 0;
+        setting.ActionCheck = () => CoeurlFury == 0;
     }
 
     static partial void ModifyRockbreakerPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 66597;
-        setting.StatusNeed = [StatusID.CoeurlForm];
+        setting.StatusNeed = [StatusID.CoeurlForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.OpoopoForm];
         setting.CreateConfig = () => new()
         {
@@ -141,7 +141,7 @@ partial class MonkRotation
     static partial void ModifyFourpointFuryPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 66600;
-        setting.StatusNeed = [StatusID.RaptorForm];
+        setting.StatusNeed = [StatusID.RaptorForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.CoeurlForm];
         setting.CreateConfig = () => new()
         {
@@ -315,14 +315,14 @@ partial class MonkRotation
 
     static partial void ModifyRisingRaptorPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.RaptorForm];
+        setting.StatusNeed = [StatusID.RaptorForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.CoeurlForm];
         setting.ActionCheck = () => RaptorFury >= 1;
     }
 
     static partial void ModifyPouncingCoeurlPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.CoeurlForm];
+        setting.StatusNeed = [StatusID.CoeurlForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.OpoopoForm];
         setting.ActionCheck = () => CoeurlFury >= 1;
     }
