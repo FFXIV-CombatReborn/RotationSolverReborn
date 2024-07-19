@@ -83,7 +83,7 @@ partial class MonkRotation
 
     static partial void ModifyArmOfTheDestroyerPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.RaptorForm, StatusID.PerfectBalance];
+        setting.StatusProvide = [StatusID.RaptorForm];
         setting.CreateConfig = () => new()
         {
             AoeCount = 2,
