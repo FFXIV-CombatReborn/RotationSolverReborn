@@ -6,8 +6,7 @@ using RotationSolver.UI.HighlightTeachingMode;
 namespace RotationSolver.UI;
 
 /// <summary>
-/// Originally belonged in the XIVDrawer namespace, however we gave it its own class.
-/// Since we integrate XIVDrawer into RSR instead of using the submodule we don't have to place it in the same class as HotbarHighlightDrawerManager 
+/// The Overlay Window
 /// </summary>
 internal class OverlayWindow : Window
 {
