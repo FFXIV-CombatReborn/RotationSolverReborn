@@ -12,41 +12,22 @@ using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
 namespace RotationSolver.UI.HighlightTeachingMode;
 
-/// <summary>
-/// The hotbar highlight drawing.
+/// <summary> 
+/// The hotbar highlight drawing. 
 /// </summary>
 public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 {
-    private static readonly Vector2 _uv1 = new(96 * 5 / 852f, 0),
-        _uv2 = new((96 * 5 + 144) / 852f, 0.5f);
-
-    private static IDalamudTextureWrap? _texture = null;
-
-    /// <summary>
-    /// The action ids that 
-    /// </summary>
-    public HashSet<HotbarID> HotbarIDs { get; } = [];
-
-    /// <summary>
-    /// The color of highlight.
-    /// </summary>
-    public Vector4 Color { get; set; } = new Vector4(0.8f, 0.5f, 0.3f, 1);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="color">Color</param>
-    /// <param name="ids">action ids</param>
+    /// <summary> </summary>
+    /// <param name="color"> Color </param>
+    /// <param name="ids">   action ids </param>
     public DrawingHighlightHotbar(Vector4 color, params HotbarID[] ids)
         : this()
     {
         Color = color;
-        HotbarIDs = new (ids);
+        HotbarIDs = new(ids);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
+    /// <summary> </summary>
     public DrawingHighlightHotbar()
     {
         if (_texture != null) return;
@@ -64,24 +45,11 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
         _texture = Svc.Texture.CreateFromRaw(RawImageSpecification.Rgba32(tex.Header.Width, tex.Header.Height), array);
     }
 
-    private static unsafe bool IsVisible(AtkUnitBase unit)
-    {
-        if (!unit.IsVisible) return false;
-        if (unit.VisibilityFlags == 1) return false;
+    /// <summary> The color of highlight. </summary>
+    public Vector4 Color { get; set; } = new Vector4(0.8f, 0.5f, 0.3f, 1);
 
-        return IsVisible(unit.RootNode);
-    }
-
-    private static unsafe bool IsVisible(AtkResNode* node)
-    {
-        while (node != null)
-        {
-            if (!node->IsVisible()) return false;
-            node = node->ParentNode;
-        }
-
-        return true;
-    }
+    /// <summary> The action ids that </summary>
+    public HashSet<HotbarID> HotbarIDs { get; } = [];
 
     private protected override unsafe IEnumerable<IDrawing2D> To2D()
     {
@@ -159,11 +127,16 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
         return result;
     }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     protected override void UpdateOnFrame()
     {
         return;
     }
+
+    private static readonly Vector2 _uv1 = new(96 * 5 / 852f, 0),
+        _uv2 = new((96 * 5 + 144) / 852f, 0.5f);
+
+    private static IDalamudTextureWrap? _texture = null;
 
     private static unsafe IEnumerable<nint> GetAddons<T>() where T : struct
     {
@@ -172,6 +145,25 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
         return on.AddonIdentifiers
             .Select(str => Svc.GameGui.GetAddonByName(str, 1))
             .Where(ptr => ptr != nint.Zero);
+    }
+
+    private static unsafe bool IsVisible(AtkUnitBase unit)
+    {
+        if (!unit.IsVisible) return false;
+        if (unit.VisibilityFlags == 1) return false;
+
+        return IsVisible(unit.RootNode);
+    }
+
+    private static unsafe bool IsVisible(AtkResNode* node)
+    {
+        while (node != null)
+        {
+            if (!node->IsVisible()) return false;
+            node = node->ParentNode;
+        }
+
+        return true;
     }
 
     private unsafe bool IsActionSlotRight(ActionBarSlot slot, HotbarSlot hot)
@@ -190,8 +182,8 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
     }
 }
 
-/// <summary>
-/// The Hot bar ID
+/// <summary> 
+/// The Hot bar ID 
 /// </summary>
 public readonly record struct HotbarID(HotbarSlotType SlotType, uint Id)
 {
@@ -202,77 +194,14 @@ public readonly record struct HotbarID(HotbarSlotType SlotType, uint Id)
     //public static implicit operator HotbarID(uint actionId) => new(HotbarSlotType.Action, actionId);
 }
 
-/// <summary>
-/// 2D drawing element.
-/// </summary>
-public interface IDrawing2D
-{
-    /// <summary>
-    /// Draw on the <seealso cref="ImGui"/>
-    /// </summary>
-    void Draw();
-}
-
-/// <summary>
-/// Drawing the image.
-/// </summary>
-/// <remarks>
-/// 
-/// </remarks>
-/// <param name="texture"></param>
-/// <param name="pt1"></param>
-/// <param name="pt2"></param>
-/// <param name="col"></param>
-public readonly struct ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2, uint col = uint.MaxValue) : IDrawing2D
-{
-    private readonly IDalamudTextureWrap _texture = texture;
-    private readonly Vector2 _pt1 = pt1, _pt2 = pt2, _uv1 = default, _uv2 = Vector2.One;
-    private readonly uint _col = col;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="texture"></param>
-    /// <param name="pt1"></param>
-    /// <param name="pt2"></param>
-    /// <param name="uv1"></param>
-    /// <param name="uv2"></param>
-    /// <param name="col"></param>
-    public ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2,
-        Vector2 uv1, Vector2 uv2, uint col = uint.MaxValue)
-        : this(texture, pt1, pt2, col)
-    {
-        _uv1 = uv1;
-        _uv2 = uv2;
-    }
-
-    /// <summary>
-    /// Draw on the <seealso cref="ImGui"/>
-    /// </summary>
-    public void Draw()
-    {
-        ImGui.GetWindowDrawList().AddImage(_texture.ImGuiHandle, _pt1, _pt2, _uv1, _uv2, _col);
-    }
-}
-
-/// <summary>
-/// Polyline drawing draws the actual border lines on the overlay window.
-/// </summary>
-/// <remarks>
-/// 
-/// </remarks>
-/// <param name="pts"></param>
-/// <param name="color"></param>
-/// <param name="thickness"></param>
+/// <summary> Polyline drawing draws the actual border lines on the overlay window. </summary>
+/// <remarks> </remarks>
+/// <param name="pts">       </param>
+/// <param name="color">     </param>
+/// <param name="thickness"> </param>
 public readonly struct PolylineDrawing(Vector2[] pts, uint color, float thickness) : IDrawing2D
 {
-    private readonly Vector2[] _pts = pts;
-    private readonly uint _color = color;
-    internal readonly float _thickness = thickness;
-
-    /// <summary>
-    /// Draw on the <seealso cref="ImGui"/>
-    /// </summary>
+    /// <summary> Draw on the <seealso cref="ImGui" /> </summary>
     public void Draw()
     {
         if (_pts == null || _pts.Length < 2) return;
@@ -295,4 +224,51 @@ public readonly struct PolylineDrawing(Vector2[] pts, uint color, float thicknes
             ImGui.GetWindowDrawList().PathStroke(_color, ImDrawFlags.Closed | ImDrawFlags.RoundCornersAll, _thickness);
         }
     }
+
+    internal readonly float _thickness = thickness;
+    private readonly uint _color = color;
+    private readonly Vector2[] _pts = pts;
+}
+
+/// <summary> 
+/// 2D drawing element. 
+/// </summary>
+public interface IDrawing2D
+{
+    /// <summary> Draw on the <seealso cref="ImGui" /> </summary>
+    void Draw();
+}
+
+/// <summary> Drawing the image. </summary>
+/// <remarks> </remarks>
+/// <param name="texture"> </param>
+/// <param name="pt1">     </param>
+/// <param name="pt2">     </param>
+/// <param name="col">     </param>
+public readonly struct ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2, uint col = uint.MaxValue) : IDrawing2D
+{
+    /// <summary> </summary>
+    /// <param name="texture"> </param>
+    /// <param name="pt1">     </param>
+    /// <param name="pt2">     </param>
+    /// <param name="uv1">     </param>
+    /// <param name="uv2">     </param>
+    /// <param name="col">     </param>
+    public ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2,
+        Vector2 uv1, Vector2 uv2, uint col = uint.MaxValue)
+        : this(texture, pt1, pt2, col)
+    {
+        _uv1 = uv1;
+        _uv2 = uv2;
+    }
+
+    /// <summary> Draw on the <seealso cref="ImGui" /> </summary>
+    public void Draw()
+    {
+        ImGui.GetWindowDrawList().AddImage(_texture.ImGuiHandle, _pt1, _pt2, _uv1, _uv2, _col);
+    }
+
+    private readonly uint _col = col;
+    private readonly Vector2 _pt1 = pt1, _pt2 = pt2, _uv1 = default, _uv2 = Vector2.One;
+    private readonly IDalamudTextureWrap _texture = texture;
 }
