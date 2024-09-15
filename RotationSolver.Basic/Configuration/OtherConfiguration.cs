@@ -21,6 +21,9 @@ internal class OtherConfiguration
 
     public static RotationSolverRecord RotationSolverRecord = new();
 
+    public static Dictionary<uint, StatusID[]> StatusProvide = [];
+    public static Dictionary<uint, StatusID[]> TargetStatusProvide = [];
+    
     public static void Init()
     {
         if (!Directory.Exists(Svc.PluginInterface.ConfigDirectory.FullName))
@@ -28,6 +31,8 @@ internal class OtherConfiguration
             Directory.CreateDirectory(Svc.PluginInterface.ConfigDirectory.FullName);
         }
 
+        Task.Run(() => InitOne(ref StatusProvide, nameof(StatusProvide)));
+        Task.Run(() => InitOne(ref TargetStatusProvide, nameof(TargetStatusProvide)));
         Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)));
         Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
         Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
@@ -58,9 +63,20 @@ internal class OtherConfiguration
             await SaveNoProvokeNames();
             await SaveNoCastingStatus();
             await SaveHostileCastingKnockback();
+            await SaveStatusProvide();
+            await SaveTargetStatusProvide();
         });
     }
 
+    private static Task SaveStatusProvide()
+    {
+        return Task.Run(() => Save(StatusProvide, nameof(StatusProvide)));
+    }
+
+    private static Task SaveTargetStatusProvide()
+    {
+        return Task.Run(() => Save(TargetStatusProvide, nameof(TargetStatusProvide)));
+    }
     private static Task SaveHostileCastingKnockback()
     {
         return Task.Run(() => Save(HostileCastingKnockback, nameof(HostileCastingKnockback)));
