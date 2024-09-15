@@ -86,17 +86,16 @@ public class BaseAction : IBaseAction
                     = Setting.CreateConfig?.Invoke() ?? new();
                 if (Action.ClassJob.Value?.GetJobRole() == JobRole.Tank)
                 {
-                    value.AoeCount = 2;
+                    value.AoeCount = Math.Min(value.AoeCount, (byte)2);
                 }
-
                 if (value.TimeToUntargetable == 0)
                 {
                     value.TimeToUntargetable = value.TimeToKill;
                 }
-
-                if (Setting.TargetStatusProvide != null)
+                if (OtherConfiguration.TargetStatusProvide.TryGetValue(ID, out var targetStatusProvide)
+                    && targetStatusProvide.Length > 0)
                 {
-                    value.TimeToKill = 10;
+                    value.TimeToKill = MathF.Max(value.TimeToKill, 10);
                 }
             }
             return value;
