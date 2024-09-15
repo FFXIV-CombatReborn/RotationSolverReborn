@@ -1,6 +1,7 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using RotationSolver.Basic.Configuration;
 using Action = Lumina.Excel.GeneratedSheets.Action;
 
 namespace RotationSolver.Basic.Actions;
