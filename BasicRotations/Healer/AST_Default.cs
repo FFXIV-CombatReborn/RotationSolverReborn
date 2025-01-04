@@ -183,8 +183,8 @@ public sealed class AST_Default : AstrologianRotation
 
         if (AstralDrawPvE.CanUse(out act)) return true;
         if (UmbralDrawPvE.CanUse(out act)) return true;
-        if ((Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(45) || !DivinationPvE.EnoughLevel || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3)) && InCombat && TheBalancePvE.CanUse(out act)) return true;
-        if ((Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(45) || !DivinationPvE.EnoughLevel || AstralDrawPvE.Cooldown.WillHaveOneCharge(3)) && InCombat && TheSpearPvE.CanUse(out act)) return true;
+        if ((Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !DivinationPvE.EnoughLevel) && InCombat && TheBalancePvE.CanUse(out act)) return true;
+        if ((Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !DivinationPvE.EnoughLevel) && InCombat && TheSpearPvE.CanUse(out act)) return true;
         return base.GeneralAbility(nextGCD, out act);
     }
 
