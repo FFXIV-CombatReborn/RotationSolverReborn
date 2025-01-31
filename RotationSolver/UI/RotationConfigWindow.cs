@@ -152,7 +152,10 @@ public partial class RotationConfigWindow : Window
         {
             string message = "Disable incompatible plugin";
             var installedPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled);
-            message = $"Disable {installedPlugin.Name}, causes targetting issues.";
+            if ((int)installedPlugin.Type == 5)
+            {
+                message = $"Disable {installedPlugin.Name}, causes targetting issues.";
+            }
 
             float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
             using (var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
