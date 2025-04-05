@@ -217,7 +217,7 @@ public static class ObjectHelper
                 if (node->Type == NodeType.Text)
                 {
                     var textNode = (AtkTextNode*)node;
-                    if (textNode->NodeText.StringPtr == null)
+                    if (string.IsNullOrEmpty(textNode->NodeText.StringPtr.ToString()))
                         continue;
 
                     // Read the enemy's name

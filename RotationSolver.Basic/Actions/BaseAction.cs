@@ -114,7 +114,7 @@ public class BaseAction : IBaseAction
     /// <param name="isDutyAction">is this action a duty action</param>
     public BaseAction(ActionID actionID, bool isDutyAction = false)
     {
-        Action = Service.GetSheet<Action>().GetRow((uint)actionID)!;
+        Action = Service.GetSheet<Action>().GetRow((uint)actionID);
         TargetInfo = new(this);
         Info = new(this, isDutyAction);
         Cooldown = new(this);

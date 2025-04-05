@@ -386,6 +386,9 @@ internal partial class Configs : IPluginConfiguration
     [UI("Use additional conditions", Filter = BasicParams)]
     public bool UseAdditionalConditions { get; set; } = false;
 
+    [ConditionBool, UI("Set Blue Mage Actions Automatically", Description = "When using a Blue Mage Rotation, RSR can automatically set your spell book to the spells required by that rotation.", Filter = Extra)]
+    private static readonly bool _setBluActions = true;
+
     #region Float
     [UI("Auto turn off RSR when combat is over for more than...",
         Parent = nameof(AutoOffAfterCombat))]
