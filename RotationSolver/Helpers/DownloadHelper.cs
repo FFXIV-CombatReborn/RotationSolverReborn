@@ -5,11 +5,11 @@ namespace RotationSolver.Helpers;
 
 public static class DownloadHelper
 {
-    public static IncompatiblePlugin[] IncompatiblePlugins { get; private set; } = [];
+    public static CommunityPlugin[] IncompatiblePlugins { get; private set; } = [];
 
     public static async Task DownloadAsync()
     {
-        IncompatiblePlugins = await DownloadOneAsync<IncompatiblePlugin[]>($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/IncompatiblePlugins.json") ?? [];
+        IncompatiblePlugins = await DownloadOneAsync<CommunityPlugin[]>($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/IncompatiblePlugins.json") ?? [];
     }
 
     private static async Task<T?> DownloadOneAsync<T>(string url)

@@ -94,6 +94,9 @@ namespace RotationSolver.Data
         [Description("Rotation Solver helps you choose targets and click actions. Any plugin that changes these will affect its decisions.\n\nHere is a list of known incompatible plugins:")]
         ConfigWindow_About_Compatibility_Description,
 
+        [Description("Known to be generally compatible with RSR.")]
+        ConfigWindow_About_Compatibility_Compatible,
+
         [Description("Cannot properly execute the behavior that RSR wants to perform.")]
         ConfigWindow_About_Compatibility_Mistake,
 

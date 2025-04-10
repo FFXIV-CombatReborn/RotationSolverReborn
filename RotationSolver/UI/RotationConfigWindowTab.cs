@@ -60,9 +60,9 @@ internal enum RotationConfigWindowTab : byte
 }
 
 /// <summary>
-/// Struct representing an incompatible plugin.
+/// Struct representing a 3PP dalamud plugin.
 /// </summary>
-public struct IncompatiblePlugin
+public struct CommunityPlugin
 {
     public string Name { get; init; }
     public string Icon { get; init; }
@@ -77,7 +77,7 @@ public struct IncompatiblePlugin
     {
         get
         {
-            var name = this.Name;
+            var name = Name;
             var installedPlugins = Svc.PluginInterface.InstalledPlugins;
             return installedPlugins.Any(x =>
                 (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded);
@@ -92,63 +92,23 @@ public struct IncompatiblePlugin
     {
         get
         {
-            var name = this.Name;
+            var name = Name;
             var installedPlugins = Svc.PluginInterface.InstalledPlugins;
             return installedPlugins.Any(x =>
                 x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
     }
 
-    public CompatibleType Type { get; init; }
-}
-
-/// <summary>
-/// Struct representing an incompatible plugin.
-/// </summary>
-public struct AutoDutyPlugin
-{
-    public string Name { get; init; }
-    public string Icon { get; init; }
-    public string Url { get; init; }
-    public string Features { get; init; }
-
-    /// <summary>
-    /// Checks if the plugin is enabled.
-    /// </summary>
-    [JsonIgnore]
-    public readonly bool IsEnabled
-    {
-        get
-        {
-            var name = this.Name;
-            var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            return installedPlugins.Any(x =>
-                (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded);
-        }
-    }
-
-    /// <summary>
-    /// Checks if the plugin is installed.
-    /// </summary>
-    [JsonIgnore]
-    public readonly bool IsInstalled
-    {
-        get
-        {
-            var name = this.Name;
-            var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            return installedPlugins.Any(x =>
-                x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase));
-        }
-    }
+    public CompatibilityType Type { get; init; }
 }
 
 /// <summary>
 /// Enum representing different types of compatibility issues.
 /// </summary>
 [Flags]
-public enum CompatibleType : byte
+public enum CompatibilityType : byte
 {
+    Compatible = 0,
     Skill_Usage = 1 << 0,
     Skill_Selection = 1 << 1,
     Crash = 1 << 2,

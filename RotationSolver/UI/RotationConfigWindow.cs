@@ -41,6 +41,8 @@ public partial class RotationConfigWindow : Window
     private const float MIN_COLUMN_WIDTH = 24;
     private const float JOB_ICON_WIDTH = 50;
 
+    private static CommunityPlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? [];
+
     public RotationConfigWindow()
     : base("", ImGuiWindowFlags.NoScrollbar, false)
     {
@@ -147,7 +149,6 @@ public partial class RotationConfigWindow : Window
 
     private bool CheckErrors()
     {
-        var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
 
         if (installedIncompatiblePlugin.Name != null)
@@ -234,7 +235,6 @@ public partial class RotationConfigWindow : Window
             diagInfo.AppendLine("Failed to get Dalamud start info.");
         }
 
-        var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsEnabled);
         if (installedIncompatiblePlugin.Name != null)
         {
@@ -261,9 +261,7 @@ public partial class RotationConfigWindow : Window
         //string cautionText;
         float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
 
-        var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var enabledIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsEnabled && (int)p.Type == 5);
-        //var installedCautionaryPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type != 5);
 
         if (enabledIncompatiblePlugin.Name != null)
         {
@@ -324,17 +322,15 @@ public partial class RotationConfigWindow : Window
         using var child = ImRaii.Child("Rotation Solver Side bar", -Vector2.One, false, ImGuiWindowFlags.NoScrollbar);
         if (child)
         {
-            var wholeWidth = ImGui.GetWindowSize().X;
+            var windowWidth = ImGui.GetWindowSize().X;
 
-            DrawHeader(wholeWidth);
+            DrawHeader(windowWidth);
 
             ImGui.Spacing();
             ImGui.Separator();
             ImGui.Spacing();
 
-            var iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(wholeWidth, Scale * JOB_ICON_WIDTH)) * 0.6f;
-
-            if (wholeWidth > JOB_ICON_WIDTH * Scale)
+            if (windowWidth > JOB_ICON_WIDTH * Scale)
             {
                 DrawDutyRotation();
                 if (CheckErrors())
@@ -345,68 +341,75 @@ public partial class RotationConfigWindow : Window
                     ImGui.Spacing();
                 }
 
-                ImGui.SetNextItemWidth(wholeWidth);
+                ImGui.SetNextItemWidth(windowWidth);
                 SearchingBox();
 
                 ImGui.Spacing();
             }
 
-            foreach (var item in Enum.GetValues<RotationConfigWindowTab>())
-            {
-                var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
-
-                // Skip the tab if it has the TabSkipAttribute
-                if (item.GetAttribute<TabSkipAttribute>() != null) continue;
-
-                if (IconSet.GetTexture(item.GetAttribute<TabIconAttribute>()?.Icon ?? 0, out var icon) && wholeWidth <= JOB_ICON_WIDTH * Scale)
-                {
-                    ImGuiHelper.DrawItemMiddle(() =>
-                    {
-                        var cursor = ImGui.GetCursorPos();
-                        if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * iconSize, item.ToString()))
-                        {
-                            _activeTab = item;
-                            _searchResults = [];
-                        }
-                        ImGuiHelper.DrawActionOverlay(cursor, iconSize, _activeTab == item ? 1 : 0);
-                    }, Math.Max(Scale * MIN_COLUMN_WIDTH, wholeWidth), iconSize);
-
-                    var desc = item.ToString();
-                    var addition = item.GetDescription();
-                    if (!string.IsNullOrEmpty(addition)) desc += "\n \n" + addition;
-                    ImguiTooltips.HoveredTooltip(desc);
-                }
-                else
-                {
-                    if (ImGui.Selectable(item.ToString(), _activeTab == item, ImGuiSelectableFlags.None, new Vector2(0, 20)))
-                    {
-                        _activeTab = item;
-                        _searchResults = [];
-                    }
-                    if (ImGui.IsItemHovered())
-                    {
-                        ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-                        var desc = item.GetDescription();
-                        if (!string.IsNullOrEmpty(desc)) ImguiTooltips.ShowTooltip(desc);
-                    }
-                }
-
-                // Add a separator after the "Debug" tab
-                if (item == RotationConfigWindowTab.Debug)
-                {
-                    ImGui.Separator();
-                }
-            }
+            DrawTabs();
             DrawDiagnosticInfoCube();
             ImGui.Spacing();
         }
     }
 
+    private void DrawTabs()
+    {
+        foreach (var tab in Enum.GetValues<RotationConfigWindowTab>())
+        {
+            var windowWidth = ImGui.GetWindowSize().X;
+            var iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(windowWidth, Scale * JOB_ICON_WIDTH)) * 0.6f;
+            // Skip the tab if it has the TabSkipAttribute
+            if (tab.GetAttribute<TabSkipAttribute>() != null) continue;
+
+            if (tab == RotationConfigWindowTab.AutoDuty && new CommunityPlugin { Name = "AutoDuty" }.IsInstalled) continue;
+
+            if (IconSet.GetTexture(tab.GetAttribute<TabIconAttribute>()?.Icon ?? 0, out var icon) && windowWidth <= JOB_ICON_WIDTH * Scale)
+            {
+                ImGuiHelper.DrawItemMiddle(() =>
+                {
+                    var cursor = ImGui.GetCursorPos();
+                    if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * iconSize, tab.ToString()))
+                    {
+                        _activeTab = tab;
+                        _searchResults = [];
+                    }
+                    ImGuiHelper.DrawActionOverlay(cursor, iconSize, _activeTab == tab ? 1 : 0);
+                }, Math.Max(Scale * MIN_COLUMN_WIDTH, windowWidth), iconSize);
+
+                var desc = tab.ToString();
+                var addition = tab.GetDescription();
+                if (!string.IsNullOrEmpty(addition)) desc += "\n \n" + addition;
+                ImguiTooltips.HoveredTooltip(desc);
+            }
+            else
+            {
+                if (ImGui.Selectable(tab.ToString(), _activeTab == tab, ImGuiSelectableFlags.None, new Vector2(0, 20)))
+                {
+                    _activeTab = tab;
+                    _searchResults = [];
+                }
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+                    var desc = tab.GetDescription();
+                    if (!string.IsNullOrEmpty(desc)) ImguiTooltips.ShowTooltip(desc);
+                }
+            }
+
+            // Add a separator after the "Debug" tab
+            if (tab == RotationConfigWindowTab.Debug)
+            {
+                ImGui.Separator();
+            }
+        }
+    }
+
     private bool _showText;
 
-    private void DrawHeader(float wholeWidth)
+    private void DrawHeader(float windowWidth)
     {
-        var size = MathF.Max(MathF.Min(wholeWidth, Scale * 128), Scale * MIN_COLUMN_WIDTH);
+        var size = MathF.Max(MathF.Min(windowWidth, Scale * 128), Scale * MIN_COLUMN_WIDTH);
 
         if (IconSet.GetTexture((uint)0, out var overlay))
         {
@@ -439,7 +442,7 @@ public partial class RotationConfigWindow : Window
                     ImGui.SetCursorPos(cursor);
                     ImGui.Image(logo.ImGuiHandle, Vector2.One * size);
                 }
-            }, wholeWidth, size);
+            }, windowWidth, size);
 
             ImGui.Spacing();
         }
@@ -463,7 +466,7 @@ public partial class RotationConfigWindow : Window
             ImGuiHelper.DrawItemMiddle(() =>
             {
                 ImGui.TextWrapped(text);
-            }, wholeWidth, textWidth);
+            }, windowWidth, textWidth);
             ImGui.PopStyleColor();
             ImguiTooltips.HoveredTooltip("Please update your rotations!");
             return;
@@ -507,15 +510,15 @@ public partial class RotationConfigWindow : Window
                 rotations = rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvE) ?? false).ToArray();
             }
 
-            var iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(wholeWidth, Scale * JOB_ICON_WIDTH));
+            var iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(windowWidth, Scale * JOB_ICON_WIDTH));
             var comboSize = ImGui.CalcTextSize(rot.Name).X;
 
             ImGuiHelper.DrawItemMiddle(() =>
             {
                 DrawRotationIcon(rotation, iconSize);
-            }, wholeWidth, iconSize);
+            }, windowWidth, iconSize);
 
-            if (Scale * JOB_ICON_WIDTH < wholeWidth)
+            if (Scale * JOB_ICON_WIDTH < windowWidth)
             {
                 DrawRotationCombo(comboSize, rotations, rotation);
             }
@@ -533,7 +536,7 @@ public partial class RotationConfigWindow : Window
             _searchResults = Array.Empty<ISearchable>(); // Corrected type
         }
 
-        // Show tooltip if the item is hovered
+        // Show tooltip if the tab is hovered
         if (ImGui.IsItemHovered())
         {
             ImguiTooltips.ShowTooltip(() =>
@@ -813,17 +816,17 @@ public partial class RotationConfigWindow : Window
         // Begin a child window to contain the list
         ImGui.BeginChild("AutoStatusOrderList", new Vector2(0, 200 * Scale), true);
 
-        int itemCount = autoStatusOrder.Count;
+        int tabCount = autoStatusOrder.Count;
 
-        for (int i = 0; i < itemCount; i++)
+        for (int i = 0; i < tabCount; i++)
         {
-            var item = autoStatusOrder[i];
-            var itemName = Enum.GetName(typeof(AutoStatus), item) ?? item.ToString(); // Retrieve the status name by its enum value
+            var tab = autoStatusOrder[i];
+            var tabName = Enum.GetName(typeof(AutoStatus), tab) ?? tab.ToString(); // Retrieve the status name by its enum value
 
             // Draw up button
             if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##Up{i}") && i > 0)
             {
-                // Swap with the previous item
+                // Swap with the previous tab
                 var temp = autoStatusOrder[i - 1];
                 autoStatusOrder[i - 1] = autoStatusOrder[i];
                 autoStatusOrder[i] = temp;
@@ -833,9 +836,9 @@ public partial class RotationConfigWindow : Window
             ImGui.SameLine();
 
             // Draw down button
-            if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##Down{i}") && i < itemCount - 1)
+            if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##Down{i}") && i < tabCount - 1)
             {
-                // Swap with the next item
+                // Swap with the next tab
                 var temp = autoStatusOrder[i + 1];
                 autoStatusOrder[i + 1] = autoStatusOrder[i];
                 autoStatusOrder[i] = temp;
@@ -844,8 +847,8 @@ public partial class RotationConfigWindow : Window
 
             ImGui.SameLine();
 
-            // Draw the item
-            ImGui.Text(itemName);
+            // Draw the tab
+            ImGui.Text(tabName);
 
             // Optionally, add tooltips or additional information
             if (ImGui.IsItemHovered())
@@ -874,34 +877,28 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawAboutMacros()
     {
-        // Adjust item spacing for better layout
+        // Adjust tab spacing for better layout
         using var style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
 
         // Display command help for different state commands
-        DisplayCommandHelp(StateCommandType.Auto);
-        DisplayCommandHelp(StateCommandType.Manual);
-        DisplayCommandHelp(StateCommandType.Off);
+        foreach (StateCommandType stateCommand in Enum.GetValues<StateCommandType>())
+        {
+            DisplayCommandHelp(stateCommand);
+        }
 
         // Display command help for other commands
-        DisplayCommandHelp(OtherCommandType.NextAction);
+        foreach (OtherCommandType otherCommand in Enum.GetValues<OtherCommandType>())
+        {
+            DisplayCommandHelp(otherCommand);
+        }
 
         ImGui.NewLine();
 
         // Display command help for special commands
-        DisplayCommandHelp(SpecialCommandType.EndSpecial);
-        DisplayCommandHelp(SpecialCommandType.HealArea);
-        DisplayCommandHelp(SpecialCommandType.HealSingle);
-        DisplayCommandHelp(SpecialCommandType.DefenseArea);
-        DisplayCommandHelp(SpecialCommandType.DefenseSingle);
-        DisplayCommandHelp(SpecialCommandType.MoveForward);
-        DisplayCommandHelp(SpecialCommandType.MoveBack);
-        DisplayCommandHelp(SpecialCommandType.Speed);
-        DisplayCommandHelp(SpecialCommandType.DispelStancePositional);
-        DisplayCommandHelp(SpecialCommandType.RaiseShirk);
-        DisplayCommandHelp(SpecialCommandType.AntiKnockback);
-        DisplayCommandHelp(SpecialCommandType.Burst);
-        DisplayCommandHelp(SpecialCommandType.LimitBreak);
-        DisplayCommandHelp(SpecialCommandType.NoCasting);
+        foreach (SpecialCommandType specialCommand in Enum.GetValues<SpecialCommandType>())
+        {
+            DisplayCommandHelp(specialCommand);
+        }
     }
 
     // Helper method to display command help
@@ -944,64 +941,66 @@ public partial class RotationConfigWindow : Window
             ImGui.TableNextColumn();
             ImGui.TableHeader("Enabled");
 
-            // Ensure that IncompatiblePlugins is not null
-            var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
-
             // Iterate over each incompatible plugin and display its details
-            foreach (var item in incompatiblePlugins)
+            foreach (var plugin in incompatiblePlugins)
             {
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
 
-                ImGui.Text(item.Name);
+                ImGui.Text(plugin.Name);
 
                 ImGui.TableNextColumn();
 
-                var icon = string.IsNullOrEmpty(item.Icon)
+                var icon = string.IsNullOrEmpty(plugin.Icon)
                     ? "https://raw.githubusercontent.com/goatcorp/DalamudAssets/master/UIRes/defaultIcon.png"
-                    : item.Icon;
+                    : plugin.Icon;
 
                 if (IconSet.GetTexture(icon, out var texture))
                 {
                     if (ImGuiHelper.NoPaddingNoColorImageButton(texture.ImGuiHandle, Vector2.One * iconSize))
                     {
-                        Util.OpenLink(item.Url);
+                        Util.OpenLink(plugin.Url);
                     }
                 }
 
                 ImGui.TableNextColumn();
-                ImGui.TextWrapped(item.Features);
+                ImGui.TextWrapped(plugin.Features);
 
                 ImGui.TableNextColumn();
-                DisplayPluginType(item.Type);
+                DisplayPluginType(plugin.Type);
 
                 ImGui.TableNextColumn();
-                ImGui.Text(item.IsEnabled ? "Yes" : "No");
+                ImGui.Text(plugin.IsEnabled ? "Yes" : "No");
             }
         }
     }
 
     // Helper method to display plugin type with appropriate colors and tooltips
-    private static void DisplayPluginType(CompatibleType type)
+    private static void DisplayPluginType(CompatibilityType type)
     {
-        if (type.HasFlag(CompatibleType.Skill_Usage))
+        if (type.HasFlag(CompatibilityType.Compatible))
         {
-            ImGui.TextColored(ImGuiColors.DalamudYellow, CompatibleType.Skill_Usage.GetDescription().Replace('_', ' '));
+            ImGui.TextColored(ImGuiColors.HealerGreen, CompatibilityType.Compatible.GetDescription().Replace('_', ' '));
+            ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Compatible.GetDescription());
+        }
+        if (type.HasFlag(CompatibilityType.Skill_Usage))
+        {
+            ImGui.TextColored(ImGuiColors.DalamudYellow, CompatibilityType.Skill_Usage.GetDescription().Replace('_', ' '));
             ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Mistake.GetDescription());
         }
-        if (type.HasFlag(CompatibleType.Skill_Selection))
+        if (type.HasFlag(CompatibilityType.Skill_Selection))
         {
-            ImGui.TextColored(ImGuiColors.DalamudOrange, CompatibleType.Skill_Selection.GetDescription().Replace('_', ' '));
+            ImGui.TextColored(ImGuiColors.DalamudOrange, CompatibilityType.Skill_Selection.GetDescription().Replace('_', ' '));
             ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Mislead.GetDescription());
         }
-        if (type.HasFlag(CompatibleType.Crash))
+        if (type.HasFlag(CompatibilityType.Crash))
         {
-            ImGui.TextColored(ImGuiColors.DalamudRed, CompatibleType.Crash.GetDescription().Replace('_', ' '));
+            ImGui.TextColored(ImGuiColors.DalamudRed, CompatibilityType.Crash.GetDescription().Replace('_', ' '));
             ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Crash.GetDescription());
         }
-        if (type.HasFlag(CompatibleType.Broken))
+        if (type.HasFlag(CompatibilityType.Broken))
         {
-            ImGui.TextColored(ImGuiColors.DalamudViolet, CompatibleType.Broken.GetDescription().Replace('_', ' '));
+            ImGui.TextColored(ImGuiColors.DalamudViolet, CompatibilityType.Broken.GetDescription().Replace('_', ' '));
             ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Crash.GetDescription());
         }
     }
@@ -1116,17 +1115,17 @@ public partial class RotationConfigWindow : Window
         ImGui.Spacing();
 
         // Create a new list of AutoDutyPlugin objects
-        var pluginsToCheck = new List<AutoDutyPlugin>
+        var pluginsToCheck = new List<CommunityPlugin>
     {
-        new AutoDutyPlugin { Name = "AutoDuty", Url = "https://puni.sh/api/repository/herc" },
-        new AutoDutyPlugin { Name = "vnavmesh", Url = "https://puni.sh/api/repository/veyn" },
-        new AutoDutyPlugin { Name = "BossModReborn", Url = "https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json" },
-        new AutoDutyPlugin { Name = "Boss Mod", Url = "https://puni.sh/api/repository/veyn" },
-        new AutoDutyPlugin { Name = "Avarice", Url = "https://love.puni.sh/ment.json" },
-        new AutoDutyPlugin { Name = "Deliveroo", Url = "https://plugins.carvel.li/" },
-        new AutoDutyPlugin { Name = "AutoRetainer", Url = "https://love.puni.sh/ment.json" },
-        new AutoDutyPlugin { Name = "SkipCutscene", Url = "https://raw.githubusercontent.com/KangasZ/DalamudPluginRepository/main/plugin_repository.json" },
-        new AutoDutyPlugin { Name = "AntiAfkKick", Url = "https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json" },
+        new CommunityPlugin { Name = "AutoDuty", Url = "https://puni.sh/api/repository/herc" },
+        new CommunityPlugin { Name = "vnavmesh", Url = "https://puni.sh/api/repository/veyn" },
+        new CommunityPlugin { Name = "BossModReborn", Url = "https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json" },
+        new CommunityPlugin { Name = "Boss Mod", Url = "https://puni.sh/api/repository/veyn" },
+        new CommunityPlugin { Name = "Avarice", Url = "https://love.puni.sh/ment.json" },
+        new CommunityPlugin { Name = "Deliveroo", Url = "https://plugins.carvel.li/" },
+        new CommunityPlugin { Name = "AutoRetainer", Url = "https://love.puni.sh/ment.json" },
+        new CommunityPlugin { Name = "SkipCutscene", Url = "https://raw.githubusercontent.com/KangasZ/DalamudPluginRepository/main/plugin_repository.json" },
+        new CommunityPlugin { Name = "AntiAfkKick", Url = "https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json" },
         // Add more plugins as needed
     };
 
@@ -1238,7 +1237,7 @@ public partial class RotationConfigWindow : Window
             ImGuiEx.TextWrappedCopy(desc);
         }
 
-        var wholeWidth = ImGui.GetWindowWidth();
+        var windowWidth = ImGui.GetWindowWidth();
         var type = rotation.GetType();
         var info = type.Assembly.GetInfo();
 
@@ -1288,7 +1287,7 @@ public partial class RotationConfigWindow : Window
         var rotation = DataCenter.CurrentRotation;
         if (rotation == null) return;
 
-        var wholeWidth = ImGui.GetWindowWidth();
+        var windowWidth = ImGui.GetWindowWidth();
         var type = rotation.GetType();
 
         var attrs = new List<RotationDescAttribute?> { RotationDescAttribute.MergeToOne(type.GetCustomAttributes<RotationDescAttribute>()) };
@@ -1345,22 +1344,22 @@ public partial class RotationConfigWindow : Window
                     bool notStart = false;
                     var size = DESC_SIZE * Scale;
                     var y = ImGui.GetCursorPosY() + size * 4 / 82;
-                    foreach (var item in allActions)
+                    foreach (var tab in allActions)
                     {
-                        if (item == null) continue;
+                        if (tab == null) continue;
 
                         if (notStart)
                         {
                             ImGui.SameLine();
                         }
 
-                        if (item.GetTexture(out var texture))
+                        if (tab.GetTexture(out var texture))
                         {
                             ImGui.SetCursorPosY(y);
                             var cursor = ImGui.GetCursorPos();
                             ImGuiHelper.NoPaddingNoColorImageButton(texture.ImGuiHandle, Vector2.One * size);
                             ImGuiHelper.DrawActionOverlay(cursor, size, 1);
-                            ImguiTooltips.HoveredTooltip(item.Name);
+                            ImguiTooltips.HoveredTooltip(tab.Name);
                         }
                         notStart = true;
                     }
@@ -1372,15 +1371,15 @@ public partial class RotationConfigWindow : Window
 
         foreach (var link in links)
         {
-            DrawLinkDescription(link.LinkDescription, wholeWidth, true);
+            DrawLinkDescription(link.LinkDescription, windowWidth, true);
         }
     }
 
-    internal static void DrawLinkDescription(LinkDescription link, float wholeWidth, bool drawQuestion)
+    internal static void DrawLinkDescription(LinkDescription link, float windowWidth, bool drawQuestion)
     {
         var hasTexture = IconSet.GetTexture(link.Url, out var texture);
 
-        if (hasTexture && ImGuiHelper.TextureButton(texture, wholeWidth, wholeWidth))
+        if (hasTexture && ImGuiHelper.TextureButton(texture, windowWidth, windowWidth))
         {
             Util.OpenLink(link.Url);
         }
@@ -1541,11 +1540,11 @@ public partial class RotationConfigWindow : Window
 
         var youtubeLink = rotation.GetType().GetCustomAttribute<YoutubeLinkAttribute>()?.ID;
 
-        var wholeWidth = ImGui.GetWindowWidth();
+        var windowWidth = ImGui.GetWindowWidth();
         if (!string.IsNullOrEmpty(youtubeLink))
         {
             ImGui.NewLine();
-            if (IconSet.GetTexture("https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg", out var icon) && ImGuiHelper.TextureButton(icon, wholeWidth, 250 * Scale, "Youtube Link"))
+            if (IconSet.GetTexture("https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg", out var icon) && ImGuiHelper.TextureButton(icon, windowWidth, 250 * Scale, "Youtube Link"))
             {
                 Util.OpenLink("https://www.youtube.com/watch?v=" + youtubeLink);
             }
@@ -1589,7 +1588,7 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text(" - " + info.Author);
                 }
 
-            }, wholeWidth, _groupWidth);
+            }, windowWidth, _groupWidth);
 
             _groupWidth = ImGui.GetItemRectSize().X;
         }
@@ -1623,9 +1622,9 @@ public partial class RotationConfigWindow : Window
                         _actionsList.AddCollapsingHeader(() => pair.Key, () =>
                         {
                             var index = 0;
-                            foreach (var item in pair.OrderBy(t => t.ID))
+                            foreach (var tab in pair.OrderBy(t => t.ID))
                             {
-                                if (!item.GetTexture(out var icon)) continue;
+                                if (!tab.GetTexture(out var icon)) continue;
 
                                 if (index++ % count != 0)
                                 {
@@ -1634,26 +1633,26 @@ public partial class RotationConfigWindow : Window
 
                                 ImGui.BeginGroup();
                                 var cursor = ImGui.GetCursorPos();
-                                if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * size, item.Name + item.ID))
+                                if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * size, tab.Name + tab.ID))
                                 {
-                                    _activeAction = item;
+                                    _activeAction = tab;
                                 }
-                                ImGuiHelper.DrawActionOverlay(cursor, size, _activeAction == item ? 1 : 0);
+                                ImGuiHelper.DrawActionOverlay(cursor, size, _activeAction == tab ? 1 : 0);
 
                                 if (IconSet.GetTexture("ui/uld/readycheck_hr1.tex", out var texture))
                                 {
                                     var offset = new Vector2(1 / 12f, 1 / 6f);
                                     ImGui.SetCursorPos(cursor + new Vector2(0.6f, 0.7f) * size);
                                     ImGui.Image(texture.ImGuiHandle, Vector2.One * size * 0.5f,
-                                        new Vector2(item.IsEnabled ? 0 : 0.5f, 0) + offset,
-                                        new Vector2(item.IsEnabled ? 0.5f : 1, 1) - offset);
+                                        new Vector2(tab.IsEnabled ? 0 : 0.5f, 0) + offset,
+                                        new Vector2(tab.IsEnabled ? 0.5f : 1, 1) - offset);
                                 }
                                 ImGui.EndGroup();
 
-                                string key = $"Action Macro Usage {item.Name} {item.ID}";
-                                var cmd = ToCommandStr(OtherCommandType.DoActions, $"{item}-{5}");
+                                string key = $"Action Macro Usage {tab.Name} {tab.ID}";
+                                var cmd = ToCommandStr(OtherCommandType.DoActions, $"{tab}-{5}");
                                 ImGuiHelper.DrawHotKeysPopup(key, cmd);
-                                ImGuiHelper.ExecuteHotKeysPopup(key, cmd, item.Name, false);
+                                ImGuiHelper.ExecuteHotKeysPopup(key, cmd, tab.Name, false);
                             }
                         });
                     }
@@ -1801,22 +1800,22 @@ public partial class RotationConfigWindow : Window
                     ImGui.TextColored(ImGuiColors.DalamudRed, "Error: " + ex.Message);
                 }
             }
-            else if (_activeAction is IBaseItem item)
+            else if (_activeAction is IBaseItem tab)
             {
                 try
                 {
                     // Ensure ActionManager.Instance() is not null
                     if (ActionManager.Instance() != null)
                     {
-                        ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Item, item.ID).ToString());
-                        ImGui.Text("Status HQ: " + ActionManager.Instance()->GetActionStatus(ActionType.Item, item.ID + 1000000).ToString());
-                        var remain = ActionManager.Instance()->GetRecastTime(ActionType.Item, item.ID) - ActionManager.Instance()->GetRecastTimeElapsed(ActionType.Item, item.ID);
+                        ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Item, tab.ID).ToString());
+                        ImGui.Text("Status HQ: " + ActionManager.Instance()->GetActionStatus(ActionType.Item, tab.ID + 1000000).ToString());
+                        var remain = ActionManager.Instance()->GetRecastTime(ActionType.Item, tab.ID) - ActionManager.Instance()->GetRecastTimeElapsed(ActionType.Item, tab.ID);
                         ImGui.Text("remain: " + remain.ToString());
                     }
 
-                    ImGui.Text("CanUse: " + item.CanUse(out _, true).ToString());
+                    ImGui.Text("CanUse: " + tab.CanUse(out _, true).ToString());
 
-                    if (item is HpPotionItem healPotionItem)
+                    if (tab is HpPotionItem healPotionItem)
                     {
                         ImGui.Text("MaxHP:" + healPotionItem.MaxHp.ToString());
                     }
@@ -2017,12 +2016,12 @@ public partial class RotationConfigWindow : Window
     {
         if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(repository)) return;
 
-        var wholeWidth = ImGui.GetWindowWidth();
+        var windowWidth = ImGui.GetWindowWidth();
 
         link = string.IsNullOrEmpty(link) ? $"https://GitHub.com/{userName}/{repository}" : link;
 
         if (IconSet.GetTexture($"https://github-readme-stats.vercel.app/api/pin/?username={userName}&repo={repository}&theme=dark", out var icon)
-            && (center ? ImGuiHelper.TextureButton(icon, wholeWidth, icon.Width, id)
+            && (center ? ImGuiHelper.TextureButton(icon, windowWidth, icon.Width, id)
             : ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, new Vector2(icon.Width, icon.Height), id)))
         {
             Util.OpenLink(link);
@@ -2040,7 +2039,7 @@ public partial class RotationConfigWindow : Window
             float width = 0;
             if (hasDate) width += releaseDate.Width;
             if (hasCount) width += downloadCount.Width;
-            var ratio = MathF.Min(1, wholeWidth / width);
+            var ratio = MathF.Min(1, windowWidth / width);
             ImGuiHelper.DrawItemMiddle(() =>
             {
                 if (hasDate && ImGuiHelper.NoPaddingNoColorImageButton(releaseDate.ImGuiHandle, new Vector2(releaseDate.Width, releaseDate.Height) * ratio, id))
@@ -2052,7 +2051,7 @@ public partial class RotationConfigWindow : Window
                 {
                     Util.OpenLink(link);
                 }
-            }, wholeWidth, width * ratio);
+            }, windowWidth, width * ratio);
         }
         else
         {
@@ -2205,7 +2204,7 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-    private static void FromClipBoardButton(HashSet<uint> items)
+    private static void FromClipBoardButton(HashSet<uint> tabs)
     {
         const string CopyErrorMessage = "Failed to copy the values to the clipboard.";
         const string PasteErrorMessage = "Failed to copy the values from the clipboard.";
@@ -2214,7 +2213,7 @@ public partial class RotationConfigWindow : Window
         {
             try
             {
-                ImGui.SetClipboardText(JsonConvert.SerializeObject(items));
+                ImGui.SetClipboardText(JsonConvert.SerializeObject(tabs));
             }
             catch (Exception ex)
             {
@@ -2233,7 +2232,7 @@ public partial class RotationConfigWindow : Window
                 {
                     foreach (var aId in JsonConvert.DeserializeObject<uint[]>(clipboardText) ?? Array.Empty<uint>())
                     {
-                        items.Add(aId);
+                        tabs.Add(aId);
                     }
                 }
             }
@@ -2692,13 +2691,13 @@ public partial class RotationConfigWindow : Window
         if (badge != 0
             && IconSet.GetTexture(badge, out var badgeTexture))
         {
-            var wholeWidth = ImGui.GetWindowWidth();
-            var size = new Vector2(badgeTexture.Width, badgeTexture.Height) * MathF.Min(1, MathF.Min(MaxWidth, wholeWidth) / badgeTexture.Width);
+            var windowWidth = ImGui.GetWindowWidth();
+            var size = new Vector2(badgeTexture.Width, badgeTexture.Height) * MathF.Min(1, MathF.Min(MaxWidth, windowWidth) / badgeTexture.Width);
 
             ImGuiHelper.DrawItemMiddle(() =>
             {
                 ImGui.Image(badgeTexture.ImGuiHandle, size);
-            }, wholeWidth, size.X);
+            }, windowWidth, size.X);
         }
     }
 
@@ -2773,16 +2772,16 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
         ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
         ImGui.Text($"DeathTarget: {DataCenter.DeathTarget}");
-        foreach (var item in DataCenter.AttackedTargets)
+        foreach (var tab in DataCenter.AttackedTargets)
         {
-            ImGui.Text(item.id.ToString());
+            ImGui.Text(tab.id.ToString());
         }
 
         // VFX info
         //ImGui.Text("VFX Data:");
-        //foreach (var item in DataCenter.VfxDataQueue)
+        //foreach (var tab in DataCenter.VfxDataQueue)
         //{
-        //    ImGui.Text(item.ToString());
+        //    ImGui.Text(tab.ToString());
         //}
 
         // Check and display VFX casting status
@@ -2958,9 +2957,9 @@ public partial class RotationConfigWindow : Window
 
         ImGui.Text($"All: {DataCenter.AllTargets.Count()}");
         ImGui.Text($"Hostile: {DataCenter.AllHostileTargets.Count()}");
-        foreach (var item in DataCenter.AllHostileTargets)
+        foreach (var tab in DataCenter.AllHostileTargets)
         {
-            ImGui.Text(item.Name.ToString());
+            ImGui.Text(tab.Name.ToString());
         }
     }
 
