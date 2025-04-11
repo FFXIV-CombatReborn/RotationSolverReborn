@@ -1,5 +1,5 @@
 using ECommons.DalamudServices;
-using RotationSolver.Basic.Configuration;s
+using RotationSolver.Basic.Configuration;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.Commands;
