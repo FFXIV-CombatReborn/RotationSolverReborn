@@ -7,10 +7,11 @@ namespace RotationSolver.Data;
 public class CommunityPlugin
 {
     public static CommunityPlugin[] IncompatiblePlugins { get; set; } = [];
-    public string Name { get; init; } = string.Empty;
-    public string Icon { get; init; } = string.Empty;
-    public string Url { get; init; } = string.Empty;
-    public string Features { get; init; } = string.Empty;
+    public string Name { get; set; }
+    public string Icon { get; set; }
+    public string Url { get; set; }
+    public string Features { get; set; }
+    public string CompatibilityIssues { get; set; }
 
     /// <summary>
     /// Checks if the plugin is enabled.
@@ -41,18 +42,4 @@ public class CommunityPlugin
                 x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
     }
-
-    public CompatibilityType Type { get; init; }
-}
-
-
-/// <summary>
-/// Enum representing different types of compatibility issues.
-/// </summary>
-[Flags]
-public enum CompatibilityType
-{
-    Compatible,
-    Minor,
-    Major
 }

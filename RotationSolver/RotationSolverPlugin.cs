@@ -187,7 +187,8 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         });
         Task.Run(async () =>
         {
-            CommunityPlugin.IncompatiblePlugins = await DownloadHelper.DownloadOneAsync<CommunityPlugin[]>("https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/main/Resources/IncompatiblePlugins.json") ?? [];
+            CommunityPlugin.IncompatiblePlugins = await DownloadHelper.DownloadOneAsync<CommunityPlugin[]>("https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/PluginTyping/Resources/IncompatiblePlugins.json") ?? [];
+            Svc.Log.Information("Incompatible Plugins: {0}", CommunityPlugin.IncompatiblePlugins.Length);
             if (Service.Config.LoadRotationsAtStartup) await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.Download);
         });
     }

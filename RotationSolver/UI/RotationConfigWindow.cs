@@ -24,6 +24,7 @@ using RotationSolver.UI.SearchableConfigs;
 using RotationSolver.UI.SearchableSettings;
 using RotationSolver.Updaters;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using GAction = Lumina.Excel.Sheets.Action;
 using Status = Lumina.Excel.Sheets.Status;
@@ -146,8 +147,12 @@ public partial class RotationConfigWindow : Window
 
     private bool CheckErrors()
     {
-        var installedIncompatiblePlugin = CommunityPlugin.IncompatiblePlugins.FirstOrDefault(p => p.IsInstalled && p.Type.HasFlag(CompatibilityType.Major))!;
-
+        foreach (var plugin in CommunityPlugin.IncompatiblePlugins)
+        {
+            Svc.Log.Information("Installed Incompatible Plugins: {0}", plugin.Name);
+        }
+        var installedIncompatiblePlugin = CommunityPlugin.IncompatiblePlugins.First(p => p.IsEnabled && p.CompatibilityIssues == "Major");
+        Svc.Log.Information("Installed Incompatible Plugins: {0}, {1}", installedIncompatiblePlugin.Name, installedIncompatiblePlugin.CompatibilityIssues);
         if (installedIncompatiblePlugin.Name != null)
         {
             return true;
@@ -243,7 +248,7 @@ public partial class RotationConfigWindow : Window
             if (plugin.IsEnabled)
             {
                 diagInfo.AppendLine(plugin.Name);
-                diagColor = plugin.Type.HasFlag(CompatibilityType.Major) ? new Vector4(1f, 0f, 0f, .3f) : new Vector4(1f, 1f, .4f, .3f);
+                diagColor = plugin.CompatibilityIssues == "Major" ? new Vector4(1f, 0f, 0f, .3f) : new Vector4(1f, 1f, .4f, .3f);
             }
         }
 
@@ -258,7 +263,7 @@ public partial class RotationConfigWindow : Window
         //string cautionText;
         float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
 
-        var enabledIncompatiblePlugin = CommunityPlugin.IncompatiblePlugins.FirstOrDefault(p => p.IsEnabled && p.Type.HasFlag(CompatibilityType.Major))!;
+        var enabledIncompatiblePlugin = CommunityPlugin.IncompatiblePlugins.FirstOrDefault(p => p.IsEnabled && p.CompatibilityIssues == "Major")!;
 
         if (enabledIncompatiblePlugin.Name != null)
         {
@@ -962,7 +967,7 @@ public partial class RotationConfigWindow : Window
                 ImGui.TextWrapped(plugin.Features);
 
                 ImGui.TableNextColumn();
-                DisplayPluginType(plugin.Type);
+                DisplayPluginType(plugin.CompatibilityIssues);
 
                 ImGui.TableNextColumn();
                 ImGui.Text(plugin.IsEnabled ? "Yes" : "No");
@@ -971,22 +976,22 @@ public partial class RotationConfigWindow : Window
     }
 
     // Helper method to display plugin type with appropriate colors and tooltips
-    private static void DisplayPluginType(CompatibilityType type)
+    private static void DisplayPluginType(string type)
     {
-        if (type.HasFlag(CompatibilityType.Compatible))
+        switch (type)
         {
-            ImGui.TextColored(ImGuiColors.HealerGreen, CompatibilityType.Compatible.ToString());
-            ImguiTooltips.HoveredTooltip("No particular issues, but may have unexpected interactions, especially as other plugins are installed.");
-        }
-        if (type.HasFlag(CompatibilityType.Minor))
-        {
-            ImGui.TextColored(ImGuiColors.DalamudYellow, CompatibilityType.Minor.ToString());
-            ImguiTooltips.HoveredTooltip("May have redundant functionality or interact with game settings in contridictory ways.");
-        }
-        if (type.HasFlag(CompatibilityType.Major))
-        {
-            ImGui.TextColored(ImGuiColors.DalamudRed, CompatibilityType.Major.ToString());
-            ImguiTooltips.HoveredTooltip("May cause crashes, instability, or other fatal errors.");
+            case "Compatible":
+                ImGui.TextColored(ImGuiColors.HealerGreen, type);
+                ImguiTooltips.HoveredTooltip("No particular issues, but may have unexpected interactions, especially as other plugins are installed.");
+                break;
+            case "Minor":
+                ImGui.TextColored(ImGuiColors.DalamudYellow, type);
+                ImguiTooltips.HoveredTooltip("May have redundant functionality or interact with game settings in contridictory ways.");
+                break;
+            case "Major":
+                ImGui.TextColored(ImGuiColors.DalamudRed, type);
+                ImguiTooltips.HoveredTooltip("May cause crashes, instability, or other fatal errors.");
+                break;
         }
     }
 
