@@ -1,8 +1,7 @@
-﻿using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using Lumina.Excel.Sheets;
-using RotationSolver.Data;
 
 using RotationSolver.UI.SearchableSettings;
 
@@ -124,7 +123,7 @@ internal readonly struct JobFilter
         {
             var roleOrJob = string.Join("\n",
                 AllJobs.Select(job => Svc.Data.GetExcelSheet<ClassJob>()?.GetRow((uint)job).Name ?? job.ToString()));
-            return string.Format(UiString.NotInJob.GetDescription(), roleOrJob);
+            return string.Format("This option is unavailable with your current job\n \nRoles or jobs needed:\n{0}", roleOrJob);
         }
     }
 }
@@ -282,7 +281,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
         if (IconSet.GetTexture(IconSet.GetJobIcon(DataCenter.Job, IconType.Framed), out var texture))
         {
             ImGui.Image(texture.ImGuiHandle, Vector2.One * 24 * ImGuiHelpers.GlobalScale);
-            ImguiTooltips.HoveredTooltip(UiString.JobConfigTip.GetDescription());
+            ImguiTooltips.HoveredTooltip("This config is job-specific");
         }
     }
 
@@ -295,3 +294,4 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
         }
     }
 }
+

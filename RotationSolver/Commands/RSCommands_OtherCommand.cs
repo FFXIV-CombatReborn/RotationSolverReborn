@@ -1,6 +1,5 @@
-﻿using ECommons.DalamudServices;
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Data;
+using ECommons.DalamudServices;
+using RotationSolver.Basic.Configuration;s
 using RotationSolver.Updaters;
 
 namespace RotationSolver.Commands;
@@ -249,7 +248,7 @@ public static partial class RSCommands
         var lastHyphenIndex = str.LastIndexOf('-');
         if (lastHyphenIndex == -1 || lastHyphenIndex == str.Length - 1)
         {
-            Svc.Chat.PrintError(UiString.CommandsInsertActionFailure.GetDescription());
+            Svc.Chat.PrintError("Cannot find the action. Please check the action name.");
             return;
         }
 
@@ -278,7 +277,7 @@ public static partial class RSCommands
             }
         }
 
-        Svc.Chat.PrintError(UiString.CommandsInsertActionFailure.GetDescription());
+        Svc.Chat.PrintError("Cannot find the action. Please check the action name.");
     }
 
     private static void DoRotationCommand(ICustomRotation customCombo, string str)
@@ -296,6 +295,6 @@ public static partial class RSCommands
             }
         }
 
-        Svc.Chat.PrintError(UiString.CommandsInsertActionFailure.GetDescription());
+        Svc.Chat.PrintError("Cannot find the action. Please check the action name.");
     }
 }

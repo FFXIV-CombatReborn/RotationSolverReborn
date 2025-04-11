@@ -1,5 +1,4 @@
-﻿using ECommons.DalamudServices;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
 namespace RotationSolver.UI;
 
@@ -57,60 +56,4 @@ internal enum RotationConfigWindowTab : byte
 
     [Description("Configure AutoDuty settings and view related information.")]
     [TabIcon(Icon = 4)] AutoDuty,
-}
-
-/// <summary>
-/// Struct representing a 3PP dalamud plugin.
-/// </summary>
-public struct CommunityPlugin
-{
-    public string Name { get; init; }
-    public string Icon { get; init; }
-    public string Url { get; init; }
-    public string Features { get; init; }
-
-    /// <summary>
-    /// Checks if the plugin is enabled.
-    /// </summary>
-    [JsonIgnore]
-    public readonly bool IsEnabled
-    {
-        get
-        {
-            var name = Name;
-            var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            return installedPlugins.Any(x =>
-                (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded);
-        }
-    }
-
-    /// <summary>
-    /// Checks if the plugin is installed.
-    /// </summary>
-    [JsonIgnore]
-    public readonly bool IsInstalled
-    {
-        get
-        {
-            var name = Name;
-            var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            return installedPlugins.Any(x =>
-                x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase));
-        }
-    }
-
-    public CompatibilityType Type { get; init; }
-}
-
-/// <summary>
-/// Enum representing different types of compatibility issues.
-/// </summary>
-[Flags]
-public enum CompatibilityType : byte
-{
-    Compatible = 0,
-    Skill_Usage = 1 << 0,
-    Skill_Selection = 1 << 1,
-    Crash = 1 << 2,
-    Broken = 1 << 3,
 }

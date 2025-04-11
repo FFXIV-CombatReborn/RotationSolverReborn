@@ -1,4 +1,4 @@
-﻿using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
@@ -8,7 +8,6 @@ using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.Sheets;
 using RotationSolver.Commands;
-using RotationSolver.Data;
 using RotationSolver.UI.HighlightTeachingMode;
 using System.Runtime.InteropServices;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
@@ -25,8 +24,6 @@ internal static class MajorUpdater
 
     private static Exception? _threadException;
     private static DateTime _lastUpdatedWork = DateTime.Now;
-    private static DateTime _warningsLastDisplayed = DateTime.MinValue;
-
     public static void Enable()
     {
         ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
@@ -235,20 +232,6 @@ internal static class MajorUpdater
         return null;
     }
 
-    private static void ShowWarning()
-    {
-        if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "Avarice"))
-        {
-#pragma warning disable CS0436
-            WarningHelper.AddSystemWarning(UiString.AvariceWarning.GetDescription());
-        }
-        if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "TextToTalk"))
-        {
-#pragma warning disable CS0436
-            WarningHelper.AddSystemWarning(UiString.TextToTalkWarning.GetDescription());
-        }
-    }
-
     static DateTime _closeWindowTime = DateTime.Now;
     private unsafe static void CloseWindow()
     {
@@ -336,3 +319,4 @@ internal static class MajorUpdater
         ActionUpdater.ClearNextAction();
     }
 }
+

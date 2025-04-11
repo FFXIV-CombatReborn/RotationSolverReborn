@@ -1,5 +1,4 @@
-﻿using RotationSolver.Basic.Configuration;
-using RotationSolver.Data;
+using RotationSolver.Basic.Configuration;
 using RotationSolver.UI.SearchableSettings;
 
 namespace RotationSolver.UI.SearchableConfigs;
@@ -61,15 +60,15 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
             ImGui.TableHeader("");
 
             ImGui.TableNextColumn();
-            ImGui.TableHeader(UiString.NormalTargets.GetDescription());
+            ImGui.TableHeader("Normal Targets");
 
             ImGui.TableNextColumn();
-            ImGui.TableHeader(UiString.HotTargets.GetDescription());
+            ImGui.TableHeader("Targets with Heal-over-Time");
 
-            DrawHealthRow(UiString.HpAoe0Gcd.GetDescription(), _healthAreaAbility, _healthAreaAbilityHot);
-            DrawHealthRow(UiString.HpAoeGcd.GetDescription(), _healthAreaSpell, _healthAreaSpellHot);
-            DrawHealthRow(UiString.HpSingle0Gcd.GetDescription(), _healthSingleAbility, _healthSingleAbilityHot);
-            DrawHealthRow(UiString.HpSingleGcd.GetDescription(), _healthSingleSpell, _healthSingleSpellHot);
+            DrawHealthRow("HP threshold for AoE healing oGCDs", _healthAreaAbility, _healthAreaAbilityHot);
+            DrawHealthRow("HP threshold for AoE healing GCDs", _healthAreaSpell, _healthAreaSpellHot);
+            DrawHealthRow("HP threshold for single-target healing oGCDs", _healthSingleAbility, _healthSingleAbilityHot);
+            DrawHealthRow("HP threshold for single-target healing GCDs", _healthSingleSpell, _healthSingleSpellHot);
 
             ImGui.EndTable();
         }

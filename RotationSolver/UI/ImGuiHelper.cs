@@ -1,4 +1,4 @@
-﻿using Dalamud.Game.ClientState.Keys;
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
@@ -8,7 +8,6 @@ using ECommons.ImGuiMethods;
 using ECommons.LanguageHelpers;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
-using RotationSolver.Data;
 
 namespace RotationSolver.UI;
 
@@ -32,7 +31,7 @@ internal static class ImGuiHelper
         }
         if (ImGui.IsItemHovered())
         {
-            ImguiTooltips.ShowTooltip($"{UiString.ConfigWindow_Helper_RunCommand.GetDescription()}: {cmdStr}\n{UiString.ConfigWindow_Helper_CopyCommand.GetDescription()}: {cmdStr}");
+            ImguiTooltips.ShowTooltip($"{"Click to execute the command"}: {cmdStr}\n{"Right-click to copy the command"}: {cmdStr}");
 
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
@@ -49,7 +48,7 @@ internal static class ImGuiHelper
                 ImGui.SameLine();
                 ImGui.Indent(INDENT_WIDTH);
             }
-            ImGui.Text(" → ");
+            ImGui.Text(" ? ");
             ImGui.SameLine();
             ImGui.TextWrapped(help);
             if (sameLine)
@@ -65,14 +64,14 @@ internal static class ImGuiHelper
         ImGui.SetNextItemWidth(50);
 
         // Display a draggable integer input for the macro index
-        if (ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.GetDescription()}##MacroIndex{info.GetHashCode()}", ref info.MacroIndex, 1, -1, 99))
+        if (ImGui.DragInt($"{"Macro No."}##MacroIndex{info.GetHashCode()}", ref info.MacroIndex, 1, -1, 99))
         {
             Service.Config.Save();
         }
 
         // Display a checkbox for the shared macro option
         ImGui.SameLine();
-        if (ImGui.Checkbox($"{UiString.ConfigWindow_Events_ShareMacro.GetDescription()}##ShareMacro{info.GetHashCode()}", ref info.IsShared))
+        if (ImGui.Checkbox($"{"Is Shared"}##ShareMacro{info.GetHashCode()}", ref info.IsShared))
         {
             Service.Config.Save();
         }
@@ -81,7 +80,7 @@ internal static class ImGuiHelper
     public static void DisplayEvent(this ActionEventInfo info)
     {
         var name = info.Name;
-        if (ImGui.InputText($"{UiString.ConfigWindow_Events_ActionName.GetDescription()}##ActionName{info.GetHashCode()}", ref name, 100))
+        if (ImGui.InputText($"{"Action Name"}##ActionName{info.GetHashCode()}", ref name, 100))
         {
             info.Name = name;
             Service.Config.Save();
@@ -513,7 +512,7 @@ internal static class ImGuiHelper
     public static string ToSymbol(this ConfigUnitType unit) => unit switch
     {
         ConfigUnitType.Seconds => " s",
-        ConfigUnitType.Degree => " °",
+        ConfigUnitType.Degree => " �",
         ConfigUnitType.Pixels => " p",
         ConfigUnitType.Yalms => " y",
         ConfigUnitType.Percent => " %%",

@@ -1,4 +1,4 @@
-﻿using Dalamud.Game.ClientState.Keys;
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -14,7 +14,7 @@ using TargetType = RotationSolver.Basic.Configuration.Conditions.TargetType;
 
 namespace RotationSolver.UI;
 
-internal static class ConditionDrawer
+internal static class ConditionRenderer
 {
     internal static void DrawMain(this ConditionSet? conditionSet, ICustomRotation? rotation)
     {
@@ -38,7 +38,7 @@ internal static class ConditionDrawer
                     isNot = !isNot;
                 }
 
-                ImguiTooltips.HoveredTooltip(string.Format(UiString.ActionSequencer_NotDescription.GetDescription(), isNot));
+                ImguiTooltips.HoveredTooltip(string.Format("Click to make it reverse.\nIs reversed: {0}", isNot));
             }
         }
         else
@@ -51,7 +51,7 @@ internal static class ConditionDrawer
                 {
                     isNot = !isNot;
                 }
-                ImguiTooltips.HoveredTooltip(string.Format(UiString.ActionSequencer_NotDescription.GetDescription(), isNot));
+                ImguiTooltips.HoveredTooltip(string.Format("Click to make it reverse.\nIs reversed: {0}", isNot));
             }
         }
     }
@@ -178,7 +178,7 @@ internal static class ConditionDrawer
             actions,
             action => action.Name, // Assuming the function to get the name of the action
             selectAction,
-            UiString.ConfigWindow_Actions_MemberName.GetDescription(),
+            "Member Name",
             null, // Optional parameter, can be null if not needed
             null  // Optional parameter, can be null if not needed
         );
@@ -240,7 +240,7 @@ internal static class ConditionDrawer
     {
         if (rotation == null)
         {
-            ImGui.TextColored(ImGuiColors.DalamudRed, UiString.ConfigWindow_Condition_RotationNullWarning.GetDescription());
+            ImGui.TextColored(ImGuiColors.DalamudRed, "Rotation is null. Please log in or switch jobs!");
             return;
         }
 
@@ -266,7 +266,7 @@ internal static class ConditionDrawer
             condition.DelayMin = Math.Max(Math.Min(condition.DelayMin, condition.DelayMax), MIN);
             condition.DelayMax = Math.Min(Math.Max(condition.DelayMin, condition.DelayMax), MAX);
         }
-        ImguiTooltips.HoveredTooltip(UiString.ActionSequencer_Delay_Description.GetDescription() +
+        ImguiTooltips.HoveredTooltip("Delay its transition to true" +
             "\n" + ConfigUnitType.Seconds.GetDescription());
 
         ImGui.SameLine();
@@ -275,7 +275,7 @@ internal static class ConditionDrawer
         ImGui.DragFloat($"##Offset Delay {condition.GetHashCode()}", ref condition.DelayOffset, 0.1f, MIN, MAX,
             $"{condition.DelayOffset:F1}{ConfigUnitType.Seconds.ToSymbol()}");
 
-        ImguiTooltips.HoveredTooltip(UiString.ActionSequencer_Offset_Description.GetDescription() +
+        ImguiTooltips.HoveredTooltip("Delay its transition" +
     "\n" + ConfigUnitType.Seconds.GetDescription());
     }
 
@@ -327,7 +327,7 @@ internal static class ConditionDrawer
             DataCenter.CurrentConditionValue.NamedConditions.Select(p => p.Name).ToArray(), i => i.ToString(), i =>
             {
                 namedCondition.ConditionName = i;
-            }, UiString.ConfigWindow_Condition_ConditionName.GetDescription());
+            }, "Condition Name");
 
         ImGui.SameLine();
     }
@@ -389,7 +389,7 @@ internal static class ConditionDrawer
         var i = 0;
         ImGuiHelper.SelectableCombo($"##Category{traitCondition.GetHashCode()}",
         [
-            UiString.ActionConditionType_EnoughLevel.GetDescription()
+            "Sufficient Level"
         ], ref i);
         ImGui.SameLine();
     }
@@ -436,7 +436,7 @@ internal static class ConditionDrawer
                 {
                     actionCondition.Param1 = Math.Max(0, actionCondition.Param1);
                 }
-                if (DrawDragInt($"{UiString.ActionSequencer_TimeOffset.GetDescription()}##Ability{actionCondition.GetHashCode()}", ref actionCondition.Param2))
+                if (DrawDragInt($"{"Time Offset"}##Ability{actionCondition.GetHashCode()}", ref actionCondition.Param2))
                 {
                     actionCondition.Param2 = Math.Max(0, actionCondition.Param2);
                 }
@@ -474,7 +474,7 @@ internal static class ConditionDrawer
             case ActionConditionType.MaxCharges:
                 DrawCondition(actionCondition, ref actionCondition.Param2);
 
-                if (DrawDragInt($"{UiString.ActionSequencer_Charges.GetDescription()}##Charges{actionCondition.GetHashCode()}", ref actionCondition.Param1))
+                if (DrawDragInt($"{"Charges"}##Charges{actionCondition.GetHashCode()}", ref actionCondition.Param1))
                 {
                     actionCondition.Param1 = Math.Max(0, actionCondition.Param1);
                 }
@@ -522,10 +522,10 @@ internal static class ConditionDrawer
             var key = $"Condition Pop Up: {condition.GetHashCode()}";
 
             ImGuiHelper.DrawHotKeysPopup(key, string.Empty,
-                (UiString.ConfigWindow_List_Remove.GetDescription(), Delete, ["Delete"]),
-                (UiString.ConfigWindow_Actions_MoveUp.GetDescription(), Up, ["↑"]),
-                (UiString.ConfigWindow_Actions_MoveDown.GetDescription(), Down, ["↓"]),
-                (UiString.ConfigWindow_Actions_Copy.GetDescription(), Copy, ["Ctrl"]));
+                ("Remove", Delete, ["Delete"]),
+                ("Move Up", Up, ["?"]),
+                ("Move Down", Down, ["?"]),
+                ("Copy", Copy, ["Ctrl"]));
 
             if (condition is DelayCondition delay)
             {
@@ -559,14 +559,14 @@ internal static class ConditionDrawer
             using var popUp = ImRaii.Popup("Popup" + conditionSet.GetHashCode().ToString());
             if (popUp)
             {
-                AddOneCondition<ConditionSet>(UiString.ConfigWindow_ConditionSet.GetDescription());
-                AddOneCondition<ActionCondition>(UiString.ConfigWindow_ActionSet.GetDescription());
-                AddOneCondition<TraitCondition>(UiString.ConfigWindow_TraitSet.GetDescription());
-                AddOneCondition<TargetCondition>(UiString.ConfigWindow_TargetSet.GetDescription());
-                AddOneCondition<RotationCondition>(UiString.ConfigWindow_RotationSet.GetDescription());
-                AddOneCondition<NamedCondition>(UiString.ConfigWindow_NamedSet.GetDescription());
-                AddOneCondition<TerritoryCondition>(UiString.ConfigWindow_Territoryset.GetDescription());
-                if (ImGui.Selectable(UiString.ActionSequencer_FromClipboard.GetDescription()))
+                AddOneCondition<ConditionSet>("Condition Value");
+                AddOneCondition<ActionCondition>("Action Condition");
+                AddOneCondition<TraitCondition>("Trait Condition");
+                AddOneCondition<TargetCondition>("Target Condition");
+                AddOneCondition<RotationCondition>("Rotation Condition");
+                AddOneCondition<NamedCondition>("Named Condition");
+                AddOneCondition<TerritoryCondition>("Territory Condition");
+                if (ImGui.Selectable("From Clipboard"))
                 {
                     var str = ImGui.GetClipboardText();
                     try
@@ -672,8 +672,8 @@ internal static class ConditionDrawer
                 ImGui.SameLine();
                 ImGuiHelper.SelectableCombo($"##Adjust{rotationCondition.GetHashCode()}",
                 [
-                    UiString.ActionSequencer_Original.GetDescription(),
-                    UiString.ActionSequencer_Adjusted.GetDescription(),
+                    "Original",
+                    "Adjusted",
                 ], ref rotationCondition.Param1);
                 break;
         }
@@ -735,7 +735,7 @@ internal static class ConditionDrawer
             }
             ImGuiHelper.DrawActionOverlay(cursor, IconSize, 1);
 
-            var description = targetCondition._action != null ? string.Format(UiString.ActionSequencer_ActionTarget.GetDescription(), targetCondition._action.Name)
+            var description = targetCondition._action != null ? string.Format("{0}'s target", targetCondition._action.Name)
                 : targetCondition.TargetType.GetDescription();
             ImguiTooltips.HoveredTooltip(description);
         }
@@ -775,8 +775,8 @@ internal static class ConditionDrawer
                 var check = targetCondition.FromSelf ? 1 : 0;
                 if (ImGuiHelper.SelectableCombo($"From Self {targetCondition.GetHashCode()}",
                 [
-                    UiString.ActionSequencer_StatusAll.GetDescription(),
-                    UiString.ActionSequencer_StatusSelf.GetDescription(),
+                    "From All",
+                    "From Self",
                 ], ref check))
                 {
                     targetCondition.FromSelf = check != 0;
@@ -792,8 +792,8 @@ internal static class ConditionDrawer
                 check = targetCondition.FromSelf ? 1 : 0;
                 if (ImGuiHelper.SelectableCombo($"From Self {targetCondition.GetHashCode()}",
                 [
-                    UiString.ActionSequencer_StatusAll.GetDescription(),
-                    UiString.ActionSequencer_StatusSelf.GetDescription(),
+                    "From All",
+                    "From Self",
                 ], ref check))
                 {
                     targetCondition.FromSelf = check != 0;
@@ -814,15 +814,15 @@ internal static class ConditionDrawer
                 check = targetCondition.FromSelf ? 1 : 0;
                 if (ImGuiHelper.SelectableCombo($"From Self {targetCondition.GetHashCode()}",
                 [
-                    UiString.ActionSequencer_StatusAll.GetDescription(),
-                    UiString.ActionSequencer_StatusSelf.GetDescription(),
+                    "From All",
+                    "From Self",
                 ], ref check))
                 {
                     targetCondition.FromSelf = check != 0;
                 }
 
                 DrawDragInt($"GCD##GCD{targetCondition.GetHashCode()}", ref targetCondition.GCD);
-                DrawDragFloat(ConfigUnitType.Seconds, $"{UiString.ActionSequencer_TimeOffset.GetDescription()}##Ability{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
+                DrawDragFloat(ConfigUnitType.Seconds, $"{"Time Offset"}##Ability{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
                 break;
 
             case TargetConditionType.Distance:
@@ -879,7 +879,7 @@ internal static class ConditionDrawer
         if (targetCondition._action == null && targetCondition.TargetType == TargetType.Target)
         {
             using var style = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
-            ImGui.TextWrapped(UiString.ConfigWindow_Condition_TargetWarning.GetDescription());
+            ImGui.TextWrapped("You should not use this, as this target isn't the action's target. Try selecting it from the action instead.");
         }
     }
 
@@ -913,7 +913,7 @@ internal static class ConditionDrawer
                 TerritoryNames, i => i.ToString(), i =>
                 {
                     territoryCondition.Name = i;
-                }, UiString.ConfigWindow_Condition_TerritoryName.GetDescription());
+                }, "Territory Name");
                 break;
 
             case TerritoryConditionType.DutyName:
@@ -923,9 +923,10 @@ internal static class ConditionDrawer
                 DutyNames, i => i.ToString(), i =>
                 {
                     territoryCondition.Name = i;
-                }, UiString.ConfigWindow_Condition_DutyName.GetDescription());
+                }, "Duty Name");
                 break;
         }
     }
     #endregion
 }
+

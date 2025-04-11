@@ -159,7 +159,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
             if (DataCenter.Territory?.IsHighEndDuty ?? false)
             {
-                var warning = string.Format(UiString.HighEndWarning.GetDescription(), DataCenter.Territory.ContentFinderName);
+                var warning = string.Format("Please also have reduction/shield cooldowns ready in case RSR fails at a crucial moment in {0}!", DataCenter.Territory.ContentFinderName);
 #pragma warning disable CS0436
                 WarningHelper.AddSystemWarning(warning);
             }
@@ -187,7 +187,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         });
         Task.Run(async () =>
         {
-            await DownloadHelper.DownloadAsync();
+            CommunityPlugin.IncompatiblePlugins = await DownloadHelper.DownloadOneAsync<CommunityPlugin[]>("https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/main/Resources/IncompatiblePlugins.json") ?? [];
             if (Service.Config.LoadRotationsAtStartup) await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.Download);
         });
     }
@@ -200,7 +200,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
     internal static void ChangeUITranslation()
     {
-        _rotationConfigWindow!.WindowName = UiString.ConfigWindowHeader.GetDescription()
+        _rotationConfigWindow!.WindowName = "Rotation Solver Reborn Settings v"
             + typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?";
 
         RSCommands.Disable();

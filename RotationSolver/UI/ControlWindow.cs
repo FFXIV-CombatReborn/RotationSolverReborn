@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface.Colors;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.DalamudServices;
@@ -86,8 +86,8 @@ internal class ControlWindow : CtrlWindow
         var value = Service.Config.IsControlWindowLock ? 0 : 1;
         if (ImGuiHelper.SelectableCombo("Rotation Solver Reborn Lock the Control Window",
         [
-            UiString.InfoWindowNoMove.GetDescription(),
-            UiString.InfoWindowMove.GetDescription(),
+            "No Move",
+            "Move",
         ], ref value))
         {
             Service.Config.IsControlWindowLock.Value = value == 0;

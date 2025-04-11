@@ -1,4 +1,4 @@
-﻿using Dalamud.Game.Command;
+using Dalamud.Game.Command;
 using ECommons.DalamudServices;
 using RotationSolver.Data;
 
@@ -10,12 +10,12 @@ namespace RotationSolver.Commands
         {
             Svc.Commands.AddHandler(Service.COMMAND, new CommandInfo(OnCommand)
             {
-                HelpMessage = UiString.Commands_Rotation.GetDescription(),
+                HelpMessage = "Open config window",
                 ShowInHelp = true,
             });
             Svc.Commands.AddHandler(Service.ALTCOMMAND, new CommandInfo(OnCommand)
             {
-                HelpMessage = UiString.Commands_Rotation.GetDescription(),
+                HelpMessage = "Open config window",
                 ShowInHelp = true,
             });
         }

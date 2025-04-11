@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface.Colors;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
 using RotationSolver.Data;
@@ -115,7 +115,7 @@ namespace RotationSolver.UI
         {
             var windowWidth = ImGui.GetWindowWidth();
             // Centered title
-            var text = UiString.WelcomeWindow_Header.GetDescription();
+            var text = "Welcome to Rotation Solver Reborn!";
             var fontSize = ImGui.GetFontSize();
             ImGui.PushFont(FontManager.GetFont(fontSize + 10));
             var textSize = ImGui.CalcTextSize(text).X;
@@ -134,7 +134,7 @@ namespace RotationSolver.UI
             }, windowWidth, textSize);
             ImGui.PopFont();
 
-            text = Service.Config.FirstTimeSetupDone ? UiString.WelcomeWindow_WelcomeBack.GetDescription() : UiString.WelcomeWindow_Welcome.GetDescription();
+            text = Service.Config.FirstTimeSetupDone ? "Here's what you missed since you were last here" : "It looks like you might be new here! Let's get you started!";
             ImGui.PushFont(FontManager.GetFont(fontSize + 1));
             textSize = ImGui.CalcTextSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
@@ -157,7 +157,7 @@ namespace RotationSolver.UI
 
         private void DrawChangeLog()
         {
-            var text = UiString.WelcomeWindow_Changelog.GetDescription();
+            var text = "Recent Changes:";
             var textSize = ImGui.CalcTextSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
             {

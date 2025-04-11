@@ -1,8 +1,7 @@
-﻿using Dalamud.Interface.Textures.TextureWraps;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
-using RotationSolver.Data;
 using RotationSolver.UI.SearchableConfigs;
 
 namespace RotationSolver.UI.SearchableSettings;
@@ -48,9 +47,9 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
 
     private class CheckBoxDisable(PropertyInfo property) : CheckBoxConditionAbstract(property)
     {
-        public override string Name => UiString.ForcedDisableCondition.GetDescription();
+        public override string Name => "Use Forced Disable Condition";
 
-        public override string Description => UiString.ForcedDisableConditionDesc.GetDescription();
+        public override string Description => "The conditions that force this to be false";
 
         protected override bool Value
         {
@@ -66,9 +65,9 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
 
     private class CheckBoxEnable(PropertyInfo property) : CheckBoxConditionAbstract(property)
     {
-        public override string Name => UiString.ForcedEnableCondition.GetDescription();
+        public override string Name => "Use Forced Enable Condition";
 
-        public override string Description => UiString.ForcedEnableConditionDesc.GetDescription();
+        public override string Description => "The conditions that force this to be true";
 
         protected override bool Value
         {
@@ -101,7 +100,7 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
     {
         if (AlwaysShowChildren)
         {
-            ConditionDrawer.DrawCondition(Condition);
+            ConditionRenderer.DrawCondition(Condition);
             ImGui.SameLine();
         }
         base.DrawMiddle();
@@ -249,3 +248,4 @@ internal abstract class CheckBoxSearch : Searchable
         if (IsJob) DrawJobIcon();
     }
 }
+

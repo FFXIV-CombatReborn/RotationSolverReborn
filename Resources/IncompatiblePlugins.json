@@ -4,69 +4,69 @@
     "Icon": "https://raw.githubusercontent.com/ffxivcode/AutoDuty/refs/heads/master/logo.png",
     "Url": "https://github.com/ffxivcode/AutoDuty",
     "Features": "Rotation state issues, sometimes causes BMR/vbm autorotation to be enabled at the same time.",
-    "Type": 1
+    "Type": "Compatible"
   },
   {
     "Name": "XIV Combo",
     "Icon": "https://raw.githubusercontent.com/MKhayle/XIVComboExpanded/master/res/icon.png",
     "Url": "https://github.com/attickdoor/XivComboPlugin",
     "Features": "Auto rotation and targetting conflicts",
-    "Type": 5
+    "Type": "Major"
   },
   {
     "Name": "XIV Combo Expanded",
     "Icon": "https://raw.githubusercontent.com/MKhayle/XIVComboExpanded/master/res/icon.png",
     "Url": "https://github.com/daemitus/XIVComboPlugin",
     "Features": "Auto rotation and targetting conflicts",
-    "Type": 5
+    "Type": "Major"
   },
   {
     "Name": "XIVSlothCombo",
     "Icon": "https://raw.githubusercontent.com/Nik-Potokar/XIVSlothCombo/main/res/plugin/xivslothcombo.png",
     "Url": "https://github.com/Nik-Potokar/XIVSlothCombo",
     "Features": "Auto rotation and targetting conflicts",
-    "Type": 5
+    "Type": "Major"
   },
   {
     "Name": "Wrath Combo",
     "Icon": "https://s3.puni.sh/media/plugin/60/icon-2bwhkn3zf1f.png",
     "Url": "https://github.com/PunishXIV/WrathCombo",
     "Features": "Auto rotation and targetting conflicts",
-    "Type": 5
+    "Type": "Minor"
   },
   {
     "Name": "BossMod Reborn",
     "Icon": "https://raw.githubusercontent.com/FFXIV-CombatReborn/RebornAssets/main/IconAssets/BMR_Icon.png",
     "Url": "https://github.com/FFXIV-CombatReborn/BossmodReborn",
     "Features": "Auto rotation and targetting conflicts",
-    "Type": 3
+    "Type": "Minor"
   },
   {
     "Name": "BossMod",
     "Icon": "https://raw.githubusercontent.com/awgil/ffxiv_bossmod/master/Data/icon.png",
     "Url": "https://github.com/FFXIV-CombatReborn/BossmodReborn",
     "Features": "Auto rotation and targetting conflicts",
-    "Type": 3
+    "Type": "Minor"
   },
   {
     "Name": "Redirect",
     "Icon": "https://raw.githubusercontent.com/cairthenn/Redirect/main/Redirect/icon.png",
     "Url": "https://github.com/cairthenn/Redirect",
     "Features": "Skill targetting conflicts",
-    "Type": 1
+    "Type": "Minor"
   },
   {
     "Name": "ReAction",
     "Icon": "",
     "Url": "https://github.com/UnknownX7/ReAction",
     "Features": "May have issues with skill queueing settings",
-    "Type": 1
+    "Type": "Minor"
   },
   {
     "Name": "ReActionEX",
     "Icon": "",
     "Url": "https://github.com/Taurenkey/ReActionEX",
     "Features": "May have issues with skill queueing settings",
-    "Type": 1
+    "Type": "Minor"
   }
 ]
