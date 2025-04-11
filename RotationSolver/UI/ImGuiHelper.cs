@@ -48,7 +48,7 @@ internal static class ImGuiHelper
                 ImGui.SameLine();
                 ImGui.Indent(INDENT_WIDTH);
             }
-            ImGui.Text(" ? ");
+            ImGui.Text(" → ");
             ImGui.SameLine();
             ImGui.TextWrapped(help);
             if (sameLine)
@@ -512,7 +512,7 @@ internal static class ImGuiHelper
     public static string ToSymbol(this ConfigUnitType unit) => unit switch
     {
         ConfigUnitType.Seconds => " s",
-        ConfigUnitType.Degree => " �",
+        ConfigUnitType.Degree => " °",
         ConfigUnitType.Pixels => " p",
         ConfigUnitType.Yalms => " y",
         ConfigUnitType.Percent => " %%",
