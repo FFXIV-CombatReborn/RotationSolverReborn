@@ -362,7 +362,7 @@ public partial class RotationConfigWindow : Window
             // Skip the tab if it has the TabSkipAttribute
             if (tab.GetAttribute<TabSkipAttribute>() != null) continue;
 
-            if (tab == RotationConfigWindowTab.AutoDuty && new CommunityPlugin { Name = "AutoDuty" }.IsInstalled) continue;
+            if (tab == RotationConfigWindowTab.AutoDuty && !new CommunityPlugin { Name = "AutoDuty" }.IsInstalled) continue;
 
             if (IconSet.GetTexture(tab.GetAttribute<TabIconAttribute>()?.Icon ?? 0, out var icon) && windowWidth <= JOB_ICON_WIDTH * Scale)
             {
