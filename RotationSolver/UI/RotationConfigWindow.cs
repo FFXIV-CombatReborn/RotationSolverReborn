@@ -147,13 +147,7 @@ public partial class RotationConfigWindow : Window
 
     private bool CheckErrors()
     {
-        foreach (var plugin in CommunityPlugin.IncompatiblePlugins)
-        {
-            Svc.Log.Information("Installed Incompatible Plugins: {0}", plugin.Name);
-        }
-        var installedIncompatiblePlugin = CommunityPlugin.IncompatiblePlugins.First(p => p.IsEnabled && p.CompatibilityIssues == "Major");
-        Svc.Log.Information("Installed Incompatible Plugins: {0}, {1}", installedIncompatiblePlugin.Name, installedIncompatiblePlugin.CompatibilityIssues);
-        if (installedIncompatiblePlugin.Name != null)
+        if (CommunityPlugin.IncompatiblePlugins.Any(p => p.IsEnabled && p.CompatibilityIssues == "Major"))
         {
             return true;
         }

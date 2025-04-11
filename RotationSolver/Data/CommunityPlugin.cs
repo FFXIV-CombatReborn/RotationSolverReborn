@@ -7,11 +7,11 @@ namespace RotationSolver.Data;
 public class CommunityPlugin
 {
     public static CommunityPlugin[] IncompatiblePlugins { get; set; } = [];
-    public string Name { get; set; }
-    public string Icon { get; set; }
-    public string Url { get; set; }
-    public string Features { get; set; }
-    public string CompatibilityIssues { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Icon { get; set; } = string.Empty;
+    public string Url { get; set; } = string.Empty;
+    public string Features { get; set; } = string.Empty;
+    public string CompatibilityIssues { get; set; } = string.Empty;
 
     /// <summary>
     /// Checks if the plugin is enabled.
