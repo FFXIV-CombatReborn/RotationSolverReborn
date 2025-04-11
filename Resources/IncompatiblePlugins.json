@@ -10,49 +10,49 @@
     "Name": "XIV Combo",
     "Icon": "https://raw.githubusercontent.com/MKhayle/XIVComboExpanded/master/res/icon.png",
     "Url": "https://github.com/attickdoor/XivComboPlugin",
-    "Features": "Auto rotation and targetting conflicts",
+    "Features": "Auto rotation and targeting conflicts",
     "CompatibilityIssues": "Major"
   },
   {
     "Name": "XIV Combo Expanded",
     "Icon": "https://raw.githubusercontent.com/MKhayle/XIVComboExpanded/master/res/icon.png",
     "Url": "https://github.com/daemitus/XIVComboPlugin",
-    "Features": "Auto rotation and targetting conflicts",
+    "Features": "Auto rotation and targeting conflicts",
     "CompatibilityIssues": "Major"
   },
   {
     "Name": "XIVSlothCombo",
     "Icon": "https://raw.githubusercontent.com/Nik-Potokar/XIVSlothCombo/main/res/plugin/xivslothcombo.png",
     "Url": "https://github.com/Nik-Potokar/XIVSlothCombo",
-    "Features": "Auto rotation and targetting conflicts",
+    "Features": "Auto rotation and targeting conflicts",
     "CompatibilityIssues": "Major"
   },
   {
     "Name": "Wrath Combo",
     "Icon": "https://s3.puni.sh/media/plugin/60/icon-2bwhkn3zf1f.png",
     "Url": "https://github.com/PunishXIV/WrathCombo",
-    "Features": "Auto rotation and targetting conflicts",
+    "Features": "Auto rotation and targeting conflicts",
     "CompatibilityIssues": "Minor"
   },
   {
     "Name": "BossMod Reborn",
     "Icon": "https://raw.githubusercontent.com/FFXIV-CombatReborn/RebornAssets/main/IconAssets/BMR_Icon.png",
     "Url": "https://github.com/FFXIV-CombatReborn/BossmodReborn",
-    "Features": "Auto rotation and targetting conflicts",
+    "Features": "Auto rotation and targeting conflicts",
     "CompatibilityIssues": "Minor"
   },
   {
     "Name": "BossMod",
     "Icon": "https://raw.githubusercontent.com/awgil/ffxiv_bossmod/master/Data/icon.png",
     "Url": "https://github.com/FFXIV-CombatReborn/BossmodReborn",
-    "Features": "Auto rotation and targetting conflicts",
+    "Features": "Auto rotation and targeting conflicts",
     "CompatibilityIssues": "Minor"
   },
   {
     "Name": "Redirect",
     "Icon": "https://raw.githubusercontent.com/cairthenn/Redirect/main/Redirect/icon.png",
     "Url": "https://github.com/cairthenn/Redirect",
-    "Features": "Skill targetting conflicts",
+    "Features": "Skill targeting conflicts",
     "CompatibilityIssues": "Minor"
   },
   {

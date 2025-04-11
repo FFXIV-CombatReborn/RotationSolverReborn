@@ -43,7 +43,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// </summary>
     public readonly bool IsTargetFriendly => action.Setting.IsFriendly;
 
-    #region Targetting Behaviour
+    #region Targeting Behaviour
 
     /// <summary>
     /// Retrieves a collection of valid battle characters that can be targeted based on the specified criteria.

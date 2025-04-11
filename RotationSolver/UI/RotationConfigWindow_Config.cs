@@ -116,11 +116,11 @@ public partial class RotationConfigWindow
             () => DataCenter.CurrentConditionValue.SwitchCancelConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
-            () => "Auto manual targetting mode conditions",
+            () => "Auto manual targeting mode conditions",
             () => DataCenter.CurrentConditionValue.SwitchManualConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
-            () => "Auto automatic targetting mode conditions",
+            () => "Auto automatic targeting mode conditions",
             () => DataCenter.CurrentConditionValue.SwitchAutoConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
     })
@@ -280,7 +280,7 @@ public partial class RotationConfigWindow
 
     private static readonly CollapsingHeaderGroup _autoHeader = new(new Dictionary<Func<string>, Action>
     {
-        { () => "Auto Switch", DrawBasicAutoSwitch },
+        { () => "Automatic RSR On/Off Configurations", DrawBasicAutoSwitch },
         { () => "Reorder AutoStatus Priorities", DrawAutoStatusOrderConfig },
         { () => "Action Usage Control", DrawActionUsageControl },
         { () => "Healing Usage and Control", DrawHealingActionCondition },
