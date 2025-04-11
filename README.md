@@ -39,6 +39,7 @@ No Plugins will be installed, you have just made them available. You can now sel
 
 ## Links
 
-The rotations definitions are [here](https://github.com/FFXIV-CombatReborn/RebornRotations).
+The rotations definitions are [here](https://github.com/FFXIV-CombatReborn/RotationSolverReborn/tree/main/BasicRotations).
 
-[![Crowdin](https://badges.crowdin.net/badge/light/crowdin-on-dark.png)](https://crowdin.com/project/rotationsolver)
+## CN users
+RSR是以最终幻想14国际服的版本进行更新的，对于最终幻想14的简中服用户，卫月链接获取的RSR由于是对标国际服最新版本无法在最终幻想14简中服的版本下使用（会导致无法获取循环等情况），解决方法为选择对应版本的RSR插件，例如现在最终幻想14简中服是7.11版本，在这种情况下，您将使用的是7.1.1.X版本（X同前缀最大数字），对应的版本可以在这个github的发布页面上找到。

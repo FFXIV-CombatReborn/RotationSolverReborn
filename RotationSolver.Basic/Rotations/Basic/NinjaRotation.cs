@@ -252,6 +252,10 @@ partial class NinjaRotation
     {
         setting.UnlockedByQuestID = 65748;
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+        };
     }
 
     static partial void ModifyNinjutsuPvE(ref ActionSetting setting)
@@ -263,6 +267,10 @@ partial class NinjaRotation
     {
         setting.UnlockedByQuestID = 65750;
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+        };
     }
 
     static partial void ModifyDeathBlossomPvE(ref ActionSetting setting)
@@ -288,6 +296,10 @@ partial class NinjaRotation
     {
         setting.UnlockedByQuestID = 65768;
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+        };
     }
 
     static partial void ModifyKassatsuPvE(ref ActionSetting setting)
@@ -439,19 +451,24 @@ partial class NinjaRotation
     public NinjaRotation()
     {
         FumaShurikenPvE.Setting.Ninjutsu = [TenPvE];
-        KatonPvE.Setting.Ninjutsu = [ChiPvE, TenPvE];
-        RaitonPvE.Setting.Ninjutsu = [TenPvE, ChiPvE];
-        HyotonPvE.Setting.Ninjutsu = [TenPvE, JinPvE];
-        HutonPvE.Setting.Ninjutsu = [JinPvE, ChiPvE, TenPvE];
-        DotonPvE.Setting.Ninjutsu = [JinPvE, TenPvE, ChiPvE];
-        SuitonPvE.Setting.Ninjutsu = [TenPvE, ChiPvE, JinPvE];
-        GokaMekkyakuPvE.Setting.Ninjutsu = [ChiPvE, TenPvE];
-        HyoshoRanryuPvE.Setting.Ninjutsu = [TenPvE, JinPvE];
+        KatonPvE.Setting.Ninjutsu = [ChiPvE, TenPvE_18805];
+        RaitonPvE.Setting.Ninjutsu = [TenPvE, ChiPvE_18806];
+        HyotonPvE.Setting.Ninjutsu = [TenPvE, JinPvE_18807];
+        HutonPvE.Setting.Ninjutsu = [JinPvE, ChiPvE_18806, TenPvE_18805];
+        DotonPvE.Setting.Ninjutsu = [JinPvE, TenPvE_18805, ChiPvE_18806];
+        SuitonPvE.Setting.Ninjutsu = [TenPvE, ChiPvE_18806, JinPvE_18807];
+        GokaMekkyakuPvE.Setting.Ninjutsu = [ChiPvE, TenPvE_18805];
+        HyoshoRanryuPvE.Setting.Ninjutsu = [TenPvE, JinPvE_18807];
     }
 
     static partial void ModifyFumaShurikenPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => FumaShurikenPvEReady;
+        setting.MPOverride = () => 0;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyKatonPvE(ref ActionSetting setting)

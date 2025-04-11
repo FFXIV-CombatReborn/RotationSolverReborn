@@ -85,7 +85,7 @@ public sealed class NIN_Default : NinjaRotation
 
         // If the last action performed matches any of a list of specific actions, it clears the Ninjutsu aim.
         // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
-        if (IsLastAction(true, RabbitMediumPvE, FumaShurikenPvE, KatonPvE, RaitonPvE,
+        if (IsLastAction(false, RabbitMediumPvE, FumaShurikenPvE, KatonPvE, RaitonPvE,
             HyotonPvE, HutonPvE, DotonPvE, SuitonPvE, GokaMekkyakuPvE, HyoshoRanryuPvE) || (Player.HasStatus(true, StatusID.ShadowWalker)
                 && (_ninActionAim == SuitonPvE || _ninActionAim == HutonPvE)))
         {
@@ -204,7 +204,9 @@ public sealed class NIN_Default : NinjaRotation
         // Ensures that the action ID currently considered for Ninjutsu is actually valid for Ninjutsu execution.
         //if (AdjustId(ActionID.NinjutsuPvE) != ActionID.NinjutsuPvE) return false;
         // If more than 4.5 seconds have passed since the last action, it clears any pending Ninjutsu to avoid stale actions.
-        if (TimeSinceLastAction.TotalSeconds > 4.5) ClearNinjutsu();
+
+        //if (TimeSinceLastAction.TotalSeconds > 4.5 ) ClearNinjutsu();
+        //-- This has been commented out for now as it breaks ninjustsu decision making at the beginning of combat, need to find better implementation.
 
         // Checks for Kassatsu status to prioritize high-impact Ninjutsu due to its buff.
         if (Player.HasStatus(true, StatusID.Kassatsu))
@@ -358,6 +360,16 @@ public sealed class NIN_Default : NinjaRotation
                 act = null;
                 return false;
             }
+            //Action Execution
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
             //First
             else if (id == ActionID.NinjutsuPvE)
             {
@@ -372,30 +384,14 @@ public sealed class NIN_Default : NinjaRotation
                 return true;
             }
             //Second
-            else if ((uint)id == _ninActionAim.ID)
-            {
-                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
-                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
-                {
-                    act = _ninActionAim;
-                    return true;
-                }
-            }
-            //Third
             else if ((uint)id == FumaShurikenPvE.ID)
             {
-                if (_ninActionAim.Setting.Ninjutsu!.Length > 1
-                    && !IsLastAction(true, _ninActionAim.Setting.Ninjutsu![1]))
-                {
-                    act = _ninActionAim.Setting.Ninjutsu![1];
-                    return true;
-                }
+                act = _ninActionAim.Setting.Ninjutsu![1];
+                return true;
             }
-            //Finished
+            //Third
             else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
             {
-                if (_ninActionAim.Setting.Ninjutsu!.Length > 2
-                    && !IsLastAction(true, _ninActionAim.Setting.Ninjutsu![2]))
                 {
                     act = _ninActionAim.Setting.Ninjutsu![2];
                     return true;
@@ -428,6 +424,16 @@ public sealed class NIN_Default : NinjaRotation
                 act = null;
                 return false;
             }
+            //Action Execution
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
             //First
             else if (id == ActionID.NinjutsuPvE)
             {
@@ -442,16 +448,6 @@ public sealed class NIN_Default : NinjaRotation
                 return true;
             }
             //Second
-            else if ((uint)id == _ninActionAim.ID)
-            {
-                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
-                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
-                {
-                    act = _ninActionAim;
-                    return true;
-                }
-            }
-            //Third
             else if ((uint)id == FumaShurikenPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 1
@@ -461,7 +457,7 @@ public sealed class NIN_Default : NinjaRotation
                     return true;
                 }
             }
-            //Finished
+            //Third
             else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 2
@@ -498,6 +494,16 @@ public sealed class NIN_Default : NinjaRotation
                 act = null;
                 return false;
             }
+            //Action Execution
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
             //First
             else if (id == ActionID.NinjutsuPvE)
             {
@@ -512,16 +518,6 @@ public sealed class NIN_Default : NinjaRotation
                 return true;
             }
             //Second
-            else if ((uint)id == _ninActionAim.ID)
-            {
-                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
-                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
-                {
-                    act = _ninActionAim;
-                    return true;
-                }
-            }
-            //Third
             else if ((uint)id == FumaShurikenPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 1
@@ -531,7 +527,7 @@ public sealed class NIN_Default : NinjaRotation
                     return true;
                 }
             }
-            //Finished
+            //Third
             else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 2
@@ -568,6 +564,16 @@ public sealed class NIN_Default : NinjaRotation
                 act = null;
                 return false;
             }
+            //Action Execution
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
             //First
             else if (id == ActionID.NinjutsuPvE)
             {
@@ -582,16 +588,6 @@ public sealed class NIN_Default : NinjaRotation
                 return true;
             }
             //Second
-            else if ((uint)id == _ninActionAim.ID)
-            {
-                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
-                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
-                {
-                    act = _ninActionAim;
-                    return true;
-                }
-            }
-            //Third
             else if ((uint)id == FumaShurikenPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 1
@@ -601,7 +597,7 @@ public sealed class NIN_Default : NinjaRotation
                     return true;
                 }
             }
-            //Finished
+            //Third
             else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 2
@@ -638,6 +634,16 @@ public sealed class NIN_Default : NinjaRotation
                 act = null;
                 return false;
             }
+            //Action Execution
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
             //First
             else if (id == ActionID.NinjutsuPvE)
             {
@@ -652,16 +658,6 @@ public sealed class NIN_Default : NinjaRotation
                 return true;
             }
             //Second
-            else if ((uint)id == _ninActionAim.ID)
-            {
-                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
-                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
-                {
-                    act = _ninActionAim;
-                    return true;
-                }
-            }
-            //Third
             else if ((uint)id == FumaShurikenPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 1
@@ -671,7 +667,7 @@ public sealed class NIN_Default : NinjaRotation
                     return true;
                 }
             }
-            //Finished
+            //Third
             else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 2
@@ -708,6 +704,16 @@ public sealed class NIN_Default : NinjaRotation
                 act = null;
                 return false;
             }
+            //Action Execution
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
             //First
             else if (id == ActionID.NinjutsuPvE)
             {
@@ -722,16 +728,6 @@ public sealed class NIN_Default : NinjaRotation
                 return true;
             }
             //Second
-            else if ((uint)id == _ninActionAim.ID)
-            {
-                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
-                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
-                {
-                    act = _ninActionAim;
-                    return true;
-                }
-            }
-            //Third
             else if ((uint)id == FumaShurikenPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 1
@@ -741,7 +737,7 @@ public sealed class NIN_Default : NinjaRotation
                     return true;
                 }
             }
-            //Finished
+            //Third
             else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 2
@@ -778,6 +774,16 @@ public sealed class NIN_Default : NinjaRotation
                 act = null;
                 return false;
             }
+            //Action Execution
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
             //First
             else if (id == ActionID.NinjutsuPvE)
             {
@@ -792,16 +798,6 @@ public sealed class NIN_Default : NinjaRotation
                 return true;
             }
             //Second
-            else if ((uint)id == _ninActionAim.ID)
-            {
-                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
-                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
-                {
-                    act = _ninActionAim;
-                    return true;
-                }
-            }
-            //Third
             else if ((uint)id == FumaShurikenPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 1
@@ -811,7 +807,7 @@ public sealed class NIN_Default : NinjaRotation
                     return true;
                 }
             }
-            //Finished
+            //Third
             else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 2
@@ -848,6 +844,16 @@ public sealed class NIN_Default : NinjaRotation
                 act = null;
                 return false;
             }
+            //Action Execution
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
             //First
             else if (id == ActionID.NinjutsuPvE)
             {
@@ -862,16 +868,6 @@ public sealed class NIN_Default : NinjaRotation
                 return true;
             }
             //Second
-            else if ((uint)id == _ninActionAim.ID)
-            {
-                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
-                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
-                {
-                    act = _ninActionAim;
-                    return true;
-                }
-            }
-            //Third
             else if ((uint)id == FumaShurikenPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 1
@@ -881,7 +877,7 @@ public sealed class NIN_Default : NinjaRotation
                     return true;
                 }
             }
-            //Finished
+            //Third
             else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 2
@@ -918,6 +914,16 @@ public sealed class NIN_Default : NinjaRotation
                 act = null;
                 return false;
             }
+            //Action Execution
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
             //First
             else if (id == ActionID.NinjutsuPvE)
             {
@@ -932,16 +938,6 @@ public sealed class NIN_Default : NinjaRotation
                 return true;
             }
             //Second
-            else if ((uint)id == _ninActionAim.ID)
-            {
-                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
-                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
-                {
-                    act = _ninActionAim;
-                    return true;
-                }
-            }
-            //Third
             else if ((uint)id == FumaShurikenPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 1
@@ -951,7 +947,7 @@ public sealed class NIN_Default : NinjaRotation
                     return true;
                 }
             }
-            //Finished
+            //Third
             else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 2
