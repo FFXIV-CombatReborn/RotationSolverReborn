@@ -120,10 +120,6 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _prioEnemyParts = true;
 
-    [ConditionBool, UI("Allow the use of AOEs against priority-marked targets.",
-        Parent = nameof(ChooseAttackMark))]
-    private static readonly bool _canAttackMarkAOE = true;
-
     [ConditionBool, UI("Never attack targets with stop markers.",
         Filter = TargetConfig)]
     private static readonly bool _filterStopMark = true;
