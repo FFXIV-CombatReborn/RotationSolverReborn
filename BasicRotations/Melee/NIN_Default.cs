@@ -213,26 +213,26 @@ public sealed class NIN_Default : NinjaRotation
         {
             // Attempts to set high-damage AoE Ninjutsu if available under Kassatsu's effect.
             // These are prioritized due to Kassatsu's enhancement of Ninjutsu abilities.
-            if (DeathBlossomPvE.CanUse(out _) && GokaMekkyakuPvE.EnoughLevel)
+            if (DeathBlossomPvE.CanUse(out _) && GokaMekkyakuPvE.EnoughLevel && GokaMekkyakuPvE.EnoughLevel)
             {
                 SetNinjutsu(GokaMekkyakuPvE);
             }
-            if (!DeathBlossomPvE.CanUse(out _) && HyoshoRanryuPvE.EnoughLevel)
+            if (!DeathBlossomPvE.CanUse(out _) && HyoshoRanryuPvE.EnoughLevel && HyoshoRanryuPvE.EnoughLevel)
             {
                 SetNinjutsu(HyoshoRanryuPvE);
             }
 
-            if (!IsShadowWalking && ShadowWalkerNeeded && !HyoshoRanryuPvE.EnoughLevel)
+            if (!IsShadowWalking && ShadowWalkerNeeded && !HyoshoRanryuPvE.EnoughLevel && HutonPvE.EnoughLevel)
             {
                 SetNinjutsu(HutonPvE);
             }
 
-            if (DeathBlossomPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel)
+            if (DeathBlossomPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel && KatonPvE.EnoughLevel)
             {
                 SetNinjutsu(KatonPvE);
             }
 
-            if (!DeathBlossomPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel)
+            if (!DeathBlossomPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel && RaitonPvE.EnoughLevel)
             {
                 SetNinjutsu(RaitonPvE);
             }
@@ -255,11 +255,12 @@ public sealed class NIN_Default : NinjaRotation
             }
 
             //Aoe
-            if (DeathBlossomPvE.CanUse(out _) && KatonPvE.EnoughLevel && TenPvE.CanUse(out _))
+            if (DeathBlossomPvE.CanUse(out _) && TenPvE.CanUse(out _))
             {
-                if (!HasDoton && !IsMoving && !IsLastGCD(true, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) || !HasDoton && !TenChiJinPvE.Cooldown.IsCoolingDown)
+                if (!HasDoton && !IsMoving && !IsLastGCD(true, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) && DotonPvE.EnoughLevel 
+                    || !HasDoton && !TenChiJinPvE.Cooldown.IsCoolingDown && DotonPvE.EnoughLevel)
                     SetNinjutsu(DotonPvE);
-                else SetNinjutsu(KatonPvE);
+                else if (KatonPvE.EnoughLevel) SetNinjutsu(KatonPvE);
             }
 
             //Single

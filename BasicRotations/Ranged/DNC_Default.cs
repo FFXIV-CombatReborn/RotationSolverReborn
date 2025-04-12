@@ -1,6 +1,6 @@
 namespace RebornRotations.Ranged;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.20", Description = "")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.20")]
 [SourceCode(Path = "main/BasicRotations/Ranged/DNC_Default.cs")]
 [Api(4)]
 public sealed class DNC_Default : DancerRotation
@@ -240,13 +240,11 @@ public sealed class DNC_Default : DancerRotation
         }
 
         if (FinishingMovePvE.CanUse(out act, skipAoeCheck: true)) return true;
-
-        if (Player.WillStatusEndGCD(2, 0, true, StatusID.FlourishingStarfall) && StarfallDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (Esprit < 100 && StarfallDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (Player.WillStatusEndGCD(3, 0, true, StatusID.Devilment) && StarfallDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
 
         // Further prioritized GCD abilities
         if ((burst || (Esprit >= 70 && !TechnicalStepPvE.Cooldown.ElapsedAfter(115))) && SaberDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
-
-        if (StarfallDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
 
         bool standardReady = StandardStepPvE.Cooldown.ElapsedAfter(28);
         bool technicalReady = TechnicalStepPvE.Cooldown.ElapsedAfter(118);
