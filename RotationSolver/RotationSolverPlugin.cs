@@ -226,7 +226,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             && !Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
             && !Svc.Condition[ConditionFlag.Occupied38] //Treasure hunt.
             && !Svc.Condition[ConditionFlag.WaitingForDuty]
-            && (!Svc.Condition[ConditionFlag.UsingParasol] || Player.Object.StatusFlags.HasFlag(Dalamud.Game.ClientState.Objects.Enums.StatusFlags.WeaponOut))
+            && (!Svc.Condition[ConditionFlag.UsingFashionAccessory] || Player.Object.StatusFlags.HasFlag(Dalamud.Game.ClientState.Objects.Enums.StatusFlags.WeaponOut))
             && !Svc.Condition[ConditionFlag.OccupiedInQuestEvent]);
 
         _nextActionWindow!.IsOpen = isValid && Service.Config.ShowNextActionWindow;
