@@ -118,7 +118,7 @@ public class BLM_Default : BlackMageRotation
                 if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
             }
 
-            if (UmbralIceStacks < 3 && LucidDreamingPvE.CanUse(out act)) return true;
+            if (UmbralIceStacks < MaxSoulCount && LucidDreamingPvE.CanUse(out act)) return true;
         }
 
         if (InAstralFire)
@@ -185,14 +185,14 @@ public class BLM_Default : BlackMageRotation
     private bool MaintainIce(out IAction? act)
     {
         act = null;
-        if (UmbralIceStacks == 1)
+        if (UmbralIceStacks == 1 && MaxSoulCount == 3)
         {
             if (BlizzardIiPvE.CanUse(out act)) return true;
 
             if (Player.Level == 90 && BlizzardPvE.CanUse(out act)) return true;
             if (BlizzardIiiPvE.CanUse(out act)) return true;
         }
-        if (UmbralIceStacks == 2 && Player.Level < 90)
+        if (UmbralIceStacks == 2 && Player.Level < 90 && MaxSoulCount == 3)
         {
             if (BlizzardIiPvE.CanUse(out act)) return true;
             if (BlizzardPvE.CanUse(out act)) return true;
@@ -207,10 +207,10 @@ public class BLM_Default : BlackMageRotation
         if (IsLastAction(ActionID.UmbralSoulPvE, ActionID.TransposePvE)
             && IsParadoxActive && BlizzardPvE.CanUse(out act)) return true;
 
-        if (UmbralIceStacks == 3 && UsePolyglot(out act)) return true;
+        if (UmbralIceStacks == MaxSoulCount && UsePolyglot(out act)) return true;
 
         //Add Hearts
-        if (UmbralIceStacks == 3 &&
+        if (UmbralIceStacks == MaxSoulCount &&
             BlizzardIvPvE.EnoughLevel && UmbralHearts < 3 && !IsLastGCD
             (ActionID.BlizzardIvPvE, ActionID.FreezePvE))
         {
@@ -237,7 +237,7 @@ public class BLM_Default : BlackMageRotation
         act = null;
 
         //Transpose line
-        if (UmbralIceStacks < 3) return false;
+        if (UmbralIceStacks < MaxSoulCount) return false;
 
         //Need more MP
         if (CurrentMp < 9600) return false;
@@ -386,7 +386,7 @@ public class BLM_Default : BlackMageRotation
         if (UmbralSoulPvE.CanUse(out act)) return true;
         if (InAstralFire && TransposePvE.CanUse(out act)) return true;
         if (UseTransposeForParadox &&
-            InUmbralIce && !IsParadoxActive && UmbralIceStacks == 3
+            InUmbralIce && !IsParadoxActive && UmbralIceStacks == MaxSoulCount
             && TransposePvE.CanUse(out act)) return true;
 
         return false;

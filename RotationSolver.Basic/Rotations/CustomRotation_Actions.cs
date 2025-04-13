@@ -158,7 +158,7 @@ partial class CustomRotation
 
     static partial void ModifyBraveryPvP(ref ActionSetting setting)
     {
-        
+        setting.TargetType = TargetType.Self;
     }
 
     static partial void ModifyEagleEyeShotPvP(ref ActionSetting setting)

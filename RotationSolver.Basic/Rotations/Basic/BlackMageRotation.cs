@@ -99,6 +99,55 @@ partial class BlackMageRotation
     }
 
     /// <summary>
+    /// Returns the higher value between Astral Fire stacks and Umbral Ice stacks.
+    /// </summary>
+    public static byte SoulStackCount => Math.Max(AstralFireStacks, UmbralIceStacks);
+
+    /// <summary>
+    /// A check with variable max stacks of Polyglot based on the trait level.
+    /// </summary>
+    public static bool IsSoulStacksMaxed
+    {
+        get
+        {
+            if (Player.Level >= 35)
+            {
+                return SoulStackCount == 3;
+            }
+            else if (Player.Level >= 20)
+            {
+                return SoulStackCount == 2;
+            }
+            else
+            {
+                return SoulStackCount == 1;
+            }
+        }
+    }
+
+    /// <summary>
+    /// A check with variable max stacks of Polyglot based on the trait level.
+    /// </summary>
+    public static byte MaxSoulCount
+    {
+        get
+        {
+            if (Player.Level >= 35)
+            {
+                return 3;
+            }
+            else if (Player.Level >= 20)
+            {
+                return 2;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+    }
+
+    /// <summary>
     /// A check with variable max stacks of Polyglot based on the trait level.
     /// </summary>
     public static bool IsPolyglotStacksMaxed
@@ -174,22 +223,28 @@ partial class BlackMageRotation
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
-        ImGui.Text("Is next GCD be instant " + NextGCDisInstant.ToString());
-        ImGui.Text("Can next GCD be instant " + CanMakeInstant.ToString());
-        ImGui.Text("Number of Instant Casts Available " + ThisManyInstantCasts.ToString());
-        ImGui.Text("AstralDefecit " + AstralDefecit.ToString());
+        ImGui.Text("Is next GCD be instant: " + NextGCDisInstant.ToString());
+        ImGui.Text("Can next GCD be instant: " + CanMakeInstant.ToString());
+        ImGui.Text("Number of Instant Casts Available: " + ThisManyInstantCasts.ToString());
+        ImGui.Text("AstralDefecit: " + AstralDefecit.ToString());
         ImGui.Text("HasFire: " + HasFire.ToString());
         ImGui.Text("HasThunder: " + HasThunder.ToString());
+        ImGui.Separator();
+        ImGui.Text("PolyglotStacks: " + PolyglotStacks.ToString());
         ImGui.Text("IsPolyglotStacksMaxed: " + IsPolyglotStacksMaxed.ToString());
+        ImGui.Separator();
+        ImGui.Text("InUmbralIce: " + InUmbralIce.ToString());
+        ImGui.Text("InAstralFire: " + InAstralFire.ToString());
+        ImGui.Separator();
         ImGui.Text("UmbralIceStacks: " + UmbralIceStacks.ToString());
         ImGui.Text("AstralFireStacks: " + AstralFireStacks.ToString());
         ImGui.Text("AstralSoulStacks: " + AstralSoulStacks.ToString());
-        ImGui.Text("PolyglotStacks: " + PolyglotStacks.ToString());
+        ImGui.Text("Soul Stack Count: " + SoulStackCount.ToString());
+        ImGui.Text("Is Soul Stacks Maxed: " + IsSoulStacksMaxed.ToString());
+        ImGui.Text("Max Soul Stacks: " + MaxSoulCount.ToString());
+        ImGui.Separator();
         ImGui.Text("UmbralHearts: " + UmbralHearts.ToString());
         ImGui.Text("IsParadoxActive: " + IsParadoxActive.ToString());
-        ImGui.Text("UmbralIceStacks: " + UmbralIceStacks.ToString());
-        ImGui.Text("InUmbralIce: " + InUmbralIce.ToString());
-        ImGui.Text("InAstralFire: " + InAstralFire.ToString());
         ImGui.Text("IsEnochianActive: " + IsEnochianActive.ToString());
         ImGui.Text("EnochianTimeRaw: " + EnochianTimeRaw.ToString());
         ImGui.Text("EnochianTime: " + EnochianTime.ToString());

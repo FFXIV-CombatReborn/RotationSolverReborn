@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.Magical;
 
-[Rotation("Pending Rework", CombatType.PvE, GameVersion = "7.2")]
+[Rotation("Pending Rework2", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Magical/BLM_Beta.cs")]
 [Api(4)]
 
