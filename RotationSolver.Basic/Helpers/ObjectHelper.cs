@@ -3,6 +3,7 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons;
 using ECommons.DalamudServices;
+using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -16,7 +17,6 @@ using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using ECommons.ExcelServices;
 
 namespace RotationSolver.Basic.Helpers;
 
@@ -169,72 +169,83 @@ public static class ObjectHelper
 
     internal static unsafe bool IsInEnemiesList(this IBattleChara battleChara)
     {
-        var addons = Service.GetAddons<AddonEnemyList>();
-
-        if (addons == null || !addons.Any())
+        try
         {
-            return false;
-        }
+            var addons = Service.GetAddons<AddonEnemyList>();
 
-        var addon = addons.First();
-        if (addon == IntPtr.Zero)
-        {
-            return false;
-        }
-
-        var enemyList = (AddonEnemyList*)addon;
-
-        // Ensure that EnemyOneComponent is valid
-        if (enemyList->EnemyOneComponent == null)
-        {
-            return false;
-        }
-
-        // EnemyCount indicates how many enemies are in the list
-        var enemyCount = enemyList->EnemyCount;
-
-        for (int i = 0; i < enemyCount; i++)
-        {
-            // Access each enemy component
-            var enemyComponentPtr = enemyList->EnemyOneComponent + i;
-            if (enemyComponentPtr == null || *enemyComponentPtr == null)
+            if (addons == null || !addons.Any())
             {
-                continue;
+                return false;
             }
 
-            var enemyComponent = *enemyComponentPtr;
-            var atkComponentBase = enemyComponent->AtkComponentBase;
-
-            // Access the UldManager's NodeList
-            var uldManager = atkComponentBase.UldManager;
-
-            for (int j = 0; j < uldManager.NodeListCount; j++)
+            var addon = addons.First();
+            if (addon == IntPtr.Zero)
             {
-                var node = uldManager.NodeList[j];
-                if (node == null)
-                    continue;
+                return false;
+            }
 
-                if (node->Type == NodeType.Text)
+            var enemyList = (AddonEnemyList*)addon;
+
+            // Ensure that EnemyOneComponent is valid
+            if (enemyList->EnemyOneComponent == null)
+            {
+                return false;
+            }
+
+            // EnemyCount indicates how many enemies are in the list
+            var enemyCount = enemyList->EnemyCount;
+
+            for (int i = 0; i < enemyCount; i++)
+            {
+                // Access each enemy component
+                var enemyComponentPtr = enemyList->EnemyOneComponent + i;
+                if (enemyComponentPtr == null || *enemyComponentPtr == null)
                 {
-                    var textNode = (AtkTextNode*)node;
-                    if (string.IsNullOrEmpty(textNode->NodeText.StringPtr.ToString()))
+                    continue;
+                }
+
+                var enemyComponent = *enemyComponentPtr;
+                var atkComponentBase = enemyComponent->AtkComponentBase;
+
+                // Access the UldManager's NodeList
+                var uldManager = atkComponentBase.UldManager;
+
+                for (int j = 0; j < uldManager.NodeListCount; j++)
+                {
+                    var node = uldManager.NodeList[j];
+                    if (node == null)
                         continue;
 
-                    // Read the enemy's name
-                    var enemyNameRaw = textNode->NodeText.StringPtr.ToString();
-                    if (string.IsNullOrEmpty(enemyNameRaw))
-                        continue;
-
-                    // Remove control characters from the enemy's name
-                    var enemyName = RemoveControlCharacters(enemyNameRaw);
-
-                    //// Compare with battleChara's name
-                    if (string.Equals(enemyName, battleChara.Name.TextValue, StringComparison.OrdinalIgnoreCase))
+                    if (node->Type == NodeType.Text)
                     {
-                        return true;
+                        var textNode = (AtkTextNode*)node;
+
+                        // Safely convert unmanaged string to managed string
+                        var rawStringPtr = textNode->NodeText.StringPtr;
+                        if (!rawStringPtr.HasValue)
+                            continue;
+
+                        var enemyNameRaw = rawStringPtr.HasValue
+                        ? Marshal.PtrToStringUTF8((IntPtr)rawStringPtr.Value)
+                        : null;
+                        if (string.IsNullOrEmpty(enemyNameRaw))
+                            continue;
+
+                        // Remove control characters from the enemy's name
+                        var enemyName = RemoveControlCharacters(enemyNameRaw);
+
+                        // Compare with battleChara's name
+                        if (string.Equals(enemyName, battleChara.Name.TextValue, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
                     }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Error($"Error in IsInEnemiesList: {ex}");
         }
 
         return false;
@@ -381,7 +392,7 @@ public static class ObjectHelper
             if (Player.Object == null) return false;
             // Check IBattleChara against the priority target list of OIDs
             if (PriorityTargetHelper.IsPriorityTarget(b.DataId)) return true;
-            
+
             if (Player.Job == Job.MCH && obj.HasStatus(true, StatusID.Wildfire)) return true;
 
             // Ensure StatusList is not null before calling Any

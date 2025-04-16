@@ -163,11 +163,12 @@ partial class CustomRotation
 
     static partial void ModifyEagleEyeShotPvP(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyCometPvP(ref ActionSetting setting)
     {
+        setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

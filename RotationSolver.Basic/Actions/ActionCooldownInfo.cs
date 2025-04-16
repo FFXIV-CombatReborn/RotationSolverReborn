@@ -64,7 +64,7 @@ public readonly struct ActionCooldownInfo : ICooldown
     /// <summary>
     /// Gets the raw recast time for one charge.
     /// </summary>
-    internal float RecastTimeOneChargeRaw => ActionManager.GetAdjustedRecastTime(ActionType.Action, _action.Info.AdjustedID) / 1000f;
+    public float RecastTimeOneChargeRaw => ActionManager.GetAdjustedRecastTime(ActionType.Action, _action.Info.AdjustedID) / 1000f;
     float ICooldown.RecastTimeOneChargeRaw => RecastTimeOneChargeRaw;
 
     /// <summary>

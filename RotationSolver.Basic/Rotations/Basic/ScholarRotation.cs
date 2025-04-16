@@ -371,7 +371,7 @@ partial class ScholarRotation
     #region PvP Actions
     static partial void ModifyBroilIvPvP(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyBiolysisPvP(ref ActionSetting setting)

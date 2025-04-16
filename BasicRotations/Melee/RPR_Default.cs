@@ -41,7 +41,7 @@ public sealed class RPR_Default : ReaperRotation
 
         if (IsBurst)
         {
-            if ((HostileTarget?.HasStatus(true, StatusID.DeathsDesign) ?? false)
+            if ((ArcaneCirclePvE.Target.Target?.HasStatus(true, StatusID.DeathsDesign) ?? false)
                 && !CombatElapsedLess(3.5f) && ArcaneCirclePvE.CanUse(out act, skipAoeCheck: true)) return true;
         }
 
@@ -89,7 +89,7 @@ public sealed class RPR_Default : ReaperRotation
         }
 
         if (WhorlOfDeathPvE.CanUse(out act)) return true;
-        if (UseCustomDDTiming && ((!HostileTarget?.HasStatus(true, StatusID.DeathsDesign) ?? false) || (HostileTarget?.WillStatusEnd(RefreshDDSecondsRemaining, true, StatusID.DeathsDesign) ?? false)))
+        if (UseCustomDDTiming && ((!ShadowOfDeathPvE.Target.Target?.HasStatus(true, StatusID.DeathsDesign) ?? false) || (ShadowOfDeathPvE.Target.Target?.WillStatusEnd(RefreshDDSecondsRemaining, true, StatusID.DeathsDesign) ?? false)))
         {
             if (ShadowOfDeathPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
         }
@@ -105,7 +105,7 @@ public sealed class RPR_Default : ReaperRotation
             if (LemureShroud > 1)
             {
                 if (PlentifulHarvestPvE.EnoughLevel && ArcaneCirclePvE.Cooldown.WillHaveOneCharge(9) &&
-                   (LemureShroud == 4 && (HostileTarget?.WillStatusEnd(30, true, StatusID.DeathsDesign) ?? false) || LemureShroud == 3 && (HostileTarget?.WillStatusEnd(50, true, StatusID.DeathsDesign) ?? false)))
+                   (LemureShroud == 4 && (ShadowOfDeathPvE.Target.Target?.WillStatusEnd(30, true, StatusID.DeathsDesign) ?? false) || LemureShroud == 3 && (ShadowOfDeathPvE.Target.Target?.WillStatusEnd(50, true, StatusID.DeathsDesign) ?? false)))
                 {
                     if (ShadowOfDeathPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
                 }

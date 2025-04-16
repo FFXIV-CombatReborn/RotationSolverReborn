@@ -17,8 +17,8 @@ public sealed class NIN_Default : NinjaRotation
     [RotationConfig(CombatType.PvE, Name = "Use Unhide")]
     public bool AutoUnhide { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Mudras Outside of Combat when enemies are near")]
-    public bool CommbatMudra { get; set; } = true;
+    [RotationConfig(CombatType.PvE, Name = "Use Mudras outside of combat when enemies are near")]
+    public bool CombatMudra { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Use Forked Raiju instead of Fleeting Raiju if you are outside of range (Dangerous)")]
     public bool ForkedUse { get; set; } = false;
@@ -86,13 +86,24 @@ public sealed class NIN_Default : NinjaRotation
         // If the last action performed matches any of a list of specific actions, it clears the Ninjutsu aim.
         // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
         if (IsLastAction(false, RabbitMediumPvE, FumaShurikenPvE, KatonPvE, RaitonPvE,
-            HyotonPvE, HutonPvE, DotonPvE, SuitonPvE, GokaMekkyakuPvE, HyoshoRanryuPvE) || (Player.HasStatus(true, StatusID.ShadowWalker)
-                && (_ninActionAim == SuitonPvE || _ninActionAim == HutonPvE)))
+            HyotonPvE, HutonPvE, DotonPvE, SuitonPvE, GokaMekkyakuPvE, HyoshoRanryuPvE) 
+            || Player.HasStatus(true, StatusID.ShadowWalker) && (_ninActionAim == SuitonPvE || _ninActionAim == HutonPvE)
+            || _ninActionAim == GokaMekkyakuPvE && IsLastGCD(false, GokaMekkyakuPvE)
+            || _ninActionAim == HyoshoRanryuPvE && IsLastGCD(false, HyoshoRanryuPvE)
+            || _ninActionAim == GokaMekkyakuPvE && !HasKassatsu
+            || _ninActionAim == HyoshoRanryuPvE && !HasKassatsu
+            || IsLastAbility(false, KassatsuPvE))
         {
             ClearNinjutsu();
         }
 
-        if ((InCombat || (CommbatMudra && HasHostilesInMaxRange)) && ChoiceNinjutsu(out act)) return true;
+        if ((InCombat || (CombatMudra && HasHostilesInMaxRange)) && ChoiceNinjutsu(out act)) return true;
+        if (!InCombat && !CombatMudra)
+        {
+            ClearNinjutsu();
+        }
+
+        if (RabbitMediumPvE.CanUse(out act)) return true;
 
         // If Ninjutsu is available or not in combat, defers to the base class's emergency ability logic.
         if (!NoNinjutsu || !InCombat) return base.EmergencyAbility(nextGCD, out act);
@@ -213,11 +224,11 @@ public sealed class NIN_Default : NinjaRotation
         {
             // Attempts to set high-damage AoE Ninjutsu if available under Kassatsu's effect.
             // These are prioritized due to Kassatsu's enhancement of Ninjutsu abilities.
-            if (DeathBlossomPvE.CanUse(out _) && GokaMekkyakuPvE.EnoughLevel && GokaMekkyakuPvE.EnoughLevel)
+            if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && GokaMekkyakuPvE.EnoughLevel && !IsLastAction(false, GokaMekkyakuPvE))
             {
                 SetNinjutsu(GokaMekkyakuPvE);
             }
-            if (!DeathBlossomPvE.CanUse(out _) && HyoshoRanryuPvE.EnoughLevel && HyoshoRanryuPvE.EnoughLevel)
+            if ((!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _)) && HyoshoRanryuPvE.EnoughLevel && !IsLastAction(false, HyoshoRanryuPvE))
             {
                 SetNinjutsu(HyoshoRanryuPvE);
             }
@@ -227,12 +238,12 @@ public sealed class NIN_Default : NinjaRotation
                 SetNinjutsu(HutonPvE);
             }
 
-            if (DeathBlossomPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel && KatonPvE.EnoughLevel)
+            if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && !HyoshoRanryuPvE.EnoughLevel && KatonPvE.EnoughLevel)
             {
                 SetNinjutsu(KatonPvE);
             }
 
-            if (!DeathBlossomPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel && RaitonPvE.EnoughLevel)
+            if ((!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _)) && !HyoshoRanryuPvE.EnoughLevel && RaitonPvE.EnoughLevel)
             {
                 SetNinjutsu(RaitonPvE);
             }
@@ -255,16 +266,16 @@ public sealed class NIN_Default : NinjaRotation
             }
 
             //Aoe
-            if (DeathBlossomPvE.CanUse(out _) && TenPvE.CanUse(out _))
+            if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && TenPvE.CanUse(out _))
             {
-                if (!HasDoton && !IsMoving && !IsLastGCD(true, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) && DotonPvE.EnoughLevel 
+                if (!HasDoton && !IsMoving && !IsLastGCD(true, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) && DotonPvE.EnoughLevel
                     || !HasDoton && !TenChiJinPvE.Cooldown.IsCoolingDown && DotonPvE.EnoughLevel)
                     SetNinjutsu(DotonPvE);
                 else if (KatonPvE.EnoughLevel) SetNinjutsu(KatonPvE);
             }
 
             //Single
-            if (!DeathBlossomPvE.CanUse(out _) && !ShadowWalkerNeeded && TenPvE.CanUse(out _, usedUp: InTrickAttack && !HasRaijuReady))
+            if ((!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _)) && !ShadowWalkerNeeded && TenPvE.CanUse(out _, usedUp: InTrickAttack && !HasRaijuReady))
             {
                 if (RaitonPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
                 {
@@ -335,7 +346,7 @@ public sealed class NIN_Default : NinjaRotation
             }
             else if (chiId == DotonPvE_18880.ID && !IsLastAction(false, DotonPvE_18880) && !HasDoton)
             {
-                if (DotonPvE_18880.CanUse(out act, skipAoeCheck: true)) return true;
+                if (DotonPvE_18880.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
             }
         }
         return false;
@@ -480,8 +491,6 @@ public sealed class NIN_Default : NinjaRotation
         act = null;
 
         //Keep Kassatsu in Burst.
-        if (!Player.WillStatusEnd(3, false, StatusID.Kassatsu)
-            && HasKassatsu && !InTrickAttack) return false;
         if (_ninActionAim == null) return false;
 
         if (_ninActionAim != null && (_ninActionAim == GokaMekkyakuPvE))
@@ -981,27 +990,22 @@ public sealed class NIN_Default : NinjaRotation
             if (ForkedUse && ForkedRaijuPvE.CanUse(out act)) return true;
         }
 
-        if ((InCombat || (CommbatMudra && HasHostilesInMaxRange)) && ChoiceNinjutsu(out act)) return true;
-
-
         if (DoTenChiJin(out act)) return true;
         if (DoRabbitMedium(out act)) return true;
 
-        //AOE
         if (DoGokaMekkyaku(out act)) return true;
         if (DoHuton(out act)) return true;
         if (DoDoton(out act)) return true;
         if (DoKaton(out act)) return true;
-
-        if (HakkeMujinsatsuPvE.CanUse(out act)) return true;
-        if (DeathBlossomPvE.CanUse(out act)) return true;
-
         if (DoHyoshoRanryu(out act)) return true;
         if (DoSuiton(out act)) return true;
         if (DoHuton(out act)) return true;
         if (DoHyoton(out act)) return true;
         if (DoRaiton(out act)) return true;
         if (DoFumaShuriken(out act)) return true;
+
+        if (HakkeMujinsatsuPvE.CanUse(out act)) return true;
+        if (DeathBlossomPvE.CanUse(out act)) return true;
 
         if (IsExecutingMudra) return base.GeneralGCD(out act);
 

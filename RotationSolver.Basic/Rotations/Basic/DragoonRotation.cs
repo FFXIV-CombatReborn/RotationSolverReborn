@@ -353,7 +353,7 @@ partial class DragoonRotation
         };
     }
     #endregion
-    
+
     #region PvP Actions
 
     static partial void ModifyRaidenThrustPvP(ref ActionSetting setting)
@@ -364,7 +364,7 @@ partial class DragoonRotation
     {
     }
 
-    static partial void ModifyWheelingThrustPvP(ref ActionSetting setting) 
+    static partial void ModifyWheelingThrustPvP(ref ActionSetting setting)
     {
     }
 
@@ -395,7 +395,7 @@ partial class DragoonRotation
         };
     }
 
-        static partial void ModifyGeirskogulPvP(ref ActionSetting setting)
+    static partial void ModifyGeirskogulPvP(ref ActionSetting setting)
     {
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -418,7 +418,7 @@ partial class DragoonRotation
         setting.IsFriendly = true;
     }
 
-        static partial void ModifyWyrmwindThrustPvP(ref ActionSetting setting)
+    static partial void ModifyWyrmwindThrustPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ElusiveJumpPvP) == ActionID.WyrmwindThrustPvP;
         setting.CreateConfig = () => new ActionConfig()
@@ -432,6 +432,6 @@ partial class DragoonRotation
         setting.SpecialType = SpecialActionType.MovingForward;
     }
     #endregion
-    
+
 
 }

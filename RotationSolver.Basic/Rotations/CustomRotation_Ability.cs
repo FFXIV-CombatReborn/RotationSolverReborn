@@ -416,7 +416,7 @@ partial class CustomRotation
 
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
         {
-            if (Role is JobRole.Healer && IActionHelper.IsLastActionGCD() && (DataCenter.DefaultGCDRemain > Service.Config.SwiftcastBuffer)  && nextGCD.IsTheSameTo(true, ActionID.RaisePvE, ActionID.EgeiroPvE, ActionID.ResurrectionPvE, ActionID.AscendPvE) && SwiftcastPvE.CanUse(out act))
+            if (Role is JobRole.Healer && IActionHelper.IsLastActionGCD() && (DataCenter.DefaultGCDRemain > Service.Config.SwiftcastBuffer) && nextGCD.IsTheSameTo(true, ActionID.RaisePvE, ActionID.EgeiroPvE, ActionID.ResurrectionPvE, ActionID.AscendPvE) && SwiftcastPvE.CanUse(out act))
             {
                 return true;
             }

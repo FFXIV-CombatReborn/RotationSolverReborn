@@ -1,6 +1,6 @@
 namespace RebornRotations.Tank;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Tank/GNB_Default.cs")]
 [Api(4)]
 public sealed class GNB_Default_Old : GunbreakerRotation
@@ -137,7 +137,7 @@ public sealed class GNB_Default_Old : GunbreakerRotation
         if (DemonSlaughterPvE.CanUse(out act)) return true;
         if (DemonSlicePvE.CanUse(out act)) return true;
 
-        if (Ammo == MaxAmmo && IsLastGCD(ActionID.BrutalShellPvE) && BurstStrikePvE.CanUse(out act)) return true;
+        if (IsAmmoCapped && IsLastGCD(ActionID.BrutalShellPvE) && BurstStrikePvE.CanUse(out act)) return true;
 
         if (!InGnashingFang)
         {
@@ -170,7 +170,7 @@ public sealed class GNB_Default_Old : GunbreakerRotation
         if (BurstStrikePvE.EnoughLevel)
         {
             if (IsLastGCD(ActionID.KeenEdgePvE) && Ammo == 1 && !GnashingFangPvE.Cooldown.IsCoolingDown && !BloodfestPvE.Cooldown.IsCoolingDown) return true;
-            else if (Ammo == MaxAmmo) return true;
+            else if (IsAmmoCapped) return true;
             else if (Ammo == 2 && GnashingFangPvE.Cooldown.IsCoolingDown) return true;
         }
 
@@ -237,7 +237,7 @@ public sealed class GNB_Default_Old : GunbreakerRotation
             if (!CartridgeChargeIiTrait.EnoughLevel && Ammo == 2) return true;
 
             if (IsLastGCD((ActionID)BrutalShellPvE.ID) &&
-                (Ammo == MaxAmmo ||
+                (IsAmmoCapped ||
                 BloodfestPvE.Cooldown.WillHaveOneCharge(6) && Ammo <= 2 && !NoMercyPvE.Cooldown.WillHaveOneCharge(10) && BloodfestPvE.EnoughLevel)) return true;
 
         }

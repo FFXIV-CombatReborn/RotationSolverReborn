@@ -1,128 +1,100 @@
 ﻿namespace RebornRotations.PVPRotations.Melee;
 
-[Rotation("Default", CombatType.PvP, GameVersion = "7.00", Description = "Beta Rotation")]
-[SourceCode(Path = "main/BasicRotations/PVPRotations/Melee/MNK_Default.PVP.cs")]
+[Rotation("Default", CombatType.PvP, GameVersion = "7.2")]
+[SourceCode(Path = "main/RebornRotations/PVPRotations/Melee/MNK_Default.PVP.cs")]
 [Api(4)]
 public sealed class MNK_DefaultPvP : MonkRotation
 {
-    [RotationConfig(CombatType.PvP, Name = "Sprint")]
-    public bool UseSprintPvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Recuperate")]
-    public bool UseRecuperatePvP { get; set; } = false;
-
-    [Range(1, 100, ConfigUnitType.Percent, 1)]
-    [RotationConfig(CombatType.PvP, Name = "RecuperateHP%%?")]
-    public int RCValue { get; set; } = 75;
+    #region Configurations
 
     [RotationConfig(CombatType.PvP, Name = "Use Purify")]
-    public bool UsePurifyPvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on Stun")]
-    public bool Use1343PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on DeepFreeze")]
-    public bool Use3219PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on HalfAsleep")]
-    public bool Use3022PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on Sleep")]
-    public bool Use1348PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on Bind")]
-    public bool Use1345PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on Heavy")]
-    public bool Use1344PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on Silence")]
-    public bool Use1347PvP { get; set; } = false;
+    public bool UsePurifyPvP { get; set; } = true;
 
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool GuardCancel { get; set; } = false;
+    public bool RespectGuard { get; set; } = true;
+    #endregion
 
-    private bool TryPurify(out IAction? action)
+    #region Standard PVP Utilities
+    private bool DoPurify(out IAction? action)
     {
         action = null;
         if (!UsePurifyPvP) return false;
 
-        var purifyStatuses = new Dictionary<int, bool>
+        var purifiableStatusesIDs = new List<int>
         {
-            { 1343, Use1343PvP },
-            { 3219, Use3219PvP },
-            { 3022, Use3022PvP },
-            { 1348, Use1348PvP },
-            { 1345, Use1345PvP },
-            { 1344, Use1344PvP },
-            { 1347, Use1347PvP }
+            // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
+            1343, 3219, 3022, 1348, 1345, 1344, 1347
         };
 
-        foreach (var status in purifyStatuses)
+        if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
         {
-            if (status.Value && Player.HasStatus(true, (StatusID)status.Key))
-            {
-                return PurifyPvP.CanUse(out action);
-            }
+            return PurifyPvP.CanUse(out action);
         }
 
         return false;
     }
+    #endregion
 
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+    #region oGCDs
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        act = null;
-        if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (TryPurify(out act)) return true;
-        if (UseRecuperatePvP && Player.CurrentHp / Player.MaxHp * 100 < RCValue && RecuperatePvP.CanUse(out act)) return true;
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (DoPurify(out action)) return true;
 
-        return base.EmergencyAbility(nextGCD, out act);
+        if (InCombat && Player.GetHealthRatio() < 0.8 && RiddleOfEarthPvP.CanUse(out action)) return true;
+
+        if (Player.HasStatus(true, StatusID.EarthResonance) && Player.WillStatusEnd(1, true, StatusID.EarthResonance))
+        {
+            if (Player.GetHealthRatio() < 0.5 && EarthsReplyPvP.CanUse(out action)) return true;
+            if (Player.WillStatusEnd(1, true, StatusID.EarthResonance) && EarthsReplyPvP.CanUse(out action)) return true;
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
-    protected override bool AttackAbility(IAction nextGCD, out IAction? act)
+    protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        act = null;
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        if (InCombat)
-        {
-            if (RisingPhoenixPvP.CanUse(out act)) return true;
-        }
-        if (InCombat)
-        {
-            if (ThunderclapPvP.CanUse(out act)) return true;
-        }
-        if (InCombat)
-        {
-            if (RiddleOfEarthPvP.CanUse(out act)) return true;
-        }
-        if (EarthsReplyPvP.CanUse(out act)) return true;
-        if (WindsReplyPvP.CanUse(out act)) return true;
-        if (FiresReplyPvP.CanUse(out act)) return true;
+        if (PhantomRushPvP.CanUse(out _) && RisingPhoenixPvP.CanUse(out action, usedUp: true)) return true;
 
-        return base.AttackAbility(nextGCD, out act);
+        return base.AttackAbility(nextGCD, out action);
     }
 
-    protected override bool GeneralGCD(out IAction? act)
+    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
-        act = null;
-        // Early exits for Guard status or Sprint usage
-        if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (!Player.HasStatus(true, StatusID.Guard) && UseSprintPvP && !Player.HasStatus(true, StatusID.Sprint) && !InCombat && SprintPvP.CanUse(out act)) return true;
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        if (FlintsReplyPvP.CanUse(out act)) return true;
-
-        if (Player.HasStatus(true, StatusID.EarthResonance))
-        {
-            if (EarthsReplyPvP.CanUse(out act)) return true;
-        }
-        if (PhantomRushPvP.CanUse(out act)) return true;
-        if (PouncingCoeurlPvP.CanUse(out act)) return true;
-        if (RisingRaptorPvP.CanUse(out act)) return true;
-        if (LeapingOpoPvP.CanUse(out act)) return true;
-        if (DemolishPvP.CanUse(out act)) return true;
-        if (TwinSnakesPvP.CanUse(out act)) return true;
-        if (DragonKickPvP.CanUse(out act)) return true;
-
-        return false;
+        return base.MoveForwardAbility(nextGCD, out action);
     }
+    #endregion
+
+    #region GCDs
+    protected override bool GeneralGCD(out IAction? action)
+    {
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (PhantomRushPvP.CanUse(out action)) return true;
+
+        if (FiresReplyPvP.CanUse(out action)) return true;
+
+        if (FlintsReplyPvP.CanUse(out action)) return true;
+        if (WindsReplyPvP.CanUse(out action)) return true;
+
+        if (PouncingCoeurlPvP.CanUse(out action)) return true;
+        if (RisingRaptorPvP.CanUse(out action)) return true;
+        if (LeapingOpoPvP.CanUse(out action)) return true;
+        if (DemolishPvP.CanUse(out action)) return true;
+        if (TwinSnakesPvP.CanUse(out action)) return true;
+        if (DragonKickPvP.CanUse(out action)) return true;
+
+        if (FlintsReplyPvP.CanUse(out action, usedUp: true)) return true;
+
+        return base.GeneralGCD(out action);
+    }
+    #endregion
 }

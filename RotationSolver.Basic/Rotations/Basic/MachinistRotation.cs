@@ -433,7 +433,7 @@ partial class MachinistRotation
     {
         setting.StatusNeed = [StatusID.DrillPrimed];
     }
-    
+
     static partial void ModifyBioblasterPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.BioblasterPrimed];

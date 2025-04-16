@@ -449,7 +449,7 @@ partial class AstrologianRotation
             AoeCount = 1,
         };
     }
-#endregion
+    #endregion
 
     #region PvP Actions
     static partial void ModifyFallMaleficPvP(ref ActionSetting setting)
@@ -462,7 +462,7 @@ partial class AstrologianRotation
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DoubleCastPvP) == ActionID.FallMaleficPvP_29246;
     }
 
-    static partial void ModifyAspectedBeneficPvP(ref ActionSetting setting) 
+    static partial void ModifyAspectedBeneficPvP(ref ActionSetting setting)
     {
 
     }
@@ -513,7 +513,7 @@ partial class AstrologianRotation
             AoeCount = 1,
         };
     }
-    
+
     static partial void ModifyMinorArcanaPvP(ref ActionSetting setting)
     {
         setting.IsFriendly = true;

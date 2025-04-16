@@ -161,6 +161,12 @@ public sealed class BRD_Default : BardRotation
                 || !RadiantFinalePvE.EnoughLevel && !BattleVoicePvE.EnoughLevel)
                 && RagingStrikesPvE.CanUse(out act, isLastAbility: OGCDTimers)) return true;
         }
+        else if (!MagesBalladPvE.EnoughLevel)
+        {
+            if (!StraightShotPvE.EnoughLevel && RagingStrikesPvE.CanUse(out act, isLastAbility: OGCDTimers)) return true;
+
+            if (nextGCD.IsTheSameTo(true, StraightShotPvE) && RagingStrikesPvE.CanUse(out act, isLastAbility: OGCDTimers)) return true;
+        }
 
         if (RadiantFinalePvE.EnoughLevel && RadiantFinalePvE.Cooldown.IsCoolingDown && BattleVoicePvE.EnoughLevel && !BattleVoicePvE.Cooldown.IsCoolingDown) return false;
 

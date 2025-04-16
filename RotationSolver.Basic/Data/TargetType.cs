@@ -64,19 +64,19 @@ public enum TargetingType
     /// </summary>
     [Description("Farthest")]
     Farthest,
-    
+
     /// <summary>
     /// PVP: Find the nearest Healer.
     /// </summary>
     [Description("Focus Healers in PvP")]
     PvPHealers,
-    
+
     /// <summary>
     /// PVP: Find the nearest Tank.
     /// </summary>
     [Description("Focus Tanks in PvP")]
     PvPTanks,
-    
+
     /// <summary>
     /// PVP: Find the nearest DPS.
     /// </summary>

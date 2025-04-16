@@ -53,7 +53,7 @@ public readonly struct ActionBasicInfo
     /// The attack type of this action.
     /// </summary>
     public readonly AttackType AttackType => (AttackType)(_action.Action.AttackType.RowId != 0 ? _action.Action.AttackType.RowId : byte.MaxValue);
-    
+
     /// <summary>
     /// The aspect of this action.
     /// </summary>
@@ -81,6 +81,11 @@ public readonly struct ActionBasicInfo
     public readonly bool IsPvP => _action.Action.IsPvP;
 
     /// <summary>
+    /// If this action a pvp action.
+    /// </summary>
+    public readonly byte CastType => _action.Action.CastType;
+
+    /// <summary>
     /// Casting time.
     /// </summary>
     public readonly unsafe float CastTime => ((ActionID)AdjustedID).GetCastTime();
@@ -93,13 +98,13 @@ public readonly struct ActionBasicInfo
         get
         {
             if (IsPvP && ID != 29711) return 0;
-            
+
             var mpOver = _action.Setting.MPOverride?.Invoke();
             if (mpOver.HasValue) return mpOver.Value;
 
             var mp = (uint)ActionManager.GetActionCost(ActionType.Action, AdjustedID, 0, 0, 0, 0);
             if (mp < 100) return 0;
-            
+
             return mp;
         }
     }

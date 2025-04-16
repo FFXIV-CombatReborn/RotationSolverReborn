@@ -359,7 +359,7 @@ partial class WarriorRotation
     {
         setting.StatusNeed = [StatusID.InnerChaosReady];
     }
-    
+
     static partial void ModifyPrimalRendPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
@@ -368,7 +368,7 @@ partial class WarriorRotation
             AoeCount = 1,
         };
     }
-    
+
     static partial void ModifyPrimalRuinationPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.PrimalRuinationReady_4285];
@@ -382,7 +382,7 @@ partial class WarriorRotation
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
-    
+
     static partial void ModifyOnslaughtPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
@@ -403,7 +403,7 @@ partial class WarriorRotation
     {
         setting.IsFriendly = true;
     }
-    
+
     static partial void ModifyChaoticCyclonePvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ChaoticCycloneReady];

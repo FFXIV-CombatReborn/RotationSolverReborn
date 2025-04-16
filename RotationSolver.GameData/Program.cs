@@ -7,7 +7,6 @@ using RotationSolver.GameData.Getters;
 using RotationSolver.GameData.Getters.Actions;
 using System.Net;
 using System.Resources.NetStandard;
-using System.Xml.Linq;
 
 /// <summary>
 /// Entry point for the RotationSolver GameData program.

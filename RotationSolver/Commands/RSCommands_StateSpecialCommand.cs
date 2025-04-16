@@ -77,7 +77,7 @@ namespace RotationSolver.Commands
                     DataCenter.State = false;
                     DataCenter.IsManual = false;
                     ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
-                    if (Service.Config.ShowToggledSettingInChat) {Svc.Chat.Print($"Targeting : Off");}
+                    if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Off"); }
                     break;
 
 
@@ -85,7 +85,7 @@ namespace RotationSolver.Commands
                     DataCenter.IsManual = false;
                     DataCenter.State = true;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
-                    if (Service.Config.ShowToggledSettingInChat) {Svc.Chat.Print($"Auto Targeting : {Service.Config.TargetingTypes[Service.Config.TargetingIndex]}");}
+                    if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Auto Targeting : {Service.Config.TargetingTypes[Service.Config.TargetingIndex]}"); }
                     break;
 
 
@@ -93,7 +93,7 @@ namespace RotationSolver.Commands
                     DataCenter.IsManual = true;
                     DataCenter.State = true;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
-                    if (Service.Config.ShowToggledSettingInChat) {Svc.Chat.Print($"Targeting : Manual");}
+                    if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Manual"); }
                     break;
             }
 

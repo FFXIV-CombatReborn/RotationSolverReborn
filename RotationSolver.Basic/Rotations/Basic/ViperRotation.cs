@@ -782,7 +782,7 @@ public partial class ViperRotation
         };
     }
 
-        static partial void ModifyFuriousBacklashPvP(ref ActionSetting setting)
+    static partial void ModifyFuriousBacklashPvP(ref ActionSetting setting)
     {
         setting.CreateConfig = () => new ActionConfig()
         {

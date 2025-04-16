@@ -82,7 +82,7 @@ partial class DancerRotation
         ImGui.Text("DanceOfTheDawnPvEReady: " + DanceOfTheDawnPvEReady.ToString());
     }
     #endregion
-    
+
     #region PvE Actions
     static partial void ModifyCascadePvE(ref ActionSetting setting)
     {
@@ -436,7 +436,7 @@ partial class DancerRotation
 
     static partial void ModifyCascadePvP(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyFountainPvP(ref ActionSetting setting)
@@ -454,7 +454,7 @@ partial class DancerRotation
         {
         };
     }
-    
+
     static partial void ModifyEnAvantPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
@@ -551,9 +551,9 @@ partial class DancerRotation
             AoeCount = 1,
         };
         setting.StatusProvide = [StatusID.HoningDance];
-        
+
     }
-    
+
     static partial void ModifyHoningOvationPvP(ref ActionSetting setting)
     {
         setting.CreateConfig = () => new ActionConfig()
@@ -562,6 +562,6 @@ partial class DancerRotation
         };
         setting.StatusProvide = [StatusID.HoningOvation];
     }
-    
+
     #endregion
 }

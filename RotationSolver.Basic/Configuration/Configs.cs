@@ -11,7 +11,7 @@ internal partial class Configs : IPluginConfiguration
     [JsonIgnore]
     public const string
         BasicTimer = "BasicTimer",
-        BasicAutoSwitch = "BasicAutoSwitch", 
+        BasicAutoSwitch = "BasicAutoSwitch",
         BasicParams = "BasicParams",
         UiInformation = "UiInformation",
         UiWindows = "UiWindows",
@@ -651,7 +651,7 @@ internal partial class Configs : IPluginConfiguration
     #region PvP
     [ConditionBool, UI("Ignore TTK for PvP purposes.", Filter = PvPSpecificControls)]
     private static readonly bool _ignorePvPTTK = true;
-    
+
     [JobConfig, UI("Ignore Invincibility for PvP purposes.", Filter = PvPSpecificControls)]
     private static readonly bool _ignorePvPInvincibility = false;
 

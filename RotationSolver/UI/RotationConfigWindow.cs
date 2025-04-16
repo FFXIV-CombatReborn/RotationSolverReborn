@@ -1382,12 +1382,8 @@ public partial class RotationConfigWindow : Window
     private static string GetRotationStatusHead()
     {
         var rotation = DataCenter.CurrentRotation;
-        var status = "Status";
-        if (Service.Config.InDebug)
-        {
-            return status;
-        }
-        if (rotation == null || !rotation.ShowStatus) return string.Empty;
+        var status = "Status"
+        if (rotation == null) return string.Empty;
         return status;
     }
 
@@ -1755,6 +1751,8 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text("ShouldCheckStatus: " + action.Config.ShouldCheckStatus);
 #if DEBUG
                     ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD);
+                    ImGui.Text("Is PvP Action: " + action.Info.IsPvP);
+                    ImGui.Text("Cast Type: " + action.Info.CastType);
 
                     // Ensure ActionManager.Instance() is not null and action.AdjustedID is valid
                     if (ActionManager.Instance() != null && action.AdjustedID != 0)

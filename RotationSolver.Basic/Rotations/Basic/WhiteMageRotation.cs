@@ -363,7 +363,7 @@ partial class WhiteMageRotation
 
     }
 
-    static partial void ModifyCureIiPvP(ref ActionSetting setting) 
+    static partial void ModifyCureIiPvP(ref ActionSetting setting)
     {
 
     }

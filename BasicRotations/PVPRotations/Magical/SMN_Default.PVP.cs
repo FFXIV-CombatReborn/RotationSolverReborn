@@ -1,116 +1,106 @@
 ﻿namespace RebornRotations.PVPRotations.Magical;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.00", Description = "Beta Rotation")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/PVPRotations/Magical/SMN_Default.PVP.cs")]
 [Api(4)]
 public class SMN_DefaultPvP : SummonerRotation
 {
-    [RotationConfig(CombatType.PvP, Name = "Sprint")]
-    public bool UseSprintPvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Recuperate")]
-    public bool UseRecuperatePvP { get; set; } = false;
-
-    [Range(1, 100, ConfigUnitType.Percent, 1)]
-    [RotationConfig(CombatType.PvP, Name = "RecuperateHP%%?")]
-    public int RCValue { get; set; } = 75;
+    #region Configurations
 
     [RotationConfig(CombatType.PvP, Name = "Use Purify")]
-    public bool UsePurifyPvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on Stun")]
-    public bool Use1343PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on DeepFreeze")]
-    public bool Use3219PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on HalfAsleep")]
-    public bool Use3022PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on Sleep")]
-    public bool Use1348PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on Bind")]
-    public bool Use1345PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on Heavy")]
-    public bool Use1344PvP { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify on Silence")]
-    public bool Use1347PvP { get; set; } = false;
+    public bool UsePurifyPvP { get; set; } = true;
 
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool GuardCancel { get; set; } = false;
+    public bool RespectGuard { get; set; } = true;
+    #endregion
 
-    private bool TryPurify(out IAction? action)
+    #region Standard PVP Utilities
+    private bool DoPurify(out IAction? action)
     {
         action = null;
         if (!UsePurifyPvP) return false;
 
-        var purifyStatuses = new Dictionary<int, bool>
+        var purifiableStatusesIDs = new List<int>
         {
-            { 1343, Use1343PvP },
-            { 3219, Use3219PvP },
-            { 3022, Use3022PvP },
-            { 1348, Use1348PvP },
-            { 1345, Use1345PvP },
-            { 1344, Use1344PvP },
-            { 1347, Use1347PvP }
+            // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
+            1343, 3219, 3022, 1348, 1345, 1344, 1347
         };
 
-        foreach (var status in purifyStatuses)
+        if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
         {
-            if (status.Value && Player.HasStatus(true, (StatusID)status.Key))
-            {
-                return PurifyPvP.CanUse(out action);
-            }
+            return PurifyPvP.CanUse(out action);
         }
 
         return false;
     }
+    #endregion
 
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+    #region oGCDs
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        act = null;
-        if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (TryPurify(out act)) return true;
-        if (UseRecuperatePvP && Player.CurrentHp / Player.MaxHp * 100 < RCValue && RecuperatePvP.CanUse(out act)) return true;
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (DoPurify(out action)) return true;
 
-        if (RadiantAegisPvP.CanUse(out act)) return true;
-
-        return base.EmergencyAbility(nextGCD, out act);
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
-    protected override bool AttackAbility(IAction nextGCD, out IAction? act)
+    [RotationDesc(ActionID.RadiantAegisPvP)]
+    protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        act = null;
-        if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        if (MountainBusterPvP.CanUse(out act)) return true;
+        if (RadiantAegisPvP.CanUse(out action)) return true;
 
-        return base.AttackAbility(nextGCD, out act);
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
-    protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
+
+    protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        act = null;
-        if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        return base.GeneralAbility(nextGCD, out act);
+        if (DeathflarePvP.CanUse(out action)) return true;
+        if (BrandOfPurgatoryPvP.CanUse(out action)) return true;
+        if (NecrotizePvP.CanUse(out action) && !Player.HasStatus(true, StatusID.FirebirdTrance) && !Player.HasStatus(true, StatusID.DreadwyrmTrance_3228)) return true;
+
+        return base.AttackAbility(nextGCD, out action);
     }
-    protected override bool GeneralGCD(out IAction? act)
+
+    [RotationDesc(ActionID.CrimsonCyclonePvP)]
+    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
-        act = null;
-        // Early exits for Guard status or Sprint usage
-        if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (!Player.HasStatus(true, StatusID.Guard) && UseSprintPvP && !Player.HasStatus(true, StatusID.Sprint) && !InCombat && SprintPvP.CanUse(out act)) return true;
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        if (SlipstreamPvP.CanUse(out act)) return true;
+        if (CrimsonCyclonePvP.CanUse(out action) && Target.DistanceToPlayer() < 5) return true;
 
-        if (RuinIiiPvP.CanUse(out act)) return true;
-
-        if (CrimsonStrikePvP.CanUse(out act)) return true;
-        if (CrimsonCyclonePvP.CanUse(out act)) return true;
-
-        return base.GeneralGCD(out act);
+        return base.MoveForwardAbility(nextGCD, out action);
     }
+
+    #endregion
+
+    #region GCDs
+    protected override bool GeneralGCD(out IAction? action)
+    {
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (AstralImpulsePvP.CanUse(out action)) return true;
+        if (FountainOfFirePvP.CanUse(out action)) return true;
+
+        if (CrimsonStrikePvP.CanUse(out action)) return true;
+        if (CrimsonCyclonePvP.CanUse(out action)) return true;
+
+        if (MountainBusterPvP.CanUse(out action)) return true;
+
+        if (SlipstreamPvP.CanUse(out action)) return true;
+
+        if (RuinIiiPvP.CanUse(out action)) return true;
+
+        return base.GeneralGCD(out action);
+    }
+    #endregion
+
 }

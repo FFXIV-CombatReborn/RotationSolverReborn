@@ -1,5 +1,4 @@
 using Dalamud.Interface.Colors;
-using ECommons;
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
@@ -716,7 +715,7 @@ public partial class PictomancerRotation
         };
     }
     #endregion
-    
+
     #region PvP Actions
     static partial void ModifyFireInRedPvP(ref ActionSetting setting)
     {
@@ -727,7 +726,7 @@ public partial class PictomancerRotation
         };
     }
 
-    static partial void ModifyHolyInWhitePvP(ref ActionSetting setting) 
+    static partial void ModifyHolyInWhitePvP(ref ActionSetting setting)
     {
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -859,7 +858,7 @@ public partial class PictomancerRotation
             AoeCount = 1,
         };
     }
-    
+
     static partial void ModifyPomMotifPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.PomSketch];

@@ -53,7 +53,7 @@ public enum JobRole : byte
     /// Disciple of the Hand role.
     /// </summary>
     DiscipleOfTheHand = 8,
-    
+
     /// <summary>
     /// All DPS Roles
     /// </summary>

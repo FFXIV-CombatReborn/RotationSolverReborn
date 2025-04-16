@@ -30,21 +30,26 @@ partial class GunbreakerRotation
     /// <summary>
     /// Gets the maximum amount of ammo available.
     /// </summary>
-    public static byte MaxAmmo
+    public static byte MaxAmmo() => (byte)(CartridgeChargeIiTrait.EnoughLevel ? 3 : CartridgeChargeTrait.EnoughLevel ? 2 : 0);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsAmmoCapped
     {
         get
         {
             if (CartridgeChargeIiTrait.EnoughLevel)
             {
-                return 3;
+                return Ammo == 3;
             }
             else if (CartridgeChargeTrait.EnoughLevel)
             {
-                return 2;
+                return Ammo == 2;
             }
             else
             {
-                return 0;
+                return Ammo == 0;
             }
         }
     }
@@ -58,6 +63,47 @@ partial class GunbreakerRotation
     /// 
     /// </summary>
     public static bool InGnashingFang => AmmoComboStep > 0;
+
+    /// <summary>
+    /// Able to execute Sonic Break.
+    /// </summary>
+    public static bool HasReadyToBreak => !Player.WillStatusEndGCD(0, 0, true, StatusID.ReadyToBreak);
+
+    /// <summary>
+    /// Able to execute Reign of Beasts.
+    /// </summary>
+    public static bool HasReadyToReign => !Player.WillStatusEndGCD(0, 0, true, StatusID.ReadyToReign);
+
+    /// <summary>
+    /// Able to execute Jugular Rip.
+    /// </summary>
+    public static bool HasReadyToRip => !Player.WillStatusEndGCD(0, 0, true, StatusID.ReadyToRip);
+
+    /// <summary>
+    /// Able to execute Abdomen Tear.
+    /// </summary>
+    public static bool HasReadyToTear => !Player.WillStatusEndGCD(0, 0, true, StatusID.ReadyToTear);
+
+    /// <summary>
+    /// Able to execute Fated Brand.
+    /// </summary>
+    public static bool HasReadyToRaze => !Player.WillStatusEndGCD(0, 0, true, StatusID.ReadyToRaze);
+
+    /// <summary>
+    /// Able to execute Eye Gouge.
+    /// </summary>
+    public static bool HasReadyToGouge => !Player.WillStatusEndGCD(0, 0, true, StatusID.ReadyToGouge);
+
+    /// <summary>
+    /// Able to execute Hypervelocity.
+    /// </summary>
+    public static bool HasReadyToBlast => !Player.WillStatusEndGCD(0, 0, true, StatusID.ReadyToBlast);
+
+    /// <summary>
+    /// Able to execute Hypervelocity.
+    /// </summary>
+    public bool NoMercyWindow => NoMercyPvE.Cooldown.RecastTimeElapsed >= 39.5f && NoMercyPvE.Cooldown.RecastTimeElapsed <= 60;
+
     #endregion
 
     #region PvE Actions Unassignable
@@ -113,9 +159,11 @@ partial class GunbreakerRotation
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
+        ImGui.Text("NoMercyWindow: " + NoMercyWindow.ToString());
         ImGui.Text("Ammo: " + Ammo.ToString());
         ImGui.Text("AmmoComboStep: " + AmmoComboStep.ToString());
-        ImGui.Text("MaxAmmo: " + MaxAmmo.ToString());
+        ImGui.Text("MaxAmmo: " + MaxAmmo().ToString());
+        ImGui.Text("Is Ammo Capped: " + IsAmmoCapped.ToString());
         ImGui.Text("MaxTimerDuration: " + MaxTimerDuration.ToString());
         ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
         ImGui.Text("SavageClawPvEReady: " + SavageClawPvEReady.ToString());
@@ -210,7 +258,7 @@ partial class GunbreakerRotation
     static partial void ModifyBurstStrikePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.ReadyToBlast, StatusID.ReadyToBlast_3041];
-        setting.ActionCheck = () => Ammo > 0;
+        setting.ActionCheck = () => Ammo >= 1;
     }
 
     static partial void ModifyNebulaPvE(ref ActionSetting setting)
@@ -244,7 +292,7 @@ partial class GunbreakerRotation
 
     static partial void ModifySonicBreakPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.ReadyToBreak];
+        setting.ActionCheck = () => HasReadyToBreak;
         setting.TargetStatusProvide = [StatusID.SonicBreak];
     }
 
@@ -255,7 +303,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyGnashingFangPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => AmmoComboStep == 0 && Ammo > 0;
+        setting.ActionCheck = () => AmmoComboStep == 0 && Ammo >= 1;
         setting.StatusProvide = [StatusID.ReadyToRip];
     }
 
@@ -318,7 +366,7 @@ partial class GunbreakerRotation
     static partial void ModifyFatedCirclePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.ReadyToRaze];
-        setting.ActionCheck = () => Ammo > 0;
+        setting.ActionCheck = () => Ammo >= 1;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 2,
@@ -328,7 +376,7 @@ partial class GunbreakerRotation
     static partial void ModifyBloodfestPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.ReadyToReign];
-        setting.ActionCheck = () => MaxAmmo - Ammo > 1;
+        setting.ActionCheck = () => Ammo == 0;
     }
 
     static partial void ModifyBlastingZonePvE(ref ActionSetting setting)

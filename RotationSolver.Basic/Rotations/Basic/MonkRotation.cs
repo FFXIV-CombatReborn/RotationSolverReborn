@@ -455,7 +455,7 @@ partial class MonkRotation
     {
     }
 
-    static partial void ModifyTwinSnakesPvP(ref ActionSetting setting) 
+    static partial void ModifyTwinSnakesPvP(ref ActionSetting setting)
     {
     }
 

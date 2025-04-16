@@ -601,7 +601,7 @@ partial class NinjaRotation
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ThreeMudraPvP) == ActionID.MeisuiPvP &&
                                     !Player.HasStatus(true, StatusID.SealedMeisui);
     }
-    
+
     static partial void ModifyHutonPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.BunshinPvP) == ActionID.HutonPvP &&

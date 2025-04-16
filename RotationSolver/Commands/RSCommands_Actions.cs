@@ -28,41 +28,76 @@ namespace RotationSolver.Commands
 
         internal static unsafe bool CanDoAnAction(bool isGCD)
         {
-            if (!_lastState || !DataCenter.State)
+            // Cache frequently accessed properties to avoid redundant calls
+            var currentState = DataCenter.State;
+
+            if (!_lastState || !currentState)
             {
-                _lastState = DataCenter.State;
+                _lastState = currentState;
                 return false;
             }
-            _lastState = DataCenter.State;
+            _lastState = currentState;
 
             if (!Player.Available) return false;
 
-            // Do not click the button in random time.
-            if (DateTime.Now - _lastClickTime < TimeSpan.FromMilliseconds(random.Next(
-                (int)(Service.Config.ClickingDelay.X * 1000), (int)(Service.Config.ClickingDelay.Y * 1000)))) return false;
+            // Precompute the delay range to avoid recalculating it multiple times
+            var delayRange = TimeSpan.FromMilliseconds(random.Next(
+                (int)(Service.Config.ClickingDelay.X * 1000),
+                (int)(Service.Config.ClickingDelay.Y * 1000)));
+
+            if (DateTime.Now - _lastClickTime < delayRange) return false;
             _lastClickTime = DateTime.Now;
 
-            if (!isGCD && ActionUpdater.NextAction is IBaseAction act1 && act1.Info.IsRealGCD) return false;
+            // Avoid unnecessary checks if isGCD is true
+            if (!isGCD && ActionUpdater.NextAction is IBaseAction nextAction && nextAction.Info.IsRealGCD) return false;
 
             return true;
         }
 
         public static void DoAction()
         {
-            var statusTimes = Player.Object.StatusTimes(false, [.. OtherConfiguration.NoCastingStatus.Select(i => (StatusID)i)]);
+            // Cache frequently accessed properties to avoid redundant calls
+            var playerObject = Player.Object;
+            if (playerObject == null) return;
 
-            if (statusTimes.Any() && statusTimes.Min() > Player.Object.TotalCastTime - Player.Object.CurrentCastTime && statusTimes.Min() < 5)
+            var statusTimes = playerObject.StatusTimes(false, [.. OtherConfiguration.NoCastingStatus.Select(i => (StatusID)i)]);
+
+            if (statusTimes.Any())
             {
-                return;
+                var minStatusTime = statusTimes.Min();
+                var remainingCastTime = playerObject.TotalCastTime - playerObject.CurrentCastTime;
+                if (minStatusTime > remainingCastTime && minStatusTime < 5)
+                {
+                    return;
+                }
             }
 
             var nextAction = ActionUpdater.NextAction;
             if (nextAction == null) return;
 
 #if DEBUG
-            // if (nextAction is BaseAction acti)
-            //     Svc.Log.Debug($"Will Do {acti}");
+            // if (nextAction is BaseAction debugAct)
+            //     Svc.Log.Debug($"Will Do {debugAct}");
 #endif
+
+            if (nextAction is BaseAction baseAct)
+            {
+                // Cache target to avoid redundant property access
+                var target = baseAct.Target.Target == playerObject
+                    ? baseAct.Target.AffectedTargets.FirstOrDefault()
+                    : baseAct.Target.Target;
+
+                if (target != null && target != playerObject && target.IsEnemy())
+                {
+                    DataCenter.HostileTarget = target;
+                    if (!DataCenter.IsManual &&
+                        (Service.Config.SwitchTargetFriendly || ((Svc.Targets.Target?.IsEnemy() ?? true)
+                        || Svc.Targets.Target?.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
+                    {
+                        Svc.Targets.Target = target;
+                    }
+                }
+            }
 
             if (Service.Config.KeyBoardNoise)
             {
@@ -71,7 +106,6 @@ namespace RotationSolver.Commands
 
             if (nextAction.Use())
             {
-                // Check if the setting to enable clicking count increment is enabled
                 if (Service.Config.EnableClickingCount)
                 {
                     OtherConfiguration.RotationSolverRecord.ClickingCount++;
@@ -80,40 +114,13 @@ namespace RotationSolver.Commands
                 _lastActionID = nextAction.AdjustedID;
                 _lastUsedTime = DateTime.Now;
 
-                if (nextAction is BaseAction act)
+                if (nextAction is BaseAction finalAct)
                 {
                     if (Service.Config.KeyBoardNoise)
                         PulseSimulation(nextAction.AdjustedID);
 
-                    if (act.Setting.EndSpecial) ResetSpecial();
-#if DEBUG
-                    // Svc.Chat.Print(act.Name);
-
-                    // if (act.Target != null)
-                    // {
-                    //     Svc.Chat.Print(act.Target.Value.Target?.Name.TextValue ?? string.Empty);
-                    //     foreach (var item in act.Target.Value.AffectedTargets)
-                    //     {
-                    //         Svc.Chat.Print(item?.Name.TextValue ?? string.Empty);
-                    //     }
-                    // }
-#endif
-                    // Change Target
-                    var tar = act.Target.Target == Player.Object
-                        ? act.Target.AffectedTargets.FirstOrDefault() : act.Target.Target;
-
-                    if (tar != null && tar != Player.Object && tar.IsEnemy())
-                    {
-                        DataCenter.HostileTarget = tar;
-                        if (!DataCenter.IsManual
-                            && (Service.Config.SwitchTargetFriendly || ((Svc.Targets.Target?.IsEnemy() ?? true)
-                            || Svc.Targets.Target?.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
-                        {
-                            Svc.Targets.Target = tar;
-                        }
-                    }
+                    if (finalAct.Setting.EndSpecial) ResetSpecial();
                 }
-
             }
             else if (Service.Config.InDebug)
             {
@@ -169,6 +176,7 @@ namespace RotationSolver.Commands
         {
             try
             {
+                // Avoid redundant checks for AutoCancelTime
                 if (ActionUpdater.AutoCancelTime != DateTime.MinValue &&
                     (!DataCenter.State || DataCenter.InCombat))
                 {
@@ -183,66 +191,87 @@ namespace RotationSolver.Commands
                     return;
                 }
 
-                var target = DataCenter.AllHostileTargets
-                    .FirstOrDefault(t => t != null && t is IBattleChara battleChara && battleChara.TargetObjectId == playerObject.GameObjectId);
+                // Cache frequently accessed properties
+                var isPvP = DataCenter.Territory?.IsPvP ?? false;
+                var currentHp = playerObject.CurrentHp;
+                var playerJob = Player.Job;
 
+                // Combine conditions to reduce redundant checks
                 if (Svc.Condition[ConditionFlag.LoggingOut] ||
-                    (Service.Config.AutoOffWhenDead && DataCenter.Territory?.IsPvP == false && Player.Available && playerObject.CurrentHp == 0) ||
-                    (Service.Config.AutoOffWhenDeadPvP && DataCenter.Territory?.IsPvP == true && Player.Available && playerObject.CurrentHp == 0) ||
+                    (Service.Config.AutoOffWhenDead && !isPvP && Player.Available && currentHp == 0) ||
+                    (Service.Config.AutoOffWhenDeadPvP && isPvP && Player.Available && currentHp == 0) ||
                     (Service.Config.AutoOffPvPMatchEnd && Svc.Condition[ConditionFlag.PvPDisplayActive]) ||
                     (Service.Config.AutoOffCutScene && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]) ||
-                    (Service.Config.AutoOffSwitchClass && Player.Job != _previousJob) ||
+                    (Service.Config.AutoOffSwitchClass && playerJob != _previousJob) ||
                     (Service.Config.AutoOffBetweenArea && (Svc.Condition[ConditionFlag.BetweenAreas] || Svc.Condition[ConditionFlag.BetweenAreas51])) ||
                     (Service.Config.CancelStateOnCombatBeforeCountdown && Service.CountDownTime > 0.2f && DataCenter.InCombat) ||
                     (ActionUpdater.AutoCancelTime != DateTime.MinValue && DateTime.Now > ActionUpdater.AutoCancelTime) ||
                     (DataCenter.CurrentConditionValue.SwitchCancelConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false))
                 {
                     CancelState();
-#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
-                    if (Player.Job != null && Player.Job != _previousJob) _previousJob = Player.Job;
-#pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
-                    if (ActionUpdater.AutoCancelTime != DateTime.MinValue) ActionUpdater.AutoCancelTime = DateTime.MinValue;
+                    if (playerJob != _previousJob)
+                        _previousJob = playerJob;
+                    ActionUpdater.AutoCancelTime = DateTime.MinValue;
+                    return;
                 }
-                else if ((Service.Config.AutoOnPvPMatchStart && Svc.Condition[ConditionFlag.BetweenAreas] &&
-                          Svc.Condition[ConditionFlag.BoundByDuty] && DataCenter.Territory?.IsPvP == true))
+
+                // Simplify PvP match start condition
+                if (Service.Config.AutoOnPvPMatchStart &&
+                    Svc.Condition[ConditionFlag.BetweenAreas] &&
+                    Svc.Condition[ConditionFlag.BoundByDuty] &&
+                    isPvP)
                 {
                     DoStateCommandType(StateCommandType.Auto);
+                    return;
                 }
-                else if (Service.Config.StartOnAttackedBySomeone && target != null && !target.IsDummy())
+
+                // Cache target lookup
+                var target = DataCenter.AllHostileTargets
+                            .FirstOrDefault(t => t is IBattleChara battleChara &&
+                            battleChara != null &&
+                            playerObject != null &&
+                            battleChara.TargetObjectId == playerObject.GameObjectId);
+
+                if (Service.Config.StartOnAttackedBySomeone && target != null && !target.IsDummy())
+                {
+                    if (!DataCenter.State)
+                    {
+                        DoStateCommandType(StateCommandType.Manual);
+                    }
+                    return;
+                }
+
+                if (Service.Config.StartOnCountdown)
+                {
+                    if (Service.CountDownTime > 0)
+                    {
+                        _lastCountdownTime = Service.CountDownTime;
+                        if (!DataCenter.State)
+                        {
+                            DoStateCommandType(Service.Config.CountdownStartsManualMode
+                                ? StateCommandType.Manual
+                                : StateCommandType.Auto);
+                        }
+                        return;
+                    }
+                    else if (Service.CountDownTime == 0 && _lastCountdownTime > 0.2f)
+                    {
+                        _lastCountdownTime = 0;
+                        CancelState();
+                        return;
+                    }
+                }
+
+                // Combine manual and auto condition checks
+                var currentConditionValue = DataCenter.CurrentConditionValue;
+                if (currentConditionValue.SwitchManualConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
                 {
                     if (!DataCenter.State)
                     {
                         DoStateCommandType(StateCommandType.Manual);
                     }
                 }
-                else if (Service.Config.StartOnCountdown && Service.CountDownTime > 0)
-                {
-                    _lastCountdownTime = Service.CountDownTime;
-                    if (!DataCenter.State)
-                    {
-                        if (Service.Config.CountdownStartsManualMode)
-                        {
-                            DoStateCommandType(StateCommandType.Manual);
-                        }
-                        else
-                        {
-                            DoStateCommandType(StateCommandType.Auto);
-                        }
-                    }
-                }
-                else if (Service.Config.StartOnCountdown && Service.CountDownTime == 0 && _lastCountdownTime > 0.2f)
-                {
-                    _lastCountdownTime = 0;
-                    CancelState();
-                }
-                else if (DataCenter.CurrentConditionValue.SwitchManualConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
-                {
-                    if (!DataCenter.State)
-                    {
-                        DoStateCommandType(StateCommandType.Manual);
-                    }
-                }
-                else if (DataCenter.CurrentConditionValue.SwitchAutoConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
+                else if (currentConditionValue.SwitchAutoConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
                 {
                     if (!DataCenter.State)
                     {

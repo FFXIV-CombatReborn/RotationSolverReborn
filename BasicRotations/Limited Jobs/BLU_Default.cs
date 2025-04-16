@@ -115,7 +115,7 @@ public sealed class Blue_Default : BlueMageRotation
     protected override bool EmergencyGCD(out IAction? act)
     {
         act = null;
-        
+
         return base.EmergencyGCD(out act);
     }
 
@@ -191,7 +191,7 @@ public sealed class Blue_Default : BlueMageRotation
         if (WhistlePvE.CanUse(out act) && Player.HasStatus(true, StatusID.Tingling)) return true;
         if (TripleTridentPvE.CanUse(out act) && IsLastGCD(ActionID.WhistlePvE) &&
             Player.HasStatus(true, StatusID.Tingling)) return true;
-        
+
         if (SonicBoomPvE.CanUse(out act)) return true;
         if (FlyingSardinePvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);

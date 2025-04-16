@@ -5,7 +5,6 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 using AttackType = RotationSolver.Basic.Data.AttackType;
@@ -189,6 +188,9 @@ public struct ActionTargetInfo(IBaseAction action)
         ActionID.AethericMimicryPvE,
         ActionID.EruptionPvE,
         ActionID.BishopAutoturretPvP,
+        ActionID.CometPvP,
+        ActionID.DotonPvE,
+        ActionID.DotonPvE_18880,
         ActionID.FeatherRainPvE,
     };
 
@@ -278,23 +280,30 @@ public struct ActionTargetInfo(IBaseAction action)
 
         try
         {
+            // Ensure the gameObject is a valid BattleChara and has a non-null StatusList
+            if (gameObject is not IBattleChara battleChara || battleChara.StatusList == null)
+            {
+                Svc.Log.Error("Invalid BattleChara or StatusList is null.");
+                return false;
+            }
+
             if (action.Info.AttackType == AttackType.Magic)
             {
-                if (gameObject.HasStatus(false, StatusHelper.MagicResistance))
+                if (battleChara.HasStatus(false, StatusHelper.MagicResistance))
                 {
                     return false;
                 }
             }
             else if (action.Info.Aspect != Aspect.Piercing) // Physical
             {
-                if (gameObject.HasStatus(false, StatusHelper.PhysicalResistance))
+                if (battleChara.HasStatus(false, StatusHelper.PhysicalResistance))
                 {
                     return false;
                 }
             }
             if (Range >= 20) // Range
             {
-                if (gameObject.HasStatus(false, StatusID.RangedResistance, StatusID.EnergyField))
+                if (battleChara.HasStatus(false, StatusID.RangedResistance, StatusID.EnergyField))
                 {
                     return false;
                 }
@@ -1160,32 +1169,33 @@ public struct ActionTargetInfo(IBaseAction action)
             {
                 return null;
             }
-            
+
             var orderedGameObjects = DataCenter.TargetingType switch
-                {
-                    TargetingType.Small => IGameObjects.OrderBy<IGameObject, float>(p => p.HitboxRadius),
-                    TargetingType.HighHP => IGameObjects.OrderByDescending<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
-                    TargetingType.LowHP => IGameObjects.OrderBy<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
-                    TargetingType.HighHPPercent => IGameObjects.OrderByDescending<IGameObject, float>(p => p is IBattleChara b ? b.CurrentHp / b.MaxHp : 0),
-                    TargetingType.LowHPPercent => IGameObjects.OrderBy<IGameObject, float>(p => p is IBattleChara b ? b.CurrentHp / b.MaxHp : 0),
-                    TargetingType.HighMaxHP => IGameObjects.OrderByDescending<IGameObject, uint>(p => p is IBattleChara b ? b.MaxHp : 0),
-                    TargetingType.LowMaxHP => IGameObjects.OrderBy<IGameObject, uint>(p => p is IBattleChara b ? b.MaxHp : 0),
-                    TargetingType.Nearest => IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                    TargetingType.Farthest => IGameObjects.OrderByDescending<IGameObject, float>(p => p.DistanceToPlayer()),
-                    TargetingType.PvPHealers => IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any() 
-                        ? IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
-                        : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                    TargetingType.PvPTanks => IGameObjects.Where(p => p.IsJobs(JobRole.Tank.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
-                        ? IGameObjects.Where(p => p.IsJobs(JobRole.Tank.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
-                        : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                    TargetingType.PvPDPS => IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
-                        ? IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
-                        : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                    _ => IGameObjects.OrderByDescending<IGameObject, float>(p => p.HitboxRadius),
-                };
-                
-                return orderedGameObjects.FirstOrDefault() as IBattleChara;
+            {
+                TargetingType.Small => IGameObjects.OrderBy<IGameObject, float>(p => p.HitboxRadius),
+                TargetingType.HighHP => IGameObjects.OrderByDescending<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
+                TargetingType.LowHP => IGameObjects.OrderBy<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
+                TargetingType.HighHPPercent => IGameObjects.OrderByDescending<IGameObject, float>(p => p is IBattleChara b ? b.CurrentHp / b.MaxHp : 0),
+                TargetingType.LowHPPercent => IGameObjects.OrderBy<IGameObject, float>(p => p is IBattleChara b ? b.CurrentHp / b.MaxHp : 0),
+                TargetingType.HighMaxHP => IGameObjects.OrderByDescending<IGameObject, uint>(p => p is IBattleChara b ? b.MaxHp : 0),
+                TargetingType.LowMaxHP => IGameObjects.OrderBy<IGameObject, uint>(p => p is IBattleChara b ? b.MaxHp : 0),
+                TargetingType.Nearest => IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
+                TargetingType.Farthest => IGameObjects.OrderByDescending<IGameObject, float>(p => p.DistanceToPlayer()),
+                TargetingType.PvPHealers => IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
+                    ? IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
+                    : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
+                TargetingType.PvPTanks => IGameObjects.Where(p => p.IsJobs(JobRole.Tank.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
+                    ? IGameObjects.Where(p => p.IsJobs(JobRole.Tank.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
+                    : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
+                TargetingType.PvPDPS => IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
+                    ? IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
+                    : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
+                _ => IGameObjects.OrderByDescending<IGameObject, float>(p => p.HitboxRadius),
             };
+
+            return orderedGameObjects.FirstOrDefault() as IBattleChara;
+        }
+        ;
 
         IBattleChara? FindBeAttackedTarget()
         {

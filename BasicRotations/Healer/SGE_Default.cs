@@ -8,7 +8,7 @@ public sealed class SGE_Default : SageRotation
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use Eukrasia Action to heal")]
     public bool EukrasiaActionHeal { get; set; } = false;
-    
+
     [RotationConfig(CombatType.PvE, Name = "Use Eukrasia when out of combat")]
     public bool OOCEukrasia { get; set; } = true;
 

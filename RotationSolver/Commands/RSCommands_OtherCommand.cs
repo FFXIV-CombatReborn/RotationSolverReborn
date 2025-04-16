@@ -81,7 +81,9 @@ public static partial class RSCommands
                 {
                     config.Value = !config.Value;
                     convertedValue = config.Value;
-                } else {
+                }
+                else
+                {
                     Svc.Chat.PrintError("Failed to parse the value.");
                     return;
                 }

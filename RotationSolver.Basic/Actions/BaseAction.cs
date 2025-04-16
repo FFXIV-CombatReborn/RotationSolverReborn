@@ -146,7 +146,7 @@ public class BaseAction : IBaseAction
 
         if (!Cooldown.CooldownCheck(usedUp, gcdCountForAbility)) return false;
 
-        if (Setting.SpecialType == SpecialActionType.MeleeRange && IActionHelper.IsLastAction(IActionHelper.MovingActions)) return false; // No range actions after moving.
+        if (Setting.SpecialType == SpecialActionType.MeleeRange && IActionHelper.IsLastAction(IActionHelper.MovingActions)) return false;
 
         if (!skipTTKCheck)
         {
@@ -159,13 +159,11 @@ public class BaseAction : IBaseAction
             }
         }
 
+        // Update the target early
         PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipStatusProvideCheck);
         if (PreviewTarget == null) return false;
 
-        if (!IBaseAction.ActionPreview)
-        {
-            Target = PreviewTarget.Value;
-        }
+        Target = PreviewTarget.Value; // Ensure the target is set early
 
         return true;
     }
@@ -180,8 +178,14 @@ public class BaseAction : IBaseAction
     public unsafe bool Use()
     {
         var target = Target;
-
         var adjustId = AdjustedID;
+        var actionManager = ActionManager.Instance(); // Cache the instance
+
+        if (actionManager == null)
+        {
+            return false;
+        }
+
         if (TargetInfo.IsTargetArea)
         {
             if (adjustId != ID) return false;
@@ -189,12 +193,12 @@ public class BaseAction : IBaseAction
 
             var loc = target.Position.Value;
 
-            if (Player.Object == null || ActionManager.Instance() == null)
+            if (Player.Object == null)
             {
                 return false;
             }
 
-            return ActionManager.Instance()->UseActionLocation(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
+            return actionManager->UseActionLocation(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
         }
         else
         {
@@ -204,12 +208,7 @@ public class BaseAction : IBaseAction
                 return false;
             }
 
-            if (ActionManager.Instance() == null)
-            {
-                return false;
-            }
-
-            return ActionManager.Instance()->UseAction(ActionType.Action, adjustId, targetId);
+            return actionManager->UseAction(ActionType.Action, adjustId, targetId);
         }
     }
 

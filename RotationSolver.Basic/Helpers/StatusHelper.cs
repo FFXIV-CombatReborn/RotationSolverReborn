@@ -355,19 +355,51 @@ public static class StatusHelper
     /// <returns>An enumerable of statuses.</returns>
     private static IEnumerable<Status> GetStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        var newEffects = new HashSet<uint>(statusIDs.Select(a => (uint)a));
-        var allStatuses = obj.GetAllStatus(isFromSelf);
-        var result = new List<Status>();
-
-        foreach (var status in allStatuses)
+        if (obj == null)
         {
-            if (newEffects.Contains(status.StatusId))
-            {
-                result.Add(status);
-            }
+            Svc.Log.Error("IGameObject is null. Cannot retrieve statuses.");
+            return Enumerable.Empty<Status>();
         }
 
-        return result;
+        if (statusIDs == null || statusIDs.Length == 0)
+        {
+            Svc.Log.Warning($"No status IDs provided for GameObjectId: {obj.GameObjectId}. Returning empty status list.");
+            return Enumerable.Empty<Status>();
+        }
+
+        try
+        {
+            var newEffects = new HashSet<uint>(statusIDs.Select(a => (uint)a));
+            var allStatuses = obj.GetAllStatus(isFromSelf);
+
+            if (allStatuses == null || !allStatuses.Any())
+            {
+                Svc.Log.Information($"No statuses found for GameObjectId: {obj.GameObjectId}.");
+                return Enumerable.Empty<Status>();
+            }
+
+            var result = new List<Status>();
+
+            foreach (var status in allStatuses)
+            {
+                if (newEffects.Contains(status.StatusId))
+                {
+                    result.Add(status);
+                }
+            }
+
+            if (!result.Any())
+            {
+                Svc.Log.Information($"No matching statuses found for GameObjectId: {obj.GameObjectId} with provided status IDs.");
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Error($"Failed to retrieve statuses for GameObjectId: {obj.GameObjectId}. Exception: {ex.Message}");
+            return Enumerable.Empty<Status>();
+        }
     }
 
     /// <summary>
@@ -378,20 +410,32 @@ public static class StatusHelper
     /// <returns>An enumerable of all statuses.</returns>
     private static IEnumerable<Status> GetAllStatus(this IGameObject obj, bool isFromSelf)
     {
-        if (obj is not IBattleChara b) return Enumerable.Empty<Status>();
+        if (obj is not IBattleChara b)
+        {
+            Svc.Log.Warning($"Object is not a valid IBattleChara (GameObjectId: {obj?.GameObjectId}). Returning empty status list.");
+            return Enumerable.Empty<Status>();
+        }
 
         var playerId = Player.Object?.GameObjectId ?? 0;
         var result = new List<Status>();
 
         try
         {
-            if (b.StatusList == null)
+            // Ensure the BattleChara object and its StatusList are valid
+            if (b == null)
             {
-                Svc.Log.Information("StatusList is null. Cannot get statuses.");
+                Svc.Log.Warning($"BattleChara object is null (GameObjectId: {obj.GameObjectId}). Cannot retrieve statuses.");
                 return Enumerable.Empty<Status>();
             }
 
-            foreach (var status in b.StatusList)
+            var statusList = b.StatusList;
+            if (statusList == null || statusList.Length == 0)
+            {
+                Svc.Log.Warning($"StatusList is null or empty for BattleChara (GameObjectId: {obj.GameObjectId}). Cannot get statuses.");
+                return Enumerable.Empty<Status>();
+            }
+
+            foreach (var status in statusList)
             {
                 if (!isFromSelf || status.SourceId == playerId || status.SourceObject?.OwnerId == playerId)
                 {
@@ -399,9 +443,13 @@ public static class StatusHelper
                 }
             }
         }
+        catch (NullReferenceException ex)
+        {
+            Svc.Log.Error($"NullReferenceException while getting statuses for GameObjectId: {obj.GameObjectId}. Exception: {ex.Message}");
+        }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Failed to get statuses: {ex.Message}");
+            Svc.Log.Error($"Unexpected error while getting statuses for GameObjectId: {obj.GameObjectId}. Exception: {ex.Message}");
         }
 
         return result;

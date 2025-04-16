@@ -130,7 +130,7 @@ partial class PaladinRotation
     {
 
     }
-    
+
     static partial void ModifyFightOrFlightPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.GoringBladeReady];
@@ -422,14 +422,14 @@ partial class PaladinRotation
     /// 
     /// </summary>
     public static bool BladeOfValorPvPReady => Service.GetAdjustedActionId(ActionID.BladeOfFaithPvP) == ActionID.BladeOfValorPvP;
-    
+
     /// <summary>
     /// 
     /// </summary>
     public static bool ConfiteorPvPReady => Service.GetAdjustedActionId(ActionID.ImperatorPvP) == ActionID.ConfiteorPvP;
     static partial void ModifyFastBladePvP(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyRiotBladePvP(ref ActionSetting setting)

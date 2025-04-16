@@ -25,7 +25,7 @@ internal static class StateUpdater
         AutoStatus status = AutoStatus.None;
 
         // Get the user-defined order of AutoStatus flags
-        var autoStatusOrder = OtherConfiguration.AutoStatusOrder;
+        var autoStatusOrder = OtherConfiguration.AutoStatusOrder?.ToArray() ?? Array.Empty<uint>();
 
         foreach (var autoStatus in autoStatusOrder)
         {

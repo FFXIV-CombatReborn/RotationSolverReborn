@@ -229,17 +229,17 @@ partial class RedMageRotation
         setting.StatusNeed = [StatusID.PrefulgenceReady];
     }
     #endregion
-    
+
     #region PvP Actions
     static partial void ModifyJoltIiiPvP(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.Dualcast_1393];        
+        setting.StatusProvide = [StatusID.Dualcast_1393];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
     }
-    
+
     static partial void ModifyGrandImpactPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Dualcast_1393];
@@ -249,7 +249,7 @@ partial class RedMageRotation
         };
     }
 
-    static partial void ModifyEnchantedRipostePvP(ref ActionSetting setting) 
+    static partial void ModifyEnchantedRipostePvP(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.EnchantedRiposte];
     }
@@ -265,7 +265,7 @@ partial class RedMageRotation
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.EnchantedRipostePvP) == ActionID.EnchantedRedoublementPvP;
         setting.StatusProvide = [StatusID.EnchantedRedoublement_3239];
     }
-    
+
     static partial void ModifyScorchPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.EnchantedRipostePvP) == ActionID.ScorchPvP;
@@ -314,7 +314,7 @@ partial class RedMageRotation
     }
 
     static partial void ModifyViceOfThornsPvP(ref ActionSetting setting)
-    {   
+    {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.FortePvP) == ActionID.ViceOfThornsPvP;
         setting.CreateConfig = () => new ActionConfig()
         {

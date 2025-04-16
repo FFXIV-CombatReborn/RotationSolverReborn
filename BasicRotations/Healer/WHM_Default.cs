@@ -80,7 +80,7 @@ public sealed class WHM_Default : WhiteMageRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         if (Player.WillStatusEndGCD(2, 0, true, StatusID.DivineGrace) && DivineCaressPvE.CanUse(out act)) return true;
-        
+
         if (UseMedicine && !PresenceOfMindPvE.Cooldown.IsCoolingDown && UseBurstMedicine(out act)) return true;
 
         bool useLastThinAirCharge = ThinAirLastChargeUsage == ThinAirUsageStrategy.UseAllCharges || (ThinAirLastChargeUsage == ThinAirUsageStrategy.ReserveLastChargeForRaise && nextGCD == RaisePvE);

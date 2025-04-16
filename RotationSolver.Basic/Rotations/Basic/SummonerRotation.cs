@@ -495,7 +495,7 @@ partial class SummonerRotation
 
     static partial void ModifyWyrmwavePvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyAkhMornPvE(ref ActionSetting setting)
@@ -548,7 +548,7 @@ partial class SummonerRotation
 
     static partial void ModifyEverlastingFlightPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyScarletFlamePvE(ref ActionSetting setting)
@@ -636,7 +636,7 @@ partial class SummonerRotation
             AoeCount = 3,
         };
     }
-    
+
     static partial void ModifySunflarePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InSolarBahamut;
@@ -653,7 +653,7 @@ partial class SummonerRotation
 
     static partial void ModifyLuxwavePvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyExodusPvE(ref ActionSetting setting)
@@ -681,7 +681,7 @@ partial class SummonerRotation
         };
     }
 
-    static partial void ModifyMountainBusterPvP(ref ActionSetting setting) 
+    static partial void ModifyMountainBusterPvP(ref ActionSetting setting)
     {
         setting.CreateConfig = () => new ActionConfig()
         {
