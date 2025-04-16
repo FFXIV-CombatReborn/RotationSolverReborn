@@ -168,7 +168,8 @@ public sealed class SAM_Default : SamuraiRotation
             return false;
         }
 
-        if ((!HiganbanaTargets || (HiganbanaTargets && NumberOfAllHostilesInRange < 2)) && (HostileTarget?.WillStatusEnd(18, true, StatusID.Higanbana) ?? false) && HiganbanaPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+        if ((!HiganbanaTargets || (HiganbanaTargets && NumberOfAllHostilesInRange < 2)) && (HostileTarget?.WillStatusEnd(18, true, StatusID.Higanbana) ?? false) && HiganbanaPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true)) return true;
+        if (KaeshiNamikiriPvE.CanUse(out act)) return true;
 
         if (NumberOfHostilesInRange >= 3)
         {
@@ -189,23 +190,22 @@ public sealed class SAM_Default : SamuraiRotation
         if (!HagakurePvE.EnoughLevel && NumberOfHostilesInRange >= 3 && MidareSetsugekkaPvE.CanUse(out act)) return true;
 
         if (TendoKaeshiGokenPvE.CanUse(out act)) return true;
-        if (TendoGokenPvE.CanUse(out act)) return true;
-        if (KaeshiGokenPvE.CanUse(out act)) return true;
-        if (TenkaGokenPvE.CanUse(out act)) return true;
+        if (TendoGokenPvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (KaeshiGokenPvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (TenkaGokenPvE.CanUse(out act, skipComboCheck: true)) return true;
 
         // aoe 12 combo's 2
         if ((!HasMoon || IsMoonTimeLessThanFlower || !OkaPvE.EnoughLevel) && MangetsuPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasGetsu)) return true;
         if ((!HasFlower || !IsMoonTimeLessThanFlower) && OkaPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasKa)) return true;
 
         // initiate aoe
-        if (FukoPvE.CanUse(out act, skipComboCheck: true)) return true;
-        if (!FukoPvE.EnoughLevel && FugaPvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (FukoPvE.CanUse(out act)) return true;
+        if (!FukoPvE.EnoughLevel && FugaPvE.CanUse(out act)) return true;
 
-        if (TendoSetsugekkaPvE.CanUse(out act)) return true;
-        if (MidareSetsugekkaPvE.CanUse(out act)) return true;
+        if (TendoSetsugekkaPvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (MidareSetsugekkaPvE.CanUse(out act, skipComboCheck: true)) return true;
 
         // use 2nd finisher combo spell first
-        if (KaeshiNamikiriPvE.CanUse(out act, usedUp: true)) return true;
         if (!KaeshiNamikiriReady && KaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
         if (!KaeshiNamikiriReady && TendoKaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
 
@@ -237,7 +237,7 @@ public sealed class SAM_Default : SamuraiRotation
             if (HakazePvE.CanUse(out act)) return true;
 
             // target out of range
-            if (EnpiPvE.CanUse(out act)) return true;
+            if (EnpiPvE.CanUse(out act, skipComboCheck: true)) return true;
         }
 
         return base.GeneralGCD(out act);

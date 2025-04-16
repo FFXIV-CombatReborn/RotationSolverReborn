@@ -55,30 +55,30 @@
             <Private>False</Private>
         </Reference>
 
-        <Using Include="System.ComponentModel"/>
-        <Using Include="Dalamud.Game.ClientState.JobGauge.Types"/>
+        <Using Include="System.ComponentModel" />
+        <Using Include="Dalamud.Game.ClientState.JobGauge.Types" />
 
-        <Using Include="Dalamud.Game.ClientState.Objects.Types"/>
+        <Using Include="Dalamud.Game.ClientState.Objects.Types" />
 
-        <Using Include="RotationSolver.Basic"/>
-        <Using Include="RotationSolver.Basic.Actions"/>
-        <Using Include="RotationSolver.Basic.Attributes"/>
-        <Using Include="RotationSolver.Basic.Configuration.RotationConfig"/>
-        <Using Include="RotationSolver.Basic.Data"/>
-        <Using Include="RotationSolver.Basic.Helpers"/>
-        <Using Include="RotationSolver.Basic.Rotations"/>
-        <Using Include="RotationSolver.Basic.Rotations.Basic"/>
-        <Using Include="Dalamud.Game.ClientState.JobGauge.Enums"/>
-        <Using Include="Dalamud.Interface"/>
-        <Using Include="ImGuiNET"/>
-        <Using Include="Newtonsoft.Json"/>
+        <Using Include="RotationSolver.Basic" />
+        <Using Include="RotationSolver.Basic.Actions" />
+        <Using Include="RotationSolver.Basic.Attributes" />
+        <Using Include="RotationSolver.Basic.Configuration.RotationConfig" />
+        <Using Include="RotationSolver.Basic.Data" />
+        <Using Include="RotationSolver.Basic.Helpers" />
+        <Using Include="RotationSolver.Basic.Rotations" />
+        <Using Include="RotationSolver.Basic.Rotations.Basic" />
+        <Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
+        <Using Include="Dalamud.Interface" />
+        <Using Include="ImGuiNET" />
+        <Using Include="Newtonsoft.Json" />
 
         <ProjectReference Include="..\ECommons\ECommons\ECommons.csproj">
             <PrivateAssets>all</PrivateAssets>
         </ProjectReference>
 
-        <PackageReference Include="System.Drawing.Common" Version="9.0.3"/>
-        <ProjectReference Include="..\RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj" OutputItemType="Analyzer" ExcludeAssets="All"/>
+        <PackageReference Include="System.Drawing.Common" Version="9.0.4" />
+        <ProjectReference Include="..\RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj" OutputItemType="Analyzer" ExcludeAssets="All" />
 
         <None Include="..\COPYING.LESSER">
             <Pack>True</Pack>
@@ -88,7 +88,7 @@
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
         </None>
-        <PackageReference Include="Svg" Version="3.4.7"/>
+        <PackageReference Include="Svg" Version="3.4.7" />
         <None Update="README.md">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>
