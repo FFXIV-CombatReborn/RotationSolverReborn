@@ -1382,7 +1382,7 @@ public partial class RotationConfigWindow : Window
     private static string GetRotationStatusHead()
     {
         var rotation = DataCenter.CurrentRotation;
-        var status = "Status"
+        var status = "Status";
         if (rotation == null) return string.Empty;
         return status;
     }
