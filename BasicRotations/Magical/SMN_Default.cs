@@ -74,8 +74,8 @@ public sealed class SMN_Default : SummonerRotation
     #region oGCD Logic
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        bool isTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
-        bool isTargetDying = HostileTarget?.IsDying() ?? false;
+        bool isTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
+        bool isTargetDying = CurrentTarget?.IsDying() ?? false;
         bool targetIsBossAndDying = isTargetBoss && isTargetDying;
         bool inBigInvocation = !SummonBahamutPvE.EnoughLevel || (InBahamut || InPhoenix || InSolarBahamut);
         bool inSolarUnique = Player.Level == 100 ? !InBahamut && !InPhoenix && InSolarBahamut : InBahamut && !InPhoenix;

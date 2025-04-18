@@ -156,7 +156,6 @@ partial class CustomRotation
     /// </summary>
     protected static IBattleChara? HostileTarget => DataCenter.HostileTarget;
 
-
     /// <summary>
     /// Is player in position to hit the positional?
     /// </summary>

@@ -32,11 +32,14 @@ internal static partial class TargetUpdater
     private static List<IBattleChara> GetAllTargets()
     {
         var allTargets = new List<IBattleChara>();
-        foreach (var obj in Svc.Objects.OfType<IBattleChara>())
+        foreach (var obj in Svc.Objects)
         {
-            if (!obj.IsDummy() || !Service.Config.DisableTargetDummys)
+            if (obj is IBattleChara battleChara)
             {
-                allTargets.Add(obj);
+                if (!battleChara.IsDummy() || !Service.Config.DisableTargetDummys)
+                {
+                    allTargets.Add(battleChara);
+                }
             }
         }
         return allTargets;

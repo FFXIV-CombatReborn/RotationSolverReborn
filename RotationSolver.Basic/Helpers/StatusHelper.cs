@@ -182,12 +182,11 @@ public static class StatusHelper
     /// <returns></returns>
     public static bool WillStatusEnd(this IGameObject obj, float time, bool isFromSelf = true, params StatusID[] statusIDs)
     {
-        if (DataCenter.HasApplyStatus(obj.GameObjectId, statusIDs)) return false;
+        if (HasApplyStatus(obj, statusIDs)) return false;
         var remain = obj.StatusTime(isFromSelf, statusIDs);
         if (remain < 0 && obj.HasStatus(isFromSelf, statusIDs)) return false;
         return remain <= time;
     }
-
 
     /// <summary>
     /// Get the remaining time of the status.
@@ -200,14 +199,12 @@ public static class StatusHelper
     {
         if (obj == null)
         {
-            // Log or handle the case where obj is null
-            PluginLog.Error("IGameObject is null. Cannot get status time.");
             return 0;
         }
 
         try
         {
-            if (DataCenter.HasApplyStatus(obj.GameObjectId, statusIDs)) return float.MaxValue;
+            if (HasApplyStatus(obj, statusIDs)) return float.MaxValue;
             var times = obj.StatusTimes(isFromSelf, statusIDs);
             if (times == null || !times.Any()) return 0;
             return Math.Max(0, times.Min() - DataCenter.DefaultGCDRemain);
@@ -224,7 +221,6 @@ public static class StatusHelper
     {
         if (obj == null)
         {
-            PluginLog.Error("IGameObject is null. Cannot get status times.");
             return Enumerable.Empty<float>();
         }
 
@@ -250,12 +246,10 @@ public static class StatusHelper
     {
         if (obj == null)
         {
-            // Log or handle the case where obj is null
-            PluginLog.Error("IGameObject is null. Cannot get status stack.");
             return 0;
         }
 
-        if (DataCenter.HasApplyStatus(obj.GameObjectId, statusIDs)) return byte.MaxValue;
+        if (HasApplyStatus(obj, statusIDs)) return byte.MaxValue;
         var stacks = obj.StatusStacks(isFromSelf, statusIDs);
         if (stacks == null || !stacks.Any()) return 0;
         return stacks.Min();
@@ -265,7 +259,6 @@ public static class StatusHelper
     {
         if (obj == null)
         {
-            PluginLog.Error("IGameObject is null. Cannot get status stacks.");
             return Enumerable.Empty<byte>();
         }
 
@@ -291,13 +284,37 @@ public static class StatusHelper
     {
         if (obj == null)
         {
-            // Log or handle the case where obj is null
-            PluginLog.Error("IGameObject is null. Cannot check status.");
             return false;
         }
 
-        if (DataCenter.HasApplyStatus(obj.GameObjectId, statusIDs)) return true;
+        if (HasApplyStatus(obj, statusIDs)) return true;
         return obj.GetStatus(isFromSelf, statusIDs).Any();
+    }
+
+    /// <summary>
+    /// Checks if the specified status needs to be applied to the given object.
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="statusIDs">An array of <see cref="StatusID"/> to check against.</param>
+    /// <returns>
+    /// <c>true</c> if any of the specified statuses have to be applied to the object; otherwise, <c>false</c>.
+    /// </returns>
+    public static bool HasApplyStatus(this IGameObject obj, StatusID[] statusIDs)
+    {
+        if (statusIDs == null || statusIDs.Length == 0 || obj == null)
+        {
+            return false;
+        }
+
+        if (DataCenter.InEffectTime && DataCenter.ApplyStatus.TryGetValue(obj.GameObjectId, out var statusId))
+        {
+            foreach (var s in statusIDs)
+            {
+                if ((uint)s == statusId) return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -306,14 +323,7 @@ public static class StatusHelper
     /// <param name="status"></param>
     public static void StatusOff(StatusID status)
     {
-        if (Player.Object == null)
-        {
-            // Log or handle the case where Player.Object is null
-            PluginLog.Error("Player object is null. Cannot remove status.");
-            return;
-        }
-
-        if (!Player.Object.HasStatus(false, status))
+        if (Player.Object == null || !Player.Object.HasStatus(false, status))
         {
             return;
         }
@@ -340,7 +350,6 @@ public static class StatusHelper
         var statusRow = Service.GetSheet<Lumina.Excel.Sheets.Status>().GetRow((uint)id);
         if (statusRow.RowId == 0)
         {
-            PluginLog.Error($"Status with ID {id} not found.");
             return string.Empty;
         }
         return statusRow.Name.ToString();
@@ -355,42 +364,23 @@ public static class StatusHelper
     /// <returns>An enumerable of statuses.</returns>
     private static IEnumerable<Status> GetStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (obj == null)
-        {
-            Svc.Log.Error("IGameObject is null. Cannot retrieve statuses.");
-            return Enumerable.Empty<Status>();
-        }
+        var newEffects = new HashSet<uint>(statusIDs.Select(a => (uint)a));
+        var allStatuses = obj.GetAllStatus(isFromSelf);
+        var result = new List<Status>();
 
-        if (statusIDs == null || statusIDs.Length == 0)
+        if (obj == null || statusIDs == null || statusIDs.Length == 0 || allStatuses == null || !allStatuses.Any())
         {
-            Svc.Log.Warning($"No status IDs provided for GameObjectId: {obj.GameObjectId}. Returning empty status list.");
             return Enumerable.Empty<Status>();
         }
 
         try
         {
-            var newEffects = new HashSet<uint>(statusIDs.Select(a => (uint)a));
-            var allStatuses = obj.GetAllStatus(isFromSelf);
-
-            if (allStatuses == null || !allStatuses.Any())
-            {
-                Svc.Log.Information($"No statuses found for GameObjectId: {obj.GameObjectId}.");
-                return Enumerable.Empty<Status>();
-            }
-
-            var result = new List<Status>();
-
             foreach (var status in allStatuses)
             {
                 if (newEffects.Contains(status.StatusId))
                 {
                     result.Add(status);
                 }
-            }
-
-            if (!result.Any())
-            {
-                Svc.Log.Information($"No matching statuses found for GameObjectId: {obj.GameObjectId} with provided status IDs.");
             }
 
             return result;
@@ -410,50 +400,57 @@ public static class StatusHelper
     /// <returns>An enumerable of all statuses.</returns>
     private static IEnumerable<Status> GetAllStatus(this IGameObject obj, bool isFromSelf)
     {
-        if (obj is not IBattleChara b)
-        {
-            Svc.Log.Warning($"Object is not a valid IBattleChara (GameObjectId: {obj?.GameObjectId}). Returning empty status list.");
-            return Enumerable.Empty<Status>();
-        }
-
         var playerId = Player.Object?.GameObjectId ?? 0;
         var result = new List<Status>();
 
+        // Early return if the object is not a BattleChara or is null
+        if (obj is not IBattleChara b || obj == null)
+        {
+            return Enumerable.Empty<Status>();
+        }
+
+        var statusList = b.StatusList;
+        if (statusList == null)
+        {
+            return Enumerable.Empty<Status>();
+        }
+
+        // Wrap the entire status retrieval process in a try-catch block
         try
         {
-            // Ensure the BattleChara object and its StatusList are valid
-            if (b == null)
+            // Iterate through the status list with additional safety checks
+            foreach (var status in b.StatusList.Where(status => status is not null && status.StatusId > 0))
             {
-                Svc.Log.Warning($"BattleChara object is null (GameObjectId: {obj.GameObjectId}). Cannot retrieve statuses.");
-                return Enumerable.Empty<Status>();
-            }
+                if (status == null) continue; // Skip null statuses
 
-            var statusList = b.StatusList;
-            if (statusList == null || statusList.Length == 0)
-            {
-                Svc.Log.Warning($"StatusList is null or empty for BattleChara (GameObjectId: {obj.GameObjectId}). Cannot get statuses.");
-                return Enumerable.Empty<Status>();
-            }
-
-            foreach (var status in statusList)
-            {
-                if (!isFromSelf || status.SourceId == playerId || status.SourceObject?.OwnerId == playerId)
+                try
                 {
-                    result.Add(status);
+                    // Check if the status is from self if required
+                    if (!isFromSelf || status.SourceId == playerId ||
+                        (status.SourceObject != null && status.SourceObject.OwnerId == playerId))
+                    {
+                        result.Add(status);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception but continue processing other statuses
+                    PluginLog.Error($"Error processing individual status: {ex.Message}");
                 }
             }
         }
         catch (NullReferenceException ex)
         {
-            Svc.Log.Error($"NullReferenceException while getting statuses for GameObjectId: {obj.GameObjectId}. Exception: {ex.Message}");
+            PluginLog.Error($"NullReferenceException while getting statuses for GameObjectId: {obj.GameObjectId}. Exception: {ex.Message}");
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Unexpected error while getting statuses for GameObjectId: {obj.GameObjectId}. Exception: {ex.Message}");
+            PluginLog.Error($"Unexpected error while getting statuses for GameObjectId: {obj.GameObjectId}. Exception: {ex.Message}");
         }
 
         return result;
     }
+
 
     /// <summary>
     /// Check if the status is invincible.

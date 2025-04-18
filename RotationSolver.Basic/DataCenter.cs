@@ -91,19 +91,6 @@ internal static class DataCenter
     internal static Dictionary<ulong, uint> ApplyStatus { get; set; } = new();
     internal static uint MPGain { get; set; }
 
-    internal static bool HasApplyStatus(ulong id, StatusID[] ids)
-    {
-        if (InEffectTime && ApplyStatus.TryGetValue(id, out var statusId))
-        {
-            foreach (var s in ids)
-            {
-                if ((ushort)s == statusId) return true;
-            }
-        }
-
-        return false;
-    }
-
     public static TerritoryInfo? Territory { get; set; }
 
     public static bool IsPvP => Territory?.IsPvP ?? false;

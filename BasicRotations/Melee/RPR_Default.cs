@@ -33,15 +33,15 @@ public sealed class RPR_Default : ReaperRotation
     #region oGCD Logic
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        bool IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
-        bool IsTargetDying = HostileTarget?.IsDying() ?? false;
+        bool IsTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
+        bool IsTargetDying = CurrentTarget?.IsDying() ?? false;
         bool NoEnshroudPooling = !EnshroudPooling && Shroud >= 50;
         bool YesEnshroudPooling = EnshroudPooling && Shroud >= 50 && (!PlentifulHarvestPvE.EnoughLevel || Player.HasStatus(true, StatusID.ArcaneCircle) || ArcaneCirclePvE.Cooldown.WillHaveOneCharge(8) || !Player.HasStatus(true, StatusID.ArcaneCircle) && ArcaneCirclePvE.Cooldown.WillHaveOneCharge(65) && !ArcaneCirclePvE.Cooldown.WillHaveOneCharge(50) || !Player.HasStatus(true, StatusID.ArcaneCircle) && Shroud >= 90);
         bool IsIdealHost = Player.HasStatus(true, StatusID.IdealHost);
 
         if (IsBurst)
         {
-            if ((ArcaneCirclePvE.Target.Target?.HasStatus(true, StatusID.DeathsDesign) ?? false)
+            if ((CurrentTarget?.HasStatus(true, StatusID.DeathsDesign) ?? false)
                 && !CombatElapsedLess(3.5f) && ArcaneCirclePvE.CanUse(out act, skipAoeCheck: true)) return true;
         }
 
@@ -89,7 +89,7 @@ public sealed class RPR_Default : ReaperRotation
         }
 
         if (WhorlOfDeathPvE.CanUse(out act)) return true;
-        if (UseCustomDDTiming && ((!ShadowOfDeathPvE.Target.Target?.HasStatus(true, StatusID.DeathsDesign) ?? false) || (ShadowOfDeathPvE.Target.Target?.WillStatusEnd(RefreshDDSecondsRemaining, true, StatusID.DeathsDesign) ?? false)))
+        if (UseCustomDDTiming && ((!CurrentTarget?.HasStatus(true, StatusID.DeathsDesign) ?? false) || (CurrentTarget?.WillStatusEnd(RefreshDDSecondsRemaining, true, StatusID.DeathsDesign) ?? false)))
         {
             if (ShadowOfDeathPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
         }

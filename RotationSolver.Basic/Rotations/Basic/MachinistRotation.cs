@@ -426,7 +426,6 @@ partial class MachinistRotation
     {
         setting.IsFriendly = true;
         setting.StatusProvide = [StatusID.Analysis];
-        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.Analysis);
     }
 
     static partial void ModifyDrillPvP(ref ActionSetting setting)
@@ -437,6 +436,10 @@ partial class MachinistRotation
     static partial void ModifyBioblasterPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.BioblasterPrimed];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyAirAnchorPvP(ref ActionSetting setting)
@@ -447,6 +450,42 @@ partial class MachinistRotation
     static partial void ModifyChainSawPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ChainSawPrimed];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyBishopAutoturretPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyFullMetalFieldPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyAetherMortarPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsEnabled = false,
+        };
+    }
+
+    static partial void ModifyHeatBlastPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsEnabled = false,
+        };
     }
     #endregion
 }

@@ -4,6 +4,7 @@ using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Hooks;
 using ECommons.Hooks.ActionEffectTypes;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
@@ -160,9 +161,20 @@ public static class Watcher
 
             DataCenter.HealHP = set.GetSpecificTypeEffect(ActionEffectType.Heal);
             DataCenter.ApplyStatus = set.GetSpecificTypeEffect(ActionEffectType.ApplyStatusEffectTarget);
-            foreach (var effect in set.GetSpecificTypeEffect(ActionEffectType.ApplyStatusEffectSource))
+            var effects = set.GetSpecificTypeEffect(ActionEffectType.ApplyStatusEffectSource);
+            try
             {
-                DataCenter.ApplyStatus[effect.Key] = effect.Value;
+                if (effects != null)
+                {
+                    foreach (var effect in effects)
+                    {
+                        DataCenter.ApplyStatus[effect.Key] = effect.Value;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error($"Error updating ApplyStatus: {ex}");
             }
 
             uint mpGain = 0;

@@ -280,30 +280,23 @@ public struct ActionTargetInfo(IBaseAction action)
 
         try
         {
-            // Ensure the gameObject is a valid BattleChara and has a non-null StatusList
-            if (gameObject is not IBattleChara battleChara || battleChara.StatusList == null)
-            {
-                Svc.Log.Error("Invalid BattleChara or StatusList is null.");
-                return false;
-            }
-
             if (action.Info.AttackType == AttackType.Magic)
             {
-                if (battleChara.HasStatus(false, StatusHelper.MagicResistance))
+                if (gameObject.HasStatus(false, StatusHelper.MagicResistance))
                 {
                     return false;
                 }
             }
             else if (action.Info.Aspect != Aspect.Piercing) // Physical
             {
-                if (battleChara.HasStatus(false, StatusHelper.PhysicalResistance))
+                if (gameObject.HasStatus(false, StatusHelper.PhysicalResistance))
                 {
                     return false;
                 }
             }
             if (Range >= 20) // Range
             {
-                if (battleChara.HasStatus(false, StatusID.RangedResistance, StatusID.EnergyField))
+                if (gameObject.HasStatus(false, StatusID.RangedResistance, StatusID.EnergyField))
                 {
                     return false;
                 }
@@ -1194,8 +1187,7 @@ public struct ActionTargetInfo(IBaseAction action)
             };
 
             return orderedGameObjects.FirstOrDefault() as IBattleChara;
-        }
-        ;
+        };
 
         IBattleChara? FindBeAttackedTarget()
         {

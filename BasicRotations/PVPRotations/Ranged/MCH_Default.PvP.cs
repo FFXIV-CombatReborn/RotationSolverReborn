@@ -59,8 +59,8 @@ public sealed class MCH_DefaultPvP : MachinistRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        if (AnalysisPvP.CanUse(out action)) return true;
-        if (WildfirePvP.CanUse(out action)) return true;
+        if (nextGCD.IsTheSameTo(false, ActionID.DrillPvP, ActionID.BioblasterPvP, ActionID.AirAnchorPvP, ActionID.ChainSawPvP) && AnalysisPvP.CanUse(out action, usedUp: true)) return true;
+        if (Player.HasStatus(true, StatusID.Overheated_3149) && WildfirePvP.CanUse(out action)) return true;
         if (BishopAutoturretPvP.CanUse(out action)) return true;
 
         return base.AttackAbility(nextGCD, out action);
@@ -76,7 +76,7 @@ public sealed class MCH_DefaultPvP : MachinistRotation
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
         if (FullMetalFieldPvP.CanUse(out action)) return true;
-        if (BlastChargePvP.CanUse(out action) && Player.HasStatus(true, StatusID.Overheated_3149)) return true;
+        if (BlazingShotPvP.CanUse(out action) && Player.HasStatus(true, StatusID.Overheated_3149) && !Player.HasStatus(true, StatusID.Analysis)) return true;
 
         if (DrillPvP.CanUse(out action, usedUp: true)) return true;
         if (BioblasterPvP.CanUse(out action, usedUp: true)) return true;
@@ -85,7 +85,7 @@ public sealed class MCH_DefaultPvP : MachinistRotation
 
         if (ScattergunPvP.CanUse(out action) && !Player.HasStatus(true, StatusID.Overheated_3149)) return true;
 
-        if (BlastChargePvP.CanUse(out action) && !Player.HasStatus(true, StatusID.Analysis)) return true;
+        if (BlastChargePvP.CanUse(out action)) return true;
 
         return base.GeneralGCD(out action);
 
