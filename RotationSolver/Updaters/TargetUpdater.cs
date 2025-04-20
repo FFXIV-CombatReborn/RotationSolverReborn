@@ -190,10 +190,10 @@ internal static partial class TargetUpdater
         {
             try
             {
-                var deathParty = DataCenter.PartyMembers?.GetDeath().ToList() ?? [];
-                var deathAll = DataCenter.AllTargets?.GetDeath().ToList() ?? [];
-                var deathNPC = DataCenter.FriendlyNPCMembers?.GetDeath().ToList() ?? [];
-                var deathAllianceMembers = DataCenter.AllianceMembers?.GetDeath().ToList() ?? [];
+                var deathParty = DataCenter.PartyMembers?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
+                var deathAll = DataCenter.AllTargets?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
+                var deathNPC = DataCenter.FriendlyNPCMembers?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
+                var deathAllianceMembers = DataCenter.AllianceMembers?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
                 var deathAllianceHealers = new List<IBattleChara>(deathParty);
                 var deathAllianceSupports = new List<IBattleChara>(deathParty);
 

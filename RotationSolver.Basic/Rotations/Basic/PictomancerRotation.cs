@@ -234,6 +234,7 @@ public partial class PictomancerRotation
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
+        ImGui.Text($"HasRainbowBright: {HasRainbowBright}");
         ImGui.Text($"PaletteGauge: {PaletteGauge}");
         ImGui.Text($"Paint: {Paint}");
         ImGui.Text($"CreatureMotifDrawn: {CreatureMotifDrawn}");
@@ -353,6 +354,11 @@ public partial class PictomancerRotation
     public static bool HasRainbowBright => !Player.WillStatusEnd(0, true, StatusID.RainbowBright);
 
     /// <summary>
+    /// Indicates if the player has Rainbow Bright.
+    /// </summary>
+    public static bool HasStarstruck => !Player.WillStatusEnd(0, true, StatusID.Starstruck);
+
+    /// <summary>
     /// Holds the remaining amount of HammerTime stacks
     /// </summary>
     public static byte HammerStacks
@@ -441,6 +447,7 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
+            ShouldCheckCombo = false,
         };
     }
 
@@ -659,6 +666,7 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
+            ShouldCheckCombo = false,
         };
     }
 
@@ -670,6 +678,7 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
+            ShouldCheckCombo = false,
         };
     }
 

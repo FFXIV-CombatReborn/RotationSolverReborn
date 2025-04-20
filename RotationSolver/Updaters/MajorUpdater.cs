@@ -119,15 +119,7 @@ internal static class MajorUpdater
 
         try
         {
-            switch (Service.Config.FrameworkStyle)
-            {
-                case FrameworkStyle.RunOnTick:
-                    await Svc.Framework.RunOnTick(() => UpdateWork());
-                    break;
-                case FrameworkStyle.MainThread:
-                    UpdateWork();
-                    break;
-            }
+            await Svc.Framework.RunOnTick(UpdateWork);
         }
         catch (Exception tEx)
         {

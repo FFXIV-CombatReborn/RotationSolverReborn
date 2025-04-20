@@ -186,10 +186,6 @@ internal partial class Configs : IPluginConfiguration
         PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _interruptibleMoreCheck = true;
 
-    [UI("Framework Update Method (Experimental: Changing this off of game thread will cause crashes)",
-        Filter = BasicParams)]
-    public FrameworkStyle FrameworkStyle { get; set; } = FrameworkStyle.MainThread;
-
     [ConditionBool, UI("Stop casting if the target dies.", Filter = Extra)]
     private static readonly bool _useStopCasting = false;
 

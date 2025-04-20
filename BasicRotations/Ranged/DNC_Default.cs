@@ -43,6 +43,8 @@ public sealed class DNC_Default : DancerRotation
     // Override the method for handling emergency abilities
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
+        if (UseClosedPosition(out act)) return true;
+
         if (Player.HasStatus(true, StatusID.TechnicalFinish))
         {
             if (DevilmentPvE.CanUse(out act)) return true;
@@ -133,7 +135,6 @@ public sealed class DNC_Default : DancerRotation
 
         // Other attacks
         if (FanDanceIvPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (UseClosedPosition(out act)) return true;
 
         return base.AttackAbility(nextGCD, out act);
     }
@@ -286,7 +287,7 @@ public sealed class DNC_Default : DancerRotation
         // Attempt to use Closed Position if available and certain conditions are met
         if (!ClosedPositionPvE.CanUse(out act)) return false;
 
-        if (InCombat && Player.HasStatus(true, StatusID.ClosedPosition))
+        if (!Player.HasStatus(true, StatusID.ClosedPosition))
         {
             // Check for party members with Closed Position status
             foreach (var friend in PartyMembers)

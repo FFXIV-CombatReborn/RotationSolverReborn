@@ -474,11 +474,14 @@ internal static class DataCenter
         }
     }
 
-    public static bool IsHostileCastingAOE => IsCastingAreaVfx() || AllHostileTargets.Any(IsHostileCastingArea);
+    public static bool IsHostileCastingAOE =>
+    InCombat && (IsCastingAreaVfx() || (AllHostileTargets?.Any(IsHostileCastingArea) ?? false));
 
-    public static bool IsHostileCastingToTank => IsCastingTankVfx() || AllHostileTargets.Any(IsHostileCastingTank);
+    public static bool IsHostileCastingToTank =>
+    InCombat && (IsCastingTankVfx() || (AllHostileTargets?.Any(IsHostileCastingTank) ?? false));
 
-    public static bool IsHostileCastingStop => InCombat && Service.Config.CastingStop && AllHostileTargets.Any(IsHostileStop);
+    public static bool IsHostileCastingStop =>
+    InCombat && (Service.Config.CastingStop && (AllHostileTargets?.Any(IsHostileStop) ?? false));
 
     private static DateTime _petLastSeen = DateTime.MinValue;
 
@@ -884,7 +887,7 @@ internal static class DataCenter
             (act) => act.RowId != 0 && OtherConfiguration.HostileCastingKnockback.Contains(act.RowId));
     }
 
-    public static bool IsHostileCastingBase(IBattleChara h, Func<Action, bool> check)
+    public static bool IsHostileCastingBase(IBattleChara? h, Func<Action, bool> check)
     {
         // Check if h is null
         if (h == null) return false;

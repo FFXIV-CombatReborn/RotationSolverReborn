@@ -18,6 +18,10 @@ internal static class StateUpdater
     {
         DataCenter.CommandStatus = StatusFromCmdOrCondition();
         DataCenter.AutoStatus = StatusFromAutomatic();
+        if (!DataCenter.InCombat && DataCenter.AttackedTargets?.Count() > 0)
+        {
+            DataCenter.ResetAllRecords();
+        }
     }
 
     private static AutoStatus StatusFromAutomatic()
@@ -157,7 +161,7 @@ internal static class StateUpdater
             if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out var positional)
                 && positional != target?.FindEnemyPositional()
                 && target?.HasPositional() == true
-                && !target.HasStatus(true, StatusID.DirectionalDisregard))
+                && !target.HasStatus(false, StatusID.DirectionalDisregard))
             {
                 return true;
             }

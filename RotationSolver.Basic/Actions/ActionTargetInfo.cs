@@ -209,6 +209,8 @@ public struct ActionTargetInfo(IBaseAction action)
     /// </returns>
     public bool GeneralCheck(IBattleChara gameObject, bool skipStatusProvideCheck)
     {
+        if (gameObject == null) return false;
+
         if (!gameObject.IsTargetable) return false;
 
         if (Service.Config.RaiseType == RaiseType.PartyOnly && gameObject.IsAllianceMember() && !gameObject.IsParty())
@@ -246,6 +248,8 @@ public struct ActionTargetInfo(IBaseAction action)
     /// </returns>
     private bool CheckStatus(IGameObject gameObject, bool skipStatusProvideCheck)
     {
+        if (gameObject == null) return false;
+
         if (!action.Config.ShouldCheckStatus) return true;
 
         if (action.Setting.TargetStatusNeed != null)
@@ -321,6 +325,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// </returns>
     private bool CheckTimeToKill(IGameObject gameObject)
     {
+        if (gameObject == null) return false;
         if (gameObject is not IBattleChara b) return false;
         var time = b.GetTTK();
         return float.IsNaN(time) || time >= action.Config.TimeToKill;

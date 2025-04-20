@@ -34,7 +34,15 @@ public sealed class DRK_Default : DarkKnightRotation
     // Decision-making for emergency abilities, focusing on Blood Weapon usage.
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
+        
         return base.EmergencyAbility(nextGCD, out act);
+    }
+
+    [RotationDesc(ActionID.ShadowstridePvE)]
+    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+    {
+        if (ShadowstridePvE.CanUse(out act)) return true;
+        return base.MoveForwardAbility(nextGCD, out act);
     }
 
     // Determines healing actions based on The Blackest Night ability.
@@ -120,15 +128,8 @@ public sealed class DRK_Default : DarkKnightRotation
 
         }
 
-        if (ShadowstridePvE.CanUse(out act, skipAoeCheck: true) && !IsMoving) return true;
-
         if (SaltAndDarknessPvE.CanUse(out act)) return true;
 
-        if (InTwoMIsBurst)
-        {
-            if (ShadowstridePvE.CanUse(out act, skipAoeCheck: true) && !IsMoving) return true;
-        }
-        if (MergedStatus.HasFlag(AutoStatus.MoveForward) && MoveForwardAbility(nextGCD, out act)) return true;
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion

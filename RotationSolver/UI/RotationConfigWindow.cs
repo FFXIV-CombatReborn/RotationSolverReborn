@@ -1230,10 +1230,6 @@ public partial class RotationConfigWindow : Window
             var author = info.Author;
             if (string.IsNullOrEmpty(author)) author = "Author";
 
-            // Display relevant debugging information
-            var frameworkStyle = Service.Config.FrameworkStyle;
-            ImGui.Text($"Current FrameworkStyle: {frameworkStyle}");
-
             // Add a button to copy the WhyNotValid string to the clipboard
             if (ImGui.Button("Copy Error Message"))
             {
@@ -2754,9 +2750,13 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
         ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
         ImGui.Text($"DeathTarget: {DataCenter.DeathTarget}");
-        foreach (var tab in DataCenter.AttackedTargets)
+        ImGui.Text($"AttackedTargets: {DataCenter.AttackedTargets?.Count() ?? 0}");
+        if (DataCenter.AttackedTargets != null)
         {
-            ImGui.Text(tab.id.ToString());
+            foreach (var item in DataCenter.AttackedTargets)
+            {
+                ImGui.Text(item.id.ToString() ?? "Unknown ID");
+            }
         }
 
         // VFX info
