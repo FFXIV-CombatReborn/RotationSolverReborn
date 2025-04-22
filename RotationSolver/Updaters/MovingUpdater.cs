@@ -11,16 +11,16 @@ internal static class MovingUpdater
     internal unsafe static void UpdateCanMove(bool doNextAction)
     {
         // Special state.
-        if (Svc.Condition[ConditionFlag.OccupiedInEvent])
+        if (Svc.Condition?[ConditionFlag.OccupiedInEvent] == true)
         {
             Service.CanMove = true;
             return;
         }
 
         // Casting the action in list.
-        if (Svc.Condition[ConditionFlag.Casting] && Player.Available)
+        if (Svc.Condition?[ConditionFlag.Casting] == true && Player.Available == true)
         {
-            Service.CanMove = ActionBasicInfo.ActionsNoNeedCasting.Contains(Player.Object.CastActionId);
+            Service.CanMove = ActionBasicInfo.ActionsNoNeedCasting.Contains(Player.Object?.CastActionId ?? 0);
             return;
         }
 
@@ -28,17 +28,17 @@ internal static class MovingUpdater
         var statusList = new List<StatusID>(4);
         var actionList = new List<ActionID>(4);
 
-        if (Service.Config.PosFlameThrower)
+        if (Service.Config?.PosFlameThrower == true)
         {
             statusList.Add(StatusID.Flamethrower);
             actionList.Add(ActionID.FlameThrowerPvE);
         }
-        if (Service.Config.PosPassageOfArms)
+        if (Service.Config?.PosPassageOfArms == true)
         {
             statusList.Add(StatusID.PassageOfArms);
             actionList.Add(ActionID.PassageOfArmsPvE);
         }
-        if (Service.Config.PosImprovisation)
+        if (Service.Config?.PosImprovisation == true)
         {
             statusList.Add(StatusID.Improvisation);
             actionList.Add(ActionID.ImprovisationPvE);
@@ -63,7 +63,7 @@ internal static class MovingUpdater
         bool specialStatus = false;
         foreach (var status in statusList)
         {
-            if (Player.Object.HasStatus(true, status))
+            if (Player.Object?.HasStatus(true, status) == true)
             {
                 specialStatus = true;
                 break;

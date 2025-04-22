@@ -237,7 +237,7 @@ internal static class DataCenter
     /// <summary>
     /// Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
     /// </summary>
-    public static float NextAbilityToNextGCD => DefaultGCDRemain - Math.Min(ActionManagerHelper.GetCurrentAnimationLock(), MinAnimationLock);
+    public static float NextAbilityToNextGCD => DefaultGCDRemain - ActionManagerHelper.GetCurrentAnimationLock();
 
     /// <summary>
     /// Returns the total duration of the default GCD.
@@ -262,7 +262,7 @@ internal static class DataCenter
     /// <summary>
     /// Calculates the action ahead time based on the default GCD total and minimum animation lock.
     /// </summary>
-    public static float CalculatedActionAhead => Math.Min(DefaultGCDTotal * 0.20f, MinAnimationLock);
+    public static float CalculatedActionAhead => DefaultGCDTotal * 0.25f;
 
     /// <summary>
     /// Calculates the total GCD time for a given number of GCDs and an optional offset.
@@ -714,7 +714,7 @@ internal static class DataCenter
     internal static Queue<MacroItem> Macros { get; } = new Queue<MacroItem>();
 
     #region Action Record
-    public const float MinAnimationLock = 0.6f;
+    //public const float MinAnimationLock = 0.6f;
 
     const int QUEUECAPACITY = 32;
     private static readonly Queue<ActionRec> _actions = new(QUEUECAPACITY);

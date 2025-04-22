@@ -115,7 +115,7 @@ public sealed class SCH_Default : ScholarRotation
     [RotationDesc(ActionID.FeyIlluminationPvE, ActionID.ExpedientPvE, ActionID.SummonSeraphPvE, ActionID.ConsolationPvE, ActionID.SacredSoilPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if ((DeploymentTacticsPvE.Target.Target?.WillStatusEnd(0, false, DeploymentTacticsPvE.Setting.TargetStatusNeed ?? []) ?? false) && DeploymentTacticsPvE.CanUse(out act)) return true;
+        if (DeploymentTacticsPvE.CanUse(out act)) return true;
 
         if (SeraphismPvE.CanUse(out act)) return true;
 

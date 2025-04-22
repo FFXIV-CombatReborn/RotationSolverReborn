@@ -105,7 +105,7 @@ internal static class ActionUpdater
 
     private unsafe static void UpdateSlots()
     {
-        var actionManager = ActionManager.Instance();
+        ActionManager* actionManager = ActionManager.Instance();
         for (int i = 0; i < DataCenter.BluSlots.Length; i++)
         {
             DataCenter.BluSlots[i] = actionManager->GetActiveBlueMageActionInSlot(i);
@@ -205,28 +205,26 @@ internal static class ActionUpdater
 
     private static void UpdateMPTimer()
     {
-        var player = Player.Object;
-        if (player == null) return;
+        if (Player.Object == null) return;
 
         // Ignore if player is Black Mage
-        if (player.ClassJob.RowId != (uint)ECommons.ExcelServices.Job.BLM) return;
+        if (Player.Object.ClassJob.RowId != (uint)ECommons.ExcelServices.Job.BLM) return;
 
         // Ignore if player is Lucid Dreaming
-        if (player.HasStatus(true, StatusID.LucidDreaming)) return;
+        if (Player.Object.HasStatus(true, StatusID.LucidDreaming)) return;
 
-        if (_lastMP < player.CurrentMp)
+        if (_lastMP < Player.Object.CurrentMp)
         {
             _lastMPUpdate = DateTime.Now;
         }
-        _lastMP = player.CurrentMp;
+        _lastMP = Player.Object.CurrentMp;
     }
 
     internal unsafe static bool CanDoAction()
     {
         if (IsPlayerOccupied() || Player.Object.CurrentHp == 0) return false;
 
-        var nextAction = NextAction;
-        if (nextAction == null) return false;
+        if (NextAction == null) return false;
 
         // Skip when casting
         if (Player.Object.TotalCastTime - DataCenter.ActionAhead > 0) return false;
@@ -256,9 +254,8 @@ internal static class ActionUpdater
             return true;
         }
 
-        var actionManager = ActionManager.Instance();
-        if (actionManager->ActionQueued && NextAction != null
-            && actionManager->QueuedActionId != NextAction.AdjustedID)
+        if (ActionManager.Instance()->ActionQueued && NextAction != null
+            && ActionManager.Instance()->QueuedActionId != NextAction.AdjustedID)
         {
             return true;
         }

@@ -104,7 +104,7 @@ partial class BlackMageRotation
     public static byte SoulStackCount => Math.Max(AstralFireStacks, UmbralIceStacks);
 
     /// <summary>
-    /// A check with variable max stacks of Polyglot based on the trait level.
+    /// A check with variable max stacks of Astral Fire stacks and Umbral Ice based on the trait level.
     /// </summary>
     public static bool IsSoulStacksMaxed
     {
@@ -126,7 +126,7 @@ partial class BlackMageRotation
     }
 
     /// <summary>
-    /// A check with variable max stacks of Polyglot based on the trait level.
+    /// A check with variable max stacks of Astral Fire stacks and Umbral Ice based on the trait level.
     /// </summary>
     public static byte MaxSoulCount
     {
@@ -270,13 +270,13 @@ partial class BlackMageRotation
 
     static partial void ModifyTransposePvE(ref ActionSetting setting)
     {
-        //setting.ActionCheck = () => DataCenter.DefaultGCDRemain <= ElementTimeRaw;
+        setting.ActionCheck = () => SoulStackCount > 0;
         setting.IsFriendly = true;
     }
 
     static partial void ModifyThunderPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Thunderhead];
+        setting.ActionCheck = () => HasThunder;
         setting.TargetStatusProvide = [StatusID.Thunder];
         setting.MPOverride = () => 0;
     }
@@ -304,9 +304,13 @@ partial class BlackMageRotation
 
     static partial void ModifyThunderIiPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Thunderhead];
+        setting.ActionCheck = () => HasThunder;
         setting.TargetStatusProvide = [StatusID.ThunderIi];
         setting.MPOverride = () => 0;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 2,
+        };
     }
 
     static partial void ModifyManawardPvE(ref ActionSetting setting)
@@ -354,7 +358,7 @@ partial class BlackMageRotation
     static partial void ModifyThunderIiiPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.ThunderIii];
-        setting.StatusNeed = [StatusID.Thunderhead];
+        setting.ActionCheck = () => HasThunder;
         setting.UnlockedByQuestID = 66612;
         setting.MPOverride = () => 0;
     }
@@ -412,10 +416,10 @@ partial class BlackMageRotation
     static partial void ModifyThunderIvPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.ThunderIv];
-        setting.StatusNeed = [StatusID.Thunderhead];
+        setting.ActionCheck = () => HasThunder;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
         setting.MPOverride = () => 0;
     }
@@ -476,18 +480,18 @@ partial class BlackMageRotation
 
     static partial void ModifyHighThunderPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Thunderhead];
+        setting.ActionCheck = () => HasThunder;
         setting.TargetStatusProvide = [StatusID.HighThunder];
         setting.MPOverride = () => 0;
     }
 
     static partial void ModifyHighThunderIiPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Thunderhead];
+        setting.ActionCheck = () => HasThunder;
         setting.TargetStatusProvide = [StatusID.HighThunder_3872];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
         setting.MPOverride = () => 0;
     }

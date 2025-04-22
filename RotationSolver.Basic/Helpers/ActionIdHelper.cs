@@ -17,7 +17,10 @@ public static class ActionIdHelper
     public unsafe static bool IsCoolingDown(this ActionID actionID)
     {
         var action = actionID.GetAction();
-        return action.HasValue && IsCoolingDown(ActionHelper.GetCoolDownGroup(action.Value));
+        if (!action.HasValue) return false;
+
+        // Use IsActionOffCooldown to determine if the action is off cooldown
+        return !ActionManager.Instance()->IsActionOffCooldown(ActionType.Action, (uint)actionID);
     }
 
     /// <summary>
@@ -25,7 +28,7 @@ public static class ActionIdHelper
     /// </summary>
     /// <param name="cdGroup">The cooldown group.</param>
     /// <returns>True if the action is cooling down, otherwise false.</returns>
-    public unsafe static bool IsCoolingDown(byte cdGroup)
+    public unsafe static bool IsCoolingDownGroup(byte cdGroup)
     {
         var detail = GetCoolDownDetail(cdGroup);
         return detail != null && detail->IsActive != 0;

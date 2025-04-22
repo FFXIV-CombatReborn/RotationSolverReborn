@@ -189,6 +189,7 @@ public sealed class SAM_Default : SamuraiRotation
 
         if (!HagakurePvE.EnoughLevel && NumberOfHostilesInRange >= 3 && MidareSetsugekkaPvE.CanUse(out act)) return true;
 
+        if (NumberOfHostilesInRange >= 2 && OgiNamikiriPvE.CanUse(out act)) return true;
         if (TendoKaeshiGokenPvE.CanUse(out act)) return true;
         if (TendoGokenPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (KaeshiGokenPvE.CanUse(out act, skipComboCheck: true)) return true;

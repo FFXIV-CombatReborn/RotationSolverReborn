@@ -27,6 +27,7 @@
     <Compile Include="Duty\EmanationDefault" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Magical\BLM_Alpha.cs" />
     <None Include="Tank\GNB_Default.cs" />
   </ItemGroup>
   <ItemGroup>

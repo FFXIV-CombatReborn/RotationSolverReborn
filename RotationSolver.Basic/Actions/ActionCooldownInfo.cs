@@ -39,7 +39,7 @@ public readonly struct ActionCooldownInfo : ICooldown
     /// <summary>
     /// Gets a value indicating whether the action is cooling down.
     /// </summary>
-    public unsafe bool IsCoolingDown => ActionIdHelper.IsCoolingDown(CoolDownGroup);
+    public unsafe bool IsCoolingDown => ActionIdHelper.IsCoolingDown((ActionID)_action.Info.AdjustedID);
 
     /// <summary>
     /// Gets the remaining recast time.

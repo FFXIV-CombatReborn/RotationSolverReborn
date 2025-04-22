@@ -179,29 +179,23 @@ namespace RotationSolver.Commands
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                 }
 
-                var playerObject = Player.Object;
-                if (playerObject == null) return;
-
-                // Cache frequently accessed properties
-                var isPvP = DataCenter.Territory?.IsPvP ?? false;
-                var currentHp = playerObject.CurrentHp;
-                var playerJob = Player.Job;
+                if (Player.Object == null) return;
 
                 // Combine conditions to reduce redundant checks
                 if (Svc.Condition[ConditionFlag.LoggingOut] ||
-                    (Service.Config.AutoOffWhenDead && !isPvP && Player.Available && currentHp == 0) ||
-                    (Service.Config.AutoOffWhenDeadPvP && isPvP && Player.Available && currentHp == 0) ||
+                    (Service.Config.AutoOffWhenDead && !(DataCenter.Territory?.IsPvP ?? false) && Player.Available && Player.Object.CurrentHp == 0) ||
+                    (Service.Config.AutoOffWhenDeadPvP && (DataCenter.Territory?.IsPvP ?? false) && Player.Available && Player.Object.CurrentHp == 0) ||
                     (Service.Config.AutoOffPvPMatchEnd && Svc.Condition[ConditionFlag.PvPDisplayActive]) ||
                     (Service.Config.AutoOffCutScene && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]) ||
-                    (Service.Config.AutoOffSwitchClass && playerJob != _previousJob) ||
+                    (Service.Config.AutoOffSwitchClass && Player.Job != _previousJob) ||
                     (Service.Config.AutoOffBetweenArea && (Svc.Condition[ConditionFlag.BetweenAreas] || Svc.Condition[ConditionFlag.BetweenAreas51])) ||
                     (Service.Config.CancelStateOnCombatBeforeCountdown && Service.CountDownTime > 0.2f && DataCenter.InCombat) ||
                     (ActionUpdater.AutoCancelTime != DateTime.MinValue && DateTime.Now > ActionUpdater.AutoCancelTime) ||
                     (DataCenter.CurrentConditionValue.SwitchCancelConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false))
                 {
                     CancelState();
-                    if (playerJob != _previousJob)
-                        _previousJob = playerJob;
+                    if (Player.Job != _previousJob)
+                        _previousJob = Player.Job;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     return;
                 }
@@ -210,28 +204,13 @@ namespace RotationSolver.Commands
                 if (Service.Config.AutoOnPvPMatchStart &&
                     Svc.Condition[ConditionFlag.BetweenAreas] &&
                     Svc.Condition[ConditionFlag.BoundByDuty] &&
-                    isPvP)
+                    (DataCenter.Territory?.IsPvP ?? false))
                 {
                     DoStateCommandType(StateCommandType.Auto);
                     return;
                 }
 
-                IBattleChara? target = null;
-                try
-                {
-                    target = DataCenter.AllHostileTargets
-                        .FirstOrDefault(t => t is IBattleChara battleChara &&
-                                             battleChara != null &&
-                                             playerObject != null &&
-                                             battleChara.TargetObjectId == playerObject.GameObjectId);
-                }
-
-                catch (Exception ex)
-                {
-                    Svc.Log.Error(ex, "Error while accessing AllHostileTargets.");
-                }
-
-                if (Service.Config.StartOnAttackedBySomeone && target != null && !target.IsDummy())
+                if (Service.Config.StartOnAttackedBySomeone && DataCenter.AllHostileTargets.FirstOrDefault(t => t != null && t is IBattleChara battleChara && battleChara.TargetObjectId == Player.Object.GameObjectId) is IBattleChara target && !ObjectHelper.IsDummy(target))
                 {
                     if (!DataCenter.State)
                     {
@@ -262,15 +241,14 @@ namespace RotationSolver.Commands
                 }
 
                 // Combine manual and auto condition checks
-                var currentConditionValue = DataCenter.CurrentConditionValue;
-                if (currentConditionValue.SwitchManualConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
+                if (DataCenter.CurrentConditionValue.SwitchManualConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
                 {
                     if (!DataCenter.State)
                     {
                         DoStateCommandType(StateCommandType.Manual);
                     }
                 }
-                else if (currentConditionValue.SwitchAutoConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
+                else if (DataCenter.CurrentConditionValue.SwitchAutoConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
                 {
                     if (!DataCenter.State)
                     {

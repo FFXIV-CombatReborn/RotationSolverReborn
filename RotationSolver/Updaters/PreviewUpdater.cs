@@ -41,13 +41,16 @@ internal static class PreviewUpdater
                 return;
             }
 
-            if (!_dtrEntry.Shown) _dtrEntry.Shown = true;
+            if (_dtrEntry != null && !_dtrEntry.Shown) _dtrEntry.Shown = true;
 
-            _dtrEntry.Text = new SeString(
-                new IconPayload(icon),
-                new TextPayload(showStr)
-            );
-            _dtrEntry.OnClick = RSCommands.IncrementState;
+            if (_dtrEntry != null)
+            {
+                _dtrEntry.Text = new SeString(
+                    new IconPayload(icon),
+                    new TextPayload(showStr)
+                );
+                _dtrEntry.OnClick = RSCommands.IncrementState;
+            }
         }
         else if (_dtrEntry != null && _dtrEntry.Shown)
         {
@@ -109,7 +112,7 @@ internal static class PreviewUpdater
 
     private static unsafe void UpdateCancelCast()
     {
-        if (!Player.Object.IsCasting) return;
+        if (Player.Object == null || !Player.Object.IsCasting) return;
 
         var tarDead = Service.Config.UseStopCasting
             && Svc.Objects.SearchById(Player.Object.CastTargetObjectId) is IBattleChara b
@@ -121,18 +124,25 @@ internal static class PreviewUpdater
 
         if (_tarStopCastDelay.Delay(tarDead) || stopDueStatus)
         {
-            UIState.Instance()->Hotbar.CancelCast();
+            var uiState = UIState.Instance();
+            if (uiState != null)
+            {
+                uiState->Hotbar.CancelCast();
+            }
         }
     }
 
     private static float[] GetStatusTimes()
     {
         var statusTimes = new List<float>();
-        foreach (var status in Player.Object.StatusList)
+        if (Player.Object?.StatusList != null)
         {
-            if (OtherConfiguration.NoCastingStatus.Contains((uint)status.StatusId))
+            foreach (var status in Player.Object.StatusList)
             {
-                statusTimes.Add(status.RemainingTime);
+                if (OtherConfiguration.NoCastingStatus.Contains((uint)status.StatusId))
+                {
+                    statusTimes.Add(status.RemainingTime);
+                }
             }
         }
         return statusTimes.ToArray();
@@ -171,6 +181,7 @@ internal static class PreviewUpdater
             if (intPtr == IntPtr.Zero) continue;
             var actionBar = (AddonActionBarBase*)intPtr;
             var hotBar = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule()->Hotbars[hotBarIndex];
+
             var slotIndex = 0;
 
             foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())

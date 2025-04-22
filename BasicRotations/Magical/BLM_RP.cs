@@ -70,25 +70,33 @@ public class BLM_RP : BlackMageRotation
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        if (HighThunderIiPvE.CanUse(out act)) return true;
-        if (!HighThunderIiPvE.EnoughLevel && ThunderIvPvE.CanUse(out act)) return true;
-        if (!ThunderIvPvE.EnoughLevel && ThunderIiPvE.CanUse(out act)) return true;
+        //2 target thunder
+        if (HighThunderIiPvE.CanUse(out act)
+            && (HighThunderIiPvE.Target.Target?.WillStatusEndGCD(HighThunderIiPvE.Config.StatusGcdCount, 0, true, HighThunderIiPvE.Setting.TargetStatusProvide ?? []) ?? false)) return true;
+        if (ThunderIvPvE.CanUse(out act)
+            && (ThunderIvPvE.Target.Target?.WillStatusEndGCD(ThunderIvPvE.Config.StatusGcdCount, 0, true, ThunderIvPvE.Setting.TargetStatusNeed ?? []) ?? false)) return true;
+        if (ThunderIiPvE.CanUse(out act)
+            && (ThunderIiPvE.Target.Target?.WillStatusEndGCD(ThunderIiPvE.Config.StatusGcdCount, 0, true, ThunderIiPvE.Setting.TargetStatusNeed ?? []) ?? false)) return true;
 
-        if (HighThunderPvE.CanUse(out act)) return true;
-        if (!HighThunderPvE.EnoughLevel && ThunderIiiPvE.CanUse(out act)) return true;
-        if (!ThunderIiiPvE.EnoughLevel && ThunderPvE.CanUse(out act)) return true;
+        //1 target thunder
+        if (HighThunderPvE.CanUse(out act)
+            && (HighThunderPvE.Target.Target?.WillStatusEndGCD(HighThunderPvE.Config.StatusGcdCount, 0, true, HighThunderPvE.Setting.TargetStatusProvide ?? []) ?? false)) return true;
+        if (ThunderIiiPvE.CanUse(out act)
+            && (ThunderIiiPvE.Target.Target?.WillStatusEndGCD(ThunderIiiPvE.Config.StatusGcdCount, 0, true, ThunderIiiPvE.Setting.TargetStatusNeed ?? []) ?? false)) return true;
+        if (ThunderPvE.CanUse(out act)
+            && (ThunderPvE.Target.Target?.WillStatusEndGCD(ThunderPvE.Config.StatusGcdCount, 0, true, ThunderPvE.Setting.TargetStatusNeed ?? []) ?? false)) return true;
 
-        if (IsPolyglotStacksMaxed || PartyBurst || Player.HasStatus(true, StatusID.LeyLines))
+        if ((IsPolyglotStacksMaxed && (EnochianEndAfterGCD(0) || AmplifierPvE.Cooldown.WillHaveOneChargeGCD(0))) || PartyBurst || Player.HasStatus(true, StatusID.LeyLines))
         {
-            if (FoulPvE.CanUse(out act, usedUp: true)) return true;
-            if (XenoglossyPvE.CanUse(out act, usedUp: true)) return true;
+            if (FoulPvE.CanUse(out act, skipAoeCheck: !XenoglossyPvE.EnoughLevel)) return true;
+            if (XenoglossyPvE.CanUse(out act)) return true;
         }
 
         if (ParadoxPvE.CanUse(out act)) return true;
 
         if (NextGCDisInstant && InUmbralIce)
         {
-            if (UmbralIceStacks < 3)
+            if (IsSoulStacksMaxed)
             {
                 if (BlizzardIiiPvE.CanUse(out act)) return true;
             }
@@ -105,7 +113,7 @@ public class BLM_RP : BlackMageRotation
 
         if (DespairPvE.CanUse(out act)) return true;
 
-        if (AstralFireStacks == 3 || UmbralIceStacks == 3)
+        if (IsSoulStacksMaxed)
         {
             if (TransposePvE.CanUse(out act)) return true;
         }

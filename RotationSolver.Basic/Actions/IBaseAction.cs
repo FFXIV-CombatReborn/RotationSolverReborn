@@ -49,7 +49,11 @@ public interface IBaseAction : IAction
     /// The setting to use this action.
     /// </summary>
     ActionSetting Setting { get; set; }
-    internal ActionConfig Config { get; }
+
+    /// <summary>
+    /// The current setting for this action.
+    /// </summary>
+    public ActionConfig Config { get; }
 
     /// <summary>
     /// Can I use this action.

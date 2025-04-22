@@ -204,9 +204,8 @@ public static class StatusHelper
         try
         {
             if (HasApplyStatus(obj, statusIDs)) return float.MaxValue;
-            var times = obj.StatusTimes(isFromSelf, statusIDs);
-            if (times == null || !times.Any()) return 0;
-            return Math.Max(0, times.Min() - DataCenter.DefaultGCDRemain);
+            if (obj.StatusTimes(isFromSelf, statusIDs) == null || !obj.StatusTimes(isFromSelf, statusIDs).Any()) return 0;
+            return Math.Max(0, obj.StatusTimes(isFromSelf, statusIDs).Min() - DataCenter.DefaultGCDRemain);
         }
         catch (Exception ex)
         {
@@ -259,10 +258,9 @@ public static class StatusHelper
             return Enumerable.Empty<byte>();
         }
 
-        var statuses = obj.GetStatus(isFromSelf, statusIDs);
         var result = new List<byte>();
 
-        foreach (var status in statuses)
+        foreach (var status in obj.GetStatus(isFromSelf, statusIDs))
         {
             result.Add((byte)(status.Param == 0 ? byte.MaxValue : status.Param));
         }
