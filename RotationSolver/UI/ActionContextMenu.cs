@@ -7,10 +7,12 @@ namespace RotationSolver.UI;
 internal static class ActionContextMenu
 {
     private static IContextMenu? contextMenu;
+    private static IGameInteropProvider? interop;
 
     public static void Init()
     {
         contextMenu = Svc.ContextMenu;
+        interop = Svc.Hook;
         contextMenu.OnMenuOpened += AddActionMenu;
     }
 
@@ -19,6 +21,7 @@ internal static class ActionContextMenu
     //This is a Dalamud issue that I will need to fix and PR to them.
     private static void AddActionMenu(IMenuOpenedArgs args)
     {
+        Svc.Log.Debug($"{args}");
         var contextAction = new BaseAction((ActionID)Svc.GameGui.HoveredAction.ActionID);
         Svc.GameGui.HoveredActionChanged += (sender, e) => { contextAction = new BaseAction((ActionID)Svc.GameGui.HoveredAction.ActionID); };
         Svc.GameGui.HoveredItemChanged += (sender, e) => { Svc.GameGui.HoveredAction.ActionID = 0; };
@@ -29,13 +32,13 @@ internal static class ActionContextMenu
         }
         
         Svc.Log.Debug(
-            $"Menu attempted spawned from {contextAction.Name}/{Svc.GameGui.HoveredAction.ActionID},{Svc.GameGui.HoveredItem}, {args.AddonName}, {args.AddonPtr}, {args.AgentPtr}, {args.EventInterfaces}, {args.MenuType}, {args.Target}");
-
-        if (args.AddonName == null || !args.AddonName.Contains("ActionBar") || contextAction == null)
+            $"Menu attempted spawned from {contextAction.Name}/{Svc.GameGui.HoveredAction.ActionID},{Svc.GameGui.HoveredItem}, {args.AddonName}, {args.MenuType}, {args.Target}");
+        
+        if (args.AddonName == null || !args.AddonName.Contains("Action") || contextAction == null)
         {
             return;
         }
-        
+         
         #region Enable/Disable Action
         if (contextAction.IsEnabled)
         {
