@@ -503,12 +503,12 @@ public sealed class BRD_Default : BardRotation
             return false;
         }
 
-        if (QuickNockPvE.CanUse(out _) && SoulVoice == 100)
+        if (QuickNockPvE.CanUse(out _) && SoulVoice == 85)
         {
             return true;
         }
 
-        if (LadonsbitePvE.CanUse(out _) && SoulVoice == 100)
+        if (LadonsbitePvE.CanUse(out _) && SoulVoice == 85)
         {
             return true;
         }
@@ -523,7 +523,7 @@ public sealed class BRD_Default : BardRotation
             return false;
         }
 
-        if (SoulVoice == 100 && BattleVoicePvE.Cooldown.WillHaveOneCharge(25))
+        if (SoulVoice == 85 && BattleVoicePvE.Cooldown.WillHaveOneCharge(25))
         {
             return false;
         }
@@ -533,7 +533,7 @@ public sealed class BRD_Default : BardRotation
             return true;
         }
 
-        if (SoulVoice == 100 && HasRagingStrikes && HasBattleVoice)
+        if (SoulVoice == 85 && HasRagingStrikes && HasBattleVoice)
         {
             return true;
         }
@@ -543,7 +543,7 @@ public sealed class BRD_Default : BardRotation
             return true;
         }
 
-        if (!HasRagingStrikes && SoulVoice == 100)
+        if (!HasRagingStrikes && SoulVoice == 85)
         {
             return true;
         }
