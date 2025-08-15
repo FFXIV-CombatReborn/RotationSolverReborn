@@ -167,54 +167,7 @@ public sealed class BLM_Gamma : BlackMageRotation
     member?.StatusList?.Any(status => status.StatusId == (uint)StatusID.Medicated) == true
 ) == true;
 
-    private readonly Lazy<IBaseAction> _dummyAoe3Creator = new(() =>
-    {
-        IBaseAction action = new BaseAction((ActionID)ActionID.None, false);
-        var setting = action.Setting;
-        ModifyDummyAoe3(ref setting);
-        action.Setting = setting;
-        return action;
-    });
-
-    private readonly Lazy<IBaseAction> _dummyAoe2Creator = new(() =>
-    {
-        IBaseAction action = new BaseAction((ActionID)ActionID.None, false);
-        var setting = action.Setting;
-        ModifyDummyAoe2(ref setting);
-        action.Setting = setting;
-        return action;
-    });
-
-    private readonly Lazy<IBaseAction> _dummyAoe1Creator = new(() =>
-    {
-        IBaseAction action = new BaseAction((ActionID)ActionID.None, false);
-        var setting = action.Setting;
-        ModifyDummyAoe1(ref setting);
-        action.Setting = setting;
-        return action;
-    });
-
-    // The public properties expose the value from the lazy creators
-    public IBaseAction Aoe3Check => _dummyAoe3Creator.Value;
-    public IBaseAction Aoe2Check => _dummyAoe2Creator.Value;
-    public IBaseAction Aoe1Check => _dummyAoe1Creator.Value;
-
-    // The modification methods now use the fully qualified name or the using alias
-    // which resolves the ambiguity.
-    private static void ModifyDummyAoe3(ref ActionSetting setting)
-    {
-        setting.CreateConfig = () => new ActionConfig() { AoeCount = 3 };
-    }
-
-    private static void ModifyDummyAoe2(ref ActionSetting setting)
-    {
-        setting.CreateConfig = () => new ActionConfig() { AoeCount = 2 };
-    }
-
-    private static void ModifyDummyAoe1(ref ActionSetting setting)
-    {
-        setting.CreateConfig = () => new ActionConfig() { AoeCount = 1 };
-    }
+    
 
 
 
@@ -371,15 +324,26 @@ public sealed class BLM_Gamma : BlackMageRotation
 
 
 
+
+
     public int GetAoeCount(IBaseAction action)
     {
+        int maxAoeCount = 0;
+        if (!CustomRotation.IsManual)
+        {
+            if (AllHostileTargets != null && action.Target.Target != null) // Use action.Target.Target
+            {
+                maxAoeCount = AllHostileTargets.Count(otherTarget =>
+                    Vector3.Distance(action.Target.Target.Position, otherTarget.Position) < (action.TargetInfo.EffectRange + otherTarget.HitboxRadius));
+            }
+        }
+        else if (AllHostileTargets != null && CurrentTarget != null) // Use action.Target.Target
+        {
+            maxAoeCount = AllHostileTargets.Count(otherTarget =>
+                Vector3.Distance(CurrentTarget.Position, otherTarget.Position) < (action.TargetInfo.EffectRange + otherTarget.HitboxRadius));
+        }
 
-        if (BlizzardIiPvE.CanUse(out _))
-            return 3;
-        else if (ThunderIiPvE.CanUse(out _, skipStatusNeed: true, skipStatusProvideCheck: true))
-            return 2;
-        else return 1;
-
+        return maxAoeCount;
     }
 
     public bool shouldTranspose
@@ -415,13 +379,7 @@ public sealed class BLM_Gamma : BlackMageRotation
             {
                 if (CurrentMp < 800 && AstralSoulStacks < 6 && !WillBeAbleToFlareStarMT && !WillBeAbleToFlareStarST && (!IsParadoxActive || CurrentMp < 1600) && ManafontPvE.Cooldown.IsCoolingDown)
                 {
-                    if (!NextGCDisInstant)
-                    {
-                        if (CanMakeInstant)
-                        {
-                            return true;
-                        }
-                    }
+
                     if (NextGCDisInstant)
                     {
                         return true;
@@ -525,7 +483,18 @@ public sealed class BLM_Gamma : BlackMageRotation
                 if (SwiftcastPvE.CanUse(out act)) return true;
                 if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
             }
+            
 
+
+        }
+        if (!NextGCDisInstant && CanMakeInstant && InCombat && InAstralFire)
+        {
+            if (CurrentMp < 800 && AstralSoulStacks < 6 && !WillBeAbleToFlareStarMT && !WillBeAbleToFlareStarST && (!IsParadoxActive || CurrentMp < 1600) && ManafontPvE.Cooldown.IsCoolingDown)
+            {
+
+                if (SwiftcastPvE.CanUse(out act)) return true;
+                if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
+            }
         }
         #region Opener
         if (isInOpener)
