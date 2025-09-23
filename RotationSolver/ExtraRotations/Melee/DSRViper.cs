@@ -1,69 +1,160 @@
-namespace RotationSolver.ExtraRotations.Melee;
+namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("DSRViper by freddersly", CombatType.PvE, GameVersion = "7.31")]
-[SourceCode(Path = "main/ExtraRotations/Melee/DSRViper.cs")]
+[Rotation("Optimal", CombatType.PvE, GameVersion = "7.31")]
+[SourceCode(Path = "main/RebornRotations/Melee/VPR_Optimal.cs")]
 
-public sealed class DSRViper : ViperRotation
+public sealed class VPR_Optimal : ViperRotation
 {
     #region Config Options
 
     [RotationConfig(CombatType.PvE, Name = "Use Standard Double Reawaken burst (vs Immediate)")]
     public bool StandardDoubleReawaken { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Early Tincture timing (5s before Serpent's Ire)")]
-    public bool EarlyTincture { get; set; } = true;
-
-    [RotationConfig(CombatType.PvE, Name = "Force buff refresh before burst windows")]
-    public bool ForceBurstBuffRefresh { get; set; } = true;
-
-    [RotationConfig(CombatType.PvE, Name = "Save 50 Offerings for 2min burst windows")]
-    public bool SaveOfferingsForBurst { get; set; } = true;
-
-    [RotationConfig(CombatType.PvE, Name = "Use Uncoiled Fury for movement optimization")]
-    public bool UFMovementOptimization { get; set; } = true;
-
-    [Range(3, 10, ConfigUnitType.None, 1)]
-    [RotationConfig(CombatType.PvE, Name = "Start dual wield only combos X seconds before Serpent's Ire")]
-    public int DualWieldPrepTime { get; set; } = 10;
+    [RotationConfig(CombatType.PvE, Name = "Use Pre-pull Tincture")]
+    public bool PrePullTincture { get; set; } = true;
 
     [Range(35, 45, ConfigUnitType.None, 1)]
     [RotationConfig(CombatType.PvE, Name = "Minimum buff time for safe Reawaken usage")]
     public int MinBuffTimeForReawaken { get; set; } = 40;
     #endregion
 
-    #region Tracking Properties
-    private bool IsPoolingForBurst()
+    #region State Management
+    private enum RotationPhase
     {
-        return SaveOfferingsForBurst && SerpentsIrePvE.EnoughLevel && 
-               SerpentsIrePvE.Cooldown.RecastTimeRemainOneCharge <= DualWieldPrepTime &&
-               SerpentOffering < 100;
+        Opener,
+        FillerPhase,
+        BurstPrep,
+        StandardDoubleBurst,
+        ImmediateDoubleBurst,
+        PostBurst
+    }
+
+    private enum OpenerStep
+    {
+        Start,
+        ReavingFangs,
+        SwiftskinsStingDone,
+        SerpentsIreUsed,
+        VicewinderStarted,
+        VicewinderComboDone,
+        FirstReawakenDone,
+        OpenerComplete
+    }
+
+    private RotationPhase currentPhase = RotationPhase.Opener;
+    private OpenerStep openerStep = OpenerStep.Start;
+    private bool burstGCDBufferUsed = false;
+    private bool firstReawakenInBurst = false;
+    private DateTime lastPhaseChange = DateTime.Now;
+    private bool tinctureUsed = false;
+
+    private RotationPhase GetCurrentPhase()
+    {
+        // Reset to opener on combat start
+        if (!InCombat)
+        {
+            currentPhase = RotationPhase.Opener;
+            openerStep = OpenerStep.Start;
+            burstGCDBufferUsed = false;
+            firstReawakenInBurst = false;
+            tinctureUsed = false;
+            return currentPhase;
+        }
+
+        // Opener phase
+        if (currentPhase == RotationPhase.Opener && openerStep != OpenerStep.OpenerComplete)
+        {
+            return RotationPhase.Opener;
+        }
+
+        // Check for burst window conditions
+        if (SerpentsIrePvE.EnoughLevel)
+        {
+            // Burst prep phase - within 10s of Ire being ready
+            if (SerpentsIrePvE.Cooldown.RecastTimeRemain <= 10 && SerpentsIrePvE.Cooldown.RecastTimeRemain > 0)
+            {
+                if (currentPhase != RotationPhase.BurstPrep)
+                {
+                    currentPhase = RotationPhase.BurstPrep;
+                    lastPhaseChange = DateTime.Now;
+                }
+                return RotationPhase.BurstPrep;
+            }
+
+            // Active burst phase - Ire just used or in process
+            if (SerpentsIrePvE.Cooldown.JustUsedAfter(0) && !SerpentsIrePvE.Cooldown.JustUsedAfter(30))
+            {
+                if (HasReadyToReawaken || InReawakenCombo())
+                {
+                    if (StandardDoubleReawaken && !burstGCDBufferUsed)
+                    {
+                        currentPhase = RotationPhase.StandardDoubleBurst;
+                    }
+                    else
+                    {
+                        currentPhase = RotationPhase.ImmediateDoubleBurst;
+                    }
+                    return currentPhase;
+                }
+            }
+
+            // Post burst - within 30s after Ire, cleaning up resources
+            if (SerpentsIrePvE.Cooldown.JustUsedAfter(0) && SerpentsIrePvE.Cooldown.JustUsedAfter(30))
+            {
+                if (currentPhase != RotationPhase.PostBurst)
+                {
+                    currentPhase = RotationPhase.PostBurst;
+                    burstGCDBufferUsed = false;
+                    firstReawakenInBurst = false;
+                }
+                return RotationPhase.PostBurst;
+            }
+        }
+
+        // Default to filler
+        currentPhase = RotationPhase.FillerPhase;
+        return RotationPhase.FillerPhase;
+    }
+
+    private bool InReawakenCombo()
+    {
+        return HasReawakenedActive || FirstGenerationPvE.CanUse(out _) || 
+               SecondGenerationPvE.CanUse(out _) || ThirdGenerationPvE.CanUse(out _) || 
+               FourthGenerationPvE.CanUse(out _) || OuroborosPvE.CanUse(out _);
     }
 
     private bool IsBuffTimeSafeForReawaken()
     {
+        // More lenient in opener
+        if (currentPhase == RotationPhase.Opener)
+        {
+            return SwiftTime > 10 && HuntersTime > 10;
+        }
         return SwiftTime > MinBuffTimeForReawaken && HuntersTime > MinBuffTimeForReawaken;
-    }
-
-    private bool ShouldRefreshBuffsBeforeBurst()
-    {
-        return ForceBurstBuffRefresh && SerpentsIrePvE.Cooldown.RecastTimeRemainOneCharge <= DualWieldPrepTime &&
-               (SwiftTime <= 50 || HuntersTime <= 50);
     }
 
     public override void DisplayRotationStatus()
     {
-        ImGui.Text($"Pooling for Burst: {IsPoolingForBurst()}");
-        ImGui.Text($"Buff Time Safe: {IsBuffTimeSafeForReawaken()}");
-        ImGui.Text($"Should Refresh Buffs: {ShouldRefreshBuffsBeforeBurst()}");
-        ImGui.Text($"Standard vs Immediate: {(StandardDoubleReawaken ? "Standard" : "Immediate")}");
+        ImGui.Text($"Phase: {GetCurrentPhase()}");
+        if (currentPhase == RotationPhase.Opener)
+            ImGui.Text($"Opener Step: {openerStep}");
+        ImGui.Text($"Buff Safe: {IsBuffTimeSafeForReawaken()}");
+        ImGui.Text($"Should Pool: {ShouldPoolOfferingsForBurst()}");
+        ImGui.Text($"Ready to Reawaken: {HasReadyToReawaken}");
+    }
+
+    private bool ShouldPoolOfferingsForBurst()
+    {
+        var phase = GetCurrentPhase();
+        return phase == RotationPhase.BurstPrep && SerpentOffering < 100;
     }
     #endregion
 
-    #region Additional oGCD Logic
+    #region oGCD Logic
     [RotationDesc]
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        // Priority 1: Uncoiled Fury follow-ups - Highest Priority
+        // Priority 1: Uncoiled Fury follow-ups
         switch ((HasPoisedFang, HasPoisedBlood))
         {
             case (true, _):
@@ -93,7 +184,7 @@ public sealed class DSRViper : ViperRotation
             if (FourthLegacyPvE.CanUse(out act)) return true;
         }
 
-        // Priority 3: Single Target Dread follow-ups
+        // Priority 3: Dread follow-ups
         switch ((HasHunterVenom, HasSwiftVenom))
         {
             case (true, _):
@@ -142,9 +233,17 @@ public sealed class DSRViper : ViperRotation
         if (DeathRattlePvE.CanUse(out act))
             return true;
 
-        // Priority 6: Early Tincture timing (based on Balance guide)
-        if (EarlyTincture && NoAbilityReady && SerpentsIrePvE.EnoughLevel && 
-            SerpentsIrePvE.Cooldown.ElapsedAfter(115) && SerpentsIrePvE.Cooldown.RecastTimeRemainOneCharge <= 5 &&
+        // Priority 6: Pre-pull Tincture in opener
+        if (PrePullTincture && !tinctureUsed && currentPhase == RotationPhase.Opener && 
+            openerStep == OpenerStep.Start && UseBurstMedicine(out act))
+        {
+            tinctureUsed = true;
+            return true;
+        }
+
+        // Priority 7: Later burst window tinctures
+        if (!PrePullTincture && NoAbilityReady && SerpentsIrePvE.EnoughLevel && 
+            SerpentsIrePvE.Cooldown.ElapsedAfter(115) && SerpentsIrePvE.Cooldown.RecastTimeRemain <= 5 &&
             UseBurstMedicine(out act))
         {
             return true;
@@ -155,10 +254,23 @@ public sealed class DSRViper : ViperRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        // Use Serpent's Ire on cooldown for 2min burst alignment
-        if (IsBurst && SerpentsIrePvE.CanUse(out act))
+        var phase = GetCurrentPhase();
+        
+        // Serpent's Ire usage based on phase
+        if (SerpentsIrePvE.CanUse(out act))
         {
-            return true;
+            // FIXED: Opener uses Ire early, after 2nd GCD
+            if (phase == RotationPhase.Opener && openerStep == OpenerStep.SwiftskinsStingDone)
+            {
+                openerStep = OpenerStep.SerpentsIreUsed;
+                return true;
+            }
+            
+            // Burst phases: Use on cooldown
+            if (phase == RotationPhase.BurstPrep && IsBurst)
+            {
+                return true;
+            }
         }
 
         return base.AttackAbility(nextGCD, out act);
@@ -168,67 +280,318 @@ public sealed class DSRViper : ViperRotation
     #region GCD Logic
     protected override bool GeneralGCD(out IAction? act)
     {
-        // Priority 1: Reawaken Combo - Always highest priority
-        if (OuroborosPvE.CanUse(out act)) return true;
+        var phase = GetCurrentPhase();
+
+        // Always prioritize Reawaken combo
+        if (OuroborosPvE.CanUse(out act)) 
+        {
+            if (phase == RotationPhase.StandardDoubleBurst && !firstReawakenInBurst)
+            {
+                firstReawakenInBurst = true;
+            }
+            return true;
+        }
         if (FourthGenerationPvE.CanUse(out act)) return true;
         if (ThirdGenerationPvE.CanUse(out act)) return true;
         if (SecondGenerationPvE.CanUse(out act)) return true;
         if (FirstGenerationPvE.CanUse(out act)) return true;
 
-        // Priority 2: Reawaken usage (based on Balance guide conditions)
-        if (SerpentOffering >= 50 && IsBuffTimeSafeForReawaken() && 
-            IsBurst && ReawakenPvE.CanUse(out act, skipComboCheck: true))
+        // Phase-specific logic
+        switch (phase)
         {
-            return true;
+            case RotationPhase.Opener:
+                return HandleOpenerLogic(out act);
+                
+            case RotationPhase.BurstPrep:
+                return HandleBurstPrepLogic(out act);
+                
+            case RotationPhase.StandardDoubleBurst:
+                return HandleStandardDoubleBurstLogic(out act);
+                
+            case RotationPhase.ImmediateDoubleBurst:
+                return HandleImmediateDoubleBurstLogic(out act);
+                
+            case RotationPhase.PostBurst:
+                return HandlePostBurstLogic(out act);
+                
+            case RotationPhase.FillerPhase:
+            default:
+                return HandleFillerLogic(out act);
+        }
+    }
+
+    private bool HandleOpenerLogic(out IAction? act)
+    {
+        switch (openerStep)
+        {
+            case OpenerStep.Start:
+                // First GCD: Reaving Fangs
+                if (ReavingFangsPvE.CanUse(out act))
+                {
+                    openerStep = OpenerStep.ReavingFangs;
+                    return true;
+                }
+                break;
+
+            case OpenerStep.ReavingFangs:
+                // Second GCD: Swiftskin's Sting
+                if (SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                {
+                    openerStep = OpenerStep.SwiftskinsStingDone;
+                    return true;
+                }
+                break;
+
+            case OpenerStep.SwiftskinsStingDone:
+                // Serpent's Ire gets weaved here (handled in AttackAbility)
+                // Wait for it to be used before continuing
+                if (openerStep == OpenerStep.SerpentsIreUsed)
+                {
+                    break;
+                }
+                // If Ire hasn't been used yet, hold
+                act = null;
+                return false;
+
+            case OpenerStep.SerpentsIreUsed:
+                // Third GCD onwards: Vicewinder combo AFTER Ire
+                if (VicewinderPvE.CanUse(out act))
+                {
+                    openerStep = OpenerStep.VicewinderStarted;
+                    return true;
+                }
+                break;
+
+            case OpenerStep.VicewinderStarted:
+                // Continue Vicewinder combo
+                if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                {
+                    return true;
+                }
+                if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                {
+                    openerStep = OpenerStep.VicewinderComboDone;
+                    return true;
+                }
+                break;
+
+            case OpenerStep.VicewinderComboDone:
+                // Uncoiled Fury if available before Reawaken
+                if (RattlingCoilStacks > 0 && NoAbilityReady && 
+                    UncoiledFuryPvE.CanUse(out act, usedUp: true))
+                {
+                    return true;
+                }
+                
+                // Use Reawaken
+                if (HasReadyToReawaken && ReawakenPvE.CanUse(out act, skipComboCheck: true))
+                {
+                    openerStep = OpenerStep.FirstReawakenDone;
+                    return true;
+                }
+                
+                // If not ready for Reawaken yet, continue with normal rotation
+                break;
+
+            case OpenerStep.FirstReawakenDone:
+                // Opener complete after first Reawaken sequence finishes
+                if (!InReawakenCombo())
+                {
+                    openerStep = OpenerStep.OpenerComplete;
+                    currentPhase = RotationPhase.FillerPhase;
+                }
+                break;
         }
 
-        // Priority 3: Resource management outside pooling periods
-        if (!IsPoolingForBurst())
+        // Fallback to standard logic if opener steps don't match
+        return HandleStandardLogic(out act);
+    }
+
+    private bool HandleBurstPrepLogic(out IAction? act)
+    {
+        // Only use dual wield combos in prep phase to avoid breaking flow
+        // Spend excess resources before burst
+        if (RattlingCoilStacks == 3 && NoAbilityReady)
         {
-            // Uncoiled Fury usage for movement and overcap protection
-            if (UFMovementOptimization && !HasHostilesInRange && RattlingCoilStacks > 0 && 
-                !HasReadyToReawaken && NoAbilityReady)
+            if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+                return true;
+        }
+
+        // Use dual wield combos only
+        return HandleDualWieldComboLogic(out act);
+    }
+
+    private bool HandleStandardDoubleBurstLogic(out IAction? act)
+    {
+        // Standard: Use one GCD between Ire and first Reawaken
+        if (HasReadyToReawaken && !burstGCDBufferUsed)
+        {
+            // Use one dual wield GCD as buffer
+            if (HandleDualWieldComboLogic(out act))
             {
-                if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
-                    return true;
+                burstGCDBufferUsed = true;
+                return true;
+            }
+        }
+
+        // After buffer GCD, use first Reawaken
+        if (HasReadyToReawaken && burstGCDBufferUsed && IsBuffTimeSafeForReawaken())
+        {
+            if (ReawakenPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
+            }
+        }
+
+        // After first Reawaken completes, immediately use second
+        if (!HasReadyToReawaken && !InReawakenCombo() && firstReawakenInBurst && 
+            SerpentOffering >= 50 && IsBuffTimeSafeForReawaken())
+        {
+            if (ReawakenPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
+            }
+        }
+
+        return HandleStandardLogic(out act);
+    }
+
+    private bool HandleImmediateDoubleBurstLogic(out IAction? act)
+    {
+        // Immediate: Use Reawaken right after Ire, no buffer
+        if (HasReadyToReawaken && IsBuffTimeSafeForReawaken())
+        {
+            if (ReawakenPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
+            }
+        }
+
+        // After first Reawaken completes, immediately use second
+        if (!HasReadyToReawaken && !InReawakenCombo() && 
+            SerpentOffering >= 50 && IsBuffTimeSafeForReawaken())
+        {
+            if (ReawakenPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
+            }
+        }
+
+        return HandleStandardLogic(out act);
+    }
+
+    private bool HandlePostBurstLogic(out IAction? act)
+    {
+        // Aggressively spend Uncoiled Fury after burst
+        if (RattlingCoilStacks > 1 && NoAbilityReady)
+        {
+            if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+                return true;
+        }
+
+        // Continue with standard rotation
+        return HandleStandardLogic(out act);
+    }
+
+    private bool HandleFillerLogic(out IAction? act)
+    {
+        // Don't pool offerings in filler unless approaching burst
+        if (!ShouldPoolOfferingsForBurst())
+        {
+            // Use Reawaken at 50+ gauge if buffs are safe
+            if (SerpentOffering >= 50 && IsBuffTimeSafeForReawaken() && 
+                ReawakenPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
             }
 
-            // Overcap protection
-            if (RattlingCoilStacks == 3 && !HasReadyToReawaken && NoAbilityReady)
-            {
-                if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
-                    return true;
-            }
-
-            // Post-burst UF spending (within 30s of Serpent's Ire)
-            if (RattlingCoilStacks > 1 && SerpentsIrePvE.Cooldown.JustUsedAfter(30) && 
-                !HasReadyToReawaken && NoAbilityReady)
-            {
-                if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
-                    return true;
-            }
-
-            // Tincture window optimization - use all UF under Medicated
-            if (Player.HasStatus(true, StatusID.Medicated) && RattlingCoilStacks > 0 && 
-                !HasReadyToReawaken && NoAbilityReady)
+            // Regular Uncoiled Fury usage
+            if (RattlingCoilStacks == 3 && NoAbilityReady)
             {
                 if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
                     return true;
             }
         }
 
-        // Priority 4: AOE Dread Combo logic
-        if (PitActive)
+        return HandleStandardLogic(out act);
+    }
+
+    private bool HandleStandardLogic(out IAction? act)
+    {
+        // Standard rotation priority when not in specific phases
+
+        // Dread combos
+        if (DreadActive)
         {
             if (HasHunterAndSwift)
             {
-                // Prioritize buffs about to expire
+                if (WillSwiftEnd && SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                    return true;
+                if (WillHunterEnd && HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                    return true;
+
+                // Positional optimization
+                if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && 
+                    HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
+                    return true;
+                if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && 
+                    SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
+                    return true;
+
+                switch (HunterOrSwiftEndsFirst)
+                {
+                    case "Hunter":
+                        if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                        break;
+                    case "Swift":
+                        if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                        break;
+                    default:
+                        if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                        if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                        break;
+                }
+            }
+            else
+            {
+                if (!IsSwift && SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                    return true;
+                if (!IsHunter && HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                    return true;
+            }
+        }
+
+        // Non-Dread Coil usage
+        if (!DreadActive)
+        {
+            if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                return true;
+            if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                return true;
+        }
+
+        // Vicewinder charge management
+        if (IsSwift && VicewinderPvE.Cooldown.CurrentCharges >= 1)
+        {
+            if (VicewinderPvE.CanUse(out act, usedUp: true))
+                return true;
+        }
+
+        // AOE logic
+        if (PitActive)
+        {
+            // AOE Dread
+            if (HasHunterAndSwift)
+            {
                 if (WillSwiftEnd && SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                     return true;
                 if (WillHunterEnd && HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                     return true;
-
-                // Standard priority based on timer
+                
                 switch (HunterOrSwiftEndsFirst)
                 {
                     case "Hunter":
@@ -254,93 +617,18 @@ public sealed class DSRViper : ViperRotation
                 if (!IsHunter && HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                     return true;
             }
-        }
 
-        if (!PitActive)
-        {
-            if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
-                return true;
-            if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+            if (VicepitPvE.CanUse(out act, usedUp: true))
                 return true;
         }
 
-        // Priority 5: Single Target Dread Combo logic with positional optimization
-        if (DreadActive)
-        {
-            if (HasHunterAndSwift)
-            {
-                // Prioritize buffs about to expire
-                if (WillSwiftEnd && SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                    return true;
-                if (WillHunterEnd && HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                    return true;
+        // Dual wield combos
+        return HandleDualWieldComboLogic(out act);
+    }
 
-                // Positional optimization - prioritize hittable positionals
-                if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && 
-                    HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
-                    return true;
-                if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && 
-                    SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
-                    return true;
-
-                // Fallback to timer priority
-                switch (HunterOrSwiftEndsFirst)
-                {
-                    case "Hunter":
-                        if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                            return true;
-                        break;
-                    case "Swift":
-                        if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                            return true;
-                        break;
-                    default:
-                        if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                            return true;
-                        if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                            return true;
-                        break;
-                }
-            }
-            else
-            {
-                // Use available Coils
-                if (!IsSwift && SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                    return true;
-                if (!IsHunter && HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                    return true;
-            }
-        }
-
-        // Non-Dread Coil usage
-        if (!DreadActive)
-        {
-            if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                return true;
-            if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                return true;
-        }
-
-        // Priority 6: Vicewinder/Vicepit charge management
-        if (IsSwift)
-        {
-            // Avoid overcapping charges
-            if (VicewinderPvE.Cooldown.CurrentCharges == 2 ||
-                (VicewinderPvE.Cooldown.CurrentCharges == 1 && VicewinderPvE.Cooldown.RecastTimeRemainOneCharge < 10))
-            {
-                if (VicewinderPvE.CanUse(out act, usedUp: true))
-                    return true;
-            }
-
-            if (VicepitPvE.Cooldown.CurrentCharges == 2 ||
-                (VicepitPvE.Cooldown.CurrentCharges == 1 && VicepitPvE.Cooldown.RecastTimeRemainOneCharge < 10))
-            {
-                if (VicepitPvE.CanUse(out act, usedUp: true))
-                    return true;
-            }
-        }
-
-        // Priority 7: AOE Serpent combo finishers
+    private bool HandleDualWieldComboLogic(out IAction? act)
+    {
+        // AOE finishers
         switch ((HasGrimHunter, HasGrimSkin))
         {
             case (true, _):
@@ -359,7 +647,7 @@ public sealed class DSRViper : ViperRotation
                 break;
         }
 
-        // Priority 8: Single Target Serpent combo finishers (optimized order)
+        // ST finishers in rotation order
         switch ((HasHindstung, HasHindsbane, HasFlankstung, HasFlanksbane))
         {
             case (true, _, _, _):
@@ -379,67 +667,34 @@ public sealed class DSRViper : ViperRotation
                     return true;
                 break;
             case (false, false, false, false):
-                // Follow standard rotation order from Balance guide
-                if (HindstingStrikePvE.CanUse(out act, skipStatusProvideCheck: true))
-                    return true;
+                // Standard rotation order: Flanksting -> Hindsting -> Flanksbane -> Hindsbane
                 if (FlankstingStrikePvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
-                if (HindsbaneFangPvE.CanUse(out act, skipStatusProvideCheck: true))
+                if (HindstingStrikePvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
                 if (FlanksbaneFangPvE.CanUse(out act, skipStatusProvideCheck: true))
+                    return true;
+                if (HindsbaneFangPvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
                 break;
         }
 
-        // Priority 9: AOE Serpent combo second hits
-        if (SwiftskinsBitePvE.EnoughLevel)
-        {
-            if (HasHunterAndSwift)
-            {
-                switch (HunterOrSwiftEndsFirst)
-                {
-                    case "Hunter":
-                        if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                            return true;
-                        break;
-                    case "Swift":
-                        if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                            return true;
-                        break;
-                    default:
-                        if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                            return true;
-                        break;
-                }
-            }
-            else
-            {
-                if (!IsSwift && SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                    return true;
-                if (!IsHunter && HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                    return true;
-            }
-        }
-
-        // Priority 10: Single Target Serpent combo second hits with positional optimization
+        // Second hits
         if (SwiftskinsStingPvE.EnoughLevel)
         {
             if (HasHunterAndSwift)
             {
-                // Use specific Stings based on positional buffs (Hind/Flank)
                 if (HasHind && SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                     return true;
                 if (HasFlank && HuntersStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                     return true;
                 
-                // Fallback when no positional buffs
                 switch (HunterOrSwiftEndsFirst)
                 {
                     case "Hunter":
                         if (HuntersStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                             return true;
                         break;
-                    case "Swift":
                     default:
                         if (SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                             return true;
@@ -448,11 +703,6 @@ public sealed class DSRViper : ViperRotation
             }
             else
             {
-                // Prioritize based on available buffs
-                if (HasHind && SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                    return true;
-                if (HasFlank && HuntersStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-                    return true;
                 if (!IsSwift && SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                     return true;
                 if (!IsHunter && HuntersStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
@@ -465,7 +715,21 @@ public sealed class DSRViper : ViperRotation
                 return true;
         }
 
-        // Priority 11: Combo starters with buff optimization
+        // AOE second hits  
+        if (SwiftskinsBitePvE.EnoughLevel)
+        {
+            if (!IsSwift && SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                return true;
+            if (!IsHunter && HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                return true;
+        }
+        else
+        {
+            if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                return true;
+        }
+
+        // Combo starters
         switch ((HasSteel, HasReavers))
         {
             case (true, _):
@@ -481,34 +745,19 @@ public sealed class DSRViper : ViperRotation
                     return true;
                 break;
             case (false, false):
-                // Prefer Reaving/Steel based on upcoming burst prep
-                if (ShouldRefreshBuffsBeforeBurst())
-                {
-                    if (ReavingFangsPvE.CanUse(out act))
-                        return true;
-                    if (ReavingMawPvE.CanUse(out act))
-                        return true;
-                }
-                else
-                {
-                    if (SteelFangsPvE.CanUse(out act))
-                        return true;
-                    if (SteelMawPvE.CanUse(out act))
-                        return true;
-                }
+                if (ReavingFangsPvE.CanUse(out act))
+                    return true;
+                if (SteelFangsPvE.CanUse(out act))
+                    return true;
+                if (ReavingMawPvE.CanUse(out act))
+                    return true;
+                if (SteelMawPvE.CanUse(out act))
+                    return true;
                 break;
         }
 
-        // Priority 12: Ranged options
-        if (UFMovementOptimization && !HasHostilesInRange)
-        {
-            if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
-                return true;
-            if (WrithingSnapPvE.CanUse(out act))
-                return true;
-        }
-
-        return base.GeneralGCD(out act);
+        act = null;
+        return false;
     }
     #endregion
 }
