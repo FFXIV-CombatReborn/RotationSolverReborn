@@ -266,10 +266,10 @@ public partial class PaladinRotation
     static partial void ModifyClemencyPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67572;
-        setting.CanTarget = t =>
-        {
-            return !t.HasStatus(false, StatusHelper.TankStanceStatus);
-        };
+        //setting.CanTarget = t =>
+        //{
+        //    return !t.HasStatus(false, StatusHelper.TankStanceStatus);
+        //};
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
