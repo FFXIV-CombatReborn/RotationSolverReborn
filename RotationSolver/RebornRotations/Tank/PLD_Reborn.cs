@@ -3,7 +3,6 @@
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.35")]
 [SourceCode(Path = "main/RebornRotations/Tank/PLD_Reborn.cs")]
 
-
 public sealed class PLD_Reborn : PaladinRotation
 {
     #region Config Options
@@ -339,10 +338,9 @@ public sealed class PLD_Reborn : PaladinRotation
     [RotationDesc(ActionID.ClemencyPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        act = null;
         if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms))
         {
-            return false;
+            return base.HealSingleGCD(out act);
         }
 
         if (RequiescatHealBot && RequiescatStacks > 0 && ClemencyPvE.CanUse(out act, skipCastingCheck: true) && ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyRequi)
