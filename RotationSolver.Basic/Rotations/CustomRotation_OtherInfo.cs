@@ -828,7 +828,7 @@ public partial class CustomRotation
                 return false;
 
             // Finally, attempt to use the burst medicine
-            return rotation.UseBurstMedicine(out act);
+            return IsConditionMet() && CanUseAtTime() && rotation.UseBurstMedicine(out act);
         }
 
         /// <summary>
