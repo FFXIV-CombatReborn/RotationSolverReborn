@@ -171,9 +171,9 @@ public sealed class GNB_Reborn : GunbreakerRotation
             return base.HealSingleAbility(nextGCD, out act);
         }
 
-        if (!IsLastAbility(ActionID.AuroraPvE) && AuroraPvE.CanUse(out act, usedUp: Player.GetHealthRatio() < 0.9))
+        if (!IsLastAbility(ActionID.AuroraPvE))
         {
-            if (AuroraPvE.Target.Target.HasStatus(true, StatusID.Aurora) == false)
+            if (AuroraPvE.CanUse(out act))
             {
                 return true;
             }
