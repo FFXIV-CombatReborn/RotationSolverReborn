@@ -261,15 +261,16 @@ public readonly struct ActionBasicInfo
             return false;
         }
 
-        if (!IsQuestUnlocked())
-        {
-            PluginLog.Warning($"Do your class quests, action not unlocked: {Name}");
-            return false;
-        }
-
         // 2. Basic requirements: not disabled, enough level, enough MP
         if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP())
         {
+            return false;
+        }
+
+        if (!IsQuestUnlocked())
+        {
+            PluginLog.Warning($"Do your class quests, action not unlocked: {Name}");
+            BasicWarningHelper.AddSystemWarning($"Do your class quests, action not unlocked: {Name}");
             return false;
         }
 

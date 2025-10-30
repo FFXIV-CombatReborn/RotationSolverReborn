@@ -35,7 +35,7 @@ public static class DownloadHelper
         }
         catch (Exception ex)
         {
-            WarningHelper.AddSystemWarning($"Failed to load downloading List because: {ex.Message}");
+            BasicWarningHelper.AddSystemWarning($"Failed to load downloading List because: {ex.Message}");
 #if DEBUG
             PluginLog.Warning($"Failed to load downloading List: {ex.Message}");
 #endif

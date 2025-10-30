@@ -182,7 +182,7 @@ namespace RotationSolver.Commands
             catch (Exception ex)
             {
                 PluginLog.Warning($"Pulse Failed!: {ex.Message}");
-                WarningHelper.AddSystemWarning($"Action bar failed to pulse because: {ex.Message}");
+                BasicWarningHelper.AddSystemWarning($"Action bar failed to pulse because: {ex.Message}");
             }
             finally
             {

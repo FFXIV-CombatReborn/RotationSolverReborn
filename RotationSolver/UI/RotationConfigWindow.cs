@@ -3381,7 +3381,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Reset Action Configs: {DataCenter.ResetActionConfigs}");
         if (ImGui.Button("Add Test Warning"))
         {
-            WarningHelper.AddSystemWarning("This is a test warning.");
+            BasicWarningHelper.AddSystemWarning("This is a test warning.");
         }
     }
 
