@@ -328,7 +328,7 @@ internal static unsafe bool CanDoAction()
 
     private static void LogError(string message, Exception ex)
     {
-        WarningHelper.AddSystemWarning($"{message} because: {ex.Message}");
+        BasicWarningHelper.AddSystemWarning($"{message} because: {ex.Message}");
         PluginLog.Error($"{message} because: {ex.Message}");
     }
 }

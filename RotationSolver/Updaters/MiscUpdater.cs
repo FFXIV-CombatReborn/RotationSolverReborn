@@ -38,7 +38,7 @@ internal static class MiscUpdater
             }
             catch
             {
-                WarningHelper.AddSystemWarning("Unable to add server bar entry");
+                BasicWarningHelper.AddSystemWarning("Unable to add server bar entry");
                 return;
             }
 

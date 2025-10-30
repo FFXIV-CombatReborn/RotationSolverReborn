@@ -188,7 +188,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             if (DataCenter.Territory?.IsHighEndDuty ?? false)
             {
                 string warning = string.Format(UiString.HighEndWarning.GetDescription(), DataCenter.Territory.ContentFinderName);
-                WarningHelper.AddSystemWarning(warning);
+                BasicWarningHelper.AddSystemWarning(warning);
             }
         }
 

@@ -367,7 +367,7 @@ internal static class RotationUpdater
             }
             catch (Exception ex)
             {
-                WarningHelper.AddSystemWarning($"Failed to create the rotation: {t.Name}");
+                BasicWarningHelper.AddSystemWarning($"Failed to create the rotation: {t.Name}");
                 PluginLog.Error($"Failed to create the rotation: {t.Name}: {ex.Message}");
                 return null;
             }
