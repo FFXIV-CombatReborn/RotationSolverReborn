@@ -100,6 +100,24 @@ public class BaseItem : IBaseItem
     }
 
     /// <summary>
+    /// Gets or sets a value indicating whether this action is restricted by min HP.
+    /// </summary>
+    public bool MinHPFeature
+    {
+        get => Config.MinHPFeature;
+        set => Config.MinHPFeature = value;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public float MinHPPercent
+    {
+        get => Config.MinHPPercent;
+        set => Config.MinHPPercent = value;
+    }
+
+    /// <summary>
     /// Description about this item.
     /// </summary>
     public string Description => string.Empty;

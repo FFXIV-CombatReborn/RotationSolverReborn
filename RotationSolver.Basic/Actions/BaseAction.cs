@@ -88,6 +88,20 @@ public class BaseAction : IBaseAction
     }
 
     /// <inheritdoc/>
+    public bool MinHPFeature
+    {
+        get => Config.MinHPFeature;
+        set => Config.MinHPFeature = value;
+    }
+
+    /// <inheritdoc/>
+    public float MinHPPercent
+    {
+        get => Config.MinHPPercent;
+        set => Config.MinHPPercent = value;
+    }
+
+    /// <inheritdoc/>
     public bool EnoughLevel => Info.EnoughLevel;
 
     /// <inheritdoc/>
