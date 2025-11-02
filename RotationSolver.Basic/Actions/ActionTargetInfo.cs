@@ -90,8 +90,9 @@ public struct ActionTargetInfo(IBaseAction action)
                 var view = TargetOnScreen(target);
                 var canUse = CanUseTo(target);
                 var asCanTarget = action.Setting.CanTarget(target);
+                var MinHPPass = !action.MinHPFeature || (action.MinHPFeature && target.GetHealthRatio() > action.MinHPPercent);
 
-                if (view && canUse && asCanTarget)
+                if (view && canUse && asCanTarget && MinHPPass)
                 {
                     validTargets.Add(target);
                 }

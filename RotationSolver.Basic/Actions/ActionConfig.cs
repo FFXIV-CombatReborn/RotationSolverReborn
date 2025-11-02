@@ -100,6 +100,16 @@ public class ActionConfig()
     public bool IsOnCooldownWindow { get; set; } = true;
 
     /// <summary>
+    /// 
+    /// </summary>
+    public bool MinHPFeature { get; set; } = false;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public float MinHPPercent { get; set; } = 0.2f;
+
+    /// <summary>
     /// One-time flag to indicate the AOE-count reset has been applied.
     /// </summary>
     public bool AoeResetDone { get; set; } = false;

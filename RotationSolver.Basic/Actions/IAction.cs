@@ -26,6 +26,16 @@ public interface IAction : ITexture, IEnoughLevel
     bool IsOnCooldownWindow { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether this action is restricted by min HP.
+    /// </summary>
+    bool MinHPFeature { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    float MinHPPercent { get; set; }
+
+    /// <summary>
     /// Gets the cooldown information for this action.
     /// </summary>
     ICooldown Cooldown { get; }

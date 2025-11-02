@@ -8,6 +8,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Utility;
 using ECommons;
+using ECommons.Configuration;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
@@ -2382,6 +2383,24 @@ public partial class RotationConfigWindow : Window
                 _activeAction.IsIntercepted = isIntercepted;
             }
 
+            bool minHPFeatureSet = _activeAction.MinHPFeature;
+            if (ImGui.Checkbox($"{UiString.ConfigWindow_Actions_MinHPFeature.GetDescription()}##{_activeAction.Name}", ref minHPFeatureSet))
+            {
+                _activeAction.MinHPFeature = minHPFeatureSet;
+            }
+
+            float minHPPercentSet = _activeAction.MinHPPercent;
+            if (_activeAction.MinHPFeature == true)
+            {
+                float minHPPercentUi = Math.Clamp(_activeAction.MinHPPercent * 100f, 0f, 100f);
+                ImGui.SetNextItemWidth(Scale * 150);
+                if (ImGui.DragFloat($"{UiString.ConfigWindow_Actions_MinHPPercent.GetDescription()}##{_activeAction.Name}",
+                    ref minHPPercentUi, 0.1f, 0f, 100f, $"{minHPPercentUi:F1}{ConfigUnitType.Percent.ToSymbol()}"))
+                {
+                    _activeAction.MinHPPercent = Math.Clamp(minHPPercentUi / 100f, 0f, 1f);
+                }
+            }
+
             bool showOnCdWindow = _activeAction.IsOnCooldownWindow;
             if (ImGui.Checkbox($"{UiString.ConfigWindow_Actions_ShowOnCDWindow.GetDescription()}##{_activeAction.Name}InCooldown", ref showOnCdWindow))
             {
@@ -2474,6 +2493,7 @@ public partial class RotationConfigWindow : Window
                     ImGui.Spacing();
                     ImGui.Text("ID: " + action.Info.ID);
                     ImGui.Text("GCDSingleHeal: " + action.Config.GCDSingleHeal);
+                    ImGui.Text("MinHPPercent: " + action.MinHPPercent);
                     ImGui.Text("AdjustedID: " + Service.GetAdjustedActionId(action.Info.ID));
                     ImGui.Text($"IsQuestUnlocked: {action.Info.IsQuestUnlocked()} ({action.Action.UnlockLink.RowId})");
                     ImGui.Text("EnoughLevel: " + action.EnoughLevel);
@@ -3726,6 +3746,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"CanSee: {battleChara.CanSee()}");
             ImGui.Text($"CanBeRaised: {battleChara.CanBeRaised()}");
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
+            ImGui.Text($"HealthRatio: {battleChara.GetHealthRatio()}");
             ImGui.Spacing();
             ImGui.Text($"NamePlate Icon ID: {battleChara.GetNamePlateIcon()}");
             ImGui.Text($"Event Type: {battleChara.GetEventType()}");
