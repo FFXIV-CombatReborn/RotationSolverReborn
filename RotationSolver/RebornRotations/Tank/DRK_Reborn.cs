@@ -278,12 +278,7 @@ public sealed class DRK_Reborn : DarkKnightRotation
         }
 
         //AOE
-        if (StalwartSoulPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (UnleashPvE.CanUse(out act))
+        if (StalwartSoulPvE.CanUse(out act, skipAoeCheck: true))
         {
             return true;
         }
@@ -295,6 +290,11 @@ public sealed class DRK_Reborn : DarkKnightRotation
         }
 
         if (!HasDelirium && SyphonStrikePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (UnleashPvE.CanUse(out act))
         {
             return true;
         }
