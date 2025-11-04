@@ -211,7 +211,7 @@ public partial class CustomRotation
         var list = new List<HpPotionItem>();
         foreach (var i in items)
         {
-            if ((i.FilterGroup == 8 && i.ItemSearchCategory.RowId == 43) || i.RowId == 22306 || i.RowId == 47102)
+            if ((i.FilterGroup == 8 && i.ItemSearchCategory.RowId == 43) || i.RowId == 22306 || i.RowId == 47102 || i.RowId == 20309)
             {
                 list.Add(new HpPotionItem(i));
             }
@@ -238,7 +238,7 @@ public partial class CustomRotation
         foreach (var a in HpPotions)
         {
             bool isDeepDungeons = DataCenter.Territory?.ContentType == TerritoryContentType.DeepDungeons;
-            if (a.CanUse(out _, true) && (a.ID != 47102 || (a.ID == 47102 && isDeepDungeons)))
+            if (a.CanUse(out _, true) && (a.ID != 47102 || (a.ID == 47102 && isDeepDungeons) || (a.ID == 20309 && isDeepDungeons && !Player.HasStatus(false, StatusID.Rehabilitation_648))))
             {
                 if (best == null || a.MaxHp >= best.MaxHp)
                 {

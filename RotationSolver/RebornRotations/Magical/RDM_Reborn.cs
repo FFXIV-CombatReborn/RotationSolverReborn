@@ -248,7 +248,7 @@ public sealed class RDM_Reborn : RedMageRotation
     [RotationDesc(ActionID.VercurePvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        if (PreventRaising)
+        if (PreventHeal)
         {
             if (HasManafication || HasEmbolden || ManaStacks == 3 || CanMagickedSwordplay || CanGrandImpact
                 || ScorchPvE.CanUse(out _) || ResolutionPvE.CanUse(out _)

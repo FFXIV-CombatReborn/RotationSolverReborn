@@ -1049,6 +1049,20 @@ internal static class DataCenter
         }
         return count;
     }
+
+    public static int NumberOfPartyMembersInRangeOf(float range)
+    {
+        var targets = PartyMembers;
+        int count = 0;
+        for (int i = 0, n = targets.Count; i < n; i++)
+        {
+            if (targets[i].DistanceToPlayer() < range)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
     public static int NumberOfAllHostilesInRange => NumberOfHostilesInRange;
     public static int NumberOfAllHostilesInMaxRange => NumberOfHostilesInMaxRange;
     #endregion

@@ -1203,13 +1203,14 @@ private static readonly HashSet<uint> IsOCUndeadSet =
     }
 
     /// <summary>
-    /// Checks if the target is immune due to any special boss mechanic (Wolf, Jeuno, COD, CinderDrift, Resistance, Omega, LimitlessBlue, HanselOrGretel).
+    /// Checks if the target is immune due to any special mob/boss.
     /// </summary>
     /// <param name="battleChara">The object to check.</param>
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsEminentGriefImmune()
+        return battleChara.IsTrueHeartImmune()
+            || battleChara.IsEminentGriefImmune()
             || battleChara.IsLOTAImmune()
             || battleChara.IsMesoImmune()
             || battleChara.IsJagdDollImmune()
@@ -1225,6 +1226,29 @@ private static readonly HashSet<uint> IsOCUndeadSet =
             || battleChara.IsOmegaImmune()
             || battleChara.IsLimitlessBlue()
             || battleChara.IsHanselorGretelShielded();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsTrueHeartImmune(this IBattleChara battleChara)
+    {
+        if (DataCenter.TerritoryID == 887)
+        {
+            var TrueHeart = battleChara.NameId == 9223;
+
+            if (TrueHeart)
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsEminentGriefImmune status found");
+                }
+                return true;
+            }
+
+        }
+
+        return false;
     }
 
     /// <summary>

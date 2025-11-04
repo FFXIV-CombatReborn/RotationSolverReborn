@@ -3692,6 +3692,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Limit Break: {CustomRotation.LimitBreakLevel}");
         ImGui.Spacing();
         ImGui.Text($"Object Data");
+        ImGui.Text($"NumberOfPartyMembersInRangeOf 5m: {DataCenter.NumberOfPartyMembersInRangeOf(5)}");
         ImGui.Text($"AllTargets Count: {DataCenter.AllTargets.Count}");
         ImGui.Text($"AllHostileTargets Count: {DataCenter.AllHostileTargets.Count}");
         foreach (IBattleChara item in DataCenter.AllHostileTargets)
