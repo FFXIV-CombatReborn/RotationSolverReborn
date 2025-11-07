@@ -55,6 +55,48 @@ public partial class RotationConfigWindow : Window
     private IDalamudTextureWrap? _logoTexture;
     private DateTime _lastLogoFetchAttempt = DateTime.MinValue;
 
+    // Hints system fields
+    private static readonly string[] _usageHints =
+    [
+        "Right-click any action, setting, or toggle to view/copy its macro chat command.",
+        "Use /rsr as a shorter alias for /rotation.",
+        "Use /rotation Auto, /rotation Manual, or /rotation Off to change modes quickly.",
+        "Use the search box (top-left) to jump directly to settings.",
+        "Click the external-link icon in search results to jump to that menu.",
+        "Right-click a setting label to copy a ready-to-use /rotation Settings command.",
+        "Actions tab: click an action icon to configure, enable/disable, or set hotkeys.",
+        "Actions: toggle 'Show on CD Window' to include an action in the cooldown overlay.",
+        "Actions: enable 'Intercepted' to let RSR fire an action you queue (PvE only).",
+        "UI > Information: enable DTR status, toasts, original cooldowns, and these hints.",
+        "UI > Windows: enable Next Action, Control, Cooldown, and Timeline windows.",
+        "Next Action: 'No Inputs' and 'No Move' options change overlay behavior.",
+        "Only show windows in duty or with enemies: UI > Windows > Only show with hostile or in duty.",
+        "List tab: manage dispels, priority statuses, knockbacks, invincibility, and no-casting lists.",
+        "List tab: use 'Reset and Update' to restore curated lists quickly.",
+        "Status lists: press '+' to search by name or ID; fuzzy search is supported.",
+        "Status lists: right-click an icon to remove; Delete key works in the popup too.",
+        "Target tab: tweak target selection, vision cone, engage behavior, and dummy/boss handling.",
+        "Target tab: set /rotation Cycle behaviour and targeting delays.",
+        "Manage TargetingTypes via chat: /rotation Settings TargetingTypes add|remove <Type>.",
+        "Auto > Action Usage: allow/deny oGCDs, set AoE style, tinctures, interrupts, and True North.",
+        "Auto > Healing: adjust thresholds and non-healer healing behavior.",
+        "Healer: customize Raise/Swiftcast and prioritization in Auto > Healing.",
+        "Ground AoEs: Auto > Healing has options to place beneficial ground actions smartly.",
+        "Basic > Timer: tune Action Ahead and Min Updating Time to balance performance vs weaving.",
+        "Basic > Auto Switch: auto on/off for countdowns, deaths, area transitions, and more.",
+        "Teaching Mode highlights targets; color is in UI > Information.",
+        "Job tab: edit DNC partner, SGE Kardia tank, and AST card priorities when on those jobs.",
+        "About > Macros lists available chat/macro commands and helpful syntax.",
+        "About > Links: open config folder, GitHub, Ko-fi, and Discord.",
+        "Extra > Internal: Backup/Restore configs safely.",
+        "Extra: optional tweaks like removing animation/cooldown delay and cactbot timeline integration.",
+        "Click the cube icon at the bottom-left of the sidebar to copy diagnostic info to clipboard.",
+        "Timeline window can visualize recent actions (UI > Windows)."
+    ];
+    private int _hintIndex = 0;
+    private float _lastHintSwitch = 0f;
+    private static readonly Random _hintRng = new();
+
     public RotationConfigWindow()
     : base("###rsrConfigWindow", ImGuiWindowFlags.NoScrollbar, false)
     {
@@ -787,6 +829,43 @@ public partial class RotationConfigWindow : Window
         ImguiTooltips.HoveredTooltip(warning);
     }
 
+    private void DrawHintsBar()
+    {
+        if (!Service.Config.ShowHints)
+        {
+            return;
+        }
+
+        if (_usageHints == null || _usageHints.Length == 0)
+        {
+            return;
+        }
+
+        float now = (float)ImGui.GetTime();
+        if (now - _lastHintSwitch >= 7f)
+        {
+            _lastHintSwitch = now;
+            int next;
+            do
+            {
+                next = _hintRng.Next(_usageHints.Length);
+            } while (next == _hintIndex && _usageHints.Length > 1);
+            _hintIndex = next;
+        }
+
+        using (ImRaii.Font _ = ImRaii.PushFont(FontManager.GetFont(12)))
+        using (ImRaii.Color __ = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow)))
+        {
+            float avail = ImGui.GetContentRegionAvail().X;
+            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + avail);
+            ImGui.TextWrapped($"Tip: {_usageHints[_hintIndex]}");
+            ImGui.PopTextWrapPos();
+        }
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+    }
+
     private void DrawBody()
     {
         // Adjust cursor position
@@ -796,6 +875,12 @@ public partial class RotationConfigWindow : Window
         using ImRaii.IEndObject child = ImRaii.Child("Rotation Solver Body", -Vector2.One);
         if (child)
         {
+            // Hints bar at the top of the body (hide when search is active)
+            if (_searchResults == null || _searchResults.Length == 0)
+            {
+                DrawHintsBar();
+            }
+
             // Check if there are search results to display
             if (_searchResults != null && _searchResults.Length != 0)
             {
