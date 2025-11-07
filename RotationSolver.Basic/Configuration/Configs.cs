@@ -302,6 +302,11 @@ internal partial class Configs : IPluginConfiguration
         Filter = UiInformation)]
     private static readonly bool _showTooltips = true;
 
+    [ConditionBool, UI("Show random usage hints at top of configuration window",
+        Description = "Displays rotating tips in the main panel; updates every 7 seconds.",
+        Filter = UiInformation)]
+    private static readonly bool _showHints = true;
+
     [ConditionBool, UI("Color disabled actions on hotbars",
         Description = "When enabled, actions you have disabled in RSR will be tinted on in-game hotbars.",
         Filter = UiInformation)]
