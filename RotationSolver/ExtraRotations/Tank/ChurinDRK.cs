@@ -10,11 +10,11 @@ public sealed class ChurinDRK : DarkKnightRotation
 {
     #region Properties
     private static bool HasDisesteem => Player.HasStatus(true, StatusID.Scorn);
-    private bool InBurstWindow => DeliriumPvE.Cooldown.IsCoolingDown && !DeliriumPvE.Cooldown.ElapsedAfter(15) && (LivingShadowPvE.EnoughLevel && ShadowTime is > 0 and < 15 || !LivingShadowPvE.EnoughLevel) || HasBuffs;
-    private static bool InOddWindow(IBaseAction action) => action.Cooldown.IsCoolingDown && action.Cooldown.ElapsedAfter(30) && !action.Cooldown.ElapsedAfter(90);
-    private static bool CanFitSksGCD(float duration, int extraGCDs = 0) => WeaponRemain + ActionManager.GetAdjustedRecastTime(ActionType.Action, 3617U) * extraGCDs < duration;
+    private bool CanBurst => MergedStatus.HasFlag(AutoStatus.Burst) && LivingShadowPvE.IsEnabled;
+    private bool InBurstWindow => LivingShadowPvE.EnoughLevel && ShadowTime is > 2.5f and <= 20f || !LivingShadowPvE.EnoughLevel || HasBuffs;
+    private static bool InOddWindow(IBaseAction action) => action.Cooldown.IsCoolingDown && action.Cooldown.ElapsedAfter(30f) && !action.Cooldown.ElapsedAfter(90f);
     private static bool IsMedicated => Player.HasStatus(true, StatusID.Medicated) && !Player.WillStatusEnd(0, true, StatusID.Medicated);
-    private bool NoCombo => !SyphonStrikePvE.CanUse(out _) && !SouleaterPvE.CanUse(out _);
+    private static bool NoCombo => !IsLastGCD(ActionID.HardSlashPvE, ActionID.SyphonStrikePvE);
 
     #region Enums
     private enum MpStrategy
@@ -38,63 +38,22 @@ public sealed class ChurinDRK : DarkKnightRotation
     }
 
     #endregion
-
-
-    #region Potions
-    private enum PotionTimings
+    
+    #region Tracking Properties
+    public override void DisplayRotationStatus()
     {
-        [Description("None")] None,
-        [Description("Opener and Six Minutes")] ZeroSix,
-        [Description("Two Minutes and Eight Minutes")] TwoEight,
-        [Description("Opener, Five Minutes and Ten Minutes")] ZeroFiveTen,
+        ImGui.Text($"HasDisesteem: {HasDisesteem}");
+        ImGui.Text($"CanBurst: {CanBurst}");
+        ImGui.Text($"InBurstWindow: {InBurstWindow}");
+        ImGui.Text($"InOddWindow: {InOddWindow(LivingShadowPvE)}");
+        ImGui.Text($"IsMedicated: {IsMedicated}");
+        ImGui.Text($"NoCombo: {NoCombo}");
+        ImGui.Text($"Delirium Stacks: {DeliriumStacks}");
+        ImGui.Text($"Next Potion Time: {_churinPotions.NextPotionTime}");
+        ImGui.Text($"IsInHighEndDuty: {IsInHighEndDuty}");
     }
-    private readonly List<(int Time, bool Enabled, bool Used)> _potions = [];
-
-    private void InitializePotions()
-    {
-        _potions.Clear();
-        switch (PotionTiming, CustomPotionTiming)
-        {
-            case (PotionTimings.None, false):
-                break;
-            case (PotionTimings.ZeroSix, false):
-                _potions.Add((0, true, false));
-                _potions.Add((6, true, false));
-                break;
-            case (PotionTimings.TwoEight, false):
-                _potions.Add((2, true, false));
-                _potions.Add((8, true, false));
-                break;
-            case (PotionTimings.ZeroFiveTen, false):
-                _potions.Add((0, true, false));
-                _potions.Add((5, true, false));
-                _potions.Add((10, true, false));
-                break;
-        }
-
-        if (CustomPotionTiming)
-        {
-            if (CustomEnableFirstPotion)
-            {
-                _potions.Add((CustomFirstPotionTime, true, false));
-            }
-
-            if (CustomEnableSecondPotion)
-            {
-                _potions.Add((CustomSecondPotionTime, true, false));
-            }
-
-            if (CustomEnableThirdPotion)
-            {
-                _potions.Add((CustomThirdPotionTime, true, false));
-            }
-        }
-
-    }
-
-
-
     #endregion
+
     #endregion
 
     #region Config Options
@@ -108,40 +67,60 @@ public sealed class ChurinDRK : DarkKnightRotation
     [RotationConfig(CombatType.PvE, Name = "Use The Blackest Night on lowest HP party member during AOE scenarios")]
     private bool BlackLantern { get; set; } = false;
 
+    [RotationConfig(CombatType.PvE, Name = "Use Shadowstride in countdown")]
+    private bool Facepull { get; set; } = true;
+
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Target health threshold needed to use Blackest Night with above option")]
     private float BlackLanternRatio { get; set; } = 0.5f;
 
-    [RotationConfig(CombatType.PvE, Name = "Potion Presets")]
-    private PotionTimings PotionTiming { get; set; } = PotionTimings.None;
+    [RotationConfig(CombatType.PvE, Name = "Enable Potion Usage")]
+    private static bool PotionUsageEnabled
+    { get => _churinPotions.Enabled; set => _churinPotions.Enabled = value; }
 
-    [Range(0, 20, ConfigUnitType.Seconds, 0.5f)]
-    [RotationConfig(CombatType.PvE, Name = "Use Opener Potion at minus time in seconds")]
-    private float OpenerPotionTime { get; set; } = 1f;
+    [RotationConfig(CombatType.PvE, Name = "Potion Usage Presets", Parent = nameof(PotionUsageEnabled))]
+    private static PotionStrategy PotionUsagePresets
+    { get => _churinPotions.Strategy; set => _churinPotions.Strategy = value; }
 
-    [RotationConfig(CombatType.PvE, Name = "Use Custom Potion Timing")]
-    private bool CustomPotionTiming { get; set; } = false;
+    [Range(0, 20, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use Opener Potion at minus time in seconds", Parent = nameof(PotionUsageEnabled))]
+    private static float OpenerPotionTime { get => _churinPotions.OpenerPotionTime; set => _churinPotions.OpenerPotionTime = value; }
+    
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 1st Potion at (value in seconds - leave at 0 if using in opener)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float FirstPotionTiming
+    {
+        get => _firstPotionTiming;
+        set
+        {
+            _firstPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
 
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Enable First Potion", Parent = nameof(CustomPotionTiming))]
-    private bool CustomEnableFirstPotion { get; set; }
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 2nd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float SecondPotionTiming
+    {
+        get => _secondPotionTiming;
+        set
+        {
+            _secondPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
 
-    [Range(0, 20, ConfigUnitType.None, 1)]
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - First Potion(time in minutes)", Parent = nameof(CustomEnableFirstPotion))]
-    private int CustomFirstPotionTime { get; set; } = 0;
-
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Enable Second Potion", Parent = nameof(CustomPotionTiming))]
-    private bool CustomEnableSecondPotion { get; set; }
-
-    [Range(0, 20, ConfigUnitType.None, 1)]
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Second Potion(time in minutes)", Parent = nameof(CustomEnableSecondPotion))]
-    private int CustomSecondPotionTime { get; set; } = 0;
-
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Enable Third Potion", Parent = nameof(CustomPotionTiming))]
-    private bool CustomEnableThirdPotion { get; set; }
-
-    [Range(0, 20, ConfigUnitType.None, 1)]
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Third Potion(time in minutes)", Parent = nameof(CustomEnableThirdPotion))]
-    private int CustomThirdPotionTime { get; set; } = 0;
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 3rd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float ThirdPotionTiming
+    {
+        get => _thirdPotionTiming;
+        set
+        {
+            _thirdPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
 
     #endregion
 
@@ -150,16 +129,30 @@ public sealed class ChurinDRK : DarkKnightRotation
     // Includes logic for using Provoke, tank stances, and burst medicines.
     protected override IAction? CountDownAction(float remainTime)
     {
-        InitializePotions();
-        UpdatePotions();
-        if (remainTime <= 3 && HasTankStance && TheBlackestNightPvE.CanUse(out var act)
-            || remainTime <= 0.98 && CurrentTarget?.DistanceToPlayer() > 3 && UnmendPvE.CanUse(out act)
-            || remainTime <= 0.58 && CurrentTarget?.DistanceToPlayer() <= 3 && HardSlashPvE.CanUse(out act)
-            || remainTime <= 1 && !HasWeaved() && TryUsePotion(out act))
+        if (_churinPotions.ShouldUsePotion(this, out var potionAct))
         {
-            return act;
+            return potionAct;
         }
-
+        if (!Facepull)
+        {
+            if (remainTime <= 3f && HasTankStance && TheBlackestNightPvE.CanUse(out var act)
+                || remainTime <= 0.98f && CurrentTarget?.DistanceToPlayer() > 3f && UnmendPvE.CanUse(out act)
+                || remainTime <= 0.58f && CurrentTarget?.DistanceToPlayer() <= 3f && HardSlashPvE.CanUse(out act))
+            {
+                return act;
+            }
+        }
+        else
+        {
+            if (remainTime <= 0.7f && ShadowstridePvE.CanUse(out var act))
+            {
+                return act;
+            }
+            if (remainTime <= 0.58f && HardSlashPvE.CanUse(out act))
+            {
+                return act;
+            }
+        }
         return base.CountDownAction(remainTime);
     }
     #endregion
@@ -235,16 +228,21 @@ public sealed class ChurinDRK : DarkKnightRotation
 
         return ReprisalPvE.CanUse(out act) || base.DefenseSingleAbility(nextGCD, out act);
     }
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+    {
+        return _churinPotions.ShouldUsePotion(this, out act)
+        || TryUseLivingShadow(out act)
+        || TryUseDelirium(out act)
+        || TryUseCarveAndSpit(out act)
+        || base.EmergencyAbility(nextGCD, out act);
+    }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        return  TryUseEdgeOfShadow(out act) ||
-                TryUseLivingShadow(out act) ||
-                TryUseDelirium(out act) ||
-                TryUseSaltedEarth(out act) ||
-                TryUseShadowbringer(out act) ||
-                TryUseCarveAndSpit(out act) ||
-                base.AttackAbility(nextGCD, out act);
+        return  TryUseSaltedEarth(out act) 
+        || TryUseShadowbringer(out act) 
+        || TryUseEdgeOfShadow(out act) 
+        || base.AttackAbility(nextGCD, out act);
     }
     #endregion
 
@@ -252,23 +250,27 @@ public sealed class ChurinDRK : DarkKnightRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         return TryUseDisesteem(out act) ||
-               TryUseDeliriumCombo(out act) ||
                TryUseBlood(out act) ||
+               TryUseDeliriumCombo(out act) ||
                TryUseFiller(out act) ||
                base.GeneralGCD(out act);
     }
     #endregion
 
     #region Extra Methods
+    
     #region GCD Skills
     private bool TryUseDisesteem(out IAction? act)
     {
         act = null;
         if (!HasDisesteem) return false;
 
-        if ((LivingShadowPvE.Cooldown.ElapsedAfterGCD(3) && CurrentTarget?.DistanceToPlayer() > 3 || LivingShadowPvE.Cooldown.ElapsedAfterGCD(3) || HasBuffs) && NoCombo)
+        if (InBurstWindow)
         {
-            return DisesteemPvE.CanUse(out act);
+            if ((NoCombo && IsLastGCD(ActionID.SouleaterPvE)) || (NoCombo && HasDelirium && CurrentMp >= 9600) || DisesteemPvE.Target.Target.DistanceToPlayer() > 3f)
+            {
+                return DisesteemPvE.CanUse(out act);
+            }
         }
 
         return false;
@@ -276,17 +278,26 @@ public sealed class ChurinDRK : DarkKnightRotation
     private bool TryUseBlood(out IAction? act)
     {
         act = null;
+        if (HasDelirium || Blood < 50) return false;
+
         if (ShouldUseBlood(BloodSpendingStrategy, CurrentTarget))
         {
-            return QuietusPvE.CanUse(out act) ||
-                   BloodspillerPvE.CanUse(out act, skipComboCheck: true);
+            return BloodSpendingStrategy switch
+            {
+                BloodStrategy.Automatic => QuietusPvE.CanUse(out act) || BloodspillerPvE.CanUse(out act),
+                BloodStrategy.Asap => QuietusPvE.CanUse(out act) || BloodspillerPvE.CanUse(out act),
+                BloodStrategy.Conserve => QuietusPvE.CanUse(out act) || BloodspillerPvE.CanUse(out act),
+                BloodStrategy.OnlyBloodspiller => BloodspillerPvE.CanUse(out act),
+                BloodStrategy.OnlyQuietus => QuietusPvE.CanUse(out act),
+                _ => false
+            };
         }
         return false;
     }
     private bool TryUseDeliriumCombo(out IAction? act)
     {
         act = null;
-        if ((CurrentMp >= 9600 || !HasDelirium ) && DeliriumPvE.EnoughLevel) return false;
+        if ((CurrentMp >= 9600 || !HasDelirium) && DeliriumPvE.EnoughLevel) return false;
 
         if (!DeliriumPvE.EnoughLevel && BloodWeaponPvE.EnoughLevel)
         {
@@ -296,12 +307,22 @@ public sealed class ChurinDRK : DarkKnightRotation
             }
         }
 
-        if (HasDelirium && NoCombo)
+        if (HasDelirium)
         {
-            return ImpalementReady && ImpalementPvE.CanUse(out act) ||
-                   TorcleaverReady && TorcleaverPvE.CanUse(out act, skipComboCheck: true) ||
-                   ComeuppanceReady && ComeuppancePvE.CanUse(out act, skipComboCheck: true) ||
-                   ScarletDeliriumReady && ScarletDeliriumPvE.CanUse(out act, skipComboCheck: true);
+            if (CombatElapsedLessGCD(3) && NoCombo)
+            {
+                return ImpalementPvE.CanUse(out act) ||
+                       TorcleaverPvE.CanUse(out act, skipComboCheck: true) ||
+                       ComeuppancePvE.CanUse(out act, skipComboCheck: true) ||
+                       ScarletDeliriumPvE.CanUse(out act, skipComboCheck: true);
+            }
+            if (!CombatElapsedLessGCD(3))
+            {
+                return ImpalementPvE.CanUse(out act) ||
+                TorcleaverPvE.CanUse(out act, skipComboCheck: true) ||
+                ComeuppancePvE.CanUse(out act, skipComboCheck: true) ||
+                ScarletDeliriumPvE.CanUse(out act, skipComboCheck: true);
+            }
         }
 
         return false;
@@ -309,7 +330,7 @@ public sealed class ChurinDRK : DarkKnightRotation
     private bool TryUseFiller(out IAction? act)
     {
         act = null;
-        if (HasDelirium && NoCombo) return false;
+        if (HasDelirium && CurrentMp < 9600 && !CombatElapsedLessGCD(3)) return false;
 
         return StalwartSoulPvE.CanUse(out act) ||
                UnleashPvE.CanUse(out act) ||
@@ -320,6 +341,7 @@ public sealed class ChurinDRK : DarkKnightRotation
     }
 
     #endregion
+    
     #region oGCD Skills
     private bool TryUseEdgeOfShadow(out IAction? act)
     {
@@ -333,52 +355,110 @@ public sealed class ChurinDRK : DarkKnightRotation
     }
     private bool TryUseLivingShadow(out IAction? act)
     {
-        if (InCombat && DarkSideTime > 0)
+        act = null;
+        if (!CanBurst) return false;
+
+        if (InCombat && DarkSideTime > 0 && !CombatElapsedLessGCD(1))
         {
             return LivingShadowPvE.CanUse(out act);
         }
-        act = null;
         return false;
     }
     private bool TryUseShadowbringer(out IAction? act)
     {
-        if (HasBuffs || InBurstWindow && ShadowbringerPvE.Cooldown.CurrentCharges > 0)
+        act = null;
+        if (!ShadowbringerPvE.EnoughLevel || ShadowbringerPvE.Cooldown.CurrentCharges == 0)
         {
-            return ShadowbringerPvE.CanUse(out act, skipAoeCheck: true);
+            return false;
         }
 
+        if (InBurstWindow && ShadowbringerPvE.Cooldown.CurrentCharges == 2 && CurrentMp < 5000)
+        {
+            return ShadowbringerPvE.CanUse(out act, skipAoeCheck: true, usedUp: false);
+        }
+        if (InBurstWindow && ShadowbringerPvE.Cooldown.CurrentCharges > 0 && CurrentMp < 3000)
+        {
+            return ShadowbringerPvE.CanUse(out act, skipAoeCheck: true, usedUp: true);
+        }
         if (ShadowbringerPvE.Cooldown.CurrentCharges == 1 && ShadowbringerPvE.Cooldown.WillHaveXChargesGCD(2, 1))
         {
             return ShadowbringerPvE.CanUse(out act, usedUp: true, skipAoeCheck: true);
         }
-        act = null;
         return false;
     }
     private bool TryUseSaltedEarth(out IAction? act)
     {
-        if (HasBuffs || !CombatElapsedLessGCD(3) || InBurstWindow)
-        {
-            return IsInHighEndDuty && SaltedEarthPvE.CanUse(out act, skipAoeCheck: true) ||
-                   !IsInHighEndDuty && !IsMoving && SaltedEarthPvE.CanUse(out act, skipAoeCheck: true) ||
-                   SaltAndDarknessPvE.CanUse(out act);
-        }
         act = null;
-        return false;
+        if (!SaltedEarthPvE.EnoughLevel || !SaltedEarthPvE.IsEnabled)
+            return false;
+
+        bool hasSaltedEarth = Player.HasStatus(true, StatusID.SaltedEarth);
+        bool canUseSaltAndDarkness = SaltAndDarknessPvE.EnoughLevel && hasSaltedEarth;
+
+        if (InBurstWindow && canUseSaltAndDarkness && CurrentMp < 6000) return SaltAndDarknessPvE.CanUse(out act);
+        if (!InBurstWindow && canUseSaltAndDarkness) return SaltAndDarknessPvE.CanUse(out act);
+
+        if (InBurstWindow) return (IsInHighEndDuty || !IsMoving) && SaltedEarthPvE.CanUse(out act);
+#if DEBUG
+        if (CurrentTarget != null && ObjectHelper.IsDummy(CurrentTarget))
+        {
+            if (_churinPotions.Enabled && _churinPotions.NextPotionTime <= 90)
+            {
+                return false;
+            }
+            if (!_churinPotions.Enabled && CombatElapsedLessGCD(2))
+            {
+                return false;
+            }
+            return !CombatElapsedLessGCD(2) && SaltedEarthPvE.CanUse(out act);
+        }
+#endif
+        // Outside burst window
+        if (IsInHighEndDuty)
+        {
+            if (_churinPotions.Enabled && _churinPotions.NextPotionTime <= 60f)
+            {
+                return false;
+            }
+            if (!_churinPotions.Enabled && CombatElapsedLessGCD(2))
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (IsMoving || CombatElapsedLessGCD(3))
+            {
+                return false;
+            }
+        }
+
+        return SaltedEarthPvE.CanUse(out act);
     }
     private bool TryUseDelirium (out IAction? act)
     {
         act = null;
+        if (!BloodWeaponPvE.EnoughLevel && DeliriumPvE.EnoughLevel 
+        || !DeliriumPvE.IsEnabled 
+        || !BloodWeaponPvE.IsEnabled 
+        || !CanBurst
+        || Blood > 70)
+        {
+            return false;
+        }
+
         if (!DeliriumPvE.EnoughLevel && BloodWeaponPvE.EnoughLevel && BloodWeaponPvE.CanUse(out act))
         {
             return true;
         }
 
-        return !CombatElapsedLessGCD(3) && DeliriumPvE.CanUse(out act, skipComboCheck: true);
+        return !CombatElapsedLessGCD(1) && DeliriumPvE.CanUse(out act);
     }
     private bool TryUseCarveAndSpit(out IAction? act)
     {
         act = null;
-        if (InBurstWindow || DeliriumPvE.Cooldown.IsCoolingDown && !DeliriumPvE.Cooldown.WillHaveOneCharge(20))
+        if (InBurstWindow && CurrentMp < 9000
+        || !InBurstWindow && DeliriumPvE.Cooldown.IsCoolingDown && !DeliriumPvE.Cooldown.WillHaveOneCharge(20))
         {
             return AbyssalDrainPvE.CanUse(out act) ||
                    CarveAndSpitPvE.CanUse(out act);
@@ -388,86 +468,100 @@ public sealed class ChurinDRK : DarkKnightRotation
     }
 
     #endregion
+    
     #region Miscellaneous Methods
-    private bool TryUsePotion(out IAction? act)
+
+    #region Potions
+    private static readonly ChurinDRKPotions _churinPotions = new();
+    private float _firstPotionTiming = 0;
+    private float _secondPotionTiming = 0;
+    private float _thirdPotionTiming = 0;
+
+    /// <summary>
+    /// DRK-specific potion manager that extends base potion logic with job-specific conditions.
+    /// </summary>
+    private class ChurinDRKPotions : Potions
     {
-        act = null;
-        if (IsMedicated) return false;
-
-        for (var i = 0; i < _potions.Count; i++)
+        public float NextPotionTime
         {
-            var (time, enabled, used) = _potions[i];
-            if (!enabled || used) continue;
-
-            var potionTimeInSeconds = time * 60;
-            var isOpenerPotion = potionTimeInSeconds == 0;
-            var isEvenMinutePotion = time % 2 == 0;
-
-            bool canUse;
-            if (isOpenerPotion)
+            get
             {
-                canUse = InCombat && IsLastGCD(ActionID.UnmendPvE) && HasWeaved();
-            }
-            else
-            {
-                canUse = InCombat && CombatTime >= potionTimeInSeconds && CombatTime <= potionTimeInSeconds + 59;
-            }
+                if (!Enabled) return 0;
 
-            if (!canUse) continue;
+                float[] timings = GetTimingsArray();
+                float difference;
 
-            var condition = (isEvenMinutePotion ? InBurstWindow : InOddWindow(LivingShadowPvE)) || isOpenerPotion || InBurstWindow;
-
-            if (condition && UseBurstMedicine(out act, false))
-            {
-                _potions[i] = (time, enabled, true);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private PotionTimings _lastPotionTiming;
-    private int _lastFirst, _lastSecond, _lastThird;
-
-    private void UpdatePotions()
-    {
-        if (_lastPotionTiming != PotionTiming ||
-            _lastFirst != CustomFirstPotionTime ||
-            _lastSecond != CustomSecondPotionTime ||
-            _lastThird != CustomThirdPotionTime)
-        {
-            var oldPotions = new List<(int Time, bool Enabled, bool Used)>(_potions);
-
-            InitializePotions();
-
-            // Merge used state if in combat
-            if (InCombat)
-            {
-                for (var i = 0; i < _potions.Count; i++)
+                for (int i = 0; i < timings.Length; i++)
                 {
-                    var (time, enabled, _) = _potions[i];
-
-                    (int Time, bool Enabled, bool Used) old = default;
-                    for (var j = 0; j < oldPotions.Count; j++)
+                    if (timings[i] > 0)
                     {
-                        if (oldPotions[j].Time == time)
+                        difference = timings[i] - DataCenter.CombatTimeRaw;
+                        if (difference > 0)
                         {
-                            old = oldPotions[j];
-                            break;
+                            return difference;
                         }
                     }
+                }
+                return 0;
+            }
+        }
+        
+        public override bool IsConditionMet()
+        {
+            float[] timings = GetTimingsArray();
 
-                    if (old.Time == time)
-                        _potions[i] = (time, enabled, old.Used);
+            foreach (float timing in timings)
+            {
+                if (IsOpenerPotion(timing) && ChurinDRK.OpenerPotionTime == 0)
+                {
+                    if (WeaponElapsed > 0 && DarkSideTime <= 0)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (IsTimingValid(timing))
+                    {
+                        return true;
+                    }
                 }
             }
 
-            _lastPotionTiming = PotionTiming;
-            _lastFirst = CustomFirstPotionTime;
-            _lastSecond = CustomSecondPotionTime;
-            _lastThird = CustomThirdPotionTime;
+            return false;
+        }
+
+        protected override bool IsTimingValid(float timing)
+        {
+            if (timing > 0 && (DataCenter.CombatTimeRaw - timing) >= -5f && (DataCenter.CombatTimeRaw - timing) < 5f)
+            {
+                return IsLastGCD(ActionID.HardSlashPvE);
+            }
+
+            // Check opener timing: if it's an opener potion and countdown is within configured time
+            float countDown = Service.CountDownTime;
+            if (IsOpenerPotion(timing) && countDown > 0 && countDown <= ChurinDRK.OpenerPotionTime && ChurinDRK.OpenerPotionTime > 0)
+            {
+                return true;
+            }
+
+            if (IsOpenerPotion(timing) && ChurinDRK.OpenerPotionTime == 0 && CombatElapsedLessGCD(5))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
+
+    private void UpdateCustomTimings()
+    {
+        _churinPotions.CustomTimings = new Potions.CustomTimingsData
+        {
+            Timings = [FirstPotionTiming, SecondPotionTiming, ThirdPotionTiming]
+        };
+    }
+    #endregion
 
     private bool ShouldUseMp(MpStrategy strategy)
     {
@@ -491,12 +585,12 @@ public sealed class ChurinDRK : DarkKnightRotation
                 }
 
                 // 1m window - 2 uses expected
-                if (!DeliriumPvE.Cooldown.WillHaveOneCharge(40) && InOddWindow(LivingShadowPvE))
+                if (!DeliriumPvE.Cooldown.WillHaveOneCharge(40f) && InOddWindow(LivingShadowPvE))
                     return CurrentMp >= 6000;
 
                 // 2m window - 4 uses expected; 5 with Dark Arts
-                if (!DeliriumPvE.Cooldown.WillHaveOneCharge(40) && !InOddWindow(LivingShadowPvE))
-                    return CurrentMp >= 3000;
+                if (InBurstWindow || !DeliriumPvE.Cooldown.WillHaveOneCharge(40f) && !InOddWindow(LivingShadowPvE))
+                    return CurrentMp >= 3000 || HasDarkArts;
             }
 
             // If no Delirium, just use it whenever we have more than 3000 MP
@@ -520,13 +614,12 @@ public sealed class ChurinDRK : DarkKnightRotation
     {
         var riskingBlood = Blood >= 90;
         var minimum = (BloodspillerPvE.EnoughLevel || QuietusPvE.EnoughLevel) && (Blood >= 50 || HasDelirium);
-        var inMeleeRange = target != null && target.DistanceToPlayer() <= 3;
+        var inMeleeRange = target?.DistanceToPlayer() <= 3;
+        var combatTarget = InCombat && target != null;
+        var deliriumCooldown = DeliriumPvE.EnoughLevel && DeliriumPvE.Cooldown.IsCoolingDown && !DeliriumPvE.Cooldown.WillHaveOneCharge(40f);
 
         // Basic condition for using blood
-        var condition = InCombat && target != null && inMeleeRange && minimum &&
-                   DarkSideTime > 0 && (riskingBlood || !InOddWindow(LivingShadowPvE) ?
-                       !CanFitSksGCD(Player.StatusTime(true, StatusID.Delirium_3836), 3) ||
-                       HasBuffs : minimum);
+        var condition = combatTarget && inMeleeRange && minimum && DarkSideTime > 0 && NoCombo && (deliriumCooldown || riskingBlood || PartyBuffDuration > WeaponTotal);
 
         return strategy switch
         {
@@ -534,7 +627,7 @@ public sealed class ChurinDRK : DarkKnightRotation
             BloodStrategy.OnlyBloodspiller => condition && target!.DistanceToPlayer() <= 3,
             BloodStrategy.OnlyQuietus => condition && NumberOfAllHostilesInRange > 2,
             BloodStrategy.Asap => minimum,
-            BloodStrategy.Conserve => riskingBlood || HasDelirium && Player.StatusTime(true, StatusID.Delirium_3836) > WeaponTotal,
+            BloodStrategy.Conserve => riskingBlood || PartyBuffDuration > WeaponTotal,
             _ => false
         };
     }
@@ -566,5 +659,6 @@ public sealed class ChurinDRK : DarkKnightRotation
 
 
     #endregion
+    
     #endregion
     }

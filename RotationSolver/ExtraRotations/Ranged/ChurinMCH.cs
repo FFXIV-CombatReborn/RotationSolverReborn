@@ -12,7 +12,7 @@ public sealed class ChurinMCH: MachinistRotation
     #region Boolean Properties
     #region Potion Booleans
     private bool InTwoMinuteWindow => WildfirePvE.Cooldown.IsCoolingDown && WildfirePvE.Cooldown.WillHaveOneChargeGCD(5) &&
-                                      AirAnchorPvE.Cooldown.IsCoolingDown && AirAnchorPvE.Cooldown.WillHaveOneChargeGCD(1);
+                                       AirAnchorPvE.Cooldown.IsCoolingDown && AirAnchorPvE.Cooldown.WillHaveOneChargeGCD(1);
     private bool InOddMinuteWindow => !InTwoMinuteWindow && AirAnchorPvE.Cooldown.IsCoolingDown && AirAnchorPvE.Cooldown.WillHaveOneChargeGCD(1);
 
     #endregion
@@ -41,67 +41,21 @@ public sealed class ChurinMCH: MachinistRotation
     private const float DefaultAnimationLock = 0.6f;
     private static float LateWeaveWindow => (float)(RecastTime * 0.5f);
     #endregion
+
     #region Potion Properties
-    private enum PotionTimings
+    private readonly ChurinMCHPotions _churinPotions = new();
+
+    private float _firstPotionTiming = 0;
+    private float _secondPotionTiming = 0;
+    private float _thirdPotionTiming = 0;
+
+    private void UpdateCustomTimings()
     {
-        [Description("None")] None,
-
-        [Description("Opener and Six Minutes")]
-        ZeroSix,
-
-        [Description("Two Minutes and Eight Minutes")]
-        TwoEight,
-
-        [Description("Opener, Five Minutes and Ten Minutes")]
-        ZeroFiveTen
-    }
-
-    #region Potions
-    private readonly List<(int Time, bool Enabled, bool Used)> _potions = [];
-
-    private void InitializePotions()
-    {
-        _potions.Clear();
-        switch (PotionTiming, CustomPotionTiming)
+        _churinPotions.CustomTimings = new Potions.CustomTimingsData
         {
-            case (PotionTimings.None, false):
-                break;
-            case (PotionTimings.ZeroSix, false):
-                _potions.Add((0, true, false));
-                _potions.Add((6, true, false));
-                break;
-            case (PotionTimings.TwoEight, false):
-                _potions.Add((2, true, false));
-                _potions.Add((8, true, false));
-                break;
-            case (PotionTimings.ZeroFiveTen, false):
-                _potions.Add((0, true, false));
-                _potions.Add((5, true, false));
-                _potions.Add((10, true, false));
-                break;
-        }
-
-        if (CustomPotionTiming)
-        {
-            if (CustomEnableFirstPotion)
-            {
-                _potions.Add((CustomFirstPotionTime, true, false));
-            }
-
-            if (CustomEnableSecondPotion)
-            {
-                _potions.Add((CustomSecondPotionTime, true, false));
-            }
-
-            if (CustomEnableThirdPotion)
-            {
-                _potions.Add((CustomThirdPotionTime, true, false));
-            }
-        }
-
+            Timings = [FirstPotionTiming, SecondPotionTiming, ThirdPotionTiming]
+        };
     }
-
-    #endregion
 
     #endregion
 
@@ -117,36 +71,53 @@ public sealed class ChurinMCH: MachinistRotation
     [RotationConfig(CombatType.PvE, Name = "Only use Wildfire on Boss targets")]
     private bool WildfireBoss { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Potion Presets")]
-    private PotionTimings PotionTiming { get; set; } = PotionTimings.None;
+    [RotationConfig(CombatType.PvE, Name = "Enable Potion Usage")]
+    private bool PotionUsageEnabled
+    { get => _churinPotions.Enabled; set => _churinPotions.Enabled = value; }
 
-    [Range(0, 20, ConfigUnitType.Seconds, 0.5f)]
-    [RotationConfig(CombatType.PvE, Name = "Use Opener Potion at minus time in seconds")]
-    private float OpenerPotionTime { get; set; } = 1f;
+    [RotationConfig(CombatType.PvE, Name = "Potion Usage Presets", Parent = nameof(PotionUsageEnabled))]
+    private PotionStrategy PotionUsagePresets
+    { get => _churinPotions.Strategy; set => _churinPotions.Strategy = value; }
 
-    [RotationConfig(CombatType.PvE, Name = "Use Custom Potion Timing")]
-    private bool CustomPotionTiming { get; set; } = false;
+    [Range(0,20, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use Opener Potion at minus (value in seconds)", Parent = nameof(PotionUsageEnabled))]
+    private float OpenerPotionTime { get => _churinPotions.OpenerPotionTime; set => _churinPotions.OpenerPotionTime = value; }
 
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Enable First Potion", Parent = nameof(CustomPotionTiming))]
-    private bool CustomEnableFirstPotion { get; set; }
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 1st Potion at (value in seconds - leave at 0 if using in opener)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float FirstPotionTiming
+    {
+        get => _firstPotionTiming;
+        set
+        {
+            _firstPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
 
-    [Range(0, 20, ConfigUnitType.None, 1)]
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - First Potion(time in minutes)", Parent = nameof(CustomEnableFirstPotion))]
-    private int CustomFirstPotionTime { get; set; } = 0;
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 2nd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float SecondPotionTiming
+    {
+        get => _secondPotionTiming;
+        set
+        {
+            _secondPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
 
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Enable Second Potion", Parent = nameof(CustomPotionTiming))]
-    private bool CustomEnableSecondPotion { get; set; }
-
-    [Range(0, 20, ConfigUnitType.None, 1)]
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Second Potion(time in minutes)", Parent = nameof(CustomEnableSecondPotion))]
-    private int CustomSecondPotionTime { get; set; } = 0;
-
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Enable Third Potion", Parent = nameof(CustomPotionTiming))]
-    private bool CustomEnableThirdPotion { get; set; }
-
-    [Range(0, 20, ConfigUnitType.None, 1)]
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Third Potion(time in minutes)", Parent = nameof(CustomEnableThirdPotion))]
-    private int CustomThirdPotionTime { get; set; } = 0;
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 3rd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float ThirdPotionTiming
+    {
+        get => _thirdPotionTiming;
+        set
+        {
+            _thirdPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
 
     #endregion
 
@@ -156,9 +127,11 @@ public sealed class ChurinMCH: MachinistRotation
     protected override IAction? CountDownAction(float remainTime)
     {
         ResetQueenTracking();
-        InitializePotions();
+        if (_churinPotions.ShouldUsePotion(this, out var potionAct))
+        {
+            return potionAct;
+        }
         if (remainTime <= 5 && ReassemblePvE.CanUse(out var act, usedUp: false) ||
-            TryUsePotion(out act) ||
             remainTime <= 0.1f && AirAnchorPvE.CanUse(out act))
         {
             return act;
@@ -170,6 +143,7 @@ public sealed class ChurinMCH: MachinistRotation
 
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
+        if (_churinPotions.ShouldUsePotion(this, out act)) return true;
         if (InCombat)
         {
             UpdateQueenStep();
@@ -630,45 +604,53 @@ public sealed class ChurinMCH: MachinistRotation
     }
     #endregion
     #endregion
-    #region Potions
 
-    private bool TryUsePotion(out IAction? act)
-    {
-        act = null;
-        if (IsMedicated) return false;
-
-        for (var i = 0; i < _potions.Count; i++)
-        {
-            var (time, enabled, used) = _potions[i];
-            if (!enabled || used) continue;
-
-            var potionTimeInSeconds = time * 60;
-            var isOpenerPotion = potionTimeInSeconds == 0;
-            var isEvenMinutePotion = time % 2 == 0;
-
-            var canUse = (isOpenerPotion && Countdown.TimeRemaining <= 2) ||
-                         (!isOpenerPotion && CombatTime >= potionTimeInSeconds && CombatTime < potionTimeInSeconds + 10);
-
-            if (!canUse) continue;
-
-            var condition = (isEvenMinutePotion ? InTwoMinuteWindow : InOddMinuteWindow) || isOpenerPotion;
-
-            if (condition && UseBurstMedicine(out act, false))
-            {
-                _potions[i] = (time, enabled, true);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    #endregion
     #region Miscellaneous
 
     private static bool SetActToNull(out IAction? act)
     {
         act = null;
         return false;
+    }
+
+    /// <summary>
+    /// MCH-specific potion manager that extends base potion logic with job-specific conditions.
+    /// </summary>
+    private class ChurinMCHPotions : Potions
+    {
+        public override bool IsConditionMet()
+        {
+            var churinMCH = new ChurinMCH();
+
+            if (churinMCH.InTwoMinuteWindow)
+            {
+                return true;
+            }
+
+            if (churinMCH.InOddMinuteWindow)
+            {
+                return true;
+            }
+        
+            return false;
+        }
+
+        protected override bool IsTimingValid(float timing)
+        {
+            if (timing > 0 && DataCenter.CombatTimeRaw >= timing && DataCenter.CombatTimeRaw - timing <= TimingWindowSeconds)
+            {
+                return true;
+            }
+
+            // Check opener timing: if it's an opener potion and countdown is within configured time
+            float countDown = Service.CountDownTime;
+            if (IsOpenerPotion(timing) && countDown > 0 && countDown <= OpenerPotionTime)
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 
     #endregion

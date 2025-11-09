@@ -26,7 +26,7 @@ public partial class DarkKnightRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasDelirium => Player.HasStatus(true, StatusID.Delirium_3836);
+    public static bool HasDelirium => DeliriumStacks > 0;
 
     private static float DarkSideTimeRemainingRaw => JobGauge.DarksideTimeRemaining / 1000f;
 
