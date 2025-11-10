@@ -166,6 +166,10 @@ public partial class SageRotation
             StatusID.EukrasianDosisIii,
             StatusID.EukrasianDyskrasia
         ];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifySoteriaPvE(ref ActionSetting setting)
@@ -281,6 +285,10 @@ public partial class SageRotation
             StatusID.EukrasianDosisIii,
             StatusID.EukrasianDyskrasia
         ];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifyRhizomataPvE(ref ActionSetting setting)
@@ -330,6 +338,10 @@ public partial class SageRotation
             StatusID.EukrasianDosisIii,
             StatusID.EukrasianDyskrasia
         ];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifyDyskrasiaIiPvE(ref ActionSetting setting)

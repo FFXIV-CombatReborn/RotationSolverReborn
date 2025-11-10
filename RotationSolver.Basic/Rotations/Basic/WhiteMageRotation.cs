@@ -120,7 +120,11 @@ public partial class WhiteMageRotation
             StatusID.Aero,
             StatusID.AeroIi,
             StatusID.Dia,
-        ];
+        ]; 
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifyMedicaPvE(ref ActionSetting setting)
@@ -204,6 +208,10 @@ public partial class WhiteMageRotation
             StatusID.AeroIi,
             StatusID.Dia,
         ];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifyMedicaIiPvE(ref ActionSetting setting)
@@ -288,6 +296,10 @@ public partial class WhiteMageRotation
             StatusID.AeroIi,
             StatusID.Dia,
         ];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifyGlarePvE(ref ActionSetting setting)

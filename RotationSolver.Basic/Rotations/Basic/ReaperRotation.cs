@@ -249,6 +249,10 @@ public partial class ReaperRotation
     {
         setting.TargetStatusProvide = [StatusID.DeathsDesign];
         setting.ActionCheck = () => !HasSoulReaver;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifyHarpePvE(ref ActionSetting setting)
@@ -285,6 +289,7 @@ public partial class ReaperRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
+            IsRestrictedDOT = true,
         };
     }
 

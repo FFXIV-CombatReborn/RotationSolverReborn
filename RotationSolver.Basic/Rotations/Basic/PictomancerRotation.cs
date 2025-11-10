@@ -58,47 +58,47 @@ public partial class PictomancerRotation
     /// <summary>
     /// Is Pom Motif ready
     /// </summary>
-    public static bool isPomMotifReady => (byte)JobGauge.CreatureFlags is 32 or 0;
+    public static bool IsPomMotifReady => (byte)JobGauge.CreatureFlags is 32 or 0;
 
     /// <summary>
     /// Is Wing Motif ready
     /// </summary>
-    public static bool isWingMotifReady => (byte)JobGauge.CreatureFlags is 33 or 1;
+    public static bool IsWingMotifReady => (byte)JobGauge.CreatureFlags is 33 or 1;
 
     /// <summary>
     /// Is Claw Motif ready
     /// </summary>
-    public static bool isClawMotifReady => (byte)JobGauge.CreatureFlags is 19 or 3;
+    public static bool IsClawMotifReady => (byte)JobGauge.CreatureFlags is 19 or 3;
 
     /// <summary>
     /// Is Maw Motif ready
     /// </summary>
-    public static bool isMawMotifReady => (byte)JobGauge.CreatureFlags is 23 or 7;
+    public static bool IsMawMotifReady => (byte)JobGauge.CreatureFlags is 23 or 7;
 
     /// <summary>
     /// Is Wing ready
     /// </summary>
-    public static bool isPomMuseReady => ((byte)JobGauge.CanvasFlags & 1) == 1 || ((byte)JobGauge.CanvasFlags & 17) == 17 || ((byte)JobGauge.CanvasFlags & 33) == 33 || ((byte)JobGauge.CanvasFlags & 49) == 49;
+    public static bool IsPomMuseReady => ((byte)JobGauge.CanvasFlags & 1) == 1 || ((byte)JobGauge.CanvasFlags & 17) == 17 || ((byte)JobGauge.CanvasFlags & 33) == 33 || ((byte)JobGauge.CanvasFlags & 49) == 49;
 
     /// <summary>
     /// Is Claw ready
     /// </summary>
-    public static bool isWingMuseReady => ((byte)JobGauge.CanvasFlags & 2) == 2 || ((byte)JobGauge.CanvasFlags & 18) == 18 || ((byte)JobGauge.CanvasFlags & 34) == 34 || ((byte)JobGauge.CanvasFlags & 50) == 50;
+    public static bool IsWingMuseReady => ((byte)JobGauge.CanvasFlags & 2) == 2 || ((byte)JobGauge.CanvasFlags & 18) == 18 || ((byte)JobGauge.CanvasFlags & 34) == 34 || ((byte)JobGauge.CanvasFlags & 50) == 50;
 
     /// <summary>
     /// Is Pom ready
     /// </summary>
-    public static bool isClawMuseReady => ((byte)JobGauge.CanvasFlags & 4) == 4 || ((byte)JobGauge.CanvasFlags & 20) == 20 || ((byte)JobGauge.CanvasFlags & 36) == 36 || ((byte)JobGauge.CanvasFlags & 52) == 52;
+    public static bool IsClawMuseReady => ((byte)JobGauge.CanvasFlags & 4) == 4 || ((byte)JobGauge.CanvasFlags & 20) == 20 || ((byte)JobGauge.CanvasFlags & 36) == 36 || ((byte)JobGauge.CanvasFlags & 52) == 52;
 
     /// <summary>
     /// Is Maw ready
     /// </summary>
-    public static bool isMawMuseReady => ((byte)JobGauge.CanvasFlags & 8) == 8 || ((byte)JobGauge.CanvasFlags & 24) == 24 || ((byte)JobGauge.CanvasFlags & 40) == 40 || ((byte)JobGauge.CanvasFlags & 56) == 56;
+    public static bool IsMawMuseReady => ((byte)JobGauge.CanvasFlags & 8) == 8 || ((byte)JobGauge.CanvasFlags & 24) == 24 || ((byte)JobGauge.CanvasFlags & 40) == 40 || ((byte)JobGauge.CanvasFlags & 56) == 56;
 
     /// <summary>
     /// Is Hammer ready
     /// </summary>
-    public static bool isHammerMuseReady => ((byte)JobGauge.CanvasFlags & 16) == 16 || ((byte)JobGauge.CanvasFlags & 17) == 17 || ((byte)JobGauge.CanvasFlags & 18) == 18 || ((byte)JobGauge.CanvasFlags & 20) == 20
+    public static bool IsHammerMuseReady => ((byte)JobGauge.CanvasFlags & 16) == 16 || ((byte)JobGauge.CanvasFlags & 17) == 17 || ((byte)JobGauge.CanvasFlags & 18) == 18 || ((byte)JobGauge.CanvasFlags & 20) == 20
         || ((byte)JobGauge.CanvasFlags & 24) == 24 || ((byte)JobGauge.CanvasFlags & 48) == 48 || ((byte)JobGauge.CanvasFlags & 49) == 49
         || ((byte)JobGauge.CanvasFlags & 50) == 50 || ((byte)JobGauge.CanvasFlags & 52) == 52
         || ((byte)JobGauge.CanvasFlags & 56) == 56;
@@ -106,7 +106,7 @@ public partial class PictomancerRotation
     /// <summary>
     /// Is Starry ready
     /// </summary>
-    public static bool isStarryMuseReady => ((byte)JobGauge.CanvasFlags & 32) == 32 || ((byte)JobGauge.CanvasFlags & 33) == 33 || ((byte)JobGauge.CanvasFlags & 34) == 34 || ((byte)JobGauge.CanvasFlags & 36) == 36
+    public static bool IsStarryMuseReady => ((byte)JobGauge.CanvasFlags & 32) == 32 || ((byte)JobGauge.CanvasFlags & 33) == 33 || ((byte)JobGauge.CanvasFlags & 34) == 34 || ((byte)JobGauge.CanvasFlags & 36) == 36
         || ((byte)JobGauge.CanvasFlags & 40) == 40 || ((byte)JobGauge.CanvasFlags & 48) == 48 || ((byte)JobGauge.CanvasFlags & 49) == 49
         || ((byte)JobGauge.CanvasFlags & 50) == 50 || ((byte)JobGauge.CanvasFlags & 52) == 52
         || ((byte)JobGauge.CanvasFlags & 56) == 56;
@@ -243,17 +243,17 @@ public partial class PictomancerRotation
         ImGui.Text($"MooglePortraitReady: {MooglePortraitReady}");
         ImGui.Text($"MadeenPortraitReady: {MadeenPortraitReady}");
         ImGui.Text($"CreatureFlags: {CreatureFlags}");
-        ImGui.Text($"isPomMotifReady: {isPomMotifReady}");
-        ImGui.Text($"isWingMotifReady: {isWingMotifReady}");
-        ImGui.Text($"isClawMotifReady: {isClawMotifReady}");
-        ImGui.Text($"isMawMotifReady: {isMawMotifReady}");
+        ImGui.Text($"isPomMotifReady: {IsPomMotifReady}");
+        ImGui.Text($"isWingMotifReady: {IsWingMotifReady}");
+        ImGui.Text($"isClawMotifReady: {IsClawMotifReady}");
+        ImGui.Text($"isMawMotifReady: {IsMawMotifReady}");
         ImGui.Text($"CanvasFlags: {CanvasFlags}");
-        ImGui.Text($"isPomMuseReady: {isPomMuseReady}");
-        ImGui.Text($"isWingMuseReady: {isWingMuseReady}");
-        ImGui.Text($"isClawMuseReady: {isClawMuseReady}");
-        ImGui.Text($"isMawMuseReady: {isMawMuseReady}");
-        ImGui.Text($"isHammerMuseReady: {isHammerMuseReady}");
-        ImGui.Text($"isStarryMuseReady: {isStarryMuseReady}");
+        ImGui.Text($"isPomMuseReady: {IsPomMuseReady}");
+        ImGui.Text($"isWingMuseReady: {IsWingMuseReady}");
+        ImGui.Text($"isClawMuseReady: {IsClawMuseReady}");
+        ImGui.Text($"isMawMuseReady: {IsMawMuseReady}");
+        ImGui.Text($"isHammerMuseReady: {IsHammerMuseReady}");
+        ImGui.Text($"isStarryMuseReady: {IsStarryMuseReady}");
         ImGui.Text($"MaxStrikingMuse: {MaxStrikingMuse}");
         ImGui.Text($"Level100: {Level100}");
         ImGui.Text($"HasSubtractivePalette: {HasSubtractivePalette}");

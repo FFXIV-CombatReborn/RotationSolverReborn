@@ -102,6 +102,10 @@ public partial class ScholarRotation
     static partial void ModifyBioPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.Bio, StatusID.BioIi, StatusID.Biolysis];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifyPhysickPvE(ref ActionSetting setting)
@@ -138,6 +142,10 @@ public partial class ScholarRotation
     static partial void ModifyBioIiPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.Bio, StatusID.BioIi, StatusID.Biolysis];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifyAdloquiumPvE(ref ActionSetting setting)
@@ -302,6 +310,10 @@ public partial class ScholarRotation
     static partial void ModifyBiolysisPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.Bio, StatusID.BioIi, StatusID.Biolysis];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifyBroilIiiPvE(ref ActionSetting setting)
