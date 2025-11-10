@@ -3,7 +3,7 @@
     /// <summary>
     /// Helper class for reflection-related operations.
     /// </summary>
-internal static class ReflectionHelper
+    internal static class ReflectionHelper
     {
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<(Type type, Type ofT), PropertyInfo[]> s_staticPropsCache = new();
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, MethodInfo[]> s_methodsCache = new();
@@ -14,7 +14,7 @@ internal static class ReflectionHelper
         /// <typeparam name="T">The type of the properties to get.</typeparam>
         /// <param name="type">The type to get the properties from.</param>
         /// <returns>An array of static properties of the specified type.</returns>
-internal static PropertyInfo[] GetStaticProperties<T>(this Type? type)
+        internal static PropertyInfo[] GetStaticProperties<T>(this Type? type)
         {
             if (type == null)
             {
@@ -56,7 +56,7 @@ internal static PropertyInfo[] GetStaticProperties<T>(this Type? type)
         /// </summary>
         /// <param name="type">The type to get the methods from.</param>
         /// <returns>An enumerable of method information.</returns>
-internal static IEnumerable<MethodInfo> GetAllMethodInfo(this Type? type)
+        internal static IEnumerable<MethodInfo> GetAllMethodInfo(this Type? type)
         {
             if (type == null)
             {
@@ -81,14 +81,14 @@ internal static IEnumerable<MethodInfo> GetAllMethodInfo(this Type? type)
             IEnumerable<MethodInfo> baseMethods = type.BaseType?.GetAllMethodInfo() ?? [];
 
             // Combine filteredMethods and baseMethods without LINQ
-            List<MethodInfo> resultList = new List<MethodInfo>(filteredMethods.Count + 8);
+            List<MethodInfo> resultList = new(filteredMethods.Count + 8);
             resultList.AddRange(filteredMethods);
             foreach (var m in baseMethods)
             {
                 resultList.Add(m);
             }
 
-            MethodInfo[] result = resultList.ToArray();
+            MethodInfo[] result = [.. resultList];
             s_methodsCache[type] = result;
             return result;
         }

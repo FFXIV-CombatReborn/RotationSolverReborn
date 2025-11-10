@@ -29,4 +29,9 @@ public class ItemConfig
     /// 
     /// </summary>
     public bool IsIntercepted { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool IsRestrictedDOT { get; set; }
 }

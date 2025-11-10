@@ -63,10 +63,10 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
     {
         if (_texture == null)
         {
-            return Array.Empty<IDrawing2D>();
+            return [];
         }
 
-        List<IDrawing2D> result = new();
+        List<IDrawing2D> result = [];
 
         int hotBarIndex = 0;
         foreach (nint intPtr in EnumerateHotbarAddons())

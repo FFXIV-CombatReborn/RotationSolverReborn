@@ -32,4 +32,9 @@ public interface ITexture
     /// 
     /// </summary>
     bool IsIntercepted { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    bool IsRestrictedDOT { get; set; }
 }

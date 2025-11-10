@@ -27,6 +27,17 @@ public class ActionConfig()
         set => _isIntercepted = value;
     }
 
+    private bool _isRestrictedDOT = false;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool IsRestrictedDOT
+    {
+        get => _isRestrictedDOT;
+        set => _isRestrictedDOT = value;
+    }
+
     /// <summary>
     /// Should check the status for this action.
     /// </summary>

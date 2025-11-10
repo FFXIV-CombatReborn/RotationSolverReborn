@@ -37,15 +37,6 @@ public sealed class VPR_Reborn : ViperRotation
 
     [RotationConfig(CombatType.PvE, Name = "Restrict GCD use if Serpent's Tail, Twinblood, or Twinfang oGCDs can be used")]
     public bool AbilityPrio2 { get; set; } = true;
-
-    [RotationConfig(CombatType.PvE, Name = "Attempt to prevent regular combo from dropping (Experimental)")]
-    public bool PreserveCombo { get; set; } = false;
-
-    [RotationConfig(CombatType.PvE, Name = "Only allow switching from ST to AOE rotation if your last combo action increased gauge (Experimental)")]
-    public bool STtoAOEBetaLogic { get; set; } = false;
-
-    [RotationConfig(CombatType.PvE, Name = "Only allow switching from AOE to ST rotation if your last combo action increased gauge (Experimental)")]
-    public bool AOEtoSTBetaLogic { get; set; } = false;
     #endregion
 
     #region Tracking Properties
@@ -300,7 +291,7 @@ public sealed class VPR_Reborn : ViperRotation
         }
 
         // Check if player meets Serpents Ire requirements, then check buff timers.
-        if (((PreserveCombo && LiveComboTime > GCDTime(6)) || !PreserveCombo) && ((SerpentsIrePvE.EnoughLevel && (!SerpentsIrePvE.Cooldown.ElapsedAfter(ReawakenDelayTimer) || SerpentOffering == 100)) || !SerpentsIrePvE.EnoughLevel)
+        if (LiveComboTime > GCDTime(6) && ((SerpentsIrePvE.EnoughLevel && (!SerpentsIrePvE.Cooldown.ElapsedAfter(ReawakenDelayTimer) || SerpentOffering == 100)) || !SerpentsIrePvE.EnoughLevel)
             && SwiftTime > SwiftTimer && HuntersTime > HuntersTimer)
         {
             // If all above conditions are met, attempt to use Reawaken.
@@ -310,7 +301,7 @@ public sealed class VPR_Reborn : ViperRotation
             }
         }
 
-        if (((PreserveCombo && LiveComboTime > GCDTime(1)) || !PreserveCombo) && !WillSwiftEnd && !WillHunterEnd)
+        if (LiveComboTime > GCDTime(1) && !WillSwiftEnd && !WillHunterEnd)
         {
             // Uncoiled Fury Overcap protection
             bool isTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
@@ -410,21 +401,18 @@ public sealed class VPR_Reborn : ViperRotation
             }
         }
 
-        if ((PreserveCombo && LiveComboTime > GCDTime(3)) || !PreserveCombo)
+        if (LiveComboTime > GCDTime(3) && IsSwift)
         {
-            if (IsSwift)
+            if (VicepitPvE.Cooldown.CurrentCharges == 1 && VicepitPvE.Cooldown.RecastTimeRemainOneCharge < 10)
             {
-                if (VicepitPvE.Cooldown.CurrentCharges == 1 && VicepitPvE.Cooldown.RecastTimeRemainOneCharge < 10)
-                {
-                    if (VicepitPvE.CanUse(out act, usedUp: true))
-                    {
-                        return true;
-                    }
-                }
                 if (VicepitPvE.CanUse(out act, usedUp: true))
                 {
                     return true;
                 }
+            }
+            if (VicepitPvE.CanUse(out act, usedUp: true))
+            {
+                return true;
             }
         }
 
@@ -456,17 +444,17 @@ public sealed class VPR_Reborn : ViperRotation
                 switch (HunterOrSwiftEndsFirst)
                 {
                     case "Hunter":
-                        if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                        if (HuntersBitePvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true, skipComboCheck: true))
                             return true;
                         break;
                     case "Swift":
-                        if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                        if (SwiftskinsBitePvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true, skipComboCheck: true))
                             return true;
                         break;
                     case "Equal":
                     case null:
                     default:
-                        if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                        if (SwiftskinsBitePvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true, skipComboCheck: true))
                             return true;
                         break;
                 }
@@ -476,7 +464,7 @@ public sealed class VPR_Reborn : ViperRotation
             {
                 if (!IsHunter && !IsSwift)
                 {
-                    if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                    if (SwiftskinsBitePvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true, skipComboCheck: true))
                     {
                         return true;
                     }
@@ -484,7 +472,7 @@ public sealed class VPR_Reborn : ViperRotation
 
                 if (!IsSwift)
                 {
-                    if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                    if (SwiftskinsBitePvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true, skipComboCheck: true))
                     {
                         return true;
                     }
@@ -492,17 +480,19 @@ public sealed class VPR_Reborn : ViperRotation
 
                 if (!IsHunter)
                 {
-                    if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                    if (HuntersBitePvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true, skipComboCheck: true))
                         return true;
                 }
             }
         }
         if (!SwiftskinsBitePvE.EnoughLevel)
         {
-            if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+            if (HuntersBitePvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true, skipComboCheck: true))
                 return true;
         }
-        if (!STtoAOEBetaLogic || (STtoAOEBetaLogic && (!FlankstingStrikePvE.EnoughLevel || IsNoActionCombo() || IsLastComboAction(ActionID.FlankstingStrikePvE, ActionID.FlanksbaneFangPvE, ActionID.HindsbaneFangPvE, ActionID.HindstingStrikePvE, ActionID.JaggedMawPvE, ActionID.BloodiedMawPvE))))
+
+        // aoe 1
+        if (!FlankstingStrikePvE.EnoughLevel || IsNoActionCombo() || IsLastComboAction(ActionID.FlankstingStrikePvE, ActionID.FlanksbaneFangPvE, ActionID.HindstingStrikePvE, ActionID.HindsbaneFangPvE, ActionID.JaggedMawPvE, ActionID.BloodiedMawPvE))
         {
             switch ((HasSteel, HasReavers))
             {
@@ -626,21 +616,18 @@ public sealed class VPR_Reborn : ViperRotation
             }
         }
 
-        if ((PreserveCombo && LiveComboTime > GCDTime(3)) || !PreserveCombo)
+        if (LiveComboTime > GCDTime(3) && IsSwift)
         {
-            if (IsSwift)
+            if (VicewinderPvE.Cooldown.CurrentCharges == 1 && VicewinderPvE.Cooldown.RecastTimeRemainOneCharge < 10)
             {
-                if (VicewinderPvE.Cooldown.CurrentCharges == 1 && VicewinderPvE.Cooldown.RecastTimeRemainOneCharge < 10)
-                {
-                    if (VicewinderPvE.CanUse(out act, usedUp: true))
-                    {
-                        return true;
-                    }
-                }
                 if (VicewinderPvE.CanUse(out act, usedUp: true))
                 {
                     return true;
                 }
+            }
+            if (VicewinderPvE.CanUse(out act, usedUp: true))
+            {
+                return true;
             }
         }
 
@@ -768,7 +755,7 @@ public sealed class VPR_Reborn : ViperRotation
         }
 
         // st 1
-        if (!AOEtoSTBetaLogic || (AOEtoSTBetaLogic && (!JaggedMawPvE.EnoughLevel || IsNoActionCombo() || IsLastComboAction(ActionID.FlankstingStrikePvE, ActionID.FlanksbaneFangPvE, ActionID.HindsbaneFangPvE, ActionID.HindstingStrikePvE, ActionID.JaggedMawPvE, ActionID.BloodiedMawPvE))))
+        if (!JaggedMawPvE.EnoughLevel || IsNoActionCombo() || IsLastComboAction(ActionID.FlankstingStrikePvE, ActionID.FlanksbaneFangPvE, ActionID.HindstingStrikePvE, ActionID.HindsbaneFangPvE, ActionID.JaggedMawPvE, ActionID.BloodiedMawPvE))
         {
             switch ((HasSteel, HasReavers))
             {

@@ -75,7 +75,7 @@
         <Using Include="Dalamud.Bindings.ImGui" />
         <Using Include="Newtonsoft.Json" />
 
-        <PackageReference Include="ECommons" Version="3.0.1.23" />
+        <PackageReference Include="ECommons" Version="3.0.1.26" />
 
         <PackageReference Include="System.Drawing.Common" Version="9.0.10" />
         <ProjectReference Include="..\RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj" OutputItemType="Analyzer" ExcludeAssets="All" />

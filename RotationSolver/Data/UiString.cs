@@ -127,6 +127,9 @@ namespace RotationSolver.Data
         [Description("Allow action to be intercepted by the intercept system")]
         ConfigWindow_Actions_IsIntercepted,
 
+        [Description("Prevent this action against a curated list of mobs (ie. Jagd Dolls)")]
+        ConfigWindow_Actions_IsRestrictedDOT,
+
         [Description("Allow action to be restricted by the minimum HP feature")]
         ConfigWindow_Actions_MinHPFeature,
 

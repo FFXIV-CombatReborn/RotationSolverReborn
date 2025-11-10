@@ -6,7 +6,7 @@
 public static class IActionHelper
 {
     internal static ActionID[] MovingActions { get; } =
-    {
+    [
         ActionID.EnAvantPvE,
         //ActionID.PlungePvE,
         ActionID.RoughDividePvE,
@@ -20,10 +20,10 @@ public static class IActionHelper
         ActionID.OnslaughtPvE,
         //ActionID.SpineshatterDivePvE,
         ActionID.DragonfireDivePvE,
-    };
+    ];
     
     internal static ActionID[] HealingActions { get; } =
-    {
+    [
         // AST
         ActionID.BeneficIiPvE,
         ActionID.BeneficPvE,
@@ -57,7 +57,7 @@ public static class IActionHelper
         ActionID.PhysickPvE,
         ActionID.PhysickPvE_11192,
         ActionID.PhysickPvE_16230
-    };
+    ];
 
     /// <summary>
     /// Determines if the last GCD action matches any of the provided actions.

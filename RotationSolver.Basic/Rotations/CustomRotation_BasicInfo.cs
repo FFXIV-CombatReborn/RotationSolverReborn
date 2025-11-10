@@ -55,6 +55,9 @@ public partial class CustomRotation : ICustomRotation
     public bool IsIntercepted { get; set; }
 
     /// <inheritdoc/>
+    public bool IsRestrictedDOT { get; set; }
+
+    /// <inheritdoc/>
     public uint IconID { get; }
 
     /// <inheritdoc/>

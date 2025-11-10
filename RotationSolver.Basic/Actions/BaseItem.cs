@@ -1,6 +1,5 @@
 ﻿using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Lumina.Excel.Sheets;
 
 namespace RotationSolver.Basic.Actions;
@@ -88,6 +87,15 @@ public class BaseItem : IBaseItem
     {
         get => Config.IsIntercepted;
         set => Config.IsIntercepted = value;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool IsRestrictedDOT
+    {
+        get => Config.IsRestrictedDOT;
+        set => Config.IsRestrictedDOT = value;
     }
 
     /// <summary>

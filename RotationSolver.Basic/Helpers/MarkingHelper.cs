@@ -1,5 +1,4 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using Dalamud.Game.ClientState.Objects.SubKinds; // Added for IPlayerCharacter
 
 namespace RotationSolver.Basic.Helpers
 {
