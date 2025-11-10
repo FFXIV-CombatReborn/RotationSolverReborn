@@ -186,6 +186,10 @@ public partial class AstrologianRotation
     static partial void ModifyCombustPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = CombustStatus;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifyLightspeedPvE(ref ActionSetting setting)
@@ -345,6 +349,10 @@ public partial class AstrologianRotation
     static partial void ModifyCombustIiPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = CombustStatus;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifySynastryPvE(ref ActionSetting setting)
@@ -447,6 +455,10 @@ public partial class AstrologianRotation
     static partial void ModifyCombustIiiPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = CombustStatus;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsRestrictedDOT = true,
+        };
     }
 
     static partial void ModifyMaleficIvPvE(ref ActionSetting setting)

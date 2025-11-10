@@ -141,6 +141,7 @@ public partial class BardRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
+            IsRestrictedDOT = true,
         };
     }
 
@@ -180,6 +181,8 @@ public partial class BardRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
+            IsRestrictedDOT = true,
+
         };
     }
 
@@ -269,6 +272,7 @@ public partial class BardRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
+            IsRestrictedDOT = true,
         };
     }
 
@@ -294,6 +298,7 @@ public partial class BardRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
+            IsRestrictedDOT = true,
         };
     }
 
@@ -304,6 +309,7 @@ public partial class BardRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
+            IsRestrictedDOT = true,
         };
     }
 
