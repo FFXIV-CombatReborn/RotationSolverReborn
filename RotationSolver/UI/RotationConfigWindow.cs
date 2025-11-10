@@ -8,7 +8,6 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Utility;
 using ECommons;
-using ECommons.Configuration;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
@@ -89,9 +88,15 @@ public partial class RotationConfigWindow : Window
         "About > Macros lists available chat/macro commands and helpful syntax.",
         "About > Links: open config folder, GitHub, Ko-fi, and Discord.",
         "Extra > Internal: Backup/Restore configs safely.",
-        "Extra: optional tweaks like removing animation/cooldown delay and cactbot timeline integration.",
+        "Extra: optional tweaks like removing animation/cooldown delay.",
         "Click the cube icon at the bottom-left of the sidebar to copy diagnostic info to clipboard.",
-        "Timeline window can visualize recent actions (UI > Windows)."
+        "Timeline window can visualize recent actions (UI > Windows).",
+        "Do damage, don't die",
+        "Healing Tip: the only HP that matters is the last one",
+        "Be kind",
+        "The icons for Combat Reborn were made by a player named Altan",
+        "Tip: you can remove some self-buffs with “/statusoff <Name>” (e.g., Peloton) when needed.",
+        "Tip: RSR works best with Legacy Type movement settings."
     ];
     private int _hintIndex = 0;
     private float _lastHintSwitch = 0f;
@@ -2472,6 +2477,12 @@ public partial class RotationConfigWindow : Window
             if (ImGui.Checkbox($"{UiString.ConfigWindow_Actions_MinHPFeature.GetDescription()}##{_activeAction.Name}", ref minHPFeatureSet))
             {
                 _activeAction.MinHPFeature = minHPFeatureSet;
+            }
+
+            bool isRestrictedDOT = _activeAction.IsRestrictedDOT;
+            if (ImGui.Checkbox($"{UiString.ConfigWindow_Actions_IsRestrictedDOT.GetDescription()}##{_activeAction.Name}", ref isRestrictedDOT))
+            {
+                _activeAction.IsRestrictedDOT = isRestrictedDOT;
             }
 
             float minHPPercentSet = _activeAction.MinHPPercent;

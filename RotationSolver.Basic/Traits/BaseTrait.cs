@@ -46,6 +46,11 @@ public class BaseTrait : IBaseTrait
     public bool IsIntercepted { get; set; }
 
     /// <summary>
+    /// 
+    /// </summary>
+    public bool IsRestrictedDOT { get; set; }
+
+    /// <summary>
     /// Gets the ID of this trait.
     /// </summary>
     public uint ID { get; }

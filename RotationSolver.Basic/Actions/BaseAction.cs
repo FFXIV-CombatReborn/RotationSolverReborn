@@ -80,6 +80,15 @@ public class BaseAction : IBaseAction
         set => Config.IsIntercepted = value;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool IsRestrictedDOT
+    {
+        get => Config.IsRestrictedDOT;
+        set => Config.IsRestrictedDOT = value;
+    }
+
     /// <inheritdoc/>
     public bool IsOnCooldownWindow
     {

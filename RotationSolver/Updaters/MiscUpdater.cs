@@ -231,6 +231,16 @@ internal static class MiscUpdater
             {
                 return false;
             }
+
+            if (hot.Value.OriginalApparentSlotType == RaptureHotbarModule.HotbarSlotType.Macro)
+            {
+                return false;
+            }
+
+            if (hot.Value.ApparentSlotType == RaptureHotbarModule.HotbarSlotType.Macro)
+            {
+                return false;
+            }
         }
 
         return Service.GetAdjustedActionId((uint)slot.ActionId) == actionID;

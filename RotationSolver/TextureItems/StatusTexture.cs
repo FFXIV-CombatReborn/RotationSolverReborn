@@ -37,6 +37,11 @@ internal class StatusTexture(Status status) : ITexture
     public bool IsIntercepted { get; set; } = true;
 
     /// <summary>
+    /// 
+    /// </summary>
+    public bool IsRestrictedDOT { get; set; } = false;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="StatusTexture"/> class with the specified status ID.
     /// </summary>
     /// <param name="id">The ID of the status.</param>

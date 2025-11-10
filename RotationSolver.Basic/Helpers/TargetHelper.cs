@@ -11,7 +11,7 @@ namespace RotationSolver.Basic.Helpers
     /// </summary>
     public static class TargetHelper
     {
-        private static readonly HashSet<long> s_emptyStopTargets = new();
+        private static readonly HashSet<long> s_emptyStopTargets = [];
 
         /// <summary>
         /// Retrieves a collection of valid battle characters that can be targeted based on the specified criteria.

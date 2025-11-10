@@ -9,7 +9,7 @@ namespace RotationSolver.Basic.Helpers;
 public static class TargetFilter
 {
     private static Dictionary<JobRole, HashSet<byte>>? _roleJobs;
-    private static readonly object _roleJobsLock = new();
+    private static readonly Lock _roleJobsLock = new();
 
     private static Dictionary<JobRole, HashSet<byte>> GetRoleMap()
     {

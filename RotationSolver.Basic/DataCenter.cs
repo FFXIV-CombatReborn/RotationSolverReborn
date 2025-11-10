@@ -60,6 +60,11 @@ internal static class DataCenter
     internal static List<uint> PrioritizedNameIds { get; set; } = [];
     internal static List<uint> BlacklistedNameIds { get; set; } = [];
 
+    /// <summary>
+    /// List of hostile NameIds that should be excluded as valid targets when an action opts-in via IsRestrictedDOT.
+    /// </summary>
+    internal static List<uint> RestrictedDotNameIds { get; set; } = [9214];
+
     internal static ConcurrentQueue<VfxNewData> VfxDataQueue { get; } = new();
 
     /// <summary>
