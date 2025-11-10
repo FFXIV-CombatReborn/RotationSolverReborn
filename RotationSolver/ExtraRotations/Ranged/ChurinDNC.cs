@@ -16,6 +16,7 @@ public sealed class ChurinDNC : DancerRotation
     private const int BurstEspritThreshold = 70;
     private const int MidEspritThreshold = 70;
     private const int DanceTargetRange = 15;
+
     #endregion
 
     #region Tracking
@@ -75,7 +76,7 @@ public sealed class ChurinDNC : DancerRotation
     {
         if (IsBurstPhase)
         {
-            return ((DisableStandardInBurst && HasFinishingMove) 
+            return ((DisableStandardInBurst && HasFinishingMove)
             || !DisableStandardInBurst)
             && Esprit < BurstEspritThreshold;
         }
@@ -155,12 +156,12 @@ public sealed class ChurinDNC : DancerRotation
                 return false;
             }
 
-            if ( IsDancing || HasTechnicalStep || HasTillana)
+            if ( IsDancing || HasTechnicalStep || HasTillana || StandardStepPvE.Cooldown.HasOneCharge && !HasStandardFinish)
             {
                 return false;
             }
 
-            if (TechnicalStepPvE.Cooldown.RecastTimeRemain < 2 || TechnicalStepPvE.Cooldown.HasOneCharge)
+            if (TechnicalStepPvE.Cooldown.RecastTimeRemain < 1.5f && WeaponRemain <= (WeaponTotal / 2f) || TechnicalStepPvE.Cooldown.HasOneCharge)
             {
                 return CanUseStepHoldCheck(TechHoldStrategy);
             }
@@ -206,7 +207,7 @@ public sealed class ChurinDNC : DancerRotation
                 return false;
             }
 
-            if (StandardStepPvE.Cooldown.RecastTimeRemain < 2 || StandardStepPvE.Cooldown.HasOneCharge)
+            if (StandardStepPvE.Cooldown.RecastTimeRemain < 1.5f && WeaponRemain <= (WeaponTotal / 2f) || StandardStepPvE.Cooldown.HasOneCharge)
             {
                 return CanUseStepHoldCheck(StandardHoldStrategy);
             }
@@ -214,7 +215,6 @@ public sealed class ChurinDNC : DancerRotation
             return false;
         }
     }
-
 
 
     #endregion
@@ -252,9 +252,9 @@ public sealed class ChurinDNC : DancerRotation
 
     private static readonly ChurinDNCPotions _churinPotions = new();
 
-    private float _firstPotionTiming = 0;
-    private float _secondPotionTiming = 0;
-    private float _thirdPotionTiming = 0;
+    private float _firstPotionTiming = 0f;
+    private float _secondPotionTiming = 0f;
+    private float _thirdPotionTiming = 0f;
 
     [RotationConfig(CombatType.PvE, Name = "Enable Potion Usage")]
     private static bool PotionUsageEnabled
@@ -587,7 +587,7 @@ public sealed class ChurinDNC : DancerRotation
             return false;
         }
         
-        if (StandardStepPvE.Cooldown.WillHaveOneCharge(5) && Esprit >= 40 && HasLastDance)
+        if (StandardStepPvE.Cooldown.WillHaveOneCharge(5f) && Esprit >= 40 && HasLastDance)
         {
             return false;
         }
@@ -603,7 +603,7 @@ public sealed class ChurinDNC : DancerRotation
             {
                 if (StandardStepPvE.Cooldown.IsCoolingDown && FlourishPvE.Cooldown.IsCoolingDown && HasFinishingMove)
                 {
-                    return Esprit < MidEspritThreshold || StandardStepPvE.Cooldown.WillHaveOneCharge(5);
+                    return Esprit < MidEspritThreshold || StandardStepPvE.Cooldown.WillHaveOneCharge(5f);
                 }
 
                 if (!HasFinishingMove)
@@ -615,11 +615,11 @@ public sealed class ChurinDNC : DancerRotation
             }
             else
             {
-                if (StandardStepPvE.Cooldown.WillHaveOneCharge(5) && (!TechnicalStepPvE.Cooldown.WillHaveOneCharge(15) || !ShouldUseTechStep))
+                if (StandardStepPvE.Cooldown.WillHaveOneCharge(5) && (!TechnicalStepPvE.Cooldown.WillHaveOneCharge(15f) || !ShouldUseTechStep))
                 {
                     return true;
                 }
-                if (Esprit < MidEspritThreshold && (!TechnicalStepPvE.Cooldown.WillHaveOneCharge(15) || !ShouldUseTechStep))
+                if (Esprit < MidEspritThreshold && (!TechnicalStepPvE.Cooldown.WillHaveOneCharge(15f) || !ShouldUseTechStep))
                 {
                     return true;
                 }
@@ -644,17 +644,27 @@ public sealed class ChurinDNC : DancerRotation
     {
         get
         {
-            if (Player.WillStatusEnd(7, true, StatusID.FlourishingStarfall))
+            if (Player.WillStatusEnd(7f, true, StatusID.FlourishingStarfall))
             {
                 return true;
             }
 
-            if (Esprit < MidEspritThreshold && !StandardStepPvE.Cooldown.WillHaveOneCharge(5) && !HasLastDance)
+            if (Esprit > MidEspritThreshold)
+            {
+                return false;
+            }
+
+            if (HasFinishingMove && StandardStepPvE.Cooldown.HasOneCharge)
+            {
+                return false;
+            }
+
+            if (Esprit < MidEspritThreshold && !StandardStepPvE.Cooldown.WillHaveOneCharge(5f) && !HasLastDance)
             {
                 return true;
             }
 
-            if (HasLastDance && HasFinishingMove && !Player.WillStatusEnd(7, true, StatusID.FlourishingStarfall))
+            if (HasLastDance && HasFinishingMove && !Player.WillStatusEnd(7f, true, StatusID.FlourishingStarfall))
             {
                 return false;
             }
@@ -870,6 +880,7 @@ public sealed class ChurinDNC : DancerRotation
     { 
         public override bool IsConditionMet()
         {
+            var churinDNC = new ChurinDNC();
 
             if (CompletedSteps <= 0)
             {
@@ -877,7 +888,9 @@ public sealed class ChurinDNC : DancerRotation
             }
 
             // Check for Technical Step completion (4+ steps) or Standard Step completion (2+ steps)
-            return (HasTechnicalStep && CompletedSteps > 3) || (HasStandardStep && CompletedSteps > 1);
+            return (HasTechnicalStep && CompletedSteps > 3) 
+            || ((InCombat && !churinDNC.TechnicalStepPvE.Cooldown.WillHaveOneCharge(30) 
+            || !InCombat) && HasStandardStep && CompletedSteps > 1);
         }
         
         protected override bool IsTimingValid(float timing)
@@ -889,7 +902,7 @@ public sealed class ChurinDNC : DancerRotation
 
             // Check opener timing: if it's an opener potion and countdown is within configured time
             float countDown = Service.CountDownTime;
-            if (IsOpenerPotion(timing) && countDown <= ChurinDNC.OpenerPotionTime)
+            if (IsOpenerPotion(timing) && countDown > 0 && countDown <= ChurinDNC.OpenerPotionTime)
             {
                 return true;
             }

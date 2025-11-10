@@ -14,9 +14,9 @@ public sealed class ChurinSMN : SummonerRotation
     private static bool InSolar => Player.Level == 100 ? !InBahamut && !InPhoenix && InSolarBahamut : InBahamut && !InPhoenix;
     private bool BahamutBurst => (SummonSolarBahamutPvE.EnoughLevel && InSolarBahamut) || (!SummonSolarBahamutPvE.EnoughLevel && InBahamut) || !SummonBahamutPvE.EnoughLevel;
     private static SMNGauge SummonerGauge => Svc.Gauges.Get<SMNGauge>();
-    private double LateWeaveWindow => (float)(RuinPvE.Cooldown.RecastTime * 0.45);
+    private static double LateWeaveWindow => (float)(WeaponTotal * 0.45);
     private static bool CanWeave => WeaponRemain > AnimationLock;
-    private bool CanLateWeave => WeaponRemain < LateWeaveWindow && CanWeave;
+    private static bool CanLateWeave => WeaponRemain < LateWeaveWindow && CanWeave;
     private static float SummonTimer => SummonerGauge.SummonTimerRemaining / 1000f;
     #endregion
 
@@ -73,6 +73,68 @@ public sealed class ChurinSMN : SummonerRotation
     [RotationConfig(CombatType.PvE, Name = "Use Physick above level 30")]
     public bool Healbot { get; set; } = false;
 
+    private static readonly ChurinSMNPotions _churinPotions = new();
+
+    private float _firstPotionTiming = 0;
+    private float _secondPotionTiming = 0;
+    private float _thirdPotionTiming = 0;
+
+    [RotationConfig(CombatType.PvE, Name = "Enable Potion Usage")]
+    private bool PotionUsageEnabled
+    { get => _churinPotions.Enabled; set => _churinPotions.Enabled = value; }
+
+    [RotationConfig(CombatType.PvE, Name = "Potion Usage Presets", Parent = nameof(PotionUsageEnabled))]
+    private PotionStrategy PotionUsagePresets
+    { get => _churinPotions.Strategy; set => _churinPotions.Strategy = value; }
+
+    [Range(0,20, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use Opener Potion at minus (value in seconds)", Parent = nameof(PotionUsageEnabled))]
+    private static float OpenerPotionTime { get => _churinPotions.OpenerPotionTime; set => _churinPotions.OpenerPotionTime = value; }
+
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 1st Potion at (value in seconds - leave at 0 if using in opener)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float FirstPotionTiming
+    {
+        get => _firstPotionTiming;
+        set
+        {
+            _firstPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
+
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 2nd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float SecondPotionTiming
+    {
+        get => _secondPotionTiming;
+        set
+        {
+            _secondPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
+
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 3rd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float ThirdPotionTiming
+    {
+        get => _thirdPotionTiming;
+        set
+        {
+            _thirdPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
+
+    private void UpdateCustomTimings()
+    {
+        _churinPotions.CustomTimings = new Potions.CustomTimingsData
+        {
+            Timings = [FirstPotionTiming, SecondPotionTiming, ThirdPotionTiming]
+        };
+    }
+
     #endregion
 
     #region Tracking Properties
@@ -80,12 +142,19 @@ public sealed class ChurinSMN : SummonerRotation
     {
         ImGui.Text($"EnergyDrainPvE: Is Cooling Down: {EnergyDrainPvE.Cooldown.IsCoolingDown}");
         ImGui.Text($"Max GCDs in Big Summon: {BigSummonGCDLeft}");
+        ImGui.Text($"Is Condition Met for Potion: {_churinPotions.IsConditionMet()}");
+        ImGui.Text($"Can Late Weave: {CanLateWeave}");
     }
     #endregion
 
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
+        if (_churinPotions.ShouldUsePotion(this, out var potionAct))
+        {
+            return potionAct;
+        }
+
         if (SummonCarbunclePvE.CanUse(out IAction? act))
         {
             return act;
@@ -208,6 +277,11 @@ public sealed class ChurinSMN : SummonerRotation
 
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
+        if (_churinPotions.ShouldUsePotion(this, out act))
+        {
+            return true;
+        }
+
         if (SwiftcastPvE.CanUse(out act))
         {
             if (AddSwiftcastOnRaise && nextGCD.IsTheSameTo(false, ResurrectionPvE))
@@ -378,6 +452,11 @@ public sealed class ChurinSMN : SummonerRotation
             RuinIvPvE.CanUse(out act, skipAoeCheck: true))
         {
             return true;
+        }
+
+        if (InIfrit && (!CrimsonCyclonePvE.CanUse(out _) || !CrimsonStrikePvE.CanUse(out _)) && IsMoving)
+        {
+            return RuinIvPvE.CanUse(out act);
         }
 
         if (BrandOfPurgatoryPvE.CanUse(out act))
@@ -726,6 +805,44 @@ public sealed class ChurinSMN : SummonerRotation
         }
     }
     #endregion
+#endregion
 
-    #endregion
+/// <summary>
+/// SMN-specific potion manager that extends base potion logic with job-specific conditions.
+/// </summary>
+private class ChurinSMNPotions : Potions
+{
+    public override bool IsConditionMet()
+    {
+        if (InSolar || InBahamut || InPhoenix)
+        {
+            return CanLateWeave;
+        }
+
+        return false;
+    }
+
+    protected override bool IsTimingValid(float timing)
+    {
+        if (timing > 0 && DataCenter.CombatTimeRaw >= timing && DataCenter.CombatTimeRaw - timing <= TimingWindowSeconds)
+        {
+            return true;
+        }
+        
+        // Check opener timing: if it's an opener potion and countdown is within configured time
+        float countDown = Service.CountDownTime;
+        if (IsOpenerPotion(timing) && countDown > 0 && ChurinSMN.OpenerPotionTime > 0)
+        {
+            return countDown <= ChurinSMN.OpenerPotionTime;
+        }
+        
+        if (IsOpenerPotion(timing) && ChurinSMN.OpenerPotionTime == 0 && DataCenter.CombatTimeRaw < TimingWindowSeconds)
+        {
+            return IsConditionMet();
+        }
+
+        return false;
+    }
+}
+
 }
