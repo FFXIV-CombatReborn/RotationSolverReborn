@@ -197,6 +197,7 @@ public partial class PaladinRotation
         setting.StatusProvide = [StatusID.Sheltron];
         setting.UnlockedByQuestID = 66592;
         setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySentinelPvE(ref ActionSetting setting)
