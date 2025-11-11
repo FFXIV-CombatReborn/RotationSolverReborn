@@ -426,72 +426,6 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-    private void DrawErrorZone()
-    {
-        string errorText = string.Empty;
-        float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
-
-        if (Watcher.DalamudBranch() != "release")
-        {
-            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
-            ImGui.TextWrapped($"Warning: You are running the '{Watcher.DalamudBranch()}' branch of Dalamud. For best compatibility, use /xlbranch and switch back to 'release' branch if available for your current version of FFXIV.");
-            ImGui.PopStyleColor();
-            ImGui.PopTextWrapPos();
-            ImGui.Spacing();
-        }
-
-        if (_crashPlugins.Count > 0 && _crashPlugins[0].Name != null)
-        {
-            errorText = $"Disable {_crashPlugins[0].Name}, can cause conflicts/crashes.";
-        }
-        else if (Player.AvailableThreadSafe && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
-                Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
-                Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
-        {
-            errorText = $"You are on an unsupported class: {Player.Job}";
-        }
-
-        if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Count != 0)
-        {
-            List<string> warningsToRemove = [];
-
-            foreach (string warning in DataCenter.SystemWarnings.Keys)
-            {
-                using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange));
-                ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-
-                // Calculate the required height for the button
-                Vector2 textSize = ImGui.CalcTextSize(warning, false, availableWidth);
-                float buttonHeight = textSize.Y + (ImGui.GetStyle().FramePadding.Y * 2);
-                float lineHeight = ImGui.GetTextLineHeight();
-                int lineCount = (int)Math.Ceiling(textSize.X / availableWidth);
-
-                if (ImGui.Button(warning, new Vector2(availableWidth, buttonHeight)))
-                {
-                    warningsToRemove.Add(warning);
-                }
-
-                ImGui.PopTextWrapPos(); // Reset text wrapping position
-            }
-
-            // Remove warnings that were cleared
-            foreach (string warning in warningsToRemove)
-            {
-                _ = DataCenter.SystemWarnings.Remove(warning);
-            }
-        }
-
-        if (errorText != string.Empty)
-        {
-            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed); // Set text color to DalamudOrange
-            ImGui.Text(errorText);
-            ImGui.PopStyleColor(); // Reset text color
-            ImGui.PopTextWrapPos(); // Reset text wrapping position
-        }
-    }
-
     private void DrawSideBar()
     {
         using ImRaii.IEndObject child = ImRaii.Child("Rotation Solver Side bar", -Vector2.One, false, ImGuiWindowFlags.NoScrollbar);
@@ -505,13 +439,6 @@ public partial class RotationConfigWindow : Window
             float iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(wholeWidth, Scale * JOB_ICON_WIDTH)) * 0.6f;
             if (wholeWidth > JOB_ICON_WIDTH * Scale)
             {
-                if (CheckErrors())
-                {
-                    DrawErrorZone();
-
-                    ImGui.Separator();
-                    ImGui.Spacing();
-                }
                 ImGui.SetNextItemWidth(wholeWidth);
                 SearchingBox();
                 ImGui.Spacing();
@@ -834,8 +761,78 @@ public partial class RotationConfigWindow : Window
         ImguiTooltips.HoveredTooltip(warning);
     }
 
+    // Hint bar at the top of the body
     private void DrawHintsBar()
     {
+        if (CheckErrors())
+        {
+            string errorText = string.Empty;
+            float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
+
+            if (Watcher.DalamudBranch() != "release")
+            {
+                ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
+                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
+                ImGui.TextWrapped($"Warning: You are running the '{Watcher.DalamudBranch()}' branch of Dalamud. For best compatibility, use /xlbranch and switch back to 'release' branch if available for your current version of FFXIV.");
+                ImGui.PopStyleColor();
+                ImGui.PopTextWrapPos();
+                ImGui.Spacing();
+            }
+
+            if (_crashPlugins.Count > 0 && _crashPlugins[0].Name != null)
+            {
+                errorText = $"Disable {_crashPlugins[0].Name}, can cause conflicts/crashes.";
+            }
+            else if (Player.AvailableThreadSafe && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+                    Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
+                    Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
+            {
+                errorText = $"You are on an unsupported class: {Player.Job}";
+            }
+
+            if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Count != 0)
+            {
+                List<string> warningsToRemove = [];
+
+                foreach (string warning in DataCenter.SystemWarnings.Keys)
+                {
+                    using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange));
+                    ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+
+                    // Calculate the required height for the button
+                    Vector2 textSize = ImGui.CalcTextSize(warning, false, availableWidth);
+                    float buttonHeight = textSize.Y + (ImGui.GetStyle().FramePadding.Y * 2);
+                    float lineHeight = ImGui.GetTextLineHeight();
+                    int lineCount = (int)Math.Ceiling(textSize.X / availableWidth);
+
+                    if (ImGui.Button(warning, new Vector2(availableWidth, buttonHeight)))
+                    {
+                        warningsToRemove.Add(warning);
+                    }
+
+                    ImGui.PopTextWrapPos(); // Reset text wrapping position
+                }
+
+                // Remove warnings that were cleared
+                foreach (string warning in warningsToRemove)
+                {
+                    _ = DataCenter.SystemWarnings.Remove(warning);
+                }
+            }
+
+            if (errorText != string.Empty)
+            {
+                ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed); // Set text color to DalamudOrange
+                ImGui.Text(errorText);
+                ImGui.PopStyleColor(); // Reset text color
+                ImGui.PopTextWrapPos(); // Reset text wrapping position
+            }
+
+            ImGui.Separator();
+            ImGui.Spacing();
+        }
+
         if (!Service.Config.ShowHints)
         {
             return;
