@@ -3739,6 +3739,12 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"SildihnSubterrane: {DataCenter.SildihnSubterrane}");
         ImGui.Spacing();
         ImGui.Text($"IsCastingMultiHit: {DataCenter.IsCastingMultiHit()}");
+        ImGui.Text($"IsCastingTankVfx: {DataCenter.IsCastingTankVfx()}");
+        ImGui.Text($"IsCastingAreaVfx: {DataCenter.IsCastingAreaVfx()}");
+        ImGui.Text($"AreHostilesCastingKnockback: {DataCenter.AreHostilesCastingKnockback}");
+        ImGui.Text($"IsHostileCastingAOE: {DataCenter.IsHostileCastingAOE}");
+        ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
+        ImGui.Text($"IsHostileCastingStop: {DataCenter.IsHostileCastingStop}");
     }
 
     private static unsafe void DrawParty()

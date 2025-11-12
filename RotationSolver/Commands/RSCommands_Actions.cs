@@ -107,6 +107,11 @@ namespace RotationSolver.Commands
                 }
             }
 
+            if (Player.Object.HasStatus(false, StatusID.Transcendent))
+            {
+                return;
+            }
+
             IAction? nextAction = ActionUpdater.NextAction;
             if (nextAction == null)
             {

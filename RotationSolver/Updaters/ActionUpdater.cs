@@ -233,7 +233,7 @@ internal static class ActionUpdater
         _lastMP = player.CurrentMp;
     }
 
-internal static unsafe bool CanDoAction()
+    internal static unsafe bool CanDoAction()
     {
         // In Target-Only mode we never perform actions.
         if (DataCenter.IsTargetOnly)

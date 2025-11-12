@@ -43,7 +43,7 @@ public static class ActionIdHelper
     /// </summary>
     /// <param name="cdGroup">The cooldown group.</param>
     /// <returns>A pointer to the cooldown details.</returns>
-public static unsafe RecastDetail* GetCoolDownDetail(byte cdGroup)
+    public static unsafe RecastDetail* GetCoolDownDetail(byte cdGroup)
     {
         ActionManager* actionManager = ActionManager.Instance();
         if (actionManager == null)
