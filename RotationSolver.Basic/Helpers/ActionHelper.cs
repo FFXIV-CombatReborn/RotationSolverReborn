@@ -63,7 +63,7 @@ internal static class ActionHelper
         return group == 0 ? GCDCooldownGroup : group;
     }
 
-private static readonly ConcurrentDictionary<Job, PropertyInfo?> JobPropertyCache = new();
+    private static readonly ConcurrentDictionary<Job, PropertyInfo?> JobPropertyCache = new();
 
     /// <summary>
     /// Determines whether the specified action is in the current job.
@@ -75,7 +75,7 @@ private static readonly ConcurrentDictionary<Job, PropertyInfo?> JobPropertyCach
         Lumina.Excel.Sheets.ClassJobCategory? cate = action.ClassJobCategory.ValueNullable;
         if (cate != null)
         {
-PropertyInfo? property = JobPropertyCache.GetOrAdd(DataCenter.Job, job =>
+            PropertyInfo? property = JobPropertyCache.GetOrAdd(DataCenter.Job, job =>
             {
                 // Cache the property info for this job once
                 var t = cate.GetType();
