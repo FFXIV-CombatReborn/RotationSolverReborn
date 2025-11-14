@@ -123,19 +123,7 @@ namespace RotationSolver.Commands
             //     PluginLog.Debug($"Will Do {debugAct}");
 #endif
 
-            if (nextAction is BaseAction baseAct)
-            {
-                if (baseAct.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
-                {
-                    DataCenter.HostileTarget = target;
-                    if (!DataCenter.IsManual &&
-                        (Service.Config.SwitchTargetFriendly || ((Svc.Targets.Target?.IsEnemy() ?? true)
-                        || Svc.Targets.Target.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
-                    {
-                        Svc.Targets.Target = target;
-                    }
-                }
-            }
+            AdoptTargetFromAction(nextAction);
 
             if (Service.Config.KeyBoardNoise)
             {
@@ -216,7 +204,7 @@ namespace RotationSolver.Commands
             DoSpecialCommandType(SpecialCommandType.EndSpecial, false);
         }
 
-internal static void CancelState()
+        internal static void CancelState()
         {
             DataCenter.ResetAllRecords();
             if (DataCenter.State)
@@ -225,9 +213,8 @@ internal static void CancelState()
             }
         }
 
-        public static void UpdateTargetFromNextAction()
+        private static void AdoptTargetFromAction(IAction nextAction)
         {
-            IAction? nextAction = ActionUpdater.NextAction;
             if (nextAction is BaseAction baseAct)
             {
                 if (baseAct.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
@@ -240,6 +227,15 @@ internal static void CancelState()
                         Svc.Targets.Target = target;
                     }
                 }
+            }
+        }
+
+        public static void UpdateTargetFromNextAction()
+        {
+            IAction? nextAction = ActionUpdater.NextAction;
+            if (nextAction != null)
+            {
+                AdoptTargetFromAction(nextAction);
             }
         }
 
@@ -275,8 +271,7 @@ internal static void CancelState()
                     (Service.Config.AutoOffSwitchClass && Player.Job != _previousJob) ||
                     (Service.Config.AutoOffBetweenArea && !DataCenter.IsAutoDuty && (Svc.Condition[ConditionFlag.BetweenAreas] || Svc.Condition[ConditionFlag.BetweenAreas51])) ||
                     (Service.Config.CancelStateOnCombatBeforeCountdown && Service.CountDownTime > 0.2f && DataCenter.InCombat) ||
-                    (ActionUpdater.AutoCancelTime != DateTime.MinValue && DateTime.Now > ActionUpdater.AutoCancelTime) ||
-false)
+                    (ActionUpdater.AutoCancelTime != DateTime.MinValue && DateTime.Now > ActionUpdater.AutoCancelTime))
                 {
                     CancelState();
                     if (Player.Job != _previousJob)
