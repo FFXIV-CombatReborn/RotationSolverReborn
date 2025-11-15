@@ -291,10 +291,17 @@ public sealed class WHM_Reborn : WhiteMageRotation
         {
             partyCount++;
         }
-
-        if (MedicaIiPvE.CanUse(out act) && hasMedica2 < partyCount / 2 && !IsLastAction(true, MedicaIiPvE))
+        if (MedicaIiPvE.EnoughLevel)
         {
-            return true;
+            if (MedicaIiiPvE.EnoughLevel && MedicaIiiPvE.CanUse(out act) && hasMedica2 < partyCount / 2 && !IsLastAction(true, MedicaIiPvE))
+            {
+                return true;
+            }
+
+            if (!MedicaIiiPvE.EnoughLevel && MedicaIiPvE.CanUse(out act) && hasMedica2 < partyCount / 2 && !IsLastAction(true, MedicaIiPvE))
+            {
+                return true;
+            }
         }
 
         if (CureIiiPvE.CanUse(out act))
@@ -380,19 +387,60 @@ public sealed class WHM_Reborn : WhiteMageRotation
             return true;
         }
 
-        if (HolyPvE.CanUse(out act))
+        if (HolyPvE.EnoughLevel)
         {
-            return true;
+            if (HolyIiiPvE.EnoughLevel && HolyIiiPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (HolyPvE.EnoughLevel && !HolyIiiPvE.EnoughLevel && HolyPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (AeroPvE.CanUse(out act))
+        if (AeroPvE.EnoughLevel)
         {
-            return true;
+            if (DiaPvE.EnoughLevel && DiaPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (AeroIiPvE.EnoughLevel && !DiaPvE.EnoughLevel && AeroIiPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (AeroPvE.EnoughLevel && !AeroIiPvE.EnoughLevel && AeroPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (StonePvE.CanUse(out act))
+        if (StoneIiPvE.EnoughLevel)
         {
-            return true;
+            if (GlareIiiPvE.EnoughLevel && GlareIiiPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (GlarePvE.EnoughLevel && !GlareIiiPvE.EnoughLevel && GlarePvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (StoneIvPvE.EnoughLevel && !GlarePvE.EnoughLevel && StoneIvPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (StoneIiiPvE.EnoughLevel && !StoneIvPvE.EnoughLevel && StoneIiiPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (StoneIiPvE.EnoughLevel && !StoneIiiPvE.EnoughLevel && StoneIiPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (!StoneIiPvE.EnoughLevel && StonePvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (AfflatusMiseryPvE.EnoughLevel && UseLilyDowntime && (liliesNearlyFull || liliesFullNoBlood))
@@ -408,9 +456,20 @@ public sealed class WHM_Reborn : WhiteMageRotation
             }
         }
 
-        if (AeroPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep))
+        if (AeroPvE.EnoughLevel)
         {
-            return true;
+            if (DiaPvE.EnoughLevel && DiaPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep))
+            {
+                return true;
+            }
+            if (AeroIiPvE.EnoughLevel && !DiaPvE.EnoughLevel && AeroIiPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep))
+            {
+                return true;
+            }
+            if (AeroPvE.EnoughLevel && !AeroIiPvE.EnoughLevel && AeroPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep))
+            {
+                return true;
+            }
         }
 
         return base.GeneralGCD(out act);
