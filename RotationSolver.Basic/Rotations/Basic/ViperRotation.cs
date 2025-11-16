@@ -50,37 +50,60 @@ public partial class ViperRotation
     /// <summary>
     /// Indicates that the player is not in a Dread Combo.
     /// </summary>
-    public static bool NODREAD => JobGauge.DreadCombo == 0;
+    public static bool NODREAD => JobGauge.DreadCombo == 0 && !HasReawakenedActive;
 
     /// <summary>
     /// Indicates that the player has Dread Combo active and both HuntersCoil and SwiftskinsCoil available.
     /// </summary>
-    public static bool DreadActive => (byte)JobGauge.DreadCombo == 1;
+    public static bool DreadActive => JobGauge.DreadCombo.HasFlag(DreadCombo.Dreadwinder);
 
     /// <summary>
     /// Indicates that the player has Dread Combo active and only SwiftskinsCoil available.
     /// </summary>
-    public static bool SwiftskinsCoilOnly => (byte)JobGauge.DreadCombo == 2;
+    public static bool SwiftskinsCoilOnly => JobGauge.DreadCombo.HasFlag(DreadCombo.HuntersCoil);
 
     /// <summary>
     /// Indicates that the player has Dread Combo active and only HuntersCoil available.
     /// </summary>
-    public static bool HuntersCoilOnly => (byte)JobGauge.DreadCombo == 3;
+    public static bool HuntersCoilOnly => JobGauge.DreadCombo.HasFlag(DreadCombo.SwiftskinsCoil);
 
     /// <summary>
     /// Indicates that the player has Pit Combo active and both HuntersDen and SwiftskinsDen available.
     /// </summary>
-    public static bool PitActive => (byte)JobGauge.DreadCombo == 4;
+    public static bool PitActive => JobGauge.DreadCombo.HasFlag(DreadCombo.PitOfDread);
 
     /// <summary>
     /// Indicates that the player has Pit Combo active and only SwiftskinsDen available.
     /// </summary>
-    public static bool SwiftskinsDenOnly => (byte)JobGauge.DreadCombo == 5;
+    public static bool SwiftskinsDenOnly => JobGauge.DreadCombo.HasFlag(DreadCombo.HuntersDen);
 
     /// <summary>
     /// Indicates that the player has Pit Combo active and only HuntersDen available.
     /// </summary>
-    public static bool HuntersDenOnly => (byte)JobGauge.DreadCombo == 6;
+    public static bool HuntersDenOnly => JobGauge.DreadCombo.HasFlag(DreadCombo.SwiftskinsDen);
+
+    // DreadCombo also indicates the states for Reawakend
+
+    /// <summary>
+    ///
+    /// </summary>
+    public static bool FirstGenReady => (byte)JobGauge.DreadCombo == 7;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public static bool SecondGenReady => (byte)JobGauge.DreadCombo == 8;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public static bool ThirdGenReady => (byte)JobGauge.DreadCombo == 9;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public static bool FourthGenReady => (byte)JobGauge.DreadCombo == 10;
+
     #endregion
 
     #region SerpentAbilities
@@ -92,37 +115,37 @@ public partial class ViperRotation
     /// <summary>
     /// Indicates if base no abilities are ready.
     /// </summary>
-    public static bool NoAbilityReady => (byte)JobGauge.SerpentCombo == 0;
+    public static bool NoAbilityReady => JobGauge.SerpentCombo.HasFlag(SerpentCombo.None);
 
     /// <summary>
     /// Indicates if base Death Rattle oGCD is ready.
     /// </summary>
-    public static bool DeathRattleReady => (byte)JobGauge.SerpentCombo == 1;
+    public static bool DeathRattleReady => JobGauge.SerpentCombo.HasFlag(SerpentCombo.DeathRattle);
 
     /// <summary>
     /// Indicates if base Last Lash oGCD is ready.
     /// </summary>
-    public static bool LastLashReady => (byte)JobGauge.SerpentCombo == 2;
+    public static bool LastLashReady => JobGauge.SerpentCombo.HasFlag(SerpentCombo.LastLash);
 
     /// <summary>
     /// Indicates if base First Legacy oGCD is ready.
     /// </summary>
-    public static bool FirstLegacyReady => (byte)JobGauge.SerpentCombo == 3;
+    public static bool FirstLegacyReady => JobGauge.SerpentCombo.HasFlag(SerpentCombo.FirstLegacy);
 
     /// <summary>
     /// Indicates if base Second Legacy oGCD is ready.
     /// </summary>
-    public static bool SecondLegacyReady => (byte)JobGauge.SerpentCombo == 4;
+    public static bool SecondLegacyReady => JobGauge.SerpentCombo.HasFlag(SerpentCombo.SecondLegacy);
 
     /// <summary>
     /// Indicates if base Third Legacy oGCD is ready.
     /// </summary>
-    public static bool ThirdLegacyReady => (byte)JobGauge.SerpentCombo == 5;
+    public static bool ThirdLegacyReady => JobGauge.SerpentCombo.HasFlag(SerpentCombo.ThirdLegacy);
 
     /// <summary>
     /// Indicates if base Fourth Legacy oGCD is ready.
     /// </summary>
-    public static bool FourthLegacyReady => (byte)JobGauge.SerpentCombo == 6;
+    public static bool FourthLegacyReady => JobGauge.SerpentCombo.HasFlag(SerpentCombo.FourthLegacy);
 
     /// <summary>
     /// Indicates if base Twins oGCDs are ready.
@@ -520,7 +543,7 @@ public partial class ViperRotation
         setting.StatusProvide = [StatusID.HuntersInstinct];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 
@@ -530,7 +553,7 @@ public partial class ViperRotation
         setting.StatusProvide = [StatusID.GrimskinsVenom];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 
@@ -550,7 +573,7 @@ public partial class ViperRotation
         setting.StatusProvide = [StatusID.Swiftscaled];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 
@@ -560,7 +583,7 @@ public partial class ViperRotation
         setting.StatusProvide = [StatusID.GrimhuntersVenom];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 
@@ -708,7 +731,8 @@ public partial class ViperRotation
 
     static partial void ModifyFirstGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTributeStacks == 5) || (MaxAnguine == 4 && AnguineTributeStacks == 4));
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTributeStacks == 5) || (MaxAnguine == 4 && AnguineTributeStacks == 4)) && FirstGenReady;
+        setting.StatusNeed = [StatusID.Reawakened];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -717,7 +741,8 @@ public partial class ViperRotation
 
     static partial void ModifySecondGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTributeStacks == 4) || (MaxAnguine == 4 && AnguineTributeStacks == 3));
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTributeStacks == 4) || (MaxAnguine == 4 && AnguineTributeStacks == 3)) && SecondGenReady;
+        setting.StatusNeed = [StatusID.Reawakened];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -726,7 +751,8 @@ public partial class ViperRotation
 
     static partial void ModifyThirdGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTributeStacks == 3) || (MaxAnguine == 4 && AnguineTributeStacks == 2));
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTributeStacks == 3) || (MaxAnguine == 4 && AnguineTributeStacks == 2)) && ThirdGenReady;
+        setting.StatusNeed = [StatusID.Reawakened];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -735,7 +761,8 @@ public partial class ViperRotation
 
     static partial void ModifyFourthGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTributeStacks == 2) || (MaxAnguine == 4 && AnguineTributeStacks == 1));
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTributeStacks == 2) || (MaxAnguine == 4 && AnguineTributeStacks == 1)) && FourthGenReady;
+        setting.StatusNeed = [StatusID.Reawakened];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -745,6 +772,7 @@ public partial class ViperRotation
     static partial void ModifyOuroborosPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => EnhancedSerpentsLineageTrait.EnoughLevel && AnguineTributeStacks == 1;
+        setting.StatusNeed = [StatusID.Reawakened];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -754,6 +782,7 @@ public partial class ViperRotation
     static partial void ModifyFirstLegacyPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => FirstLegacyReady;
+        setting.StatusNeed = [StatusID.Reawakened];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -763,6 +792,7 @@ public partial class ViperRotation
     static partial void ModifySecondLegacyPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SecondLegacyReady;
+        setting.StatusNeed = [StatusID.Reawakened];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -772,6 +802,7 @@ public partial class ViperRotation
     static partial void ModifyThirdLegacyPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => ThirdLegacyReady;
+        setting.StatusNeed = [StatusID.Reawakened];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -781,6 +812,7 @@ public partial class ViperRotation
     static partial void ModifyFourthLegacyPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => FourthLegacyReady;
+        setting.StatusNeed = [StatusID.Reawakened];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
