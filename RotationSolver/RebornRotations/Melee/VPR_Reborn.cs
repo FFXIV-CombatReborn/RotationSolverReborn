@@ -50,6 +50,30 @@ public sealed class VPR_Reborn : ViperRotation
     [RotationDesc]
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
+        //Reawaken Combo
+        if (HasReawakenedActive)
+        {
+            if (FourthLegacyPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (ThirdLegacyPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (SecondLegacyPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (FirstLegacyPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
         // Uncoiled Fury Combo
         switch ((HasPoisedFang, HasPoisedBlood))
         {
@@ -75,19 +99,19 @@ public sealed class VPR_Reborn : ViperRotation
         switch ((HasFellHuntersVenom, HasFellSkinsVenom))
         {
             case (true, _):
-                if (TwinfangThreshPvE.CanUse(out act, skipAoeCheck: true))
+                if (TwinfangThreshPvE.CanUse(out act))
                     return true;
                 break;
             case (_, true):
-                if (TwinbloodThreshPvE.CanUse(out act, skipAoeCheck: true))
+                if (TwinbloodThreshPvE.CanUse(out act))
                     return true;
                 break;
             case (false, false):
                 if (TimeSinceLastAction.TotalSeconds < 2)
                     break;
-                if (TwinfangThreshPvE.CanUse(out act, skipAoeCheck: true))
+                if (TwinfangThreshPvE.CanUse(out act))
                     return true;
-                if (TwinbloodThreshPvE.CanUse(out act, skipAoeCheck: true))
+                if (TwinbloodThreshPvE.CanUse(out act))
                     return true;
                 break;
         }
@@ -113,32 +137,8 @@ public sealed class VPR_Reborn : ViperRotation
                 break;
         }
 
-        //Reawaken Combo
-        if (HasReawakenedActive)
-        {
-            if (FirstLegacyPvE.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (SecondLegacyPvE.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (ThirdLegacyPvE.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (FourthLegacyPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
         ////Serpent Combo oGCDs
-        if (LastLashPvE.CanUse(out act, skipAoeCheck: true))
+        if (LastLashPvE.CanUse(out act))
         {
             return true;
         }
