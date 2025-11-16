@@ -50,7 +50,7 @@ public partial class ViperRotation
     /// <summary>
     /// Indicates that the player is not in a Dread Combo.
     /// </summary>
-    public static bool NODREAD => JobGauge.DreadCombo == 0 && !HasReawakenedActive;
+    public static bool NODREAD => JobGauge.DreadCombo == 0 || ((byte)JobGauge.DreadCombo > 6 && !HasReawakenedActive);
 
     /// <summary>
     /// Indicates that the player has Dread Combo active and both HuntersCoil and SwiftskinsCoil available.

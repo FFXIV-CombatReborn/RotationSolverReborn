@@ -102,8 +102,7 @@ internal static class StateUpdater
             }
 
             if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out EnemyPositional positional)
-                && positional != target?.FindEnemyPositional()
-                && target?.HasPositional() == true)
+                && target?.HasPositional() == true && positional != target.FindEnemyPositional())
             {
                 return true;
             }
