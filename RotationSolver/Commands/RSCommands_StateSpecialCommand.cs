@@ -1,4 +1,5 @@
-﻿using ECommons.DalamudServices;
+﻿using Dalamud.Game.Config;
+using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using RotationSolver.Updaters;
 
@@ -42,6 +43,11 @@ namespace RotationSolver.Commands
                     stateType = AdjustStateType(stateType, ref index);
                 }
                 UpdateState(stateType, role);
+
+                if (!DataCenter.AutoFaceTargetOnActionSetting() && DataCenter.MoveModeSetting() == 1)
+                {
+                    Svc.GameConfig.UiControl.Set(UiControlOption.AutoFaceTargetOnAction.ToString(), 1);
+                }
                 return stateType;
             });
         }
