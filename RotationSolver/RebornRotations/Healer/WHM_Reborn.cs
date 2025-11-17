@@ -415,32 +415,29 @@ public sealed class WHM_Reborn : WhiteMageRotation
             }
         }
 
-        if (StoneIiPvE.EnoughLevel)
+        if (GlareIiiPvE.EnoughLevel && GlareIiiPvE.CanUse(out act))
         {
-            if (GlareIiiPvE.EnoughLevel && GlareIiiPvE.CanUse(out act))
-            {
-                return true;
-            }
-            if (GlarePvE.EnoughLevel && !GlareIiiPvE.EnoughLevel && GlarePvE.CanUse(out act))
-            {
-                return true;
-            }
-            if (StoneIvPvE.EnoughLevel && !GlarePvE.EnoughLevel && StoneIvPvE.CanUse(out act))
-            {
-                return true;
-            }
-            if (StoneIiiPvE.EnoughLevel && !StoneIvPvE.EnoughLevel && StoneIiiPvE.CanUse(out act))
-            {
-                return true;
-            }
-            if (StoneIiPvE.EnoughLevel && !StoneIiiPvE.EnoughLevel && StoneIiPvE.CanUse(out act))
-            {
-                return true;
-            }
-            if (!StoneIiPvE.EnoughLevel && StonePvE.CanUse(out act))
-            {
-                return true;
-            }
+            return true;
+        }
+        if (GlarePvE.EnoughLevel && !GlareIiiPvE.EnoughLevel && GlarePvE.CanUse(out act))
+        {
+            return true;
+        }
+        if (StoneIvPvE.EnoughLevel && !GlarePvE.EnoughLevel && StoneIvPvE.CanUse(out act))
+        {
+            return true;
+        }
+        if (StoneIiiPvE.EnoughLevel && !StoneIvPvE.EnoughLevel && StoneIiiPvE.CanUse(out act))
+        {
+            return true;
+        }
+        if (StoneIiPvE.EnoughLevel && !StoneIiiPvE.EnoughLevel && StoneIiPvE.CanUse(out act))
+        {
+            return true;
+        }
+        if (!StoneIiPvE.EnoughLevel && StonePvE.CanUse(out act))
+        {
+            return true;
         }
 
         if (AfflatusMiseryPvE.EnoughLevel && UseLilyDowntime && (liliesNearlyFull || liliesFullNoBlood))
