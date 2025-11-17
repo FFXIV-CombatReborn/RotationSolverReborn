@@ -1,4 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.Config;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
@@ -7,6 +8,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using FFXIVClientStructs.FFXIV.Common.Lua;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
@@ -49,6 +51,17 @@ internal static class DataCenter
     public static bool PlayerAvailable()
     {
         return Player.AvailableThreadSafe;
+    }
+
+    public static bool AutoFaceTargetOnActionSetting()
+    {
+        return Svc.GameConfig.UiControl.GetBool(UiControlOption.AutoFaceTargetOnAction.ToString());
+    }
+
+    public static uint MoveModeSetting()
+    {
+        // 0 is standard, 1 is legacy
+        return Svc.GameConfig.UiControl.GetUInt(UiControlOption.MoveMode.ToString());
     }
 
     internal static IBattleChara? HostileTarget

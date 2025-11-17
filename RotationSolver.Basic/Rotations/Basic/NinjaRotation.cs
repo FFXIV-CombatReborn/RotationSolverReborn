@@ -276,6 +276,7 @@ public partial class NinjaRotation
     static partial void ModifyShadeShiftPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.ShadeShift];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyGustSlashPvE(ref ActionSetting setting)
