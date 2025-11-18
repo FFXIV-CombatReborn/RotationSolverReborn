@@ -25,7 +25,9 @@ public partial class SummonerRotation
     /// <summary>
     /// 
     /// </summary>
-    public static byte Attunement => JobGauge.Attunement;
+    public static byte AttunementCount => JobGauge.AttunementCount;
+
+    
 
     /// <summary>
     /// 
@@ -188,7 +190,7 @@ public partial class SummonerRotation
     {
         ImGui.Text("ReturnSummons: " + ReturnSummons.ToString());
         ImGui.Text("HasAetherflowStacks: " + HasAetherflowStacks.ToString());
-        ImGui.Text("Attunement: " + Attunement.ToString());
+        ImGui.Text("Attunement: " + AttunementCount.ToString());
         ImGui.Spacing();
         ImGui.TextColored(IsSolarBahamutReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IsSolarBahamutReady: " + IsSolarBahamutReady.ToString());
         ImGui.TextColored(IsBahamutReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IsBahamutReady: " + IsBahamutReady.ToString());
@@ -466,7 +468,7 @@ public partial class SummonerRotation
 
     static partial void ModifyRubyRuinPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Attunement > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinPvE.GetCastTime()) && InIfrit;
+        setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinPvE.GetCastTime()) && InIfrit;
     }
 
     static partial void ModifyEmeraldRuinPvE(ref ActionSetting setting)
@@ -481,7 +483,7 @@ public partial class SummonerRotation
 
     static partial void ModifyRubyRuinIiPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Attunement > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinIiPvE.GetCastTime()) && InIfrit;
+        setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinIiPvE.GetCastTime()) && InIfrit;
     }
 
     static partial void ModifyEmeraldRuinIiPvE(ref ActionSetting setting)
@@ -496,7 +498,7 @@ public partial class SummonerRotation
 
     static partial void ModifyRubyRuinIiiPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Attunement > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinIiiPvE.GetCastTime()) && InIfrit;
+        setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinIiiPvE.GetCastTime()) && InIfrit;
     }
 
     static partial void ModifyEmeraldRuinIiiPvE(ref ActionSetting setting)
@@ -511,12 +513,12 @@ public partial class SummonerRotation
 
     static partial void ModifyRubyRitePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Attunement > 0 && !AttunmentTimeEndAfter(ActionID.RubyRitePvE.GetCastTime()) && InIfrit;
+        setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRitePvE.GetCastTime()) && InIfrit;
     }
 
     static partial void ModifyEmeraldRitePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InGaruda;
+        setting.ActionCheck = () => AttunementCount > 0 && InGaruda;
     }
 
     static partial void ModifyTopazRitePvE(ref ActionSetting setting)
@@ -526,7 +528,7 @@ public partial class SummonerRotation
 
     static partial void ModifyRubyOutburstPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Attunement > 0 && !AttunmentTimeEndAfter(ActionID.RubyOutburstPvE.GetCastTime()) && InIfrit;
+        setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyOutburstPvE.GetCastTime()) && InIfrit;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -553,7 +555,7 @@ public partial class SummonerRotation
 
     static partial void ModifyRubyDisasterPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Attunement > 0 && !AttunmentTimeEndAfter(ActionID.RubyDisasterPvE.GetCastTime()) && InIfrit;
+        setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyDisasterPvE.GetCastTime()) && InIfrit;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -580,7 +582,7 @@ public partial class SummonerRotation
 
     static partial void ModifyRubyCatastrophePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Attunement > 0 && !AttunmentTimeEndAfter(ActionID.RubyCatastrophePvE.GetCastTime()) && InIfrit;
+        setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyCatastrophePvE.GetCastTime()) && InIfrit;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -660,7 +662,6 @@ public partial class SummonerRotation
         //setting.SpecialType = SpecialActionType.HostileMovingForward;
         setting.StatusProvide = [StatusID.CrimsonStrikeReady_4403];
         setting.StatusNeed = [StatusID.IfritsFavor];
-        setting.ActionCheck = () => InIfrit;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -669,7 +670,6 @@ public partial class SummonerRotation
 
     static partial void ModifyCrimsonStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InIfrit;
         setting.StatusNeed = [StatusID.CrimsonStrikeReady_4403];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -688,7 +688,9 @@ public partial class SummonerRotation
 
     static partial void ModifySlipstreamPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Attunement > 0 && !AttunmentTimeEndAfter(ActionID.SlipstreamPvE.GetCastTime()) && InGaruda;
+        setting.ActionCheck = () => !HasSwift && !Player.WillStatusEnd(ActionID.SlipstreamPvE.GetCastTime(), true, StatusID.GarudasFavor) 
+                                    || HasSwift && !Player.WillStatusEndGCD(0, 0, true, StatusID.GarudasFavor);
+        setting.StatusNeed = [StatusID.GarudasFavor];
         setting.StatusProvide = [StatusID.Slipstream];
         setting.CreateConfig = () => new ActionConfig()
         {
