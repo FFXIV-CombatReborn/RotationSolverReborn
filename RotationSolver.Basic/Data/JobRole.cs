@@ -98,13 +98,12 @@ public static class JobRoleExtension
     {
         return role switch
         {
-            JobRole.Tank => [Job.WAR, Job.PLD, Job.DRK, Job.GNB],
-            JobRole.Healer => [Job.WHM, Job.SCH, Job.AST, Job.SGE],
-            JobRole.Melee => [Job.MNK, Job.DRG, Job.NIN, Job.SAM, Job.RPR, Job.VPR],
-            JobRole.RangedPhysical => [Job.BRD, Job.MCH, Job.DNC],
-            JobRole.RangedMagical => [Job.BLM, Job.SMN, Job.RDM, Job.BLU, Job.PCT],
-            JobRole.AllDPS => [.. JobRole.Melee.ToJobs()
-            , .. JobRole.RangedPhysical.ToJobs(), .. JobRole.RangedMagical.ToJobs()],
+            JobRole.Tank => [Job.WAR, Job.PLD, Job.DRK, Job.GNB, Job.GLA, Job.MRD],
+            JobRole.Healer => [Job.WHM, Job.SCH, Job.AST, Job.SGE, Job.CNJ],
+            JobRole.Melee => [Job.MNK, Job.DRG, Job.NIN, Job.SAM, Job.RPR, Job.VPR, Job.LNC, Job.ROG],
+            JobRole.RangedPhysical => [Job.BRD, Job.MCH, Job.DNC, Job.ARC],
+            JobRole.RangedMagical => [Job.BLM, Job.SMN, Job.RDM, Job.BLU, Job.PCT, Job.ACN, Job.THM, Job.ARC],
+            JobRole.AllDPS => [.. JobRole.Melee.ToJobs(), .. JobRole.RangedPhysical.ToJobs(), .. JobRole.RangedMagical.ToJobs()],
             _ => [],
         };
     }

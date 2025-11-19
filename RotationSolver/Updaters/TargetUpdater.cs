@@ -292,7 +292,7 @@ internal static partial class TargetUpdater
 
     private static IBattleChara? GetDispelTarget()
     {
-        if (Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or Job.BRD)
+        if (Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or Job.BRD or Job.CNJ)
         {
             List<IBattleChara> weakenPeople = [];
             List<IBattleChara> dyingPeople = [];
