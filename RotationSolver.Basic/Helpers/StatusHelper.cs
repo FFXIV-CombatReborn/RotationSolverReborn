@@ -181,7 +181,10 @@ public static class StatusHelper
     [
         StatusID.DamageUp_1161,
         StatusID.DamageUp,
-        StatusID.DarkDefenses
+        StatusID.DarkDefenses,
+        StatusID.MagicDamageUp_2556,
+        StatusID.EvasionUp_1706
+        //StatusID.Invincibility_4539 maybe this, need verification, seems to be on guardian knight in Rooms & Lockwards part of forked tower
     ];
 
     /// <summary>
