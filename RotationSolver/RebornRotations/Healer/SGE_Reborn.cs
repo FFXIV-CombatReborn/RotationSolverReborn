@@ -35,8 +35,14 @@ public sealed class SGE_Reborn : SageRotation
     [RotationConfig(CombatType.PvE, Name = "Health threshold party member needs to be to use Soteria")]
     public float SoteriaHeal { get; set; } = 0.85f;
 
+    [RotationConfig(CombatType.PvE, Name = "Use Kerachole as a heal when applicable")]
+    public bool KeracholePvEHealOption { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Holos as a heal when applicable")]
+    public bool HolosHealOption { get; set; } = true;
+
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Average health threshold party members need to be to use Holos")]
+    [RotationConfig(CombatType.PvE, Name = "Average health threshold party members need to be to use Holos", Parent = nameof(HolosHealOption))]
     public float HolosHeal { get; set; } = 0.5f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
@@ -244,7 +250,7 @@ public sealed class SGE_Reborn : SageRotation
             return true;
         }
 
-        if (KeracholePvE.CanUse(out act) && EnhancedKeracholeTrait.EnoughLevel)
+        if (KeracholePvE.CanUse(out act) && EnhancedKeracholeTrait.EnoughLevel && KeracholePvEHealOption)
         {
             return true;
         }
@@ -264,7 +270,7 @@ public sealed class SGE_Reborn : SageRotation
             return true;
         }
 
-        if (HolosPvE.CanUse(out act) && PartyMembersAverHP < HolosHeal)
+        if (HolosPvE.CanUse(out act) && PartyMembersAverHP < HolosHeal && HolosHealOption)
         {
             return true;
         }
@@ -272,7 +278,7 @@ public sealed class SGE_Reborn : SageRotation
         return base.HealAreaAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.TaurocholePvE, ActionID.KeracholePvE, ActionID.DruocholePvE, ActionID.HolosPvE, ActionID.PhysisPvE, ActionID.PanhaimaPvE)]
+    [RotationDesc(ActionID.TaurocholePvE, ActionID.DruocholePvE, ActionID.HolosPvE, ActionID.PhysisPvE, ActionID.PanhaimaPvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         IEnumerable<IBattleChara> tankEnum = PartyMembers.GetJobCategory(JobRole.Tank);
@@ -350,7 +356,7 @@ public sealed class SGE_Reborn : SageRotation
                     return true;
                 }
 
-                if (HolosPvE.CanUse(out act))
+                if (HolosPvE.CanUse(out act) && HolosHealOption)
                 {
                     return true;
                 }
