@@ -478,7 +478,7 @@ public sealed class BRD_Reborn : BardRotation
             return true;
         }
 
-        if (StraightShotPvE.CanUse(out act))
+        if (!RefulgentArrowPvE.Info.EnoughLevelAndQuest() && StraightShotPvE.CanUse(out act))
         {
             return true;
         }

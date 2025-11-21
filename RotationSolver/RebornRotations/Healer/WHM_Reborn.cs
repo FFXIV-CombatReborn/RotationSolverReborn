@@ -431,7 +431,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
         {
             return true;
         }
-        if (StoneIiPvE.EnoughLevel && !StoneIiiPvE.EnoughLevel && StoneIiPvE.CanUse(out act))
+        if (StoneIiPvE.EnoughLevel && !StoneIiiPvE.Info.EnoughLevelAndQuest() && StoneIiPvE.CanUse(out act))
         {
             return true;
         }

@@ -651,7 +651,7 @@ public sealed class AST_Reborn : AstrologianRotation
         {
             return true;
         }
-        if (!MaleficIiPvE.EnoughLevel && MaleficPvE.EnoughLevel && MaleficPvE.CanUse(out act))
+        if (!MaleficIiPvE.Info.EnoughLevelAndQuest() && MaleficPvE.CanUse(out act))
         {
             return true;
         }

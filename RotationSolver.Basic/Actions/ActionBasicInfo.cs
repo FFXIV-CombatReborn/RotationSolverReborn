@@ -79,12 +79,17 @@ public readonly struct ActionBasicInfo
     /// </summary>
     public unsafe bool IsQuestUnlocked()
     {
-        if (UnlockLink == 0)
+        if (UnlockLink == 0 && _action.Setting.UnlockedByQuestID == 0)
         {
             return true;
         }
 
-        if (!UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(UnlockLink))
+        if (UnlockLink != 0 && !UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(UnlockLink))
+        {
+            return false;
+        }
+
+        if (_action.Setting.UnlockedByQuestID != 0 && !UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(_action.Setting.UnlockedByQuestID))
         {
             return false;
         }
@@ -96,6 +101,19 @@ public readonly struct ActionBasicInfo
     /// Determines whether the player's level is sufficient to use the action.
     /// </summary>
     public readonly bool EnoughLevel => Player.Level >= Level;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool EnoughLevelAndQuest()
+    {
+        if (EnoughLevel && IsQuestUnlocked())
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Determines whether the action is a PvP action.

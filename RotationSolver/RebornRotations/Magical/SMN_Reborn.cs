@@ -393,7 +393,7 @@ public sealed class SMN_Reborn : SummonerRotation
         {
             return true;
         }
-        if (DreadwyrmTrancePvE.CanUse(out act))
+        if (!SummonBahamutPvE.Info.EnoughLevelAndQuest() && DreadwyrmTrancePvE.CanUse(out act))
         {
             return true;
         }
@@ -433,7 +433,7 @@ public sealed class SMN_Reborn : SummonerRotation
             return true;
         }
 
-        if (!SummonBahamutPvE.EnoughLevel && HasHostilesInRange && AetherchargePvE.CanUse(out act))
+        if (!DreadwyrmTrancePvE.Info.EnoughLevelAndQuest() && HasHostilesInRange && AetherchargePvE.CanUse(out act))
         {
             return true;
         }
@@ -552,15 +552,15 @@ public sealed class SMN_Reborn : SummonerRotation
         {
             return true;
         }
-        if (RuinIiiPvE.CanUse(out act))
+        if (RuinIiiPvE.EnoughLevel && RuinIiiPvE.CanUse(out act))
         {
             return true;
         }
-        if (RuinIiPvE.CanUse(out act))
+        if (!RuinIiiPvE.Info.EnoughLevelAndQuest() && RuinIiPvE.EnoughLevel && RuinIiPvE.CanUse(out act))
         {
             return true;
         }
-        if (RuinPvE.CanUse(out act))
+        if (!RuinIiPvE.Info.EnoughLevelAndQuest() && RuinPvE.CanUse(out act))
         {
             return true;
         }
@@ -575,11 +575,11 @@ public sealed class SMN_Reborn : SummonerRotation
         {
             return true;
         }
-        if (SummonTitanPvE.CanUse(out act))
+        if (!SummonTitanIiPvE.EnoughLevel && SummonTitanPvE.CanUse(out act))
         {
             return true;
         }
-        if (SummonTopazPvE.CanUse(out act))
+        if (!SummonTitanPvE.Info.EnoughLevelAndQuest() && SummonTopazPvE.CanUse(out act))
         {
             return true;
         }
@@ -592,11 +592,11 @@ public sealed class SMN_Reborn : SummonerRotation
         {
             return true;
         }
-        if (SummonGarudaPvE.CanUse(out act))
+        if (!SummonGarudaIiPvE.EnoughLevel && SummonGarudaPvE.CanUse(out act))
         {
             return true;
         }
-        if (SummonEmeraldPvE.CanUse(out act))
+        if (!SummonGarudaPvE.Info.EnoughLevelAndQuest() && SummonEmeraldPvE.CanUse(out act))
         {
             return true;
         }
@@ -609,11 +609,11 @@ public sealed class SMN_Reborn : SummonerRotation
         {
             return true;
         }
-        if (SummonIfritPvE.CanUse(out act))
+        if (!SummonIfritIiPvE.EnoughLevel && SummonIfritPvE.CanUse(out act))
         {
             return true;
         }
-        if (SummonRubyPvE.CanUse(out act))
+        if (!SummonIfritPvE.Info.EnoughLevelAndQuest() && SummonRubyPvE.CanUse(out act))
         {
             return true;
         }
@@ -661,15 +661,15 @@ public sealed class SMN_Reborn : SummonerRotation
             return true;
         }
 
-        if (RubyRuinPvE.CanUse(out act))
+        if (!SummonIfritPvE.Info.EnoughLevelAndQuest() && RubyRuinPvE.CanUse(out act))
         {
             return true;
         }
-        if (EmeraldRuinPvE.CanUse(out act))
+        if (!SummonGarudaPvE.Info.EnoughLevelAndQuest() && EmeraldRuinPvE.CanUse(out act))
         {
             return true;
         }
-        if (TopazRuinPvE.CanUse(out act))
+        if (!SummonTitanPvE.Info.EnoughLevelAndQuest() && TopazRuinPvE.CanUse(out act))
         {
             return true;
         }

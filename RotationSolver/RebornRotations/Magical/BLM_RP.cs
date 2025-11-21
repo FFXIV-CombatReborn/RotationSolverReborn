@@ -127,7 +127,7 @@ public class BLM_RP : BlackMageRotation
             return true;
         }
 
-        if (ThunderPvE.CanUse(out act)
+        if (!ThunderIiiPvE.Info.EnoughLevelAndQuest() && ThunderPvE.CanUse(out act)
             && (ThunderPvE.Target.Target?.WillStatusEndGCD(ThunderPvE.Config.StatusGcdCount, 0, true, ThunderPvE.Setting.TargetStatusNeed ?? []) ?? false))
         {
             return true;
