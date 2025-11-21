@@ -301,7 +301,7 @@ public sealed class WAR_Reborn : WarriorRotation
         }
 
         // AOE
-        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && !DecimatePvE.Info.EnoughLevelAndQuest() && SteelCyclonePvE.CanUse(out act))
+        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest))
         {
             if (DecimatePvE.CanUse(out act, skipStatusProvideCheck: true))
             {
@@ -324,7 +324,7 @@ public sealed class WAR_Reborn : WarriorRotation
         }
 
         // Single Target
-        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && !FellCleavePvE.Info.EnoughLevelAndQuest() && InnerBeastPvE.CanUse(out act))
+        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest))
         {
             if (FellCleavePvE.CanUse(out act, skipStatusProvideCheck: true))
             {
