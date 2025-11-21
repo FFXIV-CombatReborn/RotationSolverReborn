@@ -78,7 +78,11 @@ public sealed class WAR_Reborn : WarriorRotation
         if (!Player.WillStatusEndGCD(2, 0, true, StatusID.SurgingTempest)
             || !StormsEyePvE.EnoughLevel)
         {
-            if (BerserkPvE.CanUse(out act))
+            if (InnerReleasePvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (!InnerReleasePvE.Info.EnoughLevelAndQuest() && BerserkPvE.CanUse(out act))
             {
                 return true;
             }
@@ -146,11 +150,7 @@ public sealed class WAR_Reborn : WarriorRotation
             {
                 return true;
             }
-        }
-
-        if ((InCombat && Player.GetHealthRatio() < HealIntuition && NumberOfHostilesInRange > 0) || (InCombat && PartyMembers.Count() is 1 && NumberOfHostilesInRange > 0))
-        {
-            if (RawIntuitionPvE.CanUse(out act))
+            if (!BloodwhettingPvE.Info.EnoughLevelAndQuest() && RawIntuitionPvE.CanUse(out act))
             {
                 return true;
             }
@@ -266,8 +266,16 @@ public sealed class WAR_Reborn : WarriorRotation
             {
                 return true;
             }
+            if (!DecimatePvE.Info.EnoughLevelAndQuest() && SteelCyclonePvE.CanUse(out act, skipStatusProvideCheck: true))
+            {
+                return true;
+            }
 
             if (FellCleavePvE.CanUse(out act, skipStatusProvideCheck: true))
+            {
+                return true;
+            }
+            if (!FellCleavePvE.Info.EnoughLevelAndQuest() && InnerBeastPvE.CanUse(out act, skipStatusProvideCheck: true))
             {
                 return true;
             }
@@ -293,14 +301,16 @@ public sealed class WAR_Reborn : WarriorRotation
         }
 
         // AOE
-        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && DecimatePvE.CanUse(out act, skipStatusProvideCheck: true))
+        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && !DecimatePvE.Info.EnoughLevelAndQuest() && SteelCyclonePvE.CanUse(out act))
         {
-            return true;
-        }
-
-        if (!SteelCycloneMasteryTrait.IsEnabled && !Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && SteelCyclonePvE.CanUse(out act))
-        {
-            return true;
+            if (DecimatePvE.CanUse(out act, skipStatusProvideCheck: true))
+            {
+                return true;
+            }
+            if (!DecimatePvE.Info.EnoughLevelAndQuest() && SteelCyclonePvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (MythrilTempestPvE.CanUse(out act))
@@ -314,14 +324,16 @@ public sealed class WAR_Reborn : WarriorRotation
         }
 
         // Single Target
-        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && FellCleavePvE.CanUse(out act, skipStatusProvideCheck: true))
+        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && !FellCleavePvE.Info.EnoughLevelAndQuest() && InnerBeastPvE.CanUse(out act))
         {
-            return true;
-        }
-
-        if (!InnerBeastMasteryTrait.IsEnabled && (!StormsEyePvE.EnoughLevel || !Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest)) && InnerBeastPvE.CanUse(out act))
-        {
-            return true;
+            if (FellCleavePvE.CanUse(out act, skipStatusProvideCheck: true))
+            {
+                return true;
+            }
+            if (!FellCleavePvE.Info.EnoughLevelAndQuest() && InnerBeastPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (StormsEyePvE.CanUse(out act))

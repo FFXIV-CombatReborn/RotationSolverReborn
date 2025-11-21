@@ -239,20 +239,13 @@ public sealed class NIN_Reborn : NinjaRotation
         if (InTrickAttack)
         {
             // If Dream Within A Dream is not yet available, checks if Assassinate can be used.
-            if (!DreamWithinADreamPvE.EnoughLevel)
+            if (DreamWithinADreamPvE.CanUse(out act))
             {
-                if (AssassinatePvE.CanUse(out act))
-                {
-                    return true;
-                }
+                return true;
             }
-            else if (DreamWithinADreamPvE.EnoughLevel)
+            if (!DreamWithinADreamPvE.Info.EnoughLevelAndQuest() && AssassinatePvE.CanUse(out act))
             {
-                // If Dream Within A Dream is available, it's set as the next action.
-                if (DreamWithinADreamPvE.CanUse(out act))
-                {
-                    return true;
-                }
+                return true;
             }
         }
 

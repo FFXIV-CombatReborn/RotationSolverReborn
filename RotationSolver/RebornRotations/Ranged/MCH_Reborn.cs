@@ -274,7 +274,7 @@ public sealed class MCH_Reborn : MachinistRotation
             {
                 return true;
             }
-            if (!HeatedSlugShotPvE.EnoughLevel && SlugShotPvE.CanUse(out act))
+            if (!HeatedSlugShotPvE.Info.EnoughLevelAndQuest() && SlugShotPvE.CanUse(out act))
             {
                 return true;
             }
@@ -399,7 +399,7 @@ public sealed class MCH_Reborn : MachinistRotation
         {
             return true;
         }
-        if (!HeatedSlugShotPvE.EnoughLevel && SlugShotPvE.CanUse(out act))
+        if (!HeatedSlugShotPvE.Info.EnoughLevelAndQuest() && SlugShotPvE.CanUse(out act))
         {
             return true;
         }
@@ -408,7 +408,7 @@ public sealed class MCH_Reborn : MachinistRotation
         {
             return true;
         }
-        if (!HeatedSplitShotPvE.EnoughLevel && SplitShotPvE.CanUse(out act))
+        if (!HeatedSplitShotPvE.Info.EnoughLevelAndQuest() && SplitShotPvE.CanUse(out act))
         {
             return true;
         }

@@ -457,7 +457,11 @@ public sealed class PLD_Reborn : PaladinRotation
             return true;
         }
 
-        if (RageOfHalonePvE.CanUse(out act))
+        if (RoyalAuthorityPvE.CanUse(out act))
+        {
+            return true;
+        }
+        if (!RoyalAuthorityPvE.Info.EnoughLevelAndQuest() && RageOfHalonePvE.CanUse(out act))
         {
             return true;
         }

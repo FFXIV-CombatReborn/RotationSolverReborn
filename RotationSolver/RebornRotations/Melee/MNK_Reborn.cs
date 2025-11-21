@@ -60,10 +60,26 @@ public sealed class MNK_Reborn : MonkRotation
             return act;
         }
         // turn on 5 chakra at -5 prepull 
-        if (remainTime <= 5 && Chakra < 5 && ForbiddenMeditationPvE.CanUse(out act))
+        if (remainTime <= 5 && Chakra < 5)
         {
-            return act;
+            if (EnlightenedMeditationPvE.CanUse(out act))
+            {
+                return act;
+            }
+            if (ForbiddenMeditationPvE.CanUse(out act))
+            {
+                return act;
+            }
+            if (InspiritedMeditationPvE.CanUse(out act))
+            {
+                return act;
+            }
+            if (!ForbiddenMeditationPvE.Info.EnoughLevelAndQuest() && SteeledMeditationPvE.CanUse(out act))
+            {
+                return act;
+            }
         }
+
         // formShift to prep opening
         return remainTime < 15 && FormShiftPvE.CanUse(out act) ? act : base.CountDownAction(remainTime);
     }
@@ -241,8 +257,13 @@ public sealed class MNK_Reborn : MonkRotation
 
         if (InBrotherhood)
         {
-            // 'If you are in brotherhood and forbidden chakra is available, use it.'
+            // 'If you are not high enough level for brotherhood, use it.'
             if (TheForbiddenChakraPvE.CanUse(out act))
+            {
+                return true;
+            }
+            // 'If you are not high enough level for TheForbiddenChakra, use immediately at 5 chakra.'
+            if (!TheForbiddenChakraPvE.Info.EnoughLevelAndQuest() && SteelPeakPvE.CanUse(out act))
             {
                 return true;
             }
@@ -254,8 +275,13 @@ public sealed class MNK_Reborn : MonkRotation
             {
                 return true;
             }
-            // 'If you are not in brotherhood use it.'
+            // 'If you are not high enough level for brotherhood, use it.'
             if (TheForbiddenChakraPvE.CanUse(out act))
+            {
+                return true;
+            }
+            // 'If you are not high enough level for TheForbiddenChakra, use immediately at 5 chakra.'
+            if (!TheForbiddenChakraPvE.Info.EnoughLevelAndQuest() && SteelPeakPvE.CanUse(out act))
             {
                 return true;
             }
@@ -267,11 +293,8 @@ public sealed class MNK_Reborn : MonkRotation
             {
                 return true;
             }
-        }
-        if (!TheForbiddenChakraPvE.EnoughLevel)
-        {
             // 'If you are not high enough level for TheForbiddenChakra, use immediately at 5 chakra.'
-            if (SteelPeakPvE.CanUse(out act))
+            if (!TheForbiddenChakraPvE.Info.EnoughLevelAndQuest() && SteelPeakPvE.CanUse(out act))
             {
                 return true;
             }
@@ -568,20 +591,21 @@ public sealed class MNK_Reborn : MonkRotation
         // out of range or nothing to do, recharge chakra first
         if (!HasHostilesInRange)
         {
-            if (!EnlightenedMeditationPvE.EnoughLevel)
+            if (EnlightenedMeditationPvE.CanUse(out act))
             {
-                if (ForbiddenMeditationPvE.CanUse(out act))
-                {
-                    return true;
-                }
+                return true;
             }
-
-            if (EnlightenedMeditationPvE.EnoughLevel)
+            if (ForbiddenMeditationPvE.CanUse(out act))
             {
-                if (EnlightenedMeditationPvE.CanUse(out act))
-                {
-                    return true;
-                }
+                return true;
+            }
+            if (InspiritedMeditationPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (!ForbiddenMeditationPvE.Info.EnoughLevelAndQuest() && SteeledMeditationPvE.CanUse(out act))
+            {
+                return true;
             }
         }
 

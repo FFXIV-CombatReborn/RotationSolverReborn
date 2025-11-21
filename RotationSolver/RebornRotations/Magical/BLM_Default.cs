@@ -631,7 +631,13 @@ public class BLM_Default : BlackMageRotation
         }
 
         //So long for thunder.
-        if (ThunderPvE.CanUse(out _) && (!ThunderPvE.Target.Target?.WillStatusEndGCD(gcdCount, 0, true,
+        if (ThunderIiiPvE.EnoughLevel && ThunderIiiPvE.CanUse(out _) && (!ThunderIiiPvE.Target.Target?.WillStatusEndGCD(gcdCount, 0, true,
+            StatusID.Thunder, StatusID.ThunderIi, StatusID.ThunderIii, StatusID.ThunderIv, StatusID.HighThunder_3872) ?? false))
+        {
+            return false;
+        }
+
+        if (!ThunderIiiPvE.Info.EnoughLevelAndQuest() && ThunderPvE.CanUse(out _) && (!ThunderPvE.Target.Target?.WillStatusEndGCD(gcdCount, 0, true,
             StatusID.Thunder, StatusID.ThunderIi, StatusID.ThunderIii, StatusID.ThunderIv, StatusID.HighThunder_3872) ?? false))
         {
             return false;
@@ -642,7 +648,12 @@ public class BLM_Default : BlackMageRotation
             return true;
         }
 
-        if (ThunderPvE.CanUse(out act))
+        if (ThunderIiiPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!ThunderIiiPvE.Info.EnoughLevelAndQuest() && ThunderPvE.CanUse(out act))
         {
             return true;
         }
