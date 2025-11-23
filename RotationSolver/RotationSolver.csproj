@@ -4,6 +4,8 @@
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	  <Platforms>x64</Platforms>
+	  <TargetFramework>net9.0-windows10.0.26100.0</TargetFramework>
+	  <SupportedOSPlatformVersion>10.0.26100.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
@@ -16,7 +18,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="ECommons" Version="3.0.1.28" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageReference Include="ExCSS" Version="4.3.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
 	  <Reference Include="Dalamud.Common">

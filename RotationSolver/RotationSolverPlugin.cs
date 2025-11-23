@@ -33,6 +33,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     private static ActionTimelineWindow? _actionTimelineWindow;
     private static WelcomeWindow? _changelogWindow;
     private static OverlayWindow? _overlayWindow;
+    private static EasterEggWindow? _easterEggWindow;
 
     private static readonly List<IDisposable> _dis = [];
     public static string Name => "Rotation Solver Reborn";
@@ -90,6 +91,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         _actionTimelineWindow = new();
         _changelogWindow = new();
         _overlayWindow = new();
+        _easterEggWindow = new();
 
         // Start cactbot bridge if enabled
         //try
@@ -113,6 +115,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         windowSystem.AddWindow(_actionTimelineWindow);
         windowSystem.AddWindow(_changelogWindow);
         windowSystem.AddWindow(_overlayWindow);
+        windowSystem.AddWindow(_easterEggWindow);
         //Notify.Success("Overlay Window was added!");
 
         Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
@@ -254,6 +257,14 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     internal static void OpenConfigWindow()
     {
         _rotationConfigWindow?.Toggle();
+    }
+
+    internal static void OpenTicTacToe()
+    {
+        if (_easterEggWindow != null)
+        {
+            _easterEggWindow.IsOpen = true;
+        }
     }
 
     internal static void UpdateDisplayWindow()

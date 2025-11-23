@@ -40,7 +40,7 @@ public class JobConfigGenerator : IIncrementalGenerator
             var key = entry.Item1.Parent!.Parent!.Parent!;
             if (!dict.TryGetValue(key, out var list))
             {
-                list = new List<(VariableDeclaratorSyntax, SemanticModel)>();
+                list = [];
                 dict[key] = list;
             }
             list.Add((entry.Item1, entry.SemanticModel));
