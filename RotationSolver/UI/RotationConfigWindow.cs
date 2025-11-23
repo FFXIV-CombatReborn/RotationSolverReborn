@@ -53,6 +53,11 @@ public partial class RotationConfigWindow : Window
     private IDalamudTextureWrap? _logoTexture;
     private DateTime _lastLogoFetchAttempt = DateTime.MinValue;
 
+    // Easter egg: press-and-hold on the RSR icon opens Tic-tac-toe
+    private double _rsrIconPressStart = -1;
+    private bool _rsrIconTriggered = false;
+    private const double RsrIconHoldSeconds = 1.2;
+
     // Hints system fields
     private static readonly string[] _usageHints =
     [
@@ -433,6 +438,17 @@ public partial class RotationConfigWindow : Window
         ImGui.SetCursorPosX(0);
         ImGuiEx.InfoMarker(diagInfo.ToString(), diagColor, FontAwesomeIcon.Cube.ToIconString(), false);
 
+        // Gold star if Tic-tac-toe win achieved
+        if (OtherConfiguration.RotationSolverRecord.TicTacToeWinStar == true)
+        {
+            ImGui.SameLine();
+            using (var starCol = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.ParsedGold))
+            {
+                ImGuiEx.Icon(FontAwesomeIcon.Star);
+            }
+            ImguiTooltips.HoveredTooltip("Tic-tac-toe winner!");
+        }
+
         if (clicked)
         {
             ImGui.SetClipboardText(diagInfo.ToString());
@@ -564,6 +580,27 @@ public partial class RotationConfigWindow : Window
                     _activeTab = RotationConfigWindowTab.About;
                     _searchResults = [];
                 }
+
+                // Detect long-press on the icon to open the Easter egg window.
+                if (ImGui.IsItemActive())
+                {
+                    double now = ImGui.GetTime();
+                    if (_rsrIconPressStart < 0)
+                    {
+                        _rsrIconPressStart = now;
+                    }
+                    else if (!_rsrIconTriggered && (now - _rsrIconPressStart) >= RsrIconHoldSeconds)
+                    {
+                        RotationSolverPlugin.OpenTicTacToe();
+                        _rsrIconTriggered = true;
+                    }
+                }
+                else
+                {
+                    _rsrIconPressStart = -1;
+                    _rsrIconTriggered = false;
+                }
+
                 ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Punchline.GetDescription());
                 if (_logoTexture?.Handle != null)
                 {
@@ -3279,7 +3316,7 @@ public partial class RotationConfigWindow : Window
                     if (i == removeIndex) continue;
                     list.Add(libs[i]);
                 }
-                OtherConfiguration.NoHostileNames[territoryId] = list.ToArray();
+                OtherConfiguration.NoHostileNames[territoryId] = [.. list];
                 _ = OtherConfiguration.SaveNoHostileNames();
             }
 
@@ -3332,7 +3369,7 @@ public partial class RotationConfigWindow : Window
                     if (i == removeIndex) continue;
                     list.Add(libs[i]);
                 }
-                OtherConfiguration.NoProvokeNames[territoryId] = list.ToArray();
+                OtherConfiguration.NoProvokeNames[territoryId] = [.. list];
                 _ = OtherConfiguration.SaveNoProvokeNames();
             }
 

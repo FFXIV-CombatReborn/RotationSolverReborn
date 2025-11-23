@@ -133,6 +133,9 @@ namespace RotationSolver.IPC
         /// <param name="stateCommand">
         /// The <see cref="StateCommandType"/> value specifying the desired operating mode, such as Off, Auto, or Manual.
         /// </param>
+        /// <param name="targetingType">
+        /// The <see cref="TargetingType"/> value specifying the desired operating mode, such as Big, LowHP, or Nearest.
+        /// </param>
         [EzIPC]
         public void AutodutyChangeOperatingMode(StateCommandType stateCommand, TargetingType targetingType)
         {
