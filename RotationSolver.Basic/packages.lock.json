@@ -64,7 +64,7 @@
       "rotationsolver.sourcegenerators": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.CodeAnalysis.CSharp": "[5.0.0, )"
+          "Microsoft.CodeAnalysis.CSharp": "[4.14.0, )"
         }
       }
     }
