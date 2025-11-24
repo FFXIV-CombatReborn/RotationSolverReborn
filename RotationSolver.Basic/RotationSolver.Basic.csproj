@@ -21,7 +21,8 @@
         <DalamudLibPath Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(HOME)/Library/Application Support/XIV on Mac/dalamud/Hooks/dev/</DalamudLibPath>
         <DalamudLibPath Condition="$(DALAMUD_HOME) != ''">$(DALAMUD_HOME)/</DalamudLibPath>
         <TargetFramework>net9.0-windows10.0.26100.0</TargetFramework>
-        <SupportedOSPlatformVersion>10.0.26100.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion>8.0</SupportedOSPlatformVersion>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       <NoWarn></NoWarn>

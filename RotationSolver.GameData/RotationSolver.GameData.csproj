@@ -6,7 +6,8 @@
     <Nullable>enable</Nullable>
     <Platforms>x64</Platforms>
     <TargetFramework>net9.0-windows10.0.26100.0</TargetFramework>
-    <SupportedOSPlatformVersion>10.0.26100.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>8.0</SupportedOSPlatformVersion>
+	<EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <ItemGroup>
