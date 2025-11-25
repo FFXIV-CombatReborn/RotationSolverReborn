@@ -2278,7 +2278,7 @@ internal static float GetTTK(this IBattleChara battleChara, bool wholeTime = fal
     {
         if (battleChara == null)
         {
-            return 0;
+            return 0; // This may need to be changed to 100
         }
 
         if (DataCenter.RefinedHP.TryGetValue(battleChara.GameObjectId, out float hp))

@@ -320,6 +320,9 @@ public partial class DutyRotation : IDisposable
         Oracle,
         Thief,
         None
+        //MysticKnight,
+        //Dancer,
+        //Gladiator
     }
 
     public static PhantomJob GetPhantomJob()
@@ -337,6 +340,10 @@ public partial class DutyRotation : IDisposable
         if (ThiefLevel > 0) return PhantomJob.Thief;
         if (SamuraiLevel > 0) return PhantomJob.Samurai;
         if (GeomancerLevel > 0) return PhantomJob.Geomancer;
+
+        //if (MysticKnightLevel > 0) return PhantomJob.MysticKnight;
+        //if (DancerLevel > 0) return PhantomJob.Dancer;
+        //if (GladiatorLevel > 0) return PhantomJob.Gladiator;
         return PhantomJob.None;
     }
 
@@ -514,6 +521,33 @@ public partial class DutyRotation : IDisposable
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
+
+    //public static byte MysticKnightLevel
+    //{
+    //    get
+    //    {
+    //        byte stacks = Player.StatusStack(true, StatusID.PhantomMysticKnight);
+    //        return stacks == byte.MaxValue ? (byte)0 : stacks;
+    //    }
+    //}
+
+    //public static byte DancerLevel
+    //{
+    //    get
+    //    {
+    //        byte stacks = Player.StatusStack(true, StatusID.PhantomDancer);
+    //        return stacks == byte.MaxValue ? (byte)0 : stacks;
+    //    }
+    //}
+
+    //public static byte GladiatorLevel
+    //{
+    //    get
+    //    {
+    //        byte stacks = Player.StatusStack(true, StatusID.PhantomGladiator);
+    //        return stacks == byte.MaxValue ? (byte)0 : stacks;
+    //    }
+    //}
 
     #endregion
     /// <summary>
