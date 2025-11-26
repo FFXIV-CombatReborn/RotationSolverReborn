@@ -596,8 +596,8 @@ internal static class DataCenter
     public static bool BaseClass()
     {
         // FFXIV base classes: 1-7, 26, 29 (GLA, PGL, MRD, LNC, ARC, CNJ, THM, ACN, ROG)
-        if (Svc.ClientState.LocalPlayer == null) return false;
-        var rowId = Svc.ClientState.LocalPlayer.ClassJob.RowId;
+        if (Svc.Objects.LocalPlayer == null) return false;
+        var rowId = Svc.Objects.LocalPlayer.ClassJob.RowId;
         return (rowId >= 1 && rowId <= 7) || rowId == 26 || rowId == 29;
     }
     #endregion

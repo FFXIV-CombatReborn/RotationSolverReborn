@@ -45,7 +45,7 @@ internal class OverlayWindow : Window
 
     public override unsafe void Draw()
     {
-        if (!HotbarHighlightManager.Enable || Svc.ClientState == null || Svc.ClientState.LocalPlayer == null)
+        if (!HotbarHighlightManager.Enable || Svc.ClientState == null || Svc.Objects.LocalPlayer == null)
         {
             return;
         }

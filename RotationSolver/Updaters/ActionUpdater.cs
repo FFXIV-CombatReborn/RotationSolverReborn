@@ -289,7 +289,7 @@ internal static class ActionUpdater
 
     private unsafe static bool IsPlayerOccupied()
     {
-        if (Svc.ClientState.LocalPlayer?.IsTargetable != true)
+        if (Svc.Objects.LocalPlayer?.IsTargetable != true)
         {
             return true;
         }

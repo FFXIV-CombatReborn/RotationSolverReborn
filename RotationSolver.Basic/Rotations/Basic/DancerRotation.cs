@@ -441,24 +441,40 @@ public partial class DancerRotation
     {
         setting.ActionCheck = () => (ActionID)JobGauge.NextStep == ActionID.EmboitePvE;
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsIntercepted = false,
+        };
     }
 
     static partial void ModifyEntrechatPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (ActionID)JobGauge.NextStep == ActionID.EntrechatPvE;
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsIntercepted = false,
+        };
     }
 
     static partial void ModifyJetePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (ActionID)JobGauge.NextStep == ActionID.JetePvE;
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsIntercepted = false,
+        };
     }
 
     static partial void ModifyPirouettePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (ActionID)JobGauge.NextStep == ActionID.PirouettePvE;
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsIntercepted = false,
+        };
     }
 
     static partial void ModifyLastDancePvE(ref ActionSetting setting)

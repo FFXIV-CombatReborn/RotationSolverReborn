@@ -134,6 +134,10 @@ public partial class SageRotation
         setting.ActionCheck = () => !HasEukrasia;
         setting.StatusProvide = [StatusID.Eukrasia];
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsIntercepted = false,
+        };
     }
 
     static partial void ModifyEukrasianDiagnosisPvE(ref ActionSetting setting)

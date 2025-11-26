@@ -201,6 +201,7 @@ public partial class NinjaRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
+            IsIntercepted = false
         };
     }
 
@@ -212,6 +213,7 @@ public partial class NinjaRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
+            IsIntercepted = false
         };
     }
 
@@ -223,6 +225,7 @@ public partial class NinjaRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
+            IsIntercepted = false
         };
     }
 
@@ -234,6 +237,7 @@ public partial class NinjaRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
+            IsIntercepted = false
         };
     }
 
@@ -245,6 +249,7 @@ public partial class NinjaRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
+            IsIntercepted = false
         };
     }
 
@@ -256,6 +261,7 @@ public partial class NinjaRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
+            IsIntercepted = false
         };
     }
     #endregion
