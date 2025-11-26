@@ -201,6 +201,20 @@ public static class StatusHelper
     ];
 
     /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] RotationLockoutStatus { get; } =
+    [
+        StatusID.Reawakened,
+        StatusID.Overheated,
+        StatusID.InnerRelease,
+        StatusID.Eukrasia,
+        StatusID.Mudra,
+        StatusID.TenChiJin,
+        StatusID.FullMetalMachinist
+    ];
+
+    /// <summary>
     /// Determines if the specified battle character has reached the maximum number of status effects.
     /// </summary>
     /// <param name="battleChara">The battle character to check.</param>

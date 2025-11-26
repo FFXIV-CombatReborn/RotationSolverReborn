@@ -21,23 +21,9 @@ public partial class DutyRotation
     #region Status Tracking
 
     /// <summary>
-    /// 
-    /// </summary>
-    public static StatusID[] RotationLockoutStatus { get; } =
-    [
-        StatusID.Reawakened,
-        StatusID.Overheated,
-        StatusID.InnerRelease,
-        StatusID.Eukrasia,
-        StatusID.Mudra,
-        StatusID.TenChiJin,
-        StatusID.FullMetalMachinist
-    ];
-
-    /// <summary>
     /// Has a status that is important to the main rotation and should prevent Duty Actions from being executed.
     /// </summary>
-    public static bool HasLockoutStatus => Player.HasStatus(true, RotationLockoutStatus) && InCombat;
+    public static bool HasLockoutStatus => Player.HasStatus(true, StatusHelper.RotationLockoutStatus) && InCombat;
 
     /// <summary>
     /// Able to execute Cleansing.

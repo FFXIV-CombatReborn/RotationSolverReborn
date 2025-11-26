@@ -306,7 +306,7 @@ public readonly struct ActionBasicInfo
 
         if (IsAbility && !IsRealGCD)
         {
-            if (ConfigurationHelper.BadStatusAbility.Contains(ActionManager.Instance()->GetActionStatus(ActionType.Ability, AdjustedID)))
+            if (ConfigurationHelper.BadStatusAbility.Contains(ActionManager.Instance()->GetActionStatus(ActionType.EventAction, AdjustedID)))
             {
                 return false;
             }
