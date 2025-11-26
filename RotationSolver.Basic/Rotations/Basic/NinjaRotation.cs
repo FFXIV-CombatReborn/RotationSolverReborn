@@ -507,6 +507,7 @@ public partial class NinjaRotation
     {
         setting.ActionCheck = () => FumaShurikenPvEReady;
         setting.MPOverride = () => 0;
+        setting.UnlockedByQuestID = 65748; // Chi quest
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -516,6 +517,7 @@ public partial class NinjaRotation
     static partial void ModifyKatonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => KatonPvEReady;
+        setting.UnlockedByQuestID = 65750; // Ten quest
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -525,18 +527,19 @@ public partial class NinjaRotation
     static partial void ModifyRaitonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => RaitonPvEReady;
+        setting.UnlockedByQuestID = 65750;
     }
 
     static partial void ModifyHyotonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HyotonPvEReady;
-        setting.UnlockedByQuestID = 68488;
+        setting.UnlockedByQuestID = 65768; // Jin quest
     }
 
     static partial void ModifyHutonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HutonPvEReady && !IsShadowWalking;
-        setting.UnlockedByQuestID = 68488;
+        setting.UnlockedByQuestID = 65768;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -547,7 +550,7 @@ public partial class NinjaRotation
     {
         setting.ActionCheck = () => DotonPvEReady;
         setting.StatusProvide = [StatusID.Doton];
-        setting.UnlockedByQuestID = 68488;
+        setting.UnlockedByQuestID = 65768;
         setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -558,13 +561,14 @@ public partial class NinjaRotation
     static partial void ModifySuitonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SuitonPvEReady;
-        setting.UnlockedByQuestID = 68488;
+        setting.UnlockedByQuestID = 65768;
         setting.StatusProvide = [StatusID.ShadowWalker];
     }
 
     static partial void ModifyGokaMekkyakuPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HasKassatsu;
+        setting.UnlockedByQuestID = 65770;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -574,6 +578,7 @@ public partial class NinjaRotation
     static partial void ModifyHyoshoRanryuPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HasKassatsu;
+        setting.UnlockedByQuestID = 65770;
     }
     #endregion
 
