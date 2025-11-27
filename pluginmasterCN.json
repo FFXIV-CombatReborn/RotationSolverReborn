@@ -1,8 +1,8 @@
 [
   {
     "Author": "The Combat Reborn Team",
-    "Name": "Rotation Solver Reborn",
-    "InternalName": "RotationSolverCN",
+    "Name": "Rotation Solver Reborn - CN",
+    "InternalName": "RotationSolver",
     "Description": "RSR 自动输出/循环（中文版）：逐帧分析战斗情况，找出下一帧最合适的技能。",
     "ApplicableVersion": "any",
     "DalamudApiLevel": 13,
