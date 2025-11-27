@@ -3998,6 +3998,11 @@ public partial class RotationConfigWindow : Window
             IPCProvider ipcProvider = new();
             ipcProvider.AutodutyChangeOperatingMode(StateCommandType.AutoDuty, TargetingType.HighHPPercent);
         }
+        if (ImGui.Button("Test Henchman IPC support"))
+        {
+            IPCProvider ipcProvider = new();
+            ipcProvider.ChangeOperatingMode(StateCommandType.Henched);
+        }
     }
 
     private static void DrawAction(ActionID id, string type)

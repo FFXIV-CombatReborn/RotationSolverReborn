@@ -289,7 +289,7 @@ public static class ObjectHelper
 
         // Tar on me
         return battleChara.TargetObject == Player.Object
-            || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId || DataCenter.CurrentTargetToHostileType switch
+            || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId || DataCenter.IsHenched || DataCenter.CurrentTargetToHostileType switch
             {
                 TargetHostileType.AllTargetsCanAttack => true,
                 TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is not null,
