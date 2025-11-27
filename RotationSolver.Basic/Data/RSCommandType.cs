@@ -131,6 +131,12 @@ public enum StateCommandType : byte
     /// </summary>
     [Description("This mode is managed by the Autoduty plugin")]
     AutoDuty,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Description("This mode is managed by the Henchman plugin")]
+    Henched,
 }
 
 /// <summary>

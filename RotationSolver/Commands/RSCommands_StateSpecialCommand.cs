@@ -1,7 +1,9 @@
 ﻿using Dalamud.Game.Config;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
+using RotationSolver.Basic.Data;
 using RotationSolver.Updaters;
+using static FFXIVClientStructs.FFXIV.Client.Game.Control.CharacterLookAtTargetParam;
 
 namespace RotationSolver.Commands
 {
@@ -252,6 +254,7 @@ public static void UpdateState(StateCommandType stateType, JobRole role)
                     DataCenter.IsManual = false;
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = false;
+                    DataCenter.IsHenched = false;
                     DataCenter.ResetAllRecords();
                     ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
                     DataCenter.TargetingTypeOverride = null;
@@ -259,33 +262,58 @@ public static void UpdateState(StateCommandType stateType, JobRole role)
                     break;
 
                 case StateCommandType.Auto:
+                    DataCenter.State = true;
                     DataCenter.IsManual = false;
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = false;
-                    DataCenter.State = true;
+                    DataCenter.IsHenched = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Auto Targeting : {DataCenter.TargetingType}"); }
                     break;
 
                 case StateCommandType.TargetOnly:
-                    DataCenter.IsAutoDuty = false;
-                    DataCenter.IsManual = false;
                     DataCenter.State = true;
+                    DataCenter.IsManual = false;
                     DataCenter.IsTargetOnly = true;
+                    DataCenter.IsAutoDuty = false;
+                    DataCenter.IsHenched = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Auto Targeting Only : {DataCenter.TargetingType}"); }
                     break;
 
                 case StateCommandType.Manual:
-                    DataCenter.IsManual = true;
                     DataCenter.State = true;
+                    DataCenter.IsManual = true;
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = false;
+                    DataCenter.IsHenched = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Manual"); }
+                    break;
+
+                case StateCommandType.AutoDuty:
+                    DataCenter.State = true;
+                    DataCenter.IsManual = false;
+                    DataCenter.IsTargetOnly = false;
+                    DataCenter.IsAutoDuty = true;
+                    DataCenter.IsHenched = false;
+                    ActionUpdater.AutoCancelTime = DateTime.MinValue;
+                    DataCenter.TargetingTypeOverride = null;
+                    if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : AutoDuty"); }
+                    break;
+
+                case StateCommandType.Henched:
+                    DataCenter.State = true;
+                    DataCenter.IsManual = true;
+                    DataCenter.IsTargetOnly = false;
+                    DataCenter.IsAutoDuty = false;
+                    DataCenter.IsHenched = true;
+                    ActionUpdater.AutoCancelTime = DateTime.MinValue;
+                    DataCenter.TargetingTypeOverride = null;
+                    if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Henched"); }
                     break;
             }
 
@@ -299,9 +327,10 @@ public static void AutodutyUpdateState(StateCommandType stateType, JobRole role,
             {
                 case StateCommandType.Off:
                     DataCenter.State = false;
-                    DataCenter.IsAutoDuty = false;
                     DataCenter.IsManual = false;
                     DataCenter.IsTargetOnly = false;
+                    DataCenter.IsAutoDuty = false;
+                    DataCenter.IsHenched = false;
                     DataCenter.ResetAllRecords();
                     ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
                     DataCenter.TargetingTypeOverride = null;
@@ -309,43 +338,58 @@ public static void AutodutyUpdateState(StateCommandType stateType, JobRole role,
                     break;
 
                 case StateCommandType.Auto:
-                    DataCenter.IsManual = false;
-                    DataCenter.IsAutoDuty = false;
-                    DataCenter.IsTargetOnly = false;
                     DataCenter.State = true;
+                    DataCenter.IsManual = false;
+                    DataCenter.IsTargetOnly = false;
+                    DataCenter.IsAutoDuty = false;
+                    DataCenter.IsHenched = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Auto Targeting : {DataCenter.TargetingType}"); }
                     break;
 
                 case StateCommandType.TargetOnly:
-                    DataCenter.IsManual = false;
-                    DataCenter.IsAutoDuty = false;
-                    DataCenter.IsTargetOnly = true;
                     DataCenter.State = true;
+                    DataCenter.IsManual = false;
+                    DataCenter.IsTargetOnly = true;
+                    DataCenter.IsAutoDuty = false;
+                    DataCenter.IsHenched = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = targetingType;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Auto Targeting Only : {DataCenter.TargetingType}"); }
                     break;
 
                 case StateCommandType.Manual:
-                    DataCenter.IsManual = true;
-                    DataCenter.IsAutoDuty = false;
-                    DataCenter.IsTargetOnly = false;
                     DataCenter.State = true;
+                    DataCenter.IsManual = true;
+                    DataCenter.IsTargetOnly = false;
+                    DataCenter.IsAutoDuty = false;
+                    DataCenter.IsHenched = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Manual"); }
                     break;
 
                 case StateCommandType.AutoDuty:
-                    DataCenter.IsManual = false;
-                    DataCenter.IsAutoDuty = true;
-                    DataCenter.IsTargetOnly = false;
                     DataCenter.State = true;
+                    DataCenter.IsManual = false;
+                    DataCenter.IsTargetOnly = false;
+                    DataCenter.IsAutoDuty = true;
+                    DataCenter.IsHenched = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = targetingType;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : AutoDuty"); }
+                    break;
+
+                case StateCommandType.Henched:
+                    DataCenter.State = true;
+                    DataCenter.IsManual = true;
+                    DataCenter.IsTargetOnly = false;
+                    DataCenter.IsAutoDuty = false;
+                    DataCenter.IsHenched = true;
+                    ActionUpdater.AutoCancelTime = DateTime.MinValue;
+                    DataCenter.TargetingTypeOverride = null;
+                    if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Henched"); }
                     break;
             }
 
