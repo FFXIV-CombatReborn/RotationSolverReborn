@@ -48,7 +48,44 @@ public partial class CustomRotation : ICustomRotation
     /// <inheritdoc/>
     public bool IsEnabled
     {
-        get => !Service.Config.DisabledJobs.Contains(Job); set => _ = value ? Service.Config.DisabledJobs.Remove(Job) : Service.Config.DisabledJobs.Add(Job);
+        get
+        {
+            var disabled = Service.Config.DisabledJobs;
+            foreach (var j in disabled)
+            {
+                if (j == Job)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        set
+        {
+            var disabled = Service.Config.DisabledJobs;
+            if (value)
+            {
+                // enable -> remove the job if present
+                _ = disabled.Remove(Job);
+            }
+            else
+            {
+                // disable -> add only if not already present (avoid LINQ)
+                bool exists = false;
+                foreach (var j in disabled)
+                {
+                    if (j == Job)
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists)
+                {
+                    disabled.Add(Job);
+                }
+            }
+        }
     }
 
     /// <inheritdoc/>

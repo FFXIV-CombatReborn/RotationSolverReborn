@@ -9,6 +9,7 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
@@ -2231,42 +2232,75 @@ internal static float GetTTK(this IBattleChara battleChara, bool wholeTime = fal
         return false;
     }
 
-    /// <summary>
-    /// Determines if the player can see the specified game object.
-    /// </summary>
-    /// <param name="battleChara">The game object to check visibility for.</param>
-    /// <param name="playerYOffset"></param>
-    /// /// <param name="targetYOffset"></param>
-    /// <returns>
-    /// <c>true</c> if the player can see the specified game object; otherwise, <c>false</c>.
-    /// </returns>
-    internal static unsafe bool CanSee(this IBattleChara battleChara, float playerYOffset = 2.0f, float targetYOffset = 2.0f)
+    private struct LosCacheEntry
     {
-        if (battleChara == null || Player.Object == null)
-            return false;
+        public Vector3 PlayerPos;
+        public Vector3 TargetPos;
+        public long ExpiresAt;
+        public bool Visible;
+    }
+    private static readonly ConcurrentDictionary<ulong, LosCacheEntry> _losCache = new();
+    private const float LosPosEpsilonSq = 0.04f;   // ~20 cm tolerance
+    private const long LosTtlMs = 33;      // one 30–60 FPS frame
 
+    // Optional: clear cache when swapping areas or if it grows too large
+    private static void MaybeResetLosCache()
+    {
+        if (Svc.Condition[ConditionFlag.BetweenAreas] || _losCache.Count > 4096)
+            _losCache.Clear();
+    }
+
+    // New overload to allow caller to supply eye position once per loop
+    internal static unsafe bool CanSeeFrom(this IBattleChara battleChara, Vector3 playerEyePos, float targetYOffset = 2.0f)
+    {
+        if (battleChara == null || Player.Object == null) return false;
         var targetStruct = battleChara.Struct();
-        if (targetStruct == null)
-            return false;
+        if (targetStruct == null) return false;
 
-        Vector3 playerPos = Player.Object.Position;
-        Vector3 targetPos = battleChara.Position;
+        MaybeResetLosCache();
 
-        playerPos.Y += playerYOffset;      // Simulate player's eye level
-        targetPos.Y += targetYOffset;      // Aim for target's center or head
+        Vector3 targetPos = battleChara.Position; targetPos.Y += targetYOffset;
+        ulong id = battleChara.GameObjectId;
+        long now = Environment.TickCount64;
 
-        Vector3 offset = targetPos - playerPos;
+        if (_losCache.TryGetValue(id, out var entry))
+        {
+            if (now <= entry.ExpiresAt &&
+                Vector3.DistanceSquared(playerEyePos, entry.PlayerPos) <= LosPosEpsilonSq &&
+                Vector3.DistanceSquared(targetPos, entry.TargetPos) <= LosPosEpsilonSq)
+            {
+                return entry.Visible;
+            }
+        }
+
+        Vector3 offset = targetPos - playerEyePos;
         float maxDist = offset.Length();
-        if (maxDist < 0.01f)
-            return true; // Same position, assume visible
+        if (maxDist < 0.01f) return true;
 
         Vector3 direction = offset / maxDist;
 
         RaycastHit hit;
         int* materialFilter = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
+        var module = Framework.Instance()->BGCollisionModule;
+        bool blocked = module->RaycastMaterialFilter(&hit, &playerEyePos, &direction, maxDist, 1, materialFilter);
 
-        return !FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->BGCollisionModule
-            ->RaycastMaterialFilter(&hit, &playerPos, &direction, maxDist, 1, materialFilter);
+        bool visible = !blocked;
+        _losCache[id] = new LosCacheEntry
+        {
+            PlayerPos = playerEyePos,
+            TargetPos = targetPos,
+            ExpiresAt = now + LosTtlMs,
+            Visible = visible
+        };
+        return visible;
+    }
+
+    // Backward-compatible existing API calls the overload
+    internal static unsafe bool CanSee(this IBattleChara battleChara, float playerYOffset = 2.0f, float targetYOffset = 2.0f)
+    {
+        if (battleChara == null || Player.Object == null) return false;
+        Vector3 playerPos = Player.Object.Position; playerPos.Y += playerYOffset;
+        return CanSeeFrom(battleChara, playerPos, targetYOffset);
     }
 
     /// <summary>

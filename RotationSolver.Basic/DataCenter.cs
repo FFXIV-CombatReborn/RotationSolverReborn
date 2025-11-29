@@ -368,11 +368,18 @@ internal static class DataCenter
     {
         get
         {
-            HashSet<ushort> allianceTerritoryIds =
+            ushort[] allianceTerritoryIds =
             [
-            151, 174, 372, 508, 556, 627, 734, 776, 826, 882, 917, 966, 1054, 1118, 1178, 1248, 1241
+                151, 174, 372, 508, 556, 627, 734, 776, 826, 882, 917, 966, 1054, 1118, 1178, 1248, 1241
             ];
-            return allianceTerritoryIds.Contains(TerritoryID);
+
+            for (int i = 0; i < allianceTerritoryIds.Length; i++)
+            {
+                if (allianceTerritoryIds[i] == TerritoryID)
+                    return true;
+            }
+
+            return false;
         }
     }
 
@@ -1150,7 +1157,15 @@ internal static class DataCenter
     public static bool IsHostileStop(IBattleChara h)
     {
         return IsHostileCastingStopBase(h,
-            (act) => act.RowId != 0 && OtherConfiguration.HostileCastingStop.Contains(act.RowId));
+            (act) =>
+            {
+                if (act.RowId == 0) return false;
+                foreach (var id in OtherConfiguration.HostileCastingStop)
+                {
+                    if (id == act.RowId) return true;
+                }
+                return false;
+            });
     }
 
     public static bool IsHostileCastingStopBase(IBattleChara h, Func<Action, bool> check)
@@ -1274,14 +1289,24 @@ internal static class DataCenter
     {
         return h != null && IsHostileCastingBase(h, (act) =>
         {
-            return OtherConfiguration.HostileCastingTank.Contains(act.RowId)
-                   || h.CastTargetObjectId == h.TargetObjectId;
+            foreach (var id in OtherConfiguration.HostileCastingTank)
+            {
+                if (id == act.RowId) return true;
+            }
+            return h.CastTargetObjectId == h.TargetObjectId;
         });
     }
 
     public static bool IsHostileCastingArea(IBattleChara h)
     {
-        return IsHostileCastingBase(h, (act) => { return OtherConfiguration.HostileCastingArea.Contains(act.RowId); });
+        return IsHostileCastingBase(h, (act) =>
+        {
+            foreach (var id in OtherConfiguration.HostileCastingArea)
+            {
+                if (id == act.RowId) return true;
+            }
+            return false;
+        });
     }
 
     public static bool AreHostilesCastingKnockback
@@ -1302,7 +1327,15 @@ internal static class DataCenter
     public static bool IsHostileCastingKnockback(IBattleChara h)
     {
         return IsHostileCastingBase(h,
-            (act) => act.RowId != 0 && OtherConfiguration.HostileCastingKnockback.Contains(act.RowId));
+            (act) =>
+            {
+                if (act.RowId == 0) return false;
+                foreach (var id in OtherConfiguration.HostileCastingKnockback)
+                {
+                    if (id == act.RowId) return true;
+                }
+                return false;
+            });
     }
 
     public static bool IsHostileCastingBase(IBattleChara h, Func<Action, bool> check)

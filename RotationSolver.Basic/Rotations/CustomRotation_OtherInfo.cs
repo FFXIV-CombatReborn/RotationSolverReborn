@@ -1,4 +1,5 @@
 ﻿using Dalamud.Game;
+using Dalamud.Game.ClientState.JobGauge.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
@@ -504,7 +505,17 @@ public partial class CustomRotation
         // Helper to lazily test & cache a status.
         bool HasPartyStatus(StatusID id)
         {
-            if (partyStatuses.Contains(id)) return true;
+            bool haspartyStatuses = false;
+            foreach (var status in partyStatuses)
+            {
+                if (status == id)
+                {
+                    haspartyStatuses = true;
+                    break;
+                }
+            }
+            if (haspartyStatuses) return true;
+
             if (partyEnum != null)
             {
                 foreach (var m in partyEnum)

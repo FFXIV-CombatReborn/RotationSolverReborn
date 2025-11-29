@@ -27,6 +27,46 @@ namespace RotationSolver.Updaters
             DisposeActionHooks();
         }
 
+        public static ActionID[] BlackListedInterceptActions { get; } =
+        [
+            // Ninja mudra actions
+            ActionID.TenPvE,
+            ActionID.TenPvE_18805,
+            ActionID.ChiPvE,
+            ActionID.ChiPvE_18806,
+            ActionID.JinPvE,
+            ActionID.JinPvE_18807,
+
+            // Dancer dance steps
+            ActionID.StandardStepPvE,
+            ActionID.TechnicalStepPvE,
+            ActionID.EmboitePvE,
+            ActionID.EntrechatPvE,
+            ActionID.JetePvE,
+            ActionID.PirouettePvE,
+            ActionID.StandardFinishPvE,
+            ActionID.TechnicalFinishPvE,
+
+            // Sage Eukrasian actions
+            ActionID.EukrasiaPvE,
+            ActionID.EukrasianDosisPvE,
+            ActionID.EukrasianDosisIiPvE,
+            ActionID.EukrasianDosisIiiPvE,
+            ActionID.EukrasianDyskrasiaPvE,
+            ActionID.EukrasianPrognosisPvE,
+            ActionID.EukrasianPrognosisIiPvE,
+        ];
+
+        private static bool BlackListedInterceptActionsContains(ActionID id)
+        {
+            var arr = BlackListedInterceptActions;
+            for (int i = 0; i < arr.Length; i++)
+            {
+                if (arr[i] == id) return true;
+            }
+            return false;
+        }
+
         private static unsafe void InitializeActionHooks()
         {
             try
@@ -87,7 +127,7 @@ namespace RotationSolver.Updaters
 
                             var matchingAction = ((ActionID)adjustedActionId).GetActionFromID(false, rotationActions, dutyActions);
 
-                            if (matchingAction != null)
+                            if (matchingAction != null && !BlackListedInterceptActionsContains((ActionID)matchingAction.ID))
                             {
                                 PluginLog.Debug($"[ActionQueueManager] Matching action decided: {matchingAction.Name} (ID: {matchingAction.ID}, AdjustedID: {matchingAction.AdjustedID})");
 
