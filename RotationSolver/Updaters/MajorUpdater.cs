@@ -148,7 +148,7 @@ internal static class MajorUpdater
             {
                 TargetUpdater.UpdateTargets();
             }
-            if (!DataCenter.IsActivated())
+            if (!_isActivatedThisCycle)
                 return;
 
             bool canDoAction = ActionUpdater.CanDoAction();
@@ -161,10 +161,7 @@ internal static class MajorUpdater
 
             MacroUpdater.UpdateMacro();
 
-            if (!autoOnEnabled)
-            {
-                TargetUpdater.UpdateTargets();
-            }
+            TargetUpdater.UpdateTargets();
 
             StateUpdater.UpdateState();
 

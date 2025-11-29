@@ -101,14 +101,6 @@ namespace RotationSolver.Basic.Helpers
         internal static unsafe IEnumerable<IBattleChara> FilterStopCharacters(IEnumerable<IBattleChara> charas)
         {
             long[] stopTargets = GetStopTargets();
-            HashSet<long> ids = new(stopTargets.Length);
-            for (int i = 0; i < stopTargets.Length; i++)
-            {
-                if (stopTargets[i] != 0)
-                {
-                    _ = ids.Add(stopTargets[i]);
-                }
-            }
 
             int capacity = (charas as ICollection<IBattleChara>)?.Count ?? 0;
             List<IBattleChara> result = capacity > 0 ? new List<IBattleChara>(capacity) : [];
@@ -117,10 +109,22 @@ namespace RotationSolver.Basic.Helpers
                 // Keep all player characters even if they are marked with stop markers
                 if (!b.IsEnemy())
                 {
+                    result.Add(b);
                     continue;
                 }
 
-                if (!ids.Contains((long)b.GameObjectId))
+                bool isStopTarget = false;
+                long charaId = (long)b.GameObjectId;
+                for (int i = 0; i < stopTargets.Length; i++)
+                {
+                    if (stopTargets[i] != 0 && stopTargets[i] == charaId)
+                    {
+                        isStopTarget = true;
+                        break;
+                    }
+                }
+
+                if (!isStopTarget)
                 {
                     result.Add(b);
                 }

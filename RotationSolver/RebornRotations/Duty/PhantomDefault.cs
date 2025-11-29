@@ -74,7 +74,7 @@ public sealed class PhantomDefault : PhantomRotation
     public float PredictJudgementThreshold { get; set; } = 0.7f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Average party HP percent to predict to heal instead of damage things", PhantomJob =PhantomJob.Oracle)]
+    [RotationConfig(CombatType.PvE, Name = "Average party HP percent to predict to heal instead of damage things", PhantomJob = PhantomJob.Oracle)]
     public float PredictBlessingThreshold { get; set; } = 0.5f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
@@ -817,7 +817,17 @@ public sealed class PhantomDefault : PhantomRotation
 
         if (_remainingCards.Count == 2) // We have a little time but need to think it through
         {
-            if (_remainingCards.Contains(StarfallPvE)) // We still have a starfall in the deck
+            bool hasStarfall = false;
+            foreach (var card in _remainingCards)
+            {
+                if (card == StarfallPvE)
+                {
+                    hasStarfall = true;
+                    break;
+                }
+            }
+
+            if (hasStarfall) // We still have a starfall in the deck
             {
                 if (_currentCard == StarfallPvE) // We've opted not to use it above, so either we're below health threshold, or are tanking and not invuln
                 {

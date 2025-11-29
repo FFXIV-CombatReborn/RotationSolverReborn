@@ -3,6 +3,7 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace RotationSolver.Updaters;
 
@@ -21,16 +22,29 @@ internal static partial class TargetUpdater
         //PluginLog.Debug("Updating targets");
         DataCenter.TargetsByRange.Clear();
         DataCenter.AllTargets = GetAllTargets();
-        if (DataCenter.AllTargets != null)
+
+        // Early-out: avoid downstream work when there are no potential targets
+        if (DataCenter.AllTargets == null || DataCenter.AllTargets.Count == 0)
         {
-            DataCenter.PartyMembers = GetPartyMembers();
-            DataCenter.AllianceMembers = GetAllianceMembers();
-            DataCenter.AllHostileTargets = GetAllHostileTargets();
-            DataCenter.DeathTarget = GetDeathTarget();
-            DataCenter.DispelTarget = GetDispelTarget();
-            DataCenter.ProvokeTarget = (DataCenter.Role == JobRole.Tank || Player.Object.HasStatus(true, StatusID.VariantUltimatumSet)) ? GetFirstHostileTarget(ObjectHelper.CanProvoke) : null; // Calculating this per frame rather than on-demand is actually a fair amount worse
-            DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt); // Tanks, Melee, RDM, and various phantom and duty actions can interrupt so just deal with it
+            DataCenter.PartyMembers.Clear();
+            DataCenter.AllianceMembers.Clear();
+            DataCenter.AllHostileTargets.Clear();
+            DataCenter.DeathTarget = null;
+            DataCenter.DispelTarget = null;
+            DataCenter.ProvokeTarget = null;
+            DataCenter.InterruptTarget = null;
+            UpdateTimeToKill();
+            return;
         }
+
+        DataCenter.PartyMembers = GetPartyMembers();
+        DataCenter.AllianceMembers = GetAllianceMembers();
+        DataCenter.AllHostileTargets = GetAllHostileTargets();
+        DataCenter.DeathTarget = GetDeathTarget();
+        DataCenter.DispelTarget = GetDispelTarget();
+        DataCenter.ProvokeTarget = (DataCenter.Role == JobRole.Tank || Player.Object.HasStatus(true, StatusID.VariantUltimatumSet)) ? GetFirstHostileTarget(ObjectHelper.CanProvoke) : null; // Calculating this per frame rather than on-demand is actually a fair amount worse
+        DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt); // Tanks, Melee, RDM, and various phantom and duty actions can interrupt so just deal with it
+
         UpdateTimeToKill();
     }
 
@@ -38,14 +52,11 @@ internal static partial class TargetUpdater
     {
         List<IBattleChara> allTargets = [];
         bool skipDummyCheck = !Service.Config.DisableTargetDummys;
-        foreach (var obj in Svc.Objects)
+        foreach (var obj in Svc.Objects.OfType<IBattleChara>())
         {
-            if (obj is IBattleChara battleChara)
+            if ((skipDummyCheck || !obj.IsDummy()) && obj.IsTargetable && obj.StatusList != null && !obj.IsPet())
             {
-                if ((skipDummyCheck || !battleChara.IsDummy()) && battleChara.StatusList != null && battleChara.IsTargetable && !battleChara.IsPet())
-                {
-                    allTargets.Add(battleChara);
-                }
+                allTargets.Add(obj);
             }
         }
         return allTargets;
@@ -104,11 +115,16 @@ internal static partial class TargetUpdater
     {
         List<IBattleChara> hostileTargets = [];
         var allTargets = DataCenter.AllTargets;
-        if (allTargets == null) return hostileTargets;
+        if (allTargets == null || allTargets.Count == 0) return hostileTargets;
+
+        // Reserve capacity to minimize internal resizes
+        if (hostileTargets.Capacity < allTargets.Count)
+            hostileTargets.Capacity = allTargets.Count;
 
         foreach (IBattleChara target in allTargets)
         {
-            if (!target.IsEnemy() || !target.IsTargetable || !target.CanSee() || target.DistanceToPlayer() >= 48)
+            Vector3 playerEye = Player.Object.Position; playerEye.Y += 2.0f;
+            if (!target.IsEnemy() || !target.IsTargetable || !target.CanSeeFrom(playerEye) || target.DistanceToPlayer() >= 48)
                 continue;
 
             bool hasInvincible = false;
@@ -119,13 +135,10 @@ internal static partial class TargetUpdater
                 for (int i = 0; i < statusCount; i++)
                 {
                     var status = statusList[i];
-                    if (status != null)
+                    if (status != null && status.StatusId != 0 && StatusHelper.IsInvincible(status))
                     {
-                        if (status.StatusId != 0 && StatusHelper.IsInvincible(status))
-                        {
-                            hasInvincible = true;
-                            break;
-                        }
+                        hasInvincible = true;
+                        break;
                     }
                 }
             }
@@ -162,75 +175,78 @@ internal static partial class TargetUpdater
 
     private static IBattleChara? GetDeathTarget()
     {
-        if (DataCenter.CanRaise())
+        if (!DataCenter.CanRaise())
         {
-            try
+            return null;
+        }
+
+        try
+        {
+            RaiseType raisetype = Service.Config.RaiseType;
+
+            // Collect party deaths and track by id for O(1) membership tests
+            var validRaiseTargets = new List<IBattleChara>();
+            var deathPartyIds = new HashSet<ulong>();
+            if (DataCenter.PartyMembers != null)
             {
-                RaiseType raisetype = Service.Config.RaiseType;
-
-                // Use HashSet for fast lookup
-                var deathParty = new HashSet<IBattleChara>();
-                if (DataCenter.PartyMembers != null)
+                foreach (var target in DataCenter.PartyMembers.GetDeath())
                 {
-                    foreach (var target in DataCenter.PartyMembers.GetDeath())
-                    {
-                        deathParty.Add(target);
-                    }
+                    validRaiseTargets.Add(target);
+                    _ = deathPartyIds.Add(target.GameObjectId);
                 }
+            }
 
-                var validRaiseTargets = new List<IBattleChara>(deathParty);
-
+            // Add alliance candidates depending on raise mode without N^2 checks
+            if (DataCenter.AllianceMembers != null)
+            {
                 if (raisetype == RaiseType.PartyAndAllianceSupports || raisetype == RaiseType.PartyAndAllianceHealers)
                 {
-                    if (DataCenter.AllianceMembers != null)
+                    foreach (var member in DataCenter.AllianceMembers.GetDeath())
                     {
-                        foreach (var member in DataCenter.AllianceMembers.GetDeath())
+                        if (deathPartyIds.Contains(member.GameObjectId)) continue;
+                        if (raisetype == RaiseType.PartyAndAllianceHealers)
                         {
-                            if (!deathParty.Contains(member))
-                            {
-                                if (raisetype == RaiseType.PartyAndAllianceHealers && member.IsJobCategory(JobRole.Healer))
-                                    validRaiseTargets.Add(member);
-                                else if (raisetype == RaiseType.PartyAndAllianceSupports && (member.IsJobCategory(JobRole.Healer) || member.IsJobCategory(JobRole.Tank)))
-                                    validRaiseTargets.Add(member);
-                            }
+                            if (member.IsJobCategory(JobRole.Healer)) validRaiseTargets.Add(member);
+                        }
+                        else // PartyAndAllianceSupports
+                        {
+                            if (member.IsJobCategory(JobRole.Healer) || member.IsJobCategory(JobRole.Tank)) validRaiseTargets.Add(member);
                         }
                     }
                 }
                 else if (raisetype == RaiseType.All || raisetype == RaiseType.AllOutOfDuty)
                 {
-                    if (DataCenter.AllianceMembers != null)
+                    foreach (var target in DataCenter.AllianceMembers.GetDeath())
                     {
-                        foreach (var target in DataCenter.AllianceMembers.GetDeath())
+                        if (!deathPartyIds.Contains(target.GameObjectId))
                         {
-                            if (!deathParty.Contains(target))
-                            {
-                                validRaiseTargets.Add(target);
-                            }
+                            validRaiseTargets.Add(target);
                         }
                     }
                 }
-
-                // Apply raise delay
-                if (raisetype == RaiseType.PartyOnly)
-                {
-                    _raisePartyTargets.Delay(validRaiseTargets);
-                    validRaiseTargets = [.. _raisePartyTargets];
-                }
-                else
-                {
-                    _raiseAllTargets.Delay(validRaiseTargets);
-                    validRaiseTargets = [.. _raiseAllTargets];
-                }
-
-                // Only use the current RaiseType
-                return GetPriorityDeathTarget(validRaiseTargets, raisetype);
             }
-            catch (Exception ex)
+
+            // Apply raise delay without allocating a new list per frame
+            if (raisetype == RaiseType.PartyOnly)
             {
-                PluginLog.Error($"Error in GetDeathTarget: {ex.Message}");
+                _raisePartyTargets.Delay(validRaiseTargets);
+                validRaiseTargets.Clear();
+                foreach (var p in _raisePartyTargets) validRaiseTargets.Add(p);
             }
+            else
+            {
+                _raiseAllTargets.Delay(validRaiseTargets);
+                validRaiseTargets.Clear();
+                foreach (var p in _raiseAllTargets) validRaiseTargets.Add(p);
+            }
+
+            return GetPriorityDeathTarget(validRaiseTargets, raisetype);
         }
-        return null;
+        catch (Exception ex)
+        {
+            PluginLog.Error($"Error in GetDeathTarget: {ex.Message}");
+            return null;
+        }
     }
 
     private static IBattleChara? GetPriorityDeathTarget(List<IBattleChara> validRaiseTargets, RaiseType raiseType = RaiseType.PartyOnly)
@@ -295,33 +311,33 @@ internal static partial class TargetUpdater
         if (Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or Job.BRD or Job.CNJ)
         {
             List<IBattleChara> weakenPeople = [];
-            List<IBattleChara> dyingPeople = [];
-
             AddDispelTargets(DataCenter.PartyMembers, weakenPeople);
 
-            // Apply dispel delay
+            // Apply dispel delay to the candidate list
             _dispelPartyTargets.Delay(weakenPeople);
-            var delayedWeakenPeople = new List<IBattleChara>();
-            foreach (var person in _dispelPartyTargets)
-            {
-                delayedWeakenPeople.Add(person);
-            }
 
-            var CanDispelNonDangerous = !DataCenter.MergedStatus.HasFlag(AutoStatus.HealAreaAbility)
-                    && !DataCenter.MergedStatus.HasFlag(AutoStatus.HealAreaSpell)
-                    && !DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleAbility)
-                    && !DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleSpell)
-                    && !DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea)
-                    && !DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseSingle);
+            var canDispelNonDangerous = !DataCenter.MergedStatus.HasFlag(AutoStatus.HealAreaAbility)
+                                        && !DataCenter.MergedStatus.HasFlag(AutoStatus.HealAreaSpell)
+                                        && !DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleAbility)
+                                        && !DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleSpell)
+                                        && !DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea)
+                                        && !DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseSingle);
 
-            foreach (IBattleChara person in delayedWeakenPeople)
+            // Single-pass selection over the delayed set to avoid extra list allocations
+            IBattleChara? closestDangerous = null;
+            float closestDangerousDist = float.MaxValue;
+            IBattleChara? closestNonDangerous = null;
+            float closestNonDangerousDist = float.MaxValue;
+
+            foreach (IBattleChara person in _dispelPartyTargets)
             {
                 bool hasDangerous = false;
-                if (person.StatusList != null)
+                var statusList = person.StatusList;
+                if (statusList != null)
                 {
-                    for (int i = 0; i < person.StatusList.Length; i++)
+                    for (int i = 0, n = statusList.Length; i < n; i++)
                     {
-                        Dalamud.Game.ClientState.Statuses.Status? status = person.StatusList[i];
+                        var status = statusList[i];
                         if (status != null && status.IsDangerous())
                         {
                             hasDangerous = true;
@@ -329,25 +345,34 @@ internal static partial class TargetUpdater
                         }
                     }
                 }
+
+                float dist = ObjectHelper.DistanceToPlayer(person);
                 if (hasDangerous)
                 {
-                    dyingPeople.Add(person);
+                    if (dist < closestDangerousDist)
+                    {
+                        closestDangerousDist = dist;
+                        closestDangerous = person;
+                    }
+                }
+                else if (dist < closestNonDangerousDist)
+                {
+                    closestNonDangerousDist = dist;
+                    closestNonDangerous = person;
                 }
             }
 
-            // Allow non-dangerous dispels when either we're in a safe context or explicitly configured to do so.
-            bool allowNonDangerous = CanDispelNonDangerous
+            bool allowNonDangerous = canDispelNonDangerous
                                      || !DataCenter.HasHostilesInRange
                                      || Service.Config.DispelAll
                                      || DataCenter.IsPvP;
 
-            IBattleChara? dangerousTarget = GetClosestTarget(dyingPeople);
             if (!allowNonDangerous)
             {
-                return dangerousTarget;
+                return closestDangerous;
             }
 
-            return dangerousTarget ?? GetClosestTarget(delayedWeakenPeople);
+            return closestDangerous ?? closestNonDangerous;
         }
         return null;
     }

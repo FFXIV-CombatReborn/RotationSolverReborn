@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+﻿using Dalamud.Game.ClientState.JobGauge.Enums;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.ExcelServices;
 
 namespace RotationSolver.Basic.Rotations.Duties;
@@ -564,7 +565,18 @@ public partial class DutyRotation : IDisposable
             {
                 var attr = p.GetCustomAttribute<IDAttribute>();
                 uint id = attr != null ? attr.ID : uint.MaxValue;
-                if (DataCenter.DutyActions.Contains(id))
+
+                bool hasdutyAction = false;
+                foreach (var dutyaction in DataCenter.DutyActions)
+                {
+                    if (dutyaction == id)
+                    {
+                        hasdutyAction = true;
+                        break;
+                    }
+                }
+
+                if (hasdutyAction)
                 {
                     propertiesList.Add(p);
                 }

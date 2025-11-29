@@ -426,9 +426,7 @@ public sealed class MNK_Reborn : MonkRotation
             return base.GeneralGCD(out act);
         }
 
-        // bullet proofed finisher - use when during burst
-        // or if burst was missed, and next burst is not arriving in time, use it better than waste it, otherwise, hold it for next rof
-        if (!BeastChakras.Contains(BeastChakra.None))
+        if (!BeastChakrasContains(BeastChakra.None))
         {
             switch (MBAbilities)
             {
@@ -543,17 +541,17 @@ public sealed class MNK_Reborn : MonkRotation
         // Gain Solar Nadi through 3 different forms
         if (HasPerfectBalance && !HasSolar && EnhancedPerfectBalanceTrait.EnoughLevel)
         {
-            if (!BeastChakras.Contains(BeastChakra.Raptor) && RaptorForm(out act))
+            if (!BeastChakrasContains(BeastChakra.Raptor) && RaptorForm(out act))
             {
                 return true;
             }
 
-            if (!BeastChakras.Contains(BeastChakra.Coeurl) && CoerlForm(out act))
+            if (!BeastChakrasContains(BeastChakra.Coeurl) && CoerlForm(out act))
             {
                 return true;
             }
 
-            if (!BeastChakras.Contains(BeastChakra.OpoOpo) && OpoOpoForm(out act))
+            if (!BeastChakrasContains(BeastChakra.OpoOpo) && OpoOpoForm(out act))
             {
                 return true;
             }

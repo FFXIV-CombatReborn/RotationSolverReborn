@@ -111,10 +111,23 @@ public static class Watcher
                             DataCenter.KnockbackFinished = DateTime.Now + TimeSpan.FromSeconds(knock.Value.Distance / (float)knock.Value.Speed);
                         }
 
-                        if (set.Action.HasValue && !OtherConfiguration.HostileCastingKnockback.Contains(set.Action.Value.RowId) && Service.Config.RecordKnockbackies)
+                        if (set.Action.HasValue && Service.Config.RecordKnockbackies)
                         {
-                            _ = OtherConfiguration.HostileCastingKnockback.Add(set.Action.Value.RowId);
-                            _ = OtherConfiguration.Save();
+                            bool isContained = false;
+                            foreach (var id in OtherConfiguration.HostileCastingKnockback)
+                            {
+                                if (id == set.Action.Value.RowId)
+                                {
+                                    isContained = true;
+                                    break;
+                                }
+                            }
+
+                            if (!isContained)
+                            {
+                                _ = OtherConfiguration.HostileCastingKnockback.Add(set.Action.Value.RowId);
+                                _ = OtherConfiguration.Save();
+                            }
                         }
                     }
                     break;
@@ -139,7 +152,17 @@ public static class Watcher
 
                     foreach (var effect in set.TargetEffects)
                     {
-                        if (partyIds.Contains(effect.TargetID) &&
+                        bool isPartyMember = false;
+                        foreach (var pId in partyIds)
+                        {
+                            if (pId == effect.TargetID)
+                            {
+                                isPartyMember = true;
+                                break;
+                            }
+                        }
+
+                        if (isPartyMember &&
                             effect.GetSpecificTypeEffect(ActionEffectType.Damage, out var damageEffect) &&
                             (damageEffect.value > 0 || (damageEffect.param0 & 6) == 6))
                         {

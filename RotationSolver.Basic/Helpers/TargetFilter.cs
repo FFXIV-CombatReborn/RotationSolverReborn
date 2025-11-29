@@ -160,7 +160,11 @@ public static bool IsJobCategory(this IBattleChara battleChara, JobRole role)
 
     private static bool IsJobs(this IGameObject battleChara, HashSet<byte> validJobs)
     {
-        return battleChara is IBattleChara b && validJobs != null && validJobs.Contains((byte)b.ClassJob.Value.RowId);
+        if (battleChara is IBattleChara b && validJobs != null)
+        {
+            return validJobs.TryGetValue((byte)b.ClassJob.Value.RowId, out _);
+        }
+        return false;
     }
     #endregion
 

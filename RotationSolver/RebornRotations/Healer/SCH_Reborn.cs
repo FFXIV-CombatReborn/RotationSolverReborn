@@ -686,7 +686,7 @@ public sealed class SCH_Reborn : ScholarRotation
                 return true; // This is better against 2 targets IFF it will last >= 24 seconds
             }
 
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 0)
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 0 && InCombat)
             {
                 return true;
             }
@@ -703,7 +703,7 @@ public sealed class SCH_Reborn : ScholarRotation
                 return true; // This is better against 3 targets IFF it will last >= 24 seconds
             }
 
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1)
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1 && InCombat)
             {
                 return true;
             }
@@ -713,7 +713,7 @@ public sealed class SCH_Reborn : ScholarRotation
                 return true;
             }
 
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 0)
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 0 && InCombat)
             {
                 return true;
             }
@@ -725,7 +725,7 @@ public sealed class SCH_Reborn : ScholarRotation
                 return true; // This is better against 3 targets IFF it will last >= 24 seconds
             }
 
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1)
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1 && InCombat)
             {
                 return true;
             }
@@ -742,7 +742,7 @@ public sealed class SCH_Reborn : ScholarRotation
                 return true; // This is better against 4 targets IFF it will last >= 27 seconds
             }
 
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1)
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1 && InCombat)
             {
                 return true;
             }
@@ -759,7 +759,7 @@ public sealed class SCH_Reborn : ScholarRotation
                 return true; // This is better against 4 targets IFF it will last >= 27 seconds
             }
 
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1)
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1 && InCombat)
             {
                 return true;
             }

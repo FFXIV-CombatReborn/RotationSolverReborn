@@ -135,7 +135,7 @@ public enum StateCommandType : byte
     /// <summary>
     /// 
     /// </summary>
-    [Description("This mode is managed by the Henchman plugin")]
+    [Description("This mode is managed by the Henchman plugin, or any other plugin that requires RSR just do rotation and not targetting.")]
     Henched,
 }
 
