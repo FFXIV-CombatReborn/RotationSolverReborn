@@ -78,7 +78,7 @@
         <Using Include="Dalamud.Bindings.ImGui" />
         <Using Include="Newtonsoft.Json" />
 
-        <PackageReference Include="ECommons" Version="3.0.1.28" />
+        <PackageReference Include="ECommons" Version="3.0.1.29" />
 
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
 

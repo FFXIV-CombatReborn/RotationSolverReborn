@@ -5,6 +5,7 @@ using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using Lumina.Excel.Sheets;
+using RotationSolver.Basic.Actions;
 using RotationSolver.Commands;
 using RotationSolver.UI.HighlightTeachingMode;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
@@ -355,7 +356,15 @@ internal static class MajorUpdater
 
                         if (closestEnemy != null)
                         {
-                            Svc.Targets.Target = closestEnemy;
+                            if (!Service.Config.TargetDelayEnable)
+                            {
+                                Svc.Targets.Target = closestEnemy;
+                            }
+                            // Respect TargetDelay before auto-targeting the closest enemy
+                            if (Service.Config.TargetDelayEnable)
+                            {
+                                RSCommands.SetTargetWithDelay(closestEnemy);
+                            }
                             PluginLog.Information($"Targeting {closestEnemy}");
                         }
                     }
