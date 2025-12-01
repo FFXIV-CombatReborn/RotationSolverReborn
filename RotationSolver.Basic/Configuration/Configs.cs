@@ -842,10 +842,14 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig, Section = 1)]
     private static readonly bool _targetFatePriority = true;
 
-    [UI("Range of time before locking onto aggro'd or new target to attack", Description = "(Do not set too low, can rip newly aggro'd dungeon mobs off tanks).",
+    [ConditionBool, UI("Delay autotarget. (Experimental)",
         Filter = TargetConfig)]
+    private static readonly bool _targetDelayEnable = false;
+
+    [UI("Range of time before locking onto aggro'd or new target to attack", Description = "(Do not set too low, can rip newly aggro'd dungeon mobs off tanks).",
+        Filter = TargetConfig, Parent = nameof(TargetDelayEnable))]
     [Range(0, 3, ConfigUnitType.Seconds)]
-    public Vector2 TargetDelay { get; set; } = new(1, 2);
+    public Vector2 TargetDelay { get; set; } = new(0f, 0f);
 
     [UI("The size of the sector angle that can be selected as the moveable target",
         Description = "If the selection mode is based on character facing, i.e., targets within the character's viewpoint are moveable targets.\nIf the selection mode is screen-centered, i.e., targets within a sector drawn upward from the character's point are movable targets.",

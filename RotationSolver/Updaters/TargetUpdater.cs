@@ -3,7 +3,6 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace RotationSolver.Updaters;
 
@@ -13,6 +12,7 @@ internal static partial class TargetUpdater
         _raisePartyTargets = new(() => Service.Config.RaiseDelay2),
         _raiseAllTargets = new(() => Service.Config.RaiseDelay2),
         _dispelPartyTargets = new(() => Service.Config.EsunaDelay);
+
 
     private static DateTime _lastUpdateTimeToKill = DateTime.MinValue;
     private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(1);
@@ -150,6 +150,7 @@ internal static partial class TargetUpdater
 
             hostileTargets.Add(target);
         }
+
         return hostileTargets;
     }
 

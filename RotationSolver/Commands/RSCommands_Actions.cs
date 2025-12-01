@@ -199,6 +199,41 @@ namespace RotationSolver.Commands
             }, TimeSpan.FromSeconds(time));
         }
 
+        // Schedule locking onto a candidate target after a random delay in Configs.TargetDelay
+        internal static void SetTargetWithDelay(IGameObject? candidate)
+        {
+            if (candidate == null)
+            {
+                return;
+            }
+
+            // If no delay configured, set immediately
+            float min = Service.Config.TargetDelay.X;
+            float max = Service.Config.TargetDelay.Y;
+            double delay = Math.Max(0, min + (random.NextDouble() * Math.Max(0, max - min)));
+            if (delay <= 0)
+            {
+                Svc.Targets.Target = candidate;
+                return;
+            }
+
+            // Capture the current target so we don't override user/rotation changes made during the delay
+            IGameObject? initialTarget = Svc.Targets.Target;
+            _ = Svc.Framework.RunOnTick(() =>
+            {
+                try
+                {
+                    var current = Svc.Targets.Target;
+                    // Only set if target state hasn’t changed and the candidate is still valid
+                    if (current == initialTarget && candidate.IsTargetable)
+                    {
+                        Svc.Targets.Target = candidate;
+                    }
+                }
+                catch { /* swallow */ }
+            }, TimeSpan.FromSeconds(delay));
+        }
+
         internal static void ResetSpecial()
         {
             DoSpecialCommandType(SpecialCommandType.EndSpecial, false);
@@ -224,7 +259,15 @@ namespace RotationSolver.Commands
                         (Service.Config.SwitchTargetFriendly || ((Svc.Targets.Target?.IsEnemy() ?? true)
                         || Svc.Targets.Target.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
                     {
-                        Svc.Targets.Target = target;
+                        if (!Service.Config.TargetDelayEnable)
+                        {
+                            Svc.Targets.Target = target;
+                        }
+                        // Respect TargetDelay before locking onto a new hostile target
+                        if (Service.Config.TargetDelayEnable)
+                        {
+                            SetTargetWithDelay(target);
+                        }
                     }
                 }
             }

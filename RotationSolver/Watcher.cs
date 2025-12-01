@@ -50,12 +50,12 @@ public static class Watcher
                     if (doc.RootElement.TryGetProperty("DalamudBetaKind", out var kindProp))
                     {
                         string? type = kindProp.GetString();
-                        result = string.IsNullOrEmpty(type) ? release : type; // Return the actual string or default to "release"
+                        result = string.IsNullOrEmpty(type) ? release : type;
                     }
                 }
                 catch
                 {
-                    result = release; // Default to "release" on error
+                    result = release;
                 }
             }
         }
