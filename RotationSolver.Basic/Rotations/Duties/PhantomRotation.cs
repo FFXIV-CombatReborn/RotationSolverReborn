@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game.Event;
+﻿using ECommons.ExcelServices;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
 namespace RotationSolver.Basic.Rotations.Duties;
 
@@ -44,6 +45,11 @@ public partial class DutyRotation
     /// Able to execute Blessing.
     /// </summary>
     public static bool HasBlessing => Player.HasStatus(true, StatusID.PredictionOfBlessing) || Player.HasStatus(false, StatusID.PredictionOfBlessing);
+
+    /// <summary>
+    ///
+    /// </summary>
+    public static bool NeedsViperBuffs => DataCenter.Job == Job.VPR && (!ViperRotation.HasHunterAndSwift || ViperRotation.WillSwiftEnd || ViperRotation.WillHunterEnd);
     #endregion
 
     #region Freelancer
