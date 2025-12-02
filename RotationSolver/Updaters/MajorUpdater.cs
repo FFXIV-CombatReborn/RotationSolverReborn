@@ -1,11 +1,9 @@
 using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.Config;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using Lumina.Excel.Sheets;
-using RotationSolver.Basic.Actions;
 using RotationSolver.Commands;
 using RotationSolver.UI.HighlightTeachingMode;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;

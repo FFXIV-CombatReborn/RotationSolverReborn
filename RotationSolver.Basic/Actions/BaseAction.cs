@@ -210,7 +210,7 @@ public class BaseAction : IBaseAction
 
         if (!skipTTKCheck)
         {
-            if (!DataCenter.IsPvP || !Service.Config.IgnorePvPttk)
+            if (!DataCenter.IsPvP || (DataCenter.IsPvP && !Service.Config.IgnorePvPttk))
             {
                 if (!IsTimeToKillValid())
                 {
