@@ -225,8 +225,7 @@ internal partial class Configs : IPluginConfiguration
     /// Allow usage of healing abilities when not playing as a healer (such as Vercure, Bloodbath, etc.)
     /// </markdown>
     [ConditionBool, UI("Use healing abilities when playing a non-healer role.",
-        Filter = HealingActionCondition, Section = 1,
-        PvEFilter = JobFilterType.NoHealer, PvPFilter = JobFilterType.NoJob)]
+        Filter = HealingActionCondition, Section = 1)]
     private static readonly bool _useHealWhenNotAHealer = true;
 
     [JobConfig, UI("Use interrupt abilities if possible.",
@@ -301,6 +300,10 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Show tooltips",
         Filter = UiInformation)]
     private static readonly bool _showTooltips = true;
+
+    [ConditionBool, UI("Show Action Context Menu Enable/Disable toggle",
+        Filter = UiWindows)]
+    private static readonly bool _showContext = true;
 
     [ConditionBool, UI("Show random usage hints at top of configuration window",
         Description = "Displays rotating tips in the main panel; updates every 7 seconds.",
@@ -380,7 +383,7 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Use movement speed increase abilities when out of combat and out of duty.", Parent = nameof(UseAbility))]
     private static readonly bool _autoSpeedOutOfCombatNoDuty = false;
 
-    [ConditionBool, UI("Use beneficial ground-targeted actions", Description = "1.    Self-Target Fallback:\r\nIf range is zero, always targets the player and returns all affectable targets at the player's position.\r\n2.    Preferred Positions (OnLocations):\r\n•    Tries to get predefined beneficial positions for the current territory.\r\n•    If none are found and the content is a trial or raid, uses fallback points (e.g., 0,0 or 100,100 point as those are the center of arenas most of the time).\r\n•    Picks the closest point to the player, applies a small random offset, and checks if it’s within effect range.\r\n•    If so, returns that as the target area.\r\n3.    Boss Positional Fallback:\r\n•    If the current target is a boss with positional requirements and within range, uses the boss’s position (or a point within range) as the target area.\r\n4.    Party Member Fallback:\r\n•    Gathers party members within range + effect range.\r\n•    Attempts to find a party member who is being attacked (tank or focus target).\r\n•    If found, calculates whether to stay at the player’s position or move closer to the tank, based on distances and effect range.\r\n•    If not found or not needed, defaults to the player’s position.", Filter = HealingActionCondition, Section = 3)]
+    [ConditionBool, UI("Use beneficial ground-targeted actions", Description = "1.    Self-Target Fallback:\r\nIf range is zero, always targets the player and returns all affectable targets at the player's position.\r\n2.    Preferred Positions (OnLocations):\r\n•    Tries to get predefined beneficial positions for the current territory.\r\n•    If none are found and the content is a trial or raid, uses fallback points (e.g., 0,0 or 100,100 point as those are the center of arenas most of the time).\r\n•    Picks the closest point to the player, applies a small random offset, and checks if it’s within effect range.\r\n•    If so, returns that as the target area.\r\n3.    Boss Positional Fallback:\r\n•    If the current target is a boss with positional requirements and within range, uses the boss’s position (or a point within range) as the target area.\r\n4.    Party Member Fallback:\r\n•    Gathers party members within range + effect range.\r\n•    Attempts to find a party member who is being attacked (tank or focus target).\r\n•    If found, calculates whether to stay at the player’s position or move closer to the tank, based on distances and effect range.\r\n•    If not found or not needed, defaults to the player’s position.", Section = 3)]
     private static readonly bool _useGroundBeneficialAbility = true;
 
     /// <markdown file="Auto" name="Use beneficial ground-targeted actions when moving" section="Healing Usage and Control">
@@ -432,14 +435,12 @@ internal partial class Configs : IPluginConfiguration
     /// When enabled and not a healer, skills that can target someone and heal will only target you.
     /// </markdown>
     [ConditionBool, UI("Only heal self when not a Healer",
-        Filter = HealingActionCondition, Section = 1,
-        PvPFilter = JobFilterType.NoHealer, PvEFilter = JobFilterType.NoHealer)]
+        Filter = HealingActionCondition, Section = 1)]
     private static readonly bool _onlyHealSelfWhenNoHealer = false;
 
     [ConditionBool, UI("Only use healing abilities as a non-healer if there are no living healers in the party.",
     Description = "When enabled, non-healer jobs (such as DPS or tanks) will only use healing abilities if there are no healers in the party, or if all healers are incapacitated (at 0 HP). \r\nIf at least one healer is alive, non-healers will not use healing abilities.",
-    Filter = HealingActionCondition, Section = 1,
-    PvPFilter = JobFilterType.NoHealer, PvEFilter = JobFilterType.NoHealer)]
+    Filter = HealingActionCondition, Section = 1)]
     private static readonly bool _onlyHealAsNonHealIfNoHealers = false;
 
     [ConditionBool, UI("Show toggled setting and new value in chat.",
@@ -485,20 +486,17 @@ internal partial class Configs : IPluginConfiguration
     public float HealWhenNothingTodoBelow { get; set; } = 0.8f;
 
     [UI("Heal tank first if their HP is lower than this.",
-        Filter = HealingActionCondition, Section = 1,
-        PvEFilter = JobFilterType.Healer, PvPFilter = JobFilterType.Healer)]
+        Filter = HealingActionCondition, Section = 1)]
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthTankRatio { get; set; } = 0.45f;
 
     [UI("Heal healer first if their HP is lower than this.",
-        Filter = HealingActionCondition, Section = 1,
-        PvEFilter = JobFilterType.Healer, PvPFilter = JobFilterType.Healer)]
+        Filter = HealingActionCondition, Section = 1)]
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthHealerRatio { get; set; } = 0.4f;
 
     [UI("Heal self first if your HP is lower than this.",
-        Filter = HealingActionCondition, Section = 1,
-        PvEFilter = JobFilterType.Healer, PvPFilter = JobFilterType.Healer)]
+        Filter = HealingActionCondition, Section = 1)]
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthSelfRatio { get; set; } = 0.4f;
 
@@ -508,8 +506,7 @@ internal partial class Configs : IPluginConfiguration
     private static readonly bool _raisePlayerFirst = false;
 
     [JobConfig, UI("Raise player by using Swiftcast/Dualcast if available", Description = "If this is disabled, you will never use Swiftcast/Dualcast to raise players.",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+        Filter = HealingActionCondition, Section = 2)]
     private static readonly bool _raisePlayerBySwift = true;
 
     [JobConfig, UI("Hard cast Raise logic",
@@ -540,8 +537,7 @@ internal partial class Configs : IPluginConfiguration
     /// if your co-healer manages to raise your target within your global cooldown period.
     /// </markdown>
     [JobConfig, UI("How early before next GCD should RSR use swiftcast for raise (Experimental)",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+        Filter = HealingActionCondition, Section = 2)]
     [Range(0, 1.0f, ConfigUnitType.Seconds, 0.01f)]
     public float SwiftcastBuffer { get; set; } = 0.6f;
 
@@ -550,21 +546,18 @@ internal partial class Configs : IPluginConfiguration
     /// between the two values.
     /// </markdown>
     [UI("Random delay range for resurrecting players.",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+        Filter = HealingActionCondition, Section = 2)]
     [Range(0, 10, ConfigUnitType.Seconds, 0.002f)]
     public Vector2 RaiseDelay2 { get; set; } = new(3f, 3f);
 
     [UI("Random delay range for dispelling statuses.",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Dispel, PvPFilter = JobFilterType.NoJob)]
+        Filter = HealingActionCondition, Section = 2)]
     [Range(0, 10, ConfigUnitType.Seconds, 0.002f)]
     public Vector2 EsunaDelay { get; set; } = new(0f, 0f);
 
     [Range(0, 10000, ConfigUnitType.None, 100)]
     [UI("Never raise player if MP is less than this",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+        Filter = HealingActionCondition, Section = 2)]
     public int LessMPNoRaise { get; set; } = 2400;
 
     /// <markdown file="Extra" name="HP standard deviation for using AoE heal">

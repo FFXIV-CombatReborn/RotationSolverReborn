@@ -2,6 +2,7 @@
 using Dalamud.Game.Gui.ContextMenu;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
+using ECommons.GameHelpers;
 
 namespace RotationSolver.UI;
 
@@ -49,6 +50,24 @@ internal static class ActionContextMenu
     private static void OnHoveredActionChanged(object? sender, HoveredAction hoveredAction)
     {
         currentHoveredActionId = hoveredAction.ActionID;
+        if (!Service.Config.ShowContext)
+        {
+            currentContextAction = null;
+            return;
+        }
+
+        Svc.Log.Verbose($"HoveredAction changed: {hoveredAction.ActionKind.ToString()}");
+
+        if (!Player.Available)
+        {
+            currentContextAction = null;
+            return;
+        }
+        if (hoveredAction.ActionKind != HoverActionKind.Action)
+        {
+            currentContextAction = null;
+            return;
+        }
         if (hoveredAction.ActionID != 0)
         {
             try
@@ -77,6 +96,11 @@ internal static class ActionContextMenu
     //This is a Dalamud issue that I will need to fix and PR to them.
     private static void AddActionMenu(IMenuOpenedArgs args)
     {
+        if (!Service.Config.ShowContext)
+        {   
+            return;
+        }
+
         if (DataCenter.Role == JobRole.DiscipleOfTheLand || DataCenter.Role == JobRole.DiscipleOfTheHand)
         {
             return;
@@ -90,8 +114,13 @@ internal static class ActionContextMenu
             return;
         }
 
+        if (!contextAction.Info.IsAbility && !contextAction.Info.IsRealGCD && !contextAction.Info.IsGeneralGCD && !contextAction.Info.IsDutyAction)
+        {
+            return;
+        }
+
         Svc.Log.Debug(
-            $"Menu attempted spawned from {contextAction.Name}/{currentHoveredActionId},{Svc.GameGui.HoveredItem}, {args.AddonName}, {args.MenuType}, {args.Target}");
+            $"Menu attempted spawned from {contextAction.Name}/{currentHoveredActionId},{Svc.GameGui.HoveredItem}, {args.AddonName}, {args.MenuType}, {args.Target}, ");
 
         if (string.IsNullOrEmpty(args.AddonName) || !args.AddonName.Contains("Action"))
         {
