@@ -6,7 +6,7 @@
 ![Github Latest Releases](https://img.shields.io/github/downloads/FFXIV-CombatReborn/RotationSolverReborn/latest/total.svg?style=for-the-badge)
 ![Github License](https://img.shields.io/github/license/FFXIV-CombatReborn/RotationSolverReborn.svg?label=License&style=for-the-badge)
 
-RotationSolverReborn is a community-made fork of the original RotationSolver plugin for Final Fantasy XIV. This tool is designed to enhance your gameplay experience by performing your rotation as optimally as possible, including heals, interrupts, mitigations, and MP management.
+This tool is designed to enhance your gameplay experience by performing your rotation as optimally as possible, including heals, interrupts, mitigations, and MP management.
 
 ## Features
 
@@ -23,6 +23,12 @@ RotationSolverReborn is a community-made fork of the original RotationSolver plu
 ```
 https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
 ```
+- Click on the + button and make sure the checkmark beside the new field is set afterwards.
+- **Click on the Save-icon in the bottom right.**
+
+Following these steps, you should be able to see all contained plugins in the Available Plugins tab in the Dalamud Plugin Installer.
+No Plugins will be installed, you have just made them available. You can now select which of these plugins you actually want to install.
+
 - CN users
 ```
 https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/refs/heads/main/pluginmasterCN.json
@@ -31,22 +37,17 @@ https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/refs/h
 ```
 https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/refs/heads/main/pluginmasterKR.json
 ```
-- Click on the + button and make sure the checkmark beside the new field is set afterwards.
-- **Click on the Save-icon in the bottom right.**
-
-Following these steps, you should be able to see all contained plugins in the Available Plugins tab in the Dalamud Plugin Installer.
-No Plugins will be installed, you have just made them available. You can now select which of these plugins you actually want to install.
 
 ## Want to contribute?
 
 - Create a fork
 - Make your changes
-- Test the changes
+- Test the changes (Combat rotation changes should be tested vs [Stone, Sky, Sea tests](https://ffxiv.consolegameswiki.com/wiki/Stone,_Sky,_Sea) in game in each expansion)
 - Create a PR and point it to main
 
 ## Links
 
-The rotations definitions are [here](https://github.com/FFXIV-CombatReborn/RotationSolverReborn/tree/main/BasicRotations).
+The rotations definitions are [here](https://github.com/FFXIV-CombatReborn/RotationSolverReborn/tree/main/RotationSolver/RebornRotations).
 
 ## Latest version of RSR for each FFXIV version
 7.21
