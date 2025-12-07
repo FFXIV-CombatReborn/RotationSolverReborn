@@ -930,6 +930,10 @@ internal partial class Configs : IPluginConfiguration
          Filter = PvPSpecificControls)]
     private static readonly bool _autoOnPvPMatchStart = true;
 
+    [ConditionBool, UI("Set RSR to PvP specific state when enabled in PvP zone.",
+         Filter = PvPSpecificControls)]
+    private static readonly bool _pvpStateControl = false;
+
     #endregion
 
     #region Jobs

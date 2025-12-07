@@ -4,9 +4,9 @@
     "net9.0-windows10.0.26100": {
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.0.1.29, )",
-        "resolved": "3.0.1.29",
-        "contentHash": "w4vjAdH6jh5oKcT4E7dcxbmbYhMVJ/1fL58/qfGrHNXGfkLxb2TcQlvMbQOzL8HrhEUORRBv8E1h1e9rwhR9fg=="
+        "requested": "[3.0.1.32, )",
+        "resolved": "3.0.1.32",
+        "contentHash": "OqmNYOrdnNBDnod+JvqyktD+sE2/I7RAp4uZXXXcSKThV8q9pFyrZhZhhYDcMhhAJMtWKeWt5FTiKLgYMH4eCQ=="
       },
       "Microsoft.CodeAnalysis.CSharp": {
         "type": "Direct",
