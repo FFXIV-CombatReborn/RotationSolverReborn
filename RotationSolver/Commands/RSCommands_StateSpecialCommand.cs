@@ -1,9 +1,7 @@
 ﻿using Dalamud.Game.Config;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
-using RotationSolver.Basic.Data;
 using RotationSolver.Updaters;
-using static FFXIVClientStructs.FFXIV.Client.Game.Control.CharacterLookAtTargetParam;
 
 namespace RotationSolver.Commands
 {
@@ -40,6 +38,16 @@ namespace RotationSolver.Commands
         {
             DoOneCommandType((type, role) => type.ToStateString(role), role =>
             {
+                if (!DataCenter.State && DataCenter.IsPvP && !DataCenter.IsPvPStateEnabled && Service.Config.PvpStateControl)
+                {
+                    stateType = AdjustStateType(StateCommandType.PvP, ref index);
+                }
+
+                if (DataCenter.State && DataCenter.IsPvP && DataCenter.IsPvPStateEnabled && Service.Config.PvpStateControl)
+                {
+                    stateType = AdjustStateType(StateCommandType.Off, ref index);
+                }
+
                 if (DataCenter.State)
                 {
                     stateType = AdjustStateType(stateType, ref index);
@@ -65,6 +73,16 @@ namespace RotationSolver.Commands
 
         private static StateCommandType AdjustStateType(StateCommandType stateType, ref int index)
         {
+            if (!DataCenter.State && DataCenter.IsPvP && !DataCenter.IsPvPStateEnabled && Service.Config.PvpStateControl)
+            {
+                return StateCommandType.PvP;
+            }
+
+            if (DataCenter.State && DataCenter.IsPvP && DataCenter.IsPvPStateEnabled && Service.Config.PvpStateControl)
+            {
+                return StateCommandType.Off;
+            }
+
             if (DataCenter.IsManual && stateType == StateCommandType.Manual && Service.Config.ToggleManual)
             {
                 return StateCommandType.Off;
@@ -90,8 +108,14 @@ namespace RotationSolver.Commands
 
         public static void CycleStateManualAuto()
         {
+            if (!DataCenter.State && DataCenter.IsPvP && Service.Config.PvpStateControl)
+            {
+                DoStateCommandType(StateCommandType.PvP);
+                return;
+            }
+
             // If currently Off, go to Manual
-            if (!DataCenter.State)
+            if (!DataCenter.State && (!DataCenter.IsPvP || (DataCenter.IsPvP && !Service.Config.PvpStateControl)))
             {
                 DoStateCommandType(StateCommandType.Manual);
                 return;
@@ -110,8 +134,14 @@ namespace RotationSolver.Commands
 
         public static void CycleStateAuto()
         {
+            if (!DataCenter.State && DataCenter.IsPvP && Service.Config.PvpStateControl)
+            {
+                DoStateCommandType(StateCommandType.PvP);
+                return;
+            }
+
             // If currently Off, go to Auto
-            if (!DataCenter.State)
+            if (!DataCenter.State && (!DataCenter.IsPvP || (DataCenter.IsPvP && !Service.Config.PvpStateControl)))
             {
                 DoStateCommandType(StateCommandType.Auto);
                 return;
@@ -130,8 +160,14 @@ namespace RotationSolver.Commands
 
         public static void CycleStateManual()
         {
+            if (!DataCenter.State && DataCenter.IsPvP && Service.Config.PvpStateControl)
+            {
+                DoStateCommandType(StateCommandType.PvP);
+                return;
+            }
+
             // If currently Off, go to Manual
-            if (!DataCenter.State)
+            if (!DataCenter.State && (!DataCenter.IsPvP || (DataCenter.IsPvP && !Service.Config.PvpStateControl)))
             {
                 DoStateCommandType(StateCommandType.Manual);
                 return;
@@ -150,8 +186,14 @@ namespace RotationSolver.Commands
 
         public static void CycleStateWithAllTargetTypes()
         {
+            if (!DataCenter.State && DataCenter.IsPvP && Service.Config.PvpStateControl)
+            {
+                DoStateCommandType(StateCommandType.PvP);
+                return;
+            }
+
             // If currently Off, start with the first TargetType
-            if (!DataCenter.State)
+            if (!DataCenter.State && (!DataCenter.IsPvP || (DataCenter.IsPvP && !Service.Config.PvpStateControl)))
             {
                 if (Service.Config.TargetingTypes.Count > 0)
                 {
@@ -195,8 +237,14 @@ namespace RotationSolver.Commands
 
         public static void CycleStateWithOneTargetTypes()
         {
+            if (!DataCenter.State && DataCenter.IsPvP && Service.Config.PvpStateControl)
+            {
+                DoStateCommandType(StateCommandType.PvP);
+                return;
+            }
+
             // If currently Off, go to Auto using the highest TargetingIndex (last configured type)
-            if (!DataCenter.State)
+            if (!DataCenter.State && (!DataCenter.IsPvP || (DataCenter.IsPvP && !Service.Config.PvpStateControl)))
             {
                 if (Service.Config.TargetingTypes.Count > 0)
                 {
@@ -245,7 +293,7 @@ namespace RotationSolver.Commands
             Service.Config.TargetingIndex = index;
         }
 
-public static void UpdateState(StateCommandType stateType, JobRole role)
+        public static void UpdateState(StateCommandType stateType, JobRole role)
         {
             switch (stateType)
             {
@@ -255,6 +303,7 @@ public static void UpdateState(StateCommandType stateType, JobRole role)
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = false;
                     DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = false;
                     DataCenter.ResetAllRecords();
                     ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
                     DataCenter.TargetingTypeOverride = null;
@@ -267,6 +316,7 @@ public static void UpdateState(StateCommandType stateType, JobRole role)
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = false;
                     DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Auto Targeting : {DataCenter.TargetingType}"); }
@@ -278,6 +328,7 @@ public static void UpdateState(StateCommandType stateType, JobRole role)
                     DataCenter.IsTargetOnly = true;
                     DataCenter.IsAutoDuty = false;
                     DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Auto Targeting Only : {DataCenter.TargetingType}"); }
@@ -289,6 +340,7 @@ public static void UpdateState(StateCommandType stateType, JobRole role)
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = false;
                     DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Manual"); }
@@ -300,6 +352,7 @@ public static void UpdateState(StateCommandType stateType, JobRole role)
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = true;
                     DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : AutoDuty"); }
@@ -311,9 +364,22 @@ public static void UpdateState(StateCommandType stateType, JobRole role)
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = false;
                     DataCenter.IsHenched = true;
+                    DataCenter.IsPvPStateEnabled = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Henched"); }
+                    break;
+
+                case StateCommandType.PvP:
+                    DataCenter.State = true;
+                    DataCenter.IsManual = false;
+                    DataCenter.IsTargetOnly = false;
+                    DataCenter.IsAutoDuty = false;
+                    DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = true;
+                    ActionUpdater.AutoCancelTime = DateTime.MinValue;
+                    DataCenter.TargetingTypeOverride = TargetingType.LowHP;
+                    if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : PvP"); }
                     break;
             }
 
@@ -321,7 +387,7 @@ public static void UpdateState(StateCommandType stateType, JobRole role)
             UpdateToast();
         }
 
-public static void AutodutyUpdateState(StateCommandType stateType, JobRole role, TargetingType targetingType)
+        public static void AutodutyUpdateState(StateCommandType stateType, JobRole role, TargetingType targetingType)
         {
             switch (stateType)
             {
@@ -331,6 +397,7 @@ public static void AutodutyUpdateState(StateCommandType stateType, JobRole role,
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = false;
                     DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = false;
                     DataCenter.ResetAllRecords();
                     ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
                     DataCenter.TargetingTypeOverride = null;
@@ -343,6 +410,7 @@ public static void AutodutyUpdateState(StateCommandType stateType, JobRole role,
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = false;
                     DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Auto Targeting : {DataCenter.TargetingType}"); }
@@ -354,6 +422,7 @@ public static void AutodutyUpdateState(StateCommandType stateType, JobRole role,
                     DataCenter.IsTargetOnly = true;
                     DataCenter.IsAutoDuty = false;
                     DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = targetingType;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Auto Targeting Only : {DataCenter.TargetingType}"); }
@@ -365,6 +434,7 @@ public static void AutodutyUpdateState(StateCommandType stateType, JobRole role,
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = false;
                     DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Manual"); }
@@ -376,6 +446,7 @@ public static void AutodutyUpdateState(StateCommandType stateType, JobRole role,
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = true;
                     DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = targetingType;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : AutoDuty"); }
@@ -387,9 +458,22 @@ public static void AutodutyUpdateState(StateCommandType stateType, JobRole role,
                     DataCenter.IsTargetOnly = false;
                     DataCenter.IsAutoDuty = false;
                     DataCenter.IsHenched = true;
+                    DataCenter.IsPvPStateEnabled = false;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Henched"); }
+                    break;
+
+                case StateCommandType.PvP:
+                    DataCenter.State = true;
+                    DataCenter.IsManual = false;
+                    DataCenter.IsTargetOnly = false;
+                    DataCenter.IsAutoDuty = false;
+                    DataCenter.IsHenched = false;
+                    DataCenter.IsPvPStateEnabled = true;
+                    ActionUpdater.AutoCancelTime = DateTime.MinValue;
+                    DataCenter.TargetingTypeOverride = TargetingType.LowHP;
+                    if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : PvP"); }
                     break;
             }
 

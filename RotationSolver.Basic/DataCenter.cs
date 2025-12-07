@@ -260,6 +260,8 @@ internal static class DataCenter
 
     public static bool IsHenched { get; set; } = false;
 
+    public static bool IsPvPStateEnabled { get; set; } = false;
+
     public static bool IsTargetOnly { get; set; } = false;
 
     public static bool InCombat { get; set; } = false;

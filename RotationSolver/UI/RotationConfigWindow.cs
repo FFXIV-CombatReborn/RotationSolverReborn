@@ -3696,6 +3696,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"TerritoryType: {DataCenter.Territory?.ContentType}");
         ImGui.Text($"Is in Alliance Raid: {DataCenter.IsInAllianceRaid}");
         ImGui.Spacing();
+        ImGui.Text($"IsPvP: {DataCenter.IsPvP}");
         ImGui.Text($"IsInFate: {DataCenter.IsInFate}");
         if ((IntPtr)FateManager.Instance() != IntPtr.Zero)
         {
