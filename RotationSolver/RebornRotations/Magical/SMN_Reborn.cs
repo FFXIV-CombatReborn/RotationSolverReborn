@@ -160,7 +160,7 @@ public sealed class SMN_Reborn : SummonerRotation
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         bool inBigInvocation = !SummonBahamutPvE.EnoughLevel || InBahamut || InPhoenix || InSolarBahamut;
-        bool inSolarUnique = Player.Level == 100 ? !InBahamut && !InPhoenix && InSolarBahamut : InBahamut && !InPhoenix;
+        bool inSolarUnique = DataCenter.PlayerSyncedLevel() == 100 ? !InBahamut && !InPhoenix && InSolarBahamut : InBahamut && !InPhoenix;
         bool burstInSolar = (SummonSolarBahamutPvE.EnoughLevel && InSolarBahamut) || (!SummonSolarBahamutPvE.EnoughLevel && InBahamut) || !SummonBahamutPvE.EnoughLevel;
 
         if (burstInSolar)
@@ -375,7 +375,7 @@ public sealed class SMN_Reborn : SummonerRotation
     [RotationDesc(ActionID.PhysickPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        if ((Healbot || Player.Level <= 30) && PhysickPvE.CanUse(out act))
+        if ((Healbot || DataCenter.PlayerSyncedLevel() <= 30) && PhysickPvE.CanUse(out act))
         {
             return true;
         }

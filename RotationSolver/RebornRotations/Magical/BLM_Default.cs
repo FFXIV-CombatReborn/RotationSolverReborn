@@ -349,7 +349,7 @@ public class BLM_Default : BlackMageRotation
                 return true;
             }
 
-            if (Player.Level == 90 && BlizzardPvE.CanUse(out act))
+            if (DataCenter.PlayerSyncedLevel() == 90 && BlizzardPvE.CanUse(out act))
             {
                 return true;
             }
@@ -359,7 +359,7 @@ public class BLM_Default : BlackMageRotation
                 return true;
             }
         }
-        if (UmbralIceStacks == 2 && Player.Level < 90 && MaxSoulCount == 3)
+        if (UmbralIceStacks == 2 && DataCenter.PlayerSyncedLevel() < 90 && MaxSoulCount == 3)
         {
             if (BlizzardIiPvE.CanUse(out act))
             {

@@ -40,7 +40,7 @@ public partial class MonkRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool OpoOpoUnlocked => Player.Level >= 50;
+    public static bool OpoOpoUnlocked => DataCenter.PlayerSyncedLevel() >= 50;
 
     /// <summary>
     /// Gets the amount of available Raptor Fury stacks.
@@ -50,7 +50,7 @@ public partial class MonkRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool RaptorUnlocked => Player.Level >= 18;
+    public static bool RaptorUnlocked => DataCenter.PlayerSyncedLevel() >= 18;
 
     /// <summary>
     /// Gets the amount of available Coeurl Fury stacks.
@@ -60,7 +60,7 @@ public partial class MonkRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool CoeurlUnlocked => Player.Level >= 30;
+    public static bool CoeurlUnlocked => DataCenter.PlayerSyncedLevel() >= 30;
 
     /// <summary>
     /// Determines whether all elements in the <see cref="BeastChakras"/> array are the same.

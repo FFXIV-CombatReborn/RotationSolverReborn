@@ -121,12 +121,12 @@ public partial class BlackMageRotation
     /// <summary>
     /// A check with variable max stacks of Astral Fire stacks and Umbral Ice based on the trait level.
     /// </summary>
-    public static bool IsSoulStacksMaxed => Player.Level >= 35 ? SoulStackCount == 3 : Player.Level >= 20 ? SoulStackCount == 2 : SoulStackCount == 1;
+    public static bool IsSoulStacksMaxed => DataCenter.PlayerSyncedLevel() >= 35 ? SoulStackCount == 3 : DataCenter.PlayerSyncedLevel() >= 20 ? SoulStackCount == 2 : SoulStackCount == 1;
 
     /// <summary>
     /// A check with variable max stacks of Astral Fire stacks and Umbral Ice based on the trait level.
     /// </summary>
-    public static byte MaxSoulCount => Player.Level >= 35 ? (byte)3 : Player.Level >= 20 ? (byte)2 : (byte)1;
+    public static byte MaxSoulCount => DataCenter.PlayerSyncedLevel() >= 35 ? (byte)3 : DataCenter.PlayerSyncedLevel() >= 20 ? (byte)2 : (byte)1;
 
     /// <summary>
     /// A check with variable max stacks of Polyglot based on the trait level.
