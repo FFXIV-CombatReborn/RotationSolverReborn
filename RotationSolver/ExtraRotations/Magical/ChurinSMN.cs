@@ -23,7 +23,7 @@ public sealed class ChurinSMN : SummonerRotation
     private static bool HasAnyFavor => HasGarudaFavor || HasIfritFavor || HasTitanFavor;
     private static bool HasAnyAttunement => InGaruda || InIfrit || InTitan;
     private static bool NoAttunement => !InIfrit && !InGaruda && !InTitan;
-    private static bool InSolar => Player.Level == 100 ? !InBahamut && !InPhoenix && InSolarBahamut : InBahamut && !InPhoenix;
+    private static bool InSolar => DataCenter.PlayerSyncedLevel() == 100 ? !InBahamut && !InPhoenix && InSolarBahamut : InBahamut && !InPhoenix;
     private bool BahamutBurst => ((SummonSolarBahamutPvE.EnoughLevel && InSolarBahamut) 
     || (SummonSolarBahamutPvE.EnoughLevel && (InBahamut || InPhoenix)) 
     || (!SummonSolarBahamutPvE.EnoughLevel && InBahamut) 
@@ -381,7 +381,7 @@ public sealed class ChurinSMN : SummonerRotation
     [RotationDesc(ActionID.PhysickPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        if ((Healbot || Player.Level <= 30) && PhysickPvE.CanUse(out act))
+        if ((Healbot || DataCenter.PlayerSyncedLevel() <= 30) && PhysickPvE.CanUse(out act))
         {
             return true;
         }

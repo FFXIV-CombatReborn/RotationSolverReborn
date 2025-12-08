@@ -59,7 +59,7 @@ public readonly struct ActionCooldownInfo : ICooldown
     /// <summary>
     /// Gets the maximum number of charges.
     /// </summary>
-    public unsafe ushort MaxCharges => Math.Max(ActionManager.GetMaxCharges(_action.Info.AdjustedID, (uint)Player.Level), (ushort)1);
+    public unsafe ushort MaxCharges => Math.Max(ActionManager.GetMaxCharges(_action.Info.AdjustedID, (uint)DataCenter.PlayerSyncedLevel()), (ushort)1);
 
     /// <summary>
     /// Gets the raw recast time for one charge.

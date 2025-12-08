@@ -100,7 +100,7 @@ public readonly struct ActionBasicInfo
     /// <summary>
     /// Determines whether the player's level is sufficient to use the action.
     /// </summary>
-    public readonly bool EnoughLevel => Player.Level >= Level;
+    public readonly bool EnoughLevel => DataCenter.PlayerSyncedLevel() >= Level;
 
     /// <summary>
     /// 

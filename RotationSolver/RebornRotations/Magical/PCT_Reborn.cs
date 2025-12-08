@@ -54,7 +54,7 @@ public sealed class PCT_Reborn : PictomancerRotation
                 return act;
             }
         }
-        if (remainTime < FireInRedPvE.Info.CastTime + CountDownAhead && Player.Level < 92)
+        if (remainTime < FireInRedPvE.Info.CastTime + CountDownAhead && DataCenter.PlayerSyncedLevel() < 92)
         {
             if (FireInRedPvE.CanUse(out act))
             {
@@ -147,7 +147,7 @@ public sealed class PCT_Reborn : PictomancerRotation
     {
         bool burstTimingCheckerStriking = !ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || HasStarryMuse || !StarryMusePvE.EnoughLevel;
         // Bursts
-        int adjustCombatTimeForOpener = Player.Level < 92 ? 2 : 5;
+        int adjustCombatTimeForOpener = DataCenter.PlayerSyncedLevel() < 92 ? 2 : 5;
         if (StarryMusePvE.CanUse(out act) && CombatTime > adjustCombatTimeForOpener && IsBurst)
         {
             return true;
