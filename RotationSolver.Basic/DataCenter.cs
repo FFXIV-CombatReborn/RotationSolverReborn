@@ -49,8 +49,15 @@ internal static class DataCenter
             return Player.SyncedLevel;
         }
 
+        if (PlayerCurrentLevel < PlayerUnsyncedLevel)
+        {
+            return PlayerCurrentLevel;
+        }
+
         return PlayerUnsyncedLevel;
     }
+
+    public unsafe static int PlayerCurrentLevel => PlayerState.Instance()->CurrentLevel;
 
     public static int PlayerUnsyncedLevel => Player.UnsyncedLevel;
 
