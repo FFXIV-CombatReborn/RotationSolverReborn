@@ -1210,7 +1210,8 @@ private static readonly HashSet<uint> IsOCUndeadSet =
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsTrueHeartImmune()
+        return battleChara.IsColossusRubricatusImmune()
+            || battleChara.IsTrueHeartImmune()
             || battleChara.IsEminentGriefImmune()
             || battleChara.IsLOTAImmune()
             || battleChara.IsMesoImmune()
