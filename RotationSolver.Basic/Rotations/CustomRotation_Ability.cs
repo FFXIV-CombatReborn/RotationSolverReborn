@@ -19,6 +19,11 @@ public partial class CustomRotation
         }
         IBaseAction.ForceEnable = false;
 
+        if ((Service.Config.LagMitigation || Player.HasStatus(true, StatusID.Mudra)) && DataCenter.DefaultGCDRemain < 0.625f)
+        {
+            return false;
+        }
+
         if (act is IBaseItem i && i.CanUse(out _, true))
         {
             return true;
