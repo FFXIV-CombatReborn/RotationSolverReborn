@@ -16,7 +16,7 @@ public partial class CustomRotation
     static partial void ModifyTrueNorthPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.TrueNorth];
-        setting.ActionCheck = () => !IsLastAbility(ActionID.TrueNorthPvE);
+        setting.ActionCheck = () => !IsLastAbility(ActionID.TrueNorthPvE) && DataCenter.DefaultGCDRemain > 0.630f;
     }
 
     static partial void ModifyShirkPvE(ref ActionSetting setting)
