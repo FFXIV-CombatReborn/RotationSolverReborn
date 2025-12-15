@@ -96,11 +96,11 @@ public partial class RotationConfigWindow : Window
         "Click the cube icon at the bottom-left of the sidebar to copy diagnostic info to clipboard.",
         "Timeline window can visualize recent actions (UI > Windows).",
         "Do damage, don't die",
-        "Healing Tip: the only HP that matters is the last one",
+        "Healing: the only HP that matters is the last one",
         "Be kind",
         "The icons for Combat Reborn were made by a player named Altan",
-        "Tip: you can remove some self-buffs with “/statusoff <Name>” (e.g., Peloton) when needed.",
-        "Tip: RSR works best with Legacy Type movement settings.",
+        "You can remove some self-buffs with “/statusoff <Name>” (e.g., Peloton) when needed.",
+        "RSR works best with Legacy Type movement settings.",
 		"Special thanks to Akurosuki, Chaos_co, Hyoh, kaen, kuromiromi, Miri, prismagreen, and Vaex for their support of RSR."
 	];
     private int _hintIndex = 0;
