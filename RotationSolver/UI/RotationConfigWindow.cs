@@ -100,8 +100,9 @@ public partial class RotationConfigWindow : Window
         "Be kind",
         "The icons for Combat Reborn were made by a player named Altan",
         "Tip: you can remove some self-buffs with “/statusoff <Name>” (e.g., Peloton) when needed.",
-        "Tip: RSR works best with Legacy Type movement settings."
-    ];
+        "Tip: RSR works best with Legacy Type movement settings.",
+		"Special thanks to Akurosuki, Chaos_co, Hyoh, kaen, kuromiromi, Miri, prismagreen, and Vaex for their support of RSR."
+	];
     private int _hintIndex = 0;
     private float _lastHintSwitch = 0f;
     private static readonly Random _hintRng = new();
