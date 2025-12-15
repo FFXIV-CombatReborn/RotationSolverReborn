@@ -1210,9 +1210,10 @@ private static readonly HashSet<uint> IsOCUndeadSet =
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsColossusRubricatusImmune()
-            || battleChara.IsTrueHeartImmune()
-            || battleChara.IsEminentGriefImmune()
+        return battleChara.IsCrystalOfDarknessImmune()
+            || battleChara.IsColossusRubricatusImmune()
+			|| battleChara.IsTrueHeartImmune()
+			|| battleChara.IsEminentGriefImmune()
             || battleChara.IsLOTAImmune()
             || battleChara.IsMesoImmune()
             || battleChara.IsJagdDollImmune()
@@ -1230,10 +1231,33 @@ private static readonly HashSet<uint> IsOCUndeadSet =
             || battleChara.IsHanselorGretelShielded();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool IsColossusRubricatusImmune(this IBattleChara battleChara)
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsCrystalOfDarknessImmune(this IBattleChara battleChara)
+	{
+		if (DataCenter.TerritoryID == 1238)
+		{
+			var CrystalOfDarkness = battleChara.NameId == 13556;
+
+			if (CrystalOfDarkness)
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsColossusRubricatusImmune action found, ignoring mob");
+				}
+				return true;
+			}
+
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsColossusRubricatusImmune(this IBattleChara battleChara)
     {
         if (DataCenter.TerritoryID == 1174)
         {
