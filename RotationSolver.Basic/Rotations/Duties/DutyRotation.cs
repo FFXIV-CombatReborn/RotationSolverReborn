@@ -289,12 +289,12 @@ public partial class DutyRotation : IDisposable
     /// </summary>
     public static bool InVariantDungeon => DataCenter.InVariantDungeon;
 
-    /// <summary>
-    /// This is the player.
-    /// </summary>
-    protected static IPlayerCharacter Player => ECommons.GameHelpers.Player.Object;
+	/// <summary>
+	/// This is the player.
+	/// </summary>
+	protected static IPlayerCharacter? Player => ECommons.GameHelpers.Player.Object;
 
-    public static bool IsRDM => DataCenter.Job == Job.RDM;
+	public static bool IsRDM => DataCenter.Job == Job.RDM;
     public static bool IsPLD => DataCenter.Job == Job.PLD;
     public static bool IsBLM => DataCenter.Job == Job.BLM;
 
@@ -320,10 +320,10 @@ public partial class DutyRotation : IDisposable
         Chemist,
         Oracle,
         Thief,
-        None
-        //MysticKnight,
-        //Dancer,
-        //Gladiator
+        None,
+        MysticKnight,
+        Dancer,
+        Gladiator
     }
 
     public static PhantomJob GetPhantomJob()
@@ -342,9 +342,9 @@ public partial class DutyRotation : IDisposable
         if (SamuraiLevel > 0) return PhantomJob.Samurai;
         if (GeomancerLevel > 0) return PhantomJob.Geomancer;
 
-        //if (MysticKnightLevel > 0) return PhantomJob.MysticKnight;
-        //if (DancerLevel > 0) return PhantomJob.Dancer;
-        //if (GladiatorLevel > 0) return PhantomJob.Gladiator;
+        if (MysticKnightLevel > 0) return PhantomJob.MysticKnight;
+        if (DancerLevel > 0) return PhantomJob.Dancer;
+        if (GladiatorLevel > 0) return PhantomJob.Gladiator;
         return PhantomJob.None;
     }
 
@@ -523,32 +523,32 @@ public partial class DutyRotation : IDisposable
         }
     }
 
-    //public static byte MysticKnightLevel
-    //{
-    //    get
-    //    {
-    //        byte stacks = Player.StatusStack(true, StatusID.PhantomMysticKnight);
-    //        return stacks == byte.MaxValue ? (byte)0 : stacks;
-    //    }
-    //}
+    public static byte MysticKnightLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomMysticKnight);
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
+        }
+    }
 
-    //public static byte DancerLevel
-    //{
-    //    get
-    //    {
-    //        byte stacks = Player.StatusStack(true, StatusID.PhantomDancer);
-    //        return stacks == byte.MaxValue ? (byte)0 : stacks;
-    //    }
-    //}
+    public static byte DancerLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomDancer);
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
+        }
+    }
 
-    //public static byte GladiatorLevel
-    //{
-    //    get
-    //    {
-    //        byte stacks = Player.StatusStack(true, StatusID.PhantomGladiator);
-    //        return stacks == byte.MaxValue ? (byte)0 : stacks;
-    //    }
-    //}
+    public static byte GladiatorLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomGladiator);
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
+        }
+    }
 
     #endregion
     /// <summary>

@@ -42,7 +42,7 @@ public partial class CustomRotation
 
     static partial void ModifyLucidDreamingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.CurrentMp < Service.Config.LucidDreamingMpThreshold && InCombat;
+        setting.ActionCheck = () => Player?.CurrentMp < Service.Config.LucidDreamingMpThreshold && InCombat;
     }
 
     static partial void ModifySecondWindPvE(ref ActionSetting setting)
@@ -116,7 +116,7 @@ public partial class CustomRotation
     static partial void ModifyStandardissueElixirPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => !HasHostilesInMaxRange
-            && (Player.CurrentMp <= Player.MaxMp / 3 || Player.CurrentHp <= Player.MaxHp / 3)
+            && (Player?.CurrentMp <= Player?.MaxMp / 3 || Player?.CurrentHp <= Player?.MaxHp / 3)
             && !IsLastAction(ActionID.StandardissueElixirPvP) && Player.TimeAlive() > 5;
         setting.IsFriendly = true;
     }
@@ -124,7 +124,7 @@ public partial class CustomRotation
     static partial void ModifyRecuperatePvP(ref ActionSetting setting)
     {
         //Recuperate will knock off Guard, likely killing you.
-        setting.ActionCheck = () => Player.MaxHp - Player.CurrentHp > 15000 && Player.TimeAlive() > 5;
+        setting.ActionCheck = () => Player?.MaxHp - Player?.CurrentHp > 15000 && Player?.TimeAlive() > 5;
         setting.TargetType = TargetType.Self;
         setting.IsFriendly = true;
     }
@@ -132,7 +132,7 @@ public partial class CustomRotation
     static partial void ModifyGuardPvP(ref ActionSetting setting)
     {
         //If you've just respawned; you don't wanna Guard.
-        setting.ActionCheck = () => Player.TimeAlive() > 5;
+        setting.ActionCheck = () => Player?.TimeAlive() > 5;
         setting.IsFriendly = true;
     }
 

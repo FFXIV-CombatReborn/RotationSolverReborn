@@ -6,7 +6,6 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using RotationSolver.Commands;
-using RotationSolver.Helpers;
 
 namespace RotationSolver.Updaters;
 
@@ -58,8 +57,8 @@ internal static class ActionUpdater
 
     internal static void UpdateNextAction()
     {
-        IPlayerCharacter localPlayer = Player.Object;
-        ICustomRotation? customRotation = DataCenter.CurrentRotation;
+		IPlayerCharacter? localPlayer = Player.Object;
+		ICustomRotation? customRotation = DataCenter.CurrentRotation;
 
         try
         {
@@ -281,7 +280,7 @@ internal static class ActionUpdater
 
         foreach (var status in Player.Object.StatusList)
         {
-            if (status != null && status.LockActions())
+            if (status != null && status != null && status.GameData.Value.LockActions == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain)
                 return true;
         }
         return false;

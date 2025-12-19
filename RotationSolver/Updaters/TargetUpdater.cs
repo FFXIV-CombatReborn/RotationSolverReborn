@@ -3,6 +3,7 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
+using Status = Dalamud.Game.ClientState.Statuses.IStatus;
 
 namespace RotationSolver.Updaters;
 
@@ -393,7 +394,7 @@ internal static partial class TargetUpdater
                 {
                     for (int i = 0; i < member.StatusList.Length; i++)
                     {
-                        Dalamud.Game.ClientState.Statuses.Status? status = member.StatusList[i];
+                        Dalamud.Game.ClientState.Statuses.IStatus? status = member.StatusList[i];
                         if (status != null && status.CanDispel())
                         {
                             targetList.Add(member);

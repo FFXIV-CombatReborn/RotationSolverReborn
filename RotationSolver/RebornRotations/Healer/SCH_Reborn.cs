@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Healer;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.35")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.4")]
 [SourceCode(Path = "main/RebornRotations/Healer/SCH_Reborn.cs")]
 
 public sealed class SCH_Reborn : ScholarRotation
@@ -467,7 +467,7 @@ public sealed class SCH_Reborn : ScholarRotation
         if (BanefulImpactionPvE.CanUse(out act) &&
             (closeTargetCount > 3 // Mobs are grouped up
             || Target.IsBossFromTTK() // Or it's a boss
-            || Player.WillStatusEndGCD(2, 0, true, StatusID.ImpactImminent))) // Or we'll lose the ability if we don't use it
+            || Player != null && Player.WillStatusEndGCD(2, 0, true, StatusID.ImpactImminent))) // Or we'll lose the ability if we don't use it
         {
             return true;
         }
@@ -630,7 +630,7 @@ public sealed class SCH_Reborn : ScholarRotation
 
         // Expect that players do ~ 10% of healer hp as DPS and ballpark to ensure we're not wasting dots on something that's going to die immediately based on nobody hitting it
         // This is still wildly overestimating mob survival in some contexts but initial TTK estimates from RSR can be poor based on how far mobs were being kited
-        if (UseBallparkTTK)
+        if (Player != null && UseBallparkTTK)
         {
             expectedHPToLive12Seconds = BallparkPercent * Player.MaxHp * partyMemberCount * 12;
         }

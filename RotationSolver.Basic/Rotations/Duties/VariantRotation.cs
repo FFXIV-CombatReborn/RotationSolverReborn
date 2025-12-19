@@ -114,4 +114,18 @@ public partial class DutyRotation
             AoeCount = 1,
         };
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyVariantEagleEyeShotPvE(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.VariantEagleEyeShotSet];
+        setting.TargetType = TargetType.HighHP;
+		setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
 }

@@ -89,8 +89,16 @@ public partial class SageRotation
     {
         setting.TargetType = TargetType.Kardia;
         setting.TargetStatusProvide = [StatusID.Kardion];
-        setting.ActionCheck = () => !DataCenter.PartyMembers.Any(m => m.HasStatus(true, StatusID.Kardion));
-        setting.CreateConfig = () => new ActionConfig()
+		setting.ActionCheck = () =>
+		{
+			foreach (var m in DataCenter.PartyMembers)
+			{
+				if (m.HasStatus(true, StatusID.Kardion))
+					return false;
+			}
+			return true;
+		};
+		setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
         };
@@ -109,7 +117,7 @@ public partial class SageRotation
     static partial void ModifyEgeiroPvE(ref ActionSetting setting)
     {
         setting.IsFriendly = true;
-        setting.ActionCheck = () => Player.CurrentMp >= RaiseMPMinimum;
+        setting.ActionCheck = () => Player?.CurrentMp >= RaiseMPMinimum;
     }
 
     static partial void ModifyPhysisPvE(ref ActionSetting setting)

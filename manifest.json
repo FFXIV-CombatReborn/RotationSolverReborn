@@ -5,8 +5,8 @@
   "RepoUrl": "https://github.com/FFXIV-CombatReborn/RotationSolverReborn",
   "Description": "Analyses combat information every frame and finds the best action.\n\nThis means almost all the information available in one frame in combat, including the status of all players in the party, the status of any hostile targets, skill cooldowns, the MP and HP of characters, the location of characters, casting status of the hostile target, combo, combat duration, player level, etc.\nThen, it will highlight the best action on the hot bar, or help you to click on it.\nIt is designed for `general combat`, not for savage or ultimate. Use it carefully.",
   "ApplicableVersion": "any",
-  "DalamudApiLevel": 13,
-  "TestingDalamudApiLevel": 13,
+  "DalamudApiLevel": 14,
+  "TestingDalamudApiLevel": 14,
   "Tags": [
     "combat",
     "rotation",

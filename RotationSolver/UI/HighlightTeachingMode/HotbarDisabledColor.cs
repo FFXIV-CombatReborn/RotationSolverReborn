@@ -34,94 +34,119 @@ public sealed class HotbarDisabledColor : DrawingHighlightHotbarBase
         ApplyFrame();
     }
 
-    public static unsafe void ApplyFrame()
-    {
-        if (!Service.Config.ReddenDisabledHotbarActions || !MajorUpdater.IsValid || DataCenter.CurrentRotation == null || !DataCenter.IsActivated())
-        {
-            ResetAllHotbarIconColors();
-            return;
-        }
+	public static unsafe void ApplyFrame()
+	{
+		if (!Service.Config.ReddenDisabledHotbarActions || !MajorUpdater.IsValid || DataCenter.CurrentRotation == null || !DataCenter.IsActivated())
+		{
+			ResetAllHotbarIconColors();
+			return;
+		}
 
-        var disabledBase = CollectDisabledActionIds();
+		var disabledBase = CollectDisabledActionIds();
 
-        // Walk visible hotbars and apply per-slot reddening
-        int hotBarIndex = 0;
-        foreach (nint intPtr in EnumerateHotbarAddons())
-        {
-            var actionBar = (AddonActionBarBase*)intPtr;
-            if (actionBar == null || !IsVisible(actionBar->AtkUnitBase))
-            {
-                hotBarIndex++;
-                continue;
-            }
+		int hotBarIndex = 0;
+		foreach (nint intPtr in EnumerateHotbarAddons())
+		{
+			var actionBar = (AddonActionBarBase*)intPtr;
+			if (actionBar == null || !IsVisible(actionBar->AtkUnitBase))
+			{
+				hotBarIndex++;
+				continue;
+			}
 
-            bool isCrossBar = hotBarIndex > 9;
-            // Preserve the displayed index to fetch the correct Rapture hotbar after adjustments
-            int resolvedHotbarIndex = hotBarIndex;
-            if (isCrossBar)
-            {
-                if (hotBarIndex == 10)
-                {
-                    var actBar = (AddonActionCross*)intPtr;
-                    resolvedHotbarIndex = actBar->RaptureHotbarId;
-                }
-                else
-                {
-                    var actBar = (AddonActionDoubleCrossBase*)intPtr;
-                    resolvedHotbarIndex = actBar->BarTarget;
-                }
-            }
+			bool isCrossBar = hotBarIndex > 9;
+			int resolvedHotbarIndex = hotBarIndex;
+			if (isCrossBar)
+			{
+				if (hotBarIndex == 10)
+				{
+					var actBar = (AddonActionCross*)intPtr;
+					resolvedHotbarIndex = actBar != null ? actBar->RaptureHotbarId : hotBarIndex;
+				}
+				else
+				{
+					var actBar = (AddonActionDoubleCrossBase*)intPtr;
+					resolvedHotbarIndex = actBar != null ? actBar->BarTarget : hotBarIndex;
+				}
+			}
 
-            // Get underlying Rapture hotbar (needed to check slot types)
-            Hotbar raptureHotbar = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule()->Hotbars[resolvedHotbarIndex];
+			var framework = Framework.Instance();
+			if (framework == null)
+			{
+				hotBarIndex++;
+				continue;
+			}
+			var uiModule = framework->GetUIModule();
+			if (uiModule == null)
+			{
+				hotBarIndex++;
+				continue;
+			}
+			var raptureModule = uiModule->GetRaptureHotbarModule();
+			if (raptureModule == null)
+			{
+				hotBarIndex++;
+				continue;
+			}
+			if (resolvedHotbarIndex < 0 || resolvedHotbarIndex >= raptureModule->Hotbars.Length)
+			{
+				hotBarIndex++;
+				continue;
+			}
+			Hotbar raptureHotbar = raptureModule->Hotbars[resolvedHotbarIndex];
 
-            int slotIndex = 0;
-            foreach (ActionBarSlot slot in actionBar->ActionBarSlotVector.AsSpan())
-            {
-                AtkComponentNode* iconAddon = slot.Icon;
-                if ((nint)iconAddon == nint.Zero || !IsVisible(&iconAddon->AtkResNode))
-                {
-                    slotIndex++;
-                    continue;
-                }
+			int slotIndex = 0;
+			foreach (ActionBarSlot slot in actionBar->ActionBarSlotVector.AsSpan())
+			{
+				AtkComponentNode* iconAddon = slot.Icon;
+				if ((nint)iconAddon == nint.Zero || !IsVisible(&iconAddon->AtkResNode))
+				{
+					slotIndex++;
+					continue;
+				}
 
-                // Guard: ensure index within native hotbar slots (should always be 0-15)
-                if ((uint)slotIndex >= raptureHotbar.Slots.Length)
-                {
-                    slotIndex++;
-                    continue;
-                }
+				if ((uint)slotIndex >= raptureHotbar.Slots.Length)
+				{
+					slotIndex++;
+					continue;
+				}
 
-                HotbarSlot hotbarSlot = raptureHotbar.Slots[slotIndex];
+				HotbarSlot hotbarSlot = raptureHotbar.Slots[slotIndex];
 
-                // Only apply reddening to Action slot types (byte value 1)
-                if (hotbarSlot.ApparentSlotType != HotbarSlotType.Action || hotbarSlot.OriginalApparentSlotType != HotbarSlotType.Action)
-                {
-                    slotIndex++;
-                    continue;
-                }
+				if (hotbarSlot.ApparentSlotType != HotbarSlotType.Action || hotbarSlot.OriginalApparentSlotType != HotbarSlotType.Action)
+				{
+					slotIndex++;
+					continue;
+				}
 
-                uint adjusted = 0;
-                try
-                {
-                    adjusted = ActionManager.Instance()->GetAdjustedActionId((uint)slot.ActionId);
-                }
-                catch
-                {
-                    adjusted = 0;
-                }
+				uint adjusted = 0;
+				try
+				{
+					var actionManager = ActionManager.Instance();
+					if (actionManager != null)
+					{
+						adjusted = actionManager->GetAdjustedActionId((uint)slot.ActionId);
+					}
+				}
+				catch
+				{
+					adjusted = 0;
+				}
 
-                bool shouldRedden = adjusted != 0 && disabledBase.Contains((uint)slot.ActionId);
-                ApplyIconReddening((AtkComponentIcon*)slot.Icon->Component, shouldRedden);
+				bool shouldRedden = adjusted != 0 && disabledBase.Contains((uint)slot.ActionId);
+				if (slot.Icon != null && slot.Icon->Component != null)
+				{
+					ApplyIconReddening((AtkComponentIcon*)slot.Icon->Component, shouldRedden);
+				}
 
-                slotIndex++;
-            }
+				slotIndex++;
+			}
 
-            hotBarIndex++;
-        }
-    }
+			hotBarIndex++;
+		}
+	}
 
-    private static unsafe void ApplyIconReddening(AtkComponentIcon* iconComponent, bool redden)
+	private static unsafe void ApplyIconReddening(AtkComponentIcon* iconComponent, bool redden)
     {
         if (iconComponent == null) return;
         if (iconComponent->IconImage == null) return;

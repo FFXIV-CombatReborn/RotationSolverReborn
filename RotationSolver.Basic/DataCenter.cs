@@ -49,26 +49,26 @@ internal static class DataCenter
             return Player.SyncedLevel;
         }
 
-        if (PlayerCurrentLevel < PlayerUnsyncedLevel)
+        if (PlayerCurrentLevel < PlayerMaxLevel)
         {
             return PlayerCurrentLevel;
         }
 
-        return PlayerUnsyncedLevel;
+        return PlayerMaxLevel;
     }
 
     public unsafe static int PlayerCurrentLevel => PlayerState.Instance()->CurrentLevel;
 
-    public static int PlayerUnsyncedLevel => Player.UnsyncedLevel;
+    public static int PlayerMaxLevel => Player.MaxLevel;
 
     public static bool IsActivated()
     {
-        return Player.AvailableThreadSafe && (State || IsManual || Service.Config.TeachingMode);
+        return Player.Available && (State || IsManual || Service.Config.TeachingMode);
     }
 
     public static bool PlayerAvailable()
     {
-        return Player.AvailableThreadSafe;
+        return Player.Available;
     }
 
     public static bool AutoFaceTargetOnActionSetting()
@@ -592,7 +592,7 @@ internal static class DataCenter
         get
         {
             float radius = 25;
-            if (!Player.AvailableThreadSafe)
+            if (!Player.Available)
             {
                 return radius;
             }
@@ -912,11 +912,11 @@ internal static class DataCenter
 
     public static bool HPNotFull => PartyMembersMinHP < 1;
 
-    public static uint CurrentMp => Math.Min(10000, Player.Object.CurrentMp + MPGain);
-    #endregion
+	public static uint CurrentMp => Player.Object != null ? Math.Min(10000, Player.Object.CurrentMp + MPGain) : MPGain;
+	#endregion
 
-    #region Action Record
-    private const int QUEUECAPACITY = 48;
+	#region Action Record
+	private const int QUEUECAPACITY = 48;
     private static readonly Queue<ActionRec> _actions = new(QUEUECAPACITY);
     private static readonly Queue<DamageRec> _damages = new(QUEUECAPACITY);
 
@@ -928,7 +928,7 @@ internal static class DataCenter
         {
             try
             {
-                List<DamageRec> recs = [];
+				List<DamageRec> recs = [];
                 foreach (DamageRec rec in _damages)
                 {
                     if (DateTime.Now - rec.ReceiveTime < TimeSpan.FromMilliseconds(5))
@@ -984,11 +984,6 @@ internal static class DataCenter
 
     internal static unsafe void AddActionRec(Action act)
     {
-        if (!Player.AvailableThreadSafe)
-        {
-            return;
-        }
-
         ActionID id = (ActionID)act.RowId;
 
         //Record
@@ -1016,7 +1011,8 @@ internal static class DataCenter
 
     internal static void ResetAllRecords()
     {
-        LastAction = 0;
+        PluginLog.Information("Resetting all action and damage records.");
+		LastAction = 0;
         LastGCD = 0;
         LastAbility = 0;
         _avgTTK = 0;
@@ -1254,7 +1250,7 @@ internal static class DataCenter
     {
         return IsCastingVfx([.. VfxDataQueue], s =>
         {
-            if (!Player.AvailableThreadSafe)
+            if (!Player.Available)
             {
                 return false;
             }
@@ -1278,7 +1274,7 @@ internal static class DataCenter
     {
         return IsCastingVfx([.. VfxDataQueue], s =>
         {
-            if (!Player.AvailableThreadSafe)
+            if (!Player.Available)
             {
                 return false;
             }
@@ -1300,7 +1296,7 @@ internal static class DataCenter
     {
         return IsCastingVfx([.. VfxDataQueue], s =>
         {
-            return Player.AvailableThreadSafe && (s.Path.StartsWith("vfx/lockon/eff/coshare")
+            return Player.Available && (s.Path.StartsWith("vfx/lockon/eff/coshare")
             || s.Path.StartsWith("vfx/lockon/eff/share_laser")
             || s.Path.StartsWith("vfx/lockon/eff/com_share"));
         });

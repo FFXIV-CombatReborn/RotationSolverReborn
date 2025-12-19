@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Tank;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.35")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.4")]
 [SourceCode(Path = "main/RebornRotations/Tank/GNB_Reborn.cs")]
 
 public sealed class GNB_Reborn : GunbreakerRotation
@@ -264,7 +264,7 @@ public sealed class GNB_Reborn : GunbreakerRotation
 
         if (!InReignCombo)
         {
-            if (AmmoComboStep == 0 && GnashingFangPvE.CanUse(out act, skipComboCheck: true))
+            if (AmmoComboStep == 0 && GnashingFangPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
             {
                 return true;
             }

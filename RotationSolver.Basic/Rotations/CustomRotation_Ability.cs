@@ -12,7 +12,12 @@ public partial class CustomRotation
     {
         act = DataCenter.CommandNextAction;
 
-        IBaseAction.ForceEnable = true;
+		if (Player == null)
+		{
+			return false;
+		}
+
+		IBaseAction.ForceEnable = true;
         if (act is IBaseAction a && a != null && !a.Info.IsRealGCD && a.CanUse(out _, usedUp: true, skipAoeCheck: true, skipStatusProvideCheck: true))
         {
             return true;

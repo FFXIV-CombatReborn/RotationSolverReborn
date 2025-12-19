@@ -3,7 +3,7 @@ using RotationSolver.Updaters;
 
 namespace RotationSolver.ExtraRotations.Melee;
 
-[Rotation("Churin MNK", CombatType.PvE, GameVersion = "7.35", Description = "An eye for an eye. A tooth for a tooth. An eye and a tooth for a loaf of bread. Eyes and teeth are the new currency.")]
+[Rotation("Churin MNK", CombatType.PvE, GameVersion = "7.4", Description = "An eye for an eye. A tooth for a tooth. An eye and a tooth for a loaf of bread. Eyes and teeth are the new currency.")]
 [SourceCode(Path = "main/ExtraRotations/Melee/ChurinMNK.cs")]
 public sealed class ChurinMNK : MonkRotation
 {
@@ -422,7 +422,6 @@ public sealed class ChurinMNK : MonkRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         return TryUseRiddleOfWind(out act)
                || TryUseForbiddenChakra(out act)
                || base.AttackAbility(nextGCD, out act);
@@ -737,8 +736,7 @@ public sealed class ChurinMNK : MonkRotation
 
     private bool TryUseBuffs(out IAction? act)
     {
-        act = null;
-            return TryUseBrotherhood(out act)
+        return TryUseBrotherhood(out act)
                    || TryUseRiddleOfFire(out act);
     }
     private bool TryUsePerfectBalance(out IAction? act)

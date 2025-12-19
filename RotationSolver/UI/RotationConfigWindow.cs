@@ -6,6 +6,7 @@ using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin;
 using Dalamud.Utility;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
@@ -101,7 +102,7 @@ public partial class RotationConfigWindow : Window
         "The icons for Combat Reborn were made by a player named Altan",
         "You can remove some self-buffs with “/statusoff <Name>” (e.g., Peloton) when needed.",
         "RSR works best with Legacy Type movement settings.",
-		"Special thanks to Akurosuki, Chaos_co, Hyoh, kaen, kuromiromi, Miri, prismagreen, and Vaex for their support of RSR."
+		"Special thanks to Akurosuki, Chaos_co, Hawa, Hyoh, kaen, kuromiromi, Miri, Nekomimi, Plogons, prismagreen, and Vaex for their support of RSR."
 	];
     private int _hintIndex = 0;
     private float _lastHintSwitch = 0f;
@@ -333,7 +334,7 @@ public partial class RotationConfigWindow : Window
             return true;
         }
 
-        return Player.AvailableThreadSafe && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+        return Player.Available && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
         Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
         Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN);
     }
@@ -365,7 +366,8 @@ public partial class RotationConfigWindow : Window
         {
             _ = diagInfo.AppendLine($"Rotation Solver Reborn v{_cachedDiagInfo.RSRVersion}");
             _ = diagInfo.AppendLine($"FFXIV Version: {_cachedDiagInfo.GameVersion}");
-            _ = diagInfo.AppendLine($"OS Type: {_cachedDiagInfo.Platform}");
+			//_ = diagInfo.AppendLine($"Dalamud Version: {Svc.PluginInterface.GetDalamudVersion().ToString()}");
+			_ = diagInfo.AppendLine($"OS Type: {_cachedDiagInfo.Platform}");
             _ = diagInfo.AppendLine($"Dalamud Branch: {_cachedDiagInfo.DalamudBranch}");
             _ = diagInfo.AppendLine($"Game Language: {_cachedDiagInfo.Language}");
             _ = diagInfo.AppendLine($"Update Frequency: {Service.Config.MinUpdatingTime}");
@@ -834,7 +836,7 @@ public partial class RotationConfigWindow : Window
             {
                 errorText = $"Disable {_crashPlugins[0].Name}, can cause conflicts/crashes.";
             }
-            else if (Player.AvailableThreadSafe && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+            else if (Player.Available && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
                     Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
                     Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
             {
@@ -1179,7 +1181,7 @@ public partial class RotationConfigWindow : Window
     {
         DutyRotation? rotation = DataCenter.CurrentDutyRotation;
         if (rotation == null) return;
-        if (!Player.AvailableThreadSafe) return;
+        if (!Player.Available) return;
 
         IRotationConfigSet set = rotation.Configs;
 
@@ -1970,7 +1972,7 @@ public partial class RotationConfigWindow : Window
     {
         ICustomRotation? rotation = DataCenter.CurrentRotation;
         if (rotation == null) return;
-        if (!Player.AvailableThreadSafe) return;
+        if (!Player.Available) return;
 
         bool enable = rotation.IsEnabled;
         if (ImGui.Checkbox(rotation.Name, ref enable))
@@ -2103,7 +2105,7 @@ public partial class RotationConfigWindow : Window
             ImGuiHelper.ReactPopup(key, command, Reset, false);
         }
 
-        if (Player.AvailableThreadSafe && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.DNC))
+        if (Player.Available && DataCenter.PartyMembers != null && Player.Object != null && Player.Object.IsJobs(Job.DNC))
         {
             ImGui.Spacing();
             ImGui.Text("Dance Partner Priority");
@@ -2155,7 +2157,7 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        if (Player.AvailableThreadSafe && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.SGE))
+        if (Player.Available && DataCenter.PartyMembers != null && Player.Object != null && Player.Object.IsJobs(Job.SGE))
         {
             ImGui.Spacing();
             ImGui.Text("Kardia Tank Priority");
@@ -2207,7 +2209,7 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        if (Player.AvailableThreadSafe && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.AST))
+        if (Player.Available && DataCenter.PartyMembers != null && Player.Object != null && Player.Object.IsJobs(Job.AST))
         {
             using ImRaii.IEndObject table = ImRaii.Table("AstCardPriorityTable", 2, ImGuiTableFlags.SizingStretchProp);
             if (!table)
@@ -2556,7 +2558,7 @@ public partial class RotationConfigWindow : Window
 
         static void DrawActionDebug()
         {
-            if (!Player.AvailableThreadSafe || !Service.Config.InDebug)
+            if (!Player.Available || !Service.Config.InDebug)
             {
                 return;
             }
@@ -3380,7 +3382,7 @@ public partial class RotationConfigWindow : Window
                 OtherConfiguration.BeneficialPositions[territoryId] = pts = [];
             }
 
-            if (ImGui.Button(UiString.ConfigWindow_List_AddPosition.GetDescription()) && Player.AvailableThreadSafe)
+			if (ImGui.Button(UiString.ConfigWindow_List_AddPosition.GetDescription()) && Player.Object != null && Player.Available)
             {
                 unsafe
                 {
@@ -3459,7 +3461,7 @@ public partial class RotationConfigWindow : Window
     {
         _allSearchable.DrawItems(Configs.Debug);
 
-        if (!Player.AvailableThreadSafe || !Service.Config.InDebug)
+        if (!Player.Available || !Service.Config.InDebug)
         {
             return;
         }
@@ -3509,8 +3511,12 @@ public partial class RotationConfigWindow : Window
 
     private static unsafe void DrawStatus()
     {
-        ImGui.Text($"PlayerSyncedLevel: {DataCenter.PlayerSyncedLevel()}");
-        ImGui.Text($"PlayerUnsyncedLevel: {DataCenter.PlayerUnsyncedLevel}");
+		if (Player.Object == null)
+		{
+			return;
+		}
+		ImGui.Text($"PlayerSyncedLevel: {DataCenter.PlayerSyncedLevel()}");
+        ImGui.Text($"PlayerUnsyncedLevel: {DataCenter.PlayerMaxLevel}");
         ImGui.Text($"Merged Status: {DataCenter.MergedStatus}");
         ImGui.Text($"PlayerHasLockActions: {ActionUpdater.PlayerHasLockActions()}");
         ImGui.Text($"Height: {Player.Character->ModelContainer.CalculateHeight()}");
@@ -3636,7 +3642,7 @@ public partial class RotationConfigWindow : Window
 
         ImGui.Spacing();
         ImGui.Text($"Statuses:");
-        foreach (Dalamud.Game.ClientState.Statuses.Status status in Player.Object.StatusList)
+        foreach (Dalamud.Game.ClientState.Statuses.IStatus status in Player.Object.StatusList)
         {
             string source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
             byte stacks = Player.Object.StatusStack(true, (StatusID)status.StatusId);
@@ -3757,7 +3763,7 @@ public partial class RotationConfigWindow : Window
 
 
         // AST-only card target preview
-        if (Player.Object.IsJobs(Job.AST))
+        if (Player.Object != null && Player.Object.IsJobs(Job.AST))
         {
             IBattleChara? spear = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.TheSpear, 0, SpecialActionType.None);
             IBattleChara? balance = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.TheBalance, 0, SpecialActionType.None);
@@ -3906,11 +3912,14 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Targetable: {battleChara.Struct()->Character.GameObject.TargetableStatus}");
             ImGui.Spacing();
             ImGui.Text($"Statuses:");
-            foreach (Dalamud.Game.ClientState.Statuses.Status status in battleChara.StatusList)
+            foreach (Dalamud.Game.ClientState.Statuses.IStatus status in battleChara.StatusList)
             {
-                string source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
-                ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source}");
-            }
+				if (Player.Object != null)
+				{
+					string source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
+					ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source}");
+				}
+			}
         }
     }
 

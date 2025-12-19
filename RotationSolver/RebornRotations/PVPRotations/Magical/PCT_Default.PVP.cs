@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.PVPRotations.Magical;
 
-[Rotation("Default PvP", CombatType.PvP, GameVersion = "7.35")]
+[Rotation("Default PvP", CombatType.PvP, GameVersion = "7.4")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Magical/PCT_Default.PVP.cs")]
 
 public class PCT_DefaultPvP : PictomancerRotation
@@ -121,7 +121,7 @@ public class PCT_DefaultPvP : PictomancerRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && Player != null && Player.HasStatus(true, StatusID.Guard))
         {
             return base.GeneralGCD(out action);
         }

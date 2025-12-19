@@ -57,7 +57,7 @@ internal abstract class DelayCondition : ICondition
 
     public virtual bool CheckBefore(ICustomRotation rotation)
     {
-        return Player.AvailableThreadSafe;
+        return Player.Available;
     }
 
     internal static bool CheckBaseAction(ICustomRotation rotation, ActionID id, ref IBaseAction? action)
@@ -123,7 +123,7 @@ internal abstract class DelayCondition : ICondition
     {
         if (type == null || getFunc == null)
         {
-            return Array.Empty<MemberInfo>();
+            return [];
         }
 
         IEnumerable<MemberInfo> methods = getFunc(type);

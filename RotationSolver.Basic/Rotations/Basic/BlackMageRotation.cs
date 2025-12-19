@@ -106,7 +106,7 @@ public partial class BlackMageRotation
     /// </summary>
     protected override void UpdateInfo()
     {
-        if (Player.CastActionId == (uint)ActionID.FireIvPvE && Player.CurrentCastTime < 0.2)
+        if (Player?.CastActionId == (uint)ActionID.FireIvPvE && Player.CurrentCastTime < 0.2)
         {
             Fire4Time = Player.TotalCastTime;
         }

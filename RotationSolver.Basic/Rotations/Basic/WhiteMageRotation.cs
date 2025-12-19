@@ -137,7 +137,7 @@ public partial class WhiteMageRotation
 
     static partial void ModifyRaisePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.CurrentMp >= RaiseMPMinimum || ThinAirState();
+        setting.ActionCheck = () => Player?.CurrentMp >= RaiseMPMinimum || ThinAirState();
     }
 
     static partial void ModifyStoneIiPvE(ref ActionSetting setting)
