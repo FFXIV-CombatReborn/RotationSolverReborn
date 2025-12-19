@@ -259,21 +259,21 @@ public class ActionTimelineManager : IDisposable
             if (items[i].EndTime > endTime) endTime = items[i].EndTime;
         }
 
-        // Fill session info
-        session.SessionInfo = new SessionInfo
-        {
-            StartTime = startTime,
-            EndTime = endTime,
-            DurationSeconds = (endTime - startTime).TotalSeconds,
-            PlayerName = Player.Available ? Player.Object.Name.TextValue : "Unknown",
-            PlayerJob = Player.Available ? Player.Job.ToString() : "Unknown",
-            Territory = DataCenter.Territory?.Name ?? "Unknown",
-            Duty = DataCenter.Territory?.ContentFinderName ?? "Unknown",
-            ExportedAt = DateTime.Now
-        };
+		// Fill session info
+		session.SessionInfo = new SessionInfo
+		{
+			StartTime = startTime,
+			EndTime = endTime,
+			DurationSeconds = (endTime - startTime).TotalSeconds,
+			PlayerName = Player.Available && Player.Object != null ? Player.Object.Name.TextValue : "Unknown",
+			PlayerJob = Player.Available ? Player.Job.ToString() : "Unknown",
+			Territory = DataCenter.Territory?.Name ?? "Unknown",
+			Duty = DataCenter.Territory?.ContentFinderName ?? "Unknown",
+			ExportedAt = DateTime.Now
+		};
 
-        // Convert timeline items to export format
-        Array.Sort(items, (a, b) => a.StartTime.CompareTo(b.StartTime));
+		// Convert timeline items to export format
+		Array.Sort(items, (a, b) => a.StartTime.CompareTo(b.StartTime));
         foreach (var item in items)
         {
             var exportedAction = new ExportedAction

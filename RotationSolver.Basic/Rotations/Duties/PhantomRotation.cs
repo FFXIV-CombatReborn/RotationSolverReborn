@@ -809,5 +809,184 @@ public partial class DutyRotation
         setting.TargetStatusProvide = [StatusID.Suspend];
         setting.IsFriendly = true;
     }
-    #endregion
+	#endregion
+
+	#region Mystic Knight
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifySunderingSpellbladePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => MysticKnightLevel >= 1;
+        setting.IsFriendly = false;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyMagicShellPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => MysticKnightLevel >= 2;
+		setting.IsFriendly = true;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyHolySpellbladePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => MysticKnightLevel >= 3;
+		setting.IsFriendly = false;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyBlazingSpellbladePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => MysticKnightLevel >= 4;
+		setting.IsFriendly = false;
+	}
+
+	#endregion
+
+	#region Dancer
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyDancePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DancerLevel >= 1;
+		setting.IsFriendly = false;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyPhantomSwordDancePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DancerLevel >= 1;
+        setting.StatusNeed = [StatusID.PoisedToSwordDance];
+		setting.IsFriendly = false;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyTemptingTangoPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DancerLevel >= 1;
+		setting.StatusNeed = [StatusID.TemptedToTango];
+		setting.IsFriendly = false;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyJitterbugPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DancerLevel >= 1;
+		setting.StatusNeed = [StatusID.Jitterbugged];
+		setting.IsFriendly = false;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyMysteryWaltzPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DancerLevel >= 1;
+		setting.StatusNeed = [StatusID.WillingToWaltz];
+		setting.IsFriendly = false;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyQuickstepPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DancerLevel >= 2;
+        setting.StatusProvide = [StatusID.Quickstep];
+		setting.IsFriendly = true;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifySteadfastStancePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DancerLevel >= 3;
+        setting.TargetType = TargetType.Self;
+		setting.IsFriendly = true;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyMesmerizePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DancerLevel >= 4;
+        setting.TargetStatusProvide = [StatusID.Enamored, StatusID.SilverSickness];
+		setting.IsFriendly = false;
+	}
+	#endregion
+
+	#region Gladiator
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyFinisherPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => GladiatorLevel >= 1;
+		setting.IsFriendly = false;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyDefendPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => GladiatorLevel >= 2;
+		setting.StatusProvide = [StatusID.Defend];
+		setting.IsFriendly = true;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyLongReachPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => GladiatorLevel >= 3;
+		setting.IsFriendly = false;
+	}
+
+	/// <summary>
+	/// Modifies the settings for Sundering Spellblade.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyBladeblitzPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => GladiatorLevel >= 4;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+	#endregion
 }

@@ -60,15 +60,23 @@ internal class VariantDefault : VariantRotation
 
     public override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        if (VariantRampartPvE_33864.Info.IsOnSlot)
+        if (VariantEagleEyeShotPvE.Info.IsOnSlot)
         {
-            if (VariantRampartPvE_33864.CanUse(out act))
+            if (VariantEagleEyeShotPvE.CanUse(out act))
             {
                 return true;
             }
         }
 
-        if (VariantRampartPvE.Info.IsOnSlot)
+		if (VariantRampartPvE_33864.Info.IsOnSlot)
+		{
+			if (VariantRampartPvE_33864.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		if (VariantRampartPvE.Info.IsOnSlot)
         {
             if (VariantRampartPvE.CanUse(out act))
             {

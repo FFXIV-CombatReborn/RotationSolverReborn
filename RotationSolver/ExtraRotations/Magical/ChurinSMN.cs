@@ -4,7 +4,7 @@ using ECommons.DalamudServices;
 
 namespace RotationSolver.ExtraRotations.Magical;
 
-[Rotation("Churin SMN", CombatType.PvE, GameVersion = "7.35")]
+[Rotation("Churin SMN", CombatType.PvE, GameVersion = "7.4")]
 [SourceCode(Path = "main/ExtraRotations/Magical/ChurinSMN.cs")]
 
 public sealed class ChurinSMN : SummonerRotation

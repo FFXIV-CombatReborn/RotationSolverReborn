@@ -4,7 +4,6 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using ECommons;
 using ECommons.DalamudServices;
-using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using Lumina.Excel.Sheets;
@@ -19,6 +18,7 @@ using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
 using RotationSolver.Updaters;
 using RotationSolver.ActionTimeline;
 using WelcomeWindow = RotationSolver.UI.WelcomeWindow;
+using Player = ECommons.GameHelpers.Player;
 
 namespace RotationSolver;
 
@@ -178,7 +178,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         static void DutyState_DutyStarted(object? sender, ushort e)
         {
-            if (!Player.AvailableThreadSafe)
+            if (!Player.Available)
             {
                 return;
             }
@@ -197,7 +197,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         static void DutyState_DutyWiped(object? sender, ushort e)
         {
-            if (!Player.AvailableThreadSafe)
+            if (!Player.Available)
             {
                 return;
             }
@@ -261,10 +261,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
     internal static void OpenTicTacToe()
     {
-        if (_easterEggWindow != null)
-        {
-            _easterEggWindow.IsOpen = true;
-        }
+        _easterEggWindow?.IsOpen = true;
     }
 
     internal static void UpdateDisplayWindow()

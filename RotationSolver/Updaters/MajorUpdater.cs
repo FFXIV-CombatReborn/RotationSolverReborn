@@ -24,7 +24,7 @@ internal static class MajorUpdater
     {
         get
         {
-            if (!Player.AvailableThreadSafe)
+            if (!Player.Available)
             {
                 _rotationsLoaded = false;
                 return false;
@@ -214,19 +214,20 @@ internal static class MajorUpdater
             }
         }
 
-        // Apply reddening of disabled actions on hotbars alongside highlight
-        try
-        {
-            HotbarDisabledColor.ApplyFrame();
-        }
-        catch (Exception ex)
-        {
-            LogOnce("Hotbar Disabled Redden Exception", ex);
-        }
+		// Apply reddening of disabled actions on hotbars alongside highlight
+		// TODO : Re-enable when stable
+		//try
+		//{
+		//    HotbarDisabledColor.ApplyFrame();
+		//}
+		//catch (Exception ex)
+		//{
+		//    LogOnce("Hotbar Disabled Redden Exception", ex);
+		//}
 
-    }
+	}
 
-    private static void RSRCommonUpdate(IFramework framework)
+	private static void RSRCommonUpdate(IFramework framework)
     {
         if (!_shouldRunThisCycle)
             return;
@@ -333,7 +334,7 @@ internal static class MajorUpdater
                 IAction? nextAction2 = ActionUpdater.NextAction;
                 if (nextAction2 == null)
                 {
-                    if (Svc.Targets.Target == null)
+                    if (Player.Object != null && Svc.Targets.Target == null)
                     {
                         // Try to find the closest enemy and target it
                         IBattleChara? closestEnemy = null;

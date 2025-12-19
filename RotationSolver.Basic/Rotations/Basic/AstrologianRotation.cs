@@ -214,7 +214,7 @@ public partial class AstrologianRotation
     static partial void ModifyAscendPvE(ref ActionSetting setting)
     {
         setting.IsFriendly = true;
-        setting.ActionCheck = () => Player.CurrentMp >= RaiseMPMinimum;
+        setting.ActionCheck = () => Player?.CurrentMp >= RaiseMPMinimum;
     }
 
     static partial void ModifyEssentialDignityPvE(ref ActionSetting setting)

@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Magical;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.35")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.4")]
 [SourceCode(Path = "main/BasicRotations/Magical/BLM_Default.cs")]
 
 public class BLM_Default : BlackMageRotation

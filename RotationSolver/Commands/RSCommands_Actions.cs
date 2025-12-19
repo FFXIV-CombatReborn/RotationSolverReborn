@@ -4,7 +4,6 @@ using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
-using RotationSolver.Helpers;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.Commands
@@ -40,16 +39,6 @@ namespace RotationSolver.Commands
             }
             _lastState = currentState;
 
-            // Precompute the delay range to avoid recalculating it multiple times
-            TimeSpan delayRange = TimeSpan.FromMilliseconds(random.Next(
-                (int)(Service.Config.ClickingDelay.X * 1000),
-                (int)(Service.Config.ClickingDelay.Y * 1000)));
-
-            if (DateTime.Now - _lastClickTime < delayRange)
-            {
-                return false;
-            }
-
             _lastClickTime = DateTime.Now;
 
             // Avoid unnecessary checks if isGCD is true
@@ -61,12 +50,12 @@ namespace RotationSolver.Commands
 
         public static void DoAction()
         {
-            if (Player.Object.StatusList == null)
-            {
-                return;
-            }
+			if (Player.Object == null || Player.Object.StatusList == null)
+			{
+				return;
+			}
 
-            HashSet<uint> noCastingStatus = OtherConfiguration.NoCastingStatus;
+			HashSet<uint> noCastingStatus = OtherConfiguration.NoCastingStatus;
             if (noCastingStatus != null)
             {
                 if (_cachedNoCastingStatusSet != noCastingStatus)
@@ -183,24 +172,27 @@ namespace RotationSolver.Commands
             }
         }
 
-        private static void PulseAction(uint id, int remainingPulses)
-        {
-            if (remainingPulses <= 0)
-            {
-                started = false;
-                return;
-            }
+		private static void PulseAction(uint id, int remainingPulses)
+		{
+			if (remainingPulses <= 0)
+			{
+				started = false;
+				PluginLog.Debug($"PulseAction: Completed pulsing for action ID {id}.");
+				return;
+			}
 
-            MiscUpdater.PulseActionBar(id);
-            double time = Service.Config.ClickingDelay.X + (random.NextDouble() * (Service.Config.ClickingDelay.Y - Service.Config.ClickingDelay.X));
-            _ = Svc.Framework.RunOnTick(() =>
-            {
-                PulseAction(id, remainingPulses - 1);
-            }, TimeSpan.FromSeconds(time));
-        }
+			PluginLog.Debug($"PulseAction: Pulsing action bar for action ID {id}, remaining pulses: {remainingPulses}.");
+			MiscUpdater.PulseActionBar(id);
+			double time = Service.Config.ClickingDelay.X + (random.NextDouble() * (Service.Config.ClickingDelay.Y - Service.Config.ClickingDelay.X));
+			PluginLog.Debug($"PulseAction: Next pulse for action ID {id} scheduled in {time:F2} seconds.");
+			_ = Svc.Framework.RunOnTick(() =>
+			{
+				PulseAction(id, remainingPulses - 1);
+			}, TimeSpan.FromSeconds(time));
+		}
 
-        // Schedule locking onto a candidate target after a random delay in Configs.TargetDelay
-        internal static void SetTargetWithDelay(IGameObject? candidate)
+		// Schedule locking onto a candidate target after a random delay in Configs.TargetDelay
+		internal static void SetTargetWithDelay(IGameObject? candidate)
         {
             if (candidate == null)
             {
@@ -293,7 +285,7 @@ namespace RotationSolver.Commands
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                 }
 
-                if (!Player.AvailableThreadSafe)
+                if (!Player.Available)
                 {
                     return;
                 }
@@ -305,29 +297,30 @@ namespace RotationSolver.Commands
                     if (ht != null) hostileTargetObjectIds.Add(ht.TargetObjectId);
                 }
 
-                // Combine conditions to reduce redundant checks
-                if (Svc.Condition[ConditionFlag.LoggingOut] ||
-                    (Service.Config.AutoOffWhenDead && DataCenter.Territory != null && !DataCenter.Territory.IsPvP && Player.Object.CurrentHp == 0) ||
-                    (Service.Config.AutoOffWhenDeadPvP && DataCenter.Territory != null && DataCenter.Territory.IsPvP && Player.Object.CurrentHp == 0) ||
-                    (Service.Config.AutoOffPvPMatchEnd && Svc.Condition[ConditionFlag.PvPDisplayActive]) ||
-                    (Service.Config.AutoOffCutScene && !DataCenter.IsAutoDuty && !DataCenter.IsHenched && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]) ||
-                    (Service.Config.AutoOffSwitchClass && Player.Job != _previousJob) ||
-                    (Service.Config.AutoOffBetweenArea && !DataCenter.IsAutoDuty && (Svc.Condition[ConditionFlag.BetweenAreas] || Svc.Condition[ConditionFlag.BetweenAreas51])) ||
-                    (Service.Config.CancelStateOnCombatBeforeCountdown && Service.CountDownTime > 0.2f && DataCenter.InCombat) ||
-                    (ActionUpdater.AutoCancelTime != DateTime.MinValue && DateTime.Now > ActionUpdater.AutoCancelTime))
-                {
-                    CancelState();
-                    if (Player.Job != _previousJob)
-                    {
-                        _previousJob = Player.Job;
-                    }
+				// Combine conditions to reduce redundant checks
+				if (
+	                Svc.Condition[ConditionFlag.LoggingOut] ||
+	                (Service.Config.AutoOffWhenDead && DataCenter.Territory != null && !DataCenter.Territory.IsPvP && Player.Object != null && Player.Object.CurrentHp == 0) ||
+	                (Service.Config.AutoOffWhenDeadPvP && DataCenter.Territory != null && DataCenter.Territory.IsPvP && Player.Object != null && Player.Object.CurrentHp == 0) ||
+	                (Service.Config.AutoOffPvPMatchEnd && Svc.Condition[ConditionFlag.PvPDisplayActive]) ||
+	                (Service.Config.AutoOffCutScene && !DataCenter.IsAutoDuty && !DataCenter.IsHenched && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]) ||
+	                (Service.Config.AutoOffSwitchClass && Player.Job != _previousJob) ||
+	                (Service.Config.AutoOffBetweenArea && !DataCenter.IsAutoDuty && (Svc.Condition[ConditionFlag.BetweenAreas] || Svc.Condition[ConditionFlag.BetweenAreas51])) ||
+	                (Service.Config.CancelStateOnCombatBeforeCountdown && Service.CountDownTime > 0.2f && DataCenter.InCombat) ||
+	                (ActionUpdater.AutoCancelTime != DateTime.MinValue && DateTime.Now > ActionUpdater.AutoCancelTime))
+				{
+					CancelState();
+					if (Player.Job != _previousJob)
+					{
+						_previousJob = Player.Job;
+					}
 
-                    ActionUpdater.AutoCancelTime = DateTime.MinValue;
-                    return;
-                }
+					ActionUpdater.AutoCancelTime = DateTime.MinValue;
+					return;
+				}
 
-                // Simplify PvP match start condition
-                if (Service.Config.AutoOnPvPMatchStart &&
+				// Simplify PvP match start condition
+				if (Service.Config.AutoOnPvPMatchStart &&
                     Svc.Condition[ConditionFlag.BetweenAreas] &&
                     Svc.Condition[ConditionFlag.BoundByDuty] &&
                     !DataCenter.State &&
@@ -426,12 +419,12 @@ namespace RotationSolver.Commands
                                 continue;
                             }
                         }
-                        if (t != null && t.GameObjectId != Player.Object.GameObjectId)
-                        {
-                            // PluginLog.Debug($"StartOnFieldOpInCombat: {t.Name} InCombat: {t.InCombat()} Distance: {t.DistanceToPlayer()} ");    
-                        }
+						if (t != null && Player.Object != null && t.GameObjectId != Player.Object.GameObjectId)
+						{
+							// PluginLog.Debug($"StartOnFieldOpInCombat: {t.Name} InCombat: {t.InCombat()} Distance: {t.DistanceToPlayer()} ");    
+						}
 
-                        if (t != null && t.InCombat())
+						if (t != null && t.InCombat())
                         {
                             PluginLog.Debug($"StartOnFieldOpInCombat: {t.Name} InCombat: {t.InCombat()}.");
                             DoStateCommandType(StateCommandType.Auto);
@@ -458,23 +451,26 @@ namespace RotationSolver.Commands
                     }
                 }
                 IBattleChara? target = null;
-                if (Service.Config.StartOnAttackedBySomeone && !DataCenter.State)
-                {
-                    foreach (var t in DataCenter.AllHostileTargets)
-                    {
-                        if (t != null && t is IBattleChara battleChara && battleChara.TargetObjectId == Player.Object.GameObjectId)
-                        {
-                            target = battleChara;
-                            break;
-                        }
-                    }
-                    if (target != null && !ObjectHelper.IsDummy(target))
-                    {
-                        DoStateCommandType(StateCommandType.Manual);
-                    }
-                }
+				if (Service.Config.StartOnAttackedBySomeone && !DataCenter.State)
+				{
+					if (Player.Object != null)
+					{
+						foreach (var t in DataCenter.AllHostileTargets)
+						{
+							if (t != null && t is IBattleChara battleChara && battleChara.TargetObjectId == Player.Object.GameObjectId)
+							{
+								target = battleChara;
+								break;
+							}
+						}
+						if (target != null && !ObjectHelper.IsDummy(target))
+						{
+							DoStateCommandType(StateCommandType.Manual);
+						}
+					}
+				}
 
-                if (Service.Config.StartOnCountdown)
+				if (Service.Config.StartOnCountdown)
                 {
                     if (Service.CountDownTime > 0)
                     {

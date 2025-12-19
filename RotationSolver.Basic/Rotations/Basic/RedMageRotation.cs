@@ -354,7 +354,7 @@ public partial class RedMageRotation
     static partial void ModifyVerraisePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Dualcast];
-        setting.ActionCheck = () => Player.CurrentMp >= RaiseMPMinimum;
+        setting.ActionCheck = () => Player?.CurrentMp >= RaiseMPMinimum;
     }
 
     static partial void ModifyVerflarePvE(ref ActionSetting setting)

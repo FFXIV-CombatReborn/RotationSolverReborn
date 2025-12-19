@@ -99,18 +99,19 @@ internal class NextActionWindow : Window
 
         ImGui.ProgressBar(elapsed / total, new Vector2(width, height), string.Empty);
 
-        float actionRemain = DataCenter.DefaultGCDRemain;
-        if (actionRemain > 0)
-        {
-            float value = total - DataCenter.CalculatedActionAhead;
+		float actionRemain = DataCenter.DefaultGCDRemain;
+		if (actionRemain > 0)
+		{
+			float value = total - DataCenter.CalculatedActionAhead;
 
-            if (value > Player.Object.TotalCastTime)
-            {
-                Vector2 pt = cursor + (new Vector2(width, 0) * value / total);
+			var playerObject = Player.Object;
+			if (playerObject != null && value > playerObject.TotalCastTime)
+			{
+				Vector2 pt = cursor + (new Vector2(width, 0) * value / total);
 
-                ImGui.GetWindowDrawList().AddLine(pt, pt + new Vector2(0, height),
-                    ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudRed), 2);
-            }
-        }
-    }
+				ImGui.GetWindowDrawList().AddLine(pt, pt + new Vector2(0, height),
+					ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudRed), 2);
+			}
+		}
+	}
 }

@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.35")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.4")]
 [SourceCode(Path = "main/RebornRotations/Melee/NIN_Reborn.cs")]
 
 public sealed class NIN_Reborn : NinjaRotation
@@ -921,7 +921,7 @@ public sealed class NIN_Reborn : NinjaRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         if (!IsExecutingMudra && (InTrickAttack || InMug) && NoNinjutsu && !HasRaijuReady
-            && !Player.HasStatus(true, StatusID.TenChiJin)
+            && Player != null && !Player.HasStatus(true, StatusID.TenChiJin)
             && PhantomKamaitachiPvE.CanUse(out act))
         {
             return true;

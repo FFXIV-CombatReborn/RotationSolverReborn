@@ -12,6 +12,7 @@ using RotationSolver.Basic.Rotations.Duties;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 using AttackType = RotationSolver.Basic.Data.AttackType;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
+using Player = ECommons.GameHelpers.Player;
 
 namespace RotationSolver.Basic.Actions;
 
@@ -63,7 +64,12 @@ public struct ActionTargetInfo(IBaseAction action)
             return [];
         }
 
-        List<IBattleChara> validTargets = [];
+		if (Player.Object == null)
+		{
+			return [];
+		}
+
+		List<IBattleChara> validTargets = [];
         foreach (IBattleChara target in TargetHelper.GetTargetsByRange(Range))
         {
             if (type == TargetType.Heal && target.GetHealthRatio() == 1)
@@ -220,7 +226,12 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (!Player.AvailableThreadSafe)
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (!Player.Available)
         {
             return false;
         }
@@ -399,7 +410,12 @@ public struct ActionTargetInfo(IBaseAction action)
             return null;
         }
 
-        if (Range == 0 && EffectRange == 0)
+		if (Player.Object == null)
+		{
+			return null;
+		}
+
+		if (Range == 0 && EffectRange == 0)
         {
             return new TargetResult(Player.Object, [], Player.Object.Position);
         }
@@ -559,9 +575,14 @@ public struct ActionTargetInfo(IBaseAction action)
     /// </returns>
     private readonly TargetResult? FindTargetAreaMove(float range)
     {
-        if (Service.Config.MoveAreaActionFarthest)
+		if (Player.Object == null)
+		{
+			return null;
+		}
+
+		if (Service.Config.MoveAreaActionFarthest)
         {
-            Vector3 pPosition = Player.Object.Position;
+			Vector3 pPosition = Player.Object.Position;
             if (Service.Config.MoveTowardsScreenCenter)
             {
                 unsafe
@@ -1965,7 +1986,12 @@ public struct ActionTargetInfo(IBaseAction action)
                 : Service.Config.MoveTowardsScreenCenter ? FindMoveTargetScreenCenter() : FindMoveTargetFaceDirection();
             IBattleChara? FindMoveTargetScreenCenter()
             {
-                Vector3 pPosition = Player.Object.Position;
+				if (Player.Object == null)
+				{
+					return null;
+				}
+
+				Vector3 pPosition = Player.Object.Position;
                 if (!Svc.GameGui.WorldToScreen(pPosition, out Vector2 playerScrPos))
                 {
                     return null;
@@ -1999,7 +2025,12 @@ public struct ActionTargetInfo(IBaseAction action)
 
             IBattleChara? FindMoveTargetFaceDirection()
             {
-                Vector3 pPosition = Player.Object.Position;
+				if (Player.Object == null)
+				{
+					return null;
+				}
+
+				Vector3 pPosition = Player.Object.Position;
                 Vector3 faceVec = Player.Object.GetFaceVector();
 
                 List<IBattleChara> filteredTargets = [];
@@ -2568,7 +2599,12 @@ public struct ActionTargetInfo(IBaseAction action)
 
     private static bool IsNeededRole(IBattleChara character)
     {
-        if (character.GameObjectId == Player.Object.GameObjectId)
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (character.GameObjectId == Player.Object.GameObjectId)
         {
             return false;
         }

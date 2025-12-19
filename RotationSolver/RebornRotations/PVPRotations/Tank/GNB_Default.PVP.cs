@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Tank;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.35")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.4")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/GNB_Default.PvP.cs")]
 
 public sealed class GNB_DefaultPvP : GunbreakerRotation
@@ -82,7 +82,7 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && Player != null && Player.HasStatus(true, StatusID.Guard))
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -93,7 +93,7 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
         }
 
         //You WILL try to save yourself. Configs be damned!
-        if (HeartOfCorundumPvP.CanUse(out action) && Player.GetHealthRatio() * 100 <= 30)
+        if (HeartOfCorundumPvP.CanUse(out action) && Player != null && Player.GetHealthRatio() * 100 <= 30)
         {
             return true;
         }
@@ -102,12 +102,12 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && Player != null && Player.HasStatus(true, StatusID.Guard))
         {
             return base.AttackAbility(nextGCD, out action);
         }
 
-        if (!Player.HasStatus(true, StatusID.NoMercy_3042) && RoughDividePvP.CanUse(out action, usedUp: true))
+        if (Player != null && !Player.HasStatus(true, StatusID.NoMercy_3042) && RoughDividePvP.CanUse(out action, usedUp: true))
         {
             return true;
         }
@@ -160,7 +160,7 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && Player != null && Player.HasStatus(true, StatusID.Guard))
         {
             return base.GeneralGCD(out action);
         }

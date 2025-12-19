@@ -1,5 +1,4 @@
 ﻿using Dalamud.Game;
-using Dalamud.Game.ClientState.JobGauge.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
@@ -10,16 +9,16 @@ using Lumina.Excel.Sheets;
 namespace RotationSolver.Basic.Rotations;
 public partial class CustomRotation
 {
-    #region Player
-    /// <summary>
-    /// This is the player.
-    /// </summary>
-    protected static IPlayerCharacter Player => ECommons.GameHelpers.Player.Object;
+	#region Player
+	/// <summary>
+	/// This is the player.
+	/// </summary>
+	protected static IPlayerCharacter? Player => ECommons.GameHelpers.Player.Object;
 
-    /// <summary>
-    /// Does player have swift cast, dual cast or triple cast.
-    /// </summary>
-    [Description("Has Swift")]
+	/// <summary>
+	/// Does player have swift cast, dual cast or triple cast.
+	/// </summary>
+	[Description("Has Swift")]
     public static bool HasSwift => Player?.HasStatus(true, StatusHelper.SwiftcastStatus) ?? false;
 
     /// <summary>
@@ -37,7 +36,7 @@ public partial class CustomRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasVariantCure => Player.HasStatus(true, StatusID.VariantCureSet);
+    public static bool HasVariantCure => Player?.HasStatus(true, StatusID.VariantCureSet) ?? false;
 
     /// <summary>
     /// Check the player is moving, such as running, walking or jumping.
@@ -49,12 +48,12 @@ public partial class CustomRotation
     /// Check if the player is dead.
     /// </summary>
     [Description("Is Dead, or inversely, is Alive")]
-    public static bool IsDead => Player.IsDead;
+	public static bool IsDead => Player?.IsDead ?? false;
 
-    /// <summary>
-    /// Is in combat.
-    /// </summary>
-    [Description("In Combat")]
+	/// <summary>
+	/// Is in combat.
+	/// </summary>
+	[Description("In Combat")]
     public static bool InCombat => DataCenter.InCombat;
 
     /// <summary>
@@ -230,12 +229,15 @@ public partial class CustomRotation
         Buffs.Clear();
         var processedJobs = new HashSet<string>();
 
-        if (PartyComposition == null)
-        {
-            var abbr = Player.ClassJob.Value.Abbreviation.ToString();
-            AddJobBuffs(abbr, processedJobs);
-        }
-        else
+		if (PartyComposition == null)
+		{
+			if (Player?.ClassJob.Value.Abbreviation != null)
+			{
+				var abbr = Player.ClassJob.Value.Abbreviation.ToString();
+				AddJobBuffs(abbr, processedJobs);
+			}
+		}
+		else
         {
             foreach (var job in PartyComposition)
             {
@@ -616,19 +618,19 @@ public partial class CustomRotation
     [Description("Is an enemy casting a multihit AOE party stack")]
     public static bool IsCastingMultiHit => DataCenter.IsCastingMultiHit();
 
-    #endregion
+	#endregion
 
-    #region Target
-    /// <summary>
-    /// The player's target.
-    /// <br> WARNING: Do not use if there is more than one target, this is not the actions target, it is the players current hard target. Try to use <see cref="IBaseAction.Target"/> or <seealso cref="HostileTarget"/> instead after using this.</br>
-    /// </summary>
-    protected static IBattleChara Target => Svc.Targets.Target is IBattleChara b ? b : Player;
+	#region Target
+	/// <summary>
+	/// The player's target.
+	/// <br> WARNING: Do not use if there is more than one target, this is not the actions target, it is the players current hard target. Try to use <see cref="IBaseAction.Target"/> or <seealso cref="HostileTarget"/> instead after using this.</br>
+	/// </summary>
+	protected static IBattleChara Target => Svc.Targets.Target as IBattleChara ?? Player!;
 
-    /// <summary>
-    /// The player's target, or null if no valid target. (null clears the target)
-    /// </summary>
-    protected static IBattleChara? CurrentTarget => Svc.Targets.Target is IBattleChara b ? b : null;
+	/// <summary>
+	/// The player's target, or null if no valid target. (null clears the target)
+	/// </summary>
+	protected static IBattleChara? CurrentTarget => Svc.Targets.Target is IBattleChara b ? b : null;
 
     /// <summary>
     /// The last attacked hostile target.

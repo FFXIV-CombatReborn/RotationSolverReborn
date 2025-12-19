@@ -18,7 +18,7 @@ internal class ActionSingleRotationGetter(Lumina.GameData gameData, ClassJob job
     /// </summary>
     /// <param name="item">The action item to check.</param>
     /// <returns>True if the action is added; otherwise, false.</returns>
-protected override bool AddToList(Lumina.Excel.Sheets.Action item)
+    protected override bool AddToList(Lumina.Excel.Sheets.Action item)
     {
         if (!base.AddToList(item)) return false;
 
@@ -42,7 +42,7 @@ internal abstract class ActionMultiRotationGetter(Lumina.GameData gameData)
     /// </summary>
     /// <param name="action">The action to check.</param>
     /// <returns>True if the action is a duty action; otherwise, false.</returns>
-protected static bool IsADutyAction(Lumina.Excel.Sheets.Action action)
+    protected static bool IsADutyAction(Lumina.Excel.Sheets.Action action)
     {
         return !action.IsRoleAction && !action.IsPvP && action.ActionCategory.RowId
             is not 10 and not 11 // Not System
@@ -54,7 +54,7 @@ protected static bool IsADutyAction(Lumina.Excel.Sheets.Action action)
     /// </summary>
     /// <param name="item">The action item to check.</param>
     /// <returns>True if the action is added; otherwise, false.</returns>
-protected override bool AddToList(Lumina.Excel.Sheets.Action item)
+    protected override bool AddToList(Lumina.Excel.Sheets.Action item)
     {
         if (!base.AddToList(item)) return false;
 

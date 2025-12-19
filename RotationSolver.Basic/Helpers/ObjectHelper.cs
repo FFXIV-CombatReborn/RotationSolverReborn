@@ -167,7 +167,7 @@ public static class ObjectHelper
             return false;
         }
 
-        foreach (Dalamud.Game.ClientState.Statuses.Status status in battleChara.StatusList)
+        foreach (Dalamud.Game.ClientState.Statuses.IStatus status in battleChara.StatusList)
         {
             if (StatusHelper.IsInvincible(status) && ((DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility) || !DataCenter.IsPvP))
             {
@@ -246,7 +246,12 @@ public static class ObjectHelper
 
         if (Service.Config.ForlornPriority && DataCenter.IsInFate)
         {
-            const float sipRange = 25f;
+			if (Player.Object == null)
+			{
+				return false;
+			}
+
+			const float sipRange = 25f;
 
             bool sipInRange = false;
             foreach (var o in Svc.Objects)
@@ -282,25 +287,27 @@ public static class ObjectHelper
             return true;
         }
 
-        //Special cases for Black Star and Mythic Idol, which do not have valid target objects but are still attackable.
-        if (battleChara.NameId == 13726 || battleChara.NameId == 13636)
-        {
-            return true;
-        }
+		//Special cases for Black Star and Mythic Idol, which do not have valid target objects but are still attackable.
+		if (battleChara.NameId == 13726 || battleChara.NameId == 13636)
+		{
+			return true;
+		}
 
-        // Tar on me
-        return battleChara.TargetObject == Player.Object
-            || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId || DataCenter.IsHenched || DataCenter.CurrentTargetToHostileType switch
-            {
-                TargetHostileType.AllTargetsCanAttack => true,
-                TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is not null,
-                TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Count == 1 || battleChara.TargetObject is not null,
-                TargetHostileType.AllTargetsWhenSoloInDuty => (DataCenter.PartyMembers.Count == 1 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56]))
-                                    || battleChara.TargetObject is not null,
-                TargetHostileType.SoloDeepDungeonSmart => IsSoloDeepDungeonSmartAttackable(battleChara),
-                _ => true,
-            };
-    }
+		// Tar on me
+		return (battleChara.TargetObject == Player.Object)
+			|| (Player.Object != null && battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId)
+			|| DataCenter.IsHenched
+			|| DataCenter.CurrentTargetToHostileType switch
+			{
+				TargetHostileType.AllTargetsCanAttack => true,
+				TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is not null,
+				TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Count == 1 || battleChara.TargetObject is not null,
+				TargetHostileType.AllTargetsWhenSoloInDuty => (DataCenter.PartyMembers.Count == 1 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56]))
+									|| battleChara.TargetObject is not null,
+				TargetHostileType.SoloDeepDungeonSmart => IsSoloDeepDungeonSmartAttackable(battleChara),
+				_ => true,
+			};
+	}
 
     internal static bool IsBozjanCEMob(this IBattleChara battleChara)
     {
@@ -555,7 +562,12 @@ public static class ObjectHelper
             return false;
         }
 
-        if (battleChara.GameObjectId == Player.Object.GameObjectId)
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (battleChara.GameObjectId == Player.Object.GameObjectId)
         {
             return true;
         }
@@ -719,8 +731,13 @@ public static class ObjectHelper
             return true;
         }
 
-        // Check IBattleChara bespoke IsSpecialInclusionPriority method
-        if (battleChara.IsSpecialInclusionPriority())
+		if (battleChara.IsBroPriority())
+		{
+			return true;
+		}
+
+		// Check IBattleChara bespoke IsSpecialInclusionPriority method
+		if (battleChara.IsSpecialInclusionPriority())
         {
             return true;
         }
@@ -782,7 +799,7 @@ public static class ObjectHelper
         // Ensure StatusList is not null before iterating
         if (battleChara.StatusList != null)
         {
-            foreach (Dalamud.Game.ClientState.Statuses.Status status in battleChara.StatusList)
+            foreach (Dalamud.Game.ClientState.Statuses.IStatus status in battleChara.StatusList)
             {
                 if (StatusHelper.IsPriority(status))
                 {
@@ -843,7 +860,48 @@ public static class ObjectHelper
         return false;
     }
 
-    internal static bool IsSpecialInclusionPriority(this IBattleChara battleChara)
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsBroPriority(this IBattleChara battleChara)
+	{
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (DataCenter.TerritoryID == 1322)
+		{
+			var RedHot = battleChara.NameId == 14370;
+			var DeepBlue = battleChara.NameId == 14369;
+
+			var Firesnaking = Player.Object.HasStatus(false, StatusID.Firesnaking);
+			var Watersnaking = Player.Object.HasStatus(false, StatusID.Watersnaking);
+
+			if (RedHot && Firesnaking)
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsBroPriority RedHot status found");
+				}
+				return true;
+			}
+
+			if (DeepBlue && Watersnaking)
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsBroPriority DeepBlue status found");
+				}
+				return true;
+			}
+
+		}
+
+		return false;
+	}
+
+	internal static bool IsSpecialInclusionPriority(this IBattleChara battleChara)
     {
         if (battleChara.NameId == 8145
             || battleChara.NameId == 10259
@@ -1244,7 +1302,7 @@ private static readonly HashSet<uint> IsOCUndeadSet =
 			{
 				if (Service.Config.InDebug)
 				{
-					PluginLog.Information("IsColossusRubricatusImmune action found, ignoring mob");
+					PluginLog.Information("IsCrystalOfDarknessImmune action found, ignoring mob");
 				}
 				return true;
 			}
@@ -1293,7 +1351,7 @@ private static readonly HashSet<uint> IsOCUndeadSet =
             {
                 if (Service.Config.InDebug)
                 {
-                    PluginLog.Information("IsEminentGriefImmune status found");
+                    PluginLog.Information("IsTrueHeartImmune status found");
                 }
                 return true;
             }
@@ -2379,54 +2437,54 @@ internal static float GetTTK(this IBattleChara battleChara, bool wholeTime = fal
         return (float)battleChara.CurrentHp / battleChara.MaxHp;
     }
 
-    /// <summary>
-    /// Determines the positional relationship of the player relative to the enemy.
-    /// </summary>
-    /// <param name="enemy">The enemy game object.</param>
-    /// <returns>
-    /// An <see cref="EnemyPositional"/> value indicating whether the player is in front, at the rear, or on the flank of the enemy.
-    /// </returns>
-    public static EnemyPositional FindEnemyPositional(this IBattleChara enemy)
-    {
-        if (enemy == null)
-        {
-            return EnemyPositional.None;
-        }
+	/// <summary>
+	/// Determines the positional relationship of the player relative to the enemy.
+	/// </summary>
+	/// <param name="enemy">The enemy game object.</param>
+	/// <returns>
+	/// An <see cref="EnemyPositional"/> value indicating whether the player is in front, at the rear, or on the flank of the enemy.
+	/// </returns>
+	public static EnemyPositional FindEnemyPositional(this IBattleChara enemy)
+	{
+		if (enemy == null || Player.Object == null)
+		{
+			return EnemyPositional.None;
+		}
 
-        Vector3 pPosition = enemy.Position;
-        Vector3 faceVec = enemy.GetFaceVector();
+		Vector3 pPosition = enemy.Position;
+		Vector3 faceVec = enemy.GetFaceVector();
 
-        Vector3 dir = Player.Object.Position - pPosition;
-        dir = Vector3.Normalize(dir);
-        faceVec = Vector3.Normalize(faceVec);
+		Vector3 dir = Player.Object.Position - pPosition;
+		dir = Vector3.Normalize(dir);
+		faceVec = Vector3.Normalize(faceVec);
 
-        // Calculate the angle between the direction vector and the facing vector
-        double dotProduct = Vector3.Dot(faceVec, dir);
-        double angle = Math.Acos(dotProduct);
+		// Calculate the angle between the direction vector and the facing vector
+		double dotProduct = Vector3.Dot(faceVec, dir);
+		double angle = Math.Acos(dotProduct);
 
-        const double frontAngle = Math.PI / 4;
-        const double rearAngle = Math.PI * 3 / 4;
+		const double frontAngle = Math.PI / 4;
+		const double rearAngle = Math.PI * 3 / 4;
 
-        if (angle < frontAngle)
-        {
-            return EnemyPositional.Front;
-        }
-        else if (angle > rearAngle)
-        {
-            return EnemyPositional.Rear;
-        }
+		if (angle < frontAngle)
+		{
+			return EnemyPositional.Front;
+		}
+		else if (angle > rearAngle)
+		{
+			return EnemyPositional.Rear;
+		}
 
-        return EnemyPositional.Flank;
-    }
+		return EnemyPositional.Flank;
+	}
 
-    /// <summary>
-    /// Gets the facing direction vector of the game object.
-    /// </summary>
-    /// <param name="battleChara">The game object.</param>
-    /// <returns>
-    /// A <see cref="Vector3"/> representing the facing direction of the game object.
-    /// </returns>
-    internal static Vector3 GetFaceVector(this IBattleChara battleChara)
+	/// <summary>
+	/// Gets the facing direction vector of the game object.
+	/// </summary>
+	/// <param name="battleChara">The game object.</param>
+	/// <returns>
+	/// A <see cref="Vector3"/> representing the facing direction of the game object.
+	/// </returns>
+	internal static Vector3 GetFaceVector(this IBattleChara battleChara)
     {
         if (battleChara == null)
         {
@@ -2457,20 +2515,20 @@ internal static float GetTTK(this IBattleChara battleChara, bool wholeTime = fal
         return Math.Acos(dotProduct / lengthProduct);
     }
 
-    /// <summary>
-    /// The distance from <paramref name="battleChara"/> to the player
-    /// </summary>
-    /// <param name="battleChara"></param>
-    /// <returns></returns>
-    public static float DistanceToPlayer(this IBattleChara battleChara)
-    {
-        if (battleChara == null)
-        {
-            return float.MaxValue;
-        }
+	/// <summary>
+	/// The distance from <paramref name="battleChara"/> to the player
+	/// </summary>
+	/// <param name="battleChara"></param>
+	/// <returns></returns>
+	public static float DistanceToPlayer(this IBattleChara battleChara)
+	{
+		if (battleChara == null || Player.Object == null)
+		{
+			return float.MaxValue;
+		}
 
-        float distance = Vector3.Distance(Player.Object.Position, battleChara.Position) - (Player.Object.HitboxRadius + battleChara.HitboxRadius);
-        return distance;
-    }
+		float distance = Vector3.Distance(Player.Object.Position, battleChara.Position) - (Player.Object.HitboxRadius + battleChara.HitboxRadius);
+		return distance;
+	}
 
 }

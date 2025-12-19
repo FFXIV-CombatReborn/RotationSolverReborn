@@ -4,6 +4,7 @@ using Dalamud.Game.Text.SeStringHandling.Payloads;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -198,7 +199,7 @@ internal static class MiscUpdater
         List<float> statusTimes = [];
         if (Player.Object?.StatusList != null)
         {
-            foreach (Dalamud.Game.ClientState.Statuses.Status status in Player.Object.StatusList)
+            foreach (Dalamud.Game.ClientState.Statuses.IStatus status in Player.Object.StatusList)
             {
                 // No LINQ used here, Contains is a method on the collection
                 if (OtherConfiguration.NoCastingStatus.Contains(status.StatusId))
@@ -210,43 +211,55 @@ internal static class MiscUpdater
         return [.. statusTimes];
     }
 
-    internal static unsafe void PulseActionBar(uint actionID)
-    {
-        LoopAllSlotBar((bar, hot, index) =>
-        {
-            return IsActionSlotRight(bar, hot, actionID);
-        });
-    }
+	internal static unsafe void PulseActionBar(uint actionID)
+	{
+		PluginLog.Debug($"PulseActionBar called with actionID: {actionID}");
 
-    private static unsafe bool IsActionSlotRight(ActionBarSlot slot, RaptureHotbarModule.HotbarSlot? hot, uint actionID)
-    {
-        if (hot.HasValue)
-        {
-            if (hot.Value.OriginalApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action)
-            {
-                return false;
-            }
+		LoopAllSlotBar((bar, hot, index) =>
+		{
+			bool isRight = IsActionSlotRight(bar, hot, actionID);
+			if (isRight)
+			{
+				PluginLog.Debug($"Action slot matched: slot.ActionId={bar.ActionId}, hot={(hot.HasValue ? hot.Value.ApparentActionId.ToString() : "null")}, index={index}");
+			}
+			return isRight;
+		});
+	}
 
-            if (hot.Value.ApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action)
-            {
-                return false;
-            }
+	private static unsafe bool IsActionSlotRight(ActionBarSlot slot, RaptureHotbarModule.HotbarSlot? hot, uint actionID)
+	{
+		if (hot.HasValue)
+		{
+			if (hot.Value.OriginalApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action)
+			{
+				return false;
+			}
 
-            if (hot.Value.OriginalApparentSlotType == RaptureHotbarModule.HotbarSlotType.Macro)
-            {
-                return false;
-            }
+			if (hot.Value.ApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action)
+			{
+				return false;
+			}
 
-            if (hot.Value.ApparentSlotType == RaptureHotbarModule.HotbarSlotType.Macro)
-            {
-                return false;
-            }
-        }
+			if (hot.Value.OriginalApparentSlotType == RaptureHotbarModule.HotbarSlotType.Macro)
+			{
+				return false;
+			}
 
-        return Service.GetAdjustedActionId((uint)slot.ActionId) == actionID;
-    }
+			if (hot.Value.ApparentSlotType == RaptureHotbarModule.HotbarSlotType.Macro)
+			{
+				return false;
+			}
+		}
 
-    private unsafe delegate bool ActionBarAction(ActionBarSlot bar, RaptureHotbarModule.HotbarSlot? hot, uint highLightID);
+		bool match = Service.GetAdjustedActionId((uint)slot.ActionId) == actionID;
+		if (match)
+		{
+			PluginLog.Debug($"Slot {slot.ActionId}: AdjustedActionId matches actionID {actionID}.");
+		}
+		return match;
+	}
+
+	private unsafe delegate bool ActionBarAction(ActionBarSlot bar, RaptureHotbarModule.HotbarSlot? hot, uint highLightID);
     private unsafe delegate bool ActionBarPredicate(ActionBarSlot bar, RaptureHotbarModule.HotbarSlot* hot);
     private static unsafe void LoopAllSlotBar(ActionBarAction doingSomething)
     {

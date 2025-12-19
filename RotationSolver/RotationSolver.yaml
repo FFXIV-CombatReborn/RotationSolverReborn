@@ -12,7 +12,7 @@ description: |-
 punchline: Analyses combat information every frame and finds the best action.
 repo_url: https://github.com/FFXIV-CombatReborn/RotationSolverReborn
 icon_url: https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/main/Images/Logo.png
-dalamud_api_level: 13
+dalamud_api_level: 14
 tags:
   - combat
   - rotation

@@ -231,7 +231,12 @@ public class BaseItem : IBaseItem
     /// <returns></returns>
     public unsafe bool Use()
     {
-        if (_item.RowId == 0)
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (_item.RowId == 0)
         {
             return false; // Check if the item is uninitialized
         }

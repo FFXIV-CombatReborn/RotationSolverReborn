@@ -3,7 +3,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace RotationSolver.ExtraRotations.Tank;
 
-[Rotation("ChurinDRK", CombatType.PvE, GameVersion = "7.35", Description = "Find it in your heart. You'll need to break past the ribs and then scoop it out, but it's in there, and you need to find it. Quickly.")]
+[Rotation("ChurinDRK", CombatType.PvE, GameVersion = "7.4", Description = "Find it in your heart. You'll need to break past the ribs and then scoop it out, but it's in there, and you need to find it. Quickly.")]
 [SourceCode(Path = "main/ExtraRotations/Tank/ChurinDRK.cs")]
 [ExtraRotation]
 public sealed class ChurinDRK : DarkKnightRotation

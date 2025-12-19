@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Healer;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.35")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.4")]
 [SourceCode(Path = "main/RebornRotations/Healer/SGE_Reborn.cs")]
 
 public sealed class SGE_Reborn : SageRotation
@@ -454,37 +454,37 @@ public sealed class SGE_Reborn : SageRotation
         // Only decide the aim; do not require Eukrasia to be currently usable here.
         // Attempts to set correct Eukrasia action based on availability and MergedStatus.
         if (EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisIiPvE.IsEnabled && MergedStatus.HasFlag(AutoStatus.DefenseArea)
-            && EukrasianPrognosisIiPvE.CanUse(out _, skipStatusNeed: true))
+            && EukrasianPrognosisIiPvE.CanUse(out _))
         {
             SetEukrasia(EukrasianPrognosisIiPvE);
         }
         else if (!EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisPvE.EnoughLevel && EukrasianPrognosisPvE.IsEnabled && MergedStatus.HasFlag(AutoStatus.DefenseArea)
-            && EukrasianPrognosisPvE.CanUse(out _, skipStatusNeed: true))
+            && EukrasianPrognosisPvE.CanUse(out _))
         {
             SetEukrasia(EukrasianPrognosisPvE);
         }
         else if (EukrasianDiagnosisPvE.EnoughLevel && EukrasianDiagnosisPvE.IsEnabled && MergedStatus.HasFlag(AutoStatus.DefenseSingle)
-            && EukrasianDiagnosisPvE.CanUse(out _, skipStatusNeed: true))
+            && EukrasianDiagnosisPvE.CanUse(out _))
         {
             SetEukrasia(EukrasianDiagnosisPvE);
         }
         else if (EukrasianDyskrasiaPvE.EnoughLevel && EukrasianDyskrasiaPvE.IsEnabled && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) && !MergedStatus.HasFlag(AutoStatus.DefenseArea))
-            && EukrasianDyskrasiaPvE.CanUse(out _, skipStatusNeed: true))
+            && EukrasianDyskrasiaPvE.CanUse(out _))
         {
             SetEukrasia(EukrasianDyskrasiaPvE);
         }
-        else if ((!EukrasianDyskrasiaPvE.CanUse(out _, skipStatusNeed: true) || !DyskrasiaPvE.CanUse(out _))
-            && EukrasianDosisIiiPvE.CanUse(out _, skipStatusNeed: true) && EukrasianDosisIiiPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) && !MergedStatus.HasFlag(AutoStatus.DefenseArea)) && EukrasianDosisIiiPvE.IsEnabled)
+        else if ((!EukrasianDyskrasiaPvE.CanUse(out _) || !DyskrasiaPvE.CanUse(out _))
+            && EukrasianDosisIiiPvE.CanUse(out _) && EukrasianDosisIiiPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) && !MergedStatus.HasFlag(AutoStatus.DefenseArea)) && EukrasianDosisIiiPvE.IsEnabled)
         {
             SetEukrasia(EukrasianDosisIiiPvE);
         }
-        else if ((!EukrasianDyskrasiaPvE.CanUse(out _, skipStatusNeed: true) || !DyskrasiaPvE.CanUse(out _))
-            && EukrasianDosisIiPvE.CanUse(out _, skipStatusNeed: true) && !EukrasianDosisIiiPvE.EnoughLevel && EukrasianDosisIiPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) && !MergedStatus.HasFlag(AutoStatus.DefenseArea)) && EukrasianDosisIiPvE.IsEnabled)
+        else if ((!EukrasianDyskrasiaPvE.CanUse(out _) || !DyskrasiaPvE.CanUse(out _))
+            && EukrasianDosisIiPvE.CanUse(out _) && !EukrasianDosisIiiPvE.EnoughLevel && EukrasianDosisIiPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) && !MergedStatus.HasFlag(AutoStatus.DefenseArea)) && EukrasianDosisIiPvE.IsEnabled)
         {
             SetEukrasia(EukrasianDosisIiPvE);
         }
-        else if ((!EukrasianDyskrasiaPvE.CanUse(out _, skipStatusNeed: true) || !DyskrasiaPvE.CanUse(out _))
-            && EukrasianDosisPvE.CanUse(out _, skipStatusNeed: true) && !EukrasianDosisIiPvE.EnoughLevel && EukrasianDosisPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) && !MergedStatus.HasFlag(AutoStatus.DefenseArea)) && EukrasianDosisPvE.IsEnabled)
+        else if ((!EukrasianDyskrasiaPvE.CanUse(out _) || !DyskrasiaPvE.CanUse(out _))
+            && EukrasianDosisPvE.CanUse(out _) && !EukrasianDosisIiPvE.EnoughLevel && EukrasianDosisPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) && !MergedStatus.HasFlag(AutoStatus.DefenseArea)) && EukrasianDosisPvE.IsEnabled)
         {
             SetEukrasia(EukrasianDosisPvE);
         }

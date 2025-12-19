@@ -245,8 +245,8 @@ internal static partial class Util
         var jobs = action.ClassJobCategory.IsValid ? action.ClassJobCategory.Value.Name.ToString() : string.Empty;
         jobs = string.IsNullOrEmpty(jobs) ? string.Empty : $" ({jobs})";
 
-        var cate = action.IsPvP ? " <i>PvP</i>" : " <i>PvE</i>";
+        var cate = (action.IsPvP || action.Unknown16) ? " <i>PvP</i>" : " <i>PvE</i>";
 
-        return $"<see href=\"https://garlandtools.org/db/#action/{action.RowId}\"><strong>{action.Name.ToString()}</strong></see>{cate}{jobs} [{action.RowId}] [{(action.ActionCategory.IsValid ? action.ActionCategory.Value.Name.ToString() : string.Empty)}]";
+        return $"<see href=\"https://garlandtools.org/db/#action/{action.RowId}\"><strong>{action.Name}</strong></see>{cate}{jobs} [{action.RowId}] [{(action.ActionCategory.IsValid ? action.ActionCategory.Value.Name.ToString() : string.Empty)}]";
     }
 }
