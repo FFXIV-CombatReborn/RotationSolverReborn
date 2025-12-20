@@ -3528,7 +3528,7 @@ public partial class RotationConfigWindow : Window
         {
             ImGui.Text($"    {condition}");
         }
-        ImGui.Text($"OnlineStatus: {Player.OnlineStatus}");
+        ImGui.Text($"OnlineStatus: {Player.OnlineStatus.RowId}");
         ImGui.Text($"CanBeRaised: {Player.Object.CanBeRaised()}");
         ImGui.Text($"Current Hp: {Player.Object.CurrentHp}");
         ImGui.Text($"Effective Hp: {ObjectHelper.GetEffectiveHp(Player.Object)}");

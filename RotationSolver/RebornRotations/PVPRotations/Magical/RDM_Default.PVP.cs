@@ -129,15 +129,15 @@ public class RDM_DefaultPvP : RedMageRotation
             return true;
         }
 
-        if (EnchantedRedoublementPvP.CanUse(out action))
-        {
-            return true;
-        }
+		if (EnchantedRedoublementPvP.CanUse(out action))
+		{
+			return true;
+		}
 
-        if (EnchantedZwerchhauPvP.CanUse(out action))
-        {
-            return true;
-        }
+		if (EnchantedZwerchhauPvP.CanUse(out action))
+		{
+			return true;
+		}
 
         if (EnchantedRipostePvP.CanUse(out action))
         {

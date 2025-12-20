@@ -368,25 +368,40 @@ public sealed class RDM_Reborn : RedMageRotation
             return true;
         }
 
-        if (EnchantedRedoublementPvE.CanUse(out act))
+		if (EnchantedRedoublementPvE_45962.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (EnchantedRedoublementPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (EnchantedZwerchhauPvE.CanUse(out act))
+		if (EnchantedZwerchhauPvE_45961.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (EnchantedZwerchhauPvE.CanUse(out act))
         {
             return true;
         }
 
-        //Check if you can start melee combo
-        if ((EnoughManaCombo || CanMagickedSwordplay) && (!CanVerBoth || !ManaStackTrait.EnoughLevel))
+		//Check if you can start melee combo
+		if ((EnoughManaCombo || CanMagickedSwordplay) && (!CanVerBoth || !ManaStackTrait.EnoughLevel))
         {
             if (EnchantedMoulinetPvE.CanUse(out act))
             {
                 return true;
             }
-            
-            if (EnchantedRipostePvE.CanUse(out act))
+
+			if (EnchantedRipostePvE_45960.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (EnchantedRipostePvE.CanUse(out act))
             {
                 return true;
             }
