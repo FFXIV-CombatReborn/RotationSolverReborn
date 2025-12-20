@@ -562,16 +562,8 @@ public static class StatusHelper
 			return false;
 		}
 
-		try
+		if (Player.Object.StatusList == null)
 		{
-			if (Player.Object.StatusList == null)
-			{
-				return false;
-			}
-		}
-		catch
-		{
-			// StatusList threw, treat as unavailable
 			return false;
 		}
 
@@ -597,6 +589,16 @@ public static class StatusHelper
 	public static bool HasStatus(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
     {
 		if (!DataCenter.PlayerAvailable())
+		{
+			return false;
+		}
+
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (Player.Object.StatusList == null)
 		{
 			return false;
 		}
