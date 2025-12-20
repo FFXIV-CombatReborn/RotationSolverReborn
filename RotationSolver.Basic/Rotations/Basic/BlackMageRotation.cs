@@ -10,7 +10,7 @@ public partial class BlackMageRotation
     /// <inheritdoc/>
     public override bool IsBursting()
     {
-        if (IsEnochianActive && (Player.HasStatus(true, StatusID.LeyLines) || LeyLinesPvE.Cooldown.RecastTimeRemainOneCharge > 15f))
+        if (IsEnochianActive && (StatusHelper.PlayerHasStatus(true, StatusID.LeyLines) || LeyLinesPvE.Cooldown.RecastTimeRemainOneCharge > 15f))
         {
             return true; // Enochian is active and Ley Lines is available or has a long enough recast time remaining that we'll skip waiting
         }
@@ -140,27 +140,32 @@ public partial class BlackMageRotation
     /// <summary>
     /// 
     /// </summary>
-    protected static bool HasPvPAstralFire => Player.HasStatus(true, StatusID.AstralFire_3212, StatusID.AstralFireIi_3213, StatusID.AstralFireIii_3381);
+    protected static bool HasPvPAstralFire => StatusHelper.PlayerHasStatus(true, StatusID.AstralFire_3212, StatusID.AstralFireIi_3213, StatusID.AstralFireIii_3381);
 
     /// <summary>
     /// 
     /// </summary>
-    protected static bool HasPvPUmbralIce => Player.HasStatus(true, StatusID.UmbralIce_3214, StatusID.UmbralIceIi_3215, StatusID.UmbralIceIii_3382);
+    protected static bool HasPvPUmbralIce => StatusHelper.PlayerHasStatus(true, StatusID.UmbralIce_3214, StatusID.UmbralIceIi_3215, StatusID.UmbralIceIii_3382);
 
     /// <summary>
     /// 
     /// </summary>
-    protected static bool HasFire => Player.HasStatus(true, StatusID.Firestarter);
+    protected static bool HasFire => StatusHelper.PlayerHasStatus(true, StatusID.Firestarter);
 
-    /// <summary>
-    /// 
-    /// </summary>
-    protected static bool HasThunder => Player.HasStatus(true, StatusID.Thunderhead);
+	/// <summary>
+	/// 
+	/// </summary>
+	protected static bool HasLeyLines => StatusHelper.PlayerHasStatus(true, StatusID.LeyLines);
+
+	/// <summary>
+	///
+	/// </summary>
+	protected static bool HasThunder => StatusHelper.PlayerHasStatus(true, StatusID.Thunderhead);
 
     /// <summary>
     /// Indicates whether the next GCD (Global Cooldown) action is instant.
     /// </summary>
-    protected static bool NextGCDisInstant => Player.HasStatus(true, StatusID.Triplecast, StatusID.Swiftcast);
+    protected static bool NextGCDisInstant => StatusHelper.PlayerHasStatus(true, StatusID.Triplecast, StatusID.Swiftcast);
 
     /// <summary>
     /// Determines if the player can make the next action instant by checking the availability of Triplecast or Swiftcast.
@@ -170,7 +175,7 @@ public partial class BlackMageRotation
     /// <summary>
     /// Calculates the total number of instant casts available based on Triplecast charges, active Triplecast status, and Swiftcast charges.
     /// </summary>
-    protected int ThisManyInstantCasts => (TriplecastPvE.Cooldown.CurrentCharges * 3) + Player.StatusStack(true, StatusID.Triplecast) + SwiftcastPvE.Cooldown.CurrentCharges;
+    protected int ThisManyInstantCasts => (TriplecastPvE.Cooldown.CurrentCharges * 3) + StatusHelper.PlayerStatusStack(true, StatusID.Triplecast) + SwiftcastPvE.Cooldown.CurrentCharges;
 
     /// <summary>
     /// Calculates the deficit between the number of available instant casts and the current Astral Soul stacks.
@@ -462,7 +467,7 @@ public partial class BlackMageRotation
 
     static partial void ModifyRetracePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !IsMoving && !Player.HasStatus(true, StatusID.CircleOfPower);
+        setting.ActionCheck = () => !IsMoving && !StatusHelper.PlayerHasStatus(true, StatusID.CircleOfPower);
         setting.StatusNeed = [StatusID.LeyLines];
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()

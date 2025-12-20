@@ -21,7 +21,6 @@ internal class OverlayWindow : Window
     | ImGuiWindowFlags.NoNav;
 
     // Async update support and throttling for sync path
-    private volatile Task<IDrawing2D[]>? _updateTask;
     private IDrawing2D[]? _elements;
     private readonly Stopwatch _throttle = Stopwatch.StartNew();
     private const int SyncUpdateMs = 33; // ~30 FPS updates in sync mode
@@ -56,33 +55,16 @@ internal class OverlayWindow : Window
 
         try
         {
-            if (HotbarHighlightManager.UseTaskToAccelerate)
-            {
-                if (_updateTask == null || _updateTask.IsCompleted)
-                {
-                    _updateTask = Task.Run(HotbarHighlightManager.To2DAsync);
-                }
-                if (_updateTask.IsCompletedSuccessfully)
-                {
-                    var result = _updateTask.Result ?? [];
-                    var list = new List<IDrawing2D>(result);
-                    list.Sort((a, b) => GetDrawingOrder(a).CompareTo(GetDrawingOrder(b)));
-                    _elements = [.. list];
-                }
-            }
-            else
-            {
-                if (_throttle.ElapsedMilliseconds >= SyncUpdateMs)
-                {
-                    var result = HotbarHighlightManager.To2DAsync().GetAwaiter().GetResult() ?? [];
-                    var list = new List<IDrawing2D>(result);
-                    list.Sort((a, b) => GetDrawingOrder(a).CompareTo(GetDrawingOrder(b)));
-                    _elements = [.. list];
-                    _throttle.Restart();
-                }
-            }
+			if (_throttle.ElapsedMilliseconds >= SyncUpdateMs)
+			{
+				var result = HotbarHighlightManager.To2DAsync().GetAwaiter().GetResult() ?? [];
+				var list = new List<IDrawing2D>(result);
+				list.Sort((a, b) => GetDrawingOrder(a).CompareTo(GetDrawingOrder(b)));
+				_elements = [.. list];
+				_throttle.Restart();
+			}
 
-            ImDrawListPtr drawList = ImGui.GetWindowDrawList();
+			ImDrawListPtr drawList = ImGui.GetWindowDrawList();
             if (drawList.Handle == null)
             {
                 PluginLog.Warning($"{nameof(OverlayWindow)}: Window draw list is null.");

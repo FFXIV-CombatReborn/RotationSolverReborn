@@ -22,7 +22,7 @@ public sealed class MNK_DefaultPvP : MonkRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -32,23 +32,23 @@ public sealed class MNK_DefaultPvP : MonkRotation
             return true;
         }
 
-        if (RiddleOfEarthPvP.CanUse(out action) && InCombat && Player.GetHealthRatio() < 0.8)
+        if (RiddleOfEarthPvP.CanUse(out action) && InCombat && Player?.GetHealthRatio() < 0.8)
         {
             return true;
         }
 
         if (EarthsReplyPvP.CanUse(out action))
         {
-            if (Player.HasStatus(true, StatusID.EarthResonance) && Player.WillStatusEnd(1, true, StatusID.EarthResonance))
+            if (StatusHelper.PlayerHasStatus(true, StatusID.EarthResonance) && StatusHelper.PlayerWillStatusEnd(1, true, StatusID.EarthResonance))
             {
-                if (Player.GetHealthRatio() < 0.5 || Player.WillStatusEnd(1, true, StatusID.EarthResonance))
+                if (Player?.GetHealthRatio() < 0.5 || StatusHelper.PlayerWillStatusEnd(1, true, StatusID.EarthResonance))
                 {
                     return true;
                 }
             }
         }
 
-        if (BloodbathPvP.CanUse(out action) && Player.GetHealthRatio() < BloodBathPvPPercent)
+        if (BloodbathPvP.CanUse(out action) && Player?.GetHealthRatio() < BloodBathPvPPercent)
         {
             return true;
         }
@@ -68,7 +68,7 @@ public sealed class MNK_DefaultPvP : MonkRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -88,7 +88,7 @@ public sealed class MNK_DefaultPvP : MonkRotation
 
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.MoveForwardAbility(nextGCD, out action);
         }
@@ -100,7 +100,7 @@ public sealed class MNK_DefaultPvP : MonkRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }

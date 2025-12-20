@@ -209,27 +209,26 @@ internal static class ActionUpdater
 
     private static void UpdateMPTimer(DateTime now)
     {
-        var player = Player.Object;
-        if (player == null)
+        if (Player.Object == null)
         {
             return;
         }
 
-        if (player.ClassJob.RowId != (uint)ECommons.ExcelServices.Job.BLM)
+        if (Player.Object.ClassJob.RowId != (uint)ECommons.ExcelServices.Job.BLM)
         {
             return;
         }
 
-        if (player.HasStatus(true, StatusID.LucidDreaming))
+        if (StatusHelper.PlayerHasStatus(true, StatusID.LucidDreaming))
         {
             return;
         }
 
-        if (_lastMP < player.CurrentMp)
+        if (_lastMP < Player.Object.CurrentMp)
         {
             _lastMPUpdate = now;
         }
-        _lastMP = player.CurrentMp;
+        _lastMP = Player.Object.CurrentMp;
     }
 
     internal static unsafe bool CanDoAction()

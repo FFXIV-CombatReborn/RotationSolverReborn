@@ -27,7 +27,7 @@ public static class TargetFilter
                     var role = job.GetJobRole();
                     if (!dict.TryGetValue(role, out var set))
                     {
-                        set = new HashSet<byte>();
+                        set = [];
                         dict[role] = set;
                     }
                     set.Add((byte)job.RowId);
@@ -119,13 +119,29 @@ public static IEnumerable<IBattleChara> GetJobCategory(this IEnumerable<IBattleC
         return result;
     }
 
-    /// <summary>
-    /// Is the target the role.
-    /// </summary>
-    /// <param name="battleChara">The game object.</param>
-    /// <param name="role">The role to check.</param>
-    /// <returns>True if the object is of the specified role, otherwise false.</returns>
-public static bool IsJobCategory(this IBattleChara battleChara, JobRole role)
+	/// <summary>
+	/// Is the target the role.
+	/// </summary>
+	/// <param name="role">The role to check.</param>
+	/// <returns>True if the object is of the specified role, otherwise false.</returns>
+	public static bool PlayerJobCategory(JobRole role)
+	{
+		if (ECommons.GameHelpers.Player.Object == null)
+		{
+			return false;
+		}
+
+		var map = GetRoleMap();
+		return map.TryGetValue(role, out var set) && PlayerIsJobs(set);
+	}
+
+	/// <summary>
+	/// Is the target the role.
+	/// </summary>
+	/// <param name="battleChara">The game object.</param>
+	/// <param name="role">The role to check.</param>
+	/// <returns>True if the object is of the specified role, otherwise false.</returns>
+	public static bool IsJobCategory(this IBattleChara battleChara, JobRole role)
     {
         if (battleChara == null)
         {
@@ -136,13 +152,34 @@ public static bool IsJobCategory(this IBattleChara battleChara, JobRole role)
         return map.TryGetValue(role, out var set) && battleChara.IsJobs(set);
     }
 
-    /// <summary>
-    /// Is the target in the jobs.
-    /// </summary>
-    /// <param name="battleChara">The game object.</param>
-    /// <param name="validJobs">The valid jobs.</param>
-    /// <returns>True if the object is in the valid jobs, otherwise false.</returns>
-    public static bool IsJobs(this IBattleChara battleChara, params Job[] validJobs)
+	/// <summary>
+	/// Is the Player in the jobs.
+	/// </summary>
+	/// <param name="validJobs">The valid jobs.</param>
+	/// <returns>True if the object is in the valid jobs, otherwise false.</returns>
+	public static bool PlayerIsJobs(params Job[] validJobs)
+	{
+		if (ECommons.GameHelpers.Player.Object == null || validJobs == null || validJobs.Length == 0)
+		{
+			return false;
+		}
+
+		HashSet<byte> validJobSet = [];
+		foreach (Job job in validJobs)
+		{
+			_ = validJobSet.Add((byte)(uint)job);
+		}
+
+		return ECommons.GameHelpers.Player.Object.IsJobs(validJobSet);
+	}
+
+	/// <summary>
+	/// Is the target in the jobs.
+	/// </summary>
+	/// <param name="battleChara">The game object.</param>
+	/// <param name="validJobs">The valid jobs.</param>
+	/// <returns>True if the object is in the valid jobs, otherwise false.</returns>
+	public static bool IsJobs(this IBattleChara battleChara, params Job[] validJobs)
     {
         if (battleChara == null || validJobs == null || validJobs.Length == 0)
         {
@@ -158,7 +195,21 @@ public static bool IsJobCategory(this IBattleChara battleChara, JobRole role)
         return battleChara.IsJobs(validJobSet);
     }
 
-    private static bool IsJobs(this IGameObject battleChara, HashSet<byte> validJobs)
+	private static bool PlayerIsJobs(HashSet<byte> validJobs)
+	{
+		if (ECommons.GameHelpers.Player.Object == null || validJobs == null)
+		{
+			return false;
+		}
+
+		if (ECommons.GameHelpers.Player.Object is IBattleChara b && validJobs != null)
+		{
+			return validJobs.TryGetValue((byte)b.ClassJob.Value.RowId, out _);
+		}
+		return false;
+	}
+
+	private static bool IsJobs(this IGameObject battleChara, HashSet<byte> validJobs)
     {
         if (battleChara is IBattleChara b && validJobs != null)
         {

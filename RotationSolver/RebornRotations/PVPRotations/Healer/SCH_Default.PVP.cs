@@ -14,7 +14,7 @@ public class SCH_DefaultPVP : ScholarRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -34,7 +34,7 @@ public class SCH_DefaultPVP : ScholarRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -54,7 +54,7 @@ public class SCH_DefaultPVP : ScholarRotation
 
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseAreaAbility(nextGCD, out action);
         }
@@ -69,7 +69,7 @@ public class SCH_DefaultPVP : ScholarRotation
 
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.HealAreaAbility(nextGCD, out action);
         }
@@ -86,7 +86,7 @@ public class SCH_DefaultPVP : ScholarRotation
     #region GCDs
     protected override bool DefenseSingleGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleGCD(out action);
         }
@@ -101,7 +101,7 @@ public class SCH_DefaultPVP : ScholarRotation
 
     protected override bool HealSingleGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.HealSingleGCD(out action);
         }
@@ -121,12 +121,12 @@ public class SCH_DefaultPVP : ScholarRotation
 
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }
 
-        if (BiolysisPvP.CanUse(out action) && Player.HasStatus(true, StatusID.Recitation_3094))
+        if (BiolysisPvP.CanUse(out action) && StatusHelper.PlayerHasStatus(true, StatusID.Recitation_3094))
         {
             return true;
         }

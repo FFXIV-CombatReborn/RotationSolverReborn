@@ -314,7 +314,7 @@ public sealed class VPR_Reborn : ViperRotation
                 }
             }
 
-            if (MedicineUncoiledFury && Player.HasStatus(true, StatusID.Medicated) && !HasReadyToReawaken && NoAbilityReady)
+            if (MedicineUncoiledFury && StatusHelper.PlayerHasStatus(true, StatusID.Medicated) && !HasReadyToReawaken && NoAbilityReady)
             {
                 if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
                 {

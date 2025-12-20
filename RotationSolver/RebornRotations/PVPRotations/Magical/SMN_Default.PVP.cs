@@ -14,7 +14,7 @@ public class SMN_DefaultPvP : SummonerRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -30,7 +30,7 @@ public class SMN_DefaultPvP : SummonerRotation
     [RotationDesc(ActionID.RadiantAegisPvP)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleAbility(nextGCD, out action);
         }
@@ -45,7 +45,7 @@ public class SMN_DefaultPvP : SummonerRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -60,7 +60,7 @@ public class SMN_DefaultPvP : SummonerRotation
             return true;
         }
 
-        if (NecrotizePvP.CanUse(out action) && !Player.HasStatus(true, StatusID.FirebirdTrance) && !Player.HasStatus(true, StatusID.DreadwyrmTrance_3228))
+        if (NecrotizePvP.CanUse(out action) && !StatusHelper.PlayerHasStatus(true, StatusID.FirebirdTrance) && !StatusHelper.PlayerHasStatus(true, StatusID.DreadwyrmTrance_3228))
         {
             return true;
         }
@@ -71,7 +71,7 @@ public class SMN_DefaultPvP : SummonerRotation
     [RotationDesc(ActionID.CrimsonCyclonePvP)]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.MoveForwardAbility(nextGCD, out action);
         }
@@ -100,7 +100,7 @@ public class SMN_DefaultPvP : SummonerRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }

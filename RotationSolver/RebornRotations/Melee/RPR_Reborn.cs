@@ -117,7 +117,7 @@ public sealed class RPR_Reborn : ReaperRotation
             }
         }
 
-        if ((PlentifulHarvestPvE.EnoughLevel && !HasPerfectioParata && !HasImmortalSacrifice) /*&& !Player.HasStatus(true, StatusID.BloodsownCircle_2972) */|| !PlentifulHarvestPvE.EnoughLevel)
+        if ((PlentifulHarvestPvE.EnoughLevel && !HasPerfectioParata && !HasImmortalSacrifice) /*&& !StatusHelper.PlayerHasStatus(true, StatusID.BloodsownCircle_2972) */|| !PlentifulHarvestPvE.EnoughLevel)
         {
             if (GluttonyPvE.CanUse(out act, skipAoeCheck: true))
             {

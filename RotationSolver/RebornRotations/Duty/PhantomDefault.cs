@@ -180,7 +180,12 @@ public sealed class PhantomDefault : PhantomRotation
             return base.GeneralAbility(nextGCD, out act);
         }
 
-        if (BattleBellPvE.CanUse(out act))
+		if (InCombat && MagicShellPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (BattleBellPvE.CanUse(out act))
         {
             return true;
         }
@@ -236,14 +241,14 @@ public sealed class PhantomDefault : PhantomRotation
             }
             else
             {
-                if (OccultEtherPvE.Target.Target == Player && (Player.CurrentMp < OccultEtherThreshold))
+                if (OccultEtherPvE.Target.Target == Player && (Player?.CurrentMp < OccultEtherThreshold))
                     return true;
             }
         }
 
         if (OccultChakraPvE.CanUse(out act) && InCombat)
         {
-            if (Player.CurrentMp < OccultChakraMPThreshold)
+            if (Player?.CurrentMp < OccultChakraMPThreshold)
                 return true;
         }
 
@@ -307,11 +312,6 @@ public sealed class PhantomDefault : PhantomRotation
         {
             return base.DefenseSingleAbility(nextGCD, out act);
         }
-
-		if (MagicShellPvE.CanUse(out act))
-		{
-			return true;
-		}
 
 		if (DefendPvE.CanUse(out act))
 		{
@@ -403,12 +403,12 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (BlessingUseage && BlessingPvE.CanUse(out act) && (PartyMembersAverHP < PredictBlessingThreshold || Player.GetHealthRatio() < PredictBlessingThreshold)) // Phantom heal gets a larger threshold than normal healing
+        if (BlessingUseage && BlessingPvE.CanUse(out act) && (PartyMembersAverHP < PredictBlessingThreshold || Player?.GetHealthRatio() < PredictBlessingThreshold)) // Phantom heal gets a larger threshold than normal healing
         {
             return true;
         }
 
-        if (PhantomJudgementUseage && (PartyMembersAverHP < PredictJudgementThreshold || Player.GetHealthRatio() < PredictJudgementThreshold) && PhantomJudgmentPvE.CanUse(out act)) // Heal the party or self if we're below the heal + damage threshold
+        if (PhantomJudgementUseage && (PartyMembersAverHP < PredictJudgementThreshold || Player?.GetHealthRatio() < PredictJudgementThreshold) && PhantomJudgmentPvE.CanUse(out act)) // Heal the party or self if we're below the heal + damage threshold
         {
             return true;
         }
@@ -427,14 +427,14 @@ public sealed class PhantomDefault : PhantomRotation
             }
             else
             {
-                if (OccultPotionPvE.Target.Target == Player && Player.GetHealthRatio() < OccultPotionThreshold)
+                if (OccultPotionPvE.Target.Target == Player && Player?.GetHealthRatio() < OccultPotionThreshold)
                     return true;
             }
         }
 
         if (OccultChakraPvE.CanUse(out act) && InCombat)
         {
-            if (Player.GetHealthRatio() < OccultChakraHPThreshold)
+            if (Player?.GetHealthRatio() < OccultChakraHPThreshold)
                 return true;
         }
 
@@ -448,12 +448,12 @@ public sealed class PhantomDefault : PhantomRotation
             return base.HealAreaAbility(nextGCD, out act);
         }
 
-        if (BlessingUseage && BlessingPvE.CanUse(out act) && (PartyMembersAverHP < PredictBlessingThreshold || Player.GetHealthRatio() < PredictBlessingThreshold)) // Phantom heal gets a larger threshold than normal healing
+        if (BlessingUseage && BlessingPvE.CanUse(out act) && (PartyMembersAverHP < PredictBlessingThreshold || Player?.GetHealthRatio() < PredictBlessingThreshold)) // Phantom heal gets a larger threshold than normal healing
         {
             return true;
         }
 
-        if (PhantomJudgementUseage && (PartyMembersAverHP < PredictJudgementThreshold || Player.GetHealthRatio() < PredictJudgementThreshold) && PhantomJudgmentPvE.CanUse(out act)) // Heal the party or self if we're below the heal + damage threshold
+        if (PhantomJudgementUseage && (PartyMembersAverHP < PredictJudgementThreshold || Player?.GetHealthRatio() < PredictJudgementThreshold) && PhantomJudgmentPvE.CanUse(out act)) // Heal the party or self if we're below the heal + damage threshold
         {
             return true;
         }
@@ -523,7 +523,7 @@ public sealed class PhantomDefault : PhantomRotation
 
         if (OccultResuscitationPvE.CanUse(out act))
         {
-            if (Player.GetHealthRatio() < OccultResuscitationThreshold)
+            if (Player?.GetHealthRatio() < OccultResuscitationThreshold)
             {
                 return true;
             }
@@ -594,7 +594,7 @@ public sealed class PhantomDefault : PhantomRotation
 
     public override bool GeneralGCD(out IAction? act)
     {
-        if (HasLockoutStatus || Player.HasStatus(true, StatusID.Reassembled) || (ViperTime && NeedsViperBuffs))
+        if (HasLockoutStatus || StatusHelper.PlayerHasStatus(true, StatusID.Reassembled) || (ViperTime && NeedsViperBuffs))
         {
             return base.GeneralGCD(out act);
         }
@@ -620,13 +620,13 @@ public sealed class PhantomDefault : PhantomRotation
             {
                 return true;
             }
-            if (BerserkerLevel >= 3 && (!RagePvE.IsEnabled || Player.WillStatusEndGCD(1, 0, true, StatusID.PentupRage) || (RagePvE.Cooldown.IsCoolingDown && !Player.HasStatus(true, StatusID.PentupRage))))
+            if (BerserkerLevel >= 3 && (!RagePvE.IsEnabled || StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.PentupRage) || (RagePvE.Cooldown.IsCoolingDown && !StatusHelper.PlayerHasStatus(true, StatusID.PentupRage))))
             {
                 return true;
             }
         }
 
-        if (InCombat && OccultQuickPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Manafication) && !Player.HasStatus(true, StatusID.Embolden) && !Player.HasStatus(true, StatusID.MagickedSwordplay) && !Player.HasStatus(true, StatusID.GrandImpactReady))
+        if (InCombat && OccultQuickPvE.CanUse(out act) && !StatusHelper.PlayerHasStatus(true, StatusID.Manafication) && !StatusHelper.PlayerHasStatus(true, StatusID.Embolden) && !StatusHelper.PlayerHasStatus(true, StatusID.MagickedSwordplay) && !StatusHelper.PlayerHasStatus(true, StatusID.GrandImpactReady))
         {
             return true;
         }
@@ -774,7 +774,7 @@ public sealed class PhantomDefault : PhantomRotation
             {
                 return true;
             }
-            if (IsPLD && (Player.HasStatus(true, StatusID.Requiescat) || HasSwift))
+            if (IsPLD && (StatusHelper.PlayerHasStatus(true, StatusID.Requiescat) || HasSwift))
             {
                 return true;
             }
@@ -857,7 +857,7 @@ public sealed class PhantomDefault : PhantomRotation
         // Check starfall-invuln combo
         if (StarfallUseage && StarfallPvE.CanUse(out act))
         {
-            if (ShouldHoldBurst() && !Player.WillStatusEnd(3, true, StatusID.PredictionOfStarfall) && !Player.WillStatusEnd(3, false, StatusID.PredictionOfStarfall)) // If we're holding burst, we don't want to use starfall yet, but only to a point
+            if (ShouldHoldBurst() && !StatusHelper.PlayerWillStatusEnd(3, true, StatusID.PredictionOfStarfall) && !StatusHelper.PlayerWillStatusEnd(3, false, StatusID.PredictionOfStarfall)) // If we're holding burst, we don't want to use starfall yet, but only to a point
             {
                 return false;
             }
@@ -866,7 +866,7 @@ public sealed class PhantomDefault : PhantomRotation
             {
                 return true;
             }
-            if (Player.GetEffectiveHpPercent() > 90 && (!HasTankStance || Player.GetEffectiveHpPercent() > 120) && (!SaveInvulnForStarfall || OracleLevel < 6)// Not the tank or won't kill ourselves (directly) and either can't or won't be invuln'ing self for this
+            if (Player?.GetEffectiveHpPercent() > 90 && (!HasTankStance || Player?.GetEffectiveHpPercent() > 120) && (!SaveInvulnForStarfall || OracleLevel < 6)// Not the tank or won't kill ourselves (directly) and either can't or won't be invuln'ing self for this
                 && !MergedStatus.HasFlag(AutoStatus.DefenseArea)) // And not getting hit with a raidwide
             {
                 return true;
@@ -887,7 +887,7 @@ public sealed class PhantomDefault : PhantomRotation
         {
             if (CleansingUseage && CleansingPvE.CanUse(out act)) // Cleansing is our highest potency option that doesn't rely on invulns
             {
-                if (!ShouldHoldBurst() || Player.WillStatusEnd(3, true, StatusID.PredictionOfCleansing) || Player.WillStatusEnd(3, false, StatusID.PredictionOfCleansing))
+                if (!ShouldHoldBurst() || StatusHelper.PlayerWillStatusEnd(3, true, StatusID.PredictionOfCleansing) || StatusHelper.PlayerWillStatusEnd(3, false, StatusID.PredictionOfCleansing))
                 {
                     return true;
                 }
@@ -930,8 +930,8 @@ public sealed class PhantomDefault : PhantomRotation
                 }
 
                 if (!InCombat //If we're not in combat and don't have starfall, use the current card
-                    || (HasTankStance && Player.GetEffectiveHpPercent() < 120) // If we're tanking and got here we can't invuln and we don't seem safe enough to try this gimmick
-                    || (Player.StatusTime(false, GetStatusForAction(_currentCard)) < 3f && Player.GetEffectiveHpPercent() <= 90)) // Or we don't have a lot of time and probably can't survive starfall
+                    || (HasTankStance && Player?.GetEffectiveHpPercent() < 120) // If we're tanking and got here we can't invuln and we don't seem safe enough to try this gimmick
+                    || (StatusHelper.PlayerStatusTime(false, GetStatusForAction(_currentCard)) < 3f && Player?.GetEffectiveHpPercent() <= 90)) // Or we don't have a lot of time and probably can't survive starfall
                 {
                     // We must need to use our current card
                     if (_currentCard.CanUse(out act))

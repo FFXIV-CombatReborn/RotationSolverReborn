@@ -43,7 +43,7 @@ internal static partial class TargetUpdater
         DataCenter.AllHostileTargets = GetAllHostileTargets();
         DataCenter.DeathTarget = GetDeathTarget();
         DataCenter.DispelTarget = GetDispelTarget();
-        DataCenter.ProvokeTarget = (DataCenter.Role == JobRole.Tank || Player.Object.HasStatus(true, StatusID.VariantUltimatumSet)) ? GetFirstHostileTarget(ObjectHelper.CanProvoke) : null; // Calculating this per frame rather than on-demand is actually a fair amount worse
+        DataCenter.ProvokeTarget = (DataCenter.Role == JobRole.Tank || StatusHelper.PlayerHasStatus(true, StatusID.VariantUltimatumSet)) ? GetFirstHostileTarget(ObjectHelper.CanProvoke) : null; // Calculating this per frame rather than on-demand is actually a fair amount worse
         DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt); // Tanks, Melee, RDM, and various phantom and duty actions can interrupt so just deal with it
 
         UpdateTimeToKill();
@@ -112,50 +112,60 @@ internal static partial class TargetUpdater
         return members;
     }
 
-    private static List<IBattleChara> GetAllHostileTargets()
-    {
-        List<IBattleChara> hostileTargets = [];
-        var allTargets = DataCenter.AllTargets;
-        if (allTargets == null || allTargets.Count == 0) return hostileTargets;
+	private static List<IBattleChara> GetAllHostileTargets()
+	{
+		List<IBattleChara> hostileTargets = [];
+		var allTargets = DataCenter.AllTargets;
+		if (allTargets == null || allTargets.Count == 0) return hostileTargets;
 
-        // Reserve capacity to minimize internal resizes
-        if (hostileTargets.Capacity < allTargets.Count)
-            hostileTargets.Capacity = allTargets.Count;
+		// Reserve capacity to minimize internal resizes
+		if (hostileTargets.Capacity < allTargets.Count)
+			hostileTargets.Capacity = allTargets.Count;
 
-        foreach (IBattleChara target in allTargets)
-        {
-            Vector3 playerEye = Player.Object.Position; playerEye.Y += 2.0f;
-            if (!target.IsEnemy() || !target.IsTargetable || !target.CanSeeFrom(playerEye) || target.DistanceToPlayer() >= 48)
-                continue;
+		// Fix: Check if Player.Object is not null before using its Position
+		Vector3? playerEye = Player.Object?.Position;
+		if (playerEye != null)
+		{
+			playerEye = new Vector3(playerEye.Value.X, playerEye.Value.Y + 2.0f, playerEye.Value.Z);
+		}
 
-            bool hasInvincible = false;
-            var statusList = target.StatusList;
-            if (statusList != null)
-            {
-                var statusCount = statusList.Length;
-                for (int i = 0; i < statusCount; i++)
-                {
-                    var status = statusList[i];
-                    if (status != null && status.StatusId != 0 && StatusHelper.IsInvincible(status))
-                    {
-                        hasInvincible = true;
-                        break;
-                    }
-                }
-            }
-            if (hasInvincible &&
-                ((DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility) || !DataCenter.IsPvP))
-            {
-                continue;
-            }
+		foreach (IBattleChara target in allTargets)
+		{
+			// Only proceed if playerEye is available
+			if (playerEye == null)
+				continue;
 
-            hostileTargets.Add(target);
-        }
+			if (!target.IsEnemy() || !target.IsTargetable || !target.CanSeeFrom(playerEye.Value) || target.DistanceToPlayer() >= 48)
+				continue;
 
-        return hostileTargets;
-    }
+			bool hasInvincible = false;
+			var statusList = target.StatusList;
+			if (statusList != null)
+			{
+				var statusCount = statusList.Length;
+				for (int i = 0; i < statusCount; i++)
+				{
+					var status = statusList[i];
+					if (status != null && status.StatusId != 0 && StatusHelper.IsInvincible(status))
+					{
+						hasInvincible = true;
+						break;
+					}
+				}
+			}
+			if (hasInvincible &&
+				((DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility) || !DataCenter.IsPvP))
+			{
+				continue;
+			}
 
-    private static IBattleChara? GetFirstHostileTarget(Func<IBattleChara, bool> predicate)
+			hostileTargets.Add(target);
+		}
+
+		return hostileTargets;
+	}
+
+	private static IBattleChara? GetFirstHostileTarget(Func<IBattleChara, bool> predicate)
     {
         var hostileTargets = DataCenter.AllHostileTargets;
         if (hostileTargets == null) return null;

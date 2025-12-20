@@ -107,7 +107,7 @@ namespace RotationSolver.Updaters
             {
                 try
                 {
-                    if (actionType == 1 && (useType != 2 || Service.Config.InterceptMacro) && !Player.Object.HasStatus(false, StatusHelper.RotationLockoutStatus)) // ActionType.Action == 1
+                    if (actionType == 1 && (useType != 2 || Service.Config.InterceptMacro) && !StatusHelper.PlayerHasStatus(false, StatusHelper.RotationLockoutStatus)) // ActionType.Action == 1
                     {
                         // Always compute adjusted ID first to keep logic consistent
                         uint adjustedActionId = Service.GetAdjustedActionId(actionID);

@@ -50,7 +50,7 @@ public partial class NinjaRotation
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.RaijuReady);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.RaijuReady);
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
     }
@@ -127,42 +127,47 @@ public partial class NinjaRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasKassatsu => Player.HasStatus(true, StatusID.Kassatsu);
+    public static bool HasKassatsu => StatusHelper.PlayerHasStatus(true, StatusID.Kassatsu);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasRaijuReady => Player.HasStatus(true, StatusID.RaijuReady);
+    public static bool HasRaijuReady => StatusHelper.PlayerHasStatus(true, StatusID.RaijuReady);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool HasHidden => StatusHelper.PlayerHasStatus(true, StatusID.Hidden_1316);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsExecutingMudra => StatusHelper.PlayerHasStatus(true, StatusID.Mudra) || StatusHelper.PlayerHasStatus(true, StatusID.TenChiJin);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool IsExecutingMudra => Player.HasStatus(true, StatusID.Mudra) || Player.HasStatus(true, StatusID.TenChiJin);
+    public static bool HasDoton => StatusHelper.PlayerHasStatus(true, StatusID.Doton);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasDoton => Player.HasStatus(true, StatusID.Doton);
+    public static bool IsShadowWalking => StatusHelper.PlayerHasStatus(true, StatusID.ShadowWalker);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool IsShadowWalking => Player.HasStatus(true, StatusID.ShadowWalker);
+    public static bool HasPhantomKamaitachi => StatusHelper.PlayerHasStatus(true, StatusID.PhantomKamaitachiReady);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasPhantomKamaitachi => Player.HasStatus(true, StatusID.PhantomKamaitachiReady);
+    public static bool HasTenChiJin => StatusHelper.PlayerHasStatus(true, StatusID.TenChiJin);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasTenChiJin => Player.HasStatus(true, StatusID.TenChiJin);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool IsHidden => Player.HasStatus(true, StatusID.Hidden);
+    public static bool IsHidden => StatusHelper.PlayerHasStatus(true, StatusID.Hidden);
 
     #region Draw Debug
     /// <inheritdoc/>
@@ -350,7 +355,7 @@ public partial class NinjaRotation
     static partial void ModifyKassatsuPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Kassatsu];
-        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.TenChiJin);
+        setting.ActionCheck = () => !StatusHelper.PlayerHasStatus(true, StatusID.TenChiJin);
         setting.UnlockedByQuestID = 65770;
         setting.IsFriendly = true;
     }
@@ -628,7 +633,7 @@ public partial class NinjaRotation
     static partial void ModifyForkedRaijuPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SpinningEdgePvP) == ActionID.ForkedRaijuPvP &&
-                                    !Player.HasStatus(true, StatusID.SealedForkedRaiju);
+                                    !StatusHelper.PlayerHasStatus(true, StatusID.SealedForkedRaiju);
     }
 
     static partial void ModifyFleetingRaijuPvP(ref ActionSetting setting)
@@ -639,13 +644,13 @@ public partial class NinjaRotation
     static partial void ModifyHyoshoRanryuPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.FumaShurikenPvP) == ActionID.HyoshoRanryuPvP &&
-                                    !Player.HasStatus(true, StatusID.SealedHyoshoRanryu);
+                                    !StatusHelper.PlayerHasStatus(true, StatusID.SealedHyoshoRanryu);
     }
 
     static partial void ModifyGokaMekkyakuPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DokumoriPvP) == ActionID.GokaMekkyakuPvP &&
-                                    !Player.HasStatus(true, StatusID.SealedGokaMekkyaku);
+                                    !StatusHelper.PlayerHasStatus(true, StatusID.SealedGokaMekkyaku);
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -655,13 +660,13 @@ public partial class NinjaRotation
     static partial void ModifyMeisuiPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ThreeMudraPvP) == ActionID.MeisuiPvP &&
-                                    !Player.HasStatus(true, StatusID.SealedMeisui);
+                                    !StatusHelper.PlayerHasStatus(true, StatusID.SealedMeisui);
     }
 
     static partial void ModifyHutonPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.BunshinPvP) == ActionID.HutonPvP &&
-                                    !Player.HasStatus(true, StatusID.SealedHuton);
+                                    !StatusHelper.PlayerHasStatus(true, StatusID.SealedHuton);
         setting.IsFriendly = true;
     }
 
@@ -696,7 +701,7 @@ public partial class NinjaRotation
     [RotationDesc(ActionID.FeintPvE)]
     protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        return (FeintPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) || base.DefenseAreaAbility(nextGCD, out act);
+        return (FeintPvE.CanUse(out act) && !StatusHelper.PlayerHasStatus(true, StatusID.Mudra)) || base.DefenseAreaAbility(nextGCD, out act);
     }
 
     /// <inheritdoc/>

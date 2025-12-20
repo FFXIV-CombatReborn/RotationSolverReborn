@@ -183,7 +183,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
                 return;
             }
 
-            if (!Player.Object.IsJobCategory(JobRole.Tank) && !Player.Object.IsJobCategory(JobRole.Healer))
+            if (!TargetFilter.PlayerJobCategory(JobRole.Tank) && !TargetFilter.PlayerJobCategory(JobRole.Healer))
             {
                 return;
             }

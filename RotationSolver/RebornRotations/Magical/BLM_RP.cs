@@ -133,7 +133,7 @@ public class BLM_RP : BlackMageRotation
             return true;
         }
 
-        if ((IsPolyglotStacksMaxed && (EnochianEndAfterGCD(0) || AmplifierPvE.Cooldown.WillHaveOneChargeGCD(0))) || Player.HasStatus(true, StatusID.LeyLines))
+        if ((IsPolyglotStacksMaxed && (EnochianEndAfterGCD(0) || AmplifierPvE.Cooldown.WillHaveOneChargeGCD(0))) || HasLeyLines)
         {
             if (FoulPvE.CanUse(out act, skipAoeCheck: !XenoglossyPvE.EnoughLevel))
             {
@@ -169,7 +169,7 @@ public class BLM_RP : BlackMageRotation
             }
         }
 
-        if (Player.HasStatus(true, StatusID.Firestarter))
+        if (HasFire)
         {
             if (FireIiiPvE.CanUse(out act))
             {

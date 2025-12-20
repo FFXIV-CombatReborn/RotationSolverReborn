@@ -14,7 +14,7 @@ public class AST_DefaultPVP : AstrologianRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -29,17 +29,17 @@ public class AST_DefaultPVP : AstrologianRotation
             return true;
         }
 
-        if (Player.WillStatusEnd(1, true, StatusID.Macrocosmos_3104) && MicrocosmosPvP.CanUse(out action))
+        if (StatusHelper.PlayerWillStatusEnd(1, true, StatusID.Macrocosmos_3104) && MicrocosmosPvP.CanUse(out action))
         {
             return true;
         }
 
-        if (Player.WillStatusEnd(1, true, StatusID.LadyOfCrowns_4328) && LadyOfCrownsPvE.CanUse(out action))
+        if (StatusHelper.PlayerWillStatusEnd(1, true, StatusID.LadyOfCrowns_4328) && LadyOfCrownsPvE.CanUse(out action))
         {
             return true;
         }
 
-        if (Player.GetHealthRatio() < 0.5 && MicrocosmosPvP.CanUse(out action))
+        if (Player?.GetHealthRatio() < 0.5 && MicrocosmosPvP.CanUse(out action))
         {
             return true;
         }
@@ -54,7 +54,7 @@ public class AST_DefaultPVP : AstrologianRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -96,7 +96,7 @@ public class AST_DefaultPVP : AstrologianRotation
     #region GCDs
     protected override bool DefenseSingleGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleGCD(out action);
         }
@@ -111,7 +111,7 @@ public class AST_DefaultPVP : AstrologianRotation
 
     protected override bool HealSingleGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.HealSingleGCD(out action);
         }
@@ -131,7 +131,7 @@ public class AST_DefaultPVP : AstrologianRotation
 
     protected override bool HealAreaGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.HealAreaGCD(out action);
         }
@@ -146,7 +146,7 @@ public class AST_DefaultPVP : AstrologianRotation
 
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }

@@ -151,7 +151,7 @@ public partial class SummonerRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasSearingLight => Player.HasStatus(true, StatusID.SearingLight);
+    public static bool HasSearingLight => StatusHelper.PlayerHasStatus(true, StatusID.SearingLight);
 
     #endregion
 
@@ -688,8 +688,8 @@ public partial class SummonerRotation
 
     static partial void ModifySlipstreamPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !HasSwift && !Player.WillStatusEnd(ActionID.SlipstreamPvE.GetCastTime(), true, StatusID.GarudasFavor) 
-                                    || HasSwift && !Player.WillStatusEndGCD(0, 0, true, StatusID.GarudasFavor);
+        setting.ActionCheck = () => !HasSwift && !StatusHelper.PlayerWillStatusEnd(ActionID.SlipstreamPvE.GetCastTime(), true, StatusID.GarudasFavor) 
+                                    || HasSwift && !StatusHelper.PlayerWillStatusEndGCD(0, 0, true, StatusID.GarudasFavor);
         setting.StatusNeed = [StatusID.GarudasFavor];
         setting.StatusProvide = [StatusID.Slipstream];
         setting.CreateConfig = () => new ActionConfig()

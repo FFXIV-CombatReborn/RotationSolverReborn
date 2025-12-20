@@ -12,21 +12,23 @@ namespace RotationSolver.Basic.Actions;
 /// </summary>
 public class BaseAction : IBaseAction
 {
-    /// <summary>
-    /// Gets or sets the target to use for the action.
-    /// </summary>
-    /// <value>
-    /// A <see cref="TargetResult"/> representing the target of the action.
-    /// </value>
-    public TargetResult Target { get; set; } = new(Player.Object, [], null);
+	/// <summary>
+	/// Gets or sets the target to use for the action.
+	/// </summary>
+	/// <value>
+	/// A <see cref="TargetResult"/> representing the target of the action.
+	/// </value>
+	public TargetResult Target { get; set; } = Player.Object is IBattleChara bc
+	? new(bc, [], null)
+	: default;
 
-    /// <summary>
-    /// Gets the target for preview purposes.
-    /// </summary>
-    /// <value>
-    /// A nullable <see cref="TargetResult"/> representing the preview target, or <c>null</c> if no preview target is available.
-    /// </value>
-    public TargetResult? PreviewTarget { get; private set; } = null;
+	/// <summary>
+	/// Gets the target for preview purposes.
+	/// </summary>
+	/// <value>
+	/// A nullable <see cref="TargetResult"/> representing the preview target, or <c>null</c> if no preview target is available.
+	/// </value>
+	public TargetResult? PreviewTarget { get; private set; } = null;
 
     /// <inheritdoc/>
     public Action Action { get; }

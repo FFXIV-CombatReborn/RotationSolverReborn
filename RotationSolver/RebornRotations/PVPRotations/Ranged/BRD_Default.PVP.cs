@@ -17,7 +17,7 @@ public sealed class BRD_DefaultPvP : BardRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -26,7 +26,7 @@ public sealed class BRD_DefaultPvP : BardRotation
         {
             return true;
         }
-        if (Player.HasStatus(false, StatusHelper.PurifyPvPStatuses))
+        if (StatusHelper.PlayerHasStatus(false, StatusHelper.PurifyPvPStatuses))
         {
             if (TheWardensPaeanPvP.CanUse(out action))
             {
@@ -63,14 +63,14 @@ public sealed class BRD_DefaultPvP : BardRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
 
         if (RepellingShotPvP.CanUse(out action))
         {
-            if (!Player.HasStatus(true, StatusID.Repertoire))
+            if (!StatusHelper.PlayerHasStatus(true, StatusID.Repertoire))
             {
                 return true;
             }
@@ -78,7 +78,7 @@ public sealed class BRD_DefaultPvP : BardRotation
 
         if (SilentNocturnePvP.CanUse(out action))
         {
-            if (!Player.HasStatus(true, StatusID.Repertoire))
+            if (!StatusHelper.PlayerHasStatus(true, StatusID.Repertoire))
             {
                 return true;
             }
@@ -101,7 +101,7 @@ public sealed class BRD_DefaultPvP : BardRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }

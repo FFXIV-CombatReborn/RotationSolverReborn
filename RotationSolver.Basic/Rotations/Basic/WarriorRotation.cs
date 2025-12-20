@@ -25,7 +25,7 @@ public partial class WarriorRotation
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.InnerRelease);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.InnerRelease);
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
     }
@@ -37,7 +37,7 @@ public partial class WarriorRotation
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.Berserk);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.Berserk);
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
     }
@@ -152,8 +152,8 @@ public partial class WarriorRotation
     static partial void ModifyVengeancePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = StatusHelper.RampartStatus;
-        setting.ActionCheck = Player.IsTargetOnSelf;
-        setting.IsFriendly = true;
+		setting.ActionCheck = () => ObjectHelper.PlayerIsTargetOnSelf();
+		setting.IsFriendly = true;
     }
 
     static partial void ModifyMythrilTempestPvE(ref ActionSetting setting)
@@ -216,8 +216,8 @@ public partial class WarriorRotation
 
     static partial void ModifyRawIntuitionPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = Player.IsTargetOnSelf;
-        setting.StatusProvide = [StatusID.RawIntuition];
+		setting.ActionCheck = () => ObjectHelper.PlayerIsTargetOnSelf();
+		setting.StatusProvide = [StatusID.RawIntuition];
         setting.UnlockedByQuestID = 66132;
         setting.IsFriendly = true;
     }
@@ -225,8 +225,8 @@ public partial class WarriorRotation
     static partial void ModifyEquilibriumPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 66134;
-        setting.ActionCheck = Player.IsTargetOnSelf;
-        setting.StatusProvide = [StatusID.Equilibrium];
+		setting.ActionCheck = () => ObjectHelper.PlayerIsTargetOnSelf();
+		setting.StatusProvide = [StatusID.Equilibrium];
         setting.IsFriendly = true;
     }
 
@@ -437,7 +437,7 @@ public partial class WarriorRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         return (HolmgangPvE.CanUse(out act)
-            && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) || base.EmergencyAbility(nextGCD, out act);
+            && Player?.GetHealthRatio() <= Service.Config.HealthForDyingTanks) || base.EmergencyAbility(nextGCD, out act);
     }
 
     /// <inheritdoc/>
@@ -457,6 +457,6 @@ public partial class WarriorRotation
     /// <inheritdoc/>
     public override bool IsBursting()
     {
-        return Player.HasStatus(true, StatusID.SurgingTempest);
+        return StatusHelper.PlayerHasStatus(true, StatusID.SurgingTempest);
     }
 }

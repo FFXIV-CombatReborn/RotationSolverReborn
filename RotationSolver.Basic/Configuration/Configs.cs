@@ -43,10 +43,6 @@ internal partial class Configs : IPluginConfiguration
     public MacroInfo DutyStart { get; set; } = new MacroInfo();
     public MacroInfo DutyEnd { get; set; } = new MacroInfo();
 
-    [ConditionBool, UI("Attempt to mitigate high latency to the servers (Experimental)",
-    Filter = AutoActionUsage, Section = 6)]
-    private static readonly bool _lagMitigation = false;
-
     [ConditionBool, UI("Intercept player input and queue it for RSR to execute the action. (PvE only)",
     Filter = AutoActionUsage, Section = 5)]
     private static readonly bool _interceptAction2 = false;

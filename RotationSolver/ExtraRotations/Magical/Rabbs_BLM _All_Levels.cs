@@ -120,7 +120,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
 
     public bool IsOpenerChosen => (When2Open == OpenWhen.BossIsTarget && IsCurrentTargetBoss) || (When2Open == OpenWhen.BossInRoom && IsAnyBossinRange) || When2Open == OpenWhen.Allday;
 
-    public bool IsInOpener => IsOpenerChosen && CombatTime > 0 && CombatTime < 60 && InCombat && !Player.HasStatus(true, StatusID.BrinkOfDeath, StatusID.Weakness);
+    public bool IsInOpener => IsOpenerChosen && CombatTime > 0 && CombatTime < 60 && InCombat && !StatusHelper.PlayerHasStatus(true, StatusID.BrinkOfDeath, StatusID.Weakness);
 
     public bool IsPotReady => (Poterchoice == Potchoice.WithOthers && IsPartyMedicated) || (Poterchoice == Potchoice.Q2M && IsWithinFirst15SecondsOfEvenMinute()) || (Poterchoice == Potchoice.Allday);
 
@@ -206,7 +206,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
 
                 int currentGcdEstimate = (int)(CombatTime / gcdDuration);
 
-                return Player.HasStatus(true, StatusID.Thunderhead) &&
+                return StatusHelper.PlayerHasStatus(true, StatusID.Thunderhead) &&
                        currentGcdEstimate >= openerMinGcd &&
                        currentGcdEstimate <= openerMaxGcd;
             }
@@ -214,12 +214,12 @@ public sealed class Rabbs_BLM : BlackMageRotation
             if (GetAoeCount(ThunderIiPvE) >= 3)
             {
                 // AoE: cast Thunder if we have Thunderhead and enough enemies need DoT
-                return Player.HasStatus(true, StatusID.Thunderhead) && MissingThunderAoE;
+                return StatusHelper.PlayerHasStatus(true, StatusID.Thunderhead) && MissingThunderAoE;
             }
 
             // Single target: cast Thunder if we have Thunderhead and DoT is missing or about to fall off
 
-            return Player.HasStatus(true, StatusID.Thunderhead) &&
+            return StatusHelper.PlayerHasStatus(true, StatusID.Thunderhead) &&
                    (!TargetHasThunderDebuff || ThunderBuffAboutToFallOff);
         }
     }
@@ -411,7 +411,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
         }
     }
     public bool ShouldTransposeLowLevel
-    {
+    {       
         get
         {
             if (!TransposePvE.Cooldown.IsCoolingDown)
@@ -424,7 +424,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                         if (DataCenter.PlayerSyncedLevel() >= 26 && DataCenter.PlayerSyncedLevel() <= 49)//If Thunder II needs to be refreshed, use the following to generate a fresh Thunderhead proc:Transpose->Fire II x3 > Transpose
                         {
 
-                            if (MissingThunderAoE && !Player.HasStatus(true, StatusID.Thunderhead) && (InUmbralIce || InAstralFire))
+                            if (MissingThunderAoE && !StatusHelper.PlayerHasStatus(true, StatusID.Thunderhead) && (InUmbralIce || InAstralFire))
                             { return true; }
 
                         }
@@ -446,7 +446,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                                 if (DataCenter.PlayerSyncedLevel() < 18)
                                 { return false; }
                                 // The MP condition for all levels is checked here.
-                                if (CurrentMp >= 10000 || (DataCenter.PlayerSyncedLevel() >= 35 ? CurrentMp > 5000 && Player.IsCasting && UmbralIceStacks == 3 : DataCenter.PlayerSyncedLevel() >= 20 ? CurrentMp > 7500 && Player.IsCasting && UmbralIceStacks == 2 : CurrentMp > 7500 && Player.IsCasting && UmbralIceStacks == 1))
+                                if (CurrentMp >= 10000 || (DataCenter.PlayerSyncedLevel() >= 35 ? CurrentMp > 5000 && IsCasting && UmbralIceStacks == 3 : DataCenter.PlayerSyncedLevel() >= 20 ? CurrentMp > 7500 && IsCasting && UmbralIceStacks == 2 : CurrentMp > 7500 && IsCasting && UmbralIceStacks == 1))
                                 {
                                     return true;
                                 }
@@ -504,7 +504,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                             if (InUmbralIce)
                             {
                                 // The MP condition for all levels is checked here.
-                                if (CurrentMp >= 10000 || (DataCenter.PlayerSyncedLevel() >= 35 ? CurrentMp > 5000 && Player.IsCasting && UmbralIceStacks == 3 : DataCenter.PlayerSyncedLevel() >= 20 ? CurrentMp > 7500 && Player.IsCasting && UmbralIceStacks == 2 : CurrentMp > 7500 && Player.IsCasting && UmbralIceStacks == 1))
+                                if (CurrentMp >= 10000 || (DataCenter.PlayerSyncedLevel() >= 35 ? CurrentMp > 5000 && IsCasting && UmbralIceStacks == 3 : DataCenter.PlayerSyncedLevel() >= 20 ? CurrentMp > 7500 && IsCasting && UmbralIceStacks == 2 : CurrentMp > 7500 && IsCasting && UmbralIceStacks == 1))
                                 {
                                     return true;
                                 }
@@ -562,10 +562,10 @@ public sealed class Rabbs_BLM : BlackMageRotation
     {
         get
         {
-            if (LeyLinesPvE.Cooldown.CurrentCharges == LeyLinesPvE.Cooldown.MaxCharges && !Player.HasStatus(true, StatusID.LeyLines) && (ChoiceBurst == Burstchoice.Leylines || ChoiceBurst == Burstchoice.Both) && When2Burst == BurstWhen.PreventCap)
+            if (LeyLinesPvE.Cooldown.CurrentCharges == LeyLinesPvE.Cooldown.MaxCharges && !StatusHelper.PlayerHasStatus(true, StatusID.LeyLines) && (ChoiceBurst == Burstchoice.Leylines || ChoiceBurst == Burstchoice.Both) && When2Burst == BurstWhen.PreventCap)
             { return true; }
 
-            if (LeyLinesPvE.Cooldown.CurrentCharges > 0 && IsBurstReady && !Player.HasStatus(true, StatusID.LeyLines))
+            if (LeyLinesPvE.Cooldown.CurrentCharges > 0 && IsBurstReady && !StatusHelper.PlayerHasStatus(true, StatusID.LeyLines))
             {
                 if (ChoiceBurst == Burstchoice.Both || ChoiceBurst == Burstchoice.Leylines)
                 { return true; }
@@ -636,7 +636,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
             #region Opener
             if (IsInOpener)
             {
-                if (AmplifierPvE.Cooldown.IsCoolingDown && !Player.HasStatus(true, StatusID.LeyLines))
+                if (AmplifierPvE.Cooldown.IsCoolingDown && !StatusHelper.PlayerHasStatus(true, StatusID.LeyLines))
                 {
                     if (LeyLinesPvE.CanUse(out act)) return true;
                 }
@@ -740,7 +740,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
         if (ShouldLeyLine && InCombat && HasHostilesInRange && LeyLinesPvE.CanUse(out act, usedUp: ShouldLeyLine)) return true;
-        //if (!IsLastAbility(ActionID.LeyLinesPvE) && UseRetrace && InCombat && HasHostilesInRange && !Player.HasStatus(true, StatusID.CircleOfPower) && RetracePvE.CanUse(out act)) return true;
+        //if (!IsLastAbility(ActionID.LeyLinesPvE) && UseRetrace && InCombat && HasHostilesInRange && !StatusHelper.PlayerHasStatus(true, StatusID.CircleOfPower) && RetracePvE.CanUse(out act)) return true;
 
         return base.GeneralAbility(nextGCD, out act);
     }
@@ -817,7 +817,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                 }
                 if (InUmbralIce && DataCenter.PlayerSyncedLevel() >= 35)
                 {
-                    if (CurrentMp < Player.MaxMp)
+                    if (CurrentMp < Player?.MaxMp)
                     {
                         if (UmbralSoulPvE.CanUse(out act)) return true;
                     }
@@ -978,7 +978,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                 }
                 if (InUmbralIce && DataCenter.PlayerSyncedLevel() >= 35)
                 {
-                    if (CurrentMp < Player.MaxMp)
+                    if (CurrentMp < Player?.MaxMp)
                     {
                         if (UmbralSoulPvE.CanUse(out act)) return true;
                     }
@@ -1208,13 +1208,13 @@ public sealed class Rabbs_BLM : BlackMageRotation
         ImGui.Text("GCDTime " + GCDTime());
         ImGui.Text($"Last Action: {RecordActions?.FirstOrDefault()?.Action.RowId}");
         ImGui.Text(" currentmp " + CurrentMp);
-        ImGui.Text(" Player.CurrentMP " + Player.CurrentMp);
-        ImGui.Text("iscasting " + Player.IsCasting);
+        ImGui.Text(" Player?.CurrentMp " + Player?.CurrentMp);
+        ImGui.Text("iscasting " + IsCasting);
         ImGui.Text("FlareAoeNumber " + GetAoeCount(FlarePvE));
         ImGui.Text("falre aoe range " + FlarePvE.Info.EffectRange);
-        ImGui.Text("Player.BaseCastTime " + Player.BaseCastTime);
-        ImGui.Text("Player.CurrentCastTime) " + Player.CurrentCastTime);
-        ImGui.Text("Player.TotalCastTime " + Player.TotalCastTime);
+        ImGui.Text("Player.BaseCastTime " + Player?.BaseCastTime);
+        ImGui.Text("Player.CurrentCastTime) " + Player?.CurrentCastTime);
+        ImGui.Text("Player.TotalCastTime " + Player?.TotalCastTime);
 
         base.DisplayRotationStatus();
     }

@@ -69,7 +69,7 @@ public sealed class BRD_Reborn : BardRotation
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (Player.HasStatus(false, StatusID.Doom))
+        if (StatusHelper.PlayerHasStatus(false, StatusID.Doom))
         {
             if (TheWardensPaeanPvE.CanUse(out act))
             {
@@ -85,7 +85,7 @@ public sealed class BRD_Reborn : BardRotation
         {
             if (((EmpyrealArrowPvE.Cooldown.IsCoolingDown && !EmpyrealArrowPvE.Cooldown.WillHaveOneChargeGCD(1)) || !EmpyrealArrowPvE.EnoughLevel) && Repertoire != 3)
             {
-                if (!Player.HasStatus(true, StatusID.HawksEye_3861) && BarragePvE.CanUse(out act))
+                if (!StatusHelper.PlayerHasStatus(true, StatusID.HawksEye_3861) && BarragePvE.CanUse(out act))
                 {
                     return true;
                 }
@@ -129,7 +129,7 @@ public sealed class BRD_Reborn : BardRotation
     {
         if (TheWanderersMinuetPvE.CanUse(out act) && InCombat && !IsLastAbility(ActionID.ArmysPaeonPvE) && !IsLastAbility(ActionID.MagesBalladPvE))
         {
-            if (SongEndAfter(ARMYRemainTime) && (Song != Song.None || Player.HasStatus(true, StatusID.ArmysEthos)))
+            if (SongEndAfter(ARMYRemainTime) && (Song != Song.None || StatusHelper.PlayerHasStatus(true, StatusID.ArmysEthos)))
             {
                 return true;
             }
@@ -224,7 +224,7 @@ public sealed class BRD_Reborn : BardRotation
                 return true;
             }
 
-            if (Player.HasStatus(true, StatusID.BattleVoice) && RadiantFinalePvE.CanUse(out act))
+            if (StatusHelper.PlayerHasStatus(true, StatusID.BattleVoice) && RadiantFinalePvE.CanUse(out act))
             {
                 return true;
             }
@@ -348,7 +348,7 @@ public sealed class BRD_Reborn : BardRotation
 
         if (IronJawsPvE.CanUse(out act, skipStatusProvideCheck: true) && (IronJawsPvE.Target.Target?.WillStatusEnd(30, true, IronJawsPvE.Setting.TargetStatusProvide ?? []) ?? false))
         {
-            if (Player.HasStatus(true, StatusID.BattleVoice, StatusID.RadiantFinale, StatusID.RagingStrikes) && Player.WillStatusEndGCD(1, 1, true, StatusID.BattleVoice, StatusID.RadiantFinale, StatusID.RagingStrikes))
+            if (StatusHelper.PlayerHasStatus(true, StatusID.BattleVoice, StatusID.RadiantFinale, StatusID.RagingStrikes) && StatusHelper.PlayerWillStatusEndGCD(1, 1, true, StatusID.BattleVoice, StatusID.RadiantFinale, StatusID.RagingStrikes))
             {
                 return true;
             }
@@ -374,12 +374,12 @@ public sealed class BRD_Reborn : BardRotation
 
         if (BlastArrowPvE.CanUse(out act))
         {
-            if (!Player.HasStatus(true, StatusID.RagingStrikes))
+            if (!HasRagingStrikes)
             {
                 return true;
             }
 
-            if (Player.HasStatus(true, StatusID.RagingStrikes) && BarragePvE.Cooldown.IsCoolingDown)
+            if (HasRagingStrikes && BarragePvE.Cooldown.IsCoolingDown)
             {
                 return true;
             }
@@ -530,7 +530,7 @@ public sealed class BRD_Reborn : BardRotation
             return false;
         }
 
-        if (SoulVoice >= 80 && HasRagingStrikes && Player.WillStatusEnd(10, false, StatusID.RagingStrikes))
+        if (SoulVoice >= 80 && HasRagingStrikes && StatusHelper.PlayerWillStatusEnd(10, false, StatusID.RagingStrikes))
         {
             return true;
         }

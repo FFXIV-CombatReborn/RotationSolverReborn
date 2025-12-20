@@ -327,7 +327,7 @@ public partial class BlueMageRotation
 
     static partial void ModifyFinalStingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.BrushWithDeath);
+        setting.ActionCheck = () => !StatusHelper.PlayerHasStatus(true, StatusID.BrushWithDeath);
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -426,7 +426,7 @@ public partial class BlueMageRotation
 
     static partial void ModifySelfdestructPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.BrushWithDeath);
+        setting.ActionCheck = () => !StatusHelper.PlayerHasStatus(true, StatusID.BrushWithDeath);
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -435,7 +435,7 @@ public partial class BlueMageRotation
 
     static partial void ModifyTransfusionPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.BrushWithDeath);
+        setting.ActionCheck = () => !StatusHelper.PlayerHasStatus(true, StatusID.BrushWithDeath);
     }
 
     static partial void ModifyFazePvE(ref ActionSetting setting)
@@ -807,7 +807,7 @@ public partial class BlueMageRotation
 
     static partial void ModifyRevengeBlastPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.GetHealthRatio() > 0.2;
+        setting.ActionCheck = () => Player?.GetHealthRatio() > 0.2;
     }
 
     static partial void ModifyAngelWhisperPvE(ref ActionSetting setting)
@@ -868,7 +868,7 @@ public partial class BlueMageRotation
 
     static partial void ModifyJKickPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !Player.HasStatus(false, StatusID.Bind);
+        setting.ActionCheck = () => !StatusHelper.PlayerHasStatus(false, StatusID.Bind);
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

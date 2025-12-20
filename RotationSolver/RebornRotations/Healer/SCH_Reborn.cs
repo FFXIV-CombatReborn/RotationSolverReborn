@@ -467,7 +467,7 @@ public sealed class SCH_Reborn : ScholarRotation
         if (BanefulImpactionPvE.CanUse(out act) &&
             (closeTargetCount > 3 // Mobs are grouped up
             || Target.IsBossFromTTK() // Or it's a boss
-            || Player != null && Player.WillStatusEndGCD(2, 0, true, StatusID.ImpactImminent))) // Or we'll lose the ability if we don't use it
+            || Player != null && StatusHelper.PlayerWillStatusEndGCD(2, 0, true, StatusID.ImpactImminent))) // Or we'll lose the ability if we don't use it
         {
             return true;
         }

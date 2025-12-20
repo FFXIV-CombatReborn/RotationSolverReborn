@@ -111,7 +111,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
             return true;
         }
 
-        if (Player.WillStatusEndGCD(2, 0, true, StatusID.DivineGrace) && DivineCaressPvE.CanUse(out act))
+        if (StatusHelper.PlayerWillStatusEndGCD(2, 0, true, StatusID.DivineGrace) && DivineCaressPvE.CanUse(out act))
         {
             return true;
         }

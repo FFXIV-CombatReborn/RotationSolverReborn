@@ -138,52 +138,52 @@ public partial class MonkRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool InBrotherhood => Player.HasStatus(true, StatusID.Brotherhood);
+    public static bool InBrotherhood => StatusHelper.PlayerHasStatus(true, StatusID.Brotherhood);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool InOpoopoForm => Player.HasStatus(true, StatusID.OpoopoForm);
+    public static bool InOpoopoForm => StatusHelper.PlayerHasStatus(true, StatusID.OpoopoForm);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool InRaptorForm => Player.HasStatus(true, StatusID.RaptorForm);
+    public static bool InRaptorForm => StatusHelper.PlayerHasStatus(true, StatusID.RaptorForm);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool InCoeurlForm => Player.HasStatus(true, StatusID.CoeurlForm);
+    public static bool InCoeurlForm => StatusHelper.PlayerHasStatus(true, StatusID.CoeurlForm);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasFormlessFist => Player.HasStatus(true, StatusID.FormlessFist);
+    public static bool HasFormlessFist => StatusHelper.PlayerHasStatus(true, StatusID.FormlessFist);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasRiddleOfFire => Player.HasStatus(true, StatusID.RiddleOfFire);
+    public static bool HasRiddleOfFire => StatusHelper.PlayerHasStatus(true, StatusID.RiddleOfFire);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasPerfectBalance => Player.HasStatus(true, StatusID.PerfectBalance);
+    public static bool HasPerfectBalance => StatusHelper.PlayerHasStatus(true, StatusID.PerfectBalance);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasFiresRumination => Player.HasStatus(true, StatusID.FiresRumination);
+    public static bool HasFiresRumination => StatusHelper.PlayerHasStatus(true, StatusID.FiresRumination);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasWindsRumination => Player.HasStatus(true, StatusID.WindsRumination);
+    public static bool HasWindsRumination => StatusHelper.PlayerHasStatus(true, StatusID.WindsRumination);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasBrotherhood => Player.HasStatus(true, StatusID.Brotherhood);
+    public static bool HasBrotherhood => StatusHelper.PlayerHasStatus(true, StatusID.Brotherhood);
 
     #endregion
 

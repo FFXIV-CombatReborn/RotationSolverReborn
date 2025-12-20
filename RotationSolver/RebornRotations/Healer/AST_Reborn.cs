@@ -88,11 +88,11 @@ public sealed class AST_Reborn : AstrologianRotation
     #region Tracking Properties
     public override void DisplayRotationStatus()
     {
-        ImGui.Text($"Suntouched 1: {Player.WillStatusEndGCD(1, 0, true, StatusID.Suntouched)}");
-        ImGui.Text($"Suntouched 2: {Player.WillStatusEndGCD(2, 0, true, StatusID.Suntouched)}");
-        ImGui.Text($"Suntouched 3: {Player.WillStatusEndGCD(3, 0, true, StatusID.Suntouched)}");
-        ImGui.Text($"Suntouched 4: {Player.WillStatusEndGCD(4, 0, true, StatusID.Suntouched)}");
-        ImGui.Text($"Suntouched Time: {Player.StatusTime(true, StatusID.Suntouched)}");
+        ImGui.Text($"Suntouched 1: {StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.Suntouched)}");
+        ImGui.Text($"Suntouched 2: {StatusHelper.PlayerWillStatusEndGCD(2, 0, true, StatusID.Suntouched)}");
+        ImGui.Text($"Suntouched 3: {StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.Suntouched)}");
+        ImGui.Text($"Suntouched 4: {StatusHelper.PlayerWillStatusEndGCD(4, 0, true, StatusID.Suntouched)}");
+        ImGui.Text($"Suntouched Time: {StatusHelper.PlayerStatusTime(true, StatusID.Suntouched)}");
     }
     #endregion
 
@@ -348,7 +348,7 @@ public sealed class AST_Reborn : AstrologianRotation
             return false;
         }
 
-        if (Player.HasStatus(true, StatusID.Suntouched) && Player.WillStatusEndGCD(3, 0, true, StatusID.Suntouched))
+        if (StatusHelper.PlayerHasStatus(true, StatusID.Suntouched) && StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.Suntouched))
         {
             if (SunSignPvE.CanUse(out act, skipAoeCheck: true, skipTTKCheck: true))
             {

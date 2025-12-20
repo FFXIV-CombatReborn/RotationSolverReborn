@@ -25,7 +25,7 @@ public class PCT_DefaultPvP : PictomancerRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -40,12 +40,12 @@ public class PCT_DefaultPvP : PictomancerRotation
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleAbility(nextGCD, out action);
         }
 
-        if (TemperaCoatPvP.CanUse(out action) && Player.GetHealthRatio() <= TempuraThreshold)
+        if (TemperaCoatPvP.CanUse(out action) && Player?.GetHealthRatio() <= TempuraThreshold)
         {
             return true;
         }
@@ -55,7 +55,7 @@ public class PCT_DefaultPvP : PictomancerRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -121,7 +121,7 @@ public class PCT_DefaultPvP : PictomancerRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player != null && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && Player != null && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }

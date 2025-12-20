@@ -71,8 +71,8 @@ public sealed class ChurinBRD : BardRotation
     private static bool InMages => Song == Song.Mage;
     private static bool InArmys => Song == Song.Army;
     private static bool NoSong => Song == Song.None;
-    private static bool IsMedicated => Player.HasStatus(true, StatusID.Medicated) && !Player.WillStatusEnd(0f,true, StatusID.Medicated);
-    private static bool HasResonantArrow => Player.HasStatus(true, StatusID.ResonantArrowReady);
+    private static bool IsMedicated => StatusHelper.PlayerHasStatus(true, StatusID.Medicated) && !StatusHelper.PlayerWillStatusEnd(0f,true, StatusID.Medicated);
+    private static bool HasResonantArrow => StatusHelper.PlayerHasStatus(true, StatusID.ResonantArrowReady);
     private static bool InOddMinuteWindow => InMages && SongTime > 15f;
     private static bool EnoughWeaveTime => (WeaponRemain > AnimLock) && WeaponRemain > 0;
     private static float AnimLock => Math.Max(AnimationLock, WeaponTotal * 0.25f);
@@ -277,7 +277,7 @@ public sealed class ChurinBRD : BardRotation
     {
         if (IronJawsPvE.CanUse(out act, skipStatusProvideCheck: true) && (IronJawsPvE.Target.Target?.WillStatusEnd(30f, true, IronJawsPvE.Setting.TargetStatusProvide ?? []) ?? false))
         {
-            if (InBurst && Player.WillStatusEndGCD(1, 1, true, StatusID.BattleVoice, StatusID.RadiantFinale, StatusID.RagingStrikes) && !BlastArrowPvE.CanUse(out _))
+            if (InBurst && StatusHelper.PlayerWillStatusEndGCD(1, 1, true, StatusID.BattleVoice, StatusID.RadiantFinale, StatusID.RagingStrikes) && !BlastArrowPvE.CanUse(out _))
             {
                 return true;
             }
@@ -338,8 +338,8 @@ public sealed class ChurinBRD : BardRotation
             if (ShouldEnterSandbagMode() || InBurst && HasBarrage || SoulVoice < 80) return SetActToNull(out act);
 
             var hasFullSoul = SoulVoice == 100;
-            var hasRagingStrikes = Player.HasStatus(true, StatusID.RagingStrikes);
-            var hasBattleVoice = Player.HasStatus(true, StatusID.BattleVoice);
+            var hasRagingStrikes = StatusHelper.PlayerHasStatus(true, StatusID.RagingStrikes);
+            var hasBattleVoice = StatusHelper.PlayerHasStatus(true, StatusID.BattleVoice);
 
             return ApexArrowPvE.CanUse(out act) switch
             {
@@ -348,7 +348,7 @@ public sealed class ChurinBRD : BardRotation
                     StatusID.VenomousBite, StatusID.CausticBite) ?? false => false,
                 true when hasFullSoul && BattleVoicePvE.Cooldown.WillHaveOneCharge(25) => false,
                 true when InWanderers && SoulVoice >= 80 && !hasRagingStrikes => false,
-                true when hasRagingStrikes && Player.WillStatusEnd(10, true, StatusID.RagingStrikes) &&
+                true when hasRagingStrikes && StatusHelper.PlayerWillStatusEnd(10, true, StatusID.RagingStrikes) &&
                           (hasFullSoul || SoulVoice >= 80) => true,
                 true when hasFullSoul && hasRagingStrikes && hasBattleVoice => true,
                 true when InMages && SoulVoice >= 80 && SongEndAfter(22) && SongEndAfter(18) => true,

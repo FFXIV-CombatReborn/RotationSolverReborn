@@ -190,7 +190,7 @@ public static class Watcher
 		{
 			PluginLog.Debug($"ActionFromSelf invoked. Source: {set.Source?.GameObjectId}, Action: {set.Action?.Name.ExtractText() ?? "null"}");
 
-			IPlayerCharacter playerObject = Player.Object;
+			IPlayerCharacter? playerObject = Player.Object;
 			if (set.Source == null || playerObject == null)
 			{
 				PluginLog.Debug("ActionFromSelf: Source or playerObject is null. Exiting.");

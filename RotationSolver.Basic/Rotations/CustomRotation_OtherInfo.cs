@@ -16,6 +16,12 @@ public partial class CustomRotation
 	protected static IPlayerCharacter? Player => ECommons.GameHelpers.Player.Object;
 
 	/// <summary>
+	/// 
+	/// </summary>
+	[Description("IsCasting")]
+	public static bool IsCasting => Player?.IsCasting ?? false;
+
+	/// <summary>
 	/// Does player have swift cast, dual cast or triple cast.
 	/// </summary>
 	[Description("Has Swift")]
@@ -38,10 +44,15 @@ public partial class CustomRotation
     /// </summary>
     public static bool HasVariantCure => Player?.HasStatus(true, StatusID.VariantCureSet) ?? false;
 
-    /// <summary>
-    /// Check the player is moving, such as running, walking or jumping.
-    /// </summary>
-    [Description("Is Moving or Jumping")]
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool HasPVPGuard => Player?.HasStatus(true, StatusID.Guard) ?? false;
+
+	/// <summary>
+	/// Check the player is moving, such as running, walking or jumping.
+	/// </summary>
+	[Description("Is Moving or Jumping")]
     public static bool IsMoving => DataCenter.IsMoving;
 
     /// <summary>
@@ -144,7 +155,7 @@ public partial class CustomRotation
                     var buff = Buffs[i];
                     if (buff.Type != StatusType.Buff) continue;
 
-                    if (!Player.HasStatus(false, buff.Ids) || Player.WillStatusEnd(0, false, buff.Ids))
+                    if (!StatusHelper.PlayerHasStatus(false, buff.Ids) || StatusHelper.PlayerWillStatusEnd(0, false, buff.Ids))
                     {
                         playerHasBuffs = false;
                         break;
@@ -190,9 +201,9 @@ public partial class CustomRotation
                     if (buff.Type == StatusType.Buff)
                     {
                         if (Player == null) continue;
-                        if (!Player.HasStatus(false, buff.Ids)) continue;
+                        if (!StatusHelper.PlayerHasStatus(false, buff.Ids)) continue;
 
-                        float remaining = Player.StatusTime(true, buff.Ids[0]);
+                        float remaining = StatusHelper.PlayerStatusTime(true, buff.Ids[0]);
                         if (remaining > maxDuration) maxDuration = remaining;
                     }
                     else if (buff.Type == StatusType.Debuff)
@@ -407,7 +418,7 @@ public partial class CustomRotation
         {
             if (Player == null) return null;
             IBattleChara lowest = Player;
-            var lowestHp = Player.GetHealthRatio();
+            var lowestHp = Player?.GetHealthRatio();
 
             foreach (var member in PartyMembers)
             {
@@ -1471,14 +1482,14 @@ public partial class CustomRotation
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     [Description("How long the player has been alive.")]
-    public static float AliveTime => Player.IsAlive() ? DataCenter.AliveTimeRaw + DataCenter.DefaultGCDRemain : 0;
+    public static float AliveTime => ObjectHelper.PlayerIsAlive() ? DataCenter.AliveTimeRaw + DataCenter.DefaultGCDRemain : 0;
 
     /// <summary>
     /// How long the player has been dead.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     [Description("How long the player has been dead.")]
-    public static float DeadTime => Player.IsAlive() ? 0 : DataCenter.DeadTimeRaw + DataCenter.DefaultGCDRemain;
+    public static float DeadTime => ObjectHelper.PlayerIsAlive() ? 0 : DataCenter.DeadTimeRaw + DataCenter.DefaultGCDRemain;
 
     /// <summary>
     /// Time from GCD.

@@ -14,7 +14,7 @@ public class SGE_DefaultPVP : SageRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -34,7 +34,7 @@ public class SGE_DefaultPVP : SageRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -56,7 +56,7 @@ public class SGE_DefaultPVP : SageRotation
     #region GCDs
     protected override bool DefenseSingleGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleGCD(out action);
         }
@@ -71,7 +71,7 @@ public class SGE_DefaultPVP : SageRotation
 
     protected override bool HealSingleGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.HealSingleGCD(out action);
         }
@@ -86,7 +86,7 @@ public class SGE_DefaultPVP : SageRotation
 
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }

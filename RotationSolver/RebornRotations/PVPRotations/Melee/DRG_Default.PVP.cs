@@ -25,7 +25,7 @@ public sealed class DRG_DefaultPvP : DragoonRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -35,7 +35,7 @@ public sealed class DRG_DefaultPvP : DragoonRotation
             return true;
         }
 
-        if (BloodbathPvP.CanUse(out action) && Player.GetHealthRatio() < BloodBathPvPPercent)
+        if (BloodbathPvP.CanUse(out action) && Player?.GetHealthRatio() < BloodBathPvPPercent)
         {
             return true;
         }
@@ -55,7 +55,7 @@ public sealed class DRG_DefaultPvP : DragoonRotation
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleAbility(nextGCD, out action);
         }
@@ -65,7 +65,7 @@ public sealed class DRG_DefaultPvP : DragoonRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -95,7 +95,7 @@ public sealed class DRG_DefaultPvP : DragoonRotation
 
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.MoveForwardAbility(nextGCD, out action);
         }
@@ -110,7 +110,7 @@ public sealed class DRG_DefaultPvP : DragoonRotation
 
     protected override bool MoveBackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.MoveBackAbility(nextGCD, out action);
         }
@@ -127,7 +127,7 @@ public sealed class DRG_DefaultPvP : DragoonRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }

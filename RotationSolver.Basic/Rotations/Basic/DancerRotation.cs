@@ -37,7 +37,7 @@ public partial class DancerRotation
     {
         get
         {
-            if (Player.HasStatus(true, StatusID.ClosedPosition))
+            if (StatusHelper.PlayerHasStatus(true, StatusID.ClosedPosition))
             {
                 foreach (var member in PartyMembers)
                 {
@@ -54,7 +54,7 @@ public partial class DancerRotation
     /// <inheritdoc/>
     public override bool IsBursting()
     {
-        if (Player.HasStatus(true, StatusID.StandardFinish)) // Devilment provides Crit/DH buffs, which phantom actions can't use
+        if (StatusHelper.PlayerHasStatus(true, StatusID.StandardFinish)) // Devilment provides Crit/DH buffs, which phantom actions can't use
         {
             return true;
         }
@@ -64,80 +64,85 @@ public partial class DancerRotation
     /// <summary>
     /// Able to execute Last Dance.
     /// </summary>
-    public static bool HasLastDance => Player.HasStatus(true, StatusID.LastDanceReady);
+    public static bool HasLastDance => StatusHelper.PlayerHasStatus(true, StatusID.LastDanceReady);
 
     /// <summary>
     /// Has Silken Symmetry status.
     /// </summary>
-    public static bool HasSilkenSymmetry => Player.HasStatus(true, StatusID.SilkenSymmetry);
+    public static bool HasSilkenSymmetry => StatusHelper.PlayerHasStatus(true, StatusID.SilkenSymmetry);
 
     /// <summary>
     /// Has Flourishing Symmetry status.
     /// </summary>
-    public static bool HasFlourishingSymmetry => Player.HasStatus(true, StatusID.FlourishingSymmetry);
+    public static bool HasFlourishingSymmetry => StatusHelper.PlayerHasStatus(true, StatusID.FlourishingSymmetry);
 
     /// <summary>
     /// Has Silken Flow status.
     /// </summary>
-    public static bool HasSilkenFlow => Player.HasStatus(true, StatusID.SilkenFlow);
+    public static bool HasSilkenFlow => StatusHelper.PlayerHasStatus(true, StatusID.SilkenFlow);
 
     /// <summary>
     /// Has Flourishing Flow status.
     /// </summary>
-    public static bool HasFlourishingFlow => Player.HasStatus(true, StatusID.FlourishingFlow);
+    public static bool HasFlourishingFlow => StatusHelper.PlayerHasStatus(true, StatusID.FlourishingFlow);
 
     /// <summary>
     /// Has Threefold Fan Dance status.
     /// </summary>
-    public static bool HasThreefoldFanDance => Player.HasStatus(true, StatusID.ThreefoldFanDance);
+    public static bool HasThreefoldFanDance => StatusHelper.PlayerHasStatus(true, StatusID.ThreefoldFanDance);
 
     /// <summary>
     /// Has Fourfold Fan Dance status.
     /// </summary>
-    public static bool HasFourfoldFanDance => Player.HasStatus(true, StatusID.FourfoldFanDance);
+    public static bool HasFourfoldFanDance => StatusHelper.PlayerHasStatus(true, StatusID.FourfoldFanDance);
 
     /// <summary>
     /// Has Flourishing Starfall status.
     /// </summary>
-    public static bool HasFlourishingStarfall => Player.HasStatus(true, StatusID.FlourishingStarfall);
+    public static bool HasFlourishingStarfall => StatusHelper.PlayerHasStatus(true, StatusID.FlourishingStarfall);
 
     /// <summary>
     /// Has Standard Finish status.
     /// </summary>
-    public static bool HasStandardFinish => Player.HasStatus(true, StatusID.StandardFinish);
+    public static bool HasStandardFinish => StatusHelper.PlayerHasStatus(true, StatusID.StandardFinish);
 
     /// <summary>
     /// Has Standard Step status.
     /// </summary>
-    public static bool HasStandardStep => Player.HasStatus(true, StatusID.StandardStep);
+    public static bool HasStandardStep => StatusHelper.PlayerHasStatus(true, StatusID.StandardStep);
 
     /// <summary>
     /// Has Technical Step status.
     /// </summary>
-    public static bool HasTechnicalStep => Player.HasStatus(true, StatusID.TechnicalStep);
+    public static bool HasTechnicalStep => StatusHelper.PlayerHasStatus(true, StatusID.TechnicalStep);
 
     /// <summary>
     /// Has Technical Finish status.
     /// </summary>
-    public static bool HasTechnicalFinish => Player.HasStatus(true, StatusID.TechnicalFinish);
+    public static bool HasTechnicalFinish => StatusHelper.PlayerHasStatus(true, StatusID.TechnicalFinish);
 
     /// <summary>
     /// Has Devilment status.
     /// </summary>
-    public static bool HasDevilment => Player.HasStatus(true, StatusID.Devilment);
+    public static bool HasDevilment => StatusHelper.PlayerHasStatus(true, StatusID.Devilment);
 
     /// <summary>
     /// Has Closed Position status.
     /// </summary>
-    public static bool HasClosedPosition => Player.HasStatus(true, StatusID.ClosedPosition);
-    #endregion
+    public static bool HasClosedPosition => StatusHelper.PlayerHasStatus(true, StatusID.ClosedPosition);
 
-    #region PvE Actions Unassignable
+	/// <summary>
+	/// Has Closed Position status.
+	/// </summary>
+	public static bool HasHoningDance => StatusHelper.PlayerHasStatus(true, StatusID.HoningDance);
+	#endregion
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool StandardFinishPvEReady => Service.GetAdjustedActionId(ActionID.StandardStepPvE) == ActionID.StandardFinishPvE;
+	#region PvE Actions Unassignable
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool StandardFinishPvEReady => Service.GetAdjustedActionId(ActionID.StandardStepPvE) == ActionID.StandardFinishPvE;
 
     /// <summary>
     /// 
@@ -519,13 +524,13 @@ public partial class DancerRotation
     /// <returns></returns>
     protected bool DanceFinishGCD(out IAction? act, bool finishNow = false)
     {
-        if (Player.HasStatus(true, StatusID.StandardStep) && CompletedSteps == 2)
+        if (StatusHelper.PlayerHasStatus(true, StatusID.StandardStep) && CompletedSteps == 2)
         {
             if (DoubleStandardFinishPvE.CanUse(out act, skipAoeCheck: true))
             {
                 return true;
             }
-            if (Player.WillStatusEnd(1, true, StatusID.StandardStep, StatusID.StandardFinish) || finishNow)
+            if (StatusHelper.PlayerWillStatusEnd(1, true, StatusID.StandardStep, StatusID.StandardFinish) || finishNow)
             {
                 act = StandardStepPvE;
                 return true;
@@ -533,13 +538,13 @@ public partial class DancerRotation
             return false;
         }
 
-        if (Player.HasStatus(true, StatusID.TechnicalStep) && CompletedSteps == 4)
+        if (StatusHelper.PlayerHasStatus(true, StatusID.TechnicalStep) && CompletedSteps == 4)
         {
             if (QuadrupleTechnicalFinishPvE.CanUse(out act, skipAoeCheck: true))
             {
                 return true;
             }
-            if (Player.WillStatusEnd(1, true, StatusID.TechnicalStep) || finishNow)
+            if (StatusHelper.PlayerWillStatusEnd(1, true, StatusID.TechnicalStep) || finishNow)
             {
                 act = TechnicalStepPvE;
                 return true;
@@ -672,7 +677,7 @@ public partial class DancerRotation
     {
         setting.ActionCheck = () =>
         {
-            return Player.HasStatus(true, StatusID.FlourishingSaberDance) && Player.HasStatus(true, StatusID.SoloStep);
+            return StatusHelper.PlayerHasStatus(true, StatusID.FlourishingSaberDance) && StatusHelper.PlayerHasStatus(true, StatusID.SoloStep);
         };
         setting.CreateConfig = () => new ActionConfig()
         {

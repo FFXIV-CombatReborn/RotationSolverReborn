@@ -39,22 +39,22 @@ public partial class ScholarRotation
     /// <summary>
     /// Has Impact Imminent.
     /// </summary>
-    public static bool HasImpactImminent => Player.HasStatus(true, StatusID.ImpactImminent);
+    public static bool HasImpactImminent => StatusHelper.PlayerHasStatus(true, StatusID.ImpactImminent);
 
     /// <summary>
     /// Has Dissipation.
     /// </summary>
-    public static bool HasDissipation => Player.HasStatus(true, StatusID.Dissipation);
+    public static bool HasDissipation => StatusHelper.PlayerHasStatus(true, StatusID.Dissipation);
 
     /// <summary>
     /// Has EmergencyTactics.
     /// </summary>
-    public static bool HasEmergencyTactics => Player.HasStatus(true, StatusID.EmergencyTactics);
+    public static bool HasEmergencyTactics => StatusHelper.PlayerHasStatus(true, StatusID.EmergencyTactics);
 
     /// <summary>
     /// Has Recitation.
     /// </summary>
-    public static bool HasRecitation => Player.HasStatus(true, StatusID.Recitation);
+    public static bool HasRecitation => StatusHelper.PlayerHasStatus(true, StatusID.Recitation);
     #endregion
 
     #region Actions Unassignable
@@ -501,7 +501,7 @@ public partial class ScholarRotation
 
     static partial void ModifyAccessionPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Seraphism_4327);
+        setting.ActionCheck = () => StatusHelper.PlayerHasStatus(true, StatusID.Seraphism_4327);
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

@@ -22,7 +22,7 @@ public class BLM_DefaultPVP : BlackMageRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -38,7 +38,7 @@ public class BLM_DefaultPVP : BlackMageRotation
     [RotationDesc(ActionID.WreathOfIcePvP)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleAbility(nextGCD, out action);
         }
@@ -55,7 +55,7 @@ public class BLM_DefaultPVP : BlackMageRotation
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return false;
         }
@@ -68,7 +68,7 @@ public class BLM_DefaultPVP : BlackMageRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -94,7 +94,7 @@ public class BLM_DefaultPVP : BlackMageRotation
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralAbility(nextGCD, out action);
         }
@@ -112,13 +112,13 @@ public class BLM_DefaultPVP : BlackMageRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }
 
         if (XenoglossyPvP.CanUse(out action, usedUp: true)
-            && (Player.GetHealthRatio() < XenoglossyLowHP || Player.GetHealthRatio() > XenoglossyHighHP))
+            && (Player?.GetHealthRatio() < XenoglossyLowHP || Player?.GetHealthRatio() > XenoglossyHighHP))
         {
             return true;
         }

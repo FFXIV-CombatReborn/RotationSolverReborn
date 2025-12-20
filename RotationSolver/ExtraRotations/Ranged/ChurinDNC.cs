@@ -36,12 +36,12 @@ public sealed class ChurinDNC : DancerRotation
     #endregion
 
     #region Status Booleans
-    private static bool HasTillana => Player.HasStatus(true, StatusID.FlourishingFinish) && !Player.WillStatusEnd(0, true, StatusID.FlourishingFinish);
+    private static bool HasTillana => StatusHelper.PlayerHasStatus(true, StatusID.FlourishingFinish) && !StatusHelper.PlayerWillStatusEnd(0, true, StatusID.FlourishingFinish);
     private static bool IsBurstPhase => HasDevilment && HasTechnicalFinish;
-    private static bool IsMedicated => Player.HasStatus(true, StatusID.Medicated) && !Player.WillStatusEnd(0, true, StatusID.Medicated);
-    private static bool HasAnyProc => Player.HasStatus(true, StatusID.SilkenFlow, StatusID.SilkenSymmetry, StatusID.FlourishingFlow, StatusID.FlourishingSymmetry);
-    private static bool HasFinishingMove => Player.HasStatus(true, StatusID.FinishingMoveReady) && !Player.WillStatusEnd(0, true, StatusID.FinishingMoveReady);
-    private static bool HasStarfall => HasFlourishingStarfall && !Player.WillStatusEnd(0, true, StatusID.FlourishingStarfall);
+    private static bool IsMedicated => StatusHelper.PlayerHasStatus(true, StatusID.Medicated) && !StatusHelper.PlayerWillStatusEnd(0, true, StatusID.Medicated);
+    private static bool HasAnyProc => StatusHelper.PlayerHasStatus(true, StatusID.SilkenFlow, StatusID.SilkenSymmetry, StatusID.FlourishingFlow, StatusID.FlourishingSymmetry);
+    private static bool HasFinishingMove => StatusHelper.PlayerHasStatus(true, StatusID.FinishingMoveReady) && !StatusHelper.PlayerWillStatusEnd(0, true, StatusID.FinishingMoveReady);
+    private static bool HasStarfall => HasFlourishingStarfall && !StatusHelper.PlayerWillStatusEnd(0, true, StatusID.FlourishingStarfall);
     private static bool AreDanceTargetsInRange
     {
         get
@@ -439,7 +439,7 @@ public sealed class ChurinDNC : DancerRotation
     private bool TryUseClosedPosition(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.ClosedPosition)
+        if (StatusHelper.PlayerHasStatus(true, StatusID.ClosedPosition)
         || PartyMembers == null || !HasAnyPartyMembers
         || !ClosedPositionPvE.IsEnabled)
         {
@@ -452,7 +452,7 @@ public sealed class ChurinDNC : DancerRotation
     private bool SwapDancePartner(out IAction? act)
     {
         act = null;
-        if (!Player.HasStatus(true, StatusID.ClosedPosition)
+        if (!StatusHelper.PlayerHasStatus(true, StatusID.ClosedPosition)
         || !ShouldSwapDancePartner
         || !ClosedPositionPvE.IsEnabled)
         {
@@ -504,7 +504,7 @@ public sealed class ChurinDNC : DancerRotation
         if (!HasStandardStep || HasFinishingMove) return false;
 
         var shouldFinish = HasStandardStep && CompletedSteps == 2 && CanUseStepHoldCheck(StandardHoldStrategy);
-        var aboutToTimeOut = Player.WillStatusEnd(1, true, StatusID.StandardStep);
+        var aboutToTimeOut = StatusHelper.PlayerWillStatusEnd(1, true, StatusID.StandardStep);
 
         if ((shouldFinish || aboutToTimeOut) && DoubleStandardFinishPvE.CanUse(out act, skipAoeCheck: true))
         {
@@ -520,7 +520,7 @@ public sealed class ChurinDNC : DancerRotation
         if (!HasTechnicalStep) return false;
 
         var shouldFinish = HasTechnicalStep && CompletedSteps == 4 && CanUseStepHoldCheck(TechHoldStrategy);
-        var aboutToTimeOut = Player.WillStatusEnd(1, true, StatusID.TechnicalStep);
+        var aboutToTimeOut = StatusHelper.PlayerWillStatusEnd(1, true, StatusID.TechnicalStep);
 
         if ((shouldFinish || aboutToTimeOut) && QuadrupleTechnicalFinishPvE.CanUse(out act, skipAoeCheck: true))
         {
@@ -579,7 +579,7 @@ public sealed class ChurinDNC : DancerRotation
     private bool TryUseDanceOfTheDawn(out IAction? act)
     {
         act = null;
-        if (Esprit < SaberDanceEspritCost && !Player.HasStatus(true, StatusID.DanceOfTheDawnReady)) return false;
+        if (Esprit < SaberDanceEspritCost && !StatusHelper.PlayerHasStatus(true, StatusID.DanceOfTheDawnReady)) return false;
 
         if (DanceOfTheDawnPvE.CanUse(out act)) return true;
 
@@ -662,7 +662,7 @@ public sealed class ChurinDNC : DancerRotation
     {
         get
         {
-            if (Player.WillStatusEnd(5f, true, StatusID.FlourishingStarfall))
+            if (StatusHelper.PlayerWillStatusEnd(5f, true, StatusID.FlourishingStarfall))
             {
                 return true;
             }
@@ -682,7 +682,7 @@ public sealed class ChurinDNC : DancerRotation
                 return true;
             }
 
-            if (HasLastDance && HasFinishingMove && !Player.WillStatusEnd(5f, true, StatusID.FlourishingStarfall))
+            if (HasLastDance && HasFinishingMove && !StatusHelper.PlayerWillStatusEnd(5f, true, StatusID.FlourishingStarfall))
             {
                 return false;
             }
@@ -745,8 +745,8 @@ public sealed class ChurinDNC : DancerRotation
         act = null;
         if (Feathers <= 3 || CanUseStandardStep || CanUseTechnicalStep) return false;
 
-        var hasSilkenProcs = Player.HasStatus(true, StatusID.SilkenFlow) || Player.HasStatus(true, StatusID.SilkenSymmetry);
-        var hasFlourishingProcs = Player.HasStatus(true, StatusID.FlourishingFlow) || Player.HasStatus(true, StatusID.FlourishingSymmetry);
+        var hasSilkenProcs = HasSilkenFlow || HasSilkenSymmetry;
+        var hasFlourishingProcs = HasFlourishingFlow || HasFlourishingSymmetry;
 
         if (Feathers > 3 && !hasSilkenProcs && hasFlourishingProcs && Esprit < SaberDanceEspritCost && !IsBurstPhase)
         {
@@ -769,7 +769,7 @@ public sealed class ChurinDNC : DancerRotation
 
         if (SaberDancePvE.CanUse(out act))
         {
-            if (IsBurstPhase && !Player.WillStatusEndGCD(0,0, true, StatusID.TechnicalFinish))
+            if (IsBurstPhase && !StatusHelper.PlayerWillStatusEndGCD(0,0, true, StatusID.TechnicalFinish))
             {
                 if (Esprit >= SaberDanceEspritCost && !CanUseStandardStep)
                 {
