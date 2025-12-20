@@ -265,7 +265,7 @@ public readonly struct ActionBasicInfo
         var type = ActionHelper.GetActionCate(_action.Action);
         if (type is ActionCate.Weaponskill)
         {
-            if (Player.Object.HasStatus(false, StatusID.Pacification_620))
+            if (StatusHelper.PlayerHasStatus(false, StatusID.Pacification_620))
             {
                 return false;
             }
@@ -273,7 +273,7 @@ public readonly struct ActionBasicInfo
 
         if (type is ActionCate.Spell)
         {
-            if (Player.Object.HasStatus(false, StatusID.Silence))
+            if (StatusHelper.PlayerHasStatus(false, StatusID.Silence))
             {
                 return false;
             }
@@ -401,13 +401,13 @@ public readonly struct ActionBasicInfo
         if (Player.Job == Job.WHM)
         {
             // Freecure makes the next Cure II cost 0 MP
-            if (ID == (uint)ActionID.CureIiPvE && Player.Object.HasStatus(true, StatusID.Freecure))
+            if (ID == (uint)ActionID.CureIiPvE && StatusHelper.PlayerHasStatus(true, StatusID.Freecure))
             {
                 return true;
             }
 
             // Thin Air covers any expensive spell (including Raise)
-            if (Player.Object.HasStatus(true, StatusID.ThinAir) || CustomRotation.IsLastAction(ActionID.ThinAirPvE))
+            if (StatusHelper.PlayerHasStatus(true, StatusID.ThinAir) || CustomRotation.IsLastAction(ActionID.ThinAirPvE))
             {
                 return true;
             }

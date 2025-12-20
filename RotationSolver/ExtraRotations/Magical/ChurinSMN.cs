@@ -12,12 +12,12 @@ public sealed class ChurinSMN : SummonerRotation
     #region Properties
     private bool CanBurst => MergedStatus.HasFlag(AutoStatus.Burst) && SearingLightPvE.IsEnabled;
     private bool InBigSummon => !SummonBahamutPvE.EnoughLevel || InBahamut || InPhoenix || InSolarBahamut;
-    private static bool HasFurtherRuin => Player.HasStatus(true, StatusID.FurtherRuin_2701);
-    private static bool HasCrimsonStrike => Player.HasStatus(true, StatusID.CrimsonStrikeReady_4403);
-    private static bool HasRadiantAegis => Player.HasStatus(true, StatusID.RadiantAegis);
-    private static bool HasGarudaFavor => Player.HasStatus(true, StatusID.GarudasFavor);
-    private static bool HasIfritFavor => Player.HasStatus(true, StatusID.IfritsFavor);
-    private static bool HasTitanFavor => Player.HasStatus(true, StatusID.TitansFavor);
+    private static bool HasFurtherRuin => StatusHelper.PlayerHasStatus(true, StatusID.FurtherRuin_2701);
+    private static bool HasCrimsonStrike => StatusHelper.PlayerHasStatus(true, StatusID.CrimsonStrikeReady_4403);
+    private static bool HasRadiantAegis => StatusHelper.PlayerHasStatus(true, StatusID.RadiantAegis);
+    private static bool HasGarudaFavor => StatusHelper.PlayerHasStatus(true, StatusID.GarudasFavor);
+    private static bool HasIfritFavor => StatusHelper.PlayerHasStatus(true, StatusID.IfritsFavor);
+    private static bool HasTitanFavor => StatusHelper.PlayerHasStatus(true, StatusID.TitansFavor);
     private static bool NoPrimalReady => !IsIfritReady && !IsGarudaReady && !IsTitanReady;
     private static bool AnyPrimalReady => IsIfritReady || IsGarudaReady || IsTitanReady;
     private static bool HasAnyFavor => HasGarudaFavor || HasIfritFavor || HasTitanFavor;
@@ -314,7 +314,7 @@ public sealed class ChurinSMN : SummonerRotation
     [RotationDesc(ActionID.LuxSolarisPvE)]
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        if (Player.WillStatusEndGCD(3, 0, true, StatusID.RefulgentLux))
+        if (StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.RefulgentLux))
         {
             if (LuxSolarisPvE.CanUse(out act))
             {
@@ -322,7 +322,7 @@ public sealed class ChurinSMN : SummonerRotation
             }
         }
 
-        if (Player.WillStatusEndGCD(2, 0, true, StatusID.FirebirdTrance))
+        if (StatusHelper.PlayerWillStatusEndGCD(2, 0, true, StatusID.FirebirdTrance))
         {
             if (RekindlePvE.CanUse(out act))
             {
@@ -330,7 +330,7 @@ public sealed class ChurinSMN : SummonerRotation
             }
         }
 
-        if (Player.WillStatusEndGCD(3, 0, true, StatusID.FirebirdTrance))
+        if (StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.FirebirdTrance))
         {
             if (RekindlePvE.CanUse(out act))
             {
@@ -828,9 +828,8 @@ public sealed class ChurinSMN : SummonerRotation
                                        || (UseOneAttunement && AttunementCount == 1)
                                        || (AttunementCount < 1 && UseBothAttunements && !UseOneAttunement);
            var cycloneMoveCondition = cycloneAvailable && cycloneMoveAllowed && cycloneBaseCondition;
-           var usedOneAttunement = Player.IsCasting && Player.CastActionId == (uint)ActionID.RubyRitePvE && !IsLastGCD(ActionID.RubyRitePvE) && AttunementCount >= 1;
-
-           switch (isMoving)
+		    var usedOneAttunement = Player != null && IsCasting && Player.CastActionId == (uint)ActionID.RubyRitePvE && !IsLastGCD(ActionID.RubyRitePvE) && AttunementCount >= 1;
+		switch (isMoving)
            {
                case true:
                {
@@ -894,7 +893,7 @@ public sealed class ChurinSMN : SummonerRotation
                        }
 
                        if (UseBothAttunements && AttunementCount > 0
-                           || UseOneAttunement && (AttunementCount == 2 || !UseBothAttunements && AttunementCount is <= 2 and >=1 && !Player.IsCasting)
+                           || UseOneAttunement && (AttunementCount == 2 || !UseBothAttunements && AttunementCount is <= 2 and >=1 && !IsCasting)
                            || UseOneAttunement && UseBothAttunements && !HasIfritFavor && !HasCrimsonStrike && AttunementCount == 1)
                        {
                            return PreciousBrillianceTime(out act) || GemshineTime(out act);
@@ -1069,7 +1068,7 @@ public sealed class ChurinSMN : SummonerRotation
 
             if (nextGCD.IsTheSameTo(false, RubyRitePvE, RubyCatastrophePvE) && IsMoving)
             {
-                return !HasFurtherRuin && InIfrit && (!Player.HasStatus(true, StatusID.IfritsFavor) || !AddCrimsonCyclone && CrimsonCyclonePvE.Target.Target.DistanceToPlayer() > CrimsonCycloneDistance);
+                return !HasFurtherRuin && InIfrit && (!StatusHelper.PlayerHasStatus(true, StatusID.IfritsFavor) || !AddCrimsonCyclone && CrimsonCyclonePvE.Target.Target.DistanceToPlayer() > CrimsonCycloneDistance);
             }
         }
         return false;
@@ -1357,14 +1356,14 @@ public sealed class ChurinSMN : SummonerRotation
 
     private void M4SInPrimals()
     {
-        var isCastingRubyRite = Player.CastActionId is (uint)ActionID.RubyRitePvE;
-        var castAlmostFinished = Player.IsCasting && isCastingRubyRite && WeaponRemain < 1f;
-        var attunementUsedUp = (HasIfritFavor && !InIfrit) || IsLastGCD(ActionID.RubyRitePvE) && castAlmostFinished && AttunementCount <= 1;
-        var hasOneAttunementLeft = (castAlmostFinished && AttunementCount <= 2) || (IsLastGCD(ActionID.RubyRitePvE) && AttunementCount == 1);
-        var crimsonCycloneTargetInRange = CrimsonCyclonePvE.Target.Target.DistanceToPlayer() <= CrimsonCycloneDistance;
-        var defaultCycloneCondition = (CrimsonCycloneTargetTooFar|| crimsonCycloneTargetInRange) && attunementUsedUp;
+		var isCastingRubyRite = Player != null && Player.CastActionId == (uint)ActionID.RubyRitePvE;
+		var castAlmostFinished = Player != null && IsCasting && isCastingRubyRite && WeaponRemain < 1f;
+		var attunementUsedUp = (HasIfritFavor && !InIfrit) || (Player != null && IsLastGCD(ActionID.RubyRitePvE) && castAlmostFinished && AttunementCount <= 1);
+		var hasOneAttunementLeft = (castAlmostFinished && AttunementCount <= 2) || (Player != null && IsLastGCD(ActionID.RubyRitePvE) && AttunementCount == 1);
+		var crimsonCycloneTargetInRange = CrimsonCyclonePvE.Target.Target.DistanceToPlayer() <= CrimsonCycloneDistance;
+		var defaultCycloneCondition = (CrimsonCycloneTargetTooFar || crimsonCycloneTargetInRange) && attunementUsedUp;
 
-        UseRuin3 = false;
+		UseRuin3 = false;
         UseRuin4 = false;
         AddCrimsonCyclone = false;
         SkipAttunement = false;

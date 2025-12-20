@@ -1447,7 +1447,7 @@ public struct ActionTargetInfo(IBaseAction action)
             }
 
             // Fallback: only return self if self does NOT have BattleBell
-            if (!Player.Object.HasStatus(true, StatusID.BattleBell) || !Player.Object.HasStatus(false, StatusID.BattleBell))
+            if (!StatusHelper.PlayerHasStatus(true, StatusID.BattleBell) || !StatusHelper.PlayerHasStatus(false, StatusID.BattleBell))
             {
                 return Player.Object;
             }
@@ -1502,12 +1502,17 @@ public struct ActionTargetInfo(IBaseAction action)
         {
             List<Job> dancePartnerPriority = OtherConfiguration.DancePartnerPriority;
 
-            if (!Player.Object.IsJobs(Job.DNC))
+			if (!DataCenter.PlayerAvailable())
+			{
+				return null;
+			}
+
+			if (!TargetFilter.PlayerIsJobs(Job.DNC))
             {
                 return null;
             }
 
-            if (Player.Object.HasStatus(true, StatusID.ClosedPosition))
+            if (StatusHelper.PlayerHasStatus(true, StatusID.ClosedPosition))
             {
                 return null;
             }
@@ -1587,7 +1592,7 @@ public struct ActionTargetInfo(IBaseAction action)
             // The Spear priority based on the info from The Balance Discord (user-configurable)
             List<Job> TheSpearPriority = OtherConfiguration.TheSpearPriority;
 
-            if (!Player.Object.IsJobs(Job.AST))
+            if (!TargetFilter.PlayerIsJobs(Job.AST))
             {
                 return null;
             }
@@ -1683,7 +1688,7 @@ public struct ActionTargetInfo(IBaseAction action)
             // The Balance priority based on the info from The Balance Discord (user-configurable)
             List<Job> TheBalancePriority = OtherConfiguration.TheBalancePriority;
 
-            if (!Player.Object.IsJobs(Job.AST))
+            if (!TargetFilter.PlayerIsJobs(Job.AST))
             {
                 return null;
             }
@@ -1778,7 +1783,7 @@ public struct ActionTargetInfo(IBaseAction action)
         {
             List<Job> KardiaTankPriority = OtherConfiguration.KardiaTankPriority;
 
-            if (!Player.Object.IsJobs(Job.SGE))
+            if (!TargetFilter.PlayerIsJobs(Job.SGE))
             {
                 return null;
             }
@@ -1879,7 +1884,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindDeploymentTacticsTarget()
         {
-            if (!Player.Object.IsJobs(Job.SCH))
+            if (!TargetFilter.PlayerIsJobs(Job.SCH))
             {
                 return null;
             }
@@ -2162,7 +2167,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     }
                 }
 
-                if (Player.Object.GetHealthRatio() <= Service.Config.HealthSelfRatio)
+                if (ObjectHelper.GetPlayerHealthRatio() <= Service.Config.HealthSelfRatio)
                 {
                     return Player.Object;
                 }

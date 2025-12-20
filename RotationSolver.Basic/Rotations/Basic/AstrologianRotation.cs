@@ -108,42 +108,42 @@ public partial class AstrologianRotation
     /// <summary>
     /// Has NeutralSect
     /// </summary>
-    public static bool HasNeutralSect => Player.HasStatus(true, StatusID.NeutralSect);
+    public static bool HasNeutralSect => StatusHelper.PlayerHasStatus(true, StatusID.NeutralSect);
 
     /// <summary>
     /// Has Lightspeed.
     /// </summary>
-    public static bool HasLightspeed => Player.HasStatus(true, StatusID.Lightspeed);
+    public static bool HasLightspeed => StatusHelper.PlayerHasStatus(true, StatusID.Lightspeed);
 
     /// <summary>
     /// Has Divination.
     /// </summary>
-    public static bool HasDivination => Player.HasStatus(true, StatusID.Divination);
+    public static bool HasDivination => StatusHelper.PlayerHasStatus(true, StatusID.Divination);
 
     /// <summary>
     /// Has Macrocosmos.
     /// </summary>
-    public static bool HasMacrocosmos => Player.HasStatus(true, StatusID.Macrocosmos);
+    public static bool HasMacrocosmos => StatusHelper.PlayerHasStatus(true, StatusID.Macrocosmos);
 
     /// <summary>
     /// Is holding bubble.
     /// </summary>
-    public static bool HasCollectiveUnconscious => Player.HasStatus(true, StatusID.CollectiveUnconscious_848);
+    public static bool HasCollectiveUnconscious => StatusHelper.PlayerHasStatus(true, StatusID.CollectiveUnconscious_848);
 
     /// <summary>
     /// Able to execute Giant Dominance Stellar Detonation.
     /// </summary>
-    public static bool HasGiantDominance => Player.HasStatus(true, StatusID.GiantDominance);
+    public static bool HasGiantDominance => StatusHelper.PlayerHasStatus(true, StatusID.GiantDominance);
 
     /// <summary>
     /// Able to execute Earthly Dominance Stellar Detonation.
     /// </summary>
-    public static bool HasEarthlyDominance => Player.HasStatus(true, StatusID.EarthlyDominance);
+    public static bool HasEarthlyDominance => StatusHelper.PlayerHasStatus(true, StatusID.EarthlyDominance);
 
     /// <summary>
     /// Has Synastry.
     /// </summary>
-    public static bool HasSynastry => Player.HasStatus(true, StatusID.Synastry);
+    public static bool HasSynastry => StatusHelper.PlayerHasStatus(true, StatusID.Synastry);
     #endregion
 
     #region Debug
@@ -672,7 +672,7 @@ public partial class AstrologianRotation
 
     static partial void ModifyOraclePvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Divining_4332);
+        setting.ActionCheck = () => StatusHelper.PlayerHasStatus(true, StatusID.Divining_4332);
         setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -688,7 +688,7 @@ public partial class AstrologianRotation
 
     static partial void ModifyRetrogradePvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.HasStatus(true, StatusID.RetrogradeReady);
+        setting.ActionCheck = () => StatusHelper.PlayerHasStatus(true, StatusID.RetrogradeReady);
         setting.IsFriendly = true;
         setting.MPOverride = () => 0;
         setting.SpecialType = SpecialActionType.MovingBackward;

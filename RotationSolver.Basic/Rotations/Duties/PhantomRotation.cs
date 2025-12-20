@@ -24,27 +24,27 @@ public partial class DutyRotation
     /// <summary>
     /// Has a status that is important to the main rotation and should prevent Duty Actions from being executed.
     /// </summary>
-    public static bool HasLockoutStatus => Player.HasStatus(true, StatusHelper.RotationLockoutStatus) && InCombat;
+    public static bool HasLockoutStatus => StatusHelper.PlayerHasStatus(true, StatusHelper.RotationLockoutStatus) && InCombat;
 
     /// <summary>
     /// Able to execute Cleansing.
     /// </summary>
-    public static bool HasCleansing => Player.HasStatus(true, StatusID.PredictionOfCleansing) || Player.HasStatus(false, StatusID.PredictionOfCleansing);
+    public static bool HasCleansing => StatusHelper.PlayerHasStatus(true, StatusID.PredictionOfCleansing) || StatusHelper.PlayerHasStatus(false, StatusID.PredictionOfCleansing);
 
     /// <summary>
     /// Able to execute Starfall.
     /// </summary>
-    public static bool HasStarfall => Player.HasStatus(true, StatusID.PredictionOfStarfall) || Player.HasStatus(false, StatusID.PredictionOfStarfall);
+    public static bool HasStarfall => StatusHelper.PlayerHasStatus(true, StatusID.PredictionOfStarfall) || StatusHelper.PlayerHasStatus(false, StatusID.PredictionOfStarfall);
 
     /// <summary>
     /// Able to execute Phantom Judgment.
     /// </summary>
-    public static bool HasPhantomJudgment => Player.HasStatus(true, StatusID.PredictionOfJudgment) || Player.HasStatus(false, StatusID.PredictionOfJudgment);
+    public static bool HasPhantomJudgment => StatusHelper.PlayerHasStatus(true, StatusID.PredictionOfJudgment) || StatusHelper.PlayerHasStatus(false, StatusID.PredictionOfJudgment);
 
     /// <summary>
     /// Able to execute Blessing.
     /// </summary>
-    public static bool HasBlessing => Player.HasStatus(true, StatusID.PredictionOfBlessing) || Player.HasStatus(false, StatusID.PredictionOfBlessing);
+    public static bool HasBlessing => StatusHelper.PlayerHasStatus(true, StatusID.PredictionOfBlessing) || StatusHelper.PlayerHasStatus(false, StatusID.PredictionOfBlessing);
 
     /// <summary>
     ///
@@ -175,7 +175,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyOffensiveAriaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BardLevel >= 1 && !Player.HasStatus(false, StatusID.HerosRime) && !Player.HasStatus(true, StatusID.HerosRime);
+        setting.ActionCheck = () => BardLevel >= 1 && !StatusHelper.PlayerHasStatus(false, StatusID.HerosRime) && !StatusHelper.PlayerHasStatus(true, StatusID.HerosRime);
         setting.StatusProvide = [StatusID.OffensiveAria, StatusID.HerosRime];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -829,6 +829,8 @@ public partial class DutyRotation
 	static partial void ModifyMagicShellPvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => MysticKnightLevel >= 2;
+        setting.StatusProvide = [StatusID.MagicShell];
+		setting.TargetType = TargetType.Self;
 		setting.IsFriendly = true;
 	}
 

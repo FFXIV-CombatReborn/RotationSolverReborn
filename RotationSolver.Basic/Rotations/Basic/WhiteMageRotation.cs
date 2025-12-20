@@ -10,7 +10,7 @@ public partial class WhiteMageRotation
     /// <inheritdoc/>
     public override bool IsBursting()
     {
-        if (Player.HasStatus(true, StatusID.PresenceOfMind) || PresenceOfMindPvE.Cooldown.RecastTimeRemainOneCharge > 15f)
+        if (StatusHelper.PlayerHasStatus(true, StatusID.PresenceOfMind) || PresenceOfMindPvE.Cooldown.RecastTimeRemainOneCharge > 15f)
         {
             return true; // Either have presence of mind or more than 15 seconds until we can presence of mind, use burst skills
         }
@@ -76,7 +76,7 @@ public partial class WhiteMageRotation
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.SacredSight);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.SacredSight);
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
     }
@@ -86,7 +86,7 @@ public partial class WhiteMageRotation
     /// <summary>
     /// Player has Thin Air.
     /// </summary>
-    public static bool HasThinAir => Player.HasStatus(true, StatusID.ThinAir);
+    public static bool HasThinAir => StatusHelper.PlayerHasStatus(true, StatusID.ThinAir);
     #endregion
 
     #region Debug

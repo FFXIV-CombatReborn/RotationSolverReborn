@@ -560,7 +560,7 @@ public class BLM_Default : BlackMageRotation
             return true;
         }
 
-        if (AddThunder(out act, 0) && Player.WillStatusEndGCD(1, 0, true,
+        if (AddThunder(out act, 0) && StatusHelper.PlayerWillStatusEndGCD(1, 0, true,
             StatusID.Thundercloud))
         {
             return true;

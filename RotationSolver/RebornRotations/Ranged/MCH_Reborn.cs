@@ -86,7 +86,7 @@ public sealed class MCH_Reborn : MachinistRotation
             return true;
         }
 
-        if (!MitOverlap || (MitOverlap && !Player.HasStatus(true, StatusID.Tactician_1951)))
+        if (!MitOverlap || (MitOverlap && !StatusHelper.PlayerHasStatus(true, StatusID.Tactician_1951)))
         {
             if (DismantlePvE.CanUse(out act))
             {
@@ -350,7 +350,7 @@ public sealed class MCH_Reborn : MachinistRotation
             return true;
         }
 
-        if (Player.WillStatusEnd(3, true, StatusID.FullMetalMachinist))
+        if (StatusHelper.PlayerWillStatusEnd(3, true, StatusID.FullMetalMachinist))
         {
             if (FullMetalFieldPvE.CanUse(out act))
             {
@@ -358,7 +358,7 @@ public sealed class MCH_Reborn : MachinistRotation
             }
         }
 
-        if (Player.WillStatusEnd(3, true, StatusID.ExcavatorReady))
+        if (StatusHelper.PlayerWillStatusEnd(3, true, StatusID.ExcavatorReady))
         {
             if (ExcavatorPvE.CanUse(out act))
             {
@@ -522,7 +522,7 @@ public sealed class MCH_Reborn : MachinistRotation
                 return true;
             }
 
-            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true) && !AutomatonQueenPvE.EnoughLevel)
+            if (!AutomatonQueenPvE.EnoughLevel && RookAutoturretPvE.CanUse(out act, skipTTKCheck: true))
             {
                 return true;
             }
@@ -536,7 +536,7 @@ public sealed class MCH_Reborn : MachinistRotation
                 return true;
             }
 
-            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true) && !AutomatonQueenPvE.EnoughLevel)
+            if (!AutomatonQueenPvE.EnoughLevel && RookAutoturretPvE.CanUse(out act, skipTTKCheck: true))
             {
                 return true;
             }
@@ -551,7 +551,7 @@ public sealed class MCH_Reborn : MachinistRotation
                 return true;
             }
 
-            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true) && !AutomatonQueenPvE.EnoughLevel)
+            if (!AutomatonQueenPvE.EnoughLevel && RookAutoturretPvE.CanUse(out act, skipTTKCheck: true))
             {
                 return true;
             }

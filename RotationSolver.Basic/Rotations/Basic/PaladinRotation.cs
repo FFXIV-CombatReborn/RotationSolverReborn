@@ -13,7 +13,7 @@ public partial class PaladinRotation
     /// <inheritdoc/>
     public override bool IsBursting()
     {
-        if (Player.HasStatus(true, StatusID.FightOrFlight) || FightOrFlightPvE.Cooldown.RecastTimeRemainOneCharge > 15f)
+        if (StatusHelper.PlayerHasStatus(true, StatusID.FightOrFlight) || FightOrFlightPvE.Cooldown.RecastTimeRemainOneCharge > 15f)
         {
             return true; // Either have Fight or Flight or more than 15 seconds until we can use it
         }
@@ -27,7 +27,7 @@ public partial class PaladinRotation
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.Requiescat);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.Requiescat);
             return stacks == byte.MaxValue ? (byte)5 : stacks;
         }
     }
@@ -44,22 +44,22 @@ public partial class PaladinRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasDivineMight => Player.HasStatus(true, StatusID.DivineMight);
+    public static bool HasDivineMight => StatusHelper.PlayerHasStatus(true, StatusID.DivineMight);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasFightOrFlight => Player.HasStatus(true, StatusID.FightOrFlight);
+    public static bool HasFightOrFlight => StatusHelper.PlayerHasStatus(true, StatusID.FightOrFlight);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasConfiteorReady => Player.HasStatus(true, StatusID.ConfiteorReady);
+    public static bool HasConfiteorReady => StatusHelper.PlayerHasStatus(true, StatusID.ConfiteorReady);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasAtonementReady => Player.HasStatus(true, StatusID.AtonementReady);
+    public static bool HasAtonementReady => StatusHelper.PlayerHasStatus(true, StatusID.AtonementReady);
     #endregion
 
     #region Actions Unassignable

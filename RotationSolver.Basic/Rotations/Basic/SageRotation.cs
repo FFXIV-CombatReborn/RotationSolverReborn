@@ -64,7 +64,7 @@ public partial class SageRotation
     /// <summary>
     /// Player has Kardia.
     /// </summary>
-    public static bool HasKardia => Player.HasStatus(true, StatusID.Kardia);
+    public static bool HasKardia => StatusHelper.PlayerHasStatus(true, StatusID.Kardia);
     #endregion
 
     #region PvE Actions
@@ -491,7 +491,7 @@ public partial class SageRotation
 
     static partial void ModifyToxikonIiPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Addersting);
+        setting.ActionCheck = () => StatusHelper.PlayerHasStatus(true, StatusID.Addersting);
         setting.TargetStatusProvide = [StatusID.Toxikon];
         setting.CreateConfig = () => new ActionConfig()
         {

@@ -161,7 +161,7 @@ public sealed class MNK_Reborn : MonkRotation
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        if (Player.WillStatusEnd(5, true, StatusID.EarthsRumination) && EarthsReplyPvE.CanUse(out act))
+        if (StatusHelper.PlayerWillStatusEnd(5, true, StatusID.EarthsRumination) && EarthsReplyPvE.CanUse(out act))
         {
             return true;
         }
@@ -520,12 +520,12 @@ public sealed class MNK_Reborn : MonkRotation
 
         // 'Because Fire¡¯s Reply grants formless, we have an imposed restriction that we prefer not to use it while under PB, or if we have a formless already.' + 'Cast Fire's Reply after an opo gcd'
         // need to test and see if IsLastGCD(false, ...) is better
-        if (((!HasPerfectBalance && !HasFormlessFist && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE)) || Player.WillStatusEnd(5, true, StatusID.FiresRumination)) && FiresReplyPvE.CanUse(out act))
+        if (((!HasPerfectBalance && !HasFormlessFist && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE)) || StatusHelper.PlayerWillStatusEnd(5, true, StatusID.FiresRumination)) && FiresReplyPvE.CanUse(out act))
         {
             return true; // Fires Reply
         }
         // 'Cast Wind's Reply literally anywhere in the window'
-        if ((!HasPerfectBalance || Player.WillStatusEnd(5, true, StatusID.WindsRumination)) && WindsReplyPvE.CanUse(out act))
+        if ((!HasPerfectBalance || StatusHelper.PlayerWillStatusEnd(5, true, StatusID.WindsRumination)) && WindsReplyPvE.CanUse(out act))
         {
             return true; // Winds Reply
         }
@@ -536,7 +536,7 @@ public sealed class MNK_Reborn : MonkRotation
         {
             return true;
         }
-        //if (Player.StatusStack(true, StatusID.PerfectBalance) == 3 && OpoOpoForm(out act)) return true;
+        //if (StatusHelper.PlayerStatusStack(true, StatusID.PerfectBalance) == 3 && OpoOpoForm(out act)) return true;
 
         // Gain Solar Nadi through 3 different forms
         if (HasPerfectBalance && !HasSolar && EnhancedPerfectBalanceTrait.EnoughLevel)

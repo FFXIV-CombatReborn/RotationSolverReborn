@@ -17,7 +17,7 @@ public class WHM_DefaultPVP : WhiteMageRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -26,7 +26,7 @@ public class WHM_DefaultPVP : WhiteMageRotation
         {
             return true;
         }
-        if (Player.HasStatus(false, StatusHelper.PurifyPvPStatuses))
+        if (StatusHelper.PlayerHasStatus(false, StatusHelper.PurifyPvPStatuses))
         {
             if (AquaveilPvP.CanUse(out action))
             {
@@ -47,7 +47,7 @@ public class WHM_DefaultPVP : WhiteMageRotation
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleAbility(nextGCD, out action);
         }
@@ -57,7 +57,7 @@ public class WHM_DefaultPVP : WhiteMageRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -74,7 +74,7 @@ public class WHM_DefaultPVP : WhiteMageRotation
     #region GCDs
     protected override bool DefenseSingleGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleGCD(out action);
         }
@@ -89,7 +89,7 @@ public class WHM_DefaultPVP : WhiteMageRotation
 
     protected override bool HealSingleGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.HealSingleGCD(out action);
         }
@@ -114,7 +114,7 @@ public class WHM_DefaultPVP : WhiteMageRotation
 
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }

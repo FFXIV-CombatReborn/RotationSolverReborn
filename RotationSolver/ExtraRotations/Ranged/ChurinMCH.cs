@@ -18,8 +18,8 @@ public sealed class ChurinMCH: MachinistRotation
     #endregion
     #region Status Booleans
 
-    private static bool IsMedicated => Player.HasStatus(true,StatusID.Medicated) ||
-                                       !Player.WillStatusEnd(0, true, StatusID.Medicated);
+    private static bool IsMedicated => StatusHelper.PlayerHasStatus(true,StatusID.Medicated) ||
+                                       !StatusHelper.PlayerWillStatusEnd(0, true, StatusID.Medicated);
 
     #endregion
     #region  Logic Booleans

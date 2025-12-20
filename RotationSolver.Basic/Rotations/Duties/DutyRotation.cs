@@ -1,5 +1,4 @@
-﻿using Dalamud.Game.ClientState.JobGauge.Enums;
-using Dalamud.Game.ClientState.Objects.SubKinds;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.ExcelServices;
 
 namespace RotationSolver.Basic.Rotations.Duties;
@@ -184,29 +183,29 @@ public partial class DutyRotation : IDisposable
 
         if (InVariantDungeon)
         {
-            ImGui.Text($"VariantUltimatumPvE Status: {Player.HasStatus(true, StatusID.VariantUltimatumSet)}");
+            ImGui.Text($"VariantUltimatumPvE Status: {StatusHelper.PlayerHasStatus(true, StatusID.VariantUltimatumSet)}");
             ImGui.Spacing();
-            ImGui.Text($"VariantSpiritDartPvE_33863  Status: {Player.HasStatus(true, StatusID.VariantSpiritDartSet)}");
+            ImGui.Text($"VariantSpiritDartPvE_33863  Status: {StatusHelper.PlayerHasStatus(true, StatusID.VariantSpiritDartSet)}");
             ImGui.Text($"VariantSpiritDartPvE_33863 Slotted: {VariantSpiritDartPvE_33863.Info.IsOnSlot}");
             ImGui.Spacing();
-            ImGui.Text($"VariantSpiritDartPvE  Status: {Player.HasStatus(true, StatusID.VariantSpiritDartSet)}");
+            ImGui.Text($"VariantSpiritDartPvE  Status: {StatusHelper.PlayerHasStatus(true, StatusID.VariantSpiritDartSet)}");
             ImGui.Text($"VariantSpiritDartPvE Slotted: {VariantSpiritDartPvE.Info.IsOnSlot}");
             ImGui.Spacing();
-            ImGui.Text($"VariantRampartPvE_33864 Status: {Player.HasStatus(true, StatusID.VariantRampartSet)}");
+            ImGui.Text($"VariantRampartPvE_33864 Status: {StatusHelper.PlayerHasStatus(true, StatusID.VariantRampartSet)}");
             ImGui.Spacing();
-            ImGui.Text($"VariantRampartPvE Status: {Player.HasStatus(true, StatusID.VariantRampartSet)}");
+            ImGui.Text($"VariantRampartPvE Status: {StatusHelper.PlayerHasStatus(true, StatusID.VariantRampartSet)}");
             ImGui.Spacing();
-            ImGui.Text($"VariantCurePvE_33862  Status: {Player.HasStatus(true, StatusID.VariantCureSet)}");
+            ImGui.Text($"VariantCurePvE_33862  Status: {StatusHelper.PlayerHasStatus(true, StatusID.VariantCureSet)}");
             ImGui.Text($"VariantCurePvE_33862 Slotted: {VariantCurePvE_33862.Info.IsOnSlot}");
             ImGui.Spacing();
-            ImGui.Text($"VariantCurePvE  Status: {Player.HasStatus(true, StatusID.VariantCureSet)}");
+            ImGui.Text($"VariantCurePvE  Status: {StatusHelper.PlayerHasStatus(true, StatusID.VariantCureSet)}");
             ImGui.Text($"VariantCurePvE Slotted: {VariantCurePvE.Info.IsOnSlot}");
             ImGui.Spacing();
-            ImGui.Text($"VariantRaisePvE Status: {Player.HasStatus(true, StatusID.VariantRampartSet)}");
+            ImGui.Text($"VariantRaisePvE Status: {StatusHelper.PlayerHasStatus(true, StatusID.VariantRampartSet)}");
             ImGui.Spacing();
-            ImGui.Text($"VariantRaiseIiPvE Status: {Player.HasStatus(true, StatusID.VariantRaiseSet)}");
+            ImGui.Text($"VariantRaiseIiPvE Status: {StatusHelper.PlayerHasStatus(true, StatusID.VariantRaiseSet)}");
             ImGui.Spacing();
-            ImGui.Text($"VariantRampartPvE Status: {Player.HasStatus(true, StatusID.VariantRaiseSet)}");
+            ImGui.Text($"VariantRampartPvE Status: {StatusHelper.PlayerHasStatus(true, StatusID.VariantRaiseSet)}");
             ImGui.Spacing();
             ImGui.Spacing();
             ImGui.Text($"Sildihn Subterrane: {SildihnSubterrane}");
@@ -320,11 +319,11 @@ public partial class DutyRotation : IDisposable
         Chemist,
         Oracle,
         Thief,
-        None,
-        MysticKnight,
-        Dancer,
-        Gladiator
-    }
+		MysticKnight,
+		Gladiator,
+		Dancer,
+		None
+	}
 
     public static PhantomJob GetPhantomJob()
     {
@@ -342,9 +341,9 @@ public partial class DutyRotation : IDisposable
         if (SamuraiLevel > 0) return PhantomJob.Samurai;
         if (GeomancerLevel > 0) return PhantomJob.Geomancer;
 
-        if (MysticKnightLevel > 0) return PhantomJob.MysticKnight;
+		if (GladiatorLevel > 0) return PhantomJob.Gladiator;
         if (DancerLevel > 0) return PhantomJob.Dancer;
-        if (GladiatorLevel > 0) return PhantomJob.Gladiator;
+		if (MysticKnightLevel > 0) return PhantomJob.MysticKnight;
         return PhantomJob.None;
     }
 
@@ -410,7 +409,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomFreelancer);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomFreelancer);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -419,7 +418,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomKnight);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomKnight);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -428,7 +427,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomMonk);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomMonk);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -437,7 +436,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomBard);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomBard);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -446,7 +445,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomChemist);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomChemist);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -455,7 +454,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomTimeMage);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomTimeMage);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -464,7 +463,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomCannoneer);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomCannoneer);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -473,7 +472,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomOracle);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomOracle);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -482,7 +481,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomBerserker);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomBerserker);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -491,7 +490,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomRanger);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomRanger);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -500,7 +499,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomThief);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomThief);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -509,7 +508,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomSamurai);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomSamurai);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -518,7 +517,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomGeomancer);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomGeomancer);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -527,7 +526,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomMysticKnight);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomMysticKnight);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -536,7 +535,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomDancer);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomDancer);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
@@ -545,7 +544,7 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomGladiator);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomGladiator);
             return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }

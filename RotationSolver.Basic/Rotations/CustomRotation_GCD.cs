@@ -24,7 +24,7 @@ public partial class CustomRotation
 
         IBaseAction.ForceEnable = false;
 
-        if ((Service.Config.LagMitigation || Player.HasStatus(true, StatusID.Mudra)) && DataCenter.DefaultGCDRemain >= 0.625f)
+        if (StatusHelper.PlayerHasStatus(true, StatusID.Mudra) && DataCenter.DefaultGCDRemain >= 0.625f)
         {
             return null;
         }
@@ -190,7 +190,7 @@ public partial class CustomRotation
                 if (DataCenter.CurrentDutyRotation?.HealAreaGCD(out act) == true)
                     return act;
 
-                if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
+                if (!StatusHelper.PlayerHasStatus(false, StatusID.Scalebound) && (!StatusHelper.PlayerHasStatus(false, StatusID.ShackledHealing) || StatusHelper.PlayerHasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
                 {
                     if (HealAreaGCD(out IAction? action))
                     {
@@ -210,7 +210,7 @@ public partial class CustomRotation
 
                 if (CanHealAreaSpell)
                 {
-                    if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
+                    if (!StatusHelper.PlayerHasStatus(false, StatusID.Scalebound) && (!StatusHelper.PlayerHasStatus(false, StatusID.ShackledHealing) || StatusHelper.PlayerHasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
                     {
                         if (HealAreaGCD(out IAction? action))
                         {
@@ -228,7 +228,7 @@ public partial class CustomRotation
                 if (DataCenter.CurrentDutyRotation?.HealSingleGCD(out act) == true)
                     return act;
 
-                if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
+                if (!StatusHelper.PlayerHasStatus(false, StatusID.Scalebound) && (!StatusHelper.PlayerHasStatus(false, StatusID.ShackledHealing) || StatusHelper.PlayerHasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
                 {
                     if (HealSingleGCD(out IAction? action))
                     {
@@ -251,7 +251,7 @@ public partial class CustomRotation
 
                 if (CanHealSingleSpell)
                 {
-                    if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
+                    if (!StatusHelper.PlayerHasStatus(false, StatusID.Scalebound) && (!StatusHelper.PlayerHasStatus(false, StatusID.ShackledHealing) || StatusHelper.PlayerHasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
                     {
                         if (HealSingleGCD(out IAction? action))
                         {
@@ -475,9 +475,9 @@ public partial class CustomRotation
             {
                 return true;
             }
-            if (Player.HasStatus(true, StatusID.PhantomChemist))
+            if (StatusHelper.PlayerHasStatus(true, StatusID.PhantomChemist))
             {
-                if (Player.StatusStack(true, StatusID.PhantomChemist) > 2)
+                if (StatusHelper.PlayerStatusStack(true, StatusID.PhantomChemist) > 2)
                 {
                     return false;
                 }
@@ -502,9 +502,9 @@ public partial class CustomRotation
         {
             return true;
         }
-        if (Player.HasStatus(true, StatusID.PhantomChemist))
+        if (StatusHelper.PlayerHasStatus(true, StatusID.PhantomChemist))
         {
-            if (Player.StatusStack(true, StatusID.PhantomChemist) > 2)
+            if (StatusHelper.PlayerStatusStack(true, StatusID.PhantomChemist) > 2)
             {
                 return false;
             }
@@ -612,7 +612,7 @@ public partial class CustomRotation
     protected virtual bool EmergencyGCD(out IAction? act)
     {
         #region PvP
-        if (GuardPvP.CanUse(out act) && !Player.HasStatus(true, StatusID.UndeadRedemption) && !Player.HasStatus(true, StatusID.InnerRelease_1303) && (Player.GetHealthRatio() <= Service.Config.HealthForGuard || DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk)))
+        if (GuardPvP.CanUse(out act) && !StatusHelper.PlayerHasStatus(true, StatusID.UndeadRedemption) && !StatusHelper.PlayerHasStatus(true, StatusID.InnerRelease_1303) && (Player?.GetHealthRatio() <= Service.Config.HealthForGuard || DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk)))
         {
             return true;
         }

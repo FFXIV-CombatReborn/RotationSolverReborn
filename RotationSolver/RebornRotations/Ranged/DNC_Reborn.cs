@@ -22,7 +22,7 @@ public sealed class DNC_Reborn : DancerRotation
     #endregion
     private bool shouldUseLastDance = true;
 
-    private static bool InBurstStatus => Player.HasStatus(true, StatusID.Devilment);
+    private static bool InBurstStatus => StatusHelper.PlayerHasStatus(true, StatusID.Devilment);
 
     #region Tracking Properties
     public override void DisplayRotationStatus()
@@ -333,7 +333,7 @@ public sealed class DNC_Reborn : DancerRotation
             return true;
         }
 
-        if (Player.WillStatusEndGCD(3, 0, true, StatusID.Devilment) && StarfallDancePvE.CanUse(out act, skipAoeCheck: true))
+        if (StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.Devilment) && StarfallDancePvE.CanUse(out act, skipAoeCheck: true))
         {
             return true;
         }
@@ -403,7 +403,7 @@ public sealed class DNC_Reborn : DancerRotation
             return false;
         }
 
-        if (Player.WillStatusEnd(5f, true, StatusID.StandardFinish))
+        if (StatusHelper.PlayerWillStatusEnd(5f, true, StatusID.StandardFinish))
         {
             return true;
         }
@@ -414,7 +414,7 @@ public sealed class DNC_Reborn : DancerRotation
             return false;
         }
 
-        if (HasTechnicalFinish && Player.WillStatusEndGCD(2, 0, true, StatusID.TechnicalFinish) || (TechnicalStepPvE.Cooldown.IsCoolingDown && TechnicalStepPvE.Cooldown.WillHaveOneCharge(5)))
+        if (HasTechnicalFinish && StatusHelper.PlayerWillStatusEndGCD(2, 0, true, StatusID.TechnicalFinish) || (TechnicalStepPvE.Cooldown.IsCoolingDown && TechnicalStepPvE.Cooldown.WillHaveOneCharge(5)))
         {
             return false;
         }
@@ -473,7 +473,7 @@ public sealed class DNC_Reborn : DancerRotation
 
         // Check for Standard Step if targets are in range or status is about to end.
         if (HasStandardStep && CompletedSteps == 2 &&
-            (areDanceTargetsInRange || Player.WillStatusEnd(1f, true, StatusID.StandardStep)) &&
+            (areDanceTargetsInRange || StatusHelper.PlayerWillStatusEnd(1f, true, StatusID.StandardStep)) &&
             DoubleStandardFinishPvE.CanUse(out act, skipAoeCheck: true))
         {
             return true;
@@ -481,7 +481,7 @@ public sealed class DNC_Reborn : DancerRotation
 
         // Check for Technical Step if targets are in range or status is about to end.
         if (HasTechnicalStep && CompletedSteps == 4 &&
-            (areDanceTargetsInRange || Player.WillStatusEnd(1f, true, StatusID.TechnicalStep)) &&
+            (areDanceTargetsInRange || StatusHelper.PlayerWillStatusEnd(1f, true, StatusID.TechnicalStep)) &&
             QuadrupleTechnicalFinishPvE.CanUse(out act, skipAoeCheck: true))
         {
             return true;

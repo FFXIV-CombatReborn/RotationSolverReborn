@@ -38,87 +38,87 @@ public partial class ReaperRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasEnshrouded => Player.HasStatus(true, StatusID.Enshrouded);
+    public static bool HasEnshrouded => StatusHelper.PlayerHasStatus(true, StatusID.Enshrouded);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasEnshroudedPvP => Player.HasStatus(true, StatusID.Enshrouded_2863);
+    public static bool HasEnshroudedPvP => StatusHelper.PlayerHasStatus(true, StatusID.Enshrouded_2863);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasSoulReaver => Player.HasStatus(true, StatusID.SoulReaver);
+    public static bool HasSoulReaver => StatusHelper.PlayerHasStatus(true, StatusID.SoulReaver);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasSoulsow => Player.HasStatus(true, StatusID.Soulsow);
+    public static bool HasSoulsow => StatusHelper.PlayerHasStatus(true, StatusID.Soulsow);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasEnhancedGallows => Player.HasStatus(true, StatusID.EnhancedGallows);
+    public static bool HasEnhancedGallows => StatusHelper.PlayerHasStatus(true, StatusID.EnhancedGallows);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasEnhancedGibbet => Player.HasStatus(true, StatusID.EnhancedGibbet);
+    public static bool HasEnhancedGibbet => StatusHelper.PlayerHasStatus(true, StatusID.EnhancedGibbet);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasEnhancedVoidReaping => Player.HasStatus(true, StatusID.EnhancedVoidReaping);
+    public static bool HasEnhancedVoidReaping => StatusHelper.PlayerHasStatus(true, StatusID.EnhancedVoidReaping);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasEnhancedCrossReaping => Player.HasStatus(true, StatusID.EnhancedCrossReaping);
+    public static bool HasEnhancedCrossReaping => StatusHelper.PlayerHasStatus(true, StatusID.EnhancedCrossReaping);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasExecutioner => Player.HasStatus(true, StatusID.Executioner);
+    public static bool HasExecutioner => StatusHelper.PlayerHasStatus(true, StatusID.Executioner);
 
     /// <summary>
     /// Able to execute Enshroud
     /// </summary>
-    public static bool HasIdealHost => Player.HasStatus(true, StatusID.IdealHost);
+    public static bool HasIdealHost => StatusHelper.PlayerHasStatus(true, StatusID.IdealHost);
 
     /// <summary>
     /// Able to execute Plentiful Harvest
     /// </summary>
-    public static bool HasImmortalSacrifice => Player.HasStatus(true, StatusID.ImmortalSacrifice);
+    public static bool HasImmortalSacrifice => StatusHelper.PlayerHasStatus(true, StatusID.ImmortalSacrifice);
 
     /// <summary>
     /// PvP version of Immortal Sacrifice
     /// </summary>
-    public static bool HasImmortalSacrificePvP => Player.HasStatus(true, StatusID.ImmortalSacrifice_3204);
+    public static bool HasImmortalSacrificePvP => StatusHelper.PlayerHasStatus(true, StatusID.ImmortalSacrifice_3204);
 
     /// <summary>
     /// Grants Immortal Sacrifice to the reaper who applied this effect when duration expires
     /// </summary>
-    public static bool HasBloodsownCircleOther => Player.HasStatus(true, StatusID.BloodsownCircle);
+    public static bool HasBloodsownCircleOther => StatusHelper.PlayerHasStatus(true, StatusID.BloodsownCircle);
 
     /// <summary>
     /// Able to gain stacks of Immortal Sacrifice from party members under the effect of your Circle of Sacrifice
     /// </summary>
-    public static bool HasBloodsownCircleSelf => Player.HasStatus(true, StatusID.BloodsownCircle_2972);
+    public static bool HasBloodsownCircleSelf => StatusHelper.PlayerHasStatus(true, StatusID.BloodsownCircle_2972);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasArcaneCircle => Player.HasStatus(true, StatusID.ArcaneCircle);
+    public static bool HasArcaneCircle => StatusHelper.PlayerHasStatus(true, StatusID.ArcaneCircle);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasOblatio => Player.HasStatus(true, StatusID.Oblatio);
+    public static bool HasOblatio => StatusHelper.PlayerHasStatus(true, StatusID.Oblatio);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasPerfectioParata => Player.HasStatus(true, StatusID.PerfectioParata);
+    public static bool HasPerfectioParata => StatusHelper.PlayerHasStatus(true, StatusID.PerfectioParata);
     #endregion
 
     #region Actions Unassignable

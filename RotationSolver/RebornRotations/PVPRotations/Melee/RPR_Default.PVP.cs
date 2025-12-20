@@ -22,7 +22,7 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -34,7 +34,7 @@ public sealed class RPR_DefaultPvP : ReaperRotation
 
         if (BloodbathPvP.CanUse(out action))
         {
-            if (Player.GetHealthRatio() < BloodBathPvPPercent)
+            if (Player?.GetHealthRatio() < BloodBathPvPPercent)
             {
                 return true;
             }
@@ -55,7 +55,7 @@ public sealed class RPR_DefaultPvP : ReaperRotation
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleAbility(nextGCD, out action);
         }
@@ -70,7 +70,7 @@ public sealed class RPR_DefaultPvP : ReaperRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -103,7 +103,7 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }
@@ -112,7 +112,7 @@ public sealed class RPR_DefaultPvP : ReaperRotation
         {
             if (CommunioPvP.CanUse(out action))
             {
-                if (Player.StatusStack(true, StatusID.Enshrouded_2863) == 1 || Player.WillStatusEndGCD(1, 0, true, StatusID.Enshrouded_2863))
+                if (StatusHelper.PlayerStatusStack(true, StatusID.Enshrouded_2863) == 1 || StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.Enshrouded_2863))
                 {
                     return true;
                 }
@@ -138,7 +138,7 @@ public sealed class RPR_DefaultPvP : ReaperRotation
         {
             if (PlentifulHarvestPvP.CanUse(out action))
             {
-                if (Player.StatusStack(true, StatusID.ImmortalSacrifice_3204) > 3)
+                if (StatusHelper.PlayerStatusStack(true, StatusID.ImmortalSacrifice_3204) > 3)
                 {
                     return true;
                 }

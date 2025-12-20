@@ -69,49 +69,49 @@ public partial class SamuraiRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasMoon => Player.HasStatus(true, StatusID.Fugetsu);
+    public static bool HasMoon => StatusHelper.PlayerHasStatus(true, StatusID.Fugetsu);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasFlower => Player.HasStatus(true, StatusID.Fuka);
+    public static bool HasFlower => StatusHelper.PlayerHasStatus(true, StatusID.Fuka);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool IsMoonTimeLessThanFlower => Player.StatusTime(true, StatusID.Fugetsu) < Player.StatusTime(true, StatusID.Fuka);
+    public static bool IsMoonTimeLessThanFlower => StatusHelper.PlayerStatusTime(true, StatusID.Fugetsu) < StatusHelper.PlayerStatusTime(true, StatusID.Fuka);
     #endregion
 
     #region Status Tracking
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasMeikyoShisui => Player.HasStatus(true, StatusID.MeikyoShisui);
+    public static bool HasMeikyoShisui => StatusHelper.PlayerHasStatus(true, StatusID.MeikyoShisui);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasTendo => Player.HasStatus(true, StatusID.Tendo);
+    public static bool HasTendo => StatusHelper.PlayerHasStatus(true, StatusID.Tendo);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasTsubamegaeshiReady => Player.HasStatus(true, StatusID.Tsubamegaeshi);
+    public static bool HasTsubamegaeshiReady => StatusHelper.PlayerHasStatus(true, StatusID.Tsubamegaeshi);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasOgiNamikiri => Player.HasStatus(true, StatusID.OgiNamikiri);
+    public static bool HasOgiNamikiri => StatusHelper.PlayerHasStatus(true, StatusID.OgiNamikiri);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasZanshinReady1318 => Player.HasStatus(true, StatusID.ZanshinReady);
+    public static bool HasZanshinReady1318 => StatusHelper.PlayerHasStatus(true, StatusID.ZanshinReady);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasZanshinReady => Player.HasStatus(true, StatusID.ZanshinReady_3855);
+    public static bool HasZanshinReady => StatusHelper.PlayerHasStatus(true, StatusID.ZanshinReady_3855);
 
     /// <summary>
     /// 
@@ -121,32 +121,32 @@ public partial class SamuraiRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool WillFugetsuEnd => Player.WillStatusEnd(5, true, StatusID.Fugetsu);
+    public static bool WillFugetsuEnd => StatusHelper.PlayerWillStatusEnd(5, true, StatusID.Fugetsu);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool WillFukaEnd => Player.WillStatusEnd(5, true, StatusID.Fuka);
+    public static bool WillFukaEnd => StatusHelper.PlayerWillStatusEnd(5, true, StatusID.Fuka);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasFugetsu => Player.HasStatus(true, StatusID.Fugetsu);
+    public static bool HasFugetsu => StatusHelper.PlayerHasStatus(true, StatusID.Fugetsu);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasFuka => Player.HasStatus(true, StatusID.Fuka);
+    public static bool HasFuka => StatusHelper.PlayerHasStatus(true, StatusID.Fuka);
 
     /// <summary>
     /// 
     /// </summary>
-    public static float? FugetsuTime => Player.StatusTime(true, StatusID.Fugetsu);
+    public static float? FugetsuTime => StatusHelper.PlayerStatusTime(true, StatusID.Fugetsu);
 
     /// <summary>
     /// 
     /// </summary>
-    public static float? FukaTime => Player.StatusTime(true, StatusID.Fuka);
+    public static float? FukaTime => StatusHelper.PlayerStatusTime(true, StatusID.Fuka);
 
     /// <summary>
     /// 
@@ -652,6 +652,6 @@ static partial void ModifyIkishotenPvE(ref ActionSetting setting)
     /// <inheritdoc/>
     public override bool IsBursting()
     {
-        return Player.HasStatus(true, StatusID.Fugetsu) && Player.HasStatus(true, StatusID.Fuka);
+        return StatusHelper.PlayerHasStatus(true, StatusID.Fugetsu) && StatusHelper.PlayerHasStatus(true, StatusID.Fuka);
     }
 }

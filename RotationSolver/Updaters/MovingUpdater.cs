@@ -56,9 +56,9 @@ internal static class MovingUpdater
                               || (cfgImpro && Service.GetAdjustedActionId(ActionID.ImprovisationPvE) == action);
 
         // Special statuses
-        bool specialStatus = (cfgFlame && Player.Object.HasStatus(true, StatusID.Flamethrower))
-                             || (cfgPassage && Player.Object.HasStatus(true, StatusID.PassageOfArms))
-                             || (cfgImpro && Player.Object.HasStatus(true, StatusID.Improvisation));
+        bool specialStatus = (cfgFlame && StatusHelper.PlayerHasStatus(true, StatusID.Flamethrower))
+                             || (cfgPassage && StatusHelper.PlayerHasStatus(true, StatusID.PassageOfArms))
+                             || (cfgImpro && StatusHelper.PlayerHasStatus(true, StatusID.Improvisation));
 
         Service.CanMove = !specialStatus && !specialActions;
     }

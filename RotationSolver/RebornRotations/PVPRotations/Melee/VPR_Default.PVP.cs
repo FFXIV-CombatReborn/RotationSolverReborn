@@ -22,7 +22,7 @@ public sealed class VPR_DefaultPvP : ViperRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if ((RespectGuard && Player.HasStatus(true, StatusID.Guard)) || Player.HasStatus(true, StatusID.HardenedScales))
+        if ((RespectGuard && HasPVPGuard) || StatusHelper.PlayerHasStatus(true, StatusID.HardenedScales))
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -53,7 +53,7 @@ public sealed class VPR_DefaultPvP : ViperRotation
 
         if (BloodbathPvP.CanUse(out action))
         {
-            if (Player.GetHealthRatio() < BloodBathPvPPercent)
+            if (Player?.GetHealthRatio() < BloodBathPvPPercent)
             {
                 return true;
             }
@@ -74,7 +74,7 @@ public sealed class VPR_DefaultPvP : ViperRotation
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if ((RespectGuard && Player.HasStatus(true, StatusID.Guard)) || Player.HasStatus(true, StatusID.HardenedScales))
+        if ((RespectGuard && HasPVPGuard) || StatusHelper.PlayerHasStatus(true, StatusID.HardenedScales))
         {
             return base.DefenseSingleAbility(nextGCD, out action);
         }
@@ -84,7 +84,7 @@ public sealed class VPR_DefaultPvP : ViperRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if ((RespectGuard && Player.HasStatus(true, StatusID.Guard)) || Player.HasStatus(true, StatusID.HardenedScales))
+        if ((RespectGuard && HasPVPGuard) || StatusHelper.PlayerHasStatus(true, StatusID.HardenedScales))
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -130,7 +130,7 @@ public sealed class VPR_DefaultPvP : ViperRotation
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if ((RespectGuard && Player.HasStatus(true, StatusID.Guard)) || Player.HasStatus(true, StatusID.HardenedScales))
+        if ((RespectGuard && HasPVPGuard) || StatusHelper.PlayerHasStatus(true, StatusID.HardenedScales))
         {
             return base.MoveForwardAbility(nextGCD, out action);
         }
@@ -142,7 +142,7 @@ public sealed class VPR_DefaultPvP : ViperRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if ((RespectGuard && Player.HasStatus(true, StatusID.Guard)) || Player.HasStatus(true, StatusID.HardenedScales))
+        if ((RespectGuard && HasPVPGuard) || StatusHelper.PlayerHasStatus(true, StatusID.HardenedScales))
         {
             return base.GeneralGCD(out action);
         }

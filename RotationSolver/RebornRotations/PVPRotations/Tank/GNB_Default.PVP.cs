@@ -16,7 +16,7 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
     [RotationDesc(ActionID.HeartOfCorundumPvP)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleAbility(nextGCD, out action);
         }
@@ -82,7 +82,7 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player != null && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && Player != null && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -93,7 +93,7 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
         }
 
         //You WILL try to save yourself. Configs be damned!
-        if (HeartOfCorundumPvP.CanUse(out action) && Player != null && Player.GetHealthRatio() * 100 <= 30)
+        if (HeartOfCorundumPvP.CanUse(out action) && Player != null && Player?.GetHealthRatio() * 100 <= 30)
         {
             return true;
         }
@@ -102,12 +102,12 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player != null && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && Player != null && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
 
-        if (Player != null && !Player.HasStatus(true, StatusID.NoMercy_3042) && RoughDividePvP.CanUse(out action, usedUp: true))
+        if (Player != null && !StatusHelper.PlayerHasStatus(true, StatusID.NoMercy_3042) && RoughDividePvP.CanUse(out action, usedUp: true))
         {
             return true;
         }
@@ -160,7 +160,7 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player != null && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && Player != null && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }

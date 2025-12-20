@@ -14,7 +14,7 @@ public sealed class MCH_DefaultPvP : MachinistRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -39,7 +39,7 @@ public sealed class MCH_DefaultPvP : MachinistRotation
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleAbility(nextGCD, out action);
         }
@@ -49,7 +49,7 @@ public sealed class MCH_DefaultPvP : MachinistRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -64,7 +64,7 @@ public sealed class MCH_DefaultPvP : MachinistRotation
 
         if (WildfirePvP.CanUse(out action))
         {
-            if (Player.HasStatus(true, StatusID.Overheated_3149))
+            if (StatusHelper.PlayerHasStatus(true, StatusID.Overheated_3149))
             {
                 return true;
             }
@@ -88,7 +88,7 @@ public sealed class MCH_DefaultPvP : MachinistRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }
@@ -100,7 +100,7 @@ public sealed class MCH_DefaultPvP : MachinistRotation
 
         if (BlazingShotPvP.CanUse(out action))
         {
-            if (Player.HasStatus(true, StatusID.Overheated_3149) && !Player.HasStatus(true, StatusID.Analysis))
+            if (StatusHelper.PlayerHasStatus(true, StatusID.Overheated_3149) && !StatusHelper.PlayerHasStatus(true, StatusID.Analysis))
             {
                 return true;
             }
@@ -128,7 +128,7 @@ public sealed class MCH_DefaultPvP : MachinistRotation
 
         if (ScattergunPvP.CanUse(out action))
         {
-            if (!Player.HasStatus(true, StatusID.Overheated_3149))
+            if (!StatusHelper.PlayerHasStatus(true, StatusID.Overheated_3149))
             {
                 return true;
             }

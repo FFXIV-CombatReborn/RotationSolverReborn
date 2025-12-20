@@ -34,7 +34,6 @@ internal static class HotbarHighlightManager
 
     public static void UpdateSettings()
     {
-        //UseTaskToAccelerate = Service.Config.UseTasksForOverlay;
         Enable = (Service.Config.TeachingMode || Service.Config.ReddenDisabledHotbarActions) && DataCenter.IsActivated() && MajorUpdater.IsValid;
         HighlightColor = Service.Config.TeachingModeColor;
     }

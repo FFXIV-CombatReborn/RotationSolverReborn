@@ -138,7 +138,7 @@ public partial class CustomRotation
 
     static partial void ModifyPurifyPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.HasStatus(false, StatusHelper.PurifyPvPStatuses);
+        setting.ActionCheck = () => StatusHelper.PlayerHasStatus(false, StatusHelper.PurifyPvPStatuses);
         setting.IsFriendly = true;
     }
 
@@ -238,7 +238,7 @@ public partial class CustomRotation
 
     static partial void ModifyBloodbathPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.TimeAlive() > 5;
+        setting.ActionCheck = () => ObjectHelper.PlayerTimeAlive() > 5;
         setting.StatusNeed = [StatusID.PvPRoleActionBloodbath];
     }
 

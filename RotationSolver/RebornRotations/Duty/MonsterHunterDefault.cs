@@ -29,7 +29,7 @@ internal class MonsterHunterDefault : MonsterHunterRotation
 
         if (RathalosMegaPotionBool)
         {
-            if (Player.GetHealthRatio() <= RathalosMegaPotion)
+            if (Player?.GetHealthRatio() <= RathalosMegaPotion)
             {
                 if (MegaPotionPvE.Cooldown.CurrentCharges > 0 && MegaPotionPvE.Info.IsOnSlot)
                 {
@@ -43,7 +43,7 @@ internal class MonsterHunterDefault : MonsterHunterRotation
 
         if (ArkveldMegaPotionBool)
         {
-            if (Player.GetHealthRatio() <= ArkveldMegaPotion)
+            if (Player?.GetHealthRatio() <= ArkveldMegaPotion)
             {
                 if (MegaPotionPvE_44247.Cooldown.CurrentCharges > 0 && MegaPotionPvE_44247.Info.IsOnSlot)
                 {

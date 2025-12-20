@@ -86,7 +86,7 @@ public sealed class SAM_Reborn : SamuraiRotation
     #region oGCD Logic
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        if (!HasZanshinReady && Player.GetHealthRatio() <= TengentsuHealth)
+        if (!HasZanshinReady && Player?.GetHealthRatio() <= TengentsuHealth)
         {
             if (FeintPvE.CanUse(out act))
             {

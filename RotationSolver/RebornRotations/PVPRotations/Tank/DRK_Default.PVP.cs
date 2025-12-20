@@ -18,7 +18,7 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.EmergencyAbility(nextGCD, out action);
         }
@@ -38,7 +38,7 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.DefenseSingleAbility(nextGCD, out act);
         }
@@ -58,7 +58,7 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.AttackAbility(nextGCD, out action);
         }
@@ -83,7 +83,7 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
             return true;
         }
 
-        if (!Player.HasStatus(true, StatusID.Blackblood) && ((Player.GetHealthRatio() * 100) > ShadowbringerThreshold || Player.HasStatus(true, StatusID.DarkArts_3034)) && ShadowbringerPvP.CanUse(out action))
+        if (!StatusHelper.PlayerHasStatus(true, StatusID.Blackblood) && ((Player?.GetHealthRatio() * 100) > ShadowbringerThreshold || StatusHelper.PlayerHasStatus(true, StatusID.DarkArts_3034)) && ShadowbringerPvP.CanUse(out action))
         {
             return true;
         }
@@ -100,7 +100,7 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        if (RespectGuard && HasPVPGuard)
         {
             return base.GeneralGCD(out action);
         }
@@ -110,7 +110,7 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
             return true;
         }
 
-        if ((Player.GetHealthRatio() * 100) < 60 && ImpalementPvP.CanUse(out action))
+        if ((Player?.GetHealthRatio() * 100) < 60 && ImpalementPvP.CanUse(out action))
         {
             return true;
         }

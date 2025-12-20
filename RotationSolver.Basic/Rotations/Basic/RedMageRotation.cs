@@ -127,32 +127,32 @@ public partial class RedMageRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasEmbolden => Player.HasStatus(true, StatusID.Embolden);
+    public static bool HasEmbolden => StatusHelper.PlayerHasStatus(true, StatusID.Embolden);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasEmbolden2 => Player.HasStatus(true, StatusID.Embolden_1297);
+    public static bool HasEmbolden2 => StatusHelper.PlayerHasStatus(true, StatusID.Embolden_1297);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasDualcast => Player.HasStatus(true, StatusID.Dualcast);
+    public static bool HasDualcast => StatusHelper.PlayerHasStatus(true, StatusID.Dualcast);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasAccelerate => Player.HasStatus(true, StatusID.Acceleration);
+    public static bool HasAccelerate => StatusHelper.PlayerHasStatus(true, StatusID.Acceleration);
 
     /// <summary>
     /// Time left on VerFire.
     /// </summary>
-    public static float? VerFireTime => Player.StatusTime(true, StatusID.VerfireReady);
+    public static float? VerFireTime => StatusHelper.PlayerStatusTime(true, StatusID.VerfireReady);
 
     /// <summary>
     /// Time left on VerStone.
     /// </summary>
-    public static float? VerStoneTime => Player.StatusTime(true, StatusID.VerstoneReady);
+    public static float? VerStoneTime => StatusHelper.PlayerStatusTime(true, StatusID.VerstoneReady);
 
     /// <summary>
     /// 
@@ -167,37 +167,37 @@ public partial class RedMageRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool CanVerStone => Player.HasStatus(true, StatusID.VerstoneReady);
+    public static bool CanVerStone => StatusHelper.PlayerHasStatus(true, StatusID.VerstoneReady);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool CanVerFire => Player.HasStatus(true, StatusID.VerfireReady);
+    public static bool CanVerFire => StatusHelper.PlayerHasStatus(true, StatusID.VerfireReady);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool CanGrandImpact => Player.HasStatus(true, StatusID.GrandImpactReady);
+    public static bool CanGrandImpact => StatusHelper.PlayerHasStatus(true, StatusID.GrandImpactReady);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool CanMagickedSwordplay => Player.HasStatus(true, StatusID.MagickedSwordplay);
+    public static bool CanMagickedSwordplay => StatusHelper.PlayerHasStatus(true, StatusID.MagickedSwordplay);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasManafication => Player.HasStatus(true, StatusID.Manafication);
+    public static bool HasManafication => StatusHelper.PlayerHasStatus(true, StatusID.Manafication);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool CanPrefulgence => Player.HasStatus(true, StatusID.PrefulgenceReady);
+    public static bool CanPrefulgence => StatusHelper.PlayerHasStatus(true, StatusID.PrefulgenceReady);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasThornedFlourish => Player.HasStatus(true, StatusID.ThornedFlourish);
+    public static bool HasThornedFlourish => StatusHelper.PlayerHasStatus(true, StatusID.ThornedFlourish);
 
     /// <summary>
     /// 

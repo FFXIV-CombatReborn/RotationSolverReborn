@@ -54,22 +54,22 @@ public partial class DragoonRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasLanceCharge => Player.HasStatus(true, StatusID.LanceCharge);
+    public static bool HasLanceCharge => StatusHelper.PlayerHasStatus(true, StatusID.LanceCharge);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasBattleLitany => Player.HasStatus(true, StatusID.BattleLitany);
+    public static bool HasBattleLitany => StatusHelper.PlayerHasStatus(true, StatusID.BattleLitany);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasPowerSurge => Player.HasStatus(true, StatusID.PowerSurge_2720);
+    public static bool HasPowerSurge => StatusHelper.PlayerHasStatus(true, StatusID.PowerSurge_2720);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasDraconianFire => Player.HasStatus(true, StatusID.DraconianFire);
+    public static bool HasDraconianFire => StatusHelper.PlayerHasStatus(true, StatusID.DraconianFire);
 
     #endregion
 

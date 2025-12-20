@@ -93,7 +93,7 @@ public partial class DarkKnightRotation
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.BloodWeapon);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.BloodWeapon);
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
     }
@@ -105,7 +105,7 @@ public partial class DarkKnightRotation
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.Delirium_3836);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.Delirium_3836);
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
     }
@@ -117,7 +117,7 @@ public partial class DarkKnightRotation
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.Delirium_1972);
+            byte stacks = StatusHelper.PlayerStatusStack(true, StatusID.Delirium_1972);
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
 	}
@@ -125,7 +125,7 @@ public partial class DarkKnightRotation
     /// <summary>
     /// 
     /// </summary>
-    protected static bool HasDarkArtsPvP => Player != null && Player.HasStatus(true, StatusID.DarkArts_3034);
+    protected static bool HasDarkArtsPvP => Player != null && StatusHelper.PlayerHasStatus(true, StatusID.DarkArts_3034);
     #endregion
 
     #region PvE Actions Unassignable
@@ -236,7 +236,7 @@ public partial class DarkKnightRotation
     static partial void ModifyShadowWallPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = StatusHelper.RampartStatus;
-        setting.ActionCheck = Player.IsTargetOnSelf;
+        setting.ActionCheck = () => ObjectHelper.PlayerIsTargetOnSelf();
         setting.IsFriendly = true;
     }
 
@@ -350,8 +350,8 @@ public partial class DarkKnightRotation
     static partial void ModifyDarkMissionaryPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.DarkMissionary];
-        setting.ActionCheck = Player.IsTargetOnSelf;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.ActionCheck = () => ObjectHelper.PlayerIsTargetOnSelf();
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -366,8 +366,8 @@ public partial class DarkKnightRotation
     static partial void ModifyOblationPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Oblation];
-        setting.ActionCheck = Player.IsTargetOnSelf;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.ActionCheck = () => ObjectHelper.PlayerIsTargetOnSelf();
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -443,7 +443,7 @@ public partial class DarkKnightRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         return (LivingDeadPvE.CanUse(out act)
-            && Player != null && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) || base.EmergencyAbility(nextGCD, out act);
+            && Player != null && Player?.GetHealthRatio() <= Service.Config.HealthForDyingTanks) || base.EmergencyAbility(nextGCD, out act);
     }
 
     #region PvP Actions Unassignable
@@ -474,7 +474,7 @@ public partial class DarkKnightRotation
     /// </summary>
     static partial void ModifyShadowbringerPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player?.CurrentHp > 12000 || Player.HasStatus(true, StatusID.DarkArts_3034);
+        setting.ActionCheck = () => Player?.CurrentHp > 12000 || StatusHelper.PlayerHasStatus(true, StatusID.DarkArts_3034);
         setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {

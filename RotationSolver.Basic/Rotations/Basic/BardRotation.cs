@@ -65,27 +65,27 @@ public partial class BardRotation
     /// <summary>
     /// Able to execute Raging Strikes.
     /// </summary>
-    public static bool HasRagingStrikes => Player.HasStatus(true, StatusID.RagingStrikes);
+    public static bool HasRagingStrikes => StatusHelper.PlayerHasStatus(true, StatusID.RagingStrikes);
 
     /// <summary>
     /// Able to execute Barrage.
     /// </summary>
-    public static bool HasBarrage => Player.HasStatus(true, StatusID.Barrage);
+    public static bool HasBarrage => StatusHelper.PlayerHasStatus(true, StatusID.Barrage);
 
     /// <summary>
     /// Able to execute Hawks Eye.
     /// </summary>
-    public static bool HasHawksEye => Player.HasStatus(true, StatusID.HawksEye_3861);
+    public static bool HasHawksEye => StatusHelper.PlayerHasStatus(true, StatusID.HawksEye_3861);
 
     /// <summary>
     /// Able to execute Battle Voice.
     /// </summary>
-    public static bool HasBattleVoice => Player.HasStatus(true, StatusID.BattleVoice);
+    public static bool HasBattleVoice => StatusHelper.PlayerHasStatus(true, StatusID.BattleVoice);
 
     /// <summary>
     /// Able to execute Radiant Finale.
     /// </summary>
-    public static bool HasRadiantFinale => Player.HasStatus(true, StatusID.RadiantFinale);
+    public static bool HasRadiantFinale => StatusHelper.PlayerHasStatus(true, StatusID.RadiantFinale);
     #endregion
 
     #region PvE Actions Unassignable

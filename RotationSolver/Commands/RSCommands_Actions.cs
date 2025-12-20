@@ -96,7 +96,7 @@ namespace RotationSolver.Commands
                 }
             }
 
-            if (Player.Object.HasStatus(false, StatusID.Transcendent))
+            if (StatusHelper.PlayerHasStatus(false, StatusID.Transcendent))
             {
                 return;
             }

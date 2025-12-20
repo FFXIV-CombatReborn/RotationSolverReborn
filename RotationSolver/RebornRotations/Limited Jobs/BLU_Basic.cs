@@ -94,7 +94,7 @@ public sealed class Blue_Basic : BlueMageRotation
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        if (Player.CurrentMp < 6000 && InCombat && LucidDreamingPvE.CanUse(out act))
+        if (Player?.CurrentMp < 6000 && InCombat && LucidDreamingPvE.CanUse(out act))
         {
             return true;
         }
