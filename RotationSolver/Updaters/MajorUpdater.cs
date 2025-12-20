@@ -215,15 +215,14 @@ internal static class MajorUpdater
         }
 
         // Apply reddening of disabled actions on hotbars alongside highlight
-        // TODO : Re-enable when stable
-        //try
-        //{
-        //    HotbarDisabledColor.ApplyFrame();
-        //}
-        //catch (Exception ex)
-        //{
-        //    LogOnce("Hotbar Disabled Redden Exception", ex);
-        //}
+        try
+        {
+            HotbarDisabledColor.ApplyFrame();
+        }
+        catch (Exception ex)
+        {
+            LogOnce("Hotbar Disabled Redden Exception", ex);
+        }
 
     }
 
