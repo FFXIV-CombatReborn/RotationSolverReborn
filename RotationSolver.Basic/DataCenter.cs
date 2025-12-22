@@ -71,7 +71,23 @@ internal static class DataCenter
         return Player.Available && Player.Object != null;
     }
 
-    public static bool AutoFaceTargetOnActionSetting()
+	public static bool DalamudStagingEnabled = false;
+	public static bool IsOnStaging()
+	{
+		var v = Svc.PluginInterface.GetDalamudVersion();
+		if (v.BetaTrack != null && v.BetaTrack.Equals("release", StringComparison.CurrentCultureIgnoreCase))
+		{
+			DalamudStagingEnabled = false;
+			return false;
+		}
+		else
+		{
+			DalamudStagingEnabled = true;
+			return true;
+		}
+	}
+
+	public static bool AutoFaceTargetOnActionSetting()
     {
         return Svc.GameConfig.UiControl.GetBool(UiControlOption.AutoFaceTargetOnAction.ToString());
     }

@@ -139,13 +139,18 @@ public sealed class GNB_Reborn : GunbreakerRotation
             return true;
         }
         //15
-        if (HeartOfStonePvE.CanUse(out act))
+        if (HeartOfCorundumPvE.CanUse(out act))
         {
             return true;
         }
 
-        //30
-        if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && NebulaPvE.CanUse(out act))
+		if (!HeartOfCorundumPvE.EnoughLevel && HeartOfStonePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		//30
+		if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && NebulaPvE.CanUse(out act))
         {
             return true;
         }
