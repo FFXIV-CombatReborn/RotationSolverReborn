@@ -364,11 +364,11 @@ public partial class RotationConfigWindow : Window
         }
         else
         {
-            _ = diagInfo.AppendLine($"Rotation Solver Reborn v{_cachedDiagInfo.RSRVersion}");
-            _ = diagInfo.AppendLine($"FFXIV Version: {_cachedDiagInfo.GameVersion}");
-			//_ = diagInfo.AppendLine($"Dalamud Version: {Svc.PluginInterface.GetDalamudVersion().ToString()}");
 			_ = diagInfo.AppendLine($"OS Type: {_cachedDiagInfo.Platform}");
-            _ = diagInfo.AppendLine($"Dalamud Branch: {_cachedDiagInfo.DalamudBranch}");
+            _ = diagInfo.AppendLine($"FFXIV Version: {_cachedDiagInfo.GameVersion}");
+			_ = diagInfo.AppendLine($"Dalamud Version: {Svc.PluginInterface.GetDalamudVersion().Version.ToString()}");
+			_ = diagInfo.AppendLine($"Rotation Solver Reborn v{_cachedDiagInfo.RSRVersion}");
+            _ = diagInfo.AppendLine($"Dalamud Staging: {DataCenter.DalamudStagingEnabled}");
             _ = diagInfo.AppendLine($"Game Language: {_cachedDiagInfo.Language}");
             _ = diagInfo.AppendLine($"Update Frequency: {Service.Config.MinUpdatingTime}");
             _ = diagInfo.AppendLine($"Intercept: {Service.Config.InterceptAction2}");

@@ -342,7 +342,8 @@ public partial class GunbreakerRotation
     static partial void ModifyHeartOfStonePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.HeartOfStone];
-        setting.IsFriendly = true;
+		setting.ActionCheck = () => ObjectHelper.IsPlayerInParty() || ObjectHelper.PlayerIsTargetOnSelf();
+		setting.IsFriendly = true;
     }
 
     static partial void ModifyContinuationPvE(ref ActionSetting setting)
