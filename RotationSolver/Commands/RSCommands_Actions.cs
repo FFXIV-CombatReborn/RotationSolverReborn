@@ -128,12 +128,13 @@ namespace RotationSolver.Commands
 
 			if (nextAction is BaseAction baseAct)
 			{
-				if (baseAct.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
+				if (baseAct.Target.Target != null && baseAct.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
 				{
 					DataCenter.HostileTarget = target;
 					if (!DataCenter.IsManual &&
-						(Service.Config.SwitchTargetFriendly || ((Svc.Targets.Target?.IsEnemy() ?? true)
-						|| Svc.Targets.Target.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
+						(Service.Config.SwitchTargetFriendly
+						|| (Svc.Targets.Target?.IsEnemy() ?? true)
+						|| (Svc.Targets.Target?.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
 					{
 						Svc.Targets.Target = target;
 					}
@@ -245,34 +246,57 @@ namespace RotationSolver.Commands
 				return;
 			}
 
-			// Capture the current target so we don't override user/rotation changes made during the delay
-			IGameObject? initialTarget = Svc.Targets.Target;
+			ulong initialTargetId = Svc.Targets.Target?.GameObjectId ?? 0;
+			ulong candidateId = candidate.GameObjectId;
+
 			_ = Svc.Framework.RunOnTick(() =>
 			{
 				try
 				{
 					var current = Svc.Targets.Target;
-					// Only set if target state hasn’t changed and the candidate is still valid
-					if (current == initialTarget && candidate.IsTargetable)
+					ulong currentId = current?.GameObjectId ?? 0;
+
+					if (currentId == initialTargetId)
 					{
-						Svc.Targets.Target = candidate;
+						IGameObject? cand = null;
+						foreach (var obj in Svc.Objects)
+						{
+							if (obj != null && obj.GameObjectId == candidateId)
+							{
+								cand = obj;
+								break;
+							}
+						}
+
+						if (cand != null && cand.IsTargetable)
+						{
+							Svc.Targets.Target = cand;
+						}
 					}
 				}
-				catch { /* swallow */ }
+				catch
+				{
+					// Intentionally swallow; candidate may have despawned
+				}
 			}, TimeSpan.FromSeconds(delay));
 		}
 
 		public static void UpdateTargetFromNextAction()
 		{
+			if (Player.Object == null)
+			{
+				return;
+			}
+
 			IAction? nextAction = ActionUpdater.NextAction;
 			if (nextAction is BaseAction baseAct)
 			{
-				if (baseAct.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
+				if (baseAct.Target.Target != null && baseAct.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
 				{
 					DataCenter.HostileTarget = target;
 					if (!DataCenter.IsManual &&
 						(Service.Config.SwitchTargetFriendly || ((Svc.Targets.Target?.IsEnemy() ?? true)
-						|| Svc.Targets.Target.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
+						|| Svc.Targets.Target?.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
 					{
 						Svc.Targets.Target = target;
 					}
@@ -284,6 +308,11 @@ namespace RotationSolver.Commands
 		{
 			try
 			{
+				if (Player.Object == null)
+				{
+					return;
+				}
+
 				// Avoid redundant checks for AutoCancelTime
 				if (ActionUpdater.AutoCancelTime != DateTime.MinValue &&
 					(!DataCenter.State || DataCenter.InCombat))
@@ -295,7 +324,7 @@ namespace RotationSolver.Commands
 				var hostileTargetObjectIds = new HashSet<ulong>();
 				foreach (var ht in DataCenter.AllHostileTargets)
 				{
-					if (ht != null) hostileTargetObjectIds.Add(ht.TargetObjectId);
+					if (ht != null && ht.TargetObjectId != 0) hostileTargetObjectIds.Add(ht.TargetObjectId);
 				}
 
 				// Combine conditions to reduce redundant checks
@@ -307,8 +336,7 @@ namespace RotationSolver.Commands
 					(Service.Config.AutoOffSwitchClass && Player.Job != _previousJob) ||
 					(Service.Config.AutoOffBetweenArea && !DataCenter.IsAutoDuty && (Svc.Condition[ConditionFlag.BetweenAreas] || Svc.Condition[ConditionFlag.BetweenAreas51])) ||
 					(Service.Config.CancelStateOnCombatBeforeCountdown && Service.CountDownTime > 0.2f && DataCenter.InCombat) ||
-					(ActionUpdater.AutoCancelTime != DateTime.MinValue && DateTime.Now > ActionUpdater.AutoCancelTime) ||
-false)
+					(ActionUpdater.AutoCancelTime != DateTime.MinValue && DateTime.Now > ActionUpdater.AutoCancelTime) || false)
 				{
 					CancelState();
 					if (Player.Job != _previousJob)
