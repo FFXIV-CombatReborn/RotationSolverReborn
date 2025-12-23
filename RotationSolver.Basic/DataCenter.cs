@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Config;
+using ECommons;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
@@ -74,16 +75,25 @@ internal static class DataCenter
 	public static bool DalamudStagingEnabled = false;
 	public static bool IsOnStaging()
 	{
-		var v = Svc.PluginInterface.GetDalamudVersion();
-		if (v.BetaTrack != null && v.BetaTrack.Equals("release", StringComparison.CurrentCultureIgnoreCase))
+		try
 		{
+			var v = Svc.PluginInterface.GetDalamudVersion();
+			if (v.BetaTrack != null && v.BetaTrack.Equals("release", StringComparison.CurrentCultureIgnoreCase))
+			{
+				DalamudStagingEnabled = false;
+				return false;
+			}
+			else
+			{
+				DalamudStagingEnabled = true;
+				return true;
+			}
+		}
+		catch (Exception ex)
+		{
+			ex.Log("Probably CN or something");
 			DalamudStagingEnabled = false;
 			return false;
-		}
-		else
-		{
-			DalamudStagingEnabled = true;
-			return true;
 		}
 	}
 

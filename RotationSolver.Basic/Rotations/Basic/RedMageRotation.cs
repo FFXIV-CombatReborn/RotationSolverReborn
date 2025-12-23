@@ -187,21 +187,6 @@ public partial class RedMageRotation
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool CanEnchantedRiposteRanged => StatusHelper.PlayerStatusStack(true, StatusID.MagickedSwordplay) == 3;
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool CanEnchantedZwerchhauRanged => StatusHelper.PlayerStatusStack(true, StatusID.MagickedSwordplay) == 2;
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool CanEnchantedRedoublementRanged => StatusHelper.PlayerStatusStack(true, StatusID.MagickedSwordplay) == 1;
-
-	/// <summary>
-	/// 
-	/// </summary>
 	public static bool HasManafication => StatusHelper.PlayerHasStatus(true, StatusID.Manafication);
 
     /// <summary>
@@ -470,32 +455,32 @@ public partial class RedMageRotation
     #region Enchanted Actions
     static partial void ModifyEnchantedRipostePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasEnoughManaFor1Combo && !CanMagickedSwordplay;
+        setting.ActionCheck = () => HasEnoughManaFor1Combo || CanMagickedSwordplay;
     }
 
 	static partial void ModifyEnchantedRipostePvE_45960(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => CanEnchantedRiposteRanged;
+		setting.ActionCheck = () => HasManafication && (HasEnoughManaFor1Combo || CanMagickedSwordplay);
 	}
 
 	static partial void ModifyEnchantedZwerchhauPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasEnoughManaFor23Combo && !CanMagickedSwordplay;
+        setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
     }
 
 	static partial void ModifyEnchantedZwerchhauPvE_45961(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => CanEnchantedZwerchhauRanged;
+		setting.ActionCheck = () => HasManafication && (HasEnoughManaFor23Combo || CanMagickedSwordplay);
 	}
 
 	static partial void ModifyEnchantedRedoublementPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasEnoughManaFor23Combo && !CanMagickedSwordplay;
+        setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
     }
 
 	static partial void ModifyEnchantedRedoublementPvE_45962(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => CanEnchantedRedoublementRanged;
+		setting.ActionCheck = () => HasManafication && (HasEnoughManaFor23Combo || CanMagickedSwordplay);
 	}
 
 	static partial void ModifyEnchantedMoulinetPvE(ref ActionSetting setting)
