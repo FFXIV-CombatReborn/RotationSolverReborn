@@ -623,7 +623,8 @@ public partial class NinjaRotation
     static partial void ModifyZeshoMeppoPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SpinningEdgePvP) == ActionID.ZeshoMeppoPvP;
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyAssassinatePvP(ref ActionSetting setting)
     {
@@ -634,24 +635,28 @@ public partial class NinjaRotation
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SpinningEdgePvP) == ActionID.ForkedRaijuPvP &&
                                     !StatusHelper.PlayerHasStatus(true, StatusID.SealedForkedRaiju);
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyFleetingRaijuPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SpinningEdgePvP) == ActionID.FleetingRaijuPvP;
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyHyoshoRanryuPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.FumaShurikenPvP) == ActionID.HyoshoRanryuPvP &&
                                     !StatusHelper.PlayerHasStatus(true, StatusID.SealedHyoshoRanryu);
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyGokaMekkyakuPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DokumoriPvP) == ActionID.GokaMekkyakuPvP &&
                                     !StatusHelper.PlayerHasStatus(true, StatusID.SealedGokaMekkyaku);
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -661,13 +666,15 @@ public partial class NinjaRotation
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ThreeMudraPvP) == ActionID.MeisuiPvP &&
                                     !StatusHelper.PlayerHasStatus(true, StatusID.SealedMeisui);
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyHutonPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.BunshinPvP) == ActionID.HutonPvP &&
                                     !StatusHelper.PlayerHasStatus(true, StatusID.SealedHuton);
-        setting.IsFriendly = true;
+		setting.MPOverride = () => 0;
+		setting.IsFriendly = true;
     }
 
     static partial void ModifyHollowNozuchiPvP(ref ActionSetting setting)
@@ -678,7 +685,8 @@ public partial class NinjaRotation
     static partial void ModifyDotonPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ShukuchiPvP) == ActionID.DotonPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };

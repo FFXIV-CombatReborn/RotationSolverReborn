@@ -25,29 +25,29 @@ public partial class CustomRotation
 	/// Does player have swift cast, dual cast or triple cast.
 	/// </summary>
 	[Description("Has Swift")]
-    public static bool HasSwift => Player?.HasStatus(true, StatusHelper.SwiftcastStatus) ?? false;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [Description("Has tank stance")]
-    public static bool HasTankStance => Player?.HasStatus(true, StatusHelper.TankStanceStatus) ?? false;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    [Description("Has tank stance")]
-    public static bool HasTankInvuln => Player?.HasStatus(true, StatusHelper.NoNeedHealingStatus) ?? false;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasVariantCure => Player?.HasStatus(true, StatusID.VariantCureSet) ?? false;
+    public static bool HasSwift => StatusHelper.PlayerHasStatus(true, StatusHelper.SwiftcastStatus);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool HasPVPGuard => Player?.HasStatus(true, StatusID.Guard) ?? false;
+	[Description("Has tank stance")]
+    public static bool HasTankStance => StatusHelper.PlayerHasStatus(true, StatusHelper.TankStanceStatus);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Description("Has tank stance")]
+    public static bool HasTankInvuln => StatusHelper.PlayerHasStatus(true, StatusHelper.NoNeedHealingStatus);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasVariantCure => StatusHelper.PlayerHasStatus(true, StatusID.VariantCureSet);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool HasPVPGuard => StatusHelper.PlayerHasStatus(true, StatusID.Guard);
 
 	/// <summary>
 	/// Check the player is moving, such as running, walking or jumping.

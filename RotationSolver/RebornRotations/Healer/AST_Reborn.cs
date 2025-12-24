@@ -526,7 +526,7 @@ public sealed class AST_Reborn : AstrologianRotation
             return base.HealSingleGCD(out act);
         }
 
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
+        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
             return base.HealSingleGCD(out act);
         }
@@ -573,7 +573,7 @@ public sealed class AST_Reborn : AstrologianRotation
             return base.HealAreaGCD(out act);
         }
 
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
+        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
             return base.HealAreaGCD(out act);
         }
@@ -608,7 +608,7 @@ public sealed class AST_Reborn : AstrologianRotation
             return base.GeneralGCD(out act);
         }
 
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
+        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
             return base.GeneralGCD(out act);
         }

@@ -551,15 +551,19 @@ static partial void ModifyIkishotenPvE(ref ActionSetting setting)
 
     static partial void ModifyYukikazePvP(ref ActionSetting setting)
     {
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyGekkoPvP(ref ActionSetting setting)
     {
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyKashaPvP(ref ActionSetting setting)
     {
-    }
+		setting.MPOverride = () => 0;
+	}
+
     static partial void ModifyOgiNamikiriPvP(ref ActionSetting setting)
     {
         setting.CreateConfig = () => new ActionConfig()
@@ -586,7 +590,8 @@ static partial void ModifyIkishotenPvE(ref ActionSetting setting)
     static partial void ModifyHyosetsuPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.YukikazePvP) == ActionID.HyosetsuPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -595,7 +600,8 @@ static partial void ModifyIkishotenPvE(ref ActionSetting setting)
     static partial void ModifyMangetsuPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.YukikazePvP) == ActionID.MangetsuPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -604,7 +610,8 @@ static partial void ModifyIkishotenPvE(ref ActionSetting setting)
     static partial void ModifyOkaPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.YukikazePvP) == ActionID.OkaPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -622,7 +629,8 @@ static partial void ModifyIkishotenPvE(ref ActionSetting setting)
     static partial void ModifyZanshinPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.HissatsuChitenPvP) == ActionID.ZanshinPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -631,7 +639,8 @@ static partial void ModifyIkishotenPvE(ref ActionSetting setting)
     static partial void ModifyTendoSetsugekkaPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.MeikyoShisuiPvP) == ActionID.TendoSetsugekkaPvP;
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyTendoKaeshiSetsugekkaPvP(ref ActionSetting setting)
     {

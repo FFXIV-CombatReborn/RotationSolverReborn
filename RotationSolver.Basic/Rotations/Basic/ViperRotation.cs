@@ -823,37 +823,37 @@ public partial class ViperRotation
     #region PvP Actions
     static partial void ModifyRavenousBitePvP(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new ActionConfig();
+        
     }
 
     static partial void ModifySwiftskinsStingPvP(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new ActionConfig();
+        
     }
 
     static partial void ModifyPiercingFangsPvP(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new ActionConfig();
+        
     }
 
     static partial void ModifyBarbarousBitePvP(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new ActionConfig();
+        
     }
 
     static partial void ModifyHuntersStingPvP(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new ActionConfig();
+        
     }
 
     static partial void ModifySteelFangsPvP(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new ActionConfig();
+        
     }
 
     static partial void ModifyBloodcoilPvP(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new ActionConfig();
+        
     }
 
     static partial void ModifyUncoiledFuryPvP(ref ActionSetting setting)
@@ -875,17 +875,17 @@ public partial class ViperRotation
 
     static partial void ModifySlitherPvP(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new ActionConfig();
+        
     }
 
     static partial void ModifySnakeScalesPvP(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new ActionConfig();
+        
     }
 
     static partial void ModifyRattlingCoilPvP(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new ActionConfig();
+        
     }
 
     static partial void ModifyFirstGenerationPvP(ref ActionSetting setting)
@@ -945,25 +945,26 @@ public partial class ViperRotation
     static partial void ModifyDeathRattlePvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.DeathRattlePvP;
-        setting.CreateConfig = () => new ActionConfig();
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyTwinfangBitePvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.TwinfangBitePvP;
-        setting.CreateConfig = () => new ActionConfig();
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyTwinbloodBitePvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.TwinbloodBitePvP;
-        setting.CreateConfig = () => new ActionConfig();
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyUncoiledTwinfangPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.UncoiledTwinfangPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -972,7 +973,8 @@ public partial class ViperRotation
     static partial void ModifyUncoiledTwinbloodPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.UncoiledTwinbloodPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -981,7 +983,8 @@ public partial class ViperRotation
     static partial void ModifyFirstLegacyPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.FirstLegacyPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -990,7 +993,8 @@ public partial class ViperRotation
     static partial void ModifySecondLegacyPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.SecondLegacyPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -999,7 +1003,8 @@ public partial class ViperRotation
     static partial void ModifyThirdLegacyPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.ThirdLegacyPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -1008,7 +1013,8 @@ public partial class ViperRotation
     static partial void ModifyFourthLegacyPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.FourthLegacyPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -1017,7 +1023,8 @@ public partial class ViperRotation
     static partial void ModifyBacklashPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SnakeScalesPvP) == ActionID.BacklashPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
