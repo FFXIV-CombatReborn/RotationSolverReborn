@@ -427,12 +427,14 @@ public partial class DragoonRotation
     static partial void ModifyHeavensThrustPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.RaidenThrustPvP) == ActionID.HeavensThrustPvP;
-    }
+		setting.MPOverride = () => 0;
+	}
 
     static partial void ModifyStarcrossPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.RaidenThrustPvP) == ActionID.StarcrossPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -450,7 +452,8 @@ public partial class DragoonRotation
     static partial void ModifyWyrmwindThrustPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ElusiveJumpPvP) == ActionID.WyrmwindThrustPvP;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };

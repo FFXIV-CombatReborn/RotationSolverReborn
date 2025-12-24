@@ -516,7 +516,7 @@ public sealed class SCH_Reborn : ScholarRotation
     [RotationDesc(ActionID.SuccorPvE, ActionID.ConcitationPvE, ActionID.AccessionPvE)]
     protected override bool HealAreaGCD(out IAction? act)
     {
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
+        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
             return base.HealAreaGCD(out act);
         }
@@ -549,7 +549,7 @@ public sealed class SCH_Reborn : ScholarRotation
     [RotationDesc(ActionID.AdloquiumPvE, ActionID.ManifestationPvE, ActionID.PhysickPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
+        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
             return base.HealSingleGCD(out act);
         }
@@ -575,7 +575,7 @@ public sealed class SCH_Reborn : ScholarRotation
     [RotationDesc(ActionID.SuccorPvE, ActionID.ConcitationPvE, ActionID.AccessionPvE)]
     protected override bool DefenseAreaGCD(out IAction? act)
     {
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
+        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
             return base.DefenseAreaGCD(out act);
         }
@@ -601,7 +601,7 @@ public sealed class SCH_Reborn : ScholarRotation
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
+        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
             return base.GeneralGCD(out act);
         }
