@@ -9,7 +9,10 @@ public sealed class RDM_Reborn : RedMageRotation
     [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if there are no healers alive in party)")]
     public bool GCDHeal { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Prevent healing during burst combos")]
+	[RotationConfig(CombatType.PvE, Name = "Attempt to pool Black and White Mana for burst (Experimental)")]
+	public bool Pooling { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "Prevent healing during burst combos")]
     public bool PreventHeal { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Prevent raising during burst combos")]
@@ -392,19 +395,19 @@ public sealed class RDM_Reborn : RedMageRotation
         }
 
 		//Check if you can start melee combo
-		if (EnoughManaCombo || CanMagickedSwordplay)
+		if ((!Pooling && EnoughManaComboNoPooling) || (Pooling && EnoughManaComboPooling) || CanMagickedSwordplay)
         {
-            if (EnchantedMoulinetPvE.CanUse(out act))
+            if (!IsLastGCD(true, EnchantedMoulinetPvE) && EnchantedMoulinetPvE.CanUse(out act))
             {
                 return true;
             }
 
-			if (EnchantedRipostePvE_45960.CanUse(out act))
+			if (!IsLastGCD(true, EnchantedRipostePvE_45960) && EnchantedRipostePvE_45960.CanUse(out act))
 			{
 				return true;
 			}
 
-			if (EnchantedRipostePvE.CanUse(out act))
+			if (!IsLastGCD(true, EnchantedRipostePvE) && EnchantedRipostePvE.CanUse(out act))
             {
                 return true;
             }
