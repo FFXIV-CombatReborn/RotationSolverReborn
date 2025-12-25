@@ -55,7 +55,7 @@ namespace RotationSolver.Data
         [Description("This includes almost all information available in one combat frame, including the status of all party members, hostile target statuses, skill cooldowns, MP and HP of characters, character locations, hostile target casting status, combo state, combat duration, player level, etc.\n\nIt will then highlight the best action on the hotbar, or help you click it.")]
         ConfigWindow_About_Description,
 
-        [Description("This is designed for GENERAL COMBAT, not for Savage or Ultimate content. \n\nUse it carefully! While not designed specifically for Savage or Ultimate content RSR works fine in them, but it will not solve mechancis for you. Pay attention and use macros.")]
+        [Description("This is designed for GENERAL COMBAT, not for Savage or Ultimate content. \n\nUse it carefully! While not designed specifically for Savage or Ultimate content RSR works fine in them, but it will not solve mechanics for you. Pay attention and use macros.")]
         ConfigWindow_About_Warning,
 
         [Description("RSR has helped you by clicking actions {0:N0} times.")]
