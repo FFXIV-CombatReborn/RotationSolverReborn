@@ -214,16 +214,18 @@ internal static class MajorUpdater
             }
         }
 
-        // Apply reddening of disabled actions on hotbars alongside highlight
-        try
-        {
-            HotbarDisabledColor.ApplyFrame();
-        }
-        catch (Exception ex)
-        {
-            LogOnce("Hotbar Disabled Redden Exception", ex);
-        }
-
+		// Apply reddening of disabled actions on hotbars alongside highlight
+		if (Service.Config.ReddenDisabledHotbarActions)
+		{
+			try
+			{
+				HotbarDisabledColor.ApplyFrame();
+			}
+			catch (Exception ex)
+			{
+				LogOnce("Hotbar Disabled Redden Exception", ex);
+			}
+		}
     }
 
 	private static void RSRCommonUpdate(IFramework framework)

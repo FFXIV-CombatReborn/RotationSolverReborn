@@ -141,7 +141,12 @@ public static class ObjectHelper
 
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
-        if (battleChara.IsAllianceMember())
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (battleChara.IsAllianceMember())
         {
             return false;
         }
@@ -161,8 +166,13 @@ public static class ObjectHelper
             return false; // For conditionally immune mobs
         }
 
-        // Dead.
-        if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1)
+		if (battleChara.GetEventType() == EventHandlerContent.DpsChallengeDirector && Player.Object.GetEventType() != EventHandlerContent.DpsChallengeDirector)
+		{
+			return false;
+		}
+
+		// Dead.
+		if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1)
         {
             return false;
         }
@@ -2492,6 +2502,25 @@ internal static float GetTTK(this IBattleChara battleChara, bool wholeTime = fal
         Vector3 playerPos = Player.Object.Position; playerPos.Y += playerYOffset;
         return CanSeeFrom(battleChara, playerPos, targetYOffset);
     }
+
+	/// <summary>
+	/// Get the Player's current MP percentage.
+	/// </summary>
+	/// <returns></returns>
+	public static float GetPlayerMPRatio()
+	{
+		if (Player.Object == null)
+		{
+			return 0;
+		}
+
+		if (Player.Object.MaxHp == 0)
+		{
+			return 0; // Avoid division by zero
+		}
+
+		return (float)Player.Object.CurrentMp / Player.Object.MaxMp;
+	}
 
 	/// <summary>
 	/// Get the Player's current HP percentage.
