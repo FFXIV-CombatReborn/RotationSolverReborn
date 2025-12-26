@@ -97,7 +97,7 @@ namespace RotationSolver.Data
         [Description("Causes the game to crash")]
         ConfigWindow_About_Compatibility_Crash,
 
-        [Description("Many thanks to our sponsors.")]
+        [Description("Many thanks to Ko-fi sponsors.")]
         ConfigWindow_About_ThanksToSupporters,
 
         [Description("Open Config Folder")]

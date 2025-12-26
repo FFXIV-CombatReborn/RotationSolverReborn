@@ -28,6 +28,6 @@ internal class HpPotionItem : BaseItem
 			return false;
 		}
 
-		return Player.Available && ObjectHelper.GetPlayerHealthRatio() <= Service.Config.HealthSingleAbilityHot && Player.Object.MaxHp - Player.Object.CurrentHp >= MaxHp && base.CanUse(out item);
+		return Player.Available && ObjectHelper.GetPlayerHealthRatio() <= Service.Config.UseHpPotionsPercent && Player.Object.MaxHp - Player.Object.CurrentHp >= MaxHp && base.CanUse(out item);
     }
 }

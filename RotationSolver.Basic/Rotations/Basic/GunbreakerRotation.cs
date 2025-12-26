@@ -382,7 +382,6 @@ public partial class GunbreakerRotation
     static partial void ModifyBloodfestPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.ReadyToReign];
-        setting.ActionCheck = () => Ammo == 0;
     }
 
     static partial void ModifyBlastingZonePvE(ref ActionSetting setting)

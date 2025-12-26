@@ -1134,10 +1134,84 @@ internal static class DataCenter
     }
     public static int NumberOfAllHostilesInRange => NumberOfHostilesInRange;
     public static int NumberOfAllHostilesInMaxRange => NumberOfHostilesInMaxRange;
-    #endregion
+	#endregion
 
-    #region Hostile Casting
-    public static bool IsHostileCastingAOE =>
+	#region Hostile Casting
+
+	/// <summary>
+	/// Determines whether any currently casting hostile action is classified as magical.
+	/// </summary>
+	/// <returns>
+	/// True if at least one hostile target is casting an action whose <c>AttackType.RowId == 5</c> (interpreted as magical); otherwise false.
+	/// </returns>
+	/// <remarks>
+	/// Scans all hostile entities with a non-zero <c>CastActionId</c>, looks up the action row, and inspects the attack type.
+	/// Returns early on the first confirmed magical cast.
+	/// If the action sheet cannot be loaded or no valid casts exist, returns false.
+	/// </remarks>
+	public static bool IsMagicalDamageIncoming()
+	{
+		var hostileEnum = AllHostileTargets;
+		if (hostileEnum == null) return false;
+
+		var actionSheet = Service.GetSheet<Action>();
+		if (actionSheet == null) return false;
+
+		foreach (var hostile in hostileEnum)
+		{
+			if (hostile == null) continue;
+			if (hostile.CastActionId == 0) continue;
+
+			var action = actionSheet.GetRow(hostile.CastActionId);
+			if (action.RowId == 0) continue;
+
+			// AttackType row id 5 interpreted as magical.
+			if (action.AttackType.RowId == 5)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/// <summary>
+	/// Determines whether any currently casting hostile action is classified as physical.
+	/// </summary>
+	/// <returns>
+	/// True if at least one hostile target is casting an action whose <c>AttackType.RowId == 7</c> (interpreted as physical); otherwise false.
+	/// </returns>
+	/// <remarks>
+	/// Scans all hostile entities with a non-zero <c>CastActionId</c>, looks up the action row, and inspects the attack type.
+	/// Returns early on the first confirmed magical cast.
+	/// If the action sheet cannot be loaded or no valid casts exist, returns false.
+	/// </remarks>
+	public static bool IsPhysicalDamageIncoming()
+	{
+		var hostileEnum = AllHostileTargets;
+		if (hostileEnum == null) return false;
+
+		var actionSheet = Service.GetSheet<Action>();
+		if (actionSheet == null) return false;
+
+		foreach (var hostile in hostileEnum)
+		{
+			if (hostile == null) continue;
+			if (hostile.CastActionId == 0) continue;
+
+			var action = actionSheet.GetRow(hostile.CastActionId);
+			if (action.RowId == 0) continue;
+
+			// AttackType row id 5 interpreted as physical.
+			if (action.AttackType.RowId == 7)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+
+	public static bool IsHostileCastingAOE =>
     InCombat && (IsCastingAreaVfx() || (AllHostileTargets != null && IsAnyHostileCastingArea()));
 
     private static bool IsAnyHostileCastingArea()
@@ -1255,17 +1329,17 @@ internal static class DataCenter
         return check?.Invoke(action) ?? false; // Check if check is null
     }
 
-    public static bool IsCastingVfx(VfxNewData[] vfxData, Func<VfxNewData, bool> isVfx)
-    {
-        if (vfxData == null || vfxData.Length == 0)
-        {
-            return false;
-        }
+	public static bool IsCastingVfx(ConcurrentQueue<VfxNewData> vfxData, Func<VfxNewData, bool> isVfx)
+	{
+		if (vfxData == null || vfxData.IsEmpty)
+		{
+			return false;
+		}
 
-        for (int i = 0, n = vfxData.Length; i < n; i++)
-        {
-            if (isVfx(vfxData[i]))
-            {
+		foreach (var data in vfxData)
+		{
+			if (isVfx(data))
+			{
                 return true;
             }
         }
@@ -1274,8 +1348,8 @@ internal static class DataCenter
 
     public static bool IsCastingMultiHit()
     {
-        return IsCastingVfx([.. VfxDataQueue], s =>
-        {
+		return IsCastingVfx(VfxDataQueue, s =>
+		{
             if (!Player.Available)
             {
                 return false;
@@ -1298,8 +1372,8 @@ internal static class DataCenter
 
     public static bool IsCastingTankVfx()
     {
-        return IsCastingVfx([.. VfxDataQueue], s =>
-        {
+		return IsCastingVfx(VfxDataQueue, s =>
+		{
             if (!Player.Available)
             {
                 return false;
@@ -1325,8 +1399,8 @@ internal static class DataCenter
 
     public static bool IsCastingAreaVfx()
     {
-        return IsCastingVfx([.. VfxDataQueue], s =>
-        {
+		return IsCastingVfx(VfxDataQueue, s =>
+		{
             return Player.Available && (s.Path.StartsWith("vfx/lockon/eff/coshare")
             || s.Path.StartsWith("vfx/lockon/eff/share_laser")
             || s.Path.StartsWith("vfx/lockon/eff/com_share"));

@@ -166,12 +166,20 @@ internal partial class Configs : IPluginConfiguration
     Filter = AutoActionUsage)]
     private static readonly bool _useHpPotions = false;
 
-    [ConditionBool, UI("Automatically use MP Potions",
+	[UI("Use HP Potions when HP% is lower than this", Parent = nameof(UseHpPotions))]
+	[Range(0, 1, ConfigUnitType.Percent, 0.002f)]
+	public float UseHpPotionsPercent { get; set; } = 0.5f;
+
+	[ConditionBool, UI("Automatically use MP Potions",
     Description = "Enable to allow the plugin to use MP potions automatically.",
     Filter = AutoActionUsage)]
     private static readonly bool _useMpPotions = false;
 
-    [ConditionBool, UI("Automatically use Phoenix Down",
+	[UI("Use MP Potions when MP% is lower than this", Parent = nameof(UseMpPotions))]
+	[Range(0, 1, ConfigUnitType.Percent, 0.002f)]
+	public float UseMpPotionsPercent { get; set; } = 0.5f;
+
+	[ConditionBool, UI("Automatically use Phoenix Down",
     Description = "Enable to allow the plugin to use Phoenix Down item. (Experimental feature)",
     Filter = AutoActionUsage)]
     private static readonly bool _usePhoenixDown = false;

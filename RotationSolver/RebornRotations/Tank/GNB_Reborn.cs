@@ -76,7 +76,7 @@ public sealed class GNB_Reborn : GunbreakerRotation
             return true;
         }
 
-        if (Ammo == 0 && BloodfestPvE.CanUse(out act))
+        if (BloodfestPvE.CanUse(out act))
         {
             return true;
         }
@@ -212,7 +212,7 @@ public sealed class GNB_Reborn : GunbreakerRotation
                 return true;
             }
 
-            if (HasNoMercy && GnashingFangPvE.Cooldown.IsCoolingDown)
+            if (HasNoMercy && !GnashingFangPvE.Cooldown.HasOneCharge)
             {
                 return true;
             }
@@ -269,7 +269,7 @@ public sealed class GNB_Reborn : GunbreakerRotation
 
         if (!InReignCombo)
         {
-            if (AmmoComboStep == 0 && GnashingFangPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
+            if (AmmoComboStep == 0 && GnashingFangPvE.CanUse(out act, skipComboCheck: true, usedUp: !HasReadyToReign))
             {
                 return true;
             }
@@ -295,7 +295,7 @@ public sealed class GNB_Reborn : GunbreakerRotation
             }
         }
 
-        if ((!InGnashingFang && !GnashingFangPvE.Cooldown.HasOneCharge) || InReignCombo)
+        if ((!InGnashingFang && GnashingFangPvE.Cooldown.CurrentCharges < 2) || InReignCombo)
         {
             if (LionHeartPvE.CanUse(out act, skipComboCheck: true))
             {

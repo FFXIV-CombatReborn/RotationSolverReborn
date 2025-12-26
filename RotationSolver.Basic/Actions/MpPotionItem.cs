@@ -14,9 +14,14 @@ internal class MpPotionItem : BaseItem
         MaxMp = data[1];
     }
 
-    public override bool CanUse(out IAction item, bool clippingCheck)
-    {
-        item = this;
-        return Player.Available && Player.Object != null && Player.Object.MaxMp - DataCenter.CurrentMp >= MaxMp && base.CanUse(out item);
-    }
+	public override bool CanUse(out IAction item, bool clippingCheck)
+	{
+		item = this;
+
+		if (Player.Object == null)
+		{
+			return false;
+		}
+		return Player.Available && ObjectHelper.GetPlayerMPRatio() <= Service.Config.UseMpPotionsPercent && Player.Object.MaxMp - DataCenter.CurrentMp >= MaxMp && base.CanUse(out item);
+	}
 }

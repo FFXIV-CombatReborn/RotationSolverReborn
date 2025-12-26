@@ -460,7 +460,7 @@ public partial class CustomRotation
         var hostileEnum = AllHostileTargets;
 
         // Determine (heuristically) if the imminent AoE is magical.
-        bool incomingMagical = IsMagicalDamageIncoming();
+        bool incomingMagical = IsMagicalDamageIncoming;
 
         // Enemy debuffs (scan once).
         bool addle = false;
@@ -587,46 +587,22 @@ public partial class CustomRotation
         return Math.Clamp(mitigated, 0f, 0.95f);
     }
 
-    /// <summary>
-    /// Determines whether any currently casting hostile action is classified as magical.
-    /// </summary>
-    /// <returns>
-    /// True if at least one hostile target is casting an action whose <c>AttackType.RowId == 5</c> (interpreted as magical); otherwise false.
-    /// </returns>
-    /// <remarks>
-    /// Scans all hostile entities with a non-zero <c>CastActionId</c>, looks up the action row, and inspects the attack type.
-    /// Returns early on the first confirmed magical cast.
-    /// If the action sheet cannot be loaded or no valid casts exist, returns false.
-    /// </remarks>
-    public static bool IsMagicalDamageIncoming()
-    {
-        var hostileEnum = AllHostileTargets;
-        if (hostileEnum == null) return false;
+	/// <summary>
+	///
+	/// </summary>
+	[Description("Is an enemy casting magic AOE")]
+	public static bool IsMagicalDamageIncoming => DataCenter.IsMagicalDamageIncoming();
 
-        var actionSheet = Service.GetSheet<Lumina.Excel.Sheets.Action>();
-        if (actionSheet == null) return false;
+	/// <summary>
+	///
+	/// </summary>
+	[Description("Is an enemy casting physical AOE")]
+	public static bool IsPhysicalDamageIncoming => DataCenter.IsPhysicalDamageIncoming();
 
-        foreach (var hostile in hostileEnum)
-        {
-            if (hostile == null) continue;
-            if (hostile.CastActionId == 0) continue;
-
-            var action = actionSheet.GetRow(hostile.CastActionId);
-            if (action.RowId == 0) continue;
-
-            // AttackType row id 5 interpreted as magical.
-            if (action.AttackType.RowId == 5)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    [Description("Is an enemy casting a multihit AOE party stack")]
+	/// <summary>
+	///
+	/// </summary>
+	[Description("Is an enemy casting a multihit AOE party stack")]
     public static bool IsCastingMultiHit => DataCenter.IsCastingMultiHit();
 
 	#endregion
