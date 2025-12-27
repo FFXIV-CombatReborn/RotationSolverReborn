@@ -37,6 +37,26 @@ public partial class GunbreakerRotation
 	}
 
 	/// <summary>
+	/// Gets the maximum amount of ammo available not accounting for Bloodfest.
+	/// </summary>
+	public static byte NormalMaxAmmo()
+	{
+		if (CartridgeChargeIiTrait.EnoughLevel)
+			return 3;
+		if (CartridgeChargeTrait.EnoughLevel)
+			return 2;
+		return 0;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static byte OvercappedAmmo()
+	{
+		return (byte)(Ammo - NormalMaxAmmo());
+	}
+
+	/// <summary>
 	/// Gets whether the current ammo is at the maximum allowed.
 	/// </summary>
 	public static bool IsAmmoCapped => Ammo == MaxAmmo();
