@@ -495,7 +495,7 @@ public partial class RedMageRotation
 
     static partial void ModifyMagickBarrierPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => IsMagicalDamageIncoming;
+        //setting.ActionCheck = () => IsMagicalDamageIncoming; People kept complaining that MB was never used even when they werent actually taking magic damage so disabling this for now
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
