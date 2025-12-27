@@ -29,41 +29,6 @@ public static class Watcher
     public static string ShowStrSelf { get; private set; } = string.Empty;
     public static string ShowStrEnemy { get; private set; } = string.Empty;
 
-    private static string? _cachedBranch = null;
-
-    public static string DalamudBranch()
-    {
-        if (_cachedBranch != null)
-            return _cachedBranch;
-
-        const string release = "release";
-        string result = release; // Default to "release" instead of "other"
-
-        if (DalamudReflector.TryGetDalamudStartInfo(out Dalamud.Common.DalamudStartInfo? startinfo, Svc.PluginInterface))
-        {
-            if (!string.IsNullOrEmpty(startinfo?.ConfigurationPath) && File.Exists(startinfo.ConfigurationPath))
-            {
-                try
-                {
-                    using var fs = File.OpenRead(startinfo.ConfigurationPath);
-                    using var doc = System.Text.Json.JsonDocument.Parse(fs);
-                    if (doc.RootElement.TryGetProperty("DalamudBetaKind", out var kindProp))
-                    {
-                        string? type = kindProp.GetString();
-                        result = string.IsNullOrEmpty(type) ? release : type;
-                    }
-                }
-                catch
-                {
-                    result = release;
-                }
-            }
-        }
-
-        _cachedBranch = result;
-        return result;
-    }
-
     private static void ActionFromEnemy(ActionEffectSet set)
     {
         try

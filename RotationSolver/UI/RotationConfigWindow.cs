@@ -66,6 +66,7 @@ public partial class RotationConfigWindow : Window
 	"Biscuit",
 	"catfourteen",
 	"Chaos_co",
+    "Chris",
 	"clean",
 	"Cole",
 	"DeadCode",
@@ -373,7 +374,7 @@ public partial class RotationConfigWindow : Window
             return true;
         }
 
-        if (Watcher.DalamudBranch() != "release")
+        if (DataCenter.DalamudStagingEnabled)
         {
             return true;
         }
@@ -388,7 +389,6 @@ public partial class RotationConfigWindow : Window
         public string RSRVersion { get; } = typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?";
         public GameVersion? GameVersion { get; } = startInfo.GameVersion;
         public string Platform { get; } = startInfo.Platform.ToString();
-        public string DalamudBranch { get; } = Watcher.DalamudBranch();
         public ClientLanguage Language { get; } = startInfo.Language;
     }
 
@@ -888,16 +888,16 @@ public partial class RotationConfigWindow : Window
 			string errorText = string.Empty;
 			float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
 
-			if (Watcher.DalamudBranch() != "release")
+			if (DataCenter.DalamudStagingEnabled)
 			{
 				ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
 				ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
-				ImGui.TextWrapped($"Warning: You are running the '{Watcher.DalamudBranch()}' branch of Dalamud. For best compatibility, use /xlbranch and switch back to 'release' branch if available for your current version of FFXIV.");
+				ImGui.TextWrapped($"Warning: You are running the staging branch of Dalamud. For best compatibility, use the XIVLauncher and switch back to 'release' branch if available for your current version of FFXIV.");
 				ImGui.PopStyleColor();
 				ImGui.PopTextWrapPos();
 				ImGui.Spacing();
 			}
-
+            //
 			if (_crashPlugins.Count > 0 && _crashPlugins[0].Name != null)
 			{
 				errorText = $"Disable {_crashPlugins[0].Name}, can cause conflicts/crashes.";
