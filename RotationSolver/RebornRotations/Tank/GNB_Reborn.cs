@@ -273,6 +273,19 @@ public sealed class GNB_Reborn : GunbreakerRotation
             }
         }
 
+		if (InReignCombo)
+		{
+			if (LionHeartPvE.CanUse(out act, skipComboCheck: true))
+			{
+				return true;
+			}
+
+			if (NobleBloodPvE.CanUse(out act, skipComboCheck: true))
+			{
+				return true;
+			}
+		}
+
 		if (!InGnashingFang && GnashingFangPvE.Cooldown.CurrentCharges < 2 && HasNoMercy && DoubleDownPvE.Cooldown.IsCoolingDown)
 		{
 			if (LionHeartPvE.CanUse(out act, skipComboCheck: true))
