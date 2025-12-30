@@ -5,6 +5,7 @@
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<Platforms>x64</Platforms>
 		<LangVersion>default</LangVersion>
+		<CopyLocalLockFileAssemblies>False</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 
 	<ItemGroup>
