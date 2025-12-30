@@ -75,32 +75,21 @@ public class ActionTimelineManager : IDisposable
         }
     }
 
-    private static TimelineItemType GetActionType(uint actionId, ActionType type)
-    {
-        switch (type)
-        {
-            case ActionType.Action:
-                if (Svc.Data.GetExcelSheet<Action>()?.TryGetRow(actionId, out var action) != true)
-                    break;
+	private static TimelineItemType GetActionType(uint actionId, ActionType type)
+	{
+		if (Svc.Data.GetExcelSheet<Action>()?.TryGetRow(actionId, out var action) != true)
+			return TimelineItemType.OGCD; // Default or fallback type
 
-                if (actionId == 3) return TimelineItemType.OGCD; // Sprint
+		if (actionId == 3) return TimelineItemType.OGCD; // Sprint
 
-                var isRealGcd = action.CooldownGroup == GCDCooldownGroup || action.AdditionalCooldownGroup == GCDCooldownGroup;
-                return action.ActionCategory.Value.RowId == 1 // AutoAttack
-                    ? TimelineItemType.AutoAttack
-                    : !isRealGcd && action.ActionCategory.Value.RowId == 4 ? TimelineItemType.OGCD // Ability
-                    : TimelineItemType.GCD;
+		var isRealGcd = action.CooldownGroup == GCDCooldownGroup || action.AdditionalCooldownGroup == GCDCooldownGroup;
+		return action.ActionCategory.Value.RowId == 1 // AutoAttack
+			? TimelineItemType.AutoAttack
+			: !isRealGcd && action.ActionCategory.Value.RowId == 4 ? TimelineItemType.OGCD // Ability
+			: TimelineItemType.GCD;
+	}
 
-            case ActionType.Item:
-                if (Svc.Data.GetExcelSheet<Item>()?.TryGetRow(actionId, out var item) != true)
-                    break;
-                return item.CastTimeSeconds > 0 ? TimelineItemType.GCD : TimelineItemType.OGCD;
-        }
-
-        return TimelineItemType.GCD;
-    }
-
-    private void AddItem(TimelineItem item)
+	private void AddItem(TimelineItem item)
     {
         if (item == null) return;
         if (_items.Count >= 2048)

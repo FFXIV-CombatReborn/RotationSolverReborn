@@ -406,7 +406,7 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Show Cooldown Window", Filter = UiWindows)]
     private static readonly bool _showCooldownWindow = false;
 
-    [ConditionBool, UI("Show Action Timeline Window", Filter = UiWindows)]
+    [ConditionBool, UI("Show Action Timeline Window (currently bugged)", Filter = UiWindows)]
     private static readonly bool _showActionTimelineWindow = false;
 
     [ConditionBool, UI("Only show timeline in combat", Parent = nameof(ShowActionTimelineWindow))]

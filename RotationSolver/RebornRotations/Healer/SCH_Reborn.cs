@@ -366,10 +366,13 @@ public sealed class SCH_Reborn : ScholarRotation
             {
                 if (DeploymentTacticsPvE.CanUse(out act))
                 {
-                    if (DeploymentTacticsPvE.Target.Target.HasStatus(true, StatusID.Catalyze))
+                    if (DeploymentTacticsPvE.Target.Target != null && DeploymentTacticsPvE.Target.Target.StatusList != null)
                     {
-                        return true;
-                    }
+						if (DeploymentTacticsPvE.Target.Target.HasStatus(true, StatusID.Catalyze))
+						{
+							return true;
+						}
+					}
                 }
             }
             else if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOrGalvanize)
