@@ -75,9 +75,9 @@ public partial class RotationConfigWindow : Window
 	"Ecliptive",
 	"Elita",
 	"Ephi",
+	"eudesu39",
 	"Ghosty !",
 	"Hawa",
-	"Hyoh",
 	"kaen",
 	"Kialdir",
 	"kuromiromi",
@@ -1537,199 +1537,197 @@ public partial class RotationConfigWindow : Window
 		ImGui.Separator();
 		ImGui.Spacing();
 	}
+	private static void DrawAboutMacros()
+	{
+		// Adjust item spacing for better layout
+		using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
+
+		// Display command help for different state commands
+		DisplayCommandHelp(StateCommandType.Auto);
+		DisplayCommandHelp(StateCommandType.Manual);
+		DisplayCommandHelp(StateCommandType.Off);
+		DisplayCommandHelp(OtherCommandType.Cycle);
+		DisplayCommandHelp(StateCommandType.TargetOnly);
+		ImGui.NewLine();
+
+		// Display command help for other commands
+		DisplayCommandHelp(OtherCommandType.NextAction);
+
+		ImGui.NewLine();
+
+		// Display command help for special commands
+		DisplayCommandHelp(SpecialCommandType.EndSpecial);
+		DisplayCommandHelp(SpecialCommandType.HealArea);
+		DisplayCommandHelp(SpecialCommandType.HealSingle);
+		DisplayCommandHelp(SpecialCommandType.DefenseArea);
+		DisplayCommandHelp(SpecialCommandType.DefenseSingle);
+		DisplayCommandHelp(SpecialCommandType.MoveForward);
+		DisplayCommandHelp(SpecialCommandType.MoveBack);
+		DisplayCommandHelp(SpecialCommandType.Speed);
+		DisplayCommandHelp(SpecialCommandType.DispelStancePositional);
+		DisplayCommandHelp(SpecialCommandType.RaiseShirk);
+		DisplayCommandHelp(SpecialCommandType.AntiKnockback);
+		DisplayCommandHelp(SpecialCommandType.Burst);
+		DisplayCommandHelp(SpecialCommandType.NoCasting);
+	}
+
+	private static void DrawAboutSettingsCommands()
+	{
+		// Adjust item spacing for better layout
+		using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
+		ImGui.NewLine();
+		ImGui.TextWrapped("These commands can be used to open or change plugin settings directly from chat or macros.");
+		ImGui.NewLine();
+		ImGui.TextWrapped("Simply right clicking any action, setting, or toggle will pop up the macro associated with it.");
+	}
+
+	// Helper method to display command help
+	private static void DisplayCommandHelp<T>(T commandType) where T : Enum
+	{
+		commandType.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+	}
+
+	private static void DrawAboutCompatibility()
+	{
+		// Display the compatibility description
+		ImGui.TextWrapped(UiString.ConfigWindow_About_Compatibility_Description.GetDescription());
+
+		ImGui.Spacing();
+
+		float iconSize = 40 * Scale;
+
+		// Create a table to display incompatible plugins
+		using ImRaii.IEndObject table = ImRaii.Table("Incompatible plugin", 5, ImGuiTableFlags.BordersInner
+			| ImGuiTableFlags.Resizable
+			| ImGuiTableFlags.SizingStretchProp);
+		if (table)
+		{
+			ImGui.TableSetupScrollFreeze(0, 1);
+			ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
+
+			// Set up table headers
+			_ = ImGui.TableNextColumn();
+			ImGui.TableHeader("Name");
+
+			_ = ImGui.TableNextColumn();
+			ImGui.TableHeader("Icon/Link");
+
+			_ = ImGui.TableNextColumn();
+			ImGui.TableHeader("Features");
+
+			_ = ImGui.TableNextColumn();
+			ImGui.TableHeader("Type");
+
+			_ = ImGui.TableNextColumn();
+			ImGui.TableHeader("Enabled");
+
+			// Ensure that IncompatiblePlugins is not null
+			IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? [];
+
+			// Iterate over each incompatible plugin and display its details
+			foreach (IncompatiblePlugin item in incompatiblePlugins)
+			{
+				ImGui.TableNextRow();
+				_ = ImGui.TableNextColumn();
+
+				ImGui.Text(item.Name);
+
+				_ = ImGui.TableNextColumn();
+
+				string icon = string.IsNullOrEmpty(item.Icon)
+					? "https://raw.githubusercontent.com/goatcorp/DalamudAssets/master/UIRes/defaultIcon.png"
+					: item.Icon;
+
+				if (IconSet.GetTexture(icon, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture))
+				{
+					if (ImGuiHelper.NoPaddingNoColorImageButton(texture, Vector2.One * iconSize))
+					{
+						Util.OpenLink(item.Url);
+					}
+				}
+
+				_ = ImGui.TableNextColumn();
+				ImGui.TextWrapped(item.Features);
+
+				_ = ImGui.TableNextColumn();
+				DisplayPluginType(item.Type);
+
+				_ = ImGui.TableNextColumn();
+				ImGui.Text(item.IsEnabled ? "Yes" : "No");
+			}
+		}
+	}
+
+	// Helper method to display plugin type with appropriate colors and tooltips
+	private static void DisplayPluginType(CompatibleType type)
+	{
+		if (type.HasFlag(CompatibleType.Skill_Usage))
+		{
+			ImGui.TextColored(ImGuiColors.DalamudYellow, CompatibleType.Skill_Usage.GetDescription().Replace('_', ' '));
+			ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Mistake.GetDescription());
+		}
+		if (type.HasFlag(CompatibleType.Skill_Selection))
+		{
+			ImGui.TextColored(ImGuiColors.DalamudOrange, CompatibleType.Skill_Selection.GetDescription().Replace('_', ' '));
+			ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Mislead.GetDescription());
+		}
+		if (type.HasFlag(CompatibleType.Crash))
+		{
+			ImGui.TextColored(ImGuiColors.DalamudRed, CompatibleType.Crash.GetDescription().Replace('_', ' '));
+			ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Crash.GetDescription());
+		}
+		if (type.HasFlag(CompatibleType.Broken))
+		{
+			ImGui.TextColored(ImGuiColors.DalamudViolet, CompatibleType.Broken.GetDescription().Replace('_', ' '));
+			ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Crash.GetDescription());
+		}
+	}
+
+	private static void DrawAboutLinks()
+	{
+		float width = ImGui.GetWindowWidth();
+
+		ImGui.Spacing();
+
+		// Display button to open the configuration folder
+		string text = UiString.ConfigWindow_About_OpenConfigFolder.GetDescription();
+		float textWidth = ImGuiHelpers.GetButtonSize(text).X;
+		ImGuiHelper.DrawItemMiddle(() =>
+		{
+			if (ImGui.Button(text))
+			{
+				try
+				{
+					_ = Process.Start("explorer.exe", Svc.PluginInterface.ConfigDirectory.FullName);
+				}
+				catch (Exception ex)
+				{
+					// Handle the exception (e.g., log it or display an error message)
+					ImGui.TextColored(ImGuiColors.DalamudRed, $"Failed to open config folder: {ex.Message}");
+				}
+			}
+		}, width, textWidth);
+
+		ImGui.Spacing();
+		// Display GitHub link button
+		if (IconSet.GetTexture("https://GitHub-readme-stats.vercel.app/api/pin/?username=FFXIV-CombatReborn&repo=RotationSolverReborn&show_icons=true&theme=dark", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon))
+		{
+			if (ImGuiHelper.TextureButton(icon, width, width))
+			{
+				Util.OpenLink($"https://GitHub.com/{Service.USERNAME}/{Service.REPO}");
+			}
+		}
+		else
+		{
+			// Handle the case where the texture is not found
+			ImGui.Text("Failed to load GitHub icon.");
+		}
+	}
 	#endregion
 
-	private static void DrawAboutMacros()
-    {
-        // Adjust item spacing for better layout
-        using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
+	#region Autoduty
 
-        // Display command help for different state commands
-        DisplayCommandHelp(StateCommandType.Auto);
-        DisplayCommandHelp(StateCommandType.Manual);
-        DisplayCommandHelp(StateCommandType.Off);
-        DisplayCommandHelp(OtherCommandType.Cycle);
-        DisplayCommandHelp(StateCommandType.TargetOnly);
-        ImGui.NewLine();
-
-        // Display command help for other commands
-        DisplayCommandHelp(OtherCommandType.NextAction);
-
-        ImGui.NewLine();
-
-        // Display command help for special commands
-        DisplayCommandHelp(SpecialCommandType.EndSpecial);
-        DisplayCommandHelp(SpecialCommandType.HealArea);
-        DisplayCommandHelp(SpecialCommandType.HealSingle);
-        DisplayCommandHelp(SpecialCommandType.DefenseArea);
-        DisplayCommandHelp(SpecialCommandType.DefenseSingle);
-        DisplayCommandHelp(SpecialCommandType.MoveForward);
-        DisplayCommandHelp(SpecialCommandType.MoveBack);
-        DisplayCommandHelp(SpecialCommandType.Speed);
-        DisplayCommandHelp(SpecialCommandType.DispelStancePositional);
-        DisplayCommandHelp(SpecialCommandType.RaiseShirk);
-        DisplayCommandHelp(SpecialCommandType.AntiKnockback);
-        DisplayCommandHelp(SpecialCommandType.Burst);
-        DisplayCommandHelp(SpecialCommandType.NoCasting);
-    }
-
-    private static void DrawAboutSettingsCommands()
-    {
-        // Adjust item spacing for better layout
-        using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
-        ImGui.NewLine();
-        ImGui.TextWrapped("These commands can be used to open or change plugin settings directly from chat or macros.");
-        ImGui.NewLine();
-        ImGui.TextWrapped("Simply right clicking any action, setting, or toggle will pop up the macro associated with it.");
-    }
-
-    // Helper method to display command help
-    private static void DisplayCommandHelp<T>(T commandType) where T : Enum
-    {
-        commandType.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-    }
-
-    private static void DrawAboutCompatibility()
-    {
-        // Display the compatibility description
-        ImGui.TextWrapped(UiString.ConfigWindow_About_Compatibility_Description.GetDescription());
-
-        ImGui.Spacing();
-
-        float iconSize = 40 * Scale;
-
-        // Create a table to display incompatible plugins
-        using ImRaii.IEndObject table = ImRaii.Table("Incompatible plugin", 5, ImGuiTableFlags.BordersInner
-            | ImGuiTableFlags.Resizable
-            | ImGuiTableFlags.SizingStretchProp);
-        if (table)
-        {
-            ImGui.TableSetupScrollFreeze(0, 1);
-            ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
-
-            // Set up table headers
-            _ = ImGui.TableNextColumn();
-            ImGui.TableHeader("Name");
-
-            _ = ImGui.TableNextColumn();
-            ImGui.TableHeader("Icon/Link");
-
-            _ = ImGui.TableNextColumn();
-            ImGui.TableHeader("Features");
-
-            _ = ImGui.TableNextColumn();
-            ImGui.TableHeader("Type");
-
-            _ = ImGui.TableNextColumn();
-            ImGui.TableHeader("Enabled");
-
-            // Ensure that IncompatiblePlugins is not null
-            IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? [];
-
-            // Iterate over each incompatible plugin and display its details
-            foreach (IncompatiblePlugin item in incompatiblePlugins)
-            {
-                ImGui.TableNextRow();
-                _ = ImGui.TableNextColumn();
-
-                ImGui.Text(item.Name);
-
-                _ = ImGui.TableNextColumn();
-
-                string icon = string.IsNullOrEmpty(item.Icon)
-                    ? "https://raw.githubusercontent.com/goatcorp/DalamudAssets/master/UIRes/defaultIcon.png"
-                    : item.Icon;
-
-                if (IconSet.GetTexture(icon, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture))
-                {
-                    if (ImGuiHelper.NoPaddingNoColorImageButton(texture, Vector2.One * iconSize))
-                    {
-                        Util.OpenLink(item.Url);
-                    }
-                }
-
-                _ = ImGui.TableNextColumn();
-                ImGui.TextWrapped(item.Features);
-
-                _ = ImGui.TableNextColumn();
-                DisplayPluginType(item.Type);
-
-                _ = ImGui.TableNextColumn();
-                ImGui.Text(item.IsEnabled ? "Yes" : "No");
-            }
-        }
-    }
-
-    // Helper method to display plugin type with appropriate colors and tooltips
-    private static void DisplayPluginType(CompatibleType type)
-    {
-        if (type.HasFlag(CompatibleType.Skill_Usage))
-        {
-            ImGui.TextColored(ImGuiColors.DalamudYellow, CompatibleType.Skill_Usage.GetDescription().Replace('_', ' '));
-            ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Mistake.GetDescription());
-        }
-        if (type.HasFlag(CompatibleType.Skill_Selection))
-        {
-            ImGui.TextColored(ImGuiColors.DalamudOrange, CompatibleType.Skill_Selection.GetDescription().Replace('_', ' '));
-            ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Mislead.GetDescription());
-        }
-        if (type.HasFlag(CompatibleType.Crash))
-        {
-            ImGui.TextColored(ImGuiColors.DalamudRed, CompatibleType.Crash.GetDescription().Replace('_', ' '));
-            ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Crash.GetDescription());
-        }
-        if (type.HasFlag(CompatibleType.Broken))
-        {
-            ImGui.TextColored(ImGuiColors.DalamudViolet, CompatibleType.Broken.GetDescription().Replace('_', ' '));
-            ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Crash.GetDescription());
-        }
-    }
-
-    private static void DrawAboutLinks()
-    {
-        float width = ImGui.GetWindowWidth();
-
-        ImGui.Spacing();
-
-        // Display button to open the configuration folder
-        string text = UiString.ConfigWindow_About_OpenConfigFolder.GetDescription();
-        float textWidth = ImGuiHelpers.GetButtonSize(text).X;
-        ImGuiHelper.DrawItemMiddle(() =>
-        {
-            if (ImGui.Button(text))
-            {
-                try
-                {
-                    _ = Process.Start("explorer.exe", Svc.PluginInterface.ConfigDirectory.FullName);
-                }
-                catch (Exception ex)
-                {
-                    // Handle the exception (e.g., log it or display an error message)
-                    ImGui.TextColored(ImGuiColors.DalamudRed, $"Failed to open config folder: {ex.Message}");
-                }
-            }
-        }, width, textWidth);
-
-        ImGui.Spacing();
-        // Display GitHub link button
-        if (IconSet.GetTexture("https://GitHub-readme-stats.vercel.app/api/pin/?username=FFXIV-CombatReborn&repo=RotationSolverReborn&show_icons=true&theme=dark", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon))
-        {
-            if (ImGuiHelper.TextureButton(icon, width, width))
-            {
-                Util.OpenLink($"https://GitHub.com/{Service.USERNAME}/{Service.REPO}");
-            }
-        }
-        else
-        {
-            // Handle the case where the texture is not found
-            ImGui.Text("Failed to load GitHub icon.");
-        }
-    }
-    
-
-    #region Autoduty
-
-    private void DrawAutoduty()
+	private void DrawAutoduty()
     {
         ImGui.TextWrapped("While the RSR Team has made effort to make RSR compatible with Autoduty, please keep in mind that RSR is not designed with botting in mind.");
         ImGui.Spacing();

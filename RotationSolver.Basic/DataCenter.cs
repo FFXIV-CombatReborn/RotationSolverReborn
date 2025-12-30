@@ -102,7 +102,7 @@ internal static class DataCenter
         return Svc.GameConfig.UiControl.GetBool(UiControlOption.AutoFaceTargetOnAction.ToString());
     }
 
-    public static uint MoveModeSetting()
+	public static uint MoveModeSetting()
     {
         // 0 is standard, 1 is legacy
         return Svc.GameConfig.UiControl.GetUInt(UiControlOption.MoveMode.ToString());
