@@ -357,35 +357,44 @@ public sealed class SCH_Reborn : ScholarRotation
     [RotationDesc(ActionID.FeyIlluminationPvE, ActionID.ExpedientPvE, ActionID.SummonSeraphPvE, ActionID.ConsolationPvE, ActionID.SacredSoilPvE, ActionID.SeraphismPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        // Deployment Tactics is modified in the base rotation to only use if they have galvanize so can trust that targets are at least valid?
-        // The number of times that we adlo to heal a DPS and then would like to use this is actually reasonably high in dungeons
-        // TODO: This is typically skipping because the target it's trying to cast the area defense on isn't the galvanized target
-        if (DeploymentTacticsPvE.EnoughLevel && InCombat && (!RecitationPvE.EnoughLevel || RecitationPvE.Cooldown.IsCoolingDown))
-        {
-            if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOnly)
-            {
-                if (DeploymentTacticsPvE.CanUse(out act))
-                {
-                    if (DeploymentTacticsPvE.Target.Target != null && DeploymentTacticsPvE.Target.Target.StatusList != null)
-                    {
-						if (DeploymentTacticsPvE.Target.Target.HasStatus(true, StatusID.Catalyze))
+		// Deployment Tactics is modified in the base rotation to only use if they have galvanize so can trust that targets are at least valid?
+		// The number of times that we adlo to heal a DPS and then would like to use this is actually reasonably high in dungeons
+		// TODO: This is typically skipping because the target it's trying to cast the area defense on isn't the galvanized target
+		if (DeploymentTacticsPvE.EnoughLevel && InCombat && (!RecitationPvE.EnoughLevel || RecitationPvE.Cooldown.IsCoolingDown))
+		{
+			if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOnly)
+			{
+				if (DeploymentTacticsPvE.CanUse(out act))
+				{
+					var target = DeploymentTacticsPvE.Target.Target;
+					// Avoid touching StatusList directly; HasStatus is safer but still guard it.
+					if (target != null)
+					{
+						try
 						{
-							return true;
+							if (target.HasStatus(true, StatusID.Catalyze))
+							{
+								return true;
+							}
+						}
+						catch
+						{
+							// Target may be invalid/disposed; ignore and continue.
 						}
 					}
-                }
-            }
-            else if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOrGalvanize)
-            {
-                if (DeploymentTacticsPvE.CanUse(out act))
-                {
-                    return true;
-                }
-            }
-        }
+				}
+			}
+			else if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOrGalvanize)
+			{
+				if (DeploymentTacticsPvE.CanUse(out act))
+				{
+					return true;
+				}
+			}
+		}
 
-        // Consolation is great if Seraph is up
-        if (ConsolationPvE.CanUse(out act, usedUp: true))
+		// Consolation is great if Seraph is up
+		if (ConsolationPvE.CanUse(out act, usedUp: true))
         {
             return true;
         }
