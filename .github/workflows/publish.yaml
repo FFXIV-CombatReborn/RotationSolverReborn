@@ -41,13 +41,10 @@ jobs:
       - name: Build Plugin
         run: dotnet build --no-restore -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=${{ env.tag }} -p:FileVersion=${{ env.tag }} -p:PackageVersion=${{ env.tag }} -p:InformationalVersion=${{ env.tag }} --output .\build
 
-      - name: Zip Plugin
-        run: Compress-Archive -Path .\build\* -DestinationPath .\build\RotationSolver.zip
-
       - name: Publish Plugin
         uses: softprops/action-gh-release@v2
         with:
-          files: .\build\RotationSolver\latest.zip
+          files: ./build/RotationSolver/latest.zip
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Doc Gen Tool

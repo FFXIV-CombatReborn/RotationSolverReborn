@@ -8,6 +8,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>docgen</ToolCommandName>
     <Platforms>x64</Platforms>
+	<CopyLocalLockFileAssemblies>False</CopyLocalLockFileAssemblies>
   <PackageOutputPath>./nupkg</PackageOutputPath>
   </PropertyGroup>
 

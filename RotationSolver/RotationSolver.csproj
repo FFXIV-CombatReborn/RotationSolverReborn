@@ -7,6 +7,7 @@
 	  <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
 	  <SupportedOSPlatformVersion>8.0</SupportedOSPlatformVersion>
 	  <EnableWindowsTargeting>true</EnableWindowsTargeting>
+	  <CopyLocalLockFileAssemblies>False</CopyLocalLockFileAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
