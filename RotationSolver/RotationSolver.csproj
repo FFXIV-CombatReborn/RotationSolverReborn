@@ -1,37 +1,42 @@
-﻿<Project Sdk="Dalamud.NET.Sdk/13.0.0">
-  <PropertyGroup>
-	  <Description>Based on the pve combat information in one frame, find the best action.</Description>
-	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	  <Platforms>x64</Platforms>
-	  <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
-	  <SupportedOSPlatformVersion>8.0</SupportedOSPlatformVersion>
-	  <EnableWindowsTargeting>true</EnableWindowsTargeting>
-	  <CopyLocalLockFileAssemblies>False</CopyLocalLockFileAssemblies>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
-    <NoWarn>1591</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
-	<GenerateDocumentationFile>True</GenerateDocumentationFile>
-	<NoWarn>1591</NoWarn>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="ECommons" Version="3.1.0.10" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-	  <Reference Include="Dalamud.Common">
-		  <HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
-		  <Private>False</Private>
-	  </Reference>
-  </ItemGroup>
+﻿<Project Sdk="Dalamud.NET.Sdk/14.0.1">
+	<PropertyGroup>
+		<Description>Based on the pve combat information in one frame, find the best action.</Description>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<Platforms>x64</Platforms>
+		<TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+		<SupportedOSPlatformVersion>8.0</SupportedOSPlatformVersion>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+		<!-- Allow package runtime assets to be copied; we'll prune unwanted ones -->
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+		<NoWarn>1591</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<NoWarn>1591</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- Keep ECommons runtime so its DLL is included -->
+		<PackageReference Include="ECommons" Version="3.1.0.10" />
+		<!-- Do not copy Roslyn runtime to output -->
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" PrivateAssets="all" ExcludeAssets="runtime" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="Dalamud.Common">
+			<HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
+			<!-- Do not copy this reference to output -->
+			<Private>False</Private>
+		</Reference>
+	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\RotationSolver.Basic\RotationSolver.Basic.csproj" />
-		
 		<Using Include="Dalamud.Game.ClientState.Objects.Types" />
 		<Using Include="RotationSolver.Basic" />
 		<Using Include="RotationSolver.Basic.Actions" />
@@ -48,7 +53,25 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="DalamudPackager" Version="14.0.1" />
-	  <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
+		<PackageReference Update="DalamudPackager" Version="14.0.1" />
+		<PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
 	</ItemGroup>
+
+	<!-- Prune unwanted DLLs from output -->
+	<Target Name="PruneOutputDlls" AfterTargets="ResolveReferences">
+		<ItemGroup>
+			<!-- Keep only these DLLs in the copy-local list -->
+			<_KeepDlls Include="@(ReferenceCopyLocalPaths)"
+				Condition="
+					'%(Filename)' == 'RotationSolver' or
+					'%(Filename)' == 'RotationSolver.Basic' or
+					'%(Filename)' == 'ECommons'
+				" />
+			<!-- Remove everything else -->
+			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
+				Condition="!('%(Filename)' == 'RotationSolver' or '%(Filename)' == 'RotationSolver.Basic' or '%(Filename)' == 'ECommons')" />
+			<!-- Re-add only the kept set -->
+			<ReferenceCopyLocalPaths Include="@(_KeepDlls)" />
+		</ItemGroup>
+	</Target>
 </Project>
