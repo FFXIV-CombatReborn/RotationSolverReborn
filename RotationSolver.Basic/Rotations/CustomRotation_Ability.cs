@@ -267,7 +267,8 @@ public partial class CustomRotation
             {
                 return true;
             }
-            if (DefenseSingleAbility(nextGCD, out act) || (!DataCenter.IsHostileCastingToTank && ArmsLengthPvE.CanUse(out act)))
+            if (DefenseSingleAbility(nextGCD, out act) 
+                || (!DataCenter.IsHostileCastingToTank && !StatusHelper.PlayerHasStatus(true, StatusID.Vengeance) && !StatusHelper.PlayerHasStatus(true, StatusID.Damnation) && ArmsLengthPvE.CanUse(out act)))
             {
                 return true;
             }
