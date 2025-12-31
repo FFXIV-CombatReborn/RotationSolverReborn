@@ -137,10 +137,10 @@ internal static class MajorUpdater
         if (!_shouldRunThisCycle)
             return;
 
-        var autoOnEnabled = Service.Config.StartOnAllianceIsInCombat 
-            || Service.Config.StartOnAttackedBySomeone 
-            || Service.Config.StartOnFieldOpInCombat 
-            || Service.Config.StartOnPartyIsInCombat;
+        var autoOnEnabled = Service.Config.StartOnAllianceIsInCombat2 
+            || Service.Config.StartOnAttackedBySomeone2 
+            || Service.Config.StartOnFieldOpInCombat2 
+            || Service.Config.StartOnPartyIsInCombat2;
 
         try
         {
