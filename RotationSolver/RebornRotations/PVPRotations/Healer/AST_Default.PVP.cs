@@ -24,22 +24,27 @@ public class AST_DefaultPVP : AstrologianRotation
             return true;
         }
 
-        if (AspectedBeneficPvP_29247.CanUse(out action, usedUp: true))
+		if (StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.Macrocosmos_3104) && MicrocosmosPvP.CanUse(out action))
+		{
+			return true;
+		}
+
+		if (StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.LadyOfCrowns_4328) && LadyOfCrownsPvP.CanUse(out action))
+		{
+			return true;
+		}
+
+		if (AspectedBeneficPvP_29247.CanUse(out action, usedUp: true))
         {
             return true;
         }
 
-        if (StatusHelper.PlayerWillStatusEnd(1, true, StatusID.Macrocosmos_3104) && MicrocosmosPvP.CanUse(out action))
-        {
-            return true;
-        }
+		if (Player?.GetHealthRatio() < 0.6 && LadyOfCrownsPvP.CanUse(out action))
+		{
+			return true;
+		}
 
-        if (StatusHelper.PlayerWillStatusEnd(1, true, StatusID.LadyOfCrowns_4328) && LadyOfCrownsPvE.CanUse(out action))
-        {
-            return true;
-        }
-
-        if (Player?.GetHealthRatio() < 0.5 && MicrocosmosPvP.CanUse(out action))
+		if (Player?.GetHealthRatio() < 0.6 && MicrocosmosPvP.CanUse(out action))
         {
             return true;
         }
@@ -52,7 +57,27 @@ public class AST_DefaultPVP : AstrologianRotation
         return base.EmergencyAbility(nextGCD, out action);
     }
 
-    protected override bool AttackAbility(IAction nextGCD, out IAction? action)
+	protected override bool HealSingleAbility(IAction nextGCD, out IAction? action)
+	{
+		if (RespectGuard && HasPVPGuard)
+		{
+			return base.HealSingleAbility(nextGCD, out action);
+		}
+
+		if (LadyOfCrownsPvP.CanUse(out action))
+		{
+			return true;
+		}
+
+		if (MicrocosmosPvP.CanUse(out action))
+		{
+			return true;
+		}
+
+		return base.HealSingleAbility(nextGCD, out action);
+	}
+
+	protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         if (RespectGuard && HasPVPGuard)
         {
