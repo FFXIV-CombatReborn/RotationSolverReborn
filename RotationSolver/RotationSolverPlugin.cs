@@ -268,17 +268,16 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     {
         bool isValid = MajorUpdater.IsValid && DataCenter.CurrentRotation != null;
 
-        _nextActionWindow!.IsOpen = isValid && Service.Config.ShowNextActionWindow;
-
         isValid &= !Service.Config.OnlyShowWithHostileOrInDuty
                 || Svc.Condition[ConditionFlag.BoundByDuty]
                 || AnyHostileTargetWithinDistance(25);
 
         _controlWindow!.IsOpen = isValid && Service.Config.ShowControlWindow;
         _cooldownWindow!.IsOpen = isValid && Service.Config.ShowCooldownWindow;
+		_nextActionWindow!.IsOpen = isValid && Service.Config.ShowNextActionWindow;
 
-        // ActionTimeline window with additional checks
-        bool showActionTimeline = isValid && Service.Config.ShowActionTimelineWindow;
+		// ActionTimeline window with additional checks
+		bool showActionTimeline = isValid && Service.Config.ShowActionTimelineWindow;
 
         if (Service.Config.ActionTimelineOnlyWhenActive)
         {
