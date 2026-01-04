@@ -182,7 +182,7 @@ public sealed class WAR_Reborn : WarriorRotation
         return base.GeneralAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.ShakeItOffPvE, ActionID.ReprisalPvE)]
+    [RotationDesc(ActionID.ShakeItOffPvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         if (ShakeItOffPvE.CanUse(out act, skipAoeCheck: true))

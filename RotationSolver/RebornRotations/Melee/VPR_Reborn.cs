@@ -401,7 +401,7 @@ public sealed class VPR_Reborn : ViperRotation
             }
         }
 
-        if (LiveComboTime > GCDTime(3) && IsSwift)
+        if (LiveComboTime > GCDTime(3) && IsSwift && VicepitPvE.Cooldown.CurrentCharges > 0)
         {
             if (VicepitPvE.Cooldown.CurrentCharges == 1 && VicepitPvE.Cooldown.RecastTimeRemainOneCharge < 10)
             {
