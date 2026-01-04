@@ -5,8 +5,8 @@ public partial class ViperRotation
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Dexterity;
 
-    /// <inheritdoc/>
-    public override bool IsBursting()
+	/// <inheritdoc/>
+	public override bool IsBursting()
     {
         if (HasHunterAndSwift)
         {
@@ -169,7 +169,9 @@ public partial class ViperRotation
         ImGui.Text($"SerpentOffering: {SerpentOffering}/100");
         ImGui.Text($"RattlingCoilStacks: {RattlingCoilStacks}/{MaxRattling}");
         ImGui.Text($"AnguineTributeStacks: {AnguineTributeStacks}/{MaxAnguine}");
-        ImGui.Spacing();
+		ImGui.Text($"VicewinderHasCharges: {VicewinderHasCharges}");
+		ImGui.Text($"VicepitHasCharges: {VicepitHasCharges}");
+		ImGui.Spacing();
         ImGui.Text("DreadCombo: " + DreadCombo.ToString());
         ImGui.Text("NODREAD: " + NODREAD.ToString());
         ImGui.Text("DreadActive: " + DreadActive.ToString());
@@ -228,10 +230,22 @@ public partial class ViperRotation
     /// </summary>
     public static bool HasHunterAndSwift => IsHunter && IsSwift;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool WillSwiftEnd => StatusHelper.PlayerWillStatusEnd(5, true, StatusID.Swiftscaled);
+	/// <summary>
+	/// Returns true if Vicepit has at least one charge.
+	/// </summary>
+	public static bool VicepitHasCharges
+		=> (DataCenter.CurrentRotation is ViperRotation viper ? viper.VicepitPvE.Cooldown.CurrentCharges : 0) > 0;
+
+	/// <summary>
+	/// Returns true if Vicewinder has at least one charge.
+	/// </summary>
+	public static bool VicewinderHasCharges
+		=> (DataCenter.CurrentRotation is ViperRotation viper ? viper.VicewinderPvE.Cooldown.CurrentCharges : 0) > 0;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool WillSwiftEnd => StatusHelper.PlayerWillStatusEnd(5, true, StatusID.Swiftscaled);
 
     /// <summary>
     /// 
@@ -608,7 +622,7 @@ public partial class ViperRotation
 
     static partial void ModifyVicewinderPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentOffering <= 90 && RattlingCoilStacks < MaxRattling && AnguineTributeStacks == 0 && NODREAD;
+        setting.ActionCheck = () => VicewinderHasCharges && SerpentOffering <= 90 && RattlingCoilStacks < MaxRattling && AnguineTributeStacks == 0 && NODREAD;
     }
 
     static partial void ModifyHuntersCoilPvE(ref ActionSetting setting)
@@ -623,7 +637,7 @@ public partial class ViperRotation
 
     static partial void ModifyVicepitPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentOffering <= 90 && RattlingCoilStacks < MaxRattling && AnguineTributeStacks == 0 && NODREAD;
+        setting.ActionCheck = () => VicepitHasCharges && SerpentOffering <= 90 && RattlingCoilStacks < MaxRattling && AnguineTributeStacks == 0 && NODREAD;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
