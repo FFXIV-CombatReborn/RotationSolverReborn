@@ -51,10 +51,13 @@ public sealed class SMN_Reborn : SummonerRotation
     [RotationConfig(CombatType.PvE, Name = "Order")]
     public SummonOrderType SummonOrder { get; set; } = SummonOrderType.TopazEmeraldRuby;
 
-    [RotationConfig(CombatType.PvE, Name = "Use radiant on cooldown. But still keeping one charge")]
+    [RotationConfig(CombatType.PvE, Name = "Use second charge of Radiant Aegis on cooldown")]
     public bool RadiantOnCooldown { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use this if there's no other raid buff in your party")]
+	[RotationConfig(CombatType.PvE, Name = "Use Radiant Aegis on cooldown")]
+	public bool RadiantOnCooldownSpam { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "Use this if there's no other raid buff in your party")]
     public bool SecondTypeOpenerLogic { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Use Physick above level 30")]
@@ -154,7 +157,26 @@ public sealed class SMN_Reborn : SummonerRotation
             return true;
         }
 
-        return base.GeneralAbility(nextGCD, out act);
+		if (RadiantAegisPvE.Cooldown.CurrentCharges > 0 && !IsLastAction(false, RadiantAegisPvE))
+		{
+			if (RadiantOnCooldown && (RadiantAegisPvE.Cooldown.CurrentCharges == 2 || (RadiantAegisPvE.Cooldown.CurrentCharges == 1 && RadiantAegisPvE.Cooldown.WillHaveXChargesGCD(2, 1, 0))))
+			{
+				if (RadiantAegisPvE.CanUse(out act))
+				{
+					return true;
+				}
+			}
+
+			if (RadiantOnCooldownSpam)
+			{
+				if (RadiantAegisPvE.CanUse(out act))
+				{
+					return true;
+				}
+			}
+		}
+
+		return base.GeneralAbility(nextGCD, out act);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
