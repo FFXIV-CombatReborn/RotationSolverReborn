@@ -235,7 +235,8 @@ public partial class SummonerRotation
     static partial void ModifyRadiantAegisPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HasSummon;
-        setting.IsFriendly = true;
+		setting.StatusProvide = [StatusID.RadiantAegis];
+		setting.IsFriendly = true;
     }
 
     static partial void ModifyPhysickPvE(ref ActionSetting setting)
