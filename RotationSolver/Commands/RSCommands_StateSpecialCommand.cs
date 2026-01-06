@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.Config;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
+using RotationSolver.IPC;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.Commands
@@ -305,7 +306,8 @@ namespace RotationSolver.Commands
                     DataCenter.IsHenched = false;
                     DataCenter.IsPvPStateEnabled = false;
                     DataCenter.ResetAllRecords();
-                    ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
+					Wrath_IPCSubscriber.Release();
+					ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Off"); }
                     break;
@@ -399,7 +401,8 @@ namespace RotationSolver.Commands
                     DataCenter.IsHenched = false;
                     DataCenter.IsPvPStateEnabled = false;
                     DataCenter.ResetAllRecords();
-                    ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
+					Wrath_IPCSubscriber.Release();
+					ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
                     DataCenter.TargetingTypeOverride = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Off"); }
                     break;
