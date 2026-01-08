@@ -448,7 +448,7 @@ namespace RotationSolver.Commands
 					}
 				}
 
-				if (Service.Config.StartOnCountdown)
+				if (Service.Config.StartOnCountdown && !DataCenter.IsInDutyReplay())
 				{
 					if (Service.CountDownTime > 0)
 					{
