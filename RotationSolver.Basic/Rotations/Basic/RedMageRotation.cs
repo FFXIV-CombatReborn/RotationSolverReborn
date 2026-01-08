@@ -200,13 +200,28 @@ public partial class RedMageRotation
             return "Equal";
         }
     }
-    #endregion
 
-    #region Status Check
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasEmbolden => StatusHelper.PlayerHasStatus(true, StatusID.Embolden);
+	/// <summary>
+	/// 
+	/// </summary>
+	public bool IsInMeleeCombo
+	{
+		get
+		{
+			if (IsLastComboAction(ActionID.RipostePvE, ActionID.EnchantedRipostePvE, ActionID.EnchantedRipostePvE_45960) && ZwerchhauPvE.EnoughLevel && (HasEnoughManaFor23Combo || CanMagickedSwordplay))
+				return true;
+			if (IsLastComboAction(ActionID.ZwerchhauPvE, ActionID.EnchantedZwerchhauPvE, ActionID.EnchantedZwerchhauPvE_45961) && RedoublementPvE.EnoughLevel && (HasEnoughManaFor23Combo || CanMagickedSwordplay))
+				return true;
+			return false;
+		}
+	}
+	#endregion
+
+	#region Status Check
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool HasEmbolden => StatusHelper.PlayerHasStatus(true, StatusID.Embolden);
 
     /// <summary>
     /// 

@@ -265,7 +265,7 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Debug Mode", Filter = Debug)]
     private static readonly bool _inDebug = false;
 
-    [ConditionBool, UI("Make /rotation Manual a toggle command.",
+	[ConditionBool, UI("Make /rotation Manual a toggle command.",
         Filter = BasicParams)]
     private static readonly bool _toggleManual = false;
 
