@@ -438,6 +438,12 @@ internal static class DataCenter
 	public static bool IsInFRU => TerritoryID == 1238;
 	public static bool IsInCOD => TerritoryID == 1241;
 
+	public static bool IsInM9S => TerritoryID == 1321;
+	public static bool IsInM10S => TerritoryID == 1323;
+	public static bool IsInM11S => TerritoryID == 1327;
+	public static bool IsInM12S => TerritoryID == 1325;
+
+
 	public static bool IsInTerritory(ushort territoryId)
 	{
 		return TerritoryID == territoryId;

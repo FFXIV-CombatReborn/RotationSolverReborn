@@ -9,10 +9,10 @@ public sealed class RDM_Reborn : RedMageRotation
     [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if there are no healers alive in party)")]
     public bool GCDHeal { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "Attempt to pool Black and White Mana for burst (Experimental)")]
-	public bool Pooling { get; set; } = false;
+    [RotationConfig(CombatType.PvE, Name = "Attempt to pool Black and White Mana for burst (Experimental)")]
+    public bool Pooling { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "Prevent healing during burst combos")]
+    [RotationConfig(CombatType.PvE, Name = "Prevent healing during burst combos")]
     public bool PreventHeal { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Prevent raising during burst combos")]
@@ -103,32 +103,32 @@ public sealed class RDM_Reborn : RedMageRotation
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
-	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
-	{
-		bool AnyoneInMeleeRange = NumberOfHostilesInRangeOf(3) > 0;
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+    {
+        bool AnyoneInMeleeRange = NumberOfHostilesInRangeOf(3) > 0;
 
-		if (!AnyonesMeleeRule)
+		if (HasEmbolden || EmboldenPvE.Cooldown.HasOneCharge || EmboldenPvE.Cooldown.WillHaveOneCharge(10f) && !IsInMeleeCombo)
 		{
-			if (IsBurst && InCombat && HasHostilesInRange && EmboldenPvE.CanUse(out act))
-			{
-				return true;
-			}
-		}
-		else if (AnyonesMeleeRule)
-		{
-			if (IsBurst && InCombat && AnyoneInMeleeRange && EmboldenPvE.CanUse(out act))
+			if (InCombat && HasHostilesInMaxRange && ManaficationPvE.CanUse(out act))
 			{
 				return true;
 			}
 		}
 
-		if (HasEmbolden || IsLastAbility(ActionID.EmboldenPvE))
-		{
-			if (ManaficationPvE.CanUse(out act))
-			{
-				return true;
-			}
-		}
+		if (!AnyonesMeleeRule)
+        {
+            if (IsBurst && InCombat && HasHostilesInRange && EmboldenPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+        else if (AnyonesMeleeRule)
+        {
+            if (IsBurst && InCombat && AnyoneInMeleeRange && EmboldenPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
 
 		return base.EmergencyAbility(nextGCD, out act);
 	}
@@ -206,7 +206,7 @@ public sealed class RDM_Reborn : RedMageRotation
             return true;
         }
 
-        if (PrefulgencePvE.CanUse(out act))
+        if ((HasEmbolden || StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.PrefulgenceReady)) && PrefulgencePvE.CanUse(out act))
         {
             return true;
         }
@@ -394,15 +394,15 @@ public sealed class RDM_Reborn : RedMageRotation
             return true;
         }
 
-		//Check if you can start melee combo
-		if ((!Pooling && EnoughManaComboNoPooling) || (Pooling && EnoughManaComboPooling) || CanMagickedSwordplay)
+        //Check if you can start melee combo
+        if (((!Pooling && EnoughManaComboNoPooling) || (Pooling && EnoughManaComboPooling) && (!HasEmbolden && !CanMagickedSwordplay || !ManaficationPvE.EnoughLevel)) || (CanMagickedSwordplay && HasEmbolden))
         {
             if (!IsLastGCD(true, EnchantedMoulinetPvE) && EnchantedMoulinetPvE.CanUse(out act))
             {
                 return true;
             }
 
-			if (!IsLastGCD(true, EnchantedRipostePvE_45960) && EnchantedRipostePvE_45960.CanUse(out act))
+            if (!IsLastGCD(true, EnchantedRipostePvE_45960) && (HasEmbolden || StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.MagickedSwordplay)) && EnchantedRipostePvE_45960.CanUse(out act))
 			{
 				return true;
 			}
