@@ -107,7 +107,7 @@ public sealed class RDM_Reborn : RedMageRotation
     {
         bool AnyoneInMeleeRange = NumberOfHostilesInRangeOf(3) > 0;
 
-		if (HasEmbolden || EmboldenPvE.Cooldown.HasOneCharge || EmboldenPvE.Cooldown.WillHaveOneCharge(10f) && !IsInMeleeCombo)
+		if (HasEmbolden || EmboldenPvE.Cooldown.HasOneCharge || EmboldenPvE.Cooldown.WillHaveOneCharge(5f) && !IsInMeleeCombo)
 		{
 			if (InCombat && HasHostilesInMaxRange && ManaficationPvE.CanUse(out act))
 			{
@@ -394,26 +394,27 @@ public sealed class RDM_Reborn : RedMageRotation
             return true;
         }
 
-        //Check if you can start melee combo
-        if (((!Pooling && EnoughManaComboNoPooling) || (Pooling && EnoughManaComboPooling) && (!HasEmbolden && !CanMagickedSwordplay || !ManaficationPvE.EnoughLevel)) || (CanMagickedSwordplay && HasEmbolden))
-        {
-            if (!IsLastGCD(true, EnchantedMoulinetPvE) && EnchantedMoulinetPvE.CanUse(out act))
-            {
-                return true;
-            }
+		bool EnoughMana = (!Pooling && EnoughManaComboNoPooling) || (Pooling && EnoughManaComboPooling);
+		//Check if you can start melee combo
+		if (EnoughMana)
+		{
+			if (!IsLastGCD(true, EnchantedMoulinetPvE) && EnchantedMoulinetPvE.CanUse(out act))
+			{
+				return true;
+			}
 
-            if (!IsLastGCD(true, EnchantedRipostePvE_45960) && (HasEmbolden || StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.MagickedSwordplay)) && EnchantedRipostePvE_45960.CanUse(out act))
+			if (!IsLastGCD(true, EnchantedRipostePvE_45960) && (HasEmbolden || StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.MagickedSwordplay)) && EnchantedRipostePvE_45960.CanUse(out act))
 			{
 				return true;
 			}
 
 			if (!IsLastGCD(true, EnchantedRipostePvE) && EnchantedRipostePvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-        //Grand impact usage if not interrupting melee combo
-        if (GrandImpactPvE.CanUse(out act, skipStatusProvideCheck: CanGrandImpact, skipCastingCheck: true))
+			{
+				return true;
+			}
+		}
+		//Grand impact usage if not interrupting melee combo
+		if (GrandImpactPvE.CanUse(out act, skipStatusProvideCheck: CanGrandImpact, skipCastingCheck: true))
         {
             return true;
         }
