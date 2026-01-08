@@ -3914,7 +3914,11 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"IsHostileCastingAOE: {DataCenter.IsHostileCastingAOE}");
         ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
         ImGui.Text($"IsHostileCastingStop: {DataCenter.IsHostileCastingStop}");
-    }
+		ImGui.Spacing();
+		StatusID HellInACell = (StatusID)4734;
+		var HasHellInACell = StatusHelper.PlayerHasStatus(false, HellInACell);
+		ImGui.Text($"HasHellInACell: {HasHellInACell}");
+	}
 
     private static unsafe void DrawParty()
     {
@@ -4052,7 +4056,9 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"IsOCFreezeImmuneTarget: {battleChara.IsOCFreezeImmuneTarget()}");
             ImGui.Text($"IsOCBlindImmuneTarget: {battleChara.IsOCBlindImmuneTarget()}");
             ImGui.Text($"IsOCParalysisImmuneTarget: {battleChara.IsOCParalysisImmuneTarget()}");
-            ImGui.Spacing();
+			ImGui.Spacing();
+			ImGui.Text($"IsM9SavageImmune: {battleChara.IsM9SavageImmune()}");
+			ImGui.Spacing();
             ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
             ImGui.Text($"TTK: {battleChara.GetTTK()}");
             ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
