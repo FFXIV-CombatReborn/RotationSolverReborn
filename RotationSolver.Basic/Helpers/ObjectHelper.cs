@@ -947,7 +947,7 @@ public static class ObjectHelper
 			var HasHellInACell = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47341100S74Cfc3B0E74Cfc3B0);
 			//var HasHellAwaits = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47301100S74Cfc3B0E74Cfc3B0);
 
-			if (CharnelCell && battleChara.DistanceToPlayer() <= 6f && HasHellInACell)
+			if (CharnelCell && battleChara.DistanceToPlayer() <= 8f && HasHellInACell)
 			{
 				if (Service.Config.InDebug)
 				{
@@ -1083,9 +1083,6 @@ public static class ObjectHelper
 		return false;
 	}
 
-	/// <summary>
-	/// 
-	/// </summary>
 	//public static bool IsM12SavagePriority(this IBattleChara battleChara)
 	//{
 	//	if (Player.Object == null)
@@ -1179,7 +1176,6 @@ public static class ObjectHelper
             }
         }
 
-
         // forgiven adulation - Floor 30 boss ads
         if (DataCenter.TerritoryID == 1284)
         {
@@ -1208,7 +1204,7 @@ public static class ObjectHelper
     /// <summary>
     /// List of NameIds that Undead enemies in Occult Crecent.
     /// </summary>
-private static readonly HashSet<uint> IsOCUndeadSet =
+    private static readonly HashSet<uint> IsOCUndeadSet =
     [
         13741, //Lifereaper
         13924, //Armor
@@ -1509,8 +1505,7 @@ private static readonly HashSet<uint> IsOCUndeadSet =
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsM9SavageImmune()
-			|| battleChara.IsCrystalOfDarknessImmune()
+        return battleChara.IsCrystalOfDarknessImmune()
 			|| battleChara.IsColossusRubricatusImmune()
 			|| battleChara.IsTrueHeartImmune()
 			|| battleChara.IsEminentGriefImmune()

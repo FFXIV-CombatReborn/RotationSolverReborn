@@ -111,6 +111,8 @@ public partial class RedMageRotation
 		// With Embolden unlocked:
 		if (EmboldenPvE.EnoughLevel)
 		{
+			if (CanMagickedSwordplay) return 0;
+
 			// If Embolden is currently active, use standard 50 requirement
 			if (HasEmbolden) return 50;
 
@@ -143,6 +145,8 @@ public partial class RedMageRotation
 
 		if (EmboldenPvE.EnoughLevel)
 		{
+			if (CanMagickedSwordplay) return 0;
+
 			if (HasEmbolden) return 50;
 
 			switch (EmboldenPvE.Cooldown.RecastTimeRemain)
