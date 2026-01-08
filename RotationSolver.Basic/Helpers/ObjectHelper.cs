@@ -1583,25 +1583,58 @@ public static class ObjectHelper
 
 		if (DataCenter.IsInM9S)
 		{
-			//var DeadlyDoornail = battleChara.NameId == 14303;
-			//var FatalFlail = battleChara.NameId == 14302;
-			//var VampFatale = battleChara.NameId == 14501;
 			var CharnelCell = battleChara.NameId == 14304;
 
-			StatusID HellInACell = (StatusID)4734;
+			// Heel (on target) vs Hell (on player) pairs
+			StatusID HeelInACell1 = (StatusID)4739;
+			StatusID HellInACell1 = (StatusID)4731;
 
-			var HasHellInACell = StatusHelper.PlayerHasStatus(false, HellInACell);
-			//var HasHellAwaits = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47301100S74Cfc3B0E74Cfc3B0);
+			StatusID HeelInACell2 = (StatusID)4740;
+			StatusID HellInACell2 = (StatusID)4732;
 
-			if (CharnelCell && !HasHellInACell)
+			StatusID HeelInACell3 = (StatusID)4741;
+			StatusID HellInACell3 = (StatusID)4733;
+
+			StatusID HeelInACell4 = (StatusID)4742;
+			StatusID HellInACell4 = (StatusID)4734;
+
+			StatusID HeelInACell5 = (StatusID)4743;
+			StatusID HellInACell5 = (StatusID)4735;
+
+			StatusID HeelInACell6 = (StatusID)4744;
+			StatusID HellInACell6 = (StatusID)4736;
+
+			StatusID HeelInACell7 = (StatusID)4745;
+			StatusID HellInACell7 = (StatusID)4737;
+
+			StatusID HeelInACell8 = (StatusID)4746;
+			StatusID HellInACell8 = (StatusID)4738;
+
+			if (CharnelCell)
 			{
-				if (Service.Config.InDebug)
+				// Iterate all Heel/Hell pairs; immune if target has Heel and player does NOT have corresponding Hell
+				foreach (var (heel, hell) in new (StatusID heel, StatusID hell)[]
 				{
-					PluginLog.Information("IsM9SavageImmune CharnelCell mob found");
+					(HeelInACell1, HellInACell1),
+					(HeelInACell2, HellInACell2),
+					(HeelInACell3, HellInACell3),
+					(HeelInACell4, HellInACell4),
+					(HeelInACell5, HellInACell5),
+					(HeelInACell6, HellInACell6),
+					(HeelInACell7, HellInACell7),
+					(HeelInACell8, HellInACell8),
+				})
+				{
+					if (battleChara.HasStatus(false, heel) && !StatusHelper.PlayerHasStatus(false, hell))
+					{
+						if (Service.Config.InDebug)
+						{
+							PluginLog.Information("IsM9SavageImmune: CharnelCell immune due to Heel/Hell mismatch");
+						}
+						return true;
+					}
 				}
-				return true;
 			}
-
 		}
 
 		return false;
