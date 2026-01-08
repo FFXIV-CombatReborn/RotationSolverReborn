@@ -39,6 +39,16 @@ internal static class DataCenter
 	public static List<IBattleChara> AllTargets { get; set; } = [];
 	public static Dictionary<float, List<IBattleChara>> TargetsByRange { get; set; } = [];
 
+	public static bool IsInDutyReplay()
+	{
+		if (!PlayerAvailable())
+		{
+			return false;
+		}
+		
+		return Svc.Condition[ConditionFlag.DutyRecorderPlayback];
+	}
+
 	private static ulong _hostileTargetId = 0;
 
 	public static bool ResetActionConfigs { get; set; } = false;

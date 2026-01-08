@@ -74,7 +74,12 @@ namespace RotationSolver.Commands
 
         private static StateCommandType AdjustStateType(StateCommandType stateType, ref int index)
         {
-            if (!DataCenter.State && DataCenter.IsPvP && !DataCenter.IsPvPStateEnabled && Service.Config.PvpStateControl)
+			if (DataCenter.IsInDutyReplay())
+			{
+				return StateCommandType.Off;
+			}
+
+			if (!DataCenter.State && DataCenter.IsPvP && !DataCenter.IsPvPStateEnabled && Service.Config.PvpStateControl)
             {
                 return StateCommandType.PvP;
             }

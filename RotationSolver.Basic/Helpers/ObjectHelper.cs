@@ -44,7 +44,30 @@ public static class ObjectHelper
         return battleChara == null ? null : Service.GetSheet<Lumina.Excel.Sheets.BNpcBase>().GetRow(battleChara.BaseId);
     }
 
-    internal static bool CanProvoke(this IBattleChara target)
+	/// <summary>
+	/// Returns true if any current hostile target has the specified BNpc NameId.
+	/// </summary>
+	private static bool AnyHostileHasNameId(uint nameId)
+	{
+		var hostiles = DataCenter.AllHostileTargets;
+		if (hostiles == null || hostiles.Count == 0)
+		{
+			return false;
+		}
+
+		for (int i = 0, n = hostiles.Count; i < n; i++)
+		{
+			var h = hostiles[i];
+			if (h != null && h.NameId == nameId)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	internal static bool CanProvoke(this IBattleChara target)
     {
         if (target == null)
         {
@@ -928,6 +951,16 @@ public static class ObjectHelper
     }
 
 	/// <summary>
+	/// True if a Deadly Doornail (NameId 14303) is currently in AllHostileTargets.
+	/// </summary>
+	public static bool HasDeadlyDoornail => AnyHostileHasNameId(14303);
+
+	/// <summary>
+	/// True if a Fatal Flail (NameId 14302) is currently in AllHostileTargets.
+	/// </summary>
+	public static bool HasFatalFlail => AnyHostileHasNameId(14302);
+
+	/// <summary>
 	/// 
 	/// </summary>
 	public static bool IsM9SavagePriority(this IBattleChara battleChara)
@@ -944,10 +977,12 @@ public static class ObjectHelper
 			//var VampFatale = battleChara.NameId == 14501;
 			var CharnelCell = battleChara.NameId == 14304;
 
-			var HasHellInACell = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47341100S74Cfc3B0E74Cfc3B0);
+			StatusID HellInACell = (StatusID)4734;
+
+			var HasHellInACell = StatusHelper.PlayerHasStatus(false, HellInACell);
 			//var HasHellAwaits = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47301100S74Cfc3B0E74Cfc3B0);
 
-			if (CharnelCell && battleChara.DistanceToPlayer() <= 8f && HasHellInACell)
+			if (CharnelCell && battleChara.DistanceToPlayer() <= 5f && HasHellInACell)
 			{
 				if (Service.Config.InDebug)
 				{
@@ -985,7 +1020,7 @@ public static class ObjectHelper
 					return true;
 				}
 
-				if (role == JobRole.Melee && battleChara.DistanceToPlayer() < 5f)
+				if (role == JobRole.Melee && battleChara.DistanceToPlayer() < 5f && !HasFatalFlail)
 				{
 					if (Service.Config.InDebug)
 					{
@@ -994,7 +1029,7 @@ public static class ObjectHelper
 					return true;
 				}
 
-				if (role == JobRole.Tank && battleChara.DistanceToPlayer() < 5f)
+				if (role == JobRole.Tank && battleChara.DistanceToPlayer() < 5f && !HasFatalFlail)
 				{
 					if (Service.Config.InDebug)
 					{
@@ -1022,6 +1057,15 @@ public static class ObjectHelper
 					if (Service.Config.InDebug)
 					{
 						PluginLog.Information("IsM9SavagePriority FatalFlail mob found on Tank");
+					}
+					return true;
+				}
+
+				if (role != JobRole.Tank && role != JobRole.Melee && !HasDeadlyDoornail)
+				{
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Information("IsM9SavagePriority FatalFlail mob found on NonMelee");
 					}
 					return true;
 				}
@@ -1505,7 +1549,8 @@ public static class ObjectHelper
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsCrystalOfDarknessImmune()
+        return battleChara.IsM9SavageImmune()
+			|| battleChara.IsColossusRubricatusImmune()
 			|| battleChara.IsColossusRubricatusImmune()
 			|| battleChara.IsTrueHeartImmune()
 			|| battleChara.IsEminentGriefImmune()
@@ -1543,7 +1588,9 @@ public static class ObjectHelper
 			//var VampFatale = battleChara.NameId == 14501;
 			var CharnelCell = battleChara.NameId == 14304;
 
-			var HasHellInACell = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47341100S74Cfc3B0E74Cfc3B0);
+			StatusID HellInACell = (StatusID)4734;
+
+			var HasHellInACell = StatusHelper.PlayerHasStatus(false, HellInACell);
 			//var HasHellAwaits = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47301100S74Cfc3B0E74Cfc3B0);
 
 			if (CharnelCell && !HasHellInACell)
