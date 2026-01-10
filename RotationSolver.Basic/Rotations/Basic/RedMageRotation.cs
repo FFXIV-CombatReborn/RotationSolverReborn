@@ -111,8 +111,6 @@ public partial class RedMageRotation
 		// With Embolden unlocked:
 		if (EmboldenPvE.EnoughLevel)
 		{
-			if (CanMagickedSwordplay) return 0;
-
 			// If Embolden is currently active, use standard 50 requirement
 			if (HasEmbolden) return 50;
 
@@ -145,8 +143,6 @@ public partial class RedMageRotation
 
 		if (EmboldenPvE.EnoughLevel)
 		{
-			if (CanMagickedSwordplay) return 0;
-
 			if (HasEmbolden) return 50;
 
 			switch (EmboldenPvE.Cooldown.RecastTimeRemain)
@@ -179,12 +175,12 @@ public partial class RedMageRotation
 	/// <summary>
 	/// Enough mana for starting melee, respecting asymmetric pooling.
 	/// </summary>
-	public bool EnoughManaComboPooling => JobGauge.WhiteMana >= ManaNeededWhite() && JobGauge.BlackMana >= ManaNeededBlack();
+	public bool EnoughManaComboPooling => CanMagickedSwordplay || (JobGauge.WhiteMana >= ManaNeededWhite() && JobGauge.BlackMana >= ManaNeededBlack());
 
 	/// <summary>
 	/// Enough mana for starting melee, respecting asymmetric pooling.
 	/// </summary>
-	public bool EnoughManaComboNoPooling => JobGauge.BlackMana >= ManaNeededNoPooling() && JobGauge.WhiteMana >= ManaNeededNoPooling();
+	public bool EnoughManaComboNoPooling => CanMagickedSwordplay || (JobGauge.BlackMana >= ManaNeededNoPooling() && JobGauge.WhiteMana >= ManaNeededNoPooling());
 
 	/// <summary>
 	/// 
@@ -568,6 +564,10 @@ public partial class RedMageRotation
 	static partial void ModifyEnchantedRipostePvE_45960(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => HasManafication && (HasEnoughManaFor1Combo || CanMagickedSwordplay);
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyEnchantedZwerchhauPvE(ref ActionSetting setting)
@@ -578,6 +578,10 @@ public partial class RedMageRotation
 	static partial void ModifyEnchantedZwerchhauPvE_45961(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => HasManafication && (HasEnoughManaFor23Combo || CanMagickedSwordplay);
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyEnchantedRedoublementPvE(ref ActionSetting setting)
@@ -588,6 +592,10 @@ public partial class RedMageRotation
 	static partial void ModifyEnchantedRedoublementPvE_45962(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => HasManafication && (HasEnoughManaFor23Combo || CanMagickedSwordplay);
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyEnchantedMoulinetPvE(ref ActionSetting setting)
