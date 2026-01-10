@@ -398,12 +398,12 @@ public sealed class RDM_Reborn : RedMageRotation
 		//Check if you can start melee combo
 		if (EnoughMana)
 		{
-			if (!IsLastGCD(true, EnchantedMoulinetPvE) && EnchantedMoulinetPvE.CanUse(out act))
+			if (!IsLastGCD(true, EnchantedRipostePvE_45960) && ((HasEmbolden && CanMagickedSwordplay) || StatusHelper.PlayerWillStatusEndGCD(4, 0, true, StatusID.MagickedSwordplay)) && EnchantedRipostePvE_45960.CanUse(out act))
 			{
 				return true;
 			}
 
-			if (!IsLastGCD(true, EnchantedRipostePvE_45960) && (HasEmbolden || StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.MagickedSwordplay)) && EnchantedRipostePvE_45960.CanUse(out act))
+			if (!IsLastGCD(true, EnchantedMoulinetPvE) && EnchantedMoulinetPvE.CanUse(out act))
 			{
 				return true;
 			}
