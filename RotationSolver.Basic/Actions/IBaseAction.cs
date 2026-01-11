@@ -55,21 +55,22 @@ public interface IBaseAction : IAction
     /// </summary>
     ActionConfig Config { get; }
 
-    /// <summary>
-    /// Can I use this action.
-    /// </summary>
-    /// <param name="act">The return action</param>
-    /// <param name="skipStatusProvideCheck">Skip Status Provide Check</param>
-    /// <param name="skipStatusNeed">Skip Status Need Check</param>
-    /// <param name="skipTargetStatusNeedCheck">Skip Status Provide Check</param>
-    /// <param name="skipComboCheck">Skip Combo Check</param>
-    /// <param name="skipCastingCheck">Skip Casting and Moving Check</param>
-    /// <param name="usedUp">Is it used up all stacks</param>
-    /// <param name="skipAoeCheck">Skip aoe Check</param>
-    /// <param name="skipTTKCheck">skip IsTimeToKillValid check in BaseAction</param>
-    /// <param name="gcdCountForAbility">the gcd count for the ability.</param>
-    /// <param name="checkActionManager">Whether to check the in-game action manager in addition to our own internal logic.</param>
-    /// <returns>can I use it</returns>
-    bool CanUse(out IAction act, bool skipStatusProvideCheck = false, bool skipStatusNeed = false, bool skipTargetStatusNeedCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
-        bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0, bool checkActionManager = false);
+	/// <summary>
+	/// Can I use this action.
+	/// </summary>
+	/// <param name="act">The return action</param>
+	/// <param name="skipStatusProvideCheck">Skip Status Provide Check</param>
+	/// <param name="skipStatusNeed">Skip Status Need Check</param>
+	/// <param name="skipTargetStatusNeedCheck">Skip Status Provide Check</param>
+	/// <param name="skipComboCheck">Skip Combo Check</param>
+	/// <param name="skipCastingCheck">Skip Casting and Moving Check</param>
+	/// <param name="usedUp">Is it used up all stacks</param>
+	/// <param name="skipAoeCheck">Skip aoe Check</param>
+	/// <param name="skipTTKCheck">skip IsTimeToKillValid check in BaseAction</param>
+	/// <param name="gcdCountForAbility">the gcd count for the ability.</param>
+	/// <param name="checkActionManager">Whether to check the in-game action manager in addition to our own internal logic.</param>
+	/// <param name="targetOverride">Overrides the default target type for the action.</param>
+	/// <returns>can I use it</returns>
+	bool CanUse(out IAction act, bool skipStatusProvideCheck = false, bool skipStatusNeed = false, bool skipTargetStatusNeedCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
+		bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0, bool checkActionManager = false, TargetType targetOverride = default);
 }

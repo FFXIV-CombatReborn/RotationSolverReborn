@@ -719,7 +719,6 @@ public partial class CustomRotation
     {
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting))
         {
-            act = null;
         }
 
         act = null;
@@ -736,7 +735,6 @@ public partial class CustomRotation
     {
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting))
         {
-            act = null;
         }
 
         act = null;

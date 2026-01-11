@@ -365,10 +365,25 @@ internal static partial class TargetUpdater
 			var deathPartyIds = new HashSet<ulong>();
 			if (DataCenter.PartyMembers != null)
 			{
-				foreach (var target in DataCenter.PartyMembers.GetDeath())
+				if (raisetype != RaiseType.PartyHealersOnly)
 				{
-					validRaiseTargets.Add(target);
-					_ = deathPartyIds.Add(target.GameObjectId);
+					foreach (var target in DataCenter.PartyMembers.GetDeath())
+					{
+						validRaiseTargets.Add(target);
+						_ = deathPartyIds.Add(target.GameObjectId);
+					}
+				}
+
+				if (raisetype == RaiseType.PartyHealersOnly)
+				{
+					foreach (var target in DataCenter.PartyMembers.GetDeath())
+					{
+						if (target.IsJobCategory(JobRole.Healer))
+						{
+							validRaiseTargets.Add(target);
+							_ = deathPartyIds.Add(target.GameObjectId);
+						}
+					}
 				}
 			}
 

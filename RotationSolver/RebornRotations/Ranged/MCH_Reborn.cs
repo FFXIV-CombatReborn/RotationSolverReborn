@@ -17,22 +17,30 @@ public sealed class MCH_Reborn : MachinistRotation
 
     [RotationConfig(CombatType.PvE, Name = "Restrict mitigations to not overlap")]
     private bool MitOverlap { get; set; } = false;
-    #endregion
 
-    #region Countdown logic
-    protected override IAction? CountDownAction(float remainTime)
+	[RotationConfig(CombatType.PvE, Name = "Use AirAnchor at 1 second remaining on countdown")]
+	private bool AirAnchorCountdown { get; set; } = false;
+	#endregion
+
+	#region Countdown logic
+	protected override IAction? CountDownAction(float remainTime)
     {
-        if (remainTime < 4.8f && ReassemblePvE.CanUse(out IAction? act))
+		if (AirAnchorCountdown && remainTime < 1f && AirAnchorPvE.EnoughLevel && AirAnchorPvE.CanUse(out IAction? act))
+		{
+			return act;
+		}
+
+		if (remainTime < 4.8f && ReassemblePvE.CanUse(out act))
         {
             return act;
         }
 
-        if (IsBurst && OpenerBurstMeds && remainTime <= 1f && UseBurstMedicine(out act))
+		if (IsBurst && OpenerBurstMeds && remainTime <= 1f && UseBurstMedicine(out act))
         {
             return act;
         }
 
-        return base.CountDownAction(remainTime);
+		return base.CountDownAction(remainTime);
     }
     #endregion
 

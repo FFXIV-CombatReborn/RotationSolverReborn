@@ -235,16 +235,17 @@ public readonly struct ActionBasicInfo
         Aspect = (Aspect)_action.Action.Aspect;
     }
 
-    /// <summary>
-    /// Performs a basic check to determine whether the action can be used.
-    /// </summary>
-    /// <param name="skipStatusProvideCheck">Whether to skip the status provide check.</param>
-    /// /// <param name="skipStatusNeed">Whether to skip the casting check.</param>
-    /// <param name="skipComboCheck">Whether to skip the combo check.</param>
-    /// <param name="skipCastingCheck">Whether to skip the casting check.</param>
-    /// /// <param name="checkActionManager">Whether to check the action manager directly for skills being usable.</param>
-    /// <returns>True if the action passes the basic check; otherwise, false.</returns>
-    internal readonly unsafe bool BasicCheck(bool skipStatusProvideCheck, bool skipStatusNeed,  bool skipComboCheck, bool skipCastingCheck, bool checkActionManager = false)
+	/// <summary>
+	/// Performs a basic check to determine whether the action can be used.
+	/// </summary>
+	/// <param name="skipStatusProvideCheck">Whether to skip the status provide check.</param>
+	/// <param name="skipStatusNeed">Whether to skip the casting check.</param>
+	/// <param name="skipComboCheck">Whether to skip the combo check.</param>
+	/// <param name="skipCastingCheck">Whether to skip the casting check.</param>
+	/// <param name="checkActionManager">Whether to check the action manager directly for skills being usable.</param>
+	/// <param name="targetOverride">Overrides the default target type for the action.</param>
+	/// <returns>True if the action passes the basic check; otherwise, false.</returns>
+	internal readonly unsafe bool BasicCheck(bool skipStatusProvideCheck, bool skipStatusNeed,  bool skipComboCheck, bool skipCastingCheck, bool checkActionManager = false, TargetType targetOverride = default)
     {
 		if (Player.Object == null)
 		{

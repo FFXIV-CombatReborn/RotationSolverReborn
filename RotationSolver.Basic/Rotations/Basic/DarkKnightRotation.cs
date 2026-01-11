@@ -366,13 +366,13 @@ public partial class DarkKnightRotation
     static partial void ModifyOblationPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Oblation];
-		setting.ActionCheck = () => ObjectHelper.PlayerIsTargetOnSelf();
 		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
         setting.IsFriendly = true;
-    }
+        setting.TargetType = TargetType.Self;
+	}
 
     static partial void ModifySaltAndDarknessPvE(ref ActionSetting setting)
     {
