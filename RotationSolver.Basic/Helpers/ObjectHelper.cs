@@ -699,7 +699,12 @@ public static class ObjectHelper
 
     internal static bool IsFriendlyBattleNPC(this IBattleChara battleChara)
     {
-        if (battleChara.IsPet())
+		if (DataCenter.TerritoryID == 952)
+		{
+			return false;
+		}
+
+		if (battleChara.IsPet())
         {
             return false;
         }

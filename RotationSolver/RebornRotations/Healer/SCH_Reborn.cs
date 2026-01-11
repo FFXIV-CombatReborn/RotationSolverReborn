@@ -119,22 +119,22 @@ public sealed class SCH_Reborn : ScholarRotation
             return act;
         }
 
-        if (remainTime < 3 && UseBurstMedicine(out act))
+        if (remainTime < 3f && UseBurstMedicine(out act))
         {
             return act;
         }
 
-        if (remainTime is < 4 and > 3 && DeploymentTacticsPvE.CanUse(out act))
+        if (remainTime is < 4f and > 3f && DeploymentTacticsPvE.CanUse(out act))
         {
             return act;
         }
 
-        if (remainTime is < 7 and > 6 && AdloquiumDuringCountdown && AdloquiumPvE.CanUse(out act))
+        if (remainTime is < 7f and > 6f && AdloquiumDuringCountdown && AdloquiumPvE.CanUse(out act, targetOverride: TargetType.Tank))
         {
             return act;
         }
 
-        if (remainTime <= 15 && UseRecitationInOpener && RecitationPvE.CanUse(out act))
+        if (remainTime <= 15f && UseRecitationInOpener && RecitationPvE.CanUse(out act))
         {
             return act;
         }
@@ -282,21 +282,24 @@ public sealed class SCH_Reborn : ScholarRotation
             return true;
         }
 
-        // Check if any tank matches Excogitation target
-        bool tankHasExcogTarget = false;
-        IEnumerable<IBattleChara> tanks = PartyMembers.GetJobCategory(JobRole.Tank);
-        foreach (IBattleChara member in tanks)
-        {
-            if (member == ExcogitationPvE.Target.Target)
-            {
-                tankHasExcogTarget = true;
-                break;
-            }
-        }
-        if (HasRecitation && tankHasExcogTarget && ExcogitationPvE.CanUse(out act))
-        {
-            return true;
-        }
+		if (ExcogitationPvE.CanUse(out act))
+		{
+			// Check if any tank matches Excogitation target
+			bool tankHasExcogTarget = false;
+			IEnumerable<IBattleChara> tanks = PartyMembers.GetJobCategory(JobRole.Tank);
+			foreach (IBattleChara member in tanks)
+			{
+				if (member == ExcogitationPvE.Target.Target)
+				{
+					tankHasExcogTarget = true;
+					break;
+				}
+			}
+			if (HasRecitation && tankHasExcogTarget && ExcogitationPvE.Target.Target.GetHealthRatio() < ExcogHeal)
+			{
+				return true;
+			}
+		}
 
         // Check if any party member has Fey Union status
         bool haveLink = false;
@@ -318,7 +321,7 @@ public sealed class SCH_Reborn : ScholarRotation
         }
 
         // Otherwise we'll spend aether charges; we didn't burn it on the tank above so use excog based on oGCD heal toggle
-        if (ExcogitationPvE.Target.Target.GetHealthRatio() >= ExcogHeal && ExcogitationPvE.CanUse(out act))
+        if (!HasRecitation && !IsLastAbility(false, RecitationPvE) && ExcogitationPvE.CanUse(out act) && ExcogitationPvE.Target.Target.GetHealthRatio() < ExcogHeal)
         {
             return true;
         }
@@ -445,7 +448,7 @@ public sealed class SCH_Reborn : ScholarRotation
             return true;
         }
 
-        if (ExcogitationPvE.CanUse(out act))
+        if (!HasRecitation && !IsLastAbility(false, RecitationPvE) && ExcogitationPvE.CanUse(out act))
         {
             return true;
         }

@@ -23,7 +23,7 @@ public sealed class SMN_Reborn : SummonerRotation
     [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if there are no healers alive in party)")]
     public bool GCDHeal { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Crimson Cyclone at any range, regardless of saftey use with caution (Enabling this ignores the below distance setting).")]
+	[RotationConfig(CombatType.PvE, Name = "Use Crimson Cyclone at any range, regardless of saftey use with caution (Enabling this ignores the below distance setting).")]
     public bool AddCrimsonCyclone { get; set; } = true;
 
     [Range(1, 20, ConfigUnitType.Yalms)]
@@ -36,7 +36,10 @@ public sealed class SMN_Reborn : SummonerRotation
     [RotationConfig(CombatType.PvE, Name = "Use Swiftcast on ressurection")]
     public bool AddSwiftcastOnRaise { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Swiftcast on Ruby Ruin when not enough level for Ruby Rite")]
+	[RotationConfig(CombatType.PvE, Name = "Raise while in solar bahamut")]
+	public bool SBRaise { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Swiftcast on Ruby Ruin when not enough level for Ruby Rite")]
     public bool AddSwiftcastOnLowST { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Use Swiftcast on Ruby Outburst when not enough level for Ruby Rite")]
@@ -157,7 +160,7 @@ public sealed class SMN_Reborn : SummonerRotation
             return true;
         }
 
-		if (RadiantAegisPvE.Cooldown.CurrentCharges > 0 && !IsLastAction(false, RadiantAegisPvE))
+		if (RadiantAegisPvE.Cooldown.CurrentCharges > 0 && !IsLastAction(false, RadiantAegisPvE) && InCombat)
 		{
 			if (RadiantOnCooldown && (RadiantAegisPvE.Cooldown.CurrentCharges == 2 || (RadiantAegisPvE.Cooldown.CurrentCharges == 1 && RadiantAegisPvE.Cooldown.WillHaveXChargesGCD(2, 1, 0))))
 			{
@@ -404,7 +407,20 @@ public sealed class SMN_Reborn : SummonerRotation
         return base.HealSingleGCD(out act);
     }
 
-    protected override bool GeneralGCD(out IAction? act)
+	[RotationDesc(ActionID.ResurrectionPvE)]
+	protected override bool RaiseGCD(out IAction? act)
+	{
+		if ((!InSolarBahamut && SBRaise) || !SBRaise)
+		{
+			if (ResurrectionPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+		return base.RaiseGCD(out act);
+	}
+
+	protected override bool GeneralGCD(out IAction? act)
     {
         if (SummonCarbunclePvE.CanUse(out act))
         {

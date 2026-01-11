@@ -3937,8 +3937,8 @@ public partial class RotationConfigWindow : Window
         // AST-only card target preview
         if (Player.Object != null && Player.Object.IsJobs(Job.AST))
         {
-            IBattleChara? spear = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.TheSpear, 0, SpecialActionType.None);
-            IBattleChara? balance = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.TheBalance, 0, SpecialActionType.None);
+            IBattleChara? spear = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.TheSpear, 0, SpecialActionType.None, TargetType.TheSpear, true);
+            IBattleChara? balance = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.TheBalance, 0, SpecialActionType.None, TargetType.TheBalance, true);
             ImGui.Spacing();
             ImGui.Text("AST Card Targets (Preview):");
             ImGui.Text($"- The Spear: {spear?.Name ?? "None"}");

@@ -52,4 +52,10 @@ public enum CanUseOption : byte
     /// </summary>
     [Description("Skip AoE check")]
     SkipAoeCheck = 1 << 6,
+
+	/// <summary>
+	/// Overriding targettype.
+	/// </summary>
+	[Description("Overriding targettype")]
+	targetOverride = 1 << 7,
 }

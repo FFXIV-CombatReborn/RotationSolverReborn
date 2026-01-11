@@ -34,7 +34,7 @@ internal class TargetCondition : DelayCondition
     /// <returns><c>true</c> if the condition is met; otherwise, <c>false</c>.</returns>
     protected override bool IsTrueInside(ICustomRotation rotation)
     {
-        IBattleChara? tar = _action?.TargetInfo.FindTarget(true, false, false)?.Target ?? TargetType switch
+        IBattleChara? tar = _action?.TargetInfo.FindTarget(true, false, false, default)?.Target ?? TargetType switch
         {
             TargetType.Target => Svc.Targets.Target as IBattleChara,
             TargetType.HostileTarget => DataCenter.HostileTarget,
