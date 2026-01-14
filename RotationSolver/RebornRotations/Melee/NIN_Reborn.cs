@@ -17,17 +17,17 @@ public sealed class NIN_Reborn : NinjaRotation
     [RotationConfig(CombatType.PvE, Name = "Use Mudras outside of combat when enemies are near")]
     public bool CombatMudra { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use both stacks of Mudras")]
+	[RotationConfig(CombatType.PvE, Name = "Use both stacks of Mudras")]
     public bool BurnMudraStacks { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Use Forked Raiju instead of Fleeting Raiju if you are outside of range (Dangerous)")]
     public bool ForkedUse { get; set; } = false;
-    #endregion
+	#endregion
 
-    #region Tracking Properties
-    // Properties to track RabbitMediumPvE failures and related information.
-    //private int _rabbitMediumFailures = GetActionUsageCount((uint)ActionID.RabbitMediumPvE);
-    private IBaseAction? _lastNinActionAim = null;
+	#region Tracking Properties
+	// Properties to track RabbitMediumPvE failures and related information.
+	//private int _rabbitMediumFailures = GetActionUsageCount((uint)ActionID.RabbitMediumPvE);
+	private IBaseAction? _lastNinActionAim = null;
     // Holds the next ninjutsu action to perform.
     private IBaseAction? _ninActionAim = null;
     private readonly ActionID NinjutsuPvEid = AdjustId(ActionID.NinjutsuPvE);
@@ -123,7 +123,7 @@ public sealed class NIN_Reborn : NinjaRotation
         }
 
         // Side-effect: decide/refresh ninjutsu aim; do not consume the oGCD slot here.
-        if (InCombat || (CombatMudra && HasHostilesInMaxRange && TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges))
+        if ((InCombat && HasHostilesInMaxRange) || (CombatMudra && HasHostilesInMaxRange && TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges))
         {
             _ = ChoiceNinjutsu(out _);
         }

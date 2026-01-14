@@ -295,39 +295,38 @@ public sealed class RDM_Reborn : RedMageRotation
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        if (ManaStacks == 3)
-        {
-            // Prefer Verholy if BlackMana > WhiteMana and can't use VerStone
-            if (BlackMana > WhiteMana && !CanVerStone && VerholyPvE.CanUse(out act))
-                return true;
+		if (ManaStacks == 3)
+		{
+			int diff = BlackMana - WhiteMana;
+			int gap = Math.Abs(diff);
 
-            // Prefer Verflare if WhiteMana > BlackMana and can't use VerFire
-            if (WhiteMana > BlackMana && !CanVerFire && VerflarePvE.CanUse(out act))
-                return true;
+			bool forceBalance = HasEmbolden || gap >= 19;
 
-            // Fallbacks: try Verflare, then Verholy
-            if (!CanVerFire && VerflarePvE.CanUse(out act))
-                return true;
+			if (forceBalance)
+			{
+				// Balance first
+				if (diff > 0 && VerholyPvE.CanUse(out act)) return true;  // Black leads -> add White
+				if (diff < 0 && VerflarePvE.CanUse(out act)) return true; // White leads -> add Black
+			}
+			else
+			{
+				// Slight imbalance: proc-aware preference to avoid overwriting existing procs
+				if (CanVerFire && VerholyPvE.CanUse(out act)) return true;
+				if (CanVerStone && VerflarePvE.CanUse(out act)) return true;
+			}
 
-            if (!CanVerStone && VerholyPvE.CanUse(out act))
-                return true;
+			// Fallbacks
+			if (diff > 0 && VerholyPvE.CanUse(out act)) return true;
+			if (diff < 0 && VerflarePvE.CanUse(out act)) return true;
 
-            // Prefer Verholy if BlackMana > WhiteMana
-            if (BlackMana > WhiteMana && VerholyPvE.CanUse(out act))
-                return true;
+			if (CanVerFire && !CanVerStone && VerholyPvE.CanUse(out act)) return true;
+			if (CanVerStone && !CanVerFire && VerflarePvE.CanUse(out act)) return true;
 
-            // Prefer Verflare if WhiteMana > BlackMana
-            if (WhiteMana > BlackMana && VerflarePvE.CanUse(out act))
-                return true;
+			if (VerholyPvE.CanUse(out act)) return true;
+			if (VerflarePvE.CanUse(out act)) return true;
+		}
 
-            if (VerflarePvE.CanUse(out act))
-                return true;
-
-            if (VerholyPvE.CanUse(out act))
-                return true;
-        }
-
-        if (CanInstantCast && !CanVerEither)
+		if (CanInstantCast && !CanVerEither)
         {
             if (ScatterPvE.CanUse(out act))
             {
@@ -398,7 +397,7 @@ public sealed class RDM_Reborn : RedMageRotation
 		//Check if you can start melee combo
 		if (EnoughMana)
 		{
-			if (!IsLastGCD(true, EnchantedRipostePvE_45960) && ((HasEmbolden && CanMagickedSwordplay) || StatusHelper.PlayerWillStatusEndGCD(4, 0, true, StatusID.MagickedSwordplay)) && EnchantedRipostePvE_45960.CanUse(out act))
+			if (EnchantedRipostePvE.Config.IsEnabled && !IsLastGCD(true, EnchantedRipostePvE_45960) && ((HasEmbolden && CanMagickedSwordplay) || StatusHelper.PlayerWillStatusEndGCD(4, 0, true, StatusID.MagickedSwordplay)) && EnchantedRipostePvE_45960.CanUse(out act))
 			{
 				return true;
 			}

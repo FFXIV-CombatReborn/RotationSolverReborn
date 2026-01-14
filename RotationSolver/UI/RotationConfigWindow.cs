@@ -417,7 +417,8 @@ public partial class RotationConfigWindow : Window
             _ = diagInfo.AppendLine($"Update Frequency: {Service.Config.MinUpdatingTime}");
             _ = diagInfo.AppendLine($"Intercept: {Service.Config.InterceptAction2}");
             _ = diagInfo.AppendLine($"Player Level: {DataCenter.PlayerSyncedLevel()}");
-            _ = diagInfo.AppendLine($"Player Job: {Player.Job}");
+			_ = diagInfo.AppendLine($"Rotation Name: {_curRotationAttribute?.Name ?? string.Empty}");
+			_ = diagInfo.AppendLine($"Player Job: {Player.Job}");
             _ = diagInfo.AppendLine($"AutoFaceTargetOnActionSetting: {DataCenter.AutoFaceTargetOnActionSetting()}");
             var moveModeValue = DataCenter.MoveModeSetting();
             string moveModeText = moveModeValue switch
