@@ -30,12 +30,17 @@ public sealed class MCH_Reborn : MachinistRotation
 			return act;
 		}
 
-		if (remainTime < 4.8f && ReassemblePvE.CanUse(out act))
+		if (remainTime < 4.75f && ReassemblePvE.CanUse(out act))
         {
             return act;
         }
 
-		if (IsBurst && OpenerBurstMeds && remainTime <= 1f && UseBurstMedicine(out act))
+		if (AirAnchorCountdown && IsBurst && OpenerBurstMeds && remainTime <= 1.5f && UseBurstMedicine(out act))
+		{
+			return act;
+		}
+
+		if (!AirAnchorCountdown && IsBurst && OpenerBurstMeds && remainTime <= 1f && UseBurstMedicine(out act))
         {
             return act;
         }

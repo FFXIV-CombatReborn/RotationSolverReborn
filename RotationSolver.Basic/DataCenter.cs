@@ -14,6 +14,7 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Basic.Rotations.Duties;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using Action = Lumina.Excel.Sheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
@@ -1244,9 +1245,44 @@ internal static class DataCenter
 		return false;
 	}
 
+	// Cached, case-insensitive path sets modeled after WrathCombo VFX.cs
+	private static readonly FrozenSet<string> TankbusterPaths = FrozenSet.ToFrozenSet(
+    [
+        "vfx/lockon/eff/tank",                    // Generic TB check
+		"vfx/lockon/eff/x6fe_fan100_50_0t1",     // Necron Blue Shockwave - Cone Tankbuster
+		"vfx/common/eff/mon_eisyo03t",           // M10 Deep Impact AoE TB (also generic?)
+		"vfx/lockon/eff/m0676trg_tw_d0t1p",      // M10 Hot Impact shared TB
+		"vfx/lockon/eff/m0676trg_tw_s6_d0t1p",   // M11 Raw Steel
+		"vfx/lockon/eff/z6r2b3_8sec_lockon_c0a1",// Kam'lanaut Princely Blow
+		"vfx/lockon/eff/m0742trg_b1t1",          // M7 Abominable Blink
+		"vfx/lockon/eff/x6r9_tank_lockonae"      // M9 Hardcore Large TB
+	], StringComparer.OrdinalIgnoreCase);
+
+	private static readonly FrozenSet<string> MultiHitSharedPaths = FrozenSet.ToFrozenSet(
+    [
+        "vfx/lockon/eff/com_share4a1",
+		"vfx/lockon/eff/com_share5a1",
+		"vfx/lockon/eff/com_share6m7s_1v",
+		"vfx/lockon/eff/com_share8s_0v",
+		"vfx/lockon/eff/share_laser_5s_c0w",     // Line
+		"vfx/lockon/eff/share_laser_8s_c0g",     // Line
+		"vfx/lockon/eff/m0922trg_t2w"
+	], StringComparer.OrdinalIgnoreCase);
+
+	private static readonly FrozenSet<string> SharedDamagePaths = FrozenSet.ToFrozenSet(
+    [
+        "vfx/lockon/eff/coshare",
+		"vfx/lockon/eff/share_laser",
+		"vfx/lockon/eff/com_share",
+		// Duty-specific AOE share markers
+		"vfx/monster/gimmick2/eff/z3o7_b1_g06c0t", // Puppet's Bunker, Superior Flight Unit.
+		"vfx/monster/gimmick4/eff/z5r1_b4_g09c0c"  // Aglaia, Nald'thal
+	], StringComparer.OrdinalIgnoreCase);
+
+	private static readonly StringComparison PathCmp = StringComparison.OrdinalIgnoreCase;
 
 	public static bool IsHostileCastingAOE =>
-	InCombat && (IsCastingAreaVfx() || (AllHostileTargets != null && IsAnyHostileCastingArea()));
+		InCombat && (IsCastingAreaVfx() || (AllHostileTargets != null && IsAnyHostileCastingArea()));
 
 	private static bool IsAnyHostileCastingArea()
 	{
@@ -1392,64 +1428,99 @@ internal static class DataCenter
 		return false;
 	}
 
+	// Improved multi-hit detection using a cached set of known multi-hit share paths
 	public static bool IsCastingMultiHit()
 	{
 		return IsCastingVfx(VfxDataQueue, s =>
 		{
-			if (!Player.Available)
+			if (!Player.Available || Player.Object == null)
 			{
 				return false;
 			}
 
-			// For x6fe, ignore target and player role checks.
-			if (s.Path.StartsWith("vfx/lockon/eff/com_share5a1"))
+			if (string.IsNullOrEmpty(s.Path))
 			{
-				return true;
+				return false;
 			}
 
-			if (s.Path.StartsWith("vfx/lockon/eff/m0922trg_t2w"))
+			// Any path in multi-hit share list qualifies
+			foreach (var p in MultiHitSharedPaths)
 			{
-				return true;
+				if (s.Path.StartsWith(p, PathCmp))
+				{
+					return true;
+				}
 			}
 
 			return false;
 		});
 	}
 
+	// Improved tank VFX detection: recognizes generic and specific TB paths, plus preserves original tank lock-on checks
 	public static bool IsCastingTankVfx()
 	{
 		return IsCastingVfx(VfxDataQueue, s =>
 		{
-			if (!Player.Available)
+			if (!Player.Available || Player.Object == null)
 			{
 				return false;
 			}
 
-			if (Player.Object == null)
+			if (string.IsNullOrEmpty(s.Path))
 			{
 				return false;
 			}
 
-			// For x6fe, ignore target and player role checks.
-			if (s.Path.StartsWith("vfx/lockon/eff/x6fe"))
+			// Specific tankbuster effect paths (priority)
+			foreach (var p in TankbusterPaths)
 			{
-				return true;
+				if (s.Path.StartsWith(p, PathCmp))
+				{
+					return true;
+				}
 			}
 
 			// Preserve original checks for other tank lock-on effects.
 			return (!TargetFilter.PlayerJobCategory(JobRole.Tank) || s.ObjectId == Player.Object.GameObjectId)
-				   && (s.Path.StartsWith("vfx/lockon/eff/tank_lockon")
-					   || s.Path.StartsWith("vfx/lockon/eff/tank_laser"));
+				   && (s.Path.StartsWith("vfx/lockon/eff/tank_lockon", PathCmp)
+					   || s.Path.StartsWith("vfx/lockon/eff/tank_laser", PathCmp));
 		});
 	}
 
+	// Improved shared AOE detection using cached sets, covers both regular and multi-hit stack markers
 	public static bool IsCastingAreaVfx()
 	{
 		return IsCastingVfx(VfxDataQueue, s =>
 		{
-			return Player.Available && (s.Path.StartsWith("vfx/lockon/eff/coshare")
-			|| s.Path.StartsWith("vfx/lockon/eff/share_laser")
-			|| s.Path.StartsWith("vfx/lockon/eff/com_share"));
+			if (!Player.Available || Player.Object == null)
+			{
+				return false;
+			}
+
+			if (string.IsNullOrEmpty(s.Path))
+			{
+				return false;
+			}
+
+			// Multi-hit markers (treated as area/stack mechanics)
+			foreach (var p in MultiHitSharedPaths)
+			{
+				if (s.Path.StartsWith(p, PathCmp))
+				{
+					return true;
+				}
+			}
+
+			// Regular shared markers
+			foreach (var p in SharedDamagePaths)
+			{
+				if (s.Path.StartsWith(p, PathCmp))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		});
 	}
 
