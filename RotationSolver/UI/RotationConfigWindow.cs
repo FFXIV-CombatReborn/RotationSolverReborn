@@ -60,7 +60,9 @@ public partial class RotationConfigWindow : Window
 
 	private static readonly string[] _supporters =
 	[
+	"Abracon",
 	"Akurosuki",
+	"Aniane",
 	"Baliha",
 	"BangPowNyoom",
 	"Biscuit",
@@ -70,10 +72,11 @@ public partial class RotationConfigWindow : Window
 	"clean",
 	"Cole",
 	"DeadCode",
-	"deleted_user_e3b65ec0ca7v",
 	"Drama",
 	"Ecliptive",
+	"Elena",
 	"Elita",
+	"Endings",
 	"Ephi",
 	"eudesu39",
 	"Ghosty !",
@@ -85,23 +88,30 @@ public partial class RotationConfigWindow : Window
 	"LouBird",
 	"Lyn Undercroft",
 	"Miracle Ace",
+	"Mirai",
 	"Miri",
 	"Nefertem",
 	"Nekomimi Bakeneko",
+	"no name",
+	"Nyakaze",
+	"Papaya",
 	"Plogons",
 	"poop dealer",
 	"prismagreen",
 	"purrpletime",
+	"Rini",
+	"Rockabye",
+	"sambaggins",
 	"smf26",
+	"Sware",
 	"Taazaam",
+	"That One Aura",
 	"Toska",
 	"TuckingFypo-",
 	"Vaex_Darastrix",
 	"wax",
 	"Yona",
-	"Zoe",
-	"exialla",
-	"caffeinatedrose"
+	"KuwoBlack"
 	];
 
 	// Hints system fields
