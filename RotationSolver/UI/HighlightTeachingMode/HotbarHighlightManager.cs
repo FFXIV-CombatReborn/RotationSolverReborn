@@ -44,7 +44,7 @@ internal static class HotbarHighlightManager
         {
             item.Dispose();
 #if DEBUG
-            PluginLog.Debug($"Item: {item} from '_drawingElements' was disposed");
+            //PluginLog.Debug($"Item: {item} from '_drawingElements' was disposed");
 #endif
         }
         _highLight?.Dispose();

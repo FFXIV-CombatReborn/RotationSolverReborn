@@ -439,7 +439,7 @@ public static partial class RSCommands
         }
 
         // Only log if all commands failed
-        PluginLog.Debug(UiString.CommandsInsertActionFailure.GetDescription());
+        //PluginLog.Debug(UiString.CommandsInsertActionFailure.GetDescription());
     }
 
     private static void DoDutyRotationCommand(DutyRotation dutyRotation, string str)
@@ -458,6 +458,6 @@ public static partial class RSCommands
         }
 
         // Only log if all commands failed
-        PluginLog.Debug(UiString.CommandsInsertActionFailure.GetDescription());
+        //PluginLog.Debug(UiString.CommandsInsertActionFailure.GetDescription());
     }
 }

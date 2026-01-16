@@ -63,7 +63,10 @@ public sealed unsafe class AnimationLockTweak
         
         if (_lastReqSequence != sequence && gameCurrAnimLock != gamePrevAnimLock)
         {
-            PluginLog.Debug($"[AnimLockTweak] Animation lock updated by action with unexpected sequence ID #{sequence}: {gamePrevAnimLock:f3} -> {gameCurrAnimLock:f3}");
+			if (Service.Config.InDebug)
+			{
+				PluginLog.Debug($"[AnimLockTweak] Animation lock updated by action with unexpected sequence ID #{sequence}: {gamePrevAnimLock:f3} -> {gameCurrAnimLock:f3}");
+			}
         }
         
         float reduction = 0;
@@ -107,8 +110,11 @@ public sealed unsafe class AnimationLockTweak
 
         PluginLog.Warning($"[AnimLockTweak] Unexpected animation lock {packetOriginalAnimLock:f6} -> {packetModifiedAnimLock:f6} -> {gameCurrAnimLock:f6}, disabling animation lock tweak feature");
 
-        // Log warning to chat
-        PluginLog.Debug($"[RSR] Unexpected animation lock detected! Disabling animation lock reduction feature.");
+		// Log warning to chat
+		if (Service.Config.InDebug)
+		{
+			PluginLog.Debug($"[RSR] Unexpected animation lock detected! Disabling animation lock reduction feature.");
+		}
 
         // Temporarily disable the tweak (but don't save the config, in case this condition is temporary)
         Service.Config.RemoveAnimationLockDelay.Value = false;

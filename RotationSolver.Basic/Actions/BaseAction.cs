@@ -130,8 +130,11 @@ public class BaseAction : IBaseAction
 
                 if (!Action.ClassJob.IsValid)
                 {
-                    // Log the error for debugging purposes
-                    PluginLog.Debug($"ClassJob is not valid for Action ID: {ID}");
+					// Log the error for debugging purposes
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Debug($"ClassJob is not valid for Action ID: {ID}");
+					}
                     return value;
                 }
 

@@ -15,6 +15,7 @@ using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Basic.Rotations.Duties;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
+using static Dalamud.Interface.Utility.Raii.ImRaii;
 using Action = Lumina.Excel.Sheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
@@ -1480,7 +1481,10 @@ internal static class DataCenter
 				{
 					if (!isTank || isPlayerTarget)
 					{
-						PluginLog.Debug($"Tank lock-on VFX triggered: {s.Path}, ObjectId: {s.ObjectId}");
+						if (Service.Config.InDebug)
+						{
+							PluginLog.Debug($"Tank lock-on VFX triggered: {s.Path}, ObjectId: {s.ObjectId}");
+						}
 						return true;
 					}
 				}

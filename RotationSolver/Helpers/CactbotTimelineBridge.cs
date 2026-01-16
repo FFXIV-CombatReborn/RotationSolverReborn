@@ -93,7 +93,7 @@ internal sealed class CactbotTimelineBridge : IDisposable
             var json = sb.ToString();
             sb.Clear();
             if (Service.Config.InDebug)
-                PluginLog.Debug($"CactbotTimelineBridge: recv: {json}");
+                //PluginLog.Debug($"CactbotTimelineBridge: recv: {json}");
             HandleMessage(json);
         }
     }
