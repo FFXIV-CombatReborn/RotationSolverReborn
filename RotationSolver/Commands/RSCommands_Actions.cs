@@ -368,14 +368,14 @@ namespace RotationSolver.Commands
 
 						if (p != null && p.InCombat())
 						{
-							PluginLog.Debug($"StartOnPartyIsInCombat: {p.Name} InCombat: {p.InCombat()}.");
+							//PluginLog.Debug($"StartOnPartyIsInCombat: {p.Name} InCombat: {p.InCombat()}.");
 							DoStateCommandType(StateCommandType.Auto);
 							return;
 						}
 
 						if (p != null && hostileTargetObjectIds.Contains(p.GameObjectId))
 						{
-							PluginLog.Debug($"StartOnPartyIsInCombat: {p.Name} Is Targeted By Hostile.");
+							//PluginLog.Debug($"StartOnPartyIsInCombat: {p.Name} Is Targeted By Hostile.");
 							DoStateCommandType(StateCommandType.Auto);
 							return;
 						}
@@ -390,14 +390,14 @@ namespace RotationSolver.Commands
 
 						if (a != null && a.InCombat())
 						{
-							PluginLog.Debug($"StartOnAllianceIsInCombat: {a.Name} InCombat: {a.InCombat()}.");
+							//PluginLog.Debug($"StartOnAllianceIsInCombat: {a.Name} InCombat: {a.InCombat()}.");
 							DoStateCommandType(StateCommandType.Auto);
 							return;
 						}
 
 						if (a != null && hostileTargetObjectIds.Contains(a.GameObjectId))
 						{
-							PluginLog.Debug($"StartOnAllianceIsInCombat: {a.Name} Is Targeted By Hostile.");
+							//PluginLog.Debug($"StartOnAllianceIsInCombat: {a.Name} Is Targeted By Hostile.");
 							DoStateCommandType(StateCommandType.Auto);
 							return;
 						}
@@ -419,13 +419,13 @@ namespace RotationSolver.Commands
 
 						if (t != null && t.InCombat())
 						{
-							PluginLog.Debug($"StartOnFieldOpInCombat: {t.Name} InCombat: {t.InCombat()}.");
+							//PluginLog.Debug($"StartOnFieldOpInCombat: {t.Name} InCombat: {t.InCombat()}.");
 							DoStateCommandType(StateCommandType.Auto);
 							return;
 						}
 						if (t != null && hostileTargetObjectIds.Contains(t.GameObjectId))
 						{
-							PluginLog.Debug($"StartOnFieldOpInCombat: {t.Name} Is Targeted By Hostile.");
+							//PluginLog.Debug($"StartOnFieldOpInCombat: {t.Name} Is Targeted By Hostile.");
 							DoStateCommandType(StateCommandType.Auto);
 							return;
 						}

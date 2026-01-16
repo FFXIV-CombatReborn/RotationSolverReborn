@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace RotationSolver.RebornRotations.Healer;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.4")]
@@ -81,10 +83,22 @@ public sealed class SGE_Reborn : SageRotation
     [RotationConfig(CombatType.PvE, Name = "Health threshold tank party member needs to use Pneuma as an AOE heal")]
     public float PneumaAOETankHeal { get; set; } = 0.6f;
 
-    #endregion
+	[RotationConfig(CombatType.PvE, Name = "Which opener to use")]
+	public OpenerStrategy OpenerSelection { get; set; } = OpenerStrategy.PneumaOpener;
 
-    #region Tracking Properties
-    private IBaseAction? _lastEukrasiaActionAim = null;
+	public enum OpenerStrategy : byte
+	{
+		[Description("Use Toxikon prepull opener")]
+		ToxikonOpener,
+
+		[Description("Use Pneuma prepull opener")]
+		PneumaOpener,
+	}
+
+	#endregion
+
+	#region Tracking Properties
+	private IBaseAction? _lastEukrasiaActionAim = null;
     public override void DisplayRotationStatus()
     {
         ImGui.Text($"Last E.Action Aim Cleared From Queue: {_lastEukrasiaActionAim}");
@@ -95,16 +109,22 @@ public sealed class SGE_Reborn : SageRotation
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
-        if (remainTime < PneumaPvE.Info.CastTime + CountDownAhead
+        if (OpenerSelection == OpenerStrategy.PneumaOpener && remainTime < PneumaPvE.Info.CastTime + CountDownAhead
             && PneumaPvE.CanUse(out IAction? act))
         {
             return act;
         }
 
-        if (remainTime <= 3 && UseBurstMedicine(out act))
-        {
-            return act;
-        }
+		if (remainTime <= 2.1f && UseBurstMedicine(out act))
+		{
+			return act;
+		}
+
+		if (OpenerSelection == OpenerStrategy.ToxikonOpener && remainTime < 1.5f + CountDownAhead
+			&& ToxikonIiPvE.CanUse(out act))
+		{
+			return act;
+		}
 
         if (remainTime <= 5 && EukrasiaPvE.CanUse(out act))
         {

@@ -153,18 +153,18 @@ public static class Watcher
 	{
 		try
 		{
-			PluginLog.Debug($"ActionFromSelf invoked. Source: {set.Source?.GameObjectId}, Action: {set.Action?.Name.ExtractText() ?? "null"}");
+			//PluginLog.Debug($"ActionFromSelf invoked. Source: {set.Source?.GameObjectId}, Action: {set.Action?.Name.ExtractText() ?? "null"}");
 
 			IPlayerCharacter? playerObject = Player.Object;
 			if (set.Source == null || playerObject == null)
 			{
-				PluginLog.Debug("ActionFromSelf: Source or playerObject is null. Exiting.");
+				//PluginLog.Debug("ActionFromSelf: Source or playerObject is null. Exiting.");
 				return;
 			}
 
 			if (set.Source.GameObjectId != playerObject.GameObjectId)
 			{
-				PluginLog.Debug($"ActionFromSelf: Source.GameObjectId ({set.Source.GameObjectId}) does not match playerObject.GameObjectId ({playerObject.GameObjectId}). Exiting.");
+				//PluginLog.Debug($"ActionFromSelf: Source.GameObjectId ({set.Source.GameObjectId}) does not match playerObject.GameObjectId ({playerObject.GameObjectId}). Exiting.");
 				return;
 			}
 
@@ -177,19 +177,19 @@ public static class Watcher
 
 			if (set.Action == null)
 			{
-				PluginLog.Debug("ActionFromSelf: set.Action is null. Exiting.");
+				//PluginLog.Debug("ActionFromSelf: set.Action is null. Exiting.");
 				return;
 			}
 
 			if (set.Action?.ActionCategory.Value.RowId == (uint)ActionCate.Autoattack)
 			{
-				PluginLog.Debug("ActionFromSelf: ActionCategory is Autoattack. Exiting.");
+				//PluginLog.Debug("ActionFromSelf: ActionCategory is Autoattack. Exiting.");
 				return;
 			}
 
 			if (set.TargetEffects.Length == 0)
 			{
-				PluginLog.Debug("ActionFromSelf: No TargetEffects. Exiting.");
+				//PluginLog.Debug("ActionFromSelf: No TargetEffects. Exiting.");
 				return;
 			}
 
@@ -197,7 +197,7 @@ public static class Watcher
             IGameObject? tar = set.Target;
 
 			// Record
-			PluginLog.Debug($"ActionFromSelf: ActionType is {set.Header.ActionType}.");
+			//PluginLog.Debug($"ActionFromSelf: ActionType is {set.Header.ActionType}.");
 			DataCenter.AddActionRec(action!.Value);
             ShowStrSelf = set.ToString();
 

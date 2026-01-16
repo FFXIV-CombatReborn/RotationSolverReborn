@@ -1019,7 +1019,10 @@ public struct ActionTargetInfo(IBaseAction action)
                     return (tdirLen - subTarget.HitboxRadius) <= EffectRange;
 
                 default:
-                    PluginLog.Debug($"{action.Action.Name.ExtractText()}'s CastType is not valid! The value is {action.Action.CastType}");
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Debug($"{action.Action.Name.ExtractText()}'s CastType is not valid! The value is {action.Action.CastType}");
+					}
                     return false;
             }
         }
@@ -1077,7 +1080,10 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
 
             default:
-                PluginLog.Debug($"{action.Action.Name.ExtractText()}'s CastType is not valid! The value is {action.Action.CastType}");
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Debug($"{action.Action.Name.ExtractText()}'s CastType is not valid! The value is {action.Action.CastType}");
+				}
                 return false;
         }
     }
@@ -2041,12 +2047,18 @@ public struct ActionTargetInfo(IBaseAction action)
                     {
                         if (member.IsConditionCannotTarget())
                         {
-                            PluginLog.Debug($"FindDancePartner: {member.Name} selected target.");
+							if (Service.Config.InDebug)
+							{
+								PluginLog.Debug($"FindDancePartner: {member.Name} selected target.");
+							}
                             return null;
                         }
                         if (!member.IsConditionCannotTarget())
                         {
-                            PluginLog.Debug($"FindDancePartner: {member.Name} selected target.");
+							if (Service.Config.InDebug)
+							{
+								PluginLog.Debug($"FindDancePartner: {member.Name} selected target.");
+							}
                             return member;
                         }
                     }
@@ -2062,19 +2074,28 @@ public struct ActionTargetInfo(IBaseAction action)
                     {
                         if (member.IsConditionCannotTarget())
                         {
-                            PluginLog.Debug($"FindDancePartner: {member.Name} secondary logic target.");
+							if (Service.Config.InDebug)
+							{
+								PluginLog.Debug($"FindDancePartner: {member.Name} secondary logic target.");
+							}
                             return null;
                         }
                         if (!member.IsConditionCannotTarget())
                         {
-                            PluginLog.Debug($"FindDancePartner: {member.Name} secondary logic target.");
+							if (Service.Config.InDebug)
+							{
+								PluginLog.Debug($"FindDancePartner: {member.Name} secondary logic target.");
+							}
                             return member;
                         }
                     }
                 }
             }
 
-            PluginLog.Debug($"FindDancePartner: No target found, using fallback.");
+			if (Service.Config.InDebug)
+			{
+				PluginLog.Debug($"FindDancePartner: No target found, using fallback.");
+			}
 
             IBattleChara? result = RandomMeleeTarget(battleChara);
             if (result != null) return result;
@@ -2166,7 +2187,10 @@ public struct ActionTargetInfo(IBaseAction action)
             }
             if (best != null)
             {
-                PluginLog.Debug($"FindTheSpear: {best.Name} selected by priority index {bestIndex} with tie-breakers.");
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Debug($"FindTheSpear: {best.Name} selected by priority index {bestIndex} with tie-breakers.");
+				}
                 return best;
             }
 
@@ -2262,7 +2286,10 @@ public struct ActionTargetInfo(IBaseAction action)
             }
             if (best != null)
             {
-                PluginLog.Debug($"FindTheBalance: {best.Name} selected by priority index {bestIndex} with tie-breakers.");
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Debug($"FindTheBalance: {best.Name} selected by priority index {bestIndex} with tie-breakers.");
+				}
                 return best;
             }
 
@@ -2309,12 +2336,18 @@ public struct ActionTargetInfo(IBaseAction action)
                         {
                             if (m.IsConditionCannotTarget())
                             {
-                                PluginLog.Debug($"FindKardia 1: {m.Name} is a tank with TankStanceStatus and without Kardion.");
+								if (Service.Config.InDebug)
+								{
+									PluginLog.Debug($"FindKardia 1: {m.Name} is a tank with TankStanceStatus and without Kardion.");
+								}
                                 return null;
                             }
                             if (!m.IsConditionCannotTarget())
                             {
-                                PluginLog.Debug($"FindKardia 1: {m.Name} is a tank with TankStanceStatus and without Kardion.");
+								if (Service.Config.InDebug)
+								{
+									PluginLog.Debug($"FindKardia 1: {m.Name} is a tank with TankStanceStatus and without Kardion.");
+								}
                                 return m;
                             }
                         }
@@ -2333,12 +2366,18 @@ public struct ActionTargetInfo(IBaseAction action)
                         {
                             if (m.IsConditionCannotTarget())
                             {
-                                PluginLog.Debug($"FindKardia 2: {m.Name} is a tank with TankStanceStatus.");
+								if (Service.Config.InDebug)
+								{
+									PluginLog.Debug($"FindKardia 2: {m.Name} is a tank with TankStanceStatus.");
+								}
                                 return null;
                             }
                             if (!m.IsConditionCannotTarget())
                             {
-                                PluginLog.Debug($"FindKardia 2: {m.Name} is a tank with TankStanceStatus.");
+								if (Service.Config.InDebug)
+								{
+									PluginLog.Debug($"FindKardia 2: {m.Name} is a tank with TankStanceStatus.");
+								}
                                 return m;
                             }
                         }
@@ -2355,19 +2394,28 @@ public struct ActionTargetInfo(IBaseAction action)
                         // 3. Any alive tank in priority order
                         if (m.IsConditionCannotTarget())
                         {
-                            PluginLog.Debug($"FindKardia 3: {m.Name} is a tank fallback.");
+							if (Service.Config.InDebug)
+							{
+								PluginLog.Debug($"FindKardia 3: {m.Name} is a tank fallback.");
+							}
                             return null;
                         }
                         if (!m.IsConditionCannotTarget())
                         {
-                            PluginLog.Debug($"FindKardia 3: {m.Name} is a tank fallback.");
+							if (Service.Config.InDebug)
+							{
+								PluginLog.Debug($"FindKardia 3: {m.Name} is a tank fallback.");
+							}
                             return m;
                         }
                     }
                 }
             }
 
-            PluginLog.Debug($"FindKardia: No target found, using fallback.");
+			if (Service.Config.InDebug)
+			{
+				PluginLog.Debug($"FindKardia: No target found, using fallback.");
+			}
             IBattleChara? fallback = null;
             fallback = FindTankTarget();
             if (fallback != null) return fallback;
@@ -2456,13 +2504,19 @@ public struct ActionTargetInfo(IBaseAction action)
 
             if (bestCatalyze != null)
             {
-                PluginLog.Debug($"FindDeploymentTacticsTarget: {bestCatalyze.Name} is a valid target with Catalyze, largest shield, and nearby allies.");
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Debug($"FindDeploymentTacticsTarget: {bestCatalyze.Name} is a valid target with Catalyze, largest shield, and nearby allies.");
+				}
                 return bestCatalyze;
             }
 
             if (bestGalvanize != null && bestCatalyze == null)
             {
-                PluginLog.Debug($"FindDeploymentTacticsTarget: {bestGalvanize.Name} is a valid target with Galvanize, largest shield, and nearby allies.");
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Debug($"FindDeploymentTacticsTarget: {bestGalvanize.Name} is a valid target with Galvanize, largest shield, and nearby allies.");
+				}
                 return bestGalvanize;
             }
 
@@ -3083,12 +3137,18 @@ public struct ActionTargetInfo(IBaseAction action)
 					{
 						if (m.IsConditionCannotTarget())
 						{
-							PluginLog.Debug($"FindTankTarget 1: {m.Name} is a tank with TankStanceStatus.");
+							if (Service.Config.InDebug)
+							{
+								PluginLog.Debug($"FindTankTarget 1: {m.Name} is a tank with TankStanceStatus.");
+							}
 							return null;
 						}
 						if (!m.IsConditionCannotTarget())
 						{
-							PluginLog.Debug($"FindTankTarget 1: {m.Name} is a tank with TankStanceStatus.");
+							if (Service.Config.InDebug)
+							{
+								PluginLog.Debug($"FindTankTarget 1: {m.Name} is a tank with TankStanceStatus.");
+							}
 							return m;
 						}
 					}
@@ -3101,12 +3161,18 @@ public struct ActionTargetInfo(IBaseAction action)
 				{
 					if (m.IsConditionCannotTarget())
 					{
-						PluginLog.Debug($"FindTankTarget 2: {m.Name} is a tank fallback.");
+						if (Service.Config.InDebug)
+						{
+							PluginLog.Debug($"FindTankTarget 2: {m.Name} is a tank fallback.");
+						}
 						return null;
 					}
 					if (!m.IsConditionCannotTarget())
 					{
-						PluginLog.Debug($"FindTankTarget 2: {m.Name} is a tank fallback.");
+						if (Service.Config.InDebug)
+						{
+							PluginLog.Debug($"FindTankTarget 2: {m.Name} is a tank fallback.");
+						}
 						return m;
 					}
 				}
