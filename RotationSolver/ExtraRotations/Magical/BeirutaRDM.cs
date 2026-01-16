@@ -764,7 +764,7 @@ if (EnoughMana)
     // - Manafication active is good enough (we're committing to burst sequencing).
     // - Still allow your original intent: start within ~4 GCDs of Swordplay ending.
     // - Embolden+Swordplay remains valid, but is no longer required.
-   bool burstStartOK =
+bool burstStartOK =
     !IsOpen &&
     (
         poolCapReached ||
@@ -773,20 +773,29 @@ if (EnoughMana)
         (HasEmbolden && CanMagickedSwordplay)
     );
 
-    // Start ST melee with Riposte:
-    // - Manafication -> prefer extended-range _45960
-    // - otherwise -> normal Riposte
-    // Treat both as the same starter to avoid double-Riposte issues.
-    if (burstStartOK && !IsLastRiposteStarter() && TryRiposteStarter(out act))
+// -----------------------------------------
+// Prefer AoE melee start at 3+ targets
+// -----------------------------------------
+if (NumberOfHostilesInRangeOf(5) >= 3)
+{
+    if (!IsLastGCD(false, EnchantedMoulinetPvE)
+        && EnchantedMoulinetPvE.CanUse(out act))
     {
         return true;
     }
+}
 
-    // Start AoE melee as before (unchanged behaviour)
-   if (!IsLastGCD(false, EnchantedMoulinetPvE) && EnchantedMoulinetPvE.CanUse(out act))
-    {
-        return true;
-    }
+// -----------------------------------------
+// Otherwise start ST melee with Riposte
+// -----------------------------------------
+// - Manafication -> prefer extended-range _45960
+// - otherwise -> normal Riposte
+// Treat both as the same starter to avoid double-Riposte issues.
+if (burstStartOK && !IsLastRiposteStarter() && TryRiposteStarter(out act))
+{
+    return true;
+}
+
 }
 
 
