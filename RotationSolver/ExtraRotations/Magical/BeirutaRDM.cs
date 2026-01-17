@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace RotationSolver.ExtraRotations.Magical;
 
 [Rotation("BeirutaRDM", CombatType.PvE, GameVersion = "7.4")]
@@ -15,6 +17,7 @@ public sealed class BeirutaRDM : RedMageRotation
 // Melee combo hold when out of range
 // Prevent cap for mana pooling
 // Prevent wasting Swift/Dual on short casts
+
 
 {
     #region Config Options
@@ -48,6 +51,17 @@ public sealed class BeirutaRDM : RedMageRotation
     [RotationConfig(CombatType.PvE, Name = "Delay Prefulgence/Vice of Thorns for buff alignment (about 3 gcd after Embolden)")]
     public bool DelayBuffOGCDs { get; set; } = true;
 
+    [RotationConfig(CombatType.PvE, Name = "Opener/Burst open window (GCDs)")]
+[Range(1, 3, ConfigUnitType.None, 1)]
+public OpenWindowGcd OpenWindow { get; set; } = OpenWindowGcd.TwoGcd; // default = 2 GCD
+
+public enum OpenWindowGcd : byte
+{
+    [Description("0 GCD (0.0s)")] ZeroGcd,
+    [Description("1 GCD (2.5s)")] OneGcd,
+    [Description("2 GCD (5.0s)")] TwoGcd,
+}
+
     #endregion
 
 private static BaseAction VeraeroPvEStartUp { get; } = new BaseAction(ActionID.VeraeroPvE, false);
@@ -59,7 +73,20 @@ private long _meleeHoldUntilMs = 0;
 private long _emboldenUsedAtMs = 0;
 
 // Opener window = first 5 seconds of combat
-private bool IsOpen => InCombat && CombatTime < 5f;
+private float OpenWindowSeconds => OpenWindow switch
+{
+    OpenWindowGcd.ZeroGcd => 0f,
+    OpenWindowGcd.OneGcd  => 2.5f,
+    _                     => 5f, // TwoGcd
+};
+
+// Opener/Burst open window = first N seconds of combat (based on selection)
+private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
+private const float GrandImpactExtraDelaySeconds = 1.0f;
+
+private bool IsOpenForGrandImpact =>
+    InCombat && CombatTime < (OpenWindowSeconds + GrandImpactExtraDelaySeconds);
+
 
 
 // Only checks the *correct next melee step* for the combo we are currently in.
@@ -253,7 +280,7 @@ bool blockAccel = burstPrepHoldAccel || inFirst5sAfterEmbolden;
 
 
     // "Next GCD is instant" approximation ---
-    bool nextIsInstant = HasDualcast || HasSwift || HasAccelerate || (!IsOpen && CanGrandImpact);
+    bool nextIsInstant = HasDualcast || HasSwift || HasAccelerate || (!IsOpenForGrandImpact && CanGrandImpact);
 bool openerNeedsInstant = IsOpen && !nextIsInstant;
 bool needsMovementRescue =
     InCombat && HasHostilesInMaxRange && (IsMoving || openerNeedsInstant) && !nextIsInstant;
@@ -380,8 +407,9 @@ if (!needsMovementRescue && AccelerationPvE.EnoughLevel && !Meleecheck && !block
     if (FlechePvE.CanUse(out act))
         return true;
 
-if (!IsOpen && ContreSixtePvE.CanUse(out act))
+if (!IsOpenForGrandImpact && ContreSixtePvE.CanUse(out act))
     return true;
+
 
 // ---------------------------
 // Prefulgence / Vice alignment option
@@ -763,10 +791,11 @@ if (burstStartOK && !IsLastRiposteStarter() && TryRiposteStarter(out act))
 }
 
 		//Grand impact usage if not interrupting melee combo
-		if (!IsOpen && GrandImpactPvE.CanUse(out act, skipStatusProvideCheck: CanGrandImpact, skipCastingCheck: true))
-        {
-            return true;
-        }
+		if (!IsOpenForGrandImpact && GrandImpactPvE.CanUse(out act, skipStatusProvideCheck: CanGrandImpact, skipCastingCheck: true))
+{
+    return true;
+}
+
 // ============================================================
 // VerBoth + standstill:
 // - If we have Dualcast/Swift, DO NOT spend them on "1" (proc).
@@ -991,7 +1020,7 @@ bool canRescueMovementWithOgcd =
 
 
 // Define once and reuse for both Reprise + moving gate
-bool hasInstantTools = HasSwift || HasDualcast || HasAccelerate || (!IsOpen && CanGrandImpact);
+bool hasInstantTools = HasSwift || HasDualcast || HasAccelerate || (!IsOpenForGrandImpact && CanGrandImpact);
 
 // Reprise fallback (ONLY when we truly have no instant tools AND cannot rescue with oGCDs)
 if (IsMoving
