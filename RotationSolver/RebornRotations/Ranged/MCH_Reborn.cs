@@ -30,6 +30,11 @@ public sealed class MCH_Reborn : MachinistRotation
 			return act;
 		}
 
+		if (!AirAnchorCountdown && remainTime < 0.1f && AirAnchorPvE.EnoughLevel && AirAnchorPvE.CanUse(out act))
+		{
+			return act;
+		}
+
 		if (remainTime < 4.75f && ReassemblePvE.CanUse(out act))
         {
             return act;

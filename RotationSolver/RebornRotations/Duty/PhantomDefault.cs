@@ -313,7 +313,7 @@ public sealed class PhantomDefault : PhantomRotation
             return base.DefenseSingleAbility(nextGCD, out act);
         }
 
-		if (DefendPvE.CanUse(out act))
+		if (InCombat && StatusHelper.PlayerHasStatus(true, StatusHelper.TankStanceStatus) && DefendPvE.CanUse(out act))
 		{
 			return true;
 		}
