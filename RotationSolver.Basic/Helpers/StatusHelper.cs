@@ -959,7 +959,13 @@ public static class StatusHelper
             return false;
         }
 
-        if (status.Param > 2)
+        // Catch all doom statuses that use the Doom icon
+		if (status.GameData.Value.Icon == 215503 && status.RemainingTime > 3)
+		{
+			return true;
+		}
+
+		if (status.Param > 2)
         {
             return true;
         }
