@@ -1069,7 +1069,7 @@ public sealed class NIN_Reborn : NinjaRotation
             }
         }
 
-        if (AutoUnhide && IsHidden)
+        if (StateEnabled && AutoUnhide && IsHidden)
         {
             StatusHelper.StatusOff(StatusID.Hidden);
         }

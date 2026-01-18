@@ -22,7 +22,7 @@
 
 	<ItemGroup>
 		<!-- Keep ECommons runtime so its DLL is included -->
-		<PackageReference Include="ECommons" Version="3.1.0.13" />
+		<PackageReference Include="ECommons" Version="3.1.0.15" />
 		<!-- Do not copy Roslyn runtime to output -->
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" PrivateAssets="all" ExcludeAssets="runtime" />
 	</ItemGroup>

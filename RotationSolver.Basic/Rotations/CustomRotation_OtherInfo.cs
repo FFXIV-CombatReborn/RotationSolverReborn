@@ -22,7 +22,13 @@ public partial class CustomRotation
 	public static bool IsCasting => Player?.IsCasting ?? false;
 
 	/// <summary>
-	/// Does player have swift cast, dual cast or triple cast.
+	/// 
+	/// </summary>
+	[Description("Is RSR active")]
+	public static bool StateEnabled => DataCenter.State;
+
+	/// <summary>
+	/// Does player have swift cast, dual cast or triple cast. State
 	/// </summary>
 	[Description("Has Swift")]
     public static bool HasSwift => StatusHelper.PlayerHasStatus(true, StatusHelper.SwiftcastStatus);
