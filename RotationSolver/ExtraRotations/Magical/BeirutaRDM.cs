@@ -76,8 +76,8 @@ private long _emboldenUsedAtMs = 0;
 private float OpenWindowSeconds => OpenWindow switch
 {
     OpenWindowGcd.ZeroGcd => 0f,
-    OpenWindowGcd.OneGcd  => 2.5f,
-    _                     => 5f, // TwoGcd
+    OpenWindowGcd.OneGcd  => 2.2f,
+    _                     => 5.1f, // TwoGcd
 };
 
 // Opener/Burst open window = first N seconds of combat (based on selection)
@@ -129,6 +129,14 @@ private bool TryContinueCurrentMeleeCombo(out IAction? act)
     // we don't force anything here—just report we can't continue.
     // (This avoids accidentally starting the wrong chain.)
     return false;
+}
+private bool InFinisherChain()
+{
+    return
+        ManaStacks == 3 ||
+        IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE, ActionID.ScorchPvE) ||
+        ScorchPvE.CanUse(out _) ||
+        ResolutionPvE.CanUse(out _);
 }
 
     #region Countdown Logic
@@ -537,7 +545,7 @@ else
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        bool hasInstantBuffToSpend = HasDualcast || HasSwift;
+        bool hasInstantBuffToSpend = HasDualcast || HasSwift || (IsOpen && HasAccelerate);
 
 // ---------------------------
 // Opener: first 5s of combat
@@ -553,41 +561,21 @@ if (IsOpen
     bool hasInstant = HasDualcast || HasSwift || HasAccelerate;
     if (hasInstant)
     {
-        // Prefer Impact for AoE, otherwise balance with Thunder/Aero
-        if (NumberOfHostilesInRangeOf(5) >= 2 && ImpactPvE.CanUse(out act))
+        int targets = NumberOfHostilesInRangeOf(5);
+
+        // Opener AoE rule:
+        // - If Accel is up, Impact is worth it at 2+
+        // - Otherwise, only at 3+
+        int impactThreshold = HasAccelerate ? 2 : 3;
+
+        if (targets >= impactThreshold && ImpactPvE.CanUse(out act))
             return true;
 
-        int diff = BlackMana - WhiteMana;
-
-        bool TryAero2(out IAction? a)
-        {
-            if (VeraeroIiiPvE.CanUse(out a)) return true;
-            if (VeraeroPvE.CanUse(out a)) return true;
-            a = null;
-            return false;
-        }
-
-        bool TryThunder2(out IAction? a)
-        {
-            if (VerthunderIiiPvE.CanUse(out a)) return true;
-            if (VerthunderPvE.CanUse(out a)) return true;
-            a = null;
-            return false;
-        }
-
-        if (diff > 0)
-        {
-            if (TryAero2(out act)) return true;
-            if (TryThunder2(out act)) return true;
-        }
-        else
-        {
-            if (TryThunder2(out act)) return true;
-            if (TryAero2(out act)) return true;
-        }
+        // ST opener rule: always Verthunder line (ignore mana/procs)
+        if (VerthunderIiiPvE.CanUse(out act)) return true;
+        if (VerthunderPvE.CanUse(out act)) return true;
     }
 }
-
 
 
 		if (ManaStacks == 3)
@@ -750,7 +738,7 @@ bool EnoughMana =
 // ---------------------------
 // Check if you can start melee combo
 // ---------------------------
-if (EnoughMana)
+if (EnoughMana && !InFinisherChain())
 {
     // Burst-start condition:
     // - Manafication active is good enough (we're committing to burst sequencing).
@@ -1132,27 +1120,28 @@ else
             return true;
         }
 
-        if (!CanInstantCast && !CanVerEither)
-        {
-            if (WhiteMana < BlackMana)
-            {
-                if (VeraeroIiPvE.CanUse(out act))
-                {
-                    return true;
-                }
-            }
-            if (WhiteMana >= BlackMana)
-            {
-                if (VerthunderIiPvE.CanUse(out act))
-                {
-                    return true;
-                }
-            }
-            if (!hasInstantBuffToSpend && JoltPvE.CanUse(out act))
+      if (!CanInstantCast && !CanVerEither)
 {
-                return true;
-            }
+    if (NumberOfHostilesInRangeOf(5) >= 3)
+    {
+        // AoE short-cast filler (only at 3+)
+        if (WhiteMana < BlackMana)
+        {
+            if (VeraeroIiPvE.CanUse(out act)) return true;
+            if (VerthunderIiPvE.CanUse(out act)) return true;
         }
+        else
+        {
+            if (VerthunderIiPvE.CanUse(out act)) return true;
+            if (VeraeroIiPvE.CanUse(out act)) return true;
+        }
+    }
+
+    // ST short-cast filler
+    if (!hasInstantBuffToSpend && JoltPvE.CanUse(out act))
+        return true;
+}
+
 
         if (UseVercure && !InCombat && VercurePvE.CanUse(out act))
         {
