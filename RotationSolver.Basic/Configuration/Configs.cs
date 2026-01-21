@@ -13,7 +13,17 @@ internal partial class Configs : IPluginConfiguration
     public const string
         BasicTimer = "BasicTimer",
         BasicAutoSwitch = "BasicAutoSwitch",
-        BasicParams = "BasicParams",
+		DutySpecifcPvP = "DutySpecifcPvP",
+		DutySpecifcFieldOps = "DutySpecifcFieldOps",
+		DutySpecifcAlliance = "DutySpecifcAlliance",
+		DutySpecifcDeepDungeon = "DutySpecifcDeepDungeon",
+		DutySpecifcVariantDungeon = "DutySpecifcVariantDungeon",
+		DutySpecifcChaoticAlliance = "DutySpecifcChaoticAlliance",
+		DutySpecifcDungeon = "DutySpecifcDungeon",
+		DutySpecifcUltimate = "DutySpecifcUltimate",
+		DutySpecifcExtreme = "DutySpecifcExtreme",
+		DutySpecifcSavage = "DutySpecifcSavage",
+		BasicParams = "BasicParams",
         UiInformation = "UiInformation",
         UiWindows = "UiWindows",
         PvPSpecificControls = "PvPSpecificControls",
@@ -43,7 +53,165 @@ internal partial class Configs : IPluginConfiguration
     public MacroInfo DutyStart { get; set; } = new MacroInfo();
     public MacroInfo DutyEnd { get; set; } = new MacroInfo();
 
-    [ConditionBool, UI("Intercept player input and queue it for RSR to execute the action. (PvE only)",
+	#region Duty Specific
+	[ConditionBool, UI("O12S - Packet Filter logic.",
+	Description = "Treat OmegaM/OmegaF as immune if you have their corresponding Packet Filter status (also applies to Normal).",
+	Filter = DutySpecifcSavage)]
+	private static readonly bool _o12sOmegaMF = true;
+
+	[ConditionBool, UI("M8S - Wolf Pack/Stone Pack logic.",
+	Description = "Treat Wolf of Wind/Wolf of Stone as immune if you don't have the corresponding status for it.",
+	Filter = DutySpecifcSavage)]
+	private static readonly bool _m8sWindStone = true;
+
+	[ConditionBool, UI("M9S - Only use cleave logic.",
+	Description = "This should clear up any targeting issues when a nail, the boss, and a flail are near each other at the same time.",
+	Filter = DutySpecifcSavage)]
+	private static readonly bool _m9sCleaveOnly = true;
+
+	[ConditionBool, UI("M9S - Cell Targeting logic.",
+	Description = "Treat Cells as immune if you don't have the corresponding status for it.",
+	Filter = DutySpecifcSavage)]
+	private static readonly bool _m9sCellTargeting = true;
+
+	[ConditionBool, UI("M9S - Ads Targeting logic.",
+	Description = "Prioritize Doornail or Flail based on role and distance to target.",
+	Filter = DutySpecifcSavage)]
+	private static readonly bool _m9sAdsTargeting = true;
+
+	[ConditionBool, UI("M10S - Firesnaking/Watersnaking targeting logic.",
+	Description = "Priotize Red Hot if you have firesnaking buff, and Deep Blue if you have watersnaking buff (also applies to Normal).",
+	Filter = DutySpecifcSavage)]
+	private static readonly bool _m10sBroTargeting = true;
+
+	[ConditionBool, UI("Limitless Blue Extreme - Whaleback logic.",
+	Description = "Treat Bismark Shell/Bismark Corona as immune if you don't have the Whaleback status",
+	Filter = DutySpecifcExtreme)]
+	private static readonly bool _limitlessBlueTargeting = true;
+
+	[ConditionBool, UI("Cinder Drift Extreme - Pall Targeting logic.",
+	Description = "Treat Pall of Rage/Pall of Grief as immune if you don't have the corresponding status for it.",
+	Filter = DutySpecifcExtreme)]
+	private static readonly bool _cinderDriftPallTargeting = true;
+
+	[ConditionBool, UI("The Epic of Alexander (Ultimate) - Jagd Doll logic.",
+	Description = "Treat Jagd Doll ads as immune when HP is less than 25%.",
+	Filter = DutySpecifcUltimate)]
+	private static readonly bool _teaJagdDoll = true;
+
+	[ConditionBool, UI("The Epic of Alexander (Ultimate) - True Heart logic.",
+	Description = "Treat True Heart ad as immune.",
+	Filter = DutySpecifcUltimate)]
+	private static readonly bool _teaTrueHeart = true;
+
+	[ConditionBool, UI("The Omega Protocol (Ultimate) - Packet Filter logic.",
+	Description = "Treat OmegaM/OmegaF as immune if you have their corresponding Packet Filter status.",
+	Filter = DutySpecifcUltimate)]
+	private static readonly bool _topOmegaMF = true;
+
+	[ConditionBool, UI("Futures Rewritten (Ultimate) - Crystal Of Darkness logic.",
+	Description = "Treat Crystal Of Darkness ad as immune.",
+	Filter = DutySpecifcUltimate)]
+	private static readonly bool _fruCrystalOfDarkness = true;
+
+	[ConditionBool, UI("The Ghimlyt Dark - Colossus Rubricatus ad.",
+	Description = "Treat Colossus Rubricatus as immune while its casting scripted action which leads to its death.",
+	Filter = DutySpecifcDungeon)]
+	private static readonly bool _colossusRubricatusImmune = true;
+
+	[ConditionBool, UI("Dohn Mheg - Liars Lyre mechancic.",
+	Description = "Treat Liars Lyre as immune if you don't have the Unfooled status.",
+	Filter = DutySpecifcDungeon)]
+	private static readonly bool _dohnMhegLyre = true;
+
+	[ConditionBool, UI("The Meso Terminal - Thanatos logic.",
+	Description = "Treat Jailers in second boss fight as immune if you don't have corresponding buff.",
+	Filter = DutySpecifcDungeon)]
+	private static readonly bool _jailerImmune = true;
+
+	[ConditionBool, UI("Forked Tower - Dead Star logic.",
+	Description = "Treat Triton/Nereid/Phobos as immune if you don't have the corresponding status for it.",
+	Filter = DutySpecifcFieldOps)]
+	private static readonly bool _forkedtowerDeadStar = true;
+
+	[ConditionBool, UI("Pilgrim's Traverse - Eminent Grief logic.",
+	Description = "Treat Eminent Grief as immune if you don't have Light Vengeance buff, and treat Devoured Eater as immune if you don't have Dark Vengeance buff.",
+	Filter = DutySpecifcDeepDungeon)]
+	private static readonly bool _eminent = true;
+
+	[ConditionBool, UI("The Labyrinth of the Ancients - Thanatos logic.",
+	Description = "Treat Thanatos as immune if you don't have Astral Realignment buff.",
+	Filter = DutySpecifcAlliance)]
+	private static readonly bool _thanatosImmune = true;
+
+	[ConditionBool, UI("The Void Ark - Irminsul and Sawtooth logic.",
+	Description = "Treat Irminsul and Sawtooth as immune if you don't have corresponding buff.",
+	Filter = DutySpecifcAlliance)]
+	private static readonly bool _irminsulSawtoothImmune = true;
+
+	[ConditionBool, UI("The Puppets' Bunker - Superior Flight Unit logic.",
+	Description = "Treat each Superior Flight Unit as immune if you don't have corresponding buff.",
+	Filter = DutySpecifcAlliance)]
+	private static readonly bool _superiorFlightUnitImmune = true;
+
+	[ConditionBool, UI("The Tower at Paradigm's Breach - Hansel and Gretel logic.",
+	Description = "Treat each Hansel/Gretel as immune if you are at an angle that would cause you to take rebound damage from the shield mechanic.",
+	Filter = DutySpecifcAlliance)]
+	private static readonly bool _hanselorGretelShieldedImmune = true;
+
+	[ConditionBool, UI("Jeuno: The First Walk - The Ark Angels logic.",
+	Description = "Treat each Ark Angel as immune if you don't have corresponding buff.",
+	Filter = DutySpecifcAlliance)]
+	private static readonly bool _jeunoBossImmune = true;
+
+	[ConditionBool, UI("Cloud of Darkness - Ads phase logic.",
+	Description = "Treat Cloud of Darkness/Stygian as immune if you don't have corresponding buff.",
+	Filter = DutySpecifcChaoticAlliance)]
+	private static readonly bool _codImmune = true;
+
+	[ConditionBool, UI("The Sil'dihn Subterrane - Drakefamily ads logic.",
+	Description = "Custom logic to treat certain drakes as immune to kill them in a specific order for the purposes Variant path 12.",
+	Filter = DutySpecifcVariantDungeon)]
+	private static readonly bool _drakeImmune = true;
+	#endregion
+
+	#region PvP
+	[JobConfig, UI("The HP for using Guard.",
+		Filter = DutySpecifcPvP)]
+	[Range(0, 1, ConfigUnitType.Percent, 0.02f)]
+	public float HealthForGuard { get; set; } = 0.15f;
+
+	[ConditionBool, UI("Ignore TTK for PvP purposes.", Filter = DutySpecifcPvP)]
+	private static readonly bool _ignorePvPTTK = true;
+
+	[ConditionBool, UI("Prioritize A tier tomeliths in Shatter.", Filter = DutySpecifcPvP)]
+	private static readonly bool _prioAtomelith = false;
+
+	[ConditionBool, UI("Prioritize B tier tomeliths in Shatter.", Filter = DutySpecifcPvP)]
+	private static readonly bool _prioBtomelith = false;
+
+	[JobConfig, UI("Ignore Invincibility for PvP purposes.", Filter = DutySpecifcPvP)]
+	private static readonly bool _ignorePvPInvincibility = false;
+
+	[ConditionBool, UI("Auto turn off when dead in PvP.",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _autoOffWhenDeadPvP = true;
+
+	[ConditionBool, UI("Auto turn off when PvP match ends.",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _autoOffPvPMatchEnd = true;
+
+	[ConditionBool, UI("Auto turn on when PvP match starts.",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _autoOnPvPMatchStart = true;
+
+	[ConditionBool, UI("Set RSR to PvP specific state when enabled in PvP zone.",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpStateControl = false;
+
+	#endregion
+
+	[ConditionBool, UI("Intercept player input and queue it for RSR to execute the action. (PvE only)",
     Filter = AutoActionUsage, Section = 5)]
     private static readonly bool _interceptAction2 = false;
 
@@ -751,11 +919,6 @@ internal partial class Configs : IPluginConfiguration
     Filter = Extra)]
     private static readonly bool _showCactbotToasts = false;
 
-    [JobConfig, UI("The HP for using Guard.",
-        Filter = PvPSpecificControls)]
-    [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
-    public float HealthForGuard { get; set; } = 0.15f;
-
     [UI("Highlight color.", Parent = nameof(TeachingMode))]
     public Vector4 TeachingModeColor { get; set; } = new(0f, 1f, 0f, 1f);
 
@@ -914,37 +1077,6 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.Tank)]
     [Range(1, 8, ConfigUnitType.None, 0.05f)]
     public int AutoDefenseNumber { get; set; } = 2;
-
-    #endregion
-
-    #region PvP
-    [ConditionBool, UI("Ignore TTK for PvP purposes.", Filter = PvPSpecificControls)]
-    private static readonly bool _ignorePvPTTK = true;
-
-    [ConditionBool, UI("Prioritize A tier tomeliths in Shatter.", Filter = PvPSpecificControls)]
-    private static readonly bool _prioAtomelith = false;
-
-    [ConditionBool, UI("Prioritize B tier tomeliths in Shatter.", Filter = PvPSpecificControls)]
-    private static readonly bool _prioBtomelith = false;
-
-    [JobConfig, UI("Ignore Invincibility for PvP purposes.", Filter = PvPSpecificControls)]
-    private static readonly bool _ignorePvPInvincibility = false;
-
-    [ConditionBool, UI("Auto turn off when dead in PvP.",
-         Filter = PvPSpecificControls)]
-    private static readonly bool _autoOffWhenDeadPvP = true;
-
-    [ConditionBool, UI("Auto turn off when PvP match ends.",
-         Filter = PvPSpecificControls)]
-    private static readonly bool _autoOffPvPMatchEnd = true;
-
-    [ConditionBool, UI("Auto turn on when PvP match starts.",
-         Filter = PvPSpecificControls)]
-    private static readonly bool _autoOnPvPMatchStart = true;
-
-    [ConditionBool, UI("Set RSR to PvP specific state when enabled in PvP zone.",
-         Filter = PvPSpecificControls)]
-    private static readonly bool _pvpStateControl = false;
 
     #endregion
 

@@ -155,7 +155,7 @@ public partial class BlueMageRotation
         //_ = SetBlueMageActions(); disabled for now while i figure out what is causing it to crash to desktop
     }
 
-    private uint[] _lastAppliedBluActions = Array.Empty<uint>();
+    private uint[] _lastAppliedBluActions = [];
 
     /// <summary>
     /// Attempts to set the actions for the Blue Mage character.

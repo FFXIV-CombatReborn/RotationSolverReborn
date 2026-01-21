@@ -89,7 +89,6 @@ public partial class RotationConfigWindow
         { UiString.ConfigWindow_Basic_AutoSwitch.GetDescription, DrawBasicAutoSwitch },
         { UiString.ConfigWindow_Auto_ActionUsage.GetDescription, DrawActionUsageControl },
         { UiString.ConfigWindow_Auto_HealingCondition.GetDescription, DrawHealingActionCondition },
-        { UiString.ConfigWindow_Auto_PvPSpecific.GetDescription, DrawPvPSpecificControls },
     })
     {
         HeaderSize = HeaderSize,
@@ -98,13 +97,6 @@ public partial class RotationConfigWindow
     private static void DrawBasicAutoSwitch()
     {
         _allSearchable.DrawItems(Configs.BasicAutoSwitch);
-    }
-
-    private static void DrawPvPSpecificControls()
-    {
-        ImGui.TextWrapped(UiString.ConfigWindow_Auto_PvPSpecific.GetDescription());
-        ImGui.Separator();
-        _allSearchable.DrawItems(Configs.PvPSpecificControls);
     }
 
     /// <summary>
