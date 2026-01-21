@@ -115,8 +115,8 @@ public partial class CustomRotation
     #region PvP
     static partial void ModifyStandardissueElixirPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !HasHostilesInMaxRange
-            && (Player?.CurrentMp <= Player?.MaxMp / 3 || Player?.CurrentHp <= Player?.MaxHp / 3)
+        setting.ActionCheck = () => (!HasHostilesInMaxRange || StatusHelper.PlayerHasStatus(false, StatusID.Covered_1301))
+			&& (Player?.CurrentMp <= Player?.MaxMp / 3 || Player?.CurrentHp <= Player?.MaxHp / 3)
             && !IsLastAction(ActionID.StandardissueElixirPvP) && Player.TimeAlive() > 5;
         setting.IsFriendly = true;
     }

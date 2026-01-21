@@ -918,7 +918,7 @@ public struct ActionTargetInfo(IBaseAction action)
         }
 
         // Cleave mode
-        if (aoeCount > 1 && Service.Config.AoEType == AoEType.Cleave)
+        if (aoeCount > 1 && (Service.Config.AoEType == AoEType.Cleave || (DataCenter.IsInM9S && Service.Config.M9SCleaveOnly)))
         {
             yield break;
         }

@@ -617,7 +617,7 @@ public partial class CustomRotation
             return true;
         }
 
-        if (StandardissueElixirPvP.CanUse(out act))
+		if (StandardissueElixirPvP.CanUse(out act))
         {
             return true;
         }

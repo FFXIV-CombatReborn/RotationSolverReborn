@@ -543,7 +543,7 @@ public partial class RotationConfigWindow : Window
                 {
                     displayName = Player.Job.ToString(); // Use the current player's job name
                 }
-                else if (item == RotationConfigWindowTab.Duty && Player.Object != null)
+                else if (item == RotationConfigWindowTab.DutyRotation && Player.Object != null)
                 {
                     if (!DataCenter.IsInDuty || DataCenter.CurrentDutyRotation == null)
                     {
@@ -608,7 +608,7 @@ public partial class RotationConfigWindow : Window
                 }
 
                 // Add a separator after the "Duty" tab
-                if (item == RotationConfigWindowTab.Duty)
+                if (item == RotationConfigWindowTab.DutyRotation)
                 {
                     ImGui.Separator();
                 }
@@ -618,7 +618,7 @@ public partial class RotationConfigWindow : Window
                 {
                     ImGui.Separator();
                 }
-            }
+			}
             DrawDiagnosticInfoCube();
             ImGui.Spacing();
         }
@@ -1104,7 +1104,7 @@ public partial class RotationConfigWindow : Window
                         DrawAbout();
                         break;
 
-                    case RotationConfigWindowTab.Duty:
+                    case RotationConfigWindowTab.DutyRotation:
                         DrawDutyRotationBody();
                         break;
 
@@ -1148,7 +1148,11 @@ public partial class RotationConfigWindow : Window
                         DrawTarget();
                         break;
 
-                    case RotationConfigWindowTab.Extra:
+					case RotationConfigWindowTab.Duty:
+						DrawDutySpecific();
+						break;
+
+					case RotationConfigWindowTab.Extra:
                         DrawExtra();
                         break;
 
@@ -1179,9 +1183,15 @@ public partial class RotationConfigWindow : Window
             Configs.BasicAutoSwitch => $"Auto > {UiString.ConfigWindow_Basic_AutoSwitch.GetDescription()}",
             Configs.AutoActionUsage => $"Auto > {UiString.ConfigWindow_Auto_ActionUsage.GetDescription()}",
             Configs.HealingActionCondition => $"Auto > {UiString.ConfigWindow_Auto_HealingCondition.GetDescription()}",
-            Configs.PvPSpecificControls => $"Auto > {UiString.ConfigWindow_Auto_PvPSpecific.GetDescription()}",
+            Configs.DutySpecifcUltimate => $"Auto > {UiString.ConfigWindow_Duty_Ultimate.GetDescription()}",
+			Configs.DutySpecifcSavage => $"Auto > {UiString.ConfigWindow_Duty_Savage.GetDescription()}",
+			Configs.DutySpecifcExtreme => $"Auto > {UiString.ConfigWindow_Duty_Extreme.GetDescription()}",
+			Configs.DutySpecifcAlliance => $"Auto > {UiString.ConfigWindow_Duty_Alliance.GetDescription()}",
+			Configs.DutySpecifcDungeon => $"Auto > {UiString.ConfigWindow_Duty_Dungeon.GetDescription()}",
+			Configs.DutySpecifcFieldOps => $"Auto > {UiString.ConfigWindow_Duty_FieldOps.GetDescription()}",
+			Configs.DutySpecifcPvP => $"Auto > {UiString.ConfigWindow_Duty_PvP.GetDescription()}",
 
-            Configs.TargetConfig => $"Target > {UiString.ConfigWindow_Target_Config.GetDescription()}",
+			Configs.TargetConfig => $"Target > {UiString.ConfigWindow_Target_Config.GetDescription()}",
 
             Configs.Extra => $"Extra > {UiString.ConfigWindow_Extra_Others.GetDescription()}",
 
@@ -1229,12 +1239,36 @@ public partial class RotationConfigWindow : Window
                 _activeTab = RotationConfigWindowTab.Auto;
                 _autoHeader.OpenHeaderByTitle(UiString.ConfigWindow_Auto_HealingCondition.GetDescription());
                 break;
-            case Configs.PvPSpecificControls:
-                _activeTab = RotationConfigWindowTab.Auto;
-                _autoHeader.OpenHeaderByTitle(UiString.ConfigWindow_Auto_PvPSpecific.GetDescription());
+            case Configs.DutySpecifcUltimate:
+                _activeTab = RotationConfigWindowTab.Duty;
+                _autoHeader.OpenHeaderByTitle(UiString.ConfigWindow_Duty_Ultimate.GetDescription());
                 break;
+			case Configs.DutySpecifcSavage:
+				_activeTab = RotationConfigWindowTab.Duty;
+				_autoHeader.OpenHeaderByTitle(UiString.ConfigWindow_Duty_Savage.GetDescription());
+				break;
+			case Configs.DutySpecifcExtreme:
+				_activeTab = RotationConfigWindowTab.Duty;
+				_autoHeader.OpenHeaderByTitle(UiString.ConfigWindow_Duty_Extreme.GetDescription());
+				break;
+			case Configs.DutySpecifcAlliance:
+				_activeTab = RotationConfigWindowTab.Duty;
+				_autoHeader.OpenHeaderByTitle(UiString.ConfigWindow_Duty_Alliance.GetDescription());
+				break;
+			case Configs.DutySpecifcDungeon:
+				_activeTab = RotationConfigWindowTab.Duty;
+				_autoHeader.OpenHeaderByTitle(UiString.ConfigWindow_Duty_Dungeon.GetDescription());
+				break;
+			case Configs.DutySpecifcFieldOps:
+				_activeTab = RotationConfigWindowTab.Duty;
+				_autoHeader.OpenHeaderByTitle(UiString.ConfigWindow_Duty_FieldOps.GetDescription());
+				break;
+			case Configs.DutySpecifcPvP:
+				_activeTab = RotationConfigWindowTab.Duty;
+				_autoHeader.OpenHeaderByTitle(UiString.ConfigWindow_Duty_PvP.GetDescription());
+				break;
 
-            case Configs.TargetConfig:
+			case Configs.TargetConfig:
                 _activeTab = RotationConfigWindowTab.Target;
                 _targetHeader.OpenHeaderByTitle(UiString.ConfigWindow_Target_Config.GetDescription());
                 break;
@@ -1414,10 +1448,75 @@ public partial class RotationConfigWindow : Window
             ImGuiHelper.ReactPopup(key, command, Reset, false);
         }
     }
-    #endregion
+	#endregion
 
-    #region About
-    private static void DrawAbout()
+	#region DutySpecifc
+	private static void DrawDutySpecific()
+	{
+		_dutySpecificHeader?.Draw();
+	}
+
+	private static readonly CollapsingHeaderGroup _dutySpecificHeader = new(new Dictionary<Func<string>, Action>
+	{
+		{ UiString.ConfigWindow_Duty_Ultimate.GetDescription, DrawDutySpecificUltimate },
+		{ UiString.ConfigWindow_Duty_Savage.GetDescription, DrawDutySpecificSavage },
+		{ UiString.ConfigWindow_Duty_Extreme.GetDescription, DrawDutySpecifcExtreme },
+		{ UiString.ConfigWindow_Duty_ChaoticAlliance.GetDescription, DrawDutySpecifcChaoticAlliance },
+		{ UiString.ConfigWindow_Duty_Alliance.GetDescription, DrawDutySpecifcAlliance },
+		{ UiString.ConfigWindow_Duty_Dungeon.GetDescription, DrawDutySpecifcDungeon },
+		{ UiString.ConfigWindow_Duty_DeepDungeon.GetDescription, DrawDutySpecifcDeepDungeon },
+		{ UiString.ConfigWindow_Duty_VariantDungeon.GetDescription, DrawDutySpecifcVariantDungeon },
+		{ UiString.ConfigWindow_Duty_FieldOps.GetDescription, DrawDutySpecifcFieldOps },
+		{ UiString.ConfigWindow_Duty_PvP.GetDescription, DrawDutySpecifcPvP },
+	})
+	{
+		HeaderSize = HeaderSize,
+	};
+
+	private static void DrawDutySpecificUltimate()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcUltimate);
+	}
+	private static void DrawDutySpecificSavage()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcSavage);
+	}
+	private static void DrawDutySpecifcExtreme()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcExtreme);
+	}
+	private static void DrawDutySpecifcChaoticAlliance()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcChaoticAlliance);
+	}
+	private static void DrawDutySpecifcAlliance()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcAlliance);
+	}
+	private static void DrawDutySpecifcDungeon()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcDungeon);
+	}
+	private static void DrawDutySpecifcDeepDungeon()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcDeepDungeon);
+	}
+	private static void DrawDutySpecifcVariantDungeon()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcVariantDungeon);
+	}
+	private static void DrawDutySpecifcFieldOps()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcFieldOps);
+	}
+	private static void DrawDutySpecifcPvP()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcPvP);
+	}
+
+	#endregion
+	#region About
+	private static void DrawAbout()
     {
         // Draw the punchline with a specific font and color
         using (ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(18)))
@@ -1441,7 +1540,7 @@ public partial class RotationConfigWindow : Window
 
         ImGui.Spacing();
         float width2 = ImGui.GetWindowWidth();
-        if (IconSet.GetTexture("https://storage.ko-fi.com/cdn/brandasset/kofi_button_red.png", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon2) && ImGuiHelper.TextureButton(icon2, width2, 250 * Scale, "Ko-fi link"))
+        if (IconSet.GetTexture("https://storage.ko-fi.com/cdn/brandasset/kofi_button_red.png", out IDalamudTextureWrap? icon2) && ImGuiHelper.TextureButton(icon2, width2, 250 * Scale, "Ko-fi link"))
         {
             Util.OpenLink("https://ko-fi.com/ltscombatreborn");
         }

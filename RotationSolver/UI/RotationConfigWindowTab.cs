@@ -35,7 +35,7 @@ internal enum RotationConfigWindowTab : byte
     [TabIcon(Icon = 4)] Job,
 
     [Description("Configure Duty Rotation.")]
-    [TabIcon(Icon = 4)] Duty,
+    [TabIcon(Icon = 4)] DutyRotation,
 
     [Description("Configure abilities and custom conditions for your current job.")]
     [TabIcon(Icon = 4)] Actions,
@@ -55,7 +55,10 @@ internal enum RotationConfigWindowTab : byte
     [Description("Configure targeting settings.")]
     [TabIcon(Icon = 16)] Target,
 
-    [Description("Configure optional helpful features.")]
+	[Description("Duty specific settings.")]
+	[TabIcon(Icon = 16)] Duty,
+
+	[Description("Configure optional helpful features.")]
     [TabIcon(Icon = 51)] Extra,
 
     [Description("Debug options for developers and rotation writers (disable when not in use).")]

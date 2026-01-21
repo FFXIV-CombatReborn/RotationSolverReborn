@@ -16,9 +16,9 @@
       },
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.1.0.15, )",
-        "resolved": "3.1.0.15",
-        "contentHash": "abmpVgmG8xBIG/+/IMsMEgj9p1T38ztQA9+QYL1c7HoIf47Fvlm33P1jt9V+o4NDwFg6eZigTkE5lc7EcLlyAQ=="
+        "requested": "[3.1.0.16, )",
+        "resolved": "3.1.0.16",
+        "contentHash": "wC2uvYyDLH77Wt1nmSAc4AyGVOKlPidN1qo+HslqA+HU69fiUX1JDIX2aRlDqd9thz1ALAnb+ojPBhbQSMbdCw=="
       },
       "Microsoft.CodeAnalysis.CSharp": {
         "type": "Direct",
@@ -79,7 +79,7 @@
       "RotationSolverReborn.Basic": {
         "type": "Project",
         "dependencies": {
-          "ECommons": "[3.1.0.15, )",
+          "ECommons": "[3.1.0.16, )",
           "Microsoft.CodeAnalysis.CSharp": "[5.0.0, )",
           "RotationSolver.SourceGenerators": "[1.0.0, )",
           "Svg": "[3.4.7, )",
