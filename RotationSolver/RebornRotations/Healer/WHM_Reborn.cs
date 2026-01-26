@@ -348,7 +348,18 @@ public sealed class WHM_Reborn : WhiteMageRotation
         return base.HealSingleGCD(out act);
     }
 
-    protected override bool GeneralGCD(out IAction? act)
+	[RotationDesc(ActionID.RaisePvE)]
+	protected override bool RaiseGCD(out IAction? act)
+	{
+		if (RaisePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.RaiseGCD(out act);
+	}
+
+	protected override bool GeneralGCD(out IAction? act)
     {
         if (HasThinAir && MergedStatus.HasFlag(AutoStatus.Raise))
         {

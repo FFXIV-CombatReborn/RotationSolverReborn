@@ -6,10 +6,6 @@
 public sealed class RPR_DefaultPvP : ReaperRotation
 {
     #region Configurations
-
-    [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool RespectGuard { get; set; } = true;
-
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvP, Name = "Player health threshold needed for Bloodbath use")]
     public float BloodBathPvPPercent { get; set; } = 0.75f;
@@ -22,16 +18,6 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.EmergencyAbility(nextGCD, out action);
-        }
-
-        if (PurifyPvP.CanUse(out action))
-        {
-            return true;
-        }
-
         if (BloodbathPvP.CanUse(out action))
         {
             if (Player?.GetHealthRatio() < BloodBathPvPPercent)
@@ -55,11 +41,6 @@ public sealed class RPR_DefaultPvP : ReaperRotation
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.DefenseSingleAbility(nextGCD, out action);
-        }
-
         if (ArcaneCrestPvP.CanUse(out action))
         {
             return true;
@@ -70,11 +51,6 @@ public sealed class RPR_DefaultPvP : ReaperRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.AttackAbility(nextGCD, out action);
-        }
-
         if (HasEnshroudedPvP)
         {
             if (LemuresSlicePvP.CanUse(out action))
@@ -103,11 +79,6 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.GeneralGCD(out action);
-        }
-
         if (HasEnshroudedPvP)
         {
             if (CommunioPvP.CanUse(out action))

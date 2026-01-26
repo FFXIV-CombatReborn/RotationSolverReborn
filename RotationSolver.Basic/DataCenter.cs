@@ -607,11 +607,11 @@ internal static class DataCenter
 			return true;
 		}
 
-		if ((Role == JobRole.Healer || Job == Job.SMN) && DataCenter.PlayerSyncedLevel() >= 12)
+		if ((Role == JobRole.Healer || Job == Job.SMN) && PlayerSyncedLevel() >= 12)
 		{
 			return true;
 		}
-		if (Job == Job.RDM && DataCenter.PlayerSyncedLevel() >= 64)
+		if (Job == Job.RDM && PlayerSyncedLevel() >= 64)
 		{
 			return true;
 		}

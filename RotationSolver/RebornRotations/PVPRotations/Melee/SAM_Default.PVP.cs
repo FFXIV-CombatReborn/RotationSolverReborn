@@ -6,10 +6,6 @@
 public sealed class SAM_DefaultPvP : SamuraiRotation
 {
     #region Configurations
-
-    [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool RespectGuard { get; set; } = true;
-
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvP, Name = "Player health threshold needed for Bloodbath use")]
     public float BloodBathPvPPercent { get; set; } = 0.75f;
@@ -28,17 +24,15 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.EmergencyAbility(nextGCD, out action);
-        }
+		if (MeikyoShisuiPvP.CanUse(out action))
+		{
+			if (StatusHelper.PlayerHasStatus(false, StatusHelper.PurifyPvPStatuses))
+			{
+				return true;
+			}
+		}
 
-        if (PurifyPvP.CanUse(out action))
-        {
-            return true;
-        }
-
-        if (BloodbathPvP.CanUse(out action))
+		if (BloodbathPvP.CanUse(out action))
         {
             if (Player?.GetHealthRatio() < BloodBathPvPPercent)
             {
@@ -69,11 +63,6 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.DefenseSingleAbility(nextGCD, out action);
-        }
-
         if (HissatsuChitenPvP.CanUse(out action))
         {
             return true;
@@ -84,11 +73,6 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.AttackAbility(nextGCD, out action);
-        }
-
         if (HissatsuSotenPvP.CanUse(out action, usedUp: true))
         {
             if (nextGCD.IsTheSameTo(false, ActionID.YukikazePvP, ActionID.GekkoPvP, ActionID.KashaPvP))
@@ -129,11 +113,6 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
     [RotationDesc(ActionID.HissatsuSotenPvP)]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.MoveForwardAbility(nextGCD, out action);
-        }
-
         if (HissatsuSotenPvP.CanUse(out action))
         {
             return true;
@@ -146,11 +125,6 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.GeneralGCD(out action);
-        }
-
         if (TendoKaeshiSetsugekkaPvP.CanUse(out action))
         {
             return true;

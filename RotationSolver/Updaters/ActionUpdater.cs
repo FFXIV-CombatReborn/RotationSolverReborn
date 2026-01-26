@@ -277,12 +277,15 @@ internal static class ActionUpdater
             return false;
         }
 
-        foreach (var status in Player.Object.StatusList)
-        {
-            if (status != null && status != null && status.GameData.Value.LockActions == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain)
-                return true;
-        }
-        return false;
+		foreach (var status in Player.Object.StatusList)
+		{
+			if (!DataCenter.IsPvP)
+			{
+				if (status != null && status.GameData.Value.LockActions == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain)
+					return true;
+			}
+		}
+		return false;
     }
 
     private unsafe static bool IsPlayerOccupied()

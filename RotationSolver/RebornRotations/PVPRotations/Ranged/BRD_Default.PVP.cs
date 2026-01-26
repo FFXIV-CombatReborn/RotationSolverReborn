@@ -9,37 +9,21 @@ public sealed class BRD_DefaultPvP : BardRotation
 
     [RotationConfig(CombatType.PvP, Name = "Use Warden's Paean on other players")]
     public bool BRDEsuna2 { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool RespectGuard { get; set; } = true;
     #endregion
 
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.EmergencyAbility(nextGCD, out action);
-        }
-
         if (BRDEsuna2 && TheWardensPaeanPvP.CanUse(out action))
         {
             return true;
         }
         if (StatusHelper.PlayerHasStatus(false, StatusHelper.PurifyPvPStatuses))
         {
-            if (TheWardensPaeanPvP.CanUse(out action))
+            if (TheWardensPaeanPvP.CanUse(out action, targetOverride: TargetType.Self))
             {
-                if (TheWardensPaeanPvP.Target.Target == Player)
-                {
-                    return true;
-                }
-            }
-        }
-
-        if (PurifyPvP.CanUse(out action))
-        {
-            return true;
+				return true;
+			}
         }
 
         if (BraveryPvP.CanUse(out action))
@@ -63,11 +47,6 @@ public sealed class BRD_DefaultPvP : BardRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.AttackAbility(nextGCD, out action);
-        }
-
         if (RepellingShotPvP.CanUse(out action))
         {
             if (!StatusHelper.PlayerHasStatus(true, StatusID.Repertoire))
@@ -101,11 +80,6 @@ public sealed class BRD_DefaultPvP : BardRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.GeneralGCD(out action);
-        }
-
         if (HarmonicArrowPvP.CanUse(out action))
         {
             return true;
