@@ -601,7 +601,18 @@ public sealed class AST_Reborn : AstrologianRotation
         return base.HealAreaGCD(out act);
     }
 
-    protected override bool GeneralGCD(out IAction? act)
+	[RotationDesc(ActionID.AscendPvE)]
+	protected override bool RaiseGCD(out IAction? act)
+	{
+		if (AscendPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.RaiseGCD(out act);
+	}
+
+	protected override bool GeneralGCD(out IAction? act)
     {
         if (BubbleProtec && HasCollectiveUnconscious)
         {

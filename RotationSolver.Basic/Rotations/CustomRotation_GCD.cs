@@ -29,7 +29,17 @@ public partial class CustomRotation
             return null;
         }
 
-        try
+		if (DataCenter.IsPvP && Service.Config.PvpGuardControl && HasPVPGuard)
+		{
+			return null;
+		}
+
+		if (Player != null && DataCenter.IsPvP && Service.Config.PvpGcdLockControl && Player.CurrentMp >= 2000 && Player.GetEffectiveHpPercent() < 50f)
+		{
+			return null;
+		}
+
+		try
         {
             IBaseAction.ShouldEndSpecial = false;
             if (DataCenter.CurrentDutyRotation?.EmergencyGCD(out act) == true)
@@ -70,7 +80,7 @@ public partial class CustomRotation
 
             HardCastRaiseType hardcastraisetype = Service.Config.HardCastRaiseType;
 
-            if (Service.Config.RaisePlayerFirst)
+            if (DataCenter.MergedStatus.HasFlag(AutoStatus.Raise) && DataCenter.CanRaise() && Service.Config.RaisePlayerFirst)
             {                
                 if (RaiseSpell(out act, false))
                 {
@@ -291,7 +301,7 @@ public partial class CustomRotation
 
             IBaseAction.TargetOverride = TargetType.Death;
 
-            if (!Service.Config.RaisePlayerFirst)
+            if (DataCenter.MergedStatus.HasFlag(AutoStatus.Raise) && DataCenter.CanRaise() && !Service.Config.RaisePlayerFirst)
             {
                 if (RaiseSpell(out act, false))
                 {
@@ -468,83 +478,53 @@ public partial class CustomRotation
     {
         act = null;
 
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
-        {
-            IBaseAction.ShouldEndSpecial = true;
-            if (DataCenter.CurrentDutyRotation?.RaiseGCD(out act) == true)
-            {
-                return true;
-            }
-            if (StatusHelper.PlayerHasStatus(true, StatusID.PhantomChemist))
-            {
-                if (StatusHelper.PlayerStatusStack(true, StatusID.PhantomChemist) > 2)
-                {
-                    return false;
-                }
-            }
-            if (RaiseGCD(out act))
-            {
-                return true;
-            }
-            if (RaiseAction(out act, false))
-            {
-                return true;
-            }
-        }
-        IBaseAction.ShouldEndSpecial = false;
+		if (DataCenter.CanRaise())
+		{
+			if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
+			{
+				IBaseAction.ShouldEndSpecial = true;
+				if (DataCenter.CurrentDutyRotation?.RaiseGCD(out act) == true)
+				{
+					return true;
+				}
 
-        if (!DataCenter.AutoStatus.HasFlag(AutoStatus.Raise))
-        {
-            return false;
-        }
+				if (RaiseGCD(out act))
+				{
+					return true;
+				}
+			}
+			IBaseAction.ShouldEndSpecial = false;
 
-        if (DataCenter.CurrentDutyRotation?.RaiseGCD(out act) == true)
-        {
-            return true;
-        }
-        if (StatusHelper.PlayerHasStatus(true, StatusID.PhantomChemist))
-        {
-            if (StatusHelper.PlayerStatusStack(true, StatusID.PhantomChemist) > 2)
-            {
-                return false;
-            }
-        }
-        if (RaiseGCD(out act))
-        {
-            return true;
-        }
+			if (DataCenter.AutoStatus.HasFlag(AutoStatus.Raise))
+			{
+				if (DataCenter.CurrentDutyRotation?.RaiseGCD(out act) == true)
+				{
+					return true;
+				}
 
-        if (RaiseAction(out act, true))
-        {
-            if (HasSwift || IsLastAction(ActionID.SwiftcastPvE))
-            {
-                return true;
-            }
+				if (RaiseGCD(out act))
+				{
+					if (HasSwift || IsLastAction(ActionID.SwiftcastPvE))
+					{
+						return true;
+					}
 
-            if (Service.Config.RaisePlayerBySwift && !SwiftcastPvE.Cooldown.IsCoolingDown && SwiftcastPvE.CanUse(out act))
-            {
-                return true;
-            }
+					if (Service.Config.RaisePlayerBySwift && !SwiftcastPvE.Cooldown.IsCoolingDown && SwiftcastPvE.CanUse(out act))
+					{
+						return true;
+					}
 
-            if (mustUse && !IsMoving)
-            {
-                return true;
-            }
-        }
+					if (mustUse && !IsMoving)
+					{
+						return true;
+					}
+				}
+			}
 
-        return false;
-
-        bool RaiseAction(out IAction act, bool ignoreCastingCheck)
-        {
-            if (Raise?.CanUse(out act, skipCastingCheck: ignoreCastingCheck) ?? false)
-            {
-                return true;
-            }
-
-            act = null!;
-            return false;
-        }
-    }
+			return false;
+		}
+		return false;
+	}
 
     /// <summary>
     /// Attempts to use the Interrupt GCD action.
@@ -611,20 +591,31 @@ public partial class CustomRotation
     /// <returns>True if the action can be used; otherwise, false.</returns>
     protected virtual bool EmergencyGCD(out IAction? act)
     {
-        #region PvP
-        if (GuardPvP.CanUse(out act) && !StatusHelper.PlayerHasStatus(true, StatusID.UndeadRedemption) && !StatusHelper.PlayerHasStatus(true, StatusID.InnerRelease_1303) && (Player?.GetHealthRatio() <= Service.Config.HealthForGuard || DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk)))
-        {
-            return true;
-        }
-
-		if (StandardissueElixirPvP.CanUse(out act))
-        {
-            return true;
-        }
-        #endregion
-
         act = null;
-        if (ShouldSkipAction())
+		if (DataCenter.IsPvP)
+		{
+			if (PurifyPvP.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (GuardPvP.CanUse(out act) && Player?.GetHealthRatio() <= Service.Config.HealthForGuard && !StatusHelper.PlayerHasStatus(true, StatusID.UndeadRedemption) && !StatusHelper.PlayerHasStatus(true, StatusID.InnerRelease_1303))
+			{
+				return true;
+			}
+
+			if (RecuperatePvP.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (StandardissueElixirPvP.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		if (ShouldSkipAction())
         {
             return false;
         }

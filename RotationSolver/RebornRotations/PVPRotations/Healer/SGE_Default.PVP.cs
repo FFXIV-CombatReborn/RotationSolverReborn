@@ -7,23 +7,11 @@ public class SGE_DefaultPVP : SageRotation
 {
     #region Configurations
 
-    [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool RespectGuard { get; set; } = true;
     #endregion
 
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.EmergencyAbility(nextGCD, out action);
-        }
-
-        if (PurifyPvP.CanUse(out action))
-        {
-            return true;
-        }
-
         if (KardiaPvP.CanUse(out action))
         {
             return true;
@@ -34,11 +22,6 @@ public class SGE_DefaultPVP : SageRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.AttackAbility(nextGCD, out action);
-        }
-
         if (DiabrosisPvP.CanUse(out action))
         {
             return true;
@@ -56,11 +39,6 @@ public class SGE_DefaultPVP : SageRotation
     #region GCDs
     protected override bool DefenseSingleGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.DefenseSingleGCD(out action);
-        }
-
         if (StoneskinIiPvP.CanUse(out action))
         {
             return true;
@@ -71,10 +49,6 @@ public class SGE_DefaultPVP : SageRotation
 
     protected override bool HealSingleGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.HealSingleGCD(out action);
-        }
 
         if (HaelanPvP.CanUse(out action))
         {
@@ -86,10 +60,6 @@ public class SGE_DefaultPVP : SageRotation
 
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.GeneralGCD(out action);
-        }
 
         if (PneumaPvP.CanUse(out action))
         {

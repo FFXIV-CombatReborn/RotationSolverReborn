@@ -209,6 +209,18 @@ internal partial class Configs : IPluginConfiguration
 		 Filter = DutySpecifcPvP)]
 	private static readonly bool _pvpStateControl = false;
 
+	[ConditionBool, UI("Don't use any actions while in Guard (Experimental).",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpGuardControl = true;
+
+	[ConditionBool, UI("Lock out GCD cycle if you are below 50% HP and have over 2000 MP for heals (Experimental).",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpGCDLockControl = true;
+
+	[ConditionBool, UI("Allow Sprint when no target is set even if youre in range of hostiles (Experimental).",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpAllowSprintWithoutTarget = true;
+
 	#endregion
 
 	[ConditionBool, UI("Intercept player input and queue it for RSR to execute the action. (PvE only)",
@@ -536,11 +548,26 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Auto-use oGCD abilities", Filter = AutoActionUsage)]
     private static readonly bool _useAbility = true;
 
-    [ConditionBool, UI("Use defensive abilities", Description = "It is recommended to check this option if you are playing Raids or you can plan the heal and defense ability usage by yourself.",
-        Parent = nameof(UseAbility))]
+	[ConditionBool, UI("Use defensive actions", Filter = AutoActionUsage, Description = "It is recommended to check this option if you are playing Raids or you can plan the heal and defense ability usage by yourself.")]
     private static readonly bool _useDefenseAbility = true;
 
-    [ConditionBool, UI("Automatically activate tank stance", Parent = nameof(UseAbility),
+	[ConditionBool, UI("Automatically use Single Target defensive actions", Filter = AutoActionUsage, Parent = nameof(UseDefenseAbility))]
+	private static readonly bool _useSTDefense = true;
+
+	[ConditionBool, UI("Automatically use AOE defensive actions", Filter = AutoActionUsage, Parent = nameof(UseDefenseAbility))]
+	private static readonly bool _useAOEDefense = true;
+
+	[UI("Number of hostiles", Parent = nameof(UseDefenseAbility),
+		PvEFilter = JobFilterType.Tank)]
+	[Range(1, 8, ConfigUnitType.None, 0.05f)]
+	public int AutoDefenseNumber { get; set; } = 2;
+
+	[JobConfig, Range(0, 1, ConfigUnitType.Percent, 0.02f)]
+	[UI("HP%% needed to use single/self targetted mitigation on Tanks", Parent = nameof(UseDefenseAbility),
+		PvEFilter = JobFilterType.Tank)]
+	private readonly float _healthForAutoDefense = 1;
+
+	[ConditionBool, UI("Automatically activate tank stance", Parent = nameof(UseAbility),
         PvEFilter = JobFilterType.Tank)]
     private static readonly bool _autoTankStance = true;
 
@@ -575,7 +602,10 @@ internal partial class Configs : IPluginConfiguration
     [JobConfig, UI("Use beneficial ground-targeted actions only on self, skipping other logic.", Parent = nameof(UseGroundBeneficialAbility))]
     private static readonly bool _useGroundBeneficialAbilityOnlySelf = false;
 
-    [ConditionBool, UI("Show Cooldown Window", Filter = UiWindows)]
+	[JobConfig, UI("Use beneficial ground-targeted actions on party Tank if present, skipping other logic.", Parent = nameof(UseGroundBeneficialAbility))]
+	private static readonly bool _useTargetTankForGroundHeal = false;
+
+	[ConditionBool, UI("Show Cooldown Window", Filter = UiWindows)]
     private static readonly bool _showCooldownWindow = false;
 
     [ConditionBool, UI("Show Action Timeline Window", Filter = UiWindows)]
@@ -1073,11 +1103,6 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 10, ConfigUnitType.None)]
     public int TargetingIndex { get; set; }
 
-    [UI("Number of hostiles", Parent = nameof(UseDefenseAbility),
-        PvEFilter = JobFilterType.Tank)]
-    [Range(1, 8, ConfigUnitType.None, 0.05f)]
-    public int AutoDefenseNumber { get; set; } = 2;
-
     #endregion
 
     #region Jobs
@@ -1158,11 +1183,6 @@ internal partial class Configs : IPluginConfiguration
         Filter = AutoActionUsage, Section = 3,
         PvEFilter = JobFilterType.Tank, PvPFilter = JobFilterType.NoJob)]
     private readonly float _healthForDyingTanks = 0.15f;
-
-    [JobConfig, Range(0, 1, ConfigUnitType.Percent, 0.02f)]
-    [UI("HP%% needed to use single/self targetted mitigation on Tanks", Parent = nameof(UseDefenseAbility),
-        PvEFilter = JobFilterType.Tank)]
-    private readonly float _healthForAutoDefense = 1;
 
     [JobConfig]
     private readonly string _PvPRotationChoice = string.Empty;

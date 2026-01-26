@@ -6,10 +6,6 @@
 public sealed class DRG_DefaultPvP : DragoonRotation
 {
     #region Configurations
-
-    [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool RespectGuard { get; set; } = true;
-
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvP, Name = "Player health threshold needed for Bloodbath use")]
     public float BloodBathPvPPercent { get; set; } = 0.75f;
@@ -25,16 +21,6 @@ public sealed class DRG_DefaultPvP : DragoonRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.EmergencyAbility(nextGCD, out action);
-        }
-
-        if (PurifyPvP.CanUse(out action))
-        {
-            return true;
-        }
-
         if (BloodbathPvP.CanUse(out action) && Player?.GetHealthRatio() < BloodBathPvPPercent)
         {
             return true;
@@ -53,23 +39,8 @@ public sealed class DRG_DefaultPvP : DragoonRotation
         return base.EmergencyAbility(nextGCD, out action);
     }
 
-    protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
-    {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.DefenseSingleAbility(nextGCD, out action);
-        }
-
-        return base.DefenseSingleAbility(nextGCD, out action);
-    }
-
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.AttackAbility(nextGCD, out action);
-        }
-
         if (HorridRoarPvP.CanUse(out action))
         {
             return true;
@@ -95,11 +66,6 @@ public sealed class DRG_DefaultPvP : DragoonRotation
 
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.MoveForwardAbility(nextGCD, out action);
-        }
-
         if (HighJumpPvP.CanUse(out action))
         {
             return true;
@@ -110,11 +76,6 @@ public sealed class DRG_DefaultPvP : DragoonRotation
 
     protected override bool MoveBackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.MoveBackAbility(nextGCD, out action);
-        }
-
         if (ElusiveJumpPvP.CanUse(out action))
         {
             return true;
@@ -127,11 +88,6 @@ public sealed class DRG_DefaultPvP : DragoonRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.GeneralGCD(out action);
-        }
-
         if (WyrmwindThrustPvP.CanUse(out action))
         {
             return true;

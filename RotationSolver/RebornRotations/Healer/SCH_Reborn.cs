@@ -614,7 +614,18 @@ public sealed class SCH_Reborn : ScholarRotation
         return base.DefenseAreaGCD(out act);
     }
 
-    protected override bool GeneralGCD(out IAction? act)
+	[RotationDesc(ActionID.ResurrectionPvE)]
+	protected override bool RaiseGCD(out IAction? act)
+	{
+		if (ResurrectionPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.RaiseGCD(out act);
+	}
+
+	protected override bool GeneralGCD(out IAction? act)
     {
         if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {

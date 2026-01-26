@@ -6,9 +6,6 @@
 public sealed class GNB_DefaultPvP : GunbreakerRotation
 {
     #region Configurations
-
-    [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool RespectGuard { get; set; } = true;
     #endregion
 
     #region Gunbreaker Utilities
@@ -16,11 +13,6 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
     [RotationDesc(ActionID.HeartOfCorundumPvP)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.DefenseSingleAbility(nextGCD, out action);
-        }
-
         if (HeartOfCorundumPvP.CanUse(out action))
         {
             return true;
@@ -82,18 +74,8 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player != null && HasPVPGuard)
-        {
-            return base.EmergencyAbility(nextGCD, out action);
-        }
-
-        if (PurifyPvP.CanUse(out action))
-        {
-            return true;
-        }
-
         //You WILL try to save yourself. Configs be damned!
-        if (HeartOfCorundumPvP.CanUse(out action) && Player != null && Player?.GetHealthRatio() * 100 <= 30)
+        if (HeartOfCorundumPvP.CanUse(out action) && Player?.GetHealthRatio() * 100 <= 30)
         {
             return true;
         }
@@ -102,12 +84,7 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && Player != null && HasPVPGuard)
-        {
-            return base.AttackAbility(nextGCD, out action);
-        }
-
-        if (Player != null && !StatusHelper.PlayerHasStatus(true, StatusID.NoMercy_3042) && RoughDividePvP.CanUse(out action, usedUp: true))
+        if (!StatusHelper.PlayerHasStatus(true, StatusID.NoMercy_3042) && RoughDividePvP.CanUse(out action, usedUp: true))
         {
             return true;
         }
@@ -160,11 +137,6 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && Player != null && HasPVPGuard)
-        {
-            return base.GeneralGCD(out action);
-        }
-
         // I could totally collapse these into one function but *dab*
         if (!ReadyToRoll())
         {

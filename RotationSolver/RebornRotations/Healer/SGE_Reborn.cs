@@ -764,7 +764,19 @@ public sealed class SGE_Reborn : SageRotation
         return base.HealSingleGCD(out act);
     }
 
-    protected override bool GeneralGCD(out IAction? act)
+
+	[RotationDesc(ActionID.EgeiroPvE)]
+	protected override bool RaiseGCD(out IAction? act)
+	{
+		if (EgeiroPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.RaiseGCD(out act);
+	}
+
+	protected override bool GeneralGCD(out IAction? act)
     {
         if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
 		{

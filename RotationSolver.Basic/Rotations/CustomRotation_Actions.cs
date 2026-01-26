@@ -115,32 +115,35 @@ public partial class CustomRotation
     #region PvP
     static partial void ModifyStandardissueElixirPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (!HasHostilesInMaxRange || StatusHelper.PlayerHasStatus(false, StatusID.Covered_1301))
+        setting.ActionCheck = () => (!HasHostilesInMaxRange
 			&& (Player?.CurrentMp <= Player?.MaxMp / 3 || Player?.CurrentHp <= Player?.MaxHp / 3)
-            && !IsLastAction(ActionID.StandardissueElixirPvP) && Player.TimeAlive() > 5;
-        setting.IsFriendly = true;
-    }
+            && !IsLastAction(ActionID.StandardissueElixirPvP) && Player.TimeAlive() > 5) || StatusHelper.PlayerHasStatus(false, StatusID.Covered_1301);
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
+	}
 
     static partial void ModifyRecuperatePvP(ref ActionSetting setting)
     {
         //Recuperate will knock off Guard, likely killing you.
-        setting.ActionCheck = () => Player?.MaxHp - Player?.CurrentHp > 15000 && Player?.TimeAlive() > 5;
-        setting.TargetType = TargetType.Self;
+        setting.ActionCheck = () => (Player?.MaxHp - Player?.CurrentHp) >= 15000 && Player?.TimeAlive() > 5;
         setting.IsFriendly = true;
-    }
+		setting.TargetType = TargetType.Self;
+	}
 
     static partial void ModifyGuardPvP(ref ActionSetting setting)
     {
         //If you've just respawned; you don't wanna Guard.
         setting.ActionCheck = () => Player?.TimeAlive() > 5;
         setting.IsFriendly = true;
-    }
+		setting.TargetType = TargetType.Self;
+	}
 
     static partial void ModifyPurifyPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => StatusHelper.PlayerHasStatus(false, StatusHelper.PurifyPvPStatuses);
         setting.IsFriendly = true;
-    }
+        setting.TargetType = TargetType.Self;
+	}
 
     static partial void ModifySprintPvP(ref ActionSetting setting)
     {

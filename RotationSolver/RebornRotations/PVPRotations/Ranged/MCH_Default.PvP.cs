@@ -6,24 +6,11 @@ namespace RotationSolver.RebornRotations.PVPRotations.Ranged;
 public sealed class MCH_DefaultPvP : MachinistRotation
 {
     #region Configurations
-
-    [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool RespectGuard { get; set; } = true;
     #endregion
 
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.EmergencyAbility(nextGCD, out action);
-        }
-
-        if (PurifyPvP.CanUse(out action))
-        {
-            return true;
-        }
-
         if (InCombat && BraveryPvP.CanUse(out action))
         {
             return true;
@@ -37,23 +24,8 @@ public sealed class MCH_DefaultPvP : MachinistRotation
         return base.EmergencyAbility(nextGCD, out action);
     }
 
-    protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
-    {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.DefenseSingleAbility(nextGCD, out action);
-        }
-
-        return base.DefenseSingleAbility(nextGCD, out action);
-    }
-
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.AttackAbility(nextGCD, out action);
-        }
-
         if (AnalysisPvP.CanUse(out action, usedUp: true))
         {
             if (nextGCD.IsTheSameTo(false, ActionID.DrillPvP, ActionID.BioblasterPvP, ActionID.AirAnchorPvP, ActionID.ChainSawPvP))
@@ -88,11 +60,6 @@ public sealed class MCH_DefaultPvP : MachinistRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.GeneralGCD(out action);
-        }
-
         if (FullMetalFieldPvP.CanUse(out action))
         {
             return true;

@@ -112,12 +112,12 @@ internal static class StateUpdater
 
     private static bool ShouldAddDefenseArea()
     {
-        return DataCenter.InCombat && Service.Config.UseDefenseAbility && DataCenter.IsHostileCastingAOE;
+        return DataCenter.InCombat && Service.Config.UseAoeDefense && DataCenter.IsHostileCastingAOE;
     }
 
     private static bool ShouldAddDefenseSingle()
     {
-        if (!DataCenter.InCombat || !Service.Config.UseDefenseAbility)
+        if (!DataCenter.InCombat || !Service.Config.UseStDefense)
         {
             return false;
         }

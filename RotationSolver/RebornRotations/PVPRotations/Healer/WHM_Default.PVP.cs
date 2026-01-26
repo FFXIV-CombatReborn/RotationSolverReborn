@@ -9,59 +9,28 @@ public class WHM_DefaultPVP : WhiteMageRotation
 
     [RotationConfig(CombatType.PvP, Name = "Use Aquaveil on other players")]
     public bool AquaveilEsuna { get; set; } = false;
-
-    [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool RespectGuard { get; set; } = true;
     #endregion
 
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.EmergencyAbility(nextGCD, out action);
-        }
-
         if (AquaveilEsuna && AquaveilPvP.CanUse(out action))
         {
             return true;
         }
         if (StatusHelper.PlayerHasStatus(false, StatusHelper.PurifyPvPStatuses))
         {
-            if (AquaveilPvP.CanUse(out action))
+            if (AquaveilPvP.CanUse(out action, targetOverride: TargetType.Self))
             {
-                if (AquaveilPvP.Target.Target == Player)
-                {
-                    return true;
-                }
-            }
-        }
-
-        if (PurifyPvP.CanUse(out action))
-        {
-            return true;
+				return true;
+			}
         }
 
         return base.EmergencyAbility(nextGCD, out action);
     }
 
-    protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
-    {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.DefenseSingleAbility(nextGCD, out action);
-        }
-
-        return base.DefenseSingleAbility(nextGCD, out action);
-    }
-
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.AttackAbility(nextGCD, out action);
-        }
-
         if (DiabrosisPvP.CanUse(out action))
         {
             return true;
@@ -74,11 +43,6 @@ public class WHM_DefaultPVP : WhiteMageRotation
     #region GCDs
     protected override bool DefenseSingleGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.DefenseSingleGCD(out action);
-        }
-
         if (StoneskinIiPvP.CanUse(out action))
         {
             return true;
@@ -89,11 +53,6 @@ public class WHM_DefaultPVP : WhiteMageRotation
 
     protected override bool HealSingleGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.HealSingleGCD(out action);
-        }
-
         if (HaelanPvP.CanUse(out action))
         {
             return true;
@@ -114,11 +73,6 @@ public class WHM_DefaultPVP : WhiteMageRotation
 
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.GeneralGCD(out action);
-        }
-
         if (AfflatusMiseryPvP.CanUse(out action))
         {
             return true;

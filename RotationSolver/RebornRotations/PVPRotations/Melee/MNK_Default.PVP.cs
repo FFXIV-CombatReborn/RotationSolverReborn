@@ -6,10 +6,6 @@
 public sealed class MNK_DefaultPvP : MonkRotation
 {
     #region Configurations
-
-    [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool RespectGuard { get; set; } = true;
-
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvP, Name = "Player health threshold needed for Bloodbath use")]
     public float BloodBathPvPPercent { get; set; } = 0.75f;
@@ -22,16 +18,6 @@ public sealed class MNK_DefaultPvP : MonkRotation
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.EmergencyAbility(nextGCD, out action);
-        }
-
-        if (PurifyPvP.CanUse(out action))
-        {
-            return true;
-        }
-
         if (RiddleOfEarthPvP.CanUse(out action) && InCombat && Player?.GetHealthRatio() < 0.8)
         {
             return true;
@@ -68,11 +54,6 @@ public sealed class MNK_DefaultPvP : MonkRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.AttackAbility(nextGCD, out action);
-        }
-
         if (NumberOfHostilesInRangeOf(6) > 0 && RisingPhoenixPvP.CanUse(out action, usedUp: true) && InCombat)
         {
             return true;
@@ -85,26 +66,11 @@ public sealed class MNK_DefaultPvP : MonkRotation
 
         return base.AttackAbility(nextGCD, out action);
     }
-
-    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
-    {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.MoveForwardAbility(nextGCD, out action);
-        }
-
-        return base.MoveForwardAbility(nextGCD, out action);
-    }
     #endregion
 
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.GeneralGCD(out action);
-        }
-
         if (PhantomRushPvP.CanUse(out action))
         {
             return true;

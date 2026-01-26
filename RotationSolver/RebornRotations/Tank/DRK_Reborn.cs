@@ -291,7 +291,7 @@ public sealed class DRK_Reborn : DarkKnightRotation
         }
 
         //AOE
-        if (StalwartSoulPvE.CanUse(out act, skipAoeCheck: true))
+        if (StalwartSoulPvE.CanUse(out act, skipAoeCheck: true) && NumberOfHostilesInRange > 0)
         {
             return true;
         }

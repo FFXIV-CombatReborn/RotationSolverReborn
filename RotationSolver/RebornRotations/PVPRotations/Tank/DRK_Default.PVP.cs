@@ -10,24 +10,11 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
     [Range(1, 100, ConfigUnitType.Percent, 1)]
     [RotationConfig(CombatType.PvP, Name = "Shadowbringer Threshold")]
     public int ShadowbringerThreshold { get; set; } = 50;
-
-    [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
-    public bool RespectGuard { get; set; } = true;
     #endregion
 
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.EmergencyAbility(nextGCD, out action);
-        }
-
-        if (PurifyPvP.CanUse(out action))
-        {
-            return true;
-        }
-
         if (TheBlackestNightPvP.CanUse(out action) && TheBlackestNightPvP.Cooldown.CurrentCharges == 2 && InCombat)
         {
             return true;
@@ -38,11 +25,6 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.DefenseSingleAbility(nextGCD, out act);
-        }
-
         if (RampartPvP.CanUse(out act))
         {
             return true;
@@ -58,11 +40,6 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.AttackAbility(nextGCD, out action);
-        }
-
         if (RampagePvP.CanUse(out action))
         {
             return true;
@@ -100,11 +77,6 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (RespectGuard && HasPVPGuard)
-        {
-            return base.GeneralGCD(out action);
-        }
-
         if (DisesteemPvP.CanUse(out action))
         {
             return true;
