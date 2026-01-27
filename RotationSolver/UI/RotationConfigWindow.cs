@@ -892,7 +892,7 @@ public partial class RotationConfigWindow : Window
 			{
 				ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
 				ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
-				ImGui.TextWrapped($"Warning: You are running the staging branch of Dalamud. For best compatibility, use the XIVLauncher and switch back to 'release' branch if available for your current version of FFXIV.");
+				ImGui.TextWrapped($"Notice: You are running the staging branch of Dalamud. For best compatibility, use the XIVLauncher and switch back to 'release' branch if available for your current version of FFXIV.");
 				ImGui.PopStyleColor();
 				ImGui.PopTextWrapPos();
 				ImGui.Spacing();

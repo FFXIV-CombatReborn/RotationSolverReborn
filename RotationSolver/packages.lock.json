@@ -10,15 +10,15 @@
       },
       "DotNet.ReproducibleBuilds": {
         "type": "Direct",
-        "requested": "[1.2.39, )",
-        "resolved": "1.2.39",
-        "contentHash": "fcFN01tDTIQqDuTwr1jUQK/geofiwjG5DycJQOnC72i1SsLAk1ELe+apBOuZ11UMQG8YKFZG1FgvjZPbqHyatg=="
+        "requested": "[2.0.2, )",
+        "resolved": "2.0.2",
+        "contentHash": "VaHoEN6YHp0jXucxm67vfuRy8zo9ufiKSuaZ4ZudRi8xmWcEFMKxfCsg2nvYNvdISFTURDu+IHqADGh53+Bamw=="
       },
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.1.0.16, )",
-        "resolved": "3.1.0.16",
-        "contentHash": "wC2uvYyDLH77Wt1nmSAc4AyGVOKlPidN1qo+HslqA+HU69fiUX1JDIX2aRlDqd9thz1ALAnb+ojPBhbQSMbdCw=="
+        "requested": "[3.1.0.19, )",
+        "resolved": "3.1.0.19",
+        "contentHash": "BW+fGzBkV3gq0zvjcLW3Q7pVIDCKVUvWfu4qEP2xA2UxsLKfn5iv7Yt/UcLWN2PXBeLsuMn8Twgs6efayb1ByA=="
       },
       "Microsoft.CodeAnalysis.CSharp": {
         "type": "Direct",
@@ -79,7 +79,7 @@
       "RotationSolverReborn.Basic": {
         "type": "Project",
         "dependencies": {
-          "ECommons": "[3.1.0.16, )",
+          "ECommons": "[3.1.0.19, )",
           "Microsoft.CodeAnalysis.CSharp": "[5.0.0, )",
           "RotationSolver.SourceGenerators": "[1.0.0, )",
           "Svg": "[3.4.7, )",
