@@ -56,7 +56,7 @@ internal static class ActionContextMenu
             return;
         }
 
-        Svc.Log.Verbose($"HoveredAction changed: {hoveredAction.ActionKind.ToString()}");
+        Svc.Log.Verbose($"HoveredAction changed: {hoveredAction.ActionKind}");
 
         if (!Player.Available)
         {

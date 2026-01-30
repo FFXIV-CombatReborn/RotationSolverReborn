@@ -227,8 +227,8 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
         }
     }
     public virtual string ID => _property.Name;
-    private string Popup_Key => "Rotation Solver RightClicking: " + ID;
-    protected bool IsJob => _property.GetCustomAttribute<JobConfigAttribute>() != null
+	private string Popup_Key => $"Rotation Solver RightClicking##{ID}_{GetHashCode()}";
+	protected bool IsJob => _property.GetCustomAttribute<JobConfigAttribute>() != null
         || _property.GetCustomAttribute<JobChoiceConfigAttribute>() != null;
 
     public uint Color { get; set; } = 0;

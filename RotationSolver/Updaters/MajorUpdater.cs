@@ -76,9 +76,13 @@ internal static class MajorUpdater
             _isValidThisCycle = IsValid;
             _isActivatedThisCycle = DataCenter.IsActivated();
             _shouldRunThisCycle = true;
+			if (!Service.Config.TutorialDone)
+			{
+				RotationSolverPlugin.OpenFirstStartTutorial();
+			}
 
-            // Opportunistically load rotations if not yet loaded
-            if (_isValidThisCycle && !_rotationsLoaded)
+			// Opportunistically load rotations if not yet loaded
+			if (_isValidThisCycle && !_rotationsLoaded)
             {
                 RotationUpdater.LoadBuiltInRotations();
                 _rotationsLoaded = true;
