@@ -259,15 +259,21 @@ public partial class RotationConfigWindow : Window
         base.OnOpen();
     }
 
-    public override void OnClose()
-    {
-        Service.Config.Save();
-        ActionSequencerUpdater.SaveFiles();
-        _cachedDiagInfo = null;
-        base.OnClose();
-    }
+	public override void OnClose()
+	{
+		Service.Config.Save();
+		ActionSequencerUpdater.SaveFiles();
+		_cachedDiagInfo = null;
+		base.OnClose();
+	}
 
-    public override void Draw()
+	internal void SetActiveTab(RotationConfigWindowTab tab)
+	{
+		_activeTab = tab;
+		_searchResults = [];
+	}
+
+	public override void Draw()
     {
         if (_showResetPopup)
         {
@@ -1330,9 +1336,10 @@ public partial class RotationConfigWindow : Window
             if (!config.Type.HasFlag(CombatType.PvE)) continue;
             if (!ShouldShowRotationConfig(config, set)) continue;
 
-            string key = rotation.GetType().FullName ?? rotation.GetType().Name + "." + config.Name;
-            string name = $"##{config.GetHashCode()}_{key}.Name";
-            string command = ToCommandStr(OtherCommandType.DutyRotations, config.Name, config.DefaultValue);
+			string typeName = rotation.GetType().FullName ?? rotation.GetType().Name;
+			string key = $"{typeName}.{config.Name}";
+			string name = $"##{config.GetHashCode()}_{key}.Name";
+			string command = ToCommandStr(OtherCommandType.DutyRotations, config.Name, config.DefaultValue);
             void Reset() => config.Value = config.DefaultValue;
 
             ImGuiHelper.PrepareGroup(key, command, Reset);
@@ -1506,63 +1513,69 @@ public partial class RotationConfigWindow : Window
 	#endregion
 	#region About
 	private static void DrawAbout()
-    {
-        // Draw the punchline with a specific font and color
-        using (ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(18)))
-        {
-            using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow));
-            ImGui.TextWrapped(UiString.ConfigWindow_About_Punchline.GetDescription());
-        }
+	{
+		// Draw the punchline with a specific font and color
+		using (ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(18)))
+		{
+			using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow));
+			ImGui.TextWrapped(UiString.ConfigWindow_About_Punchline.GetDescription());
+		}
 
-        ImGui.Spacing();
+		ImGui.Spacing();
 
-        // Draw the description
-        ImGui.TextWrapped(UiString.ConfigWindow_About_Description.GetDescription());
+		// Draw the description
+		ImGui.TextWrapped(UiString.ConfigWindow_About_Description.GetDescription());
 
-        ImGui.Spacing();
+		ImGui.Spacing();
 
-        // Draw the warning with a specific color
-        using (ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
-        {
-            ImGui.TextWrapped(UiString.ConfigWindow_About_Warning.GetDescription());
-        }
+		// Draw the warning with a specific color
+		using (ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
+		{
+			ImGui.TextWrapped(UiString.ConfigWindow_About_Warning.GetDescription());
+		}
 
-        ImGui.Spacing();
-        float width2 = ImGui.GetWindowWidth();
-        if (IconSet.GetTexture("https://storage.ko-fi.com/cdn/brandasset/kofi_button_red.png", out IDalamudTextureWrap? icon2) && ImGuiHelper.TextureButton(icon2, width2, 250 * Scale, "Ko-fi link"))
-        {
-            Util.OpenLink("https://ko-fi.com/ltscombatreborn");
-        }
+		ImGui.Spacing();
+		if (ImGui.Button("Open First Start Tutorial"))
+		{
+            Service.Config.TutorialDone = false;
+		}
 
-        float width = ImGui.GetWindowWidth();
+		ImGui.Spacing();
+		float width2 = ImGui.GetWindowWidth();
+		if (IconSet.GetTexture("https://storage.ko-fi.com/cdn/brandasset/kofi_button_red.png", out IDalamudTextureWrap? icon2) && ImGuiHelper.TextureButton(icon2, width2, 250 * Scale, "Ko-fi link"))
+		{
+			Util.OpenLink("https://ko-fi.com/ltscombatreborn");
+		}
 
-        // Draw the Discord link button
-        if (IconSet.GetTexture("https://discordapp.com/api/guilds/1064448004498653245/embed.png?style=banner2", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon) && ImGuiHelper.TextureButton(icon, width, 250 * Scale, "Discord link"))
-        {
-            Util.OpenLink("https://discord.gg/p54TZMPnC9");
-        }
+		float width = ImGui.GetWindowWidth();
 
-        uint clickingCount = OtherConfiguration.RotationSolverRecord.ClickingCount;
-        if (clickingCount > 0)
-        {
-            // Draw the clicking count with a specific color
-            using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, new Vector4(0.2f, 0.6f, 0.95f, 1));
-            string countStr = UiString.ConfigWindow_About_ClickingCount.GetDescription();
-            if (countStr != null)
-            {
-                countStr = string.Format(countStr, clickingCount);
-                ImGuiHelper.DrawItemMiddle(() =>
-                {
-                    ImGui.TextWrapped(countStr);
-                }, width, ImGui.CalcTextSize(countStr).X);
-            }
-        }
+		// Draw the Discord link button
+		if (IconSet.GetTexture("https://discordapp.com/api/guilds/1064448004498653245/embed.png?style=banner2", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon) && ImGuiHelper.TextureButton(icon, width, 250 * Scale, "Discord link"))
+		{
+			Util.OpenLink("https://discord.gg/p54TZMPnC9");
+		}
 
-        // Draw the about headers
-        _aboutHeaders.Draw();
-    }
+		uint clickingCount = OtherConfiguration.RotationSolverRecord.ClickingCount;
+		if (clickingCount > 0)
+		{
+			// Draw the clicking count with a specific color
+			using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, new Vector4(0.2f, 0.6f, 0.95f, 1));
+			string countStr = UiString.ConfigWindow_About_ClickingCount.GetDescription();
+			if (countStr != null)
+			{
+				countStr = string.Format(countStr, clickingCount);
+				ImGuiHelper.DrawItemMiddle(() =>
+				{
+					ImGui.TextWrapped(countStr);
+				}, width, ImGui.CalcTextSize(countStr).X);
+			}
+		}
 
-    private static readonly CollapsingHeaderGroup _aboutHeaders = new(new()
+		// Draw the about headers
+		_aboutHeaders.Draw();
+	}
+
+	private static readonly CollapsingHeaderGroup _aboutHeaders = new(new()
     {
 		{ UiString.ConfigWindow_About_ThanksToSupporters.GetDescription, DrawThanksToSupporters },
 		{ UiString.ConfigWindow_About_Macros.GetDescription, DrawAboutMacros },
@@ -2271,9 +2284,10 @@ public partial class RotationConfigWindow : Window
 
             if (!ShouldShowRotationConfig(config, set)) continue;
 
-            string key = rotation.GetType().FullName ?? rotation.GetType().Name + "." + config.Name;
-            string name = $"##{config.GetHashCode()}_{key}.Name";
-            string command = ToCommandStr(OtherCommandType.Rotations, config.Name, config.DefaultValue);
+			string typeName = rotation.GetType().FullName ?? rotation.GetType().Name;
+			string key = $"{typeName}.{config.Name}";
+			string name = $"##{config.GetHashCode()}_{key}.Name";
+			string command = ToCommandStr(OtherCommandType.Rotations, config.Name, config.DefaultValue);
             void Reset() => config.Value = config.DefaultValue;
 
             ImGuiHelper.PrepareGroup(key, command, Reset);

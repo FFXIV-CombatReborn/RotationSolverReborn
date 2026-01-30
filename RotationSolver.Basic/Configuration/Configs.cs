@@ -42,7 +42,7 @@ internal partial class Configs : IPluginConfiguration
     public int Version { get; set; } = CurrentVersion;
 
     public string LastSeenChangelog { get; set; } = "0.0.0.0";
-    public bool FirstTimeSetupDone { get; set; } = false;
+    public bool TutorialDone { get; set; } = false;
 
     public List<ActionEventInfo> Events { get; private set; } = [];
     public SortedSet<Job> DisabledJobs { get; private set; } = [];
@@ -433,11 +433,11 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Stop casting if the target dies.", Filter = Extra)]
     private static readonly bool _useStopCasting = false;
 
-    /// <markdown file="Auto" name="Cleanse all dispellable debuffs" section="Action Usage and Control">
-    /// Enabling this setting will force the usage of Esuna on all target that are affected by a
-    /// cleansable debuff.
-    /// </markdown>
-    [ConditionBool, UI("Cleanse all dispellable debuffs regardless of healing.",
+	/// <markdown file="Auto" name="Cleanse all dispellable debuffs" section="Action Usage and Control">
+	/// Enabling this setting will force the usage of Esuna on all target that are affected by a
+	/// cleansable debuff.
+	/// </markdown>
+	[ConditionBool, UI("Cleanse all dispellable debuffs regardless of healing.",
         Filter = AutoActionUsage, Section = 3,
         PvEFilter = JobFilterType.Dispel, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _dispelAll = false;

@@ -431,10 +431,21 @@ namespace RotationSolver.Commands
 					for (int i = 0; i < DataCenter.AllHostileTargets.Count; i++)
 					{
 						var t = DataCenter.AllHostileTargets[i];
-						if (t != null && t is IBattleChara battleChara && battleChara.TargetObjectId == Player.Object.GameObjectId)
+						if (t != null && t is IBattleChara battleChara)
 						{
-							target = battleChara;
-							break;
+							try
+							{
+								if (battleChara.TargetObjectId == Player.Object.GameObjectId)
+								{
+									target = battleChara;
+									break;
+								}
+							}
+							catch (AccessViolationException)
+							{
+								// Object became invalid while reading TargetObjectId.
+								continue;
+							}
 						}
 					}
 					if (target != null && !ObjectHelper.IsDummy(target))

@@ -14,7 +14,7 @@ namespace RotationSolver.UI
         {
             Size = new Vector2(650, 500);
             SizeCondition = ImGuiCond.FirstUseEver;
-            if (((_lastSeenChangelog != _assemblyVersion && Service.Config.ChangelogPopup) || !Service.Config.FirstTimeSetupDone) && Service.Config.ChangelogPopup)
+            if (_lastSeenChangelog != _assemblyVersion && Service.Config.ChangelogPopup)
             {
                 PopulateChangelogs();
                 IsOpen = true;
@@ -71,7 +71,7 @@ namespace RotationSolver.UI
             }
         }
 
-        private async Task<string> GetNextMostRecentReleaseTag()
+        private static async Task<string> GetNextMostRecentReleaseTag()
         {
             string url = $"https://api.github.com/repos/{Service.USERNAME}/{Service.REPO}/releases";
             try
@@ -139,7 +139,7 @@ namespace RotationSolver.UI
             }, windowWidth, textSize);
             ImGui.PopFont();
 
-            text = Service.Config.FirstTimeSetupDone ? UiString.WelcomeWindow_WelcomeBack.GetDescription() : UiString.WelcomeWindow_Welcome.GetDescription();
+            text = UiString.WelcomeWindow_Welcome.GetDescription();
             ImGui.PushFont(FontManager.GetFont(fontSize + 1));
             textSize = ImGui.CalcTextSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
@@ -175,7 +175,7 @@ namespace RotationSolver.UI
                 return;
             }
 
-            List<Commit> commits = new();
+            List<Commit> commits = [];
             foreach (Commit c in changeLog.Commits)
             {
                 if (!c.CommitData.Message.Contains("Merge pull request"))
@@ -246,25 +246,20 @@ namespace RotationSolver.UI
             }
         }
 
-        private List<string> GetAuthorsFromChangeLogs(IEnumerable<Commit> commits)
+        private static List<string> GetAuthorsFromChangeLogs(IEnumerable<Commit> commits)
         {
-            HashSet<string> authors = new();
+            HashSet<string> authors = [];
             foreach (Commit commit in commits)
             {
                 _ = authors.Add(commit.CommitData.CommitAuthor.Name);
             }
-            List<string> authorList = new();
-            foreach (string author in authors)
-            {
-                authorList.Add(author);
-            }
+            List<string> authorList = [.. authors];
             return authorList;
         }
 
         public override void OnClose()
         {
             Service.Config.LastSeenChangelog = _assemblyVersion;
-            Service.Config.FirstTimeSetupDone = true;
             Service.Config.Save();
             IsOpen = false;
             base.OnClose();

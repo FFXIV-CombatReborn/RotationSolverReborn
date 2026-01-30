@@ -11,7 +11,7 @@ public abstract class DrawingHighlightHotbarBase : IDisposable
     public virtual bool Enable { get; set; } = true;
 
     private bool _disposed;
-    private readonly object _disposeLock = new();
+    private readonly Lock _disposeLock = new();
 
     protected DrawingHighlightHotbarBase()
     {
@@ -49,7 +49,7 @@ public abstract class DrawingHighlightHotbarBase : IDisposable
 
     internal async Task<IEnumerable<IDrawing2D>> To2DMain()
     {
-        return !Enable ? Array.Empty<IDrawing2D>() : await Task.FromResult(To2D());
+        return !Enable ? [] : await Task.FromResult(To2D());
     }
 
     internal void UpdateOnFrameMain()
