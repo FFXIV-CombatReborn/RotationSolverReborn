@@ -19,6 +19,8 @@ namespace RotationSolver.Commands
 		private static Job _previousJob = Job.ADV;
 		private static readonly Random random = Random.Shared;
 
+		internal static IBaseAction? CurrentAction { get; set; } = null;
+
 		public static void IncrementState()
 		{
 			if (!DataCenter.State) { DoStateCommandType(StateCommandType.Auto); return; }
@@ -137,6 +139,8 @@ namespace RotationSolver.Commands
 				}
 			}
 
+			CurrentAction = nextAction as IBaseAction;
+
 			if (Service.Config.KeyBoardNoise)
 			{
 				MiscUpdater.PulseActionBar(nextAction.AdjustedID);
@@ -151,6 +155,21 @@ namespace RotationSolver.Commands
 
 				_lastActionID = nextAction.AdjustedID;
 				_lastUsedTime = DateTime.Now;
+
+				// If this action was the one intercepted by the user, clear intercepted state and end the intercept window early
+				try
+				{
+					if (DataCenter.CurrentInterceptedAction != null && DataCenter.CurrentInterceptedAction.AdjustedID == nextAction.AdjustedID)
+					{
+						DataCenter.CurrentInterceptedAction = null;
+						// End the special intercepting state without showing toast
+						DoSpecialCommandType(SpecialCommandType.EndSpecial, false);
+					}
+				}
+				catch (Exception ex)
+				{
+					PluginLog.Warning($"Failed to clear CurrentInterceptedAction after execution: {ex}");
+				}
 
 				if (nextAction is BaseAction finalAct)
 				{
@@ -472,23 +491,6 @@ namespace RotationSolver.Commands
 						_lastCountdownTime = 0;
 						CancelState();
 						return;
-					}
-				}
-
-				if (!DataCenter.State)
-				{
-					var switchManual = DataCenter.CurrentConditionValue.SwitchManualConditionSet;
-					if (switchManual != null && switchManual.IsTrue(DataCenter.CurrentRotation))
-					{
-						DoStateCommandType(StateCommandType.Manual);
-					}
-					else
-					{
-						var switchAuto = DataCenter.CurrentConditionValue.SwitchAutoConditionSet;
-						if (switchAuto != null && switchAuto.IsTrue(DataCenter.CurrentRotation))
-						{
-							DoStateCommandType(StateCommandType.Auto);
-						}
 					}
 				}
 			}

@@ -1,5 +1,4 @@
 ﻿using ECommons.GameHelpers;
-using RotationSolver.Basic.Configuration.Conditions;
 
 namespace RotationSolver.Updaters;
 internal static class StateUpdater
@@ -600,21 +599,6 @@ internal static class StateUpdater
         }
 
         return status;
-    }
-
-    private static void AddStatus(ref AutoStatus status, AutoStatus flag, ConditionSet set)
-    {
-        AddStatus(ref status, flag, () => set.IsTrue(DataCenter.CurrentRotation));
-    }
-
-    private static void AddStatus(ref AutoStatus status, AutoStatus flag, Func<bool> getValue)
-    {
-        if (status.HasFlag(flag) || !getValue())
-        {
-            return;
-        }
-
-        status |= flag;
     }
 
     private static int CountAllianceTanks()

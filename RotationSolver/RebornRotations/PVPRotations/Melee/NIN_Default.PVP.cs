@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Melee;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.4")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.41")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/NIN_Default.PvP.cs")]
 
 public sealed class NIN_DefaultPvP : NinjaRotation

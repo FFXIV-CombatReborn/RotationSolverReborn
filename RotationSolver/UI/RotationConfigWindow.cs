@@ -262,7 +262,6 @@ public partial class RotationConfigWindow : Window
 	public override void OnClose()
 	{
 		Service.Config.Save();
-		ActionSequencerUpdater.SaveFiles();
 		_cachedDiagInfo = null;
 		base.OnClose();
 	}

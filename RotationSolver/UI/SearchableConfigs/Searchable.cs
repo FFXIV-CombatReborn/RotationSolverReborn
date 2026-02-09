@@ -91,30 +91,31 @@ internal readonly struct JobFilter
     /// </summary>
     public Job[]? Jobs { get; init; }
 
-    public bool CanDraw
-    {
-        get
-        {
-            bool canDraw = true;
+	public bool CanDraw
+	{
+		get
+		{
+			bool canDraw = true;
 
-            if (JobRoles != null)
-            {
-                JobRole? role = DataCenter.CurrentRotation?.Role;
-                if (role.HasValue)
-                {
-                    canDraw = JobRoles.Contains(role.Value);
-                }
-            }
+			if (JobRoles is { Length: > 0 })
+			{
+				JobRole? role = DataCenter.CurrentRotation?.Role;
+				if (role.HasValue)
+				{
+					canDraw = JobRoles.Contains(role.Value);
+				}
+			}
 
-            if (Jobs != null)
-            {
-                canDraw |= Jobs.Contains(DataCenter.Job);
-            }
-            return canDraw;
-        }
-    }
+			if (Jobs is { Length: > 0 })
+			{
+				canDraw |= Jobs.Contains(DataCenter.Job);
+			}
 
-    public Job[] AllJobs
+			return canDraw;
+		}
+	}
+
+	public Job[] AllJobs
     {
         get
         {

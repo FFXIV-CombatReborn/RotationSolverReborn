@@ -4,9 +4,10 @@ using RotationSolver.Data;
 namespace RotationSolver.UI.SearchableConfigs;
 
 internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] otherChildren)
-    : CheckBoxSearchCondition(property, ConcatChildren(otherChildren))
+    : CheckBoxCondition(property, ConcatChildren(otherChildren))
 {
     private readonly ISearchable[] _otherChildren = otherChildren;
+
 
     // Static fields for health-related properties
     private static readonly DragFloatSearch

@@ -381,7 +381,7 @@ public readonly struct ActionBasicInfo
 
     private bool IsActionDisabled()
     {
-        return !IBaseAction.ForceEnable && (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false);
+        return !IBaseAction.ForceEnable && _action.Config?.IsEnabled == false;
     }
 
     /// <summary>

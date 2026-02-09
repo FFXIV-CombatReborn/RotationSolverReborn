@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.4")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.41")]
 [SourceCode(Path = "main/RebornRotations/Melee/DRG_Reborn.cs")]
 
 
@@ -296,14 +296,14 @@ public sealed class DRG_Reborn : DragoonRotation
 
         if (LanceMasteryIvTrait.EnoughLevel)
         {
-            if (SpiralBlowPvE.CanUse(out act))
-            {
+            if (SpiralBlowPvE.CanUse(out act, skipStatusProvideCheck: StatusHelper.PlayerWillStatusEndGCD(6, 0, true, StatusID.PowerSurge_2720)))
+			{
                 return true;
             }
         }
         if (!LanceMasteryIvTrait.EnoughLevel)
         {
-            if (DisembowelPvE.CanUse(out act))
+            if (DisembowelPvE.CanUse(out act, skipStatusProvideCheck: StatusHelper.PlayerWillStatusEndGCD(6, 0, true, StatusID.PowerSurge_2720)))
             {
                 return true;
             }

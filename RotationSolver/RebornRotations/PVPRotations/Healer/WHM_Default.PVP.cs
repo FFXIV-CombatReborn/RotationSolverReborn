@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.PVPRotations.Healer;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.4")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.41")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Healer/WHM_Default.PVP.cs")]
 
 public class WHM_DefaultPVP : WhiteMageRotation

@@ -184,7 +184,21 @@ public struct ActionTargetInfo(IBaseAction action)
                 if (isRestricted) continue;
             }
 
-            if (CheckStatus(tar, skipStatusProvideCheck, skipTargetStatusNeedCheck) && CheckTimeToKill(tar) && CheckResistance(tar))
+			if (DataCenter.IsInM9S && action.AdjustedID == 36982 && DataCenter.RestrictedActionNameIds != null)
+			{
+				bool isRestrictedAction = false;
+				for (int i = 0; i < DataCenter.RestrictedActionNameIds.Count; i++)
+				{
+					if (tar.NameId == DataCenter.RestrictedActionNameIds[i])
+					{
+						isRestrictedAction = true;
+						break;
+					}
+				}
+				if (isRestrictedAction) continue;
+			}
+
+			if (CheckStatus(tar, skipStatusProvideCheck, skipTargetStatusNeedCheck) && CheckTimeToKill(tar) && CheckResistance(tar))
             {
                 validTargets.Add(tar);
             }

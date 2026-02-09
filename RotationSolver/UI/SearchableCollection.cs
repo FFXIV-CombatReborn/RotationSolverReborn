@@ -151,27 +151,27 @@ internal class SearchableCollection
 
     private static ISearchable? CreateSearchable(PropertyInfo property)
     {
-        if (property.Name == nameof(Configs.AutoHeal))
-        {
-            return new AutoHealCheckBox(property);
-        }
-        else if (property.PropertyType.IsEnum)
-        {
-            return new EnumSearch(property);
-        }
-        else if (property.PropertyType == typeof(bool))
-        {
-            return new CheckBoxSearchNoCondition(property);
-        }
-        else if (property.PropertyType == typeof(ConditionBoolean))
-        {
-            return new CheckBoxSearchCondition(property);
-        }
-        else if (property.PropertyType == typeof(float))
-        {
-            return new DragFloatSearch(property);
-        }
-        else if (property.PropertyType == typeof(int))
+		if (property.Name == nameof(Configs.AutoHeal))
+		{
+			return new AutoHealCheckBox(property);
+		}
+		else if (property.PropertyType.IsEnum)
+		{
+			return new EnumSearch(property);
+		}
+		else if (property.PropertyType == typeof(bool))
+		{
+			return new CheckBoxSearchNoCondition(property);
+		}
+		else if (property.PropertyType == typeof(ConditionBoolean))
+		{
+			return new CheckBoxCondition(property);
+		}
+		else if (property.PropertyType == typeof(float))
+		{
+			return new DragFloatSearch(property);
+		}
+		else if (property.PropertyType == typeof(int))
         {
             return new DragIntSearch(property);
         }

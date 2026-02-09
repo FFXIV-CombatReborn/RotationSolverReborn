@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Tank;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.4")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.41")]
 [SourceCode(Path = "main/RebornRotations/Tank/WAR_Reborn.cs")]
 
 public sealed class WAR_Reborn : WarriorRotation

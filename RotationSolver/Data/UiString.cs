@@ -532,18 +532,6 @@ namespace RotationSolver.Data
         [Description("Please separately bind damage reduction/shield cooldowns in case RSR fails at a crucial moment in {0}!")]
         HighEndWarning,
 
-        [Description("Use Forced Enable Condition")]
-        ForcedEnableCondition,
-
-        [Description("The conditions that force this to be true")]
-        ForcedEnableConditionDesc,
-
-        [Description("Use Forced Disable Condition")]
-        ForcedDisableCondition,
-
-        [Description("The conditions that force this to be false")]
-        ForcedDisableConditionDesc,
-
         [Description("Click to execute the command")]
         ConfigWindow_Helper_RunCommand,
 

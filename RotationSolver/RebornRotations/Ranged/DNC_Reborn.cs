@@ -2,7 +2,7 @@ using Dalamud.Interface.Colors;
 
 namespace RotationSolver.RebornRotations.Ranged;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.4")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.41")]
 [SourceCode(Path = "main/RebornRotations/Ranged/DNC_Reborn.cs")]
 
 public sealed class DNC_Reborn : DancerRotation
