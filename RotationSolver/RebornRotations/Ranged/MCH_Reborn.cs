@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Ranged;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.4")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.41")]
 [SourceCode(Path = "main/RebornRotations/Ranged/MCH_Reborn.cs")]
 
 public sealed class MCH_Reborn : MachinistRotation
@@ -359,8 +359,8 @@ public sealed class MCH_Reborn : MachinistRotation
         {
             if (FullMetalFieldPvE.CanUse(out act))
             {
-                return true;
-            }
+				return true;
+			}
         }
 
         if (DrillPvE.CanUse(out act, usedUp: true))
@@ -372,8 +372,8 @@ public sealed class MCH_Reborn : MachinistRotation
         {
             if (FullMetalFieldPvE.CanUse(out act))
             {
-                return true;
-            }
+				return true;
+			}
         }
 
         if (StatusHelper.PlayerWillStatusEnd(3, true, StatusID.ExcavatorReady))

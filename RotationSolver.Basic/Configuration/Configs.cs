@@ -464,11 +464,14 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Lock Control Window",
         Filter = UiWindows)]
     private static readonly bool _isControlWindowLock = false;
-
-    [ConditionBool, UI("Show Next Action Window", Filter = UiWindows)]
+	
+	[ConditionBool, UI("Show Next Action Window", Filter = UiWindows)]
     private static readonly bool _showNextActionWindow = false;
 
-    [ConditionBool, UI("No Inputs", Parent = nameof(ShowNextActionWindow))]
+	[ConditionBool, UI("Show Intercepted Action Window", Filter = UiWindows)]
+	private static readonly bool _showInterceptedActionWindow = false;
+
+	[ConditionBool, UI("No Inputs", Parent = nameof(ShowNextActionWindow))]
     private static readonly bool _isInfoWindowNoInputs = false;
 
     [ConditionBool, UI("No Move", Parent = nameof(ShowNextActionWindow))]

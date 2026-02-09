@@ -19,6 +19,11 @@ public partial class CustomRotation
 			return false;
 		}
 
+		if (WeaponRemain <= 0.5f && WeaponRemain > 0f)
+		{
+			return false;
+		}
+
 		IBaseAction.ForceEnable = true;
         if (act is IBaseAction a && a != null && !a.Info.IsRealGCD && a.CanUse(out _, usedUp: true, skipAoeCheck: true, skipStatusProvideCheck: true))
         {

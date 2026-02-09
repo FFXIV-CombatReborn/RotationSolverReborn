@@ -1,276 +1,244 @@
 ﻿using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using RotationSolver.Basic.Configuration;
-using RotationSolver.Basic.Configuration.Conditions;
-using RotationSolver.Data;
 
 namespace RotationSolver.UI.SearchableConfigs;
 
-internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable[] children)
-    : CheckBoxSearch(property, children)
+internal class CheckBoxCondition(PropertyInfo property, params ISearchable[] children)
+	: CheckBoxSearch(property, children)
 {
-    private abstract class CheckBoxConditionAbstract : CheckBoxSearch
-    {
-        protected readonly ConditionBoolean _condition;
-        public override string SearchingKeys => string.Empty;
+	private ConditionBoolean? Condition => _property.GetValue(Service.Config) as ConditionBoolean;
 
-        public override string Command => string.Empty;
+	protected override bool Value
+	{
+		get => Condition?.Value ?? false;
+		set
+		{
+			if (Condition is { } condition)
+			{
+				condition.Value = value;
+			}
+		}
+	}
 
-        public override string ID => base.ID + Name;
+	public override void ResetToDefault()
+	{
+		if (Condition is { } condition)
+		{
+			condition.ResetValue();
+		}
+	}
 
-        public override bool ShowInChild => false;
+	private abstract class CheckBoxConditionAbstract : CheckBoxSearch
+	{
+		protected readonly ConditionBoolean _condition;
+		public override string SearchingKeys => string.Empty;
 
-        public CheckBoxConditionAbstract(PropertyInfo property) : base(property)
-        {
-            _condition = (ConditionBoolean)property.GetValue(Service.Config)!;
-            AdditionalDraw = () =>
-            {
-                if (DataCenter.CurrentRotation == null)
-                {
-                    return;
-                }
-            };
-        }
+		public override string Command => string.Empty;
 
-        protected abstract ConditionSet GetCondition();
+		public override string ID => base.ID + Name;
 
-        public override void ResetToDefault()
-        {
-            Value = false;
-        }
-    }
+		public override bool ShowInChild => false;
 
-    private class CheckBoxDisable(PropertyInfo property) : CheckBoxConditionAbstract(property)
-    {
-        public override string Name => UiString.ForcedDisableCondition.GetDescription();
+		public CheckBoxConditionAbstract(PropertyInfo property) : base(property)
+		{
+			_condition = (ConditionBoolean)property.GetValue(Service.Config)!;
+			AdditionalDraw = () =>
+			{
+				if (DataCenter.CurrentRotation == null)
+				{
+					return;
+				}
+			};
+		}
 
-        public override string Description => UiString.ForcedDisableConditionDesc.GetDescription();
+		public override void ResetToDefault()
+		{
+			Value = false;
+		}
+	}
 
-        protected override bool Value
-        {
-            get => _condition.Disable;
-            set => _condition.Disable = value;
-        }
-
-        protected override ConditionSet GetCondition()
-        {
-            return DataCenter.CurrentConditionValue.GetDisableCondition(_condition.Key);
-        }
-    }
-
-    private class CheckBoxEnable(PropertyInfo property) : CheckBoxConditionAbstract(property)
-    {
-        public override string Name => UiString.ForcedEnableCondition.GetDescription();
-
-        public override string Description => UiString.ForcedEnableConditionDesc.GetDescription();
-
-        protected override bool Value
-        {
-            get => _condition.Enable;
-            set => _condition.Enable = value;
-        }
-
-        protected override ConditionSet GetCondition()
-        {
-            return DataCenter.CurrentConditionValue.GetEnableCondition(_condition.Key);
-        }
-    }
-
-    private ConditionBoolean Condition => (ConditionBoolean)_property.GetValue(Service.Config)!;
-
-    public override bool AlwaysShowChildren => false;
-
-    protected override bool Value
-    {
-        get => Condition.Value;
-        set => Condition.Value = value;
-    }
-
-    public override void ResetToDefault()
-    {
-        Condition.ResetValue();
-    }
-
-    protected override void DrawMiddle()
-    {
-        if (AlwaysShowChildren)
-        {
-            ImGui.SameLine();
-        }
-        base.DrawMiddle();
-    }
+	public override bool AlwaysShowChildren => false;
+	protected override void DrawMiddle()
+	{
+		if (AlwaysShowChildren)
+		{
+			ImGui.SameLine();
+		}
+		base.DrawMiddle();
+	}
 }
 
 internal class CheckBoxSearchNoCondition(PropertyInfo property, params ISearchable[] children)
-    : CheckBoxSearch(property, children)
+	: CheckBoxSearch(property, children)
 {
-    protected override bool Value
-    {
-        get => (bool)_property.GetValue(Service.Config)!;
-        set => _property.SetValue(Service.Config, value);
-    }
+	protected override bool Value
+	{
+		get => (bool)_property.GetValue(Service.Config)!;
+		set => _property.SetValue(Service.Config, value);
+	}
 
-    public override void ResetToDefault()
-    {
-        _property.SetValue(Service.Config, false);
-    }
+	public override void ResetToDefault()
+	{
+		_property.SetValue(Service.Config, false);
+	}
 }
 
 internal abstract class CheckBoxSearch : Searchable
 {
-    public List<ISearchable> Children { get; } = [];
+	public List<ISearchable> Children { get; } = [];
 
-    public ActionID Action { get; init; } = ActionID.None;
+	public ActionID Action { get; init; } = ActionID.None;
 
-    public Action? AdditionalDraw { get; set; } = null;
+	public Action? AdditionalDraw { get; set; } = null;
 
-    public virtual bool AlwaysShowChildren => false;
+	public virtual bool AlwaysShowChildren => false;
 
-    public override string Description => Action == ActionID.None ? base.Description : Action.ToString();
+	public override string Description => Action == ActionID.None ? base.Description : Action.ToString();
 
-    internal CheckBoxSearch(PropertyInfo property, params ISearchable[] children)
-        : base(property)
-    {
-        Action = property.GetCustomAttribute<UIAttribute>()?.Action ?? ActionID.None;
-        foreach (ISearchable child in children)
-        {
-            AddChild(child);
-        }
-    }
+	internal CheckBoxSearch(PropertyInfo property, params ISearchable[] children)
+		: base(property)
+	{
+		Action = property.GetCustomAttribute<UIAttribute>()?.Action ?? ActionID.None;
+		foreach (ISearchable child in children)
+		{
+			AddChild(child);
+		}
+	}
 
-    public void AddChild(ISearchable child)
-    {
-        child.Parent = this;
-        Children.Add(child);
-    }
+	public void AddChild(ISearchable child)
+	{
+		child.Parent = this;
+		Children.Add(child);
+	}
 
-    protected abstract bool Value { get; set; }
+	protected abstract bool Value { get; set; }
 
-    protected virtual void DrawChildren()
-    {
-        bool lastIs = false;
-        foreach (ISearchable child in Children)
-        {
-            if (!child.ShowInChild)
-            {
-                continue;
-            }
+	protected virtual void DrawChildren()
+	{
+		bool lastIs = false;
+		foreach (ISearchable child in Children)
+		{
+			if (!child.ShowInChild)
+			{
+				continue;
+			}
 
-            bool thisIs = child is CheckBoxSearch c && c.Action != ActionID.None && c.Action.GetTexture(out IDalamudTextureWrap? texture);
-            if (lastIs && thisIs)
-            {
-                ImGui.SameLine();
-            }
-            lastIs = thisIs;
+			bool thisIs = child is CheckBoxSearch c && c.Action != ActionID.None && c.Action.GetTexture(out IDalamudTextureWrap? texture);
+			if (lastIs && thisIs)
+			{
+				ImGui.SameLine();
+			}
+			lastIs = thisIs;
 
-            child.Draw();
-        }
-    }
+			child.Draw();
+		}
+	}
 
-    protected virtual void DrawMiddle()
-    {
+	protected virtual void DrawMiddle()
+	{
 
-    }
+	}
 
-    protected override void DrawMain()
-    {
-        bool hasChild = false;
-        if (Children != null)
-        {
-            foreach (ISearchable c in Children)
-            {
-                if (c.ShowInChild)
-                {
-                    hasChild = true;
-                    break;
-                }
-            }
-        }
-        bool hasAdditional = AdditionalDraw != null;
-        bool hasSub = hasChild || hasAdditional;
-        IDalamudTextureWrap? texture = null;
-        bool hasIcon = Action != ActionID.None && Action.GetTexture(out texture);
+	protected override void DrawMain()
+	{
+		bool hasChild = false;
+		if (Children != null)
+		{
+			foreach (ISearchable c in Children)
+			{
+				if (c.ShowInChild)
+				{
+					hasChild = true;
+					break;
+				}
+			}
+		}
+		bool hasAdditional = AdditionalDraw != null;
+		bool hasSub = hasChild || hasAdditional;
+		IDalamudTextureWrap? texture = null;
+		bool hasIcon = Action != ActionID.None && Action.GetTexture(out texture);
 
-        bool enable = Value;
-        if (ImGui.Checkbox($"##{ID}", ref enable))
-        {
-            Value = enable;
-        }
-        if (ImGui.IsItemHovered())
-        {
-            ShowTooltip();
-        }
+		bool enable = Value;
+		if (ImGui.Checkbox($"##{ID}", ref enable))
+		{
+			Value = enable;
+		}
+		if (ImGui.IsItemHovered())
+		{
+			ShowTooltip();
+		}
 
-        ImGui.SameLine();
+		ImGui.SameLine();
 
-        string name = $"{Name}##Config_{ID}{GetHashCode()}";
-        if (hasIcon)
-        {
-            ImGui.BeginGroup();
-            Vector2 cursor = ImGui.GetCursorPos();
-            float size = ImGuiHelpers.GlobalScale * 32;
-            if (texture?.Handle != null && ImGuiHelper.NoPaddingNoColorImageButton(texture, Vector2.One * size, ID))
-            {
-                Value = enable;
-            }
-            ImGuiHelper.DrawActionOverlay(cursor, size, enable ? 1 : 0);
-            ImGui.EndGroup();
+		string name = $"{Name}##Config_{ID}{GetHashCode()}";
+		if (hasIcon)
+		{
+			ImGui.BeginGroup();
+			Vector2 cursor = ImGui.GetCursorPos();
+			float size = ImGuiHelpers.GlobalScale * 32;
+			if (texture?.Handle != null && ImGuiHelper.NoPaddingNoColorImageButton(texture, Vector2.One * size, ID))
+			{
+				Value = enable;
+			}
+			ImGuiHelper.DrawActionOverlay(cursor, size, enable ? 1 : 0);
+			ImGui.EndGroup();
 
-            if (ImGui.IsItemHovered())
-            {
-                ShowTooltip();
-            }
-        }
-        else if (hasSub)
-        {
-            if (enable || AlwaysShowChildren)
-            {
-                float x = ImGui.GetCursorPosX();
-                DrawMiddle();
-                bool drawBody = ImGui.TreeNode(name);
-                if (ImGui.IsItemHovered())
-                {
-                    ShowTooltip();
-                }
+			if (ImGui.IsItemHovered())
+			{
+				ShowTooltip();
+			}
+		}
+		else if (hasSub)
+		{
+			if (enable || AlwaysShowChildren)
+			{
+				float x = ImGui.GetCursorPosX();
+				DrawMiddle();
+				bool drawBody = ImGui.TreeNode(name);
+				if (ImGui.IsItemHovered())
+				{
+					ShowTooltip();
+				}
 
-                if (drawBody)
-                {
-                    ImGui.SetCursorPosX(x);
-                    ImGui.BeginGroup();
-                    AdditionalDraw?.Invoke();
-                    if (hasChild)
-                    {
-                        DrawChildren();
-                    }
-                    ImGui.EndGroup();
-                    ImGui.TreePop();
-                }
-            }
-            else
-            {
-                ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0x0);
-                ImGui.PushStyleColor(ImGuiCol.HeaderActive, 0x0);
-                _ = ImGui.TreeNodeEx(name, ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen);
-                if (ImGui.IsItemHovered())
-                {
-                    ShowTooltip(false);
-                }
+				if (drawBody)
+				{
+					ImGui.SetCursorPosX(x);
+					ImGui.BeginGroup();
+					AdditionalDraw?.Invoke();
+					if (hasChild)
+					{
+						DrawChildren();
+					}
+					ImGui.EndGroup();
+					ImGui.TreePop();
+				}
+			}
+			else
+			{
+				ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0x0);
+				ImGui.PushStyleColor(ImGuiCol.HeaderActive, 0x0);
+				_ = ImGui.TreeNodeEx(name, ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen);
+				if (ImGui.IsItemHovered())
+				{
+					ShowTooltip(false);
+				}
 
-                ImGui.PopStyleColor(2);
-            }
-        }
-        else
-        {
-            ImGui.TextWrapped(Name);
-            if (ImGui.IsItemHovered())
-            {
-                ShowTooltip(false);
-            }
-        }
-        // Draw job icon if IsJob is true
-        if (IsJob)
-        {
-            DrawJobIcon();
-        }
-    }
+				ImGui.PopStyleColor(2);
+			}
+		}
+		else
+		{
+			ImGui.TextWrapped(Name);
+			if (ImGui.IsItemHovered())
+			{
+				ShowTooltip(false);
+			}
+		}
+		// Draw job icon if IsJob is true
+		if (IsJob)
+		{
+			DrawJobIcon();
+		}
+	}
 }

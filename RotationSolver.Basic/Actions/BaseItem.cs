@@ -204,11 +204,6 @@ public class BaseItem : IBaseItem
             return false;
         }
 
-        if (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false)
-        {
-            return false;
-        }
-
         if (!IsEnabled)
         {
             return false;

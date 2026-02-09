@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Healer;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.4")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.41")]
 [SourceCode(Path = "main/RebornRotations/Healer/WHM_Reborn.cs")]
 
 public sealed class WHM_Reborn : WhiteMageRotation
@@ -159,7 +159,12 @@ public sealed class WHM_Reborn : WhiteMageRotation
             }
         }
 
-        if (TemperancePvE.CanUse(out act))
+		if (PlenaryIndulgencePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (TemperancePvE.CanUse(out act))
         {
             return true;
         }
@@ -398,7 +403,15 @@ public sealed class WHM_Reborn : WhiteMageRotation
             return true;
         }
 
-        if (HolyPvE.EnoughLevel)
+		if (StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.Confession))
+		{
+			if (AfflatusRapturePvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		if (HolyPvE.EnoughLevel)
         {
             if (HolyIiiPvE.EnoughLevel && HolyIiiPvE.CanUse(out act))
             {

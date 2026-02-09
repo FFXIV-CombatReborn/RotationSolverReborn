@@ -46,8 +46,6 @@ internal static class MajorUpdater
 
     public static void Enable()
     {
-        ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
-
         Svc.Framework.Update += RSRGateUpdate;
         Svc.Framework.Update += RSRTeachingClearUpdate;
         Svc.Framework.Update += RSRInvalidUpdate;
@@ -155,21 +153,21 @@ internal static class MajorUpdater
             if (!_isActivatedThisCycle)
                 return;
 
-            bool canDoAction = ActionUpdater.CanDoAction();
-            MovingUpdater.UpdateCanMove(canDoAction);
+			MacroUpdater.UpdateMacro();
 
-            if (canDoAction)
+			StateUpdater.UpdateState();
+
+			TargetUpdater.UpdateTargets();
+
+			ActionUpdater.UpdateNextAction();
+
+			bool canDoAction = ActionUpdater.CanDoAction();
+			MovingUpdater.UpdateCanMove(canDoAction);
+
+			if (canDoAction)
             {
                 RSCommands.DoAction();
             }
-
-            MacroUpdater.UpdateMacro();
-
-            TargetUpdater.UpdateTargets();
-
-            StateUpdater.UpdateState();
-
-            ActionUpdater.UpdateNextAction();
 
             // In Target-Only mode, update the player's target from the computed next action without executing it.
             if (DataCenter.IsTargetOnly)
@@ -177,7 +175,6 @@ internal static class MajorUpdater
                 RSCommands.UpdateTargetFromNextAction();
             }
 
-            ActionSequencerUpdater.UpdateActionSequencerAction();
 			Wrath_IPCSubscriber.DisableAutoRotation();
 		}
         catch (Exception ex)
@@ -439,7 +436,6 @@ internal static class MajorUpdater
         Svc.Framework.Update -= RSRResetUpdate;
 
         MiscUpdater.Dispose();
-        ActionSequencerUpdater.SaveFiles();
         ActionUpdater.ClearNextAction();
     }
 }

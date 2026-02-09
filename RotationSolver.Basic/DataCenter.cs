@@ -11,11 +11,9 @@ using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
-using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Basic.Rotations.Duties;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
-using static Dalamud.Interface.Utility.Raii.ImRaii;
 using Action = Lumina.Excel.Sheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
@@ -40,6 +38,12 @@ internal static class DataCenter
 
 	public static List<IBattleChara> AllTargets { get; set; } = [];
 	public static Dictionary<float, List<IBattleChara>> TargetsByRange { get; set; } = [];
+
+	/// <summary>
+	/// The action most recently queued via interception (current).
+	/// Set by the interception logic when an action is queued for RSR to attempt.
+	/// </summary>
+	public static IAction? CurrentInterceptedAction { get; set; }
 
 	public static bool IsInDutyReplay()
 	{
@@ -132,33 +136,20 @@ internal static class DataCenter
 	/// <summary>
 	/// List of hostile NameIds that should be excluded as valid targets when an action opts-in via IsRestrictedDOT.
 	/// </summary>
-	internal static List<uint> RestrictedDotNameIds { get; set; } = [9214];
-
-	internal static ConcurrentQueue<VfxNewData> VfxDataQueue { get; } = new();
+	internal static List<uint> RestrictedDotNameIds { get; set; } =
+	[
+		9214,
+	];
 
 	/// <summary>
-	/// This one never be null.
+	/// 
 	/// </summary>
-	public static MajorConditionValue CurrentConditionValue
-	{
-		get
-		{
-			if (ConditionSets == null || ConditionSets.Length == 0)
-			{
-				ConditionSets = [new MajorConditionValue()];
-			}
+	internal static List<uint> RestrictedActionNameIds { get; set; } =
+	[
+		14301, 14499,
+	];
 
-			int index = Service.Config.ActionSequencerIndex;
-			if (index < 0 || index >= ConditionSets.Length)
-			{
-				Service.Config.ActionSequencerIndex = index = 0;
-			}
-
-			return ConditionSets[index];
-		}
-	}
-
-	internal static MajorConditionValue[] ConditionSets { get; set; } = [];
+	internal static ConcurrentQueue<VfxNewData> VfxDataQueue { get; } = new();
 
 	/// <summary>
 	/// Only recorded 15s hps.
@@ -199,10 +190,7 @@ internal static class DataCenter
 	public static AutoStatus AutoStatus { get; set; } = AutoStatus.None;
 	public static AutoStatus CommandStatus { get; set; } = AutoStatus.None;
 
-	public static HashSet<uint> DisabledActionSequencer { get; set; } = [];
-
 	private static readonly List<NextAct> NextActs = [];
-	public static IAction? ActionSequencerAction { private get; set; }
 
 	public static IAction? CommandNextAction
 	{
@@ -221,7 +209,7 @@ internal static class DataCenter
 				next = NextActs.Count > 0 ? NextActs[0] : null;
 			}
 
-			return next != null ? next.Act : ActionSequencerAction;
+			return next?.Act;
 		}
 	}
 
