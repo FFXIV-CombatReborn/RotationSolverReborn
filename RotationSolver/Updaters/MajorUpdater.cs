@@ -153,11 +153,12 @@ internal static class MajorUpdater
             if (!_isActivatedThisCycle)
                 return;
 
+			TargetUpdater.UpdateTargets();
+
+            // Target updater always needs to be first to update
 			MacroUpdater.UpdateMacro();
 
 			StateUpdater.UpdateState();
-
-			TargetUpdater.UpdateTargets();
 
 			ActionUpdater.UpdateNextAction();
 
