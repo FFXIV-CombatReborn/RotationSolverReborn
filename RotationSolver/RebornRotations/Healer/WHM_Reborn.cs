@@ -403,7 +403,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
             return true;
         }
 
-		if (StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.Confession))
+		if (StatusHelper.PlayerHasStatus(true, StatusID.Confession) && StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.Confession))
 		{
 			if (AfflatusRapturePvE.CanUse(out act))
 			{
