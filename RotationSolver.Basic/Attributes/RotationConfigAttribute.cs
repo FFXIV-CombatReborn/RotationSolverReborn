@@ -33,4 +33,9 @@ public class RotationConfigAttribute(CombatType type) : Attribute
     /// Phantom Job for this config.
     /// </summary>
     public PhantomJob PhantomJob { get; set; } = PhantomJob.None;
+
+    /// <summary>
+    /// Tooltip for this config.
+    /// </summary>
+    public string Tooltip { get; set; } = string.Empty;
 }

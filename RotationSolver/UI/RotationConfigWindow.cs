@@ -2383,6 +2383,50 @@ public partial class RotationConfigWindow : Window
 
             ImGui.SameLine();
             ImGui.TextWrapped($"{config.DisplayName}");
+
+            string? tooltip = null;
+            {
+	            var prop = rotation.GetType().GetProperty(config.Name,
+		            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+	            if (prop != null)
+	            {
+		            var rotAttr = prop.GetCustomAttribute<RotationConfigAttribute>();
+		            tooltip = rotAttr?.Tooltip;
+	            }
+            }
+
+            if (string.IsNullOrEmpty(tooltip))
+            {
+	            var tProp = config.GetType().GetProperty("Tooltip", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+	            if (tProp != null)
+		            tooltip = tProp.GetValue(config) as string;
+            }
+
+            // Only render the small help marker and ImGui tooltip when we have a non-empty tooltip
+            if (!string.IsNullOrEmpty(tooltip))
+            {
+	            ImGui.SameLine();
+	            ImGui.TextDisabled("(?)");
+	            if (ImGui.IsItemHovered())
+	            {
+		            ImGui.BeginTooltip();
+
+		            // Limit tooltip width so very long tooltips wrap nicely.
+		            // `Scale` is the existing global UI scale in this file.
+		            const float BASE_MAX_TOOLTIP_PX = 520f;
+		            float maxWidth = BASE_MAX_TOOLTIP_PX * Scale;
+		            float screenMax = ImGui.GetIO().DisplaySize.X * 0.8f; // don't exceed most of the screen
+		            float wrapWidth = Math.Min(maxWidth, screenMax);
+
+		            // Push wrap position relative to current cursor X
+		            ImGui.PushTextWrapPos(ImGui.GetCursorPosX() + wrapWidth);
+		            ImGui.TextWrapped(tooltip);
+		            ImGui.PopTextWrapPos();
+
+		            ImGui.EndTooltip();
+	            }
+            }
+
             ImGuiHelper.ReactPopup(key, command, Reset, false);
         }
 

@@ -3,7 +3,7 @@ using ECommons.Logging;
 
 namespace RotationSolver.UI;
 
-internal class CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
+internal class  CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
 {
     private readonly Dictionary<Func<string>, Action> _headers = headers ?? throw new ArgumentNullException(nameof(headers));
     private int _openedIndex = -1;
