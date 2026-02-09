@@ -3,6 +3,7 @@ using Dalamud.Game.Config;
 using ECommons;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
+using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -1586,6 +1587,14 @@ internal static class DataCenter
 		if (h == null || check == null)
 		{
 			return false;
+		}
+
+		unsafe
+		{
+			if (h.Struct() == null)
+			{
+				return false;
+			}
 		}
 
 		try
