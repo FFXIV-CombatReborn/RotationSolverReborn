@@ -34,6 +34,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 
     #endregion
     private long _fangedUsedInStarryAtMs = 0;
+    private long _prepStrikingUsedAtMs = 0;
     private static bool InBurstStatus => StatusHelper.PlayerHasStatus(true, StatusID.StarryMuse);
 
     private static bool HasInspiration =>
@@ -76,7 +77,7 @@ public sealed class BeirutaPCT : PictomancerRotation
     {
         if (InCombat)
         {
-            if (RainbowDripSwift && nextGCD.IsTheSameTo(false, RainbowDripPvE) && SwiftcastPvE.CanUse(out act))
+            if (RainbowDripSwift && !HasRainbowBright && nextGCD.IsTheSameTo(false, RainbowDripPvE) && SwiftcastPvE.CanUse(out act))
             {
                 return true;
             }
@@ -149,6 +150,10 @@ public sealed class BeirutaPCT : PictomancerRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
+        bool starryReadySoon10 =
+    !HasStarryMuse &&
+    StarryMusePvE.Cooldown.WillHaveOneCharge(10f);
+
         bool burstTimingCheckerStriking = !ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || HasStarryMuse || !StarryMusePvE.EnoughLevel;
         // Bursts
         int adjustCombatTimeForOpener = DataCenter.PlayerSyncedLevel() < 92 ? 2 : 5;
@@ -163,6 +168,19 @@ bool mogRestrictedWindow =
 bool mogReady = MogOfTheAgesPvE.CanUse(out _); // "ready" for overwrite-blocking
 bool mogAllowedNow = mogReady && (!mogRestrictedWindow || HasStarryMuse);
 bool starrySoon = StarryMusePvE.Cooldown.WillHaveOneCharge(40f);
+bool starryReadySoon60 =
+    !HasStarryMuse &&
+    StarryMusePvE.Cooldown.WillHaveOneCharge(60f);
+
+bool starryReadySoon5 =
+    !HasStarryMuse &&
+    StarryMusePvE.Cooldown.WillHaveOneCharge(5f);
+
+// Hold the last Striking charge until ~5s before Starry
+bool preserveStrikingForStarry =
+    starryReadySoon60 &&
+    !starryReadySoon5 &&
+    StrikingMusePvE.Cooldown.CurrentCharges <= 1;
 
 // Keep at least 1 Living Muse charge if burst is within 40s (and we are not already in Starry)
 bool preserveLivingForBurst =
@@ -174,14 +192,30 @@ bool preserveLivingForBurst =
         {
             return true;
         }
-        if (SubtractivePalettePvE.CanUse(out act) && !HasSubtractivePalette)
-        {
-            return true;
-        }
-        if (CombatTime > adjustCombatTimeForOpener && StrikingMusePvE.CanUse(out act, usedUp: true) && burstTimingCheckerStriking)
-        {
-            return true;
-        }
+        if (!starryReadySoon10
+    && SubtractivePalettePvE.CanUse(out act)
+    && !HasSubtractivePalette)
+{
+    return true;
+}
+// Deliberately spend the LAST Striking charge at ~5s before Starry
+if (starryReadySoon5
+    && StrikingMusePvE.Cooldown.CurrentCharges == 1
+    && CombatTime > adjustCombatTimeForOpener
+    && StrikingMusePvE.CanUse(out act, usedUp: true))
+{
+    _prepStrikingUsedAtMs = nowMs;
+    return true;
+}
+
+        if (!preserveStrikingForStarry
+    && CombatTime > adjustCombatTimeForOpener
+    && StrikingMusePvE.CanUse(out act, usedUp: true)
+    && burstTimingCheckerStriking)
+{
+    return true;
+}
+
 
         if (HasStarryMuse)
         {
@@ -198,10 +232,13 @@ bool preserveLivingForBurst =
 // else: Mog is ready but intentionally held
 
 
-        if (StrikingMusePvE.CanUse(out act, usedUp: true) && burstTimingCheckerStriking)
-        {
-            return true;
-        }
+        if (!preserveStrikingForStarry
+    && StrikingMusePvE.CanUse(out act, usedUp: true)
+    && burstTimingCheckerStriking)
+{
+    return true;
+}
+
 if (!preserveLivingForBurst)
 {
         if (!madeenAvailable && PomMusePvE.CanUse(out act, usedUp: true))
@@ -282,6 +319,28 @@ if (FangedMusePvE.CanUse(out act, usedUp: true))
                 return true;
             }
         }
+        long nowMs = Environment.TickCount64;
+
+// Starry <2s gate
+bool starryReadySoon2 =
+    HasStarryMuse || StarryMusePvE.Cooldown.WillHaveOneCharge(2f);
+bool starryReadySoon10 =
+    !HasStarryMuse &&
+    StarryMusePvE.Cooldown.WillHaveOneCharge(10f);
+
+// Block hammer chain ONLY after we did the ~5s prep Striking, until Starry <2s
+bool blockPrepHammerChain =
+    _prepStrikingUsedAtMs != 0
+    && InCombat
+    && !starryReadySoon2;
+
+// Clear marker once it’s no longer relevant
+if (!InCombat || starryReadySoon2)
+{
+    _prepStrikingUsedAtMs = 0;
+}
+
+
         // some gcd priority
         if (RainbowDripPvE.CanUse(out act) && HasRainbowBright)
         {
@@ -300,7 +359,7 @@ if (FangedMusePvE.CanUse(out act, usedUp: true))
             return true;
         }
 
-        if (!HasInspiration)
+        if (!blockPrepHammerChain && !HasInspiration)
 {
     if (PolishingHammerPvE.CanUse(out act, skipComboCheck: true) ||
         HammerBrushPvE.CanUse(out act, skipComboCheck: true) ||
@@ -389,7 +448,7 @@ if (FangedMusePvE.CanUse(out act, usedUp: true))
         // white/black paint use while moving
         if (IsMoving && !HasSwift)
         {
-                if (!HasInspiration)
+                if (!blockPrepHammerChain && !HasInspiration)
     {
         if (PolishingHammerPvE.CanUse(out act)) return true;
         if (HammerBrushPvE.CanUse(out act)) return true;
@@ -397,17 +456,18 @@ if (FangedMusePvE.CanUse(out act, usedUp: true))
     }
 
             if (HolyCometMoving)
-            {
-                if (CometInBlackPvE.CanUse(out act))
-                {
-                    return true;
-                }
+{
+    if (!starryReadySoon10 && CometInBlackPvE.CanUse(out act))
+    {
+        return true;
+    }
 
-                if (HolyInWhitePvE.CanUse(out act))
-                {
-                    return true;
-                }
-            }
+    if (HolyInWhitePvE.CanUse(out act))
+    {
+        return true;
+    }
+}
+
         }
 
         // When in swift management
