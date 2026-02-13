@@ -375,7 +375,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                 if (InUmbralIce)
                 {
                     //if (GetAoeCount(FlarePvE) >= 3 && lastAction != null && (lastAction.Action.RowId == FoulPvE.ID || lastAction.Action.RowId == ThunderIiiPvE.ID || lastAction.Action.RowId == ParadoxPvE.ID))
-                    if (GetAoeCount(FlarePvE) >= 3 && (IsLastAction(true, FoulPvE) || IsLastAction(true, ThunderIiiPvE) || IsLastAction(true, ParadoxPvE)))
+                    if (IsLastAction(true, FoulPvE) || IsLastAction(true, ThunderIiiPvE) || IsLastAction(true, ParadoxPvE))
                     {
                         return true;
                     }
@@ -404,7 +404,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                 }
                 if (InUmbralIce)
                 {
-                    if (UmbralHearts == 3 && UmbralIceStacks == 3 && !IsParadoxActive && CurrentMp == 10000)
+                    if (UmbralHearts == 3 && UmbralIceStacks == 3 && !IsParadoxActive)
                     { return true; }
                 }
             }
@@ -1174,7 +1174,6 @@ public sealed class Rabbs_BLM : BlackMageRotation
                 {
                     if (UmbralIceStacks < 3)
                     {
-                        if (ScathePvE.CanUse(out act)) return true;
                         if (BlizzardIiiPvE.CanUse(out act) && !IsLastGCD(true, BlizzardIiiPvE)) return true;
                     }
 
@@ -1188,6 +1187,20 @@ public sealed class Rabbs_BLM : BlackMageRotation
                     }
 
                     if (BlizzardIiiPvE.CanUse(out act) && CurrentMp < 10000 && !IsLastGCD(true,BlizzardIvPvE) && !IsLastGCD(true, BlizzardIiiPvE)) return true;
+                    if (InCombat && IsMoving && !NextGCDisInstant && HasHostilesInRange && NextAbilityToNextGCD < 0.5)
+                    {
+                        if (PolyglotStacks > 0)
+                        {
+                            if (XenoglossyPvE.CanUse(out act, usedUp: true)) return true;
+                        }
+                        if (CanMakeInstant)
+                        {
+
+                            if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
+
+                            if (SwiftcastPvE.CanUse(out act)) return true;
+                        }
+                    }
 
                 }
                 
@@ -1224,6 +1237,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
         ImGui.Text("Player.BaseCastTime " + Player?.BaseCastTime);
         ImGui.Text("Player.CurrentCastTime) " + Player?.CurrentCastTime);
         ImGui.Text("Player.TotalCastTime " + Player?.TotalCastTime);
+        ImGui.Text("NextAbilityToNextGCD " + NextAbilityToNextGCD);
 
         base.DisplayRotationStatus();
     }
