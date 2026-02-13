@@ -20,25 +20,29 @@ public sealed class BeirutaPCT : PictomancerRotation
     [RotationConfig(CombatType.PvE, Name = "Paint overcap protection limit. How many paint you need to be at for it to use Holy out of burst (Setting is ignored when you have Hyperphantasia)")]
     public int HolyCometMax { get; set; } = 5;
 
-    [RotationConfig(CombatType.PvE, Name = "Use swiftcast on Rainbow Drip (Priority over below settings)")]
+    [RotationConfig(CombatType.PvE, Name = "Use swiftcast on Intercepted Rainbow Drip before Boss Untargetable")]
     public bool RainbowDripSwift { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Use swiftcast on Motif")]
-    public bool MotifSwiftCastSwift { get; set; } = true;
+    public bool MotifSwiftCastSwift { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Which Motif to use swiftcast on")]
     public CanvasFlags MotifSwiftCast { get; set; } = CanvasFlags.Claw;
 
-    [RotationConfig(CombatType.PvE, Name = "Prevent the use of defense abilties during burst")]
+    [RotationConfig(CombatType.PvE, Name = "Prevent the use of defense abilties during bursts")]
     private bool BurstDefense { get; set; } = true;
 
+    [RotationConfig(CombatType.PvE, Name =
+"TIP: Intercept Rainbow Drip uses AUTO Swiftcast when Rainbow Drip is queued.\n" +
+"Manual Swiftcast input will spent on Motif.")]
+public bool SwiftcastInterceptInfo_DoNotChange { get; set; } = true;
+
+
     #endregion
-    private bool _openerPotUsed = false;
 
     private long _fangedUsedInStarryAtMs = 0;
     private long _prepStrikingUsedAtMs = 0;
     private static bool InBurstStatus => StatusHelper.PlayerHasStatus(true, StatusID.StarryMuse);
-
     private static bool HasInspiration =>
     StatusHelper.PlayerHasStatus(true, StatusID.Inspiration);
 
@@ -47,13 +51,7 @@ public sealed class BeirutaPCT : PictomancerRotation
     protected override IAction? CountDownAction(float remainTime)
     {
         IAction act;
-        if (remainTime < RainbowDripPvE.Info.CastTime + CountDownAhead)
-        {
-            if (StrikingMusePvE.CanUse(out act) && WeaponMotifDrawn)
-            {
-                return act;
-            }
-        }
+        
         if (remainTime < RainbowDripPvE.Info.CastTime + 0.4f + CountDownAhead)
         {
             if (RainbowDripPvE.CanUse(out act))
@@ -76,33 +74,52 @@ public sealed class BeirutaPCT : PictomancerRotation
     #region Additional oGCD Logic
 
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
-    {
-        if (InCombat)
-        {
-            if (RainbowDripSwift && !HasRainbowBright && nextGCD.IsTheSameTo(false, RainbowDripPvE) && SwiftcastPvE.CanUse(out act))
-            {
-                return true;
-            }
+{
+    act = null;
 
-            if (MotifSwiftCastSwift)
-            {
-                if (MotifSwiftCast switch
-                {
-                    CanvasFlags.Pom => nextGCD.IsTheSameTo(false, PomMotifPvE),
-                    CanvasFlags.Wing => nextGCD.IsTheSameTo(false, WingMotifPvE),
-                    CanvasFlags.Claw => nextGCD.IsTheSameTo(false, ClawMotifPvE),
-                    CanvasFlags.Maw => nextGCD.IsTheSameTo(false, MawMotifPvE),
-                    CanvasFlags.Weapon => nextGCD.IsTheSameTo(false, HammerMotifPvE),
-                    CanvasFlags.Landscape => nextGCD.IsTheSameTo(false, StarrySkyMotifPvE),
-                    _ => false
-                } && SwiftcastPvE.CanUse(out act))
-                {
-                    return true;
-                }
-            }
-        }
+    if (RainbowDripSwift && !HasRainbowBright && nextGCD.IsTheSameTo(false, RainbowDripPvE) && SwiftcastPvE.CanUse(out act))
+    {
+        return true;
+    }
+
+    bool isMedicated = StatusHelper.PlayerHasStatus(true, StatusID.Medicated);
+
+    // If Medicated: Swiftcast any creature motif if it is the next GCD.
+    if (isMedicated)
+    {
+        bool isCreatureMotif =
+            nextGCD.IsTheSameTo(false, PomMotifPvE) ||
+            nextGCD.IsTheSameTo(false, WingMotifPvE) ||
+            nextGCD.IsTheSameTo(false, ClawMotifPvE) ||
+            nextGCD.IsTheSameTo(false, MawMotifPvE);
+
+        if (isCreatureMotif && SwiftcastPvE.CanUse(out act))
+            return true;
+
+        // Important: do NOT run the normal motif-swift logic while medicated.
         return base.EmergencyAbility(nextGCD, out act);
     }
+
+    if (MotifSwiftCastSwift)
+    {
+        if ((MotifSwiftCast switch
+        {
+            CanvasFlags.Pom => nextGCD.IsTheSameTo(false, PomMotifPvE),
+            CanvasFlags.Wing => nextGCD.IsTheSameTo(false, WingMotifPvE),
+            CanvasFlags.Claw => nextGCD.IsTheSameTo(false, ClawMotifPvE),
+            CanvasFlags.Maw => nextGCD.IsTheSameTo(false, MawMotifPvE),
+            CanvasFlags.Weapon => nextGCD.IsTheSameTo(false, HammerMotifPvE),
+            CanvasFlags.Landscape => nextGCD.IsTheSameTo(false, StarrySkyMotifPvE),
+            _ => false
+        }) && SwiftcastPvE.CanUse(out act))
+        {
+            return true;
+        }
+    }
+
+    return base.EmergencyAbility(nextGCD, out act);
+}
+
 
     [RotationDesc(ActionID.SmudgePvE)]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
@@ -151,16 +168,32 @@ public sealed class BeirutaPCT : PictomancerRotation
     #region oGCD Logic
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
-    {
-        if (!InCombat) _openerPotUsed = false;
+{   
+    if (InCombat
+    && CombatTime <= 5f
+    && StrikingMusePvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+{
+    return true;
+}
+
+  // Opener pot — absolute priority first 10s
+if (InCombat
+    && CombatTime <= 10f
+    && CombatTime >= 1f
+    && HasHammerTime
+    && UseBurstMedicine(out act))
+{
+    return true;
+}
+
 
         bool starryReadySoon10 =
     !HasStarryMuse &&
-    StarryMusePvE.Cooldown.WillHaveOneCharge(10f);
+    StarryMusePvE.Cooldown.WillHaveOneCharge(12f);
 
         bool burstTimingCheckerStriking = !ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || HasStarryMuse || !StarryMusePvE.EnoughLevel;
         // Bursts
-        int adjustCombatTimeForOpener = DataCenter.PlayerSyncedLevel() < 92 ? 2 : 4;
+        int adjustCombatTimeForOpener = DataCenter.PlayerSyncedLevel() < 92 ? 2 : 5;
 
 bool madeenAvailable = RetributionOfTheMadeenPvE.CanUse(out _);
 
@@ -188,24 +221,18 @@ bool preserveStrikingForStarry =
 
 // Keep at least 1 Living Muse charge if burst is within 40s (and we are not already in Starry)
 bool preserveLivingForBurst =
+    CombatTime > 5f &&
     !HasStarryMuse
     && starrySoon
     && LivingMusePvE.Cooldown.CurrentCharges <= 1;
     
-// Opener pot once, before Pom Muse
-if (!_openerPotUsed
-    && InCombat
-    && IsBurst
-    && CombatTime < adjustCombatTimeForOpener
-    && UseBurstMedicine(out act))
+        if (IsBurst
+    && CombatTime > adjustCombatTimeForOpener
+    && StarryMusePvE.CanUse(out act, skipCastingCheck: true))
 {
-    _openerPotUsed = true;
     return true;
 }
-        if (StarryMusePvE.CanUse(out act) && CombatTime > adjustCombatTimeForOpener && IsBurst)
-        {
-            return true;
-        }
+
         if (!starryReadySoon10
     && SubtractivePalettePvE.CanUse(out act)
     && !HasSubtractivePalette)
@@ -245,17 +272,11 @@ if (starryReadySoon5
 }
 // else: Mog is ready but intentionally held
 
-
-        if (!preserveStrikingForStarry
-    && StrikingMusePvE.CanUse(out act, usedUp: true)
-    && burstTimingCheckerStriking)
-{
-    return true;
-}
-
 if (!preserveLivingForBurst)
 {
-        if (!madeenAvailable && PomMusePvE.CanUse(out act, usedUp: true))
+        if (!madeenAvailable
+    && !(InCombat && CombatTime < 2f && !HasHammerTime)
+    && PomMusePvE.CanUse(out act, usedUp: true))
 {
     return true;
 }
@@ -287,6 +308,34 @@ if (FangedMusePvE.CanUse(out act, usedUp: true))
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
+        // 1) Swiftcast Rainbow Drip (highest priority)
+if (RainbowDripSwift
+    && !HasRainbowBright
+    && nextGCD.IsTheSameTo(false, RainbowDripPvE)
+    && SwiftcastPvE.CanUse(out act))
+{
+    return true;
+}
+
+// 2) Swiftcast only the configured Motif
+if (MotifSwiftCastSwift)
+{
+    bool shouldSwiftMotif = MotifSwiftCast switch
+    {
+        CanvasFlags.Pom       => nextGCD.IsTheSameTo(false, PomMotifPvE),
+        CanvasFlags.Wing      => nextGCD.IsTheSameTo(false, WingMotifPvE),
+        CanvasFlags.Claw      => nextGCD.IsTheSameTo(false, ClawMotifPvE),
+        CanvasFlags.Maw       => nextGCD.IsTheSameTo(false, MawMotifPvE),
+        CanvasFlags.Weapon    => nextGCD.IsTheSameTo(false, HammerMotifPvE),
+        CanvasFlags.Landscape => nextGCD.IsTheSameTo(false, StarrySkyMotifPvE),
+        _ => false
+    };
+
+    if (shouldSwiftMotif && SwiftcastPvE.CanUse(out act))
+        return true;
+}
+
+
         if ((MergedStatus.HasFlag(AutoStatus.DefenseArea) || StatusHelper.PlayerWillStatusEndGCD(2, 0, true, StatusID.TemperaCoat)) && TemperaGrassaPvE.CanUse(out act))
         {
             return true;
@@ -306,42 +355,29 @@ if (FangedMusePvE.CanUse(out act, usedUp: true))
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        bool isMedicated =
+    bool isMedicated =
     StatusHelper.PlayerHasStatus(true, StatusID.Medicated);
+    bool blockEarlyFire = InCombat && CombatTime < 10f && !HasHyperphantasia;
+    bool blockEarlyHammerStamp = InCombat && CombatTime < 10f && !HasHyperphantasia; 
+    bool blockEarlyHolyAndLivingMotif = InCombat && CombatTime < 2f && !HasHammerTime;
+
 
         //Opener requirements
-        if (CombatTime < 5)
-        {
-            if (HolyInWhitePvE.CanUse(out act))
-            {
-                return true;
-            }
+if (CombatTime < 5)
+{
+    if (!blockEarlyHolyAndLivingMotif && HolyInWhitePvE.CanUse(out act))
+        return true;
 
-            if (PomMotifPvE.CanUse(out act))
-            {
-                return true;
-            }
+    if (PomMotifPvE.CanUse(out act)) return true;
+    if (WingMotifPvE.CanUse(out act)) return true;
+    if (ClawMotifPvE.CanUse(out act)) return true;
+    if (MawMotifPvE.CanUse(out act)) return true;
+}
 
-            if (WingMotifPvE.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (ClawMotifPvE.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (MawMotifPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-        long nowMs = Environment.TickCount64;
 
 // Starry <2s gate
 bool starryReadySoon2 =
-    HasStarryMuse || StarryMusePvE.Cooldown.WillHaveOneCharge(2f);
+    HasStarryMuse || StarryMusePvE.Cooldown.WillHaveOneCharge(1f);
 bool starryReadySoon10 =
     !HasStarryMuse &&
     StarryMusePvE.Cooldown.WillHaveOneCharge(10f);
@@ -382,11 +418,12 @@ if (!InCombat || starryReadySoon2)
 {
     if (PolishingHammerPvE.CanUse(out act, skipComboCheck: true) ||
         HammerBrushPvE.CanUse(out act, skipComboCheck: true) ||
-        HammerStampPvE.CanUse(out act, skipComboCheck: true))
+        (!blockEarlyHammerStamp && HammerStampPvE.CanUse(out act, skipComboCheck: true)))
     {
         return true;
     }
 }
+
 
         if (!InCombat)
         {
@@ -430,35 +467,27 @@ if (!InCombat || starryReadySoon2)
         }
 
         // timings for motif casting
-        if (ScenicMusePvE.Cooldown.RecastTimeRemainOneCharge <= 25 && !HasStarryMuse && !HasHyperphantasia)
-        {
-            if (StarrySkyMotifPvE.CanUse(out act) && !HasHyperphantasia)
-            {
-                return true;
-            }
-        }
-        if ((LivingMusePvE.Cooldown.HasOneCharge || LivingMusePvE.Cooldown.RecastTimeRemainOneCharge <= CreatureMotifPvE.Info.CastTime * 1.7) && !HasStarryMuse && !HasHyperphantasia)
-        {
-            if (PomMotifPvE.CanUse(out act))
-            {
-                return true;
-            }
+if (ScenicMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30 && !HasStarryMuse && !HasHyperphantasia)
+{
+    if (StarrySkyMotifPvE.CanUse(out act) && !HasHyperphantasia)
+        return true;
 
-            if (WingMotifPvE.CanUse(out act))
-            {
-                return true;
-            }
+    // Also prep Weapon motif in the same window
+    if (!isMedicated && !WeaponMotifDrawn && HammerMotifPvE.CanUse(out act))
+        return true;
+}
 
-            if (ClawMotifPvE.CanUse(out act))
-            {
-                return true;
-            }
+        if (!blockEarlyHolyAndLivingMotif
+    && (LivingMusePvE.Cooldown.HasOneCharge
+        || LivingMusePvE.Cooldown.RecastTimeRemainOneCharge <= CreatureMotifPvE.Info.CastTime * 1.7)
+    && !HasStarryMuse && !HasHyperphantasia)
+{
+    if (PomMotifPvE.CanUse(out act)) return true;
+    if (WingMotifPvE.CanUse(out act)) return true;
+    if (ClawMotifPvE.CanUse(out act)) return true;
+    if (MawMotifPvE.CanUse(out act)) return true;
+}
 
-            if (MawMotifPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
         if ((SteelMusePvE.Cooldown.HasOneCharge || SteelMusePvE.Cooldown.RecastTimeRemainOneCharge <= WeaponMotifPvE.Info.CastTime) && !HasStarryMuse && !HasHyperphantasia)
         {
             if (!isMedicated && HammerMotifPvE.CanUse(out act))
@@ -469,12 +498,12 @@ if (!InCombat || starryReadySoon2)
 
         // white/black paint use while moving
         if (IsMoving && !HasSwift)
-        {
-                if (!blockPrepHammerChain && !(HasInspiration && HasSubtractivePalette))
+{
+    if (!blockPrepHammerChain && !(HasInspiration && HasSubtractivePalette))
     {
         if (PolishingHammerPvE.CanUse(out act)) return true;
         if (HammerBrushPvE.CanUse(out act)) return true;
-        if (HammerStampPvE.CanUse(out act)) return true;
+        if (!blockEarlyHammerStamp && HammerStampPvE.CanUse(out act)) return true;
     }
 
             if (HolyCometMoving)
@@ -567,10 +596,11 @@ if (!InCombat || starryReadySoon2)
             return true;
         }
 
-        if (FireIiInRedPvE.CanUse(out act))
-        {
-            return true;
-        }
+        if (!blockEarlyFire && FireIiInRedPvE.CanUse(out act))
+{
+    return true;
+}
+
 
         //ST Subtractive Inks
         if (ThunderInMagentaPvE.CanUse(out act))
@@ -599,10 +629,12 @@ if (!InCombat || starryReadySoon2)
             return true;
         }
 
-        if (FireInRedPvE.CanUse(out act))
-        {
-            return true;
-        }
+        if (!blockEarlyFire && FireInRedPvE.CanUse(out act))
+{
+    return true;
+}
+
+
 
         // In comabt fallback in case of no target, allow GCD to roll on motif refresh
         if (PomMotifPvE.CanUse(out act))
