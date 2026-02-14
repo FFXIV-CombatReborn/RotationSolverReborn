@@ -7,6 +7,16 @@ namespace RotationSolver.ExtraRotations.Magical;
 public sealed class BeirutaPCT : PictomancerRotation
 {
     #region Config Options
+    [RotationConfig(CombatType.PvE, Name =
+"Please note that this rotation is optimised for combats that start with a countdown Rainbow Drip cast.\n" +
+"• Enable Spell Intercept to manually use Rainbow Drip before the boss becomes untargetable.\n" +
+"• This rotation is designed to align Madeen within burst windows.\n" +
+"• During burst, it attempts to use two Comet in Black casts by skipping one Hammer action.\n" +
+"• Hyperphantasia is prioritised early in burst to allow earlier movement flexibility.\n" +
+"• Intercept Rainbow Drip automatically uses Swiftcast when Rainbow Drip is queued.\n" +
+"• Manual Swiftcast input will be spent on Motif (creature -> weapon -> landscape)."
+)]
+    public bool Info_DoNotChange { get; set; } = true;
     [RotationConfig(CombatType.PvE, Name = "Use HolyInWhite or CometInBlack while moving")]
     public bool HolyCometMoving { get; set; } = true;
 
@@ -31,15 +41,10 @@ public sealed class BeirutaPCT : PictomancerRotation
 
     [RotationConfig(CombatType.PvE, Name = "Prevent the use of defense abilties during bursts")]
     private bool BurstDefense { get; set; } = true;
-
-    [RotationConfig(CombatType.PvE, Name =
-"TIP: Intercept Rainbow Drip uses AUTO Swiftcast when Rainbow Drip is queued.\n" +
-"Manual Swiftcast input will spent on Motif.")]
-public bool SwiftcastInterceptInfo_DoNotChange { get; set; } = true;
-
-
     #endregion
+    
 
+    private long _holyUsedInOpenerAtMs = 0;
     private long _fangedUsedInStarryAtMs = 0;
     private long _prepStrikingUsedAtMs = 0;
     private static bool InBurstStatus => StatusHelper.PlayerHasStatus(true, StatusID.StarryMuse);
@@ -189,7 +194,7 @@ if (InCombat
 
         bool starryReadySoon10 =
     !HasStarryMuse &&
-    StarryMusePvE.Cooldown.WillHaveOneCharge(12f);
+    StarryMusePvE.Cooldown.WillHaveOneCharge(10f);
 
         bool burstTimingCheckerStriking = !ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || HasStarryMuse || !StarryMusePvE.EnoughLevel;
         // Bursts
@@ -355,18 +360,25 @@ if (MotifSwiftCastSwift)
 
     protected override bool GeneralGCD(out IAction? act)
     {
+    if (!InCombat)
+    _holyUsedInOpenerAtMs = 0;    
     bool isMedicated =
     StatusHelper.PlayerHasStatus(true, StatusID.Medicated);
-    bool blockEarlyFire = InCombat && CombatTime < 10f && !HasHyperphantasia;
+    bool blockEarlyFire = InCombat && CombatTime < 2f;
     bool blockEarlyHammerStamp = InCombat && CombatTime < 10f && !HasHyperphantasia; 
     bool blockEarlyHolyAndLivingMotif = InCombat && CombatTime < 2f && !HasHammerTime;
-
 
         //Opener requirements
 if (CombatTime < 5)
 {
-    if (!blockEarlyHolyAndLivingMotif && HolyInWhitePvE.CanUse(out act))
+     if (!blockEarlyHolyAndLivingMotif && HolyInWhitePvE.CanUse(out act))
+    {
+        if (InCombat && CombatTime < 5f && _holyUsedInOpenerAtMs == 0)
+            _holyUsedInOpenerAtMs = Environment.TickCount64;
+
         return true;
+    }
+
 
     if (PomMotifPvE.CanUse(out act)) return true;
     if (WingMotifPvE.CanUse(out act)) return true;
@@ -374,13 +386,24 @@ if (CombatTime < 5)
     if (MawMotifPvE.CanUse(out act)) return true;
 }
 
+long nowMs = Environment.TickCount64;
+
+bool fireHardLockout =
+    InCombat &&
+    _holyUsedInOpenerAtMs != 0 &&
+    (nowMs - _holyUsedInOpenerAtMs) < 8000; 
+    if (fireHardLockout)
+{
+    act = null;
+    return false;
+}
 
 // Starry <2s gate
 bool starryReadySoon2 =
     HasStarryMuse || StarryMusePvE.Cooldown.WillHaveOneCharge(1f);
 bool starryReadySoon10 =
     !HasStarryMuse &&
-    StarryMusePvE.Cooldown.WillHaveOneCharge(10f);
+    StarryMusePvE.Cooldown.WillHaveOneCharge(12f);
 
 // Block hammer chain ONLY after we did the ~5s prep Striking, until Starry <2s
 bool blockPrepHammerChain =
@@ -596,10 +619,12 @@ if (ScenicMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30 && !HasStarryMuse && 
             return true;
         }
 
-        if (!blockEarlyFire && FireIiInRedPvE.CanUse(out act))
+        if (FireIiInRedPvE.CanUse(out act))
 {
     return true;
 }
+
+
 
 
         //ST Subtractive Inks
@@ -629,10 +654,11 @@ if (ScenicMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30 && !HasStarryMuse && 
             return true;
         }
 
-        if (!blockEarlyFire && FireInRedPvE.CanUse(out act))
+        if (!blockEarlyFire && !fireHardLockout && FireInRedPvE.CanUse(out act))
 {
     return true;
 }
+
 
 
 
