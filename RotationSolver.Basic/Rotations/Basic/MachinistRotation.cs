@@ -165,7 +165,7 @@ public partial class MachinistRotation
     static partial void ModifyReassemblePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Reassembled];
-        setting.ActionCheck = () => HasHostilesInRange && !HasReassembled;
+        setting.ActionCheck = () => HasHostilesInRange && !HasReassembled && !DataCenter.IsExtremeCastingSpecialIndicator();
     }
 
     static partial void ModifyGaussRoundPvE(ref ActionSetting setting)

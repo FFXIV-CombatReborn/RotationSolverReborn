@@ -23,16 +23,24 @@ public readonly record struct VfxNewData
     public readonly DateTime Time;
 
     /// <summary>
+    /// Gets the estimated duration for the VFX (seconds).
+    /// Stored as an estimation because the engine does not expose VFX lifetime directly.
+    /// </summary>
+    public readonly float Duration;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="VfxNewData"/> struct.
     /// </summary>
     /// <param name="objectId">The object ID.</param>
     /// <param name="path">The path.</param>
-    public VfxNewData(ulong objectId, string path)
+    /// <param name="duration">Estimated duration for the VFX in seconds.</param>
+    public VfxNewData(ulong objectId, string path, float duration)
     {
         ObjectId = objectId;
         Path = path;
         Time = DateTime.Now;
-    }
+        Duration = duration;
+	}
 
     /// <summary>
     /// Gets the duration since the VFX data was created.

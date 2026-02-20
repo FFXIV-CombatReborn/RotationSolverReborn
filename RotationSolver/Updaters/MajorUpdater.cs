@@ -282,9 +282,43 @@ internal static class MajorUpdater
             // Clear old VFX data
             if (!DataCenter.VfxDataQueue.IsEmpty)
             {
-                while (DataCenter.VfxDataQueue.TryPeek(out var vfx) && vfx.TimeDuration > TimeSpan.FromSeconds(6))
+                // ConcurrentQueue does not support removal from the middle, and the previous
+                // logic only removed from the head while the head entry was finished.
+                // That could leave finished entries behind if an unfinished entry was at the front.
+                // To reliably remove finished VFX entries, drain the queue and re-enqueue only
+                // the unfinished items.
+                var remaining = new List<VfxNewData>();
+                while (DataCenter.VfxDataQueue.TryDequeue(out var vfx))
                 {
-                    _ = DataCenter.VfxDataQueue.TryDequeue(out _);
+                    try
+                    {
+                        // If we have a reasonable estimated duration, use it to determine whether the
+                        // VFX is still active. The hook currently provides remaining cast time at
+                        // creation which can be very small or zero; treat very small values as unknown
+                        // and keep those entries for a short default window to avoid immediate drops.
+                        if (vfx.Duration >= 0.5f)
+                        {
+                            if (vfx.TimeDuration.TotalSeconds <= vfx.Duration)
+                                remaining.Add(vfx);
+                        }
+                        else
+                        {
+                            // Unknown / very short duration: keep for up to 5 seconds by default
+                            if (vfx.TimeDuration.TotalSeconds <= 5.0)
+                                remaining.Add(vfx);
+                        }
+                    }
+                    catch
+                    {
+                        // On any unexpected error, keep the item to avoid data loss
+                        remaining.Add(vfx);
+                    }
+                }
+
+                // Re-enqueue items that are still active
+                foreach (var item in remaining)
+                {
+                    DataCenter.VfxDataQueue.Enqueue(item);
                 }
             }
         }

@@ -550,7 +550,8 @@ public partial class RotationConfigWindow : Window
                         var _ when DataCenter.InVariantDungeon => "Duty - Variant",
                         var _ when DataCenter.IsInBozja => "Duty - Bozja",
                         var _ when DataCenter.IsInMonsterHunterDuty => "Duty - Monster Hunter",
-                        _ => "Duty",
+						var _ when DataCenter.Orbonne => "Duty - Orbonne Monastery",
+						_ => "Duty",
                     };
                 }
 
@@ -4074,6 +4075,9 @@ public partial class RotationConfigWindow : Window
 		StatusID HellInACell = (StatusID)4734;
 		var HasHellInACell = StatusHelper.PlayerHasStatus(false, HellInACell);
 		ImGui.Text($"HasHellInACell: {HasHellInACell}");
+		ImGui.Spacing();
+		ImGui.Text($"IsInM11S: {DataCenter.IsInM11S}");
+		ImGui.Text($"IsTyrantCastingSpecialIndicator2: {DataCenter.IsTyrantCastingSpecialIndicator2()}");
 	}
 
     private static unsafe void DrawParty()
