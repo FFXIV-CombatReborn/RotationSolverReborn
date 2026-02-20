@@ -860,7 +860,7 @@ public sealed class ChurinDNC : DancerRotation
     private bool TryUseDevilment(out IAction? act)
     {
         act = null;
-        if (DevilmentPvE.CanUse(out act))
+        if (DevilmentPvE.CanUse(out act, skipTTKCheck: true))
         {
             return HasTechnicalFinish || IsLastGCD(true, QuadrupleTechnicalFinishPvE) || HasTillana;
         }

@@ -2167,6 +2167,25 @@ public struct ActionTargetInfo(IBaseAction action)
                 return Player.Object;
             }
 
+            // If there are two party members and the other is the player's chocobo,
+            // treat this as effectively solo and return the player.
+            if (DataCenter.PartyMembers.Count == 2 && Player.Object != null)
+            {
+                bool hasPlayer = false;
+                bool hasChocobo = false;
+                foreach (var m in DataCenter.PartyMembers)
+                {
+                    if (m == null) continue;
+                    if (m.GameObjectId == Player.Object.GameObjectId) hasPlayer = true;
+                    else if (ObjectHelper.IsPlayerCharacterChocobo(m)) hasChocobo = true;
+                }
+
+                if (hasPlayer && hasChocobo)
+                {
+                    return Player.Object;
+                }
+            }
+
             // Build filtered candidate list
             List<IBattleChara> candidates = [];
             foreach (IBattleChara m in DataCenter.PartyMembers)
@@ -2262,13 +2281,32 @@ public struct ActionTargetInfo(IBaseAction action)
                 return null;
             }
 
-            if (DataCenter.PartyMembers.Count == 1)
+			if (DataCenter.PartyMembers.Count == 1)
             {
                 return Player.Object;
             }
 
-            // Build filtered candidate list
-            List<IBattleChara> candidates = [];
+			// If there are two party members and the other is the player's chocobo,
+			// treat this as effectively solo and return the player.
+			if (DataCenter.PartyMembers.Count == 2 && Player.Object != null)
+			{
+				bool hasPlayer = false;
+				bool hasChocobo = false;
+				foreach (var m in DataCenter.PartyMembers)
+				{
+					if (m == null) continue;
+					if (m.GameObjectId == Player.Object.GameObjectId) hasPlayer = true;
+					else if (ObjectHelper.IsPlayerCharacterChocobo(m)) hasChocobo = true;
+				}
+
+				if (hasPlayer && hasChocobo)
+				{
+					return Player.Object;
+				}
+			}
+
+			// Build filtered candidate list
+			List<IBattleChara> candidates = [];
             foreach (IBattleChara m in DataCenter.PartyMembers)
             {
                 if (m == null) continue;

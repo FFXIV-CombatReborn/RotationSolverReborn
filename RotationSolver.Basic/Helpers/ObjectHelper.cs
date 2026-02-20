@@ -125,7 +125,15 @@ public static class ObjectHelper
             return false;
         }
 
-        try
+		unsafe
+		{
+			if (battleChara.Struct() == null)
+			{
+				return false;
+			}
+		}
+
+		try
         {
             if (battleChara.StatusList == null)
             {
@@ -821,7 +829,7 @@ public static class ObjectHelper
             return true;
         }
 
-		if (battleChara.IsBroPriority())
+		if (battleChara.IsM10SavagePriority())
 		{
 			return true;
 		}
@@ -1131,7 +1139,6 @@ public static class ObjectHelper
 		{
 			var RedHot = battleChara.NameId == 14370;
 			var DeepBlue = battleChara.NameId == 14369;
-			var WateryGrave = battleChara.NameId == 14373;
 
 			var Firesnaking = StatusHelper.PlayerHasStatus(false, StatusID.Firesnaking);
 			var Watersnaking = StatusHelper.PlayerHasStatus(false, StatusID.Watersnaking);
@@ -1154,34 +1161,10 @@ public static class ObjectHelper
 				return true;
 			}
 
-			if (WateryGrave)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsM10SavagePriority WateryGrave status found");
-				}
-				return true;
-			}
-
 		}
 
 		return false;
 	}
-
-	//public static bool IsM12SavagePriority(this IBattleChara battleChara)
-	//{
-	//	if (Player.Object == null)
-	//	{
-	//		return false;
-	//	}
-
-	//	if (DataCenter.IsInM12S)
-	//	{
-
-	//	}
-
-	//	return false;
-	//}
 
 	/// <summary>
 	/// 
@@ -1590,8 +1573,8 @@ public static class ObjectHelper
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsM9SavageImmune()
-			|| battleChara.IsColossusRubricatusImmune()
+        return battleChara.IsOrbonneImmune()
+			|| battleChara.IsM9SavageImmune()
 			|| battleChara.IsColossusRubricatusImmune()
 			|| battleChara.IsTrueHeartImmune()
 			|| battleChara.IsEminentGriefImmune()
@@ -1611,6 +1594,39 @@ public static class ObjectHelper
             || battleChara.IsLimitlessBlue()
             || battleChara.IsHanselorGretelShielded();
     }
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsOrbonneImmune(this IBattleChara battleChara)
+	{
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (DataCenter.Orbonne)
+		{
+			if (battleChara.HasStatus(false, StatusID.VulnerabilityDown_1782))
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsOrbonneImmune: VulnerabilityDown_1782 detected");
+				}
+				return true;
+			}
+			if (battleChara.HasStatus(false, StatusID.VulnerabilityDown_350))
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsOrbonneImmune: VulnerabilityDown_350 detected");
+				}
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	/// <summary>
 	/// 

@@ -1,6 +1,7 @@
 ﻿using Dalamud.Utility.Signatures;
 using ECommons.DalamudServices;
 using ECommons.EzHookManager;
+using ECommons.GameFunctions;
 using ECommons.Logging;
 using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -76,7 +77,7 @@ internal class Service : IDisposable
                 return actorVfxCreateHook!.Original(a1, a2, a3, a4, a5, a6, a7);
             }
 
-            VfxNewData newVfx = new(battleChara.GameObjectId, path);
+            VfxNewData newVfx = new(battleChara.GameObjectId, path, battleChara.RemainingCastTime);
             DataCenter.VfxDataQueue.Enqueue(newVfx);
         }
         catch (Exception ex)
