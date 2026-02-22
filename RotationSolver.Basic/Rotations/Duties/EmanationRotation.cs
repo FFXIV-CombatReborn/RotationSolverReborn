@@ -19,7 +19,8 @@ public partial class DutyRotation
         setting.StatusFromSelf = true;
         setting.TargetType = TargetType.Self;
         setting.TargetStatusProvide = [StatusID.Vril];
-    }
+        setting.ActionCheck = () => DataCenter.IsLakshmiCastingSpecialIndicator();
+	}
 
     /// <summary>
     /// Modifies the settings for Vril PvE with ID 9345.
@@ -30,5 +31,6 @@ public partial class DutyRotation
         setting.StatusFromSelf = true;
         setting.TargetType = TargetType.Self;
         setting.TargetStatusProvide = [StatusID.Vril];
-    }
+		setting.ActionCheck = () => DataCenter.IsLakshmiCastingSpecialIndicator();
+	}
 }

@@ -24,6 +24,26 @@ public partial class CustomRotation
 			return false;
 		}
 
+		if (DataCenter.Orbonne && IsLastAction(ActionID.HeavenlyShieldPvE) && DataCenter.IsAgriasCastingSpecialIndicator())
+		{
+			return false;
+		}
+
+        //if (DataCenter.Job == ECommons.ExcelServices.Job.PLD && !DataCenter.IsMoving && IsLastAction(ActionID.PassageOfArmsPvE) && StatusHelper.PlayerHasStatus(true, StatusID.PassageOfArms) && DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea))
+        //{
+        //    return false;
+        //}
+
+        //if (DataCenter.Job == ECommons.ExcelServices.Job.AST && !DataCenter.IsMoving && IsLastAction(ActionID.CollectiveUnconsciousPvE) && StatusHelper.PlayerHasStatus(true, StatusID.CollectiveUnconscious_848) && DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea))
+        //{
+        //    return false;
+        //}
+
+        if (DataCenter.Job == ECommons.ExcelServices.Job.BLU && !DataCenter.IsMoving && IsLastAction(ActionID.PhantomFlurryPvE) && StatusHelper.PlayerHasStatus(true, StatusID.PhantomFlurry) && !StatusHelper.PlayerWillStatusEnd(1, true, StatusID.PhantomFlurry))
+		{
+			return false;
+		}
+
 		IBaseAction.ForceEnable = true;
         if (act is IBaseAction a && a != null && !a.Info.IsRealGCD && a.CanUse(out _, usedUp: true, skipAoeCheck: true, skipStatusProvideCheck: true))
         {
@@ -31,8 +51,8 @@ public partial class CustomRotation
         }
         IBaseAction.ForceEnable = false;
 
-        if (StatusHelper.PlayerHasStatus(true, StatusID.Mudra))
-        {
+        if (DataCenter.Job == ECommons.ExcelServices.Job.NIN && StatusHelper.PlayerHasStatus(true, StatusID.Mudra))
+		{
             return false;
         }
 

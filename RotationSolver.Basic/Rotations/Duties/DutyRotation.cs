@@ -137,7 +137,24 @@ public partial class DutyRotation : IDisposable
 
     public virtual void DisplayDutyStatus()
     {
-        if (DataCenter.IsInMonsterHunterDuty)
+		if (DataCenter.Orbonne)
+		{
+			ImGui.Spacing();
+			ImGui.Text($"HeavenlyShieldPvE Status: {StatusHelper.PlayerHasStatus(false, StatusID.Shieldbearer)}");
+			ImGui.Text($"HeavenlyShieldPvE Slotted: {HeavenlyShieldPvE.Info.IsOnSlot}");
+			ImGui.Text($"HeavenlyShieldPvE Charges: {HeavenlyShieldPvE.Cooldown.CurrentCharges}");
+			ImGui.Spacing();
+			ImGui.Text($"HeavenlySwordPvE Status: {StatusHelper.PlayerHasStatus(false, StatusID.Swordbearer)}");
+			ImGui.Text($"HeavenlySwordPvE Slotted: {HeavenlySwordPvE.Info.IsOnSlot}");
+			ImGui.Text($"HeavenlySwordPvE Charges: {HeavenlySwordPvE.Cooldown.CurrentCharges}");
+			ImGui.Spacing();
+			ImGui.Text($"Orbonee Monestary: {InOrbonne}");
+			ImGui.Spacing();
+			ImGui.Text($"IsAgriasCastingJudgementBlade: {IsAgriasCastingJudgementBlade}");
+			ImGui.Spacing();
+		}
+
+		if (DataCenter.IsInMonsterHunterDuty)
         {
             ImGui.Spacing();
             ImGui.Text($"MegaPotionPvE Slotted: {MegaPotionPvE.Info.IsOnSlot}");
@@ -153,7 +170,7 @@ public partial class DutyRotation : IDisposable
             ImGui.Text($"Arkveld Normal: {ArkveldNormal}");
             ImGui.Text($"Arkveld EX: {ArkveldEX}");
             ImGui.Spacing();
-        }
+		}
 
         if (DataCenter.IsInOccultCrescentOp)
         {
@@ -287,6 +304,16 @@ public partial class DutyRotation : IDisposable
     /// 
     /// </summary>
     public static bool InVariantDungeon => DataCenter.InVariantDungeon;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool InOrbonne => DataCenter.Orbonne;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsAgriasCastingJudgementBlade => DataCenter.IsAgriasCastingSpecialIndicator();
 
 	/// <summary>
 	/// This is the player.

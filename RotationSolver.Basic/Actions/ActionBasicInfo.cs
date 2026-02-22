@@ -4,6 +4,7 @@ using ECommons.Logging;
 using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using RotationSolver.Basic.Rotations.Duties;
 
 namespace RotationSolver.Basic.Actions;
 
@@ -258,7 +259,12 @@ public readonly struct ActionBasicInfo
             return false;
         }
 
-        if (!EnoughLevel)
+		if (DataCenter.Orbonne && (_action.ID == 14415 || _action.ID == 14414) && IsActionCheckValid() && ActionManagerStatusValid())
+		{
+			return true;
+		}
+
+		if (!EnoughLevel)
         {
             return false;
         }

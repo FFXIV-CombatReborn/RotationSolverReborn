@@ -20,6 +20,9 @@ public sealed class MCH_Reborn : MachinistRotation
 
 	[RotationConfig(CombatType.PvE, Name = "Use AirAnchor at 1 second remaining on countdown")]
 	private bool AirAnchorCountdown { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "Restrict Tactician to only be allowed to be used when there are multiple hostile targets")]
+	private bool MultiTact { get; set; } = false;
 	#endregion
 
 	#region Countdown logic
@@ -99,12 +102,15 @@ public sealed class MCH_Reborn : MachinistRotation
             return base.DefenseAreaAbility(nextGCD, out act);
         }
 
-        if (TacticianPvE.CanUse(out act))
-        {
-            return true;
-        }
+		if (!MultiTact || (MultiTact && NumberOfAllHostilesInMaxRange > 1))
+		{
+			if (TacticianPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
 
-        if (!MitOverlap || (MitOverlap && !StatusHelper.PlayerHasStatus(true, StatusID.Tactician_1951)))
+		if (!MitOverlap || (MitOverlap && !StatusHelper.PlayerHasStatus(true, StatusID.Tactician_1951)))
         {
             if (DismantlePvE.CanUse(out act))
             {
@@ -535,7 +541,7 @@ public sealed class MCH_Reborn : MachinistRotation
         // Opener
         if (Battery == 60 && IsLastGCD(false, ExcavatorPvE) && CombatTime < 15)
         {
-            if (AutomatonQueenPvE.CanUse(out act, skipTTKCheck: true))
+            if (AutomatonQueenPvE.EnoughLevel && AutomatonQueenPvE.CanUse(out act, skipTTKCheck: true))
             {
                 return true;
             }
@@ -549,7 +555,7 @@ public sealed class MCH_Reborn : MachinistRotation
         // Only allow battery usage if the current transition matches the expected step
         if (foundStepPair)
         {
-            if (AutomatonQueenPvE.CanUse(out act, skipTTKCheck: true))
+            if (AutomatonQueenPvE.EnoughLevel && AutomatonQueenPvE.CanUse(out act, skipTTKCheck: true))
             {
                 return true;
             }
@@ -564,7 +570,7 @@ public sealed class MCH_Reborn : MachinistRotation
         if ((nextGCD.IsTheSameTo(false, CleanShotPvE, HeatedCleanShotPvE) && Battery > 90)
             || (nextGCD.IsTheSameTo(false, HotShotPvE, AirAnchorPvE, ChainSawPvE, ExcavatorPvE) && Battery > 80))
         {
-            if (AutomatonQueenPvE.CanUse(out act, skipTTKCheck: true))
+            if (AutomatonQueenPvE.EnoughLevel && AutomatonQueenPvE.CanUse(out act, skipTTKCheck: true))
             {
                 return true;
             }

@@ -309,7 +309,7 @@ public sealed class WAR_Reborn : WarriorRotation
         }
 
         // AOE
-        if (!StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.SurgingTempest))
+        if (!StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) || !StormsEyePvE.EnoughLevel)
         {
             if (DecimatePvE.CanUse(out act, skipStatusProvideCheck: true))
             {
@@ -332,7 +332,7 @@ public sealed class WAR_Reborn : WarriorRotation
         }
 
         // Single Target
-        if (!StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.SurgingTempest))
+        if (!StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) || !StormsEyePvE.EnoughLevel)
         {
             if (FellCleavePvE.CanUse(out act, skipStatusProvideCheck: true))
             {

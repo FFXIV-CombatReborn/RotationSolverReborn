@@ -58,6 +58,12 @@ internal static class DataCenter
 
 	private static ulong _hostileTargetId = 0;
 
+    // Tracking fields for Tyrant special sequence (Scythe/Axe -> Charybdistopia)
+    private static bool _hasCastScythe = false;
+    private static bool _hasCastAxe = false;
+    private static bool _wasCastingCharyb = false;
+    private static bool _tyrantShouldStopHealing = false;
+
 	public static bool ResetActionConfigs { get; set; } = false;
 
 	public static int PlayerSyncedLevel()
@@ -578,6 +584,21 @@ internal static class DataCenter
 	/// 
 	/// </summary>
 	public static bool ArkveldEX => IsInTerritory(1306);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool Orbonne => IsInTerritory(826);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool Emanation => IsInTerritory(719);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool EmanationEX => IsInTerritory(720);
 	#endregion
 
 	#region Job Info
@@ -1232,6 +1253,280 @@ internal static class DataCenter
 				PluginLog.Warning($"AccessViolation in IsPhysicalDamageIncoming for obj {hostile?.GameObjectId}: {ex.Message}");
 			}
 		}
+		return false;
+	}
+
+	/// <summary>
+	/// True if any hostile is currently casting action 46553 or 46554.
+	/// </summary>
+	public static bool IsExtremeCastingSpecialIndicator()
+	{
+		if (IsInM10S)
+		{
+			var hostileEnum = AllHostileTargets;
+			if (hostileEnum == null) return false;
+
+			for (int i = 0, n = hostileEnum.Count; i < n; i++)
+			{
+				var hostile = hostileEnum[i];
+				if (hostile == null) continue;
+
+				try
+				{
+					if (hostile.CastActionId == 46553 || hostile.CastActionId == 46554)
+					{
+						return true;
+					}
+				}
+				catch (AccessViolationException ex)
+				{
+					PluginLog.Warning($"AccessViolation in IsHostileCastingSpecialIndicator for obj {hostile?.GameObjectId}: {ex.Message}");
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// True if any hostile is currently casting action 46553 or 46554.
+	/// </summary>
+	public static bool IsTyrantCastingSpecialIndicator()
+	{
+		if (IsInM11S)
+		{
+			var hostileEnum = AllHostileTargets;
+			if (hostileEnum == null) return false;
+
+			for (int i = 0, n = hostileEnum.Count; i < n; i++)
+			{
+				var hostile = hostileEnum[i];
+				if (hostile == null) continue;
+
+				try
+				{
+					if (hostile.CastActionId == 46117)
+					{
+						return true;
+					}
+				}
+				catch (AccessViolationException ex)
+				{
+					PluginLog.Warning($"AccessViolation in IsTyrantCastingSpecialIndicator for obj {hostile?.GameObjectId}: {ex.Message}");
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsTyrantCastingSpecialIndicator2()
+	{
+		if (!IsInM11S)
+		{
+			// Not in the relevant duty, ensure flags are cleared
+			_hasCastScythe = false;
+			_hasCastAxe = false;
+			_wasCastingCharyb = false;
+			_tyrantShouldStopHealing = false;
+			return false;
+		}
+
+		// If combat hasn't started, reset everything
+		if (CombatTimeRaw == 0)
+		{
+			_hasCastScythe = false;
+			_hasCastAxe = false;
+			_wasCastingCharyb = false;
+			_tyrantShouldStopHealing = false;
+			return false;
+		}
+
+		var hostileEnum = AllHostileTargets;
+		if (hostileEnum == null) return false;
+
+		bool anyCurrentlyCastingCharyb = false;
+
+		for (int i = 0, n = hostileEnum.Count; i < n; i++)
+		{
+			var hostile = hostileEnum[i];
+			if (hostile == null) continue;
+
+			try
+			{
+				if (!hostile.IsCasting)
+				{
+					anyCurrentlyCastingCharyb = false;
+					continue;
+				}
+
+				var castId = hostile.CastActionId;
+				if (castId == 46115)
+				{
+					_hasCastScythe = true;
+					continue;
+				}
+				else if (castId == 46114)
+				{
+					_hasCastAxe = true;
+					continue;
+				}
+				else if (castId == 46117)
+				{
+					anyCurrentlyCastingCharyb = true;
+					_wasCastingCharyb = true;
+					continue;
+				}
+			}
+			catch (AccessViolationException ex)
+			{
+				PluginLog.Warning($"AccessViolation in IsTyrantCastingSpecialIndicator for obj {hostile?.GameObjectId}: {ex.Message}");
+			}
+		}
+
+		// If we've observed both scythe and axe, flip the stop-healing flag
+		if (_hasCastScythe && _hasCastAxe)
+		{
+			_tyrantShouldStopHealing = true;
+		}
+
+		// If Charybdistopia was casting and now finished, clear everything
+		if (_wasCastingCharyb && !anyCurrentlyCastingCharyb)
+		{
+			_hasCastScythe = false;
+			_hasCastAxe = false;
+			_wasCastingCharyb = false;
+			_tyrantShouldStopHealing = false;
+		}
+
+		return _tyrantShouldStopHealing;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsAgriasCastingSpecialIndicator()
+	{
+		if (!Orbonne)
+		{
+			return false;
+		}
+
+		var hostileEnum = AllHostileTargets;
+		if (hostileEnum == null) return false;
+
+		for (int i = 0, n = hostileEnum.Count; i < n; i++)
+		{
+			var hostile = hostileEnum[i];
+			if (hostile == null) continue;
+
+			try
+			{
+				// Ensure the hostile is actually casting
+				if (!hostile.IsCasting) continue;
+
+				// We're only interested in this specific cast id
+				if (hostile.CastActionId != 14423) continue;
+
+				// Remaining cast time is exposed as CurrentCastTime (units consistent with other checks)
+				float remaining = hostile.TotalCastTime - hostile.CurrentCastTime;
+
+				// If the remaining cast time is less than or equal to the player's remaining GCD,
+				// trigger as close to the last second as possible.
+				if (remaining <= 2.5f)
+				{
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Debug($"Agrias cast detected on obj {hostile.GameObjectId} - remaining: {remaining:F3}s, GCD remain: {DefaultGCDRemain:F3}s");
+					}
+					return true;
+				}
+			}
+			catch (AccessViolationException ex)
+			{
+				PluginLog.Warning($"AccessViolation in IsHostileCastingSpecialIndicator for obj {hostile?.GameObjectId}: {ex.Message}");
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsLakshmiCastingSpecialIndicator()
+	{
+		if (!EmanationEX && !Emanation)
+		{
+			return false;
+		}
+
+		var hostileEnum = AllHostileTargets;
+		if (hostileEnum == null) return false;
+
+		for (int i = 0, n = hostileEnum.Count; i < n; i++)
+		{
+			var hostile = hostileEnum[i];
+			if (hostile == null) continue;
+
+			try
+			{
+				// Ensure the hostile is actually casting
+				if (!hostile.IsCasting) continue;
+
+				// We're only interested in a specific set of Lakshmi cast ids
+				// Known special casts (from duty):
+				// Stotram - 8519 (Raidwide DOT)
+				// Divine Denial - 8521 (Raidwide knockback)
+				// Divine Doubt - 8522 (Raidwide confuse)
+				// Divine Desire - 8523 (Raidwide pull and bleed)
+				// The Path of Light - 8539 (high damage when Chanchala buffed)
+				// The Pull of Light - 8543 (high damage when Chanchala buffed)
+				uint castId = hostile.CastActionId;
+
+				if (EmanationEX)
+				{
+					if (hostile.HasStatus(false, StatusID.Chanchala_1410))
+					{
+						if (castId != 8519 && castId != 8521 && castId != 8522 && castId != 8523 && castId != 8539 && castId != 8543)
+							continue;
+					}
+					if (!hostile.HasStatus(false, StatusID.Chanchala_1410))
+					{
+						if (castId != 8519 && castId != 8521 && castId != 8522 && castId != 8523)
+							continue;
+					}
+				}
+
+				if (Emanation)
+				{
+					if (castId != 9349)
+						continue;
+				}
+
+				// Remaining cast time is exposed as CurrentCastTime (units consistent with other checks)
+				float remaining = hostile.TotalCastTime - hostile.CurrentCastTime;
+
+				// If the remaining cast time is less than or equal to the player's remaining GCD,
+				// trigger as close to the last second as possible.
+				if (remaining <= 3f)
+				{
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Debug($"Lakshmi cast detected on obj {hostile.GameObjectId} - remaining: {remaining:F3}s, GCD remain: {DefaultGCDRemain:F3}s");
+					}
+					return true;
+				}
+			}
+			catch (AccessViolationException ex)
+			{
+				PluginLog.Warning($"AccessViolation in IsHostileCastingSpecialIndicator for obj {hostile?.GameObjectId}: {ex.Message}");
+			}
+		}
+
 		return false;
 	}
 

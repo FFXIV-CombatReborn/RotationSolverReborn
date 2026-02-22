@@ -83,7 +83,7 @@
 
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
 
-        <PackageReference Include="System.Drawing.Common" Version="10.0.2" />
+        <PackageReference Include="System.Drawing.Common" Version="10.0.3" />
         <ProjectReference Include="..\RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj" OutputItemType="Analyzer" ExcludeAssets="All" />
 
         <None Include="..\COPYING.LESSER">

@@ -19,16 +19,16 @@ internal class EmanationDefault : EmanationRotation
 
     #region Configs
     [RotationConfig(CombatType.PvE, Name = "Auto Use Vril")]
-    public bool AllowVril { get; set; } = false;
+    public bool AllowVril2 { get; set; } = true;
     #endregion
 
     public override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (AllowVril)
+        if (AllowVril2)
         {
             if (VrilPvE.Cooldown.CurrentCharges > 0)
             {
-                if (VrilPvE.CanUse(out act))
+                if (VrilPvE.CanUse(out act, usedUp: true))
                 {
                     return true;
                 }
@@ -36,7 +36,7 @@ internal class EmanationDefault : EmanationRotation
 
             if (VrilPvE_9345.Cooldown.CurrentCharges > 0)
             {
-                if (VrilPvE_9345.CanUse(out act))
+                if (VrilPvE_9345.CanUse(out act, usedUp: true))
                 {
                     return true;
                 }

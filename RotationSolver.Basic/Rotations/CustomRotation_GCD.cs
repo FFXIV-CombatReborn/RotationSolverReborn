@@ -24,7 +24,27 @@ public partial class CustomRotation
 
         IBaseAction.ForceEnable = false;
 
-        if (StatusHelper.PlayerHasStatus(true, StatusID.Mudra) && DataCenter.DefaultGCDRemain >= 0.625f)
+		if (DataCenter.Orbonne && IsLastAction(ActionID.HeavenlyShieldPvE) && DataCenter.IsAgriasCastingSpecialIndicator())
+		{
+			return null;
+		}
+
+		if (DataCenter.Job == ECommons.ExcelServices.Job.PLD && IsLastAction(ActionID.PassageOfArmsPvE) && StatusHelper.PlayerHasStatus(true, StatusID.PassageOfArms))
+		{
+			return null;
+		}
+
+		if (DataCenter.Job == ECommons.ExcelServices.Job.AST && IsLastAction(ActionID.CollectiveUnconsciousPvE) && StatusHelper.PlayerHasStatus(true, StatusID.CollectiveUnconscious_848))
+		{
+			return null;
+		}
+
+		if (DataCenter.Job == ECommons.ExcelServices.Job.BLU && IsLastAction(ActionID.PhantomFlurryPvE) && StatusHelper.PlayerHasStatus(true, StatusID.PhantomFlurry))
+		{
+			return null;
+		}
+
+		if (DataCenter.Job == ECommons.ExcelServices.Job.NIN && StatusHelper.PlayerHasStatus(true, StatusID.Mudra) && DataCenter.DefaultGCDRemain >= 0.625f)
         {
             return null;
         }
