@@ -749,13 +749,13 @@ public sealed class ChurinMNK : MonkRotation
             if (BrotherhoodPvE.Cooldown.HasOneCharge &&
                 RiddleOfFirePvE.Cooldown.HasOneCharge)
             {
-                return PerfectBalancePvE.CanUse(out act, usedUp: false);
+                return PerfectBalancePvE.CanUse(out act, usedUp: false, skipTTKCheck:true);
             }
         }
 
         if (InBurst && !HasFiresRumination)
         {
-            return IsLastGCDOpo && PerfectBalancePvE.CanUse(out act, usedUp: true);
+            return IsLastGCDOpo && PerfectBalancePvE.CanUse(out act, usedUp: true, skipTTKCheck:true);
         }
 
         if (SolarOddWindow && IsLastGCDOpo && IsReadySoon(RiddleOfFirePvE, 2))
@@ -765,12 +765,12 @@ public sealed class ChurinMNK : MonkRotation
 
         if (LunarOddWindow && (HasRiddleOfFire || IsReadySoon(RiddleOfFirePvE, 0)) && !HasBothNadi)
         {
-            return  IsLastGCDOpo && PerfectBalancePvE.Cooldown.WillHaveOneCharge(10) && PerfectBalancePvE.CanUse(out act, usedUp: true);
+            return  IsLastGCDOpo && PerfectBalancePvE.Cooldown.WillHaveOneCharge(10) && PerfectBalancePvE.CanUse(out act, usedUp: true, skipTTKCheck:true);
         }
 
         if (IsReadySoon(BrotherhoodPvE, 2) && IsReadySoon(RiddleOfFirePvE,2))
         {
-                return IsLastGCDOpo && PerfectBalancePvE.CanUse(out act, usedUp: true);
+                return IsLastGCDOpo && PerfectBalancePvE.CanUse(out act, usedUp: true, skipTTKCheck:true);
         }
 
 
