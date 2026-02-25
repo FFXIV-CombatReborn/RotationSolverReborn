@@ -492,11 +492,24 @@ internal static class RotationUpdater
 
                 foreach (Type rotationType in customRotationGroup.Rotations)
                 {
-                    CombatType? comType = rotationType.GetCustomAttribute<RotationAttribute>()?.Type;
+                    var rotAttr = rotationType.GetCustomAttribute<RotationAttribute>();
+                    if (rotAttr == null)
+                    {
+                        continue;
+                    }
+
+                    // Skip rotations that are explicitly disabled
+                    if (rotAttr.Disabled)
+                    {
+                        continue;
+                    }
+
+                    CombatType? comType = rotAttr.Type;
                     if (comType == null)
                     {
                         continue;
                     }
+
                     var possibleRotation = GetRotation(rotationType);
                     if (possibleRotation == null)
                     {

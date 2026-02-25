@@ -60,6 +60,7 @@ public partial class RotationConfigWindow : Window
 
 	private static readonly string[] _supporters =
 	[
+	"A bunch of dots and dashed idk",
 	"Abracon",
 	"Akurosuki",
 	"Aniane",
@@ -69,33 +70,28 @@ public partial class RotationConfigWindow : Window
 	"catfourteen",
 	"Chaos_co",
     "Chris",
-	"clean",
 	"DeadCode",
 	"Drama",
-	"Ecliptive",
 	"Elena",
 	"Endings",
-	"Ephi",
+	"Heathcote",
 	"kaen",
+	"Kialdir",
 	"kuromiromi",
 	"Lemon",
 	"LouBird",
 	"Lyn Undercroft",
 	"Miracle Ace",
-	"Mirai",
 	"Miri",
 	"Moniika",
-	"Nefertem",
 	"Papaya",
 	"Plogons",
 	"prismagreen",
 	"purrpletime",
-	"q",
-	"Rini",
-	"Rockabye",
+	"Salmon",
 	"sambaggins",
 	"Savage",
-	"That One Aura",
+	"smf26",
 	"Toska",
 	"TuckingFypo-",
 	"Vaex_Darastrix",
@@ -1607,7 +1603,7 @@ public partial class RotationConfigWindow : Window
 		using (ImRaii.Font _ = ImRaii.PushFont(FontManager.GetFont(16)))
 		using (ImRaii.Color __ = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.ParsedGreen)))
 		{
-			ImGui.TextWrapped($"Special thanks to {_supporters.Length} supporters:");
+			ImGui.TextWrapped($"Special thanks to the {_supporters.Length} supporters (including those not listed here):");
 		}
 
 		ImGui.Spacing();
