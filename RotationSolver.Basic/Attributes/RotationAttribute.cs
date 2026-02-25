@@ -27,4 +27,9 @@ public class RotationAttribute(string name, CombatType type) : Attribute
     /// The Game version of this rotation.
     /// </summary>
     public string? GameVersion { get; set; }
+
+    /// <summary>
+    /// If true the rotation will be treated as disabled and not loaded.
+    /// </summary>
+    public bool Disabled { get; set; } = false;
 }
