@@ -45,7 +45,7 @@ public sealed class RDM_Reborn : RedMageRotation
         }
 
         //Remove Swift
-        if (HasDualcast && remainTime < 0f)
+        if (HasDualcast && remainTime < 0f && !InCombat)
         {
             StatusHelper.StatusOff(StatusID.Dualcast);
         }

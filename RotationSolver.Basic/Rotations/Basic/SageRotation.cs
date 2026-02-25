@@ -139,7 +139,7 @@ public partial class SageRotation
 
     static partial void ModifyEukrasiaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !HasEukrasia;
+        setting.ActionCheck = () => !IsLastAction(ActionID.EukrasiaPvE);
         setting.StatusProvide = [StatusID.Eukrasia];
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
