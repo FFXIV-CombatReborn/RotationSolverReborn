@@ -329,7 +329,8 @@ public partial class RedMageRotation
     static partial void ModifyJoltPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Dualcast];
-    }
+		setting.ActionCheck = () => !IsLastAction(ActionID.JoltPvE);
+	}
 
     static partial void ModifyVerthunderPvE(ref ActionSetting setting)
     {
@@ -451,8 +452,8 @@ public partial class RedMageRotation
 
     static partial void ModifyJoltIiPvE(ref ActionSetting setting)
     {
-        
-    }
+		setting.ActionCheck = () => !IsLastAction(ActionID.JoltIiPvE);
+	}
 
     static partial void ModifyVerraisePvE(ref ActionSetting setting)
     {
@@ -505,8 +506,8 @@ public partial class RedMageRotation
 
     static partial void ModifyJoltIiiPvE(ref ActionSetting setting)
     {
-
-    }
+		setting.ActionCheck = () => !IsLastAction(ActionID.JoltIiiPvE);
+	}
 
     static partial void ModifyMagickBarrierPvE(ref ActionSetting setting)
     {
