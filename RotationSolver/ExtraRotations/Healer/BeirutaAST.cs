@@ -81,8 +81,6 @@ public enum OpenWindowGcd : byte
     }
     #endregion
 
-    private static bool InBurstStatus => HasDivination;
-
     // Opener window seconds based on GCD selection
 private float OpenWindowSeconds => OpenWindow switch
 {
@@ -369,7 +367,7 @@ private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
 
     if ((divinationLearned && HasDivination) // simple: only under Divination
         || (!divinationLearned)              // low level: no Divination exists, so spend Lord
-        || (divinationLearned && !DivinationPvE.Cooldown.WillHaveOneCharge(45)) // Divination not soon
+        || (divinationLearned && !DivinationPvE.Cooldown.WillHaveOneCharge(60)) // Divination not soon
         || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3)) // avoid holding through imminent Umbral Draw
     {
         return true;
@@ -404,65 +402,127 @@ if (UmbralDrawPvE.CanUse(out act) && !(hasBurstCardToPlay && hasLordToSpend))
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
-    {   
-        bool divineReadySoon60 = DivinationPvE.Cooldown.WillHaveOneCharge(60f);
-bool divineReadySoon2s = DivinationPvE.Cooldown.WillHaveOneCharge(2f);
+{
+    act = null;
 
-bool preserveLightspeedForDivine =
-    divineReadySoon60 &&
-    !divineReadySoon2s &&
-    LightspeedPvE.Cooldown.CurrentCharges <= 1;
-        
-// Spend last Lightspeed 2s before Divination
-if (divineReadySoon2s
-    && LightspeedPvE.Cooldown.CurrentCharges == 1
+    bool divLearned = DivinationPvE.EnoughLevel;
+
+    bool divReadySoon60 = divLearned && DivinationPvE.Cooldown.WillHaveOneCharge(60f);
+    bool divReadySoon2  = divLearned && DivinationPvE.Cooldown.WillHaveOneCharge(2f);
+
+    // Hold last Lightspeed charge if Divination is within 60s but not imminent
+    bool holdLastLightspeedForDiv =
+        divReadySoon60 &&
+        !divReadySoon2 &&
+        LightspeedPvE.Cooldown.CurrentCharges == 1 &&
+        !HasLightspeed;
+
+// Only these GCDs are allowed while moving without needing Lightspeed
+bool nextIsMovementSafeGcd =
+    nextGCD.IsTheSameTo(false,
+        MacrocosmosPvE,
+        AspectedBeneficPvE,
+        CombustIiiPvE, CombustIiPvE, CombustPvE);
+// True if Combust is missing or will fall off within 18s
+bool combustSoon18 =
+    CurrentTarget != null &&
+    (
+        (CombustIiiPvE.EnoughLevel &&
+            (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
+             || (CurrentTarget?.WillStatusEnd(18, true, StatusID.CombustIii) ?? false)))
+        ||
+        (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
+            (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
+             || (CurrentTarget?.WillStatusEnd(18, true, StatusID.CombustIi) ?? false)))
+        ||
+        (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
+            (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
+             || (CurrentTarget?.WillStatusEnd(18, true, StatusID.Combust) ?? false)))
+    );
+// If moving, and next GCD is NOT one of the safe ones,
+// and we are not already under Swift or Lightspeed,
+// then we need Lightspeed.
+bool needsMovementRescue =
+    InCombat
+    && IsMoving
+    && !nextIsMovementSafeGcd
+    && !HasSwift
     && !HasLightspeed
-    && InCombat
-    && IsBurst
+    && !combustSoon18;
+
+
+    // First ~5 seconds of Divination (Divination lasts 15s)
+    bool divJustStarted =
+        HasDivination &&
+        StatusHelper.PlayerStatusTime(true, StatusID.Divination) >= 8f;
+
+    // Use Lightspeed once during opener window
+    bool openerLightspeed =
+        IsOpen &&
+        InCombat &&
+        !HasLightspeed &&
+        !holdLastLightspeedForDiv &&
+        LightspeedPvE.Cooldown.CurrentCharges >= 1;
+
+    // Spend last Lightspeed ~2s before Divination (burst prep)
+    if (divReadySoon2
+        && LightspeedPvE.Cooldown.CurrentCharges >= 1
+        && !HasLightspeed
+        && InCombat
+        && IsBurst
+        && LightspeedPvE.CanUse(out act, usedUp: true))
+    {
+        return true;
+    }
+
+    if (!IsOpen && IsBurst && InCombat && DivinationPvE.CanUse(out act))
+    {
+        return true;
+    }
+
+    // Opener Lightspeed
+    if (openerLightspeed && LightspeedPvE.CanUse(out act, usedUp: true))
+    {
+        return true;
+    }
+
+    if (AstralDrawPvE.CanUse(out act, usedUp: IsBurst))
+    {
+        return true;
+    }
+
+    // Divination early window Lightspeed
+    if (!HasLightspeed
+        && InCombat
+        && divJustStarted
+        && !holdLastLightspeedForDiv
+        && LightspeedPvE.CanUse(out act, usedUp: true))
+    {
+        return true;
+    }
+
+
+    if (InCombat)
+    {   
+bool canWeaveNow = NextAbilityToNextGCD < 0.8f;
+        // Movement rescue
+        if (needsMovementRescue
+    && canWeaveNow
+    && !holdLastLightspeedForDiv
     && LightspeedPvE.CanUse(out act, usedUp: true))
 {
     return true;
 }
 
-        if (!IsOpen && IsBurst && InCombat && DivinationPvE.CanUse(out act))
-{
-    return true;
-}
-
-        if (AstralDrawPvE.CanUse(out act, usedUp: IsBurst))
+        // Earthly Star
+        if (!HasGiantDominance && !HasEarthlyDominance && EarthlyStarPvE.CanUse(out act))
         {
             return true;
         }
-
-        if (!HasLightspeed && InCombat &&
-            (InBurstStatus
-            || DivinationPvE.Cooldown.ElapsedAfter(115)
-            || DivinationPvE.Cooldown.WillHaveOneCharge(5)
-            || HasDivination) && LightspeedPvE.CanUse(out act, usedUp: true))
-        {
-            return true;
-        }
-
-        if (InCombat)
-        {
-            if (!preserveLightspeedForDivine)
-
-{
-    if (!HasLightspeed && IsMoving && LightspeedPvE.CanUse(out act, usedUp: true))
-    {
-        return true;
     }
+
+    return base.AttackAbility(nextGCD, out act);
 }
-
-
-            if ( !HasGiantDominance && !HasEarthlyDominance && EarthlyStarPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        return base.AttackAbility(nextGCD, out act);
-    }
     #endregion
 
     #region GCD Logic
@@ -606,7 +666,33 @@ if (divineReadySoon2s
         {
             return true;
         }
+// Moving Combust refresh (<15s) with timing gate (0.8f)
+{
+    bool canCommitGcdNow = NextAbilityToNextGCD < 0.8f;
 
+    if (InCombat && IsMoving && canCommitGcdNow && CurrentTarget != null)
+    {
+        bool combustLow15 =
+            (CombustIiiPvE.EnoughLevel &&
+                (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
+                 || (CurrentTarget?.WillStatusEnd(15, true, StatusID.CombustIii) ?? false)))
+            ||
+            (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
+                (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
+                 || (CurrentTarget?.WillStatusEnd(15, true, StatusID.CombustIi) ?? false)))
+            ||
+            (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
+                (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
+                 || (CurrentTarget?.WillStatusEnd(15, true, StatusID.Combust) ?? false)));
+
+        if (combustLow15)
+        {
+            if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+            if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+            if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+        }
+    }
+}
 // Force earlier Combust refresh during Divination: refresh if remaining < 12s
 if (HasDivination && InCombat && CurrentTarget != null)
 {
