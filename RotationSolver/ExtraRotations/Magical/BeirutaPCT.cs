@@ -11,7 +11,6 @@ public sealed class BeirutaPCT : PictomancerRotation
 "Please note that this rotation is optimised for combats that start with a countdown Rainbow Drip cast.\n" +
 "• Enable Spell Intercept to manually use Rainbow Drip before the boss becomes untargetable.\n" +
 "• This rotation is designed to align Madeen within burst windows.\n" +
-"• During burst, it attempts to use two Comet in Black casts by skipping one Hammer action.\n" +
 "• Hyperphantasia is prioritised early in burst to allow earlier movement flexibility.\n" +
 "• Intercept Rainbow Drip automatically uses Swiftcast when Rainbow Drip is queued.\n" +
 "• Manual Swiftcast input will be spent on Motif (creature -> weapon -> landscape)."
@@ -82,7 +81,37 @@ public sealed class BeirutaPCT : PictomancerRotation
 {
     act = null;
 
-    if (RainbowDripSwift && !HasRainbowBright && nextGCD.IsTheSameTo(false, RainbowDripPvE) && SwiftcastPvE.CanUse(out act))
+    // Same opener timing gate used in AttackAbility()
+    int adjustCombatTimeForOpener = DataCenter.PlayerSyncedLevel() < 92 ? 2 : 5;
+
+    if (InCombat
+        && CombatTime <= 5f
+        && StrikingMusePvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+    {
+        return true;
+    }
+
+    // Opener pot — absolute priority first 10s
+    if (InCombat
+        && CombatTime <= 10f
+        && CombatTime >= 1f
+        && HasHammerTime
+        && UseBurstMedicine(out act))
+    {
+        return true;
+    }
+
+    if (IsBurst
+        && CombatTime > adjustCombatTimeForOpener
+        && StarryMusePvE.CanUse(out act, skipCastingCheck: true))
+    {
+        return true;
+    }
+
+    if (RainbowDripSwift
+        && !HasRainbowBright
+        && nextGCD.IsTheSameTo(false, RainbowDripPvE)
+        && SwiftcastPvE.CanUse(out act))
     {
         return true;
     }
@@ -174,23 +203,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
 {   
-    if (InCombat
-    && CombatTime <= 5f
-    && StrikingMusePvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
-{
-    return true;
-}
-
-  // Opener pot — absolute priority first 10s
-if (InCombat
-    && CombatTime <= 10f
-    && CombatTime >= 1f
-    && HasHammerTime
-    && UseBurstMedicine(out act))
-{
-    return true;
-}
-
+    
 
         bool starryReadySoon10 =
     !HasStarryMuse &&
@@ -216,7 +229,8 @@ bool starryReadySoon60 =
 
 bool starryReadySoon5 =
     !HasStarryMuse &&
-    StarryMusePvE.Cooldown.WillHaveOneCharge(5f);
+    StarryMusePvE.Cooldown.WillHaveOneCharge(5f) &&
+    IsBurst;
 
 // Hold the last Striking charge until ~5s before Starry
 bool preserveStrikingForStarry =
@@ -230,13 +244,6 @@ bool preserveLivingForBurst =
     !HasStarryMuse
     && starrySoon
     && LivingMusePvE.Cooldown.CurrentCharges <= 1;
-    
-        if (IsBurst
-    && CombatTime > adjustCombatTimeForOpener
-    && StarryMusePvE.CanUse(out act, skipCastingCheck: true))
-{
-    return true;
-}
 
         if (!starryReadySoon10
     && SubtractivePalettePvE.CanUse(out act)
@@ -400,10 +407,11 @@ bool fireHardLockout =
 
 // Starry <2s gate
 bool starryReadySoon2 =
-    HasStarryMuse || StarryMusePvE.Cooldown.WillHaveOneCharge(1f);
+    HasStarryMuse || StarryMusePvE.Cooldown.WillHaveOneCharge(0f);
 bool starryReadySoon10 =
     !HasStarryMuse &&
-    StarryMusePvE.Cooldown.WillHaveOneCharge(12f);
+    StarryMusePvE.Cooldown.WillHaveOneCharge(12f)&&
+    IsBurst;
 
 // Block hammer chain ONLY after we did the ~5s prep Striking, until Starry <2s
 bool blockPrepHammerChain =
@@ -419,13 +427,8 @@ if (!InCombat || starryReadySoon2)
 
 
         // some gcd priority
-       if (RainbowDripPvE.CanUse(out act) && HasRainbowBright)
-{
-    return true;
-}
 
-
-        if (HasStarryMuse)
+        if (HasStarryMuse && HasInspiration)
         {
             if (CometInBlackPvE.CanUse(out act, skipCastingCheck: true))
             {
@@ -447,6 +450,10 @@ if (!InCombat || starryReadySoon2)
     }
 }
 
+if (RainbowDripPvE.CanUse(out act) && HasRainbowBright)
+{
+    return true;
+}
 
         if (!InCombat)
         {
@@ -531,7 +538,7 @@ if (ScenicMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30 && !HasStarryMuse && 
 
             if (HolyCometMoving)
 {
-    if (!starryReadySoon10 && CometInBlackPvE.CanUse(out act))
+    if ( CometInBlackPvE.CanUse(out act))
     {
         return true;
     }
