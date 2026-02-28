@@ -199,6 +199,12 @@ private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
             return true;
         }
 
+        if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 1
+    && CelestialIntersectionPvE.CanUse(out act, usedUp: true))
+{
+    return true;
+}
+
         return base.DefenseSingleAbility(nextGCD, out act);
     }
 
@@ -257,10 +263,12 @@ private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
             return true;
         }
 
-        if (CelestialIntersectionPvE.CanUse(out act, usedUp: true))
-        {
-            return true;
-        }
+if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 2
+    && (CelestialIntersectionPvE.Target.Target?.GetHealthRatio() < 0.9f) == true
+    && CelestialIntersectionPvE.CanUse(out act, usedUp: true))
+{
+    return true;
+}
 
         return base.HealSingleAbility(nextGCD, out act);
     }
@@ -504,7 +512,7 @@ bool needsMovementRescue =
 
     if (InCombat)
     {   
-bool canWeaveNow = NextAbilityToNextGCD < 0.8f;
+bool canWeaveNow = NextAbilityToNextGCD < 0.6f;
         // Movement rescue
         if (needsMovementRescue
     && canWeaveNow
@@ -591,10 +599,18 @@ bool canWeaveNow = NextAbilityToNextGCD < 0.8f;
             return base.HealSingleGCD(out act);
         }
 
-        if (AspectedBeneficPvE.CanUse(out act) && (IsMoving || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal))
-        {
-            return true;
-        }
+        bool movingHealWindow =
+    InCombat &&
+    IsMoving &&
+    NextAbilityToNextGCD < 0.6f &&
+    (AspectedBeneficPvE.Target.Target?.GetHealthRatio() < 0.9f) == true;
+
+if (AspectedBeneficPvE.CanUse(out act)
+    && (AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal
+        || movingHealWindow))
+{
+    return true;
+}
 
         if (BeneficIiPvE.CanUse(out act))
         {
@@ -666,9 +682,9 @@ bool canWeaveNow = NextAbilityToNextGCD < 0.8f;
         {
             return true;
         }
-// Moving Combust refresh (<15s) with timing gate (0.8f)
+// Moving Combust refresh (<15s) with timing gate (0.6f)
 {
-    bool canCommitGcdNow = NextAbilityToNextGCD < 0.8f;
+    bool canCommitGcdNow = NextAbilityToNextGCD < 0.6f;
 
     if (InCombat && IsMoving && canCommitGcdNow && CurrentTarget != null)
     {
@@ -693,21 +709,21 @@ bool canWeaveNow = NextAbilityToNextGCD < 0.8f;
         }
     }
 }
-// Force earlier Combust refresh during Divination: refresh if remaining < 12s
+// Force earlier Combust refresh during Divination: refresh if remaining < 11s
 if (HasDivination && InCombat && CurrentTarget != null)
 {
     bool combustMissingOrLow =
         (CombustIiiPvE.EnoughLevel &&
             (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
-             || (CurrentTarget?.WillStatusEnd(12, true, StatusID.CombustIii) ?? false)))
+             || (CurrentTarget?.WillStatusEnd(11, true, StatusID.CombustIii) ?? false)))
         ||
         (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
             (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
-             || (CurrentTarget?.WillStatusEnd(12, true, StatusID.CombustIi) ?? false)))
+             || (CurrentTarget?.WillStatusEnd(11, true, StatusID.CombustIi) ?? false)))
         ||
         (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
             (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
-             || (CurrentTarget?.WillStatusEnd(12, true, StatusID.Combust) ?? false)));
+             || (CurrentTarget?.WillStatusEnd(11, true, StatusID.Combust) ?? false)));
 
     if (combustMissingOrLow)
     {
