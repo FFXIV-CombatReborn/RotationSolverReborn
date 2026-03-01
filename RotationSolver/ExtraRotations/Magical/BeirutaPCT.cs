@@ -42,7 +42,22 @@ public sealed class BeirutaPCT : PictomancerRotation
     private bool BurstDefense { get; set; } = true;
     #endregion
     
+private bool NextIsMovementSafeGcd(IAction nextGCD) =>
+    nextGCD.IsTheSameTo(false, HolyInWhitePvE, CometInBlackPvE);
 
+private bool NeedsStrikingMovementRescue(IAction nextGCD) =>
+    InCombat
+    && IsMoving
+    && !NextIsMovementSafeGcd(nextGCD)
+    && !HasSwift
+    && !HasHammerTime 
+    && NextAbilityToNextGCD < 0.6f;
+
+// Overcap protection: about to reach 2 charges within 5s
+private bool StrikingOvercapSoon5 =>
+    StrikingMusePvE.Cooldown.CurrentCharges == 1
+    && StrikingMusePvE.Cooldown.WillHaveOneCharge(5f); 
+// (meaning: the next charge arrives within 5 seconds)
     private long _holyUsedInOpenerAtMs = 0;
     private long _fangedUsedInStarryAtMs = 0;
     private long _prepStrikingUsedAtMs = 0;
@@ -203,57 +218,65 @@ public sealed class BeirutaPCT : PictomancerRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
 {   
-    
+    // ---------- Burst / timing helpers ----------
+int adjustCombatTimeForOpener = DataCenter.PlayerSyncedLevel() < 92 ? 2 : 5;
 
-        bool starryReadySoon10 =
-    !HasStarryMuse &&
-    StarryMusePvE.Cooldown.WillHaveOneCharge(10f);
-
-        bool burstTimingCheckerStriking = !ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || HasStarryMuse || !StarryMusePvE.EnoughLevel;
-        // Bursts
-        int adjustCombatTimeForOpener = DataCenter.PlayerSyncedLevel() < 92 ? 2 : 5;
+long nowMs = Environment.TickCount64;
 
 bool madeenAvailable = RetributionOfTheMadeenPvE.CanUse(out _);
 
-long nowMs = Environment.TickCount64;
+// Mog overwrite restriction (same as your logic, just grouped)
 bool mogRestrictedWindow =
     _fangedUsedInStarryAtMs != 0 &&
     (nowMs - _fangedUsedInStarryAtMs) < 160_000;
 
-bool mogReady = MogOfTheAgesPvE.CanUse(out _); // "ready" for overwrite-blocking
+bool mogReady      = MogOfTheAgesPvE.CanUse(out _);
 bool mogAllowedNow = mogReady && (!mogRestrictedWindow || HasStarryMuse);
-bool starrySoon = StarryMusePvE.Cooldown.WillHaveOneCharge(40f);
-bool starryReadySoon60 =
-    !HasStarryMuse &&
-    StarryMusePvE.Cooldown.WillHaveOneCharge(60f);
 
-bool starryReadySoon5 =
-    !HasStarryMuse &&
-    StarryMusePvE.Cooldown.WillHaveOneCharge(5f) &&
-    IsBurst;
+// Starry timing (single source of truth)
+float starryIn = HasStarryMuse ? 0f : StarryMusePvE.Cooldown.RecastTimeRemainOneCharge;
+bool starryWithin60   = !HasStarryMuse && starryIn <= 60f;
+bool starryWithin40   = !HasStarryMuse && starryIn <= 40f;
+bool starryReadySoon10 = !HasStarryMuse && starryIn <= 10f && IsBurst;
 
-// Hold the last Striking charge until ~5s before Starry
+// ---------- Striking Muse (HammerTime) reserve logic ----------
+// Requirement you stated:
+// "It is OK to be at 0 charges as long as Striking will have 1 charge
+// at least 10s BEFORE Starry is ready."
+//
+// So: we only preserve when spending the last charge would mean we *cannot*
+// regain a charge by (Starry - 10s).
+float strikingNeededIn = MathF.Max(0f, starryIn - 5f);
+
 bool preserveStrikingForStarry =
-    starryReadySoon60 &&
-    !starryReadySoon5 &&
-    StrikingMusePvE.Cooldown.CurrentCharges <= 1;
+    starryWithin60
+    && StrikingMusePvE.Cooldown.CurrentCharges == 1
+    && StrikingMusePvE.Cooldown.RecastTimeRemainOneCharge > strikingNeededIn;
 
-// Keep at least 1 Living Muse charge if burst is within 40s (and we are not already in Starry)
+// Overcap soon (2 charges) within 10s: spend one unless we're preserving
+bool strikingOvercapSoon30 =
+    StrikingMusePvE.Cooldown.CurrentCharges == 1
+    && StrikingMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30f;
+
+// Keep at least 1 Living Muse charge if Starry is soon (your existing intent)
 bool preserveLivingForBurst =
-    CombatTime > 5f &&
-    !HasStarryMuse
-    && starrySoon
+    CombatTime > 5f
+    && !HasStarryMuse
+    && starryWithin40
     && LivingMusePvE.Cooldown.CurrentCharges <= 1;
 
-        if (!starryReadySoon10
+// ---------- Palette upkeep ----------
+if (!starryReadySoon10
     && SubtractivePalettePvE.CanUse(out act)
     && !HasSubtractivePalette)
 {
     return true;
 }
-// Deliberately spend the LAST Striking charge at ~5s before Starry
-if (starryReadySoon5
-    && StrikingMusePvE.Cooldown.CurrentCharges == 1
+
+// ---------- Striking usage priorities ----------
+
+// 1) Prep: deliberately spend Striking about 10s before Starry (to ensure HammerTime exists)
+if (starryReadySoon10
     && CombatTime > adjustCombatTimeForOpener
     && StrikingMusePvE.CanUse(out act, usedUp: true))
 {
@@ -261,14 +284,23 @@ if (starryReadySoon5
     return true;
 }
 
-        if (!preserveStrikingForStarry
+// 2) Overcap protection: spend if we would cap in ~10s (unless preserving for Starry)
+if (strikingOvercapSoon30
     && CombatTime > adjustCombatTimeForOpener
-    && StrikingMusePvE.CanUse(out act, usedUp: true)
-    && burstTimingCheckerStriking)
+    && !preserveStrikingForStarry
+    && StrikingMusePvE.CanUse(out act, usedUp: true))
 {
     return true;
 }
 
+// 3) Movement rescue: spend Striking if moving and next GCD unsafe (unless preserving for Starry)
+if (NeedsStrikingMovementRescue(nextGCD)
+    && StrikingMusePvE.Cooldown.CurrentCharges > 0
+    && !preserveStrikingForStarry
+    && StrikingMusePvE.CanUse(out act, usedUp: true))
+{
+    return true;
+}
 
         if (HasStarryMuse)
         {
@@ -435,19 +467,83 @@ if (!InCombat || starryReadySoon2)
                 return true;
             }
         }
+
+if (HasStarryMuse
+    && !HasSubtractivePalette
+    && InCombat
+    && HammerStampPvE.CanUse(out act, skipComboCheck: true))
+{
+    return true;
+}
+        // Extra: Subtractive Inks under Inspiration (before StarPrism)
+if (HasInspiration && HasSubtractivePalette)
+{
+    if (ThunderInMagentaPvE.CanUse(out act)) return true;
+    if (StoneInYellowPvE.CanUse(out act)) return true;
+    if (BlizzardInCyanPvE.CanUse(out act)) return true;
+}
         if (StarPrismPvE.CanUse(out act) && HasStarstruck)
         {
             return true;
         }
+bool canCommitGcdNow = NextAbilityToNextGCD < 0.6f;
 
-        if (!blockPrepHammerChain && !(HasInspiration && HasSubtractivePalette))
+float hammerRemain = HasHammerTime
+    ? StatusHelper.PlayerStatusTime(true, StatusID.HammerTime)
+    : 0f;
+
+// HammerTime = 30s total
+// Early = first 5s  => remain >= 25
+bool hammerEarly5  = HasHammerTime && hammerRemain >= 25f;
+// After early = remaining 25s => remain < 25
+bool hammerAfter5  = HasHammerTime && hammerRemain > 0f && hammerRemain < 25f;
+
+// Helper: whether we are allowed to use hammer chain right now
+// - During Starry: if moving, ignore (HasInspiration && HasSubtractivePalette)
+// - Otherwise: keep the restriction
+bool hammerAllowedByInspirationRule =
+    HasStarryMuse
+        ? (IsMoving || !(HasInspiration && HasSubtractivePalette))
+        : !(HasInspiration && HasSubtractivePalette);
+
+// 1) During Starry: use hammer chain any time it’s allowed (moving ignores Inspiration rule)
+if (HasStarryMuse
+    && InCombat
+    && !HasSwift
+    && !blockPrepHammerChain
+    && hammerAllowedByInspirationRule)
 {
-    if (PolishingHammerPvE.CanUse(out act, skipComboCheck: true) ||
-        HammerBrushPvE.CanUse(out act, skipComboCheck: true) ||
-        (!blockEarlyHammerStamp && HammerStampPvE.CanUse(out act, skipComboCheck: true)))
-    {
-        return true;
-    }
+    if (PolishingHammerPvE.CanUse(out act, skipComboCheck: true)) return true;
+    if (HammerBrushPvE.CanUse(out act, skipComboCheck: true)) return true;
+    if (!blockEarlyHammerStamp && HammerStampPvE.CanUse(out act, skipComboCheck: true)) return true;
+}
+
+// 2) Not Starry + first 5s: movement rescue ONLY (commit window), keep restriction
+if (!HasStarryMuse
+    && hammerEarly5
+    && InCombat
+    && IsMoving
+    && canCommitGcdNow
+    && !HasSwift
+    && !blockPrepHammerChain
+    && hammerAllowedByInspirationRule)
+{
+    if (PolishingHammerPvE.CanUse(out act, skipComboCheck: true)) return true;
+    if (HammerBrushPvE.CanUse(out act, skipComboCheck: true)) return true;
+    if (!blockEarlyHammerStamp && HammerStampPvE.CanUse(out act, skipComboCheck: true)) return true;
+}
+
+// 3) Not Starry + remaining 25s: spend ASAP (like the old behaviour), keep restriction
+if (!HasStarryMuse
+    && hammerAfter5
+    && InCombat
+    && !HasSwift
+    && !blockPrepHammerChain
+    && hammerAllowedByInspirationRule)
+{
+    if (PolishingHammerPvE.CanUse(out act, skipComboCheck: true)) return true;
+    if (HammerBrushPvE.CanUse(out act, skipComboCheck: true)) return true;
+    if (!blockEarlyHammerStamp && HammerStampPvE.CanUse(out act, skipComboCheck: true)) return true;
 }
 
 if (RainbowDripPvE.CanUse(out act) && HasRainbowBright)
@@ -526,30 +622,15 @@ if (ScenicMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30 && !HasStarryMuse && 
             }
         }
 
-        // white/black paint use while moving
-        if (IsMoving && !HasSwift)
+           // moving Holy/Comet: only when about to commit a GCD (AST moving Combust analogue)
 {
-    if (!blockPrepHammerChain && !(HasInspiration && HasSubtractivePalette))
-    {
-        if (PolishingHammerPvE.CanUse(out act)) return true;
-        if (HammerBrushPvE.CanUse(out act)) return true;
-        if (!blockEarlyHammerStamp && HammerStampPvE.CanUse(out act)) return true;
-    }
 
-            if (HolyCometMoving)
-{
-    if ( CometInBlackPvE.CanUse(out act))
+    if (HolyCometMoving && InCombat && IsMoving && canCommitGcdNow && !HasSwift && !HasHammerTime)
     {
-        return true;
-    }
-
-    if (HolyInWhitePvE.CanUse(out act))
-    {
-        return true;
+        if (CometInBlackPvE.CanUse(out act)) return true;
+        if (HolyInWhitePvE.CanUse(out act)) return true;
     }
 }
-
-        }
 
         // When in swift management
         if (HasSwift && (!LandscapeMotifDrawn || !CreatureMotifDrawn || !WeaponMotifDrawn))
