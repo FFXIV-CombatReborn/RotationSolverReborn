@@ -154,7 +154,7 @@ public static class ObjectHelper
         return Svc.Data.GetExcelSheet<BNpcBase>().TryGetRow(battleChara.BaseId, out var dataRow) && !dataRow.IsOmnidirectional;
     }
 
-    internal static unsafe bool IsOthersPlayersMob(this IBattleChara battleChara)
+	internal static bool IsOthersPlayersMob(this IBattleChara battleChara)
     {
         //SpecialType but no NamePlateIcon
         bool isEventType = false;
@@ -1510,6 +1510,209 @@ public static class ObjectHelper
     internal static unsafe uint FateId(this IBattleChara battleChara)
     {
         return battleChara.Struct()->FateId;
+    }
+
+    /// <summary>
+    /// Attempts to retrieve all tethers currently present using the ECommons TetherInfo API via reflection.
+    /// </summary>
+    public static IReadOnlyList<TetherInfo> GetAllTethers()
+    {
+        try
+        {
+            var tType = typeof(TetherInfo);
+            // Look for a public static method that returns an array or IEnumerable of TetherInfo
+            var methods = tType.GetMethods(BindingFlags.Public | BindingFlags.Static);
+            foreach (var m in methods)
+            {
+                var ret = m.ReturnType;
+                if (ret == typeof(TetherInfo[]) || typeof(System.Collections.IEnumerable).IsAssignableFrom(ret))
+                {
+                    var res = m.Invoke(null, null);
+                    if (res == null) continue;
+
+                    if (res is TetherInfo[] arr)
+                        return arr;
+
+                    if (res is System.Collections.IEnumerable ie)
+                    {
+                        var list = new List<TetherInfo>();
+                        foreach (var o in ie)
+                        {
+                            if (o is TetherInfo ti) list.Add(ti);
+                        }
+                        return list;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // ignore and fallthrough to empty
+        }
+
+        return [];
+    }
+
+    /// <summary>
+    /// Returns tethers where the object is either source or target.
+    /// </summary>
+    public static IReadOnlyList<TetherInfo> GetTethersFor(this IGameObject obj)
+    {
+        if (obj == null) return [];
+        var all = GetAllTethers();
+        ulong id = obj.GameObjectId;
+        var result = new List<TetherInfo>();
+        foreach (var t in all)
+        {
+            if (t == null) continue;
+            if (ExtractTetherId(t, out _, out var src, out var tgt) && (src == id || tgt == id))
+                result.Add(t);
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Returns outgoing tethers (where object is source).
+    /// </summary>
+    public static IReadOnlyList<TetherInfo> GetOutgoingTethers(this IGameObject obj)
+    {
+        if (obj == null) return [];
+        var all = GetAllTethers();
+        ulong id = obj.GameObjectId;
+        var result = new List<TetherInfo>();
+        foreach (var t in all)
+        {
+            if (t == null) continue;
+            if (ExtractTetherId(t, out _, out var src, out _ ) && src == id)
+                result.Add(t);
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Returns incoming tethers (where object is target).
+    /// </summary>
+    public static IReadOnlyList<TetherInfo> GetIncomingTethers(this IGameObject obj)
+    {
+        if (obj == null) return [];
+        var all = GetAllTethers();
+        ulong id = obj.GameObjectId;
+        var result = new List<TetherInfo>();
+        foreach (var t in all)
+        {
+            if (t == null) continue;
+            if (ExtractTetherId(t, out _, out _, out var tgt) && tgt == id)
+                result.Add(t);
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Try to extract common tether fields (tether id, source object id, target object id) using reflection.
+    /// Returns true if at least source/target were obtained.
+    /// </summary>
+    private static bool ExtractTetherId(TetherInfo t, out uint tetherId, out ulong sourceObjectId, out ulong targetObjectId)
+    {
+        tetherId = 0;
+        sourceObjectId = 0;
+        targetObjectId = 0;
+        try
+        {
+            var tType = typeof(TetherInfo);
+
+            // possible names for fields/properties
+            string[] tetherNames = ["TetherId", "Id", "Tether"];
+            string[] sourceNames = ["SourceObjectId", "SourceId", "Source", "SourceActorId"];
+            string[] targetNames = ["TargetObjectId", "TargetId", "Target", "TargetActorId"];
+
+            object? val;
+
+            val = TryGetMemberValue(tType, t, tetherNames);
+            if (val != null)
+            {
+                if (val is uint ui) tetherId = ui;
+                else if (val is int i) tetherId = (uint)i;
+                else if (uint.TryParse(val.ToString(), out var parsed)) tetherId = parsed;
+            }
+
+            val = TryGetMemberValue(tType, t, sourceNames);
+            if (val != null)
+            {
+                if (val is ulong ul) sourceObjectId = ul;
+                else if (val is uint u) sourceObjectId = u;
+                else if (ulong.TryParse(val.ToString(), out var pul)) sourceObjectId = pul;
+            }
+
+            val = TryGetMemberValue(tType, t, targetNames);
+            if (val != null)
+            {
+                if (val is ulong ul2) targetObjectId = ul2;
+                else if (val is uint u2) targetObjectId = u2;
+                else if (ulong.TryParse(val.ToString(), out var pul2)) targetObjectId = pul2;
+            }
+
+            return sourceObjectId != 0 || targetObjectId != 0 || tetherId != 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static object? TryGetMemberValue(Type tType, object instance, string[] names)
+    {
+        foreach (var n in names)
+        {
+            var f = tType.GetField(n, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            if (f != null)
+            {
+                var v = f.GetValue(instance);
+                if (v != null) return v;
+            }
+            var p = tType.GetProperty(n, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            if (p != null)
+            {
+                var v = p.GetValue(instance);
+                if (v != null) return v;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Returns true if the specified battleChara is tethered to the player.
+    /// </summary>
+    public static bool IsTetheredToPlayer(this IBattleChara battleChara)
+    {
+        if (battleChara == null || Player.Object == null) return false;
+
+        ulong playerId = Player.Object.GameObjectId;
+        var tethers = GetTethersFor(battleChara);
+        foreach (var t in tethers)
+        {
+            if (t == null) continue;
+            if (ExtractTetherId(t, out _, out var src, out var tgt) && (src == playerId || tgt == playerId))
+                return true;
+        }
+        return false;
+    }
+
+	/// <summary>
+	/// Returns true if the specified checkedtarget is tethered to checkedtarget.
+	/// </summary>
+	public static bool IsTetheredToSpecificTarget(this IBattleChara battleChara, IBattleChara checkedtarget)
+    {
+        if (battleChara == null || checkedtarget == null) return false;
+
+		ulong memberId = checkedtarget.GameObjectId;
+        var tethers = GetTethersFor(battleChara);
+        foreach (var t in tethers)
+        {
+            if (t == null) continue;
+            if (ExtractTetherId(t, out _, out var src, out var tgt) && (src == memberId || tgt == memberId))
+                return true;
+        }
+        return false;
     }
 
     private static readonly ConcurrentDictionary<uint, bool> _effectRangeCheck = [];

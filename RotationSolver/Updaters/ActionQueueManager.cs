@@ -103,7 +103,7 @@ namespace RotationSolver.Updaters
 
 		private static unsafe bool UseActionDetour(ActionManager* actionManager, uint actionType, uint actionID, ulong targetObjectID, uint param, uint useType, int pvp, bool* isGroundTarget)
 		{
-			if (Player.Available && Service.Config.InterceptAction2 && DataCenter.State && DataCenter.InCombat && !DataCenter.IsPvP)
+			if (Player.Available && Service.Config.InterceptAction3 && DataCenter.State && DataCenter.InCombat && !DataCenter.IsPvP)
 			{
 				try
 				{
@@ -201,17 +201,17 @@ namespace RotationSolver.Updaters
 				return false;
 			}
 
-			if (!Service.Config.InterceptSpell2 && type == ActionCate.Spell)
+			if (!Service.Config.InterceptSpell3 && type == ActionCate.Spell)
 			{
 				return false;
 			}
 
-			if (!Service.Config.InterceptWeaponskill2 && type == ActionCate.Weaponskill)
+			if (!Service.Config.InterceptWeaponskill3 && type == ActionCate.Weaponskill)
 			{
 				return false;
 			}
 
-			if (!Service.Config.InterceptAbility2 && type == ActionCate.Ability)
+			if (!Service.Config.InterceptAbility3 && type == ActionCate.Ability)
 			{
 				return false;
 			}

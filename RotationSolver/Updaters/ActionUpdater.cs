@@ -78,7 +78,7 @@ internal static class ActionUpdater
         NextAction = NextGCDAction = null;
     }
 
-    internal static unsafe void UpdateCombatInfo()
+    internal static void UpdateCombatInfo()
     {
         var now = DateTime.Now;
         SetAction(NextGCDAction?.AdjustedID ?? 0);
@@ -231,7 +231,7 @@ internal static class ActionUpdater
         _lastMP = Player.Object.CurrentMp;
     }
 
-    internal static unsafe bool CanDoAction()
+    internal static bool CanDoAction()
     {
         // In Target-Only mode we never perform actions.
         if (DataCenter.IsTargetOnly)
@@ -261,8 +261,13 @@ internal static class ActionUpdater
             return false;
         }
 
-        // GCD
-        return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);
+		if (DataCenter.AnimationLock > 0f)
+		{
+			return false;
+		}
+
+		// GCD
+		return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);
     }
 
     internal static bool PlayerHasLockActions()

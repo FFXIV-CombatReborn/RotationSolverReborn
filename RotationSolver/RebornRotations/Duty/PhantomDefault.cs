@@ -21,7 +21,10 @@ public sealed class PhantomDefault : PhantomRotation
     [RotationConfig(CombatType.PvE, Name = "Use Pray as a Heal", PhantomJob = PhantomJob.Knight)]
     public bool PrayHeal { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Phantom Judgement", PhantomJob = PhantomJob.Oracle)]
+	[RotationConfig(CombatType.PvE, Name = "Use Pledge on self", PhantomJob = PhantomJob.Knight)]
+	public bool PledgeSelf { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Phantom Judgement", PhantomJob = PhantomJob.Oracle)]
     public bool PhantomJudgementUseage { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Use Cleansing", PhantomJob = PhantomJob.Oracle)]
@@ -316,6 +319,24 @@ public sealed class PhantomDefault : PhantomRotation
 		if (InCombat && StatusHelper.PlayerHasStatus(true, StatusHelper.TankStanceStatus) && DefendPvE.CanUse(out act))
 		{
 			return true;
+		}
+
+		if (KnightLevel >= 6)
+		{
+			if (!PledgeSelf)
+			{
+				if (PledgePvE.CanUse(out act, targetOverride: TargetType.BeAttacked))
+				{
+					return true;
+				}
+			}
+			if (PledgeSelf)
+			{
+				if (PledgePvE.CanUse(out act))
+				{
+					return true;
+				}
+			}
 		}
 
 		if (PhantomGuardPvE.CanUse(out act))
