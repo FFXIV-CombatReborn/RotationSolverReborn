@@ -415,7 +415,7 @@ public partial class RotationConfigWindow : Window
             _ = diagInfo.AppendLine($"Dalamud Staging: {DataCenter.DalamudStagingEnabled}");
             _ = diagInfo.AppendLine($"Game Language: {_cachedDiagInfo.Language}");
             _ = diagInfo.AppendLine($"Update Frequency: {Service.Config.MinUpdatingTime}");
-            _ = diagInfo.AppendLine($"Intercept: {Service.Config.InterceptAction2}");
+            _ = diagInfo.AppendLine($"Intercept: {Service.Config.InterceptAction3}");
             _ = diagInfo.AppendLine($"Player Level: {DataCenter.PlayerSyncedLevel()}");
 			_ = diagInfo.AppendLine($"Rotation Name: {_curRotationAttribute?.Name ?? string.Empty}");
 			_ = diagInfo.AppendLine($"Player Job: {Player.Job}");

@@ -115,7 +115,8 @@ public partial class DutyRotation
     static partial void ModifyPledgePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => KnightLevel >= 6;
-    }
+        setting.TargetType = TargetType.Self;
+	}
     #endregion
 
     #region Monk

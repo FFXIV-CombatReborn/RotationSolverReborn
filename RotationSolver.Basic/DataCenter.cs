@@ -688,34 +688,37 @@ internal static class DataCenter
 
 	#region GCD
 	/// <summary>
-	/// Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
+	/// Returns the current animation lock remaining time (seconds).
 	/// </summary>
 	public static float AnimationLock => Player.AnimationLock;
 
 	/// <summary>
-	/// Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
+	/// Time until the next ability relative to the next GCD window.
+	/// Non-negative (clamped to 0).
 	/// </summary>
-	public static float NextAbilityToNextGCD => DefaultGCDRemain - AnimationLock;
+	public static float NextAbilityToNextGCD => Math.Max(0f, DefaultGCDRemain - AnimationLock);
 
 	/// <summary>
-	/// Returns the total duration of the default GCD.
+	/// Returns the total duration of the default GCD (seconds). Clamped to non-negative.
 	/// </summary>
-	public static float DefaultGCDTotal => ActionManagerHelper.GetDefaultRecastTime();
+	public static float DefaultGCDTotal => Math.Max(0f, ActionManagerHelper.GetDefaultRecastTime());
 
 	/// <summary>
 	/// Returns the remaining time for the default GCD by subtracting the elapsed time from the total recast time.
+	/// Clamped to non-negative.
 	/// </summary>
-	public static float DefaultGCDRemain => DefaultGCDTotal - DefaultGCDElapsed;
+	public static float DefaultGCDRemain => Math.Max(0f, DefaultGCDTotal - DefaultGCDElapsed);
 
 	/// <summary>
-	/// Returns the elapsed time since the start of the default GCD.
+	/// Returns the elapsed time since the start of the default GCD. Clamped to non-negative.
 	/// </summary>
-	public static float DefaultGCDElapsed => ActionManagerHelper.GetDefaultRecastTimeElapsed();
+	public static float DefaultGCDElapsed => Math.Max(0f, ActionManagerHelper.GetDefaultRecastTimeElapsed());
 
 	/// <summary>
-	/// Calculates the action ahead time based on the default GCD total and minimum animation lock.
+	/// Calculates the action ahead time based on the default GCD total and configured multiplier.
+	/// Result is clamped to non-negative.
 	/// </summary>
-	public static float CalculatedActionAhead => DefaultGCDTotal * Service.Config.Action6Head;
+	public static float CalculatedActionAhead => Math.Max(0f, DefaultGCDTotal * Service.Config.Action6Head);
 
 	/// <summary>
 	/// Calculates the total GCD time for a given number of GCDs and an optional offset.

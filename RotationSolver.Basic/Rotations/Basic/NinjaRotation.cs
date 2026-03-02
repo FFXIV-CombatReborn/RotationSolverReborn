@@ -203,10 +203,11 @@ public partial class NinjaRotation
         setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.TenPvE, ActionID.TenPvE_18805);
         setting.UnlockedByQuestID = 65748;
         setting.IsFriendly = true;
+        setting.IsMudra = true;
         setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
-            IsIntercepted = false
+            IsIntercepted = false,
         };
     }
 
@@ -215,7 +216,8 @@ public partial class NinjaRotation
         setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.TenPvE, ActionID.TenPvE_18805);
         setting.UnlockedByQuestID = 65748;
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.IsMudra = true;
+		setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
             IsIntercepted = false
@@ -227,7 +229,8 @@ public partial class NinjaRotation
         setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.ChiPvE, ActionID.ChiPvE_18806);
         setting.UnlockedByQuestID = 65750;
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.IsMudra = true;
+		setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
             IsIntercepted = false
@@ -239,7 +242,8 @@ public partial class NinjaRotation
         setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.ChiPvE, ActionID.ChiPvE_18806);
         setting.UnlockedByQuestID = 65750;
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.IsMudra = true;
+		setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
             IsIntercepted = false
@@ -251,7 +255,8 @@ public partial class NinjaRotation
         setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.JinPvE, ActionID.JinPvE_18807);
         setting.UnlockedByQuestID = 65768;
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.IsMudra = true;
+		setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
             IsIntercepted = false
@@ -263,7 +268,8 @@ public partial class NinjaRotation
         setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.JinPvE, ActionID.JinPvE_18807);
         setting.UnlockedByQuestID = 65768;
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.IsMudra = true;
+		setting.CreateConfig = () => new ActionConfig()
         {
             ShouldCheckStatus = false,
             IsIntercepted = false

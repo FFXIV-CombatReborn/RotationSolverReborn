@@ -29,7 +29,7 @@ namespace RotationSolver.Commands
 			if (DataCenter.State && DataCenter.IsManual) { DoStateCommandType(StateCommandType.Off); return; }
 		}
 
-		internal static unsafe bool CanDoAnAction(bool isGCD)
+		internal static bool CanDoAnAction(bool isGCD)
 		{
 			bool currentState = DataCenter.State;
 
@@ -51,6 +51,11 @@ namespace RotationSolver.Commands
 
 			_lastClickTime = DateTime.Now;
 
+			if (!isGCD && DataCenter.DefaultGCDRemain <= 0.5f && DataCenter.DefaultGCDRemain > 0f)
+			{
+				return false;
+			}
+
 			return isGCD || ActionUpdater.NextAction is not IBaseAction nextAction || !nextAction.Info.IsRealGCD;
 		}
 
@@ -62,6 +67,26 @@ namespace RotationSolver.Commands
 			if (Player.Object != null && Player.Object.StatusList == null)
 			{
 				return;
+			}
+
+			IAction? nextAction = ActionUpdater.NextAction;
+			if (nextAction == null)
+			{
+				return;
+			}
+
+			if (DataCenter.AnimationLock > 0f)
+			{
+				return;
+			}
+
+			if (nextAction is BaseAction baseAct)
+			{
+				// If this is an ability and not a Ninjutsu-type action, and GCD remaining is between 0 and 0.5s, skip using it
+				if (baseAct.Info.IsAbility && !baseAct.Setting.IsMudra && DataCenter.DefaultGCDRemain <= 0.5f && DataCenter.DefaultGCDRemain > 0f)
+				{
+					return;
+				}
 			}
 
 			HashSet<uint> noCastingStatus = OtherConfiguration.NoCastingStatus;
@@ -113,20 +138,14 @@ namespace RotationSolver.Commands
 				return;
 			}
 
-			IAction? nextAction = ActionUpdater.NextAction;
-			if (nextAction == null)
-			{
-				return;
-			}
-
 #if DEBUG
 			// if (nextAction is BaseAction debugAct)
 			//     PluginLog.Debug($"Will Do {debugAct}");
 #endif
 
-			if (nextAction is BaseAction baseAct)
+			if (nextAction is BaseAction baseAct2)
 			{
-				if (baseAct.Target.Target != null && baseAct.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
+				if (baseAct2.Target.Target != null && baseAct2.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
 				{
 					DataCenter.HostileTarget = target;
 					if (!DataCenter.IsManual &&
@@ -141,17 +160,8 @@ namespace RotationSolver.Commands
 
 			CurrentAction = nextAction as IBaseAction;
 
-			if (Service.Config.KeyBoardNoise)
-			{
-				MiscUpdater.PulseActionBar(nextAction.AdjustedID);
-			}
-
 			if (nextAction.Use())
 			{
-				if (Service.Config.EnableClickingCount)
-				{
-					OtherConfiguration.RotationSolverRecord.ClickingCount++;
-				}
 
 				_lastActionID = nextAction.AdjustedID;
 				_lastUsedTime = DateTime.Now;
@@ -176,6 +186,10 @@ namespace RotationSolver.Commands
 					if (Service.Config.KeyBoardNoise)
 					{
 						PulseSimulation(nextAction.AdjustedID);
+						if (Service.Config.EnableClickingCount)
+						{
+							OtherConfiguration.RotationSolverRecord.ClickingCount++;
+						}
 					}
 
 					if (finalAct.Setting.EndSpecial)

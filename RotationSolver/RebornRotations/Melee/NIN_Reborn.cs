@@ -332,7 +332,7 @@ public sealed class NIN_Reborn : NinjaRotation
         // Checks for Kassatsu status to prioritize high-impact Ninjutsu due to its buff.
         if (HasKassatsu)
         {
-            if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && GokaMekkyakuPvE.EnoughLevel && !IsLastAction(false, GokaMekkyakuPvE) && GokaMekkyakuPvE.IsEnabled && ChiPvE.Info.IsQuestUnlocked())
+            if (GokaMekkyakuPvE.Target.Target != null && GokaMekkyakuPvE.Target.AffectedTargets.Length > 1 && GokaMekkyakuPvE.EnoughLevel && !IsLastAction(false, GokaMekkyakuPvE) && GokaMekkyakuPvE.IsEnabled && ChiPvE.Info.IsQuestUnlocked())
             {
                 SetNinjutsu(GokaMekkyakuPvE);
             }
@@ -1009,13 +1009,13 @@ public sealed class NIN_Reborn : NinjaRotation
             return true;
         }
 
-        if (DeathBlossomPvE.CanUse(out act))
-        {
-            return true;
-        }
+		if (DeathBlossomPvE.CanUse(out act))
+		{
+			return true;
+		}
 
-        //Single
-        if (AeolianEdgePvE.EnoughLevel)
+		//Single
+		if (AeolianEdgePvE.EnoughLevel)
         {
             // If ArmorCrushPvE is not yet available, checks if AeolianEdgePvE can be used.
             if (!ArmorCrushPvE.EnoughLevel)

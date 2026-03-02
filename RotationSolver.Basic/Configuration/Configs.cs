@@ -225,26 +225,26 @@ internal partial class Configs : IPluginConfiguration
 
 	[ConditionBool, UI("Intercept player input and queue it for RSR to execute the action. (PvE only)",
     Filter = AutoActionUsage, Section = 5)]
-    private static readonly bool _interceptAction2 = false;
+    private static readonly bool _interceptAction3 = true;
 
     [ConditionBool, UI("Allow intercepting Spells.",
-    Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction2))]
-    private static readonly bool _interceptSpell2 = false;
+    Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction3))]
+    private static readonly bool _interceptSpell3 = true;
 
     [ConditionBool, UI("Allow intercepting Weaponskills.",
-    Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction2))]
-    private static readonly bool _interceptWeaponskill2 = false;
+    Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction3))]
+    private static readonly bool _interceptWeaponskill3 = true;
 
     [ConditionBool, UI("Allow intercepting Abilities.",
-    Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction2))]
-    private static readonly bool _interceptAbility2 = false;
+    Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction3))]
+    private static readonly bool _interceptAbility3 = true;
 
     [ConditionBool, UI("Allow intercepting actions in macros.",
-    Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction2))]
+    Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction3))]
     private static readonly bool _interceptMacro = false;
 
     [ConditionBool, UI("Allow intercepting actions that are currently on cooldown.",
-    Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction2))]
+    Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction3))]
     private static readonly bool _interceptCooldown = false;
 
     [UI("Intercepted action execution window (amount of time RSR is allowed to attempt to use an action after it has been intercepted)",
