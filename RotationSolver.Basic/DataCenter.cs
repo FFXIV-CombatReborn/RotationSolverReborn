@@ -541,6 +541,11 @@ internal static class DataCenter
 	/// <summary>
 	/// 
 	/// </summary>
+	public static bool TheMerchantsTale => IsInTerritory(1315);
+
+	/// <summary>
+	/// 
+	/// </summary>
 	public static bool SildihnSubterrane => IsInTerritory(1069);
 
 	/// <summary>
@@ -556,7 +561,7 @@ internal static class DataCenter
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool InVariantDungeon => AloaloIsland || MountRokkon || SildihnSubterrane;
+	public static bool InVariantDungeon => TheMerchantsTale || AloaloIsland || MountRokkon || SildihnSubterrane;
 	#endregion
 
 	#region Misc Duty Info

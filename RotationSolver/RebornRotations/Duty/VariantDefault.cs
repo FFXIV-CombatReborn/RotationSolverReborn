@@ -18,7 +18,15 @@ internal class VariantDefault : VariantRotation
 
     public override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        if (VariantSpiritDartPvE_33863.Info.IsOnSlot)
+		if (VariantSpiritDartPvE_46940.Info.IsOnSlot)
+		{
+			if (VariantSpiritDartPvE_46940.CanUse(out act, skipAoeCheck: true))
+			{
+				return true;
+			}
+		}
+
+		if (VariantSpiritDartPvE_33863.Info.IsOnSlot)
         {
             if (VariantSpiritDartPvE_33863.CanUse(out act, skipAoeCheck: true))
             {
@@ -34,12 +42,28 @@ internal class VariantDefault : VariantRotation
             }
         }
 
-        return base.AttackAbility(nextGCD, out act);
+		if (VariantEagleEyeShotPvE.Info.IsOnSlot)
+		{
+			if (VariantEagleEyeShotPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		return base.AttackAbility(nextGCD, out act);
     }
 
     public override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (VariantRampartPvE_33864.Info.IsOnSlot)
+		if (VariantRampartPvE_46941.Info.IsOnSlot)
+		{
+			if (VariantRampartPvE_46941.CanUse(out act, skipStatusProvideCheck: true))
+			{
+				return true;
+			}
+		}
+
+		if (VariantRampartPvE_33864.Info.IsOnSlot)
         {
             if (VariantRampartPvE_33864.CanUse(out act, skipStatusProvideCheck: true))
             {
@@ -60,13 +84,13 @@ internal class VariantDefault : VariantRotation
 
     public override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        if (VariantEagleEyeShotPvE.Info.IsOnSlot)
-        {
-            if (VariantEagleEyeShotPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
+		if (VariantRampartPvE_46941.Info.IsOnSlot)
+		{
+			if (VariantRampartPvE_46941.CanUse(out act))
+			{
+				return true;
+			}
+		}
 
 		if (VariantRampartPvE_33864.Info.IsOnSlot)
 		{
@@ -94,7 +118,15 @@ internal class VariantDefault : VariantRotation
 
     public override bool HealSingleGCD(out IAction? act)
     {
-        if (VariantCurePvE_33862.Info.IsOnSlot)
+		if (VariantCurePvE_46939.Info.IsOnSlot)
+		{
+			if (VariantCurePvE_46939.CanUse(out act, skipStatusProvideCheck: true))
+			{
+				return true;
+			}
+		}
+
+		if (VariantCurePvE_33862.Info.IsOnSlot)
         {
             if (VariantCurePvE_33862.CanUse(out act, skipStatusProvideCheck: true))
             {
