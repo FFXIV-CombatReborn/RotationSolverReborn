@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a rotation for variant duties in the game.
 /// </summary>
-[DutyTerritory(1069, 1137, 1176)] // 1069: Sildihn Subterrane, 1137: Mount Rokkon, 1176: Aloalo Island
+[DutyTerritory(1069, 1137, 1176, 1315)] // 1069: Sildihn Subterrane, 1137: Mount Rokkon, 1176: Aloalo Island, 1315: The Merchant's Tale
 public abstract class VariantRotation : DutyRotation
 {
 }
@@ -30,11 +30,21 @@ public partial class DutyRotation
         setting.TargetType = TargetType.Death;
     }
 
-    /// <summary>
-    /// Modifies the settings for Variant Cure PvE with ID 33862.
-    /// </summary>
-    /// <param name="setting">The action setting to modify.</param>
-    static partial void ModifyVariantCurePvE_33862(ref ActionSetting setting)
+	/// <summary>
+	/// Modifies the settings for Variant Cure PvE with ID 33862.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyVariantCurePvE_46939(ref ActionSetting setting)
+	{
+		setting.StatusNeed = [StatusID.VariantCureSet];
+		setting.StatusProvide = [StatusID.Rehabilitation_3367];
+	}
+
+	/// <summary>
+	/// Modifies the settings for Variant Cure PvE with ID 33862.
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyVariantCurePvE_33862(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.VariantCureSet];
         setting.StatusProvide = [StatusID.Rehabilitation_3367];
@@ -65,11 +75,22 @@ public partial class DutyRotation
         };
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="setting">The action setting to modify.</param>
-    static partial void ModifyVariantRampartPvE_33864(ref ActionSetting setting)
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyVariantRampartPvE_46941(ref ActionSetting setting)
+	{
+		setting.StatusNeed = [StatusID.VariantRampartSet];
+		setting.TargetType = TargetType.Self;
+		setting.StatusProvide = [StatusID.VulnerabilityDown_3360];
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyVariantRampartPvE_33864(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.VariantRampartSet];
         setting.TargetType = TargetType.Self;
@@ -87,11 +108,25 @@ public partial class DutyRotation
         setting.StatusProvide = [StatusID.VulnerabilityDown_3360];
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="setting">The action setting to modify.</param>
-    static partial void ModifyVariantSpiritDartPvE_33863(ref ActionSetting setting)
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyVariantSpiritDartPvE_46940(ref ActionSetting setting)
+	{
+		setting.StatusNeed = [StatusID.VariantSpiritDartSet];
+		setting.TargetStatusProvide = [StatusID.SustainedDamage_3359];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="setting">The action setting to modify.</param>
+	static partial void ModifyVariantSpiritDartPvE_33863(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.VariantSpiritDartSet];
         setting.TargetStatusProvide = [StatusID.SustainedDamage_3359];

@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.PVPRotations.Ranged;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.41")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.45")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Ranged/MCH_Default.PvP.cs")]
 
 public sealed class MCH_DefaultPvP : MachinistRotation

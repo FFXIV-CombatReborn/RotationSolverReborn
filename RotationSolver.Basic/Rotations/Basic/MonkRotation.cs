@@ -617,14 +617,6 @@ public partial class MonkRotation
         };
     }
 
-    static partial void ModifyFlintsReplyPvP(ref ActionSetting setting)
-    {
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
-    }
-
     static partial void ModifyWindsReplyPvP(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.WindsRumination];
@@ -637,7 +629,7 @@ public partial class MonkRotation
 
     static partial void ModifyRisingPhoenixPvP(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.FiresRumination_4301, StatusID.FireResonance];
+        setting.StatusProvide = [StatusID.FireResonance];
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -653,7 +645,7 @@ public partial class MonkRotation
 
     static partial void ModifyFiresReplyPvP(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.FiresRumination_4301];
+        
     }
 
     static partial void ModifyEarthsReplyPvP(ref ActionSetting setting)

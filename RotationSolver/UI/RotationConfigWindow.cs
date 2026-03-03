@@ -4056,7 +4056,8 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"GeomancerLevel: {DutyRotation.GeomancerLevel}");
         ImGui.Spacing();
         ImGui.Text($"InVariantDungeon: {DataCenter.InVariantDungeon}");
-        ImGui.Text($"AloaloIsland: {DataCenter.AloaloIsland}");
+		ImGui.Text($"The Merchant's Tale: {DataCenter.TheMerchantsTale}");
+		ImGui.Text($"AloaloIsland: {DataCenter.AloaloIsland}");
         ImGui.Text($"MountRokkon: {DataCenter.MountRokkon}");
         ImGui.Text($"SildihnSubterrane: {DataCenter.SildihnSubterrane}");
         ImGui.Spacing();
