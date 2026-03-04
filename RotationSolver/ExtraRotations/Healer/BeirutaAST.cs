@@ -1,23 +1,25 @@
+using System;
 using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Healer;
 
 [Rotation("BeirutaAST", CombatType.PvE, GameVersion = "7.41")]
 [SourceCode(Path = "main/ExtraRotations/Healer/BeirutaAST.cs")]
-
 public sealed class AST_Reborn : AstrologianRotation
 {
     #region Config Options
-[RotationConfig(CombatType.PvE, Name = "Opener/Burst open window (GCDs)")]
-[Range(0, 2, ConfigUnitType.None, 1)]
-public OpenWindowGcd OpenWindow { get; set; } = OpenWindowGcd.TwoGcd; // default = 2 GCD
 
-public enum OpenWindowGcd : byte
-{
-    [Description("0 GCD (0.0s)")] ZeroGcd,
-    [Description("1 GCD (2.5s)")] OneGcd,
-    [Description("2 GCD (5.0s)")] TwoGcd,
-}
+    [RotationConfig(CombatType.PvE, Name = "Opener/Burst open window (GCDs)")]
+    [Range(0, 2, ConfigUnitType.None, 1)]
+    public OpenWindowGcd OpenWindow { get; set; } = OpenWindowGcd.TwoGcd; // default = 2 GCD
+
+    public enum OpenWindowGcd : byte
+    {
+        [Description("0 GCD (0.0s)")] ZeroGcd,
+        [Description("1 GCD (2.5s)")] OneGcd,
+        [Description("2 GCD (5.0s)")] TwoGcd,
+    }
+
     [RotationConfig(CombatType.PvE, Name = "Limit Macrocosmos to multihit party stacks")]
     public bool MultiHitRestrict { get; set; } = false;
 
@@ -49,6 +51,11 @@ public enum OpenWindowGcd : byte
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to use Horoscope")]
     public float HoroscopeHeal { get; set; } = 0.3f;
 
+    // Microcosmos threshold (default 0.3f like Horoscope)
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to use Microcosmos")]
+    public float MicrocosmosHeal { get; set; } = 0.3f;
+
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Lady Of Crowns")]
     public float LadyOfHeals { get; set; } = 0.8f;
@@ -79,18 +86,104 @@ public enum OpenWindowGcd : byte
         [Description("Any charges")]
         AnyCharges,
     }
+
+    // Default TRUE: only use Lord/Bal/Spear under Divination
+    [RotationConfig(CombatType.PvE, Name = "Only use Lord of Crowns, The Balance and The Spear Under Divination")]
+    public bool CardsUnderDivinationOnly { get; set; } = true;
+
     #endregion
 
     // Opener window seconds based on GCD selection
-private float OpenWindowSeconds => OpenWindow switch
-{
-    OpenWindowGcd.ZeroGcd => 0f,
-    OpenWindowGcd.OneGcd  => 2.2f,
-    _                     => 5.1f, // TwoGcd
-};
+    private float OpenWindowSeconds => OpenWindow switch
+    {
+        OpenWindowGcd.ZeroGcd => 0f,
+        OpenWindowGcd.OneGcd => 2.2f,
+        _ => 5.1f, // TwoGcd
+    };
 
-// Opener/burst open window active?
-private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
+    // Opener/burst open window active?
+    private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
+
+    #region Divination / Oracle helpers (timestamp gating)
+
+    // Track when we actually used Divination so we can gate Oracle / early-window logic reliably.
+    private long _divinationUsedAtMs = 0;
+    private const long DivinationFirst5sMs = 5000;
+
+    private bool InFirst5sAfterDivination
+    {
+        get
+        {
+            if (_divinationUsedAtMs == 0) return false;
+            long now = Environment.TickCount64;
+            return (now - _divinationUsedAtMs) < DivinationFirst5sMs;
+        }
+    }
+
+    // Gate Oracle for 5s after using Divination.
+    private bool OracleGatedByDivination => InFirst5sAfterDivination;
+
+    #endregion
+
+    #region Cooldown timing helpers (PCT-style "time until ready")
+
+    // Time until Divination has 1 charge (0 if already active/usable)
+ private float DivIn =>
+    DivinationPvE.Cooldown.CurrentCharges >= 1
+        ? 0f
+        : DivinationPvE.Cooldown.RecastTimeRemainOneCharge;
+
+    // Time until Lightspeed gains the next charge:
+    // - If capped (2/2): 0
+    // - If 1/2: time until 2/2
+    // - If 0/2: time until 1/2
+    private float LightspeedNextChargeIn =>
+        LightspeedPvE.Cooldown.CurrentCharges >= LightspeedPvE.Cooldown.MaxCharges
+            ? 0f
+            : LightspeedPvE.Cooldown.RecastTimeRemainOneCharge;
+
+    // "Burst prep" replaces divReadySoon2, using the real time-to-ready instead of a yes/no.
+    // (4s window)
+    private bool BurstPrep
+    {
+        get
+        {
+            if (!DivinationPvE.EnoughLevel) return false;
+            return DivIn <= 4f;
+        }
+    }
+
+    // Hold last Lightspeed charge for Divination unless it will naturally regain a charge
+    // at least 4s BEFORE Divination comes up.
+    private bool HoldLastLightspeedForDivination
+    {
+        get
+        {
+            if (!DivinationPvE.EnoughLevel) return false;
+
+            // only matters when Divination is within a relevant horizon
+            bool divSoon60 = DivIn <= 60f;
+            if (!divSoon60) return false;
+
+            // don’t bother holding if we’re in the "prep" window already
+            if (BurstPrep) return false;
+
+            // only consider holding if we're on the last charge
+            if (LightspeedPvE.Cooldown.CurrentCharges != 1) return false;
+
+            // don't hold if Lightspeed buff is already up (we already spent it)
+            if (HasLightspeed) return false;
+
+            // Allow spending last LS if LS will regain by (DivIn - 4s)
+            float lsMustBeBackBy = MathF.Max(0f, DivIn - 4f);
+            bool spendingLastLsIsSafe = LightspeedNextChargeIn <= lsMustBeBackBy;
+
+            return !spendingLastLsIsSafe;
+        }
+    }
+
+    #endregion
+
     #region Tracking Properties
     public override void DisplayRotationStatus()
     {
@@ -127,6 +220,8 @@ private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
+        act = null;
+
         if (MicroPrio && HasMacrocosmos)
         {
             return base.EmergencyAbility(nextGCD, out act);
@@ -163,10 +258,28 @@ private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
             }
         }
 
+        // Burst-prep Lightspeed (same as your intent, but BurstPrep is now DivIn<=4)
+        if (BurstPrep
+            && LightspeedPvE.Cooldown.CurrentCharges >= 1
+            && !HasLightspeed
+            && InCombat
+            && IsBurst
+            && LightspeedPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
+
+        // Divination here does NOT need !HasLightspeed
+        if (!IsOpen && IsBurst && InCombat && DivinationPvE.CanUse(out act))
+        {
+            _divinationUsedAtMs = Environment.TickCount64; // stamp for gating + early window
+            return true;
+        }
+
         if (!IsOpen && DivinationPvE.CanUse(out _) && UseBurstMedicine(out act))
-{
-    return true;
-}
+        {
+            return true;
+        }
 
         if (StellarNow && HasGiantDominance && StellarDetonationPvE.CanUse(out act))
         {
@@ -200,10 +313,10 @@ private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
         }
 
         if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 1
-    && CelestialIntersectionPvE.CanUse(out act, usedUp: true))
-{
-    return true;
-}
+            && CelestialIntersectionPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
 
         return base.DefenseSingleAbility(nextGCD, out act);
     }
@@ -233,6 +346,14 @@ private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
     [RotationDesc(ActionID.TheArrowPvE, ActionID.TheEwerPvE, ActionID.EssentialDignityPvE, ActionID.CelestialIntersectionPvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
+        act = null;
+
+        // Gate all healing (Single Ability) when HasMacrocosmos
+        if (HasMacrocosmos)
+        {
+            return false;
+        }
+
         if (MicroPrio && HasMacrocosmos)
         {
             return base.HealSingleAbility(nextGCD, out act);
@@ -248,27 +369,33 @@ private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
             return true;
         }
 
-        if (EssentialDignityPvE.Cooldown.CurrentCharges == 3 && EssentialDignityPvE.CanUse(out act, usedUp: true) && EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityThird)
+        if (EssentialDignityPvE.Cooldown.CurrentCharges == 3 &&
+            EssentialDignityPvE.CanUse(out act, usedUp: true) &&
+            EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityThird)
         {
             return true;
         }
 
-        if (EssentialDignityPvE.Cooldown.CurrentCharges == 2 && EssentialDignityPvE.CanUse(out act, usedUp: true) && EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignitySecond)
+        if (EssentialDignityPvE.Cooldown.CurrentCharges == 2 &&
+            EssentialDignityPvE.CanUse(out act, usedUp: true) &&
+            EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignitySecond)
         {
             return true;
         }
 
-        if (EssentialDignityPvE.Cooldown.CurrentCharges == 1 && EssentialDignityPvE.CanUse(out act, usedUp: true) && EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityLast)
+        if (EssentialDignityPvE.Cooldown.CurrentCharges == 1 &&
+            EssentialDignityPvE.CanUse(out act, usedUp: true) &&
+            EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityLast)
         {
             return true;
         }
 
-if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 2
-    && (CelestialIntersectionPvE.Target.Target?.GetHealthRatio() < 0.9f) == true
-    && CelestialIntersectionPvE.CanUse(out act, usedUp: true))
-{
-    return true;
-}
+        if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 2
+            && (CelestialIntersectionPvE.Target.Target?.GetHealthRatio() < 0.9f) == true
+            && CelestialIntersectionPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
 
         return base.HealSingleAbility(nextGCD, out act);
     }
@@ -276,12 +403,21 @@ if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 2
     [RotationDesc(ActionID.CelestialOppositionPvE, ActionID.StellarDetonationPvE, ActionID.HoroscopePvE, ActionID.HoroscopePvE_16558, ActionID.LadyOfCrownsPvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
+        act = null;
+
+        // Gate all healing (Area Ability) when HasMacrocosmos
+        if (HasMacrocosmos)
+        {
+            return false;
+        }
+
         if (HasGiantDominance && StellarDetonationPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (MicrocosmosPvE.CanUse(out act))
+        // Microcosmos thresholded (default 0.3f)
+        if (PartyMembersAverHP < MicrocosmosHeal && MicrocosmosPvE.CanUse(out act))
         {
             return true;
         }
@@ -321,7 +457,10 @@ if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 2
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        if (StatusHelper.PlayerHasStatus(true, StatusID.Suntouched) && StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.Suntouched))
+        act = null;
+
+        if (StatusHelper.PlayerHasStatus(true, StatusID.Suntouched) &&
+            StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.Suntouched))
         {
             if (SunSignPvE.CanUse(out act, skipAoeCheck: true, skipTTKCheck: true))
             {
@@ -334,27 +473,7 @@ if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 2
             return true;
         }
 
-        if (AstralDrawPvE.Cooldown.WillHaveOneCharge(3) && LadyOfCrownsPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (AstralDrawPvE.Cooldown.WillHaveOneCharge(3) && InCombat && TheEwerPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (AstralDrawPvE.Cooldown.WillHaveOneCharge(3) && InCombat && TheBolePvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (UmbralDrawPvE.Cooldown.WillHaveOneCharge(3) && InCombat && TheArrowPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (UmbralDrawPvE.Cooldown.WillHaveOneCharge(3) && InCombat && TheSpirePvE.CanUse(out act))
+        if (AstralDrawPvE.Cooldown.WillHaveOneCharge(5) && LadyOfCrownsPvE.CanUse(out act))
         {
             return true;
         }
@@ -364,45 +483,84 @@ if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 2
             return true;
         }
 
-        if ((HasDivination || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !DivinationPvE.EnoughLevel) && InCombat && TheBalancePvE.CanUse(out act))
+        bool divLearned = DivinationPvE.EnoughLevel;
+
+        // Cards gating (default: only under Divination if learned)
+        bool burstCardsAllowed =
+            CardsUnderDivinationOnly
+                ? (!divLearned || HasDivination)
+                : (HasDivination || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !divLearned);
+
+        if (burstCardsAllowed && InCombat && TheBalancePvE.CanUse(out act))
         {
             return true;
         }
 
+        // Lord of Crowns usage rules
         if (!IsOpen && InCombat && LordOfCrownsPvE.CanUse(out act))
-{
-    bool divinationLearned = DivinationPvE.EnoughLevel;
+        {
+            if (CardsUnderDivinationOnly)
+            {
+                // Only under Divination when learned; if not learned, spend freely.
+                if (!divLearned || HasDivination)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                bool divinationLearned = divLearned;
 
-    if ((divinationLearned && HasDivination) // simple: only under Divination
-        || (!divinationLearned)              // low level: no Divination exists, so spend Lord
-        || (divinationLearned && !DivinationPvE.Cooldown.WillHaveOneCharge(60)) // Divination not soon
-        || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3)) // avoid holding through imminent Umbral Draw
-    {
-        return true;
-    }
-}
+                if ((divinationLearned && HasDivination)
+                    || (!divinationLearned)
+                    || (divinationLearned && !DivinationPvE.Cooldown.WillHaveOneCharge(60))
+                    || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3))
+                {
+                    return true;
+                }
+            }
+        }
 
-// Gate Umbral Draw if we can spend Balance (or Spear) and Lord first
-bool burstCardsAllowed =
-    (HasDivination || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !DivinationPvE.EnoughLevel);
+        // Gate Umbral Draw if we can spend Balance (or Spear) and Lord first
+        bool hasBurstCardToPlay =
+            InCombat && burstCardsAllowed && (TheBalancePvE.CanUse(out _) || TheSpearPvE.CanUse(out _));
 
-bool hasBurstCardToPlay =
-    InCombat && burstCardsAllowed && (TheBalancePvE.CanUse(out _) || TheSpearPvE.CanUse(out _));
+        bool hasLordToSpend =
+            InCombat && LordOfCrownsPvE.CanUse(out _);
 
-bool hasLordToSpend =
-    InCombat && LordOfCrownsPvE.CanUse(out _);
-
-if (UmbralDrawPvE.CanUse(out act) && !(hasBurstCardToPlay && hasLordToSpend))
-{
-    return true;
-}
-        if ((HasDivination || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !DivinationPvE.EnoughLevel) && InCombat && TheSpearPvE.CanUse(out act))
+        if (UmbralDrawPvE.CanUse(out act) && !(hasBurstCardToPlay && hasLordToSpend))
         {
             return true;
         }
 
-        if (InCombat && OraclePvE.CanUse(out act))
-       {
+        if (burstCardsAllowed && InCombat && TheSpearPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        // Gate Oracle for 5s after Divination (timestamp-based)
+        if (InCombat && !OracleGatedByDivination && OraclePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (AstralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheEwerPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (AstralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheBolePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (UmbralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheArrowPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (UmbralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheSpirePvE.CanUse(out act))
+        {
             return true;
         }
 
@@ -410,127 +568,104 @@ if (UmbralDrawPvE.CanUse(out act) && !(hasBurstCardToPlay && hasLordToSpend))
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
-{
-    act = null;
-
-    bool divLearned = DivinationPvE.EnoughLevel;
-
-    bool divReadySoon60 = divLearned && DivinationPvE.Cooldown.WillHaveOneCharge(60f);
-    bool divReadySoon2  = divLearned && DivinationPvE.Cooldown.WillHaveOneCharge(2f);
-
-    // Hold last Lightspeed charge if Divination is within 60s but not imminent
-    bool holdLastLightspeedForDiv =
-        divReadySoon60 &&
-        !divReadySoon2 &&
-        LightspeedPvE.Cooldown.CurrentCharges == 1 &&
-        !HasLightspeed;
-
-// Only these GCDs are allowed while moving without needing Lightspeed
-bool nextIsMovementSafeGcd =
-    nextGCD.IsTheSameTo(false,
-        MacrocosmosPvE,
-        AspectedBeneficPvE,
-        CombustIiiPvE, CombustIiPvE, CombustPvE);
-// True if Combust is missing or will fall off within 18s
-bool combustSoon18 =
-    CurrentTarget != null &&
-    (
-        (CombustIiiPvE.EnoughLevel &&
-            (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
-             || (CurrentTarget?.WillStatusEnd(18, true, StatusID.CombustIii) ?? false)))
-        ||
-        (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
-            (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
-             || (CurrentTarget?.WillStatusEnd(18, true, StatusID.CombustIi) ?? false)))
-        ||
-        (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
-            (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
-             || (CurrentTarget?.WillStatusEnd(18, true, StatusID.Combust) ?? false)))
-    );
-// If moving, and next GCD is NOT one of the safe ones,
-// and we are not already under Swift or Lightspeed,
-// then we need Lightspeed.
-bool needsMovementRescue =
-    InCombat
-    && IsMoving
-    && !nextIsMovementSafeGcd
-    && !HasSwift
-    && !HasLightspeed
-    && !combustSoon18;
-
-
-    // First ~5 seconds of Divination (Divination lasts 15s)
-    bool divJustStarted =
-        HasDivination &&
-        StatusHelper.PlayerStatusTime(true, StatusID.Divination) >= 8f;
-
-    // Use Lightspeed once during opener window
-    bool openerLightspeed =
-        IsOpen &&
-        InCombat &&
-        !HasLightspeed &&
-        !holdLastLightspeedForDiv &&
-        LightspeedPvE.Cooldown.CurrentCharges >= 1;
-
-    // Spend last Lightspeed ~2s before Divination (burst prep)
-    if (divReadySoon2
-        && LightspeedPvE.Cooldown.CurrentCharges >= 1
-        && !HasLightspeed
-        && InCombat
-        && IsBurst
-        && LightspeedPvE.CanUse(out act, usedUp: true))
     {
-        return true;
-    }
+        act = null;
 
-    if (!IsOpen && IsBurst && InCombat && DivinationPvE.CanUse(out act))
-    {
-        return true;
-    }
+        // Only these GCDs are allowed while moving without needing Lightspeed
+        bool nextIsMovementSafeGcd =
+            nextGCD.IsTheSameTo(false,
+                MacrocosmosPvE,
+                AspectedBeneficPvE,
+                CombustIiiPvE, CombustIiPvE, CombustPvE);
 
-    // Opener Lightspeed
-    if (openerLightspeed && LightspeedPvE.CanUse(out act, usedUp: true))
-    {
-        return true;
-    }
+        // True if Combust is missing or will fall off within 18s
+        bool combustSoon18 =
+            CurrentTarget != null &&
+            (
+                (CombustIiiPvE.EnoughLevel &&
+                    (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
+                     || (CurrentTarget?.WillStatusEnd(18, true, StatusID.CombustIii) ?? false)))
+                ||
+                (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
+                    (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
+                     || (CurrentTarget?.WillStatusEnd(18, true, StatusID.CombustIi) ?? false)))
+                ||
+                (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
+                    (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
+                     || (CurrentTarget?.WillStatusEnd(18, true, StatusID.Combust) ?? false)))
+            );
 
-    if (AstralDrawPvE.CanUse(out act, usedUp: IsBurst))
-    {
-        return true;
-    }
+        bool needsMovementRescue =
+            InCombat
+            && IsMoving
+            && !nextIsMovementSafeGcd
+            && !HasSwift
+            && !HasLightspeed
+            && !combustSoon18;
 
-    // Divination early window Lightspeed
-    if (!HasLightspeed
-        && InCombat
-        && divJustStarted
-        && !holdLastLightspeedForDiv
-        && LightspeedPvE.CanUse(out act, usedUp: true))
-    {
-        return true;
-    }
+        // First 5 seconds after Divination (timestamp-based, reliable)
+        bool divJustStarted = InFirst5sAfterDivination;
+
+        // Use Lightspeed once during opener window
+        bool openerLightspeed =
+            IsOpen &&
+            InCombat &&
+            !HasLightspeed &&
+            !HoldLastLightspeedForDivination &&
+            LightspeedPvE.Cooldown.CurrentCharges >= 1;
 
 
-    if (InCombat)
-    {   
-bool canWeaveNow = NextAbilityToNextGCD < 0.6f;
-        // Movement rescue
-        if (needsMovementRescue
-    && canWeaveNow
-    && !holdLastLightspeedForDiv
-    && LightspeedPvE.CanUse(out act, usedUp: true))
-{
-    return true;
-}
+        // Divination does NOT need !HasLightspeed
+        if (!IsOpen && IsBurst && InCombat && DivinationPvE.CanUse(out act))
+        {
+            _divinationUsedAtMs = Environment.TickCount64; // stamp for gating + early window
+            return true;
+        }
 
-        // Earthly Star
-        if (!HasGiantDominance && !HasEarthlyDominance && EarthlyStarPvE.CanUse(out act))
+        // Opener Lightspeed
+        if (openerLightspeed && LightspeedPvE.CanUse(out act, usedUp: true))
         {
             return true;
         }
-    }
 
-    return base.AttackAbility(nextGCD, out act);
-}
+        if (AstralDrawPvE.CanUse(out act, usedUp: IsBurst))
+        {
+            return true;
+        }
+
+        // Divination early window Lightspeed (first 5s after Divination)
+        if (!HasLightspeed
+            && InCombat
+            && HasDivination
+            && divJustStarted
+            && !HoldLastLightspeedForDivination
+            && LightspeedPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
+
+        if (InCombat)
+        {
+            bool canWeaveNow = NextAbilityToNextGCD < 0.6f;
+
+            // Movement rescue
+            if (needsMovementRescue
+                && canWeaveNow
+                && !HoldLastLightspeedForDivination
+                && LightspeedPvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
+
+            // Earthly Star
+            if (!HasGiantDominance && !HasEarthlyDominance && EarthlyStarPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        return base.AttackAbility(nextGCD, out act);
+    }
     #endregion
 
     #region GCD Logic
@@ -542,7 +677,8 @@ bool canWeaveNow = NextAbilityToNextGCD < 0.6f;
             return base.DefenseAreaGCD(out act);
         }
 
-        if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) && AspectedBeneficPvE.CanUse(out act, skipStatusProvideCheck: true))
+        if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) &&
+            AspectedBeneficPvE.CanUse(out act, skipStatusProvideCheck: true))
         {
             return true;
         }
@@ -559,7 +695,8 @@ bool canWeaveNow = NextAbilityToNextGCD < 0.6f;
             return base.DefenseAreaGCD(out act);
         }
 
-        if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) && HeliosConjunctionPvE.CanUse(out act, skipStatusProvideCheck: true))
+        if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) &&
+            HeliosConjunctionPvE.CanUse(out act, skipStatusProvideCheck: true))
         {
             return true;
         }
@@ -578,6 +715,14 @@ bool canWeaveNow = NextAbilityToNextGCD < 0.6f;
     [RotationDesc(ActionID.AspectedBeneficPvE, ActionID.BeneficIiPvE, ActionID.BeneficPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
+        act = null;
+
+        // Gate all healing (Single GCD) when HasMacrocosmos
+        if (HasMacrocosmos)
+        {
+            return false;
+        }
+
         if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
             return base.HealSingleGCD(out act);
@@ -600,17 +745,17 @@ bool canWeaveNow = NextAbilityToNextGCD < 0.6f;
         }
 
         bool movingHealWindow =
-    InCombat &&
-    IsMoving &&
-    NextAbilityToNextGCD < 0.6f &&
-    (AspectedBeneficPvE.Target.Target?.GetHealthRatio() < 0.9f) == true;
+            InCombat &&
+            IsMoving &&
+            NextAbilityToNextGCD < 0.6f &&
+            (AspectedBeneficPvE.Target.Target?.GetHealthRatio() < 0.9f) == true;
 
-if (AspectedBeneficPvE.CanUse(out act)
-    && (AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal
-        || movingHealWindow))
-{
-    return true;
-}
+        if (AspectedBeneficPvE.CanUse(out act)
+            && (AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal
+                || movingHealWindow))
+        {
+            return true;
+        }
 
         if (BeneficIiPvE.CanUse(out act))
         {
@@ -628,6 +773,14 @@ if (AspectedBeneficPvE.CanUse(out act)
     [RotationDesc(ActionID.AspectedHeliosPvE, ActionID.HeliosPvE, ActionID.HeliosConjunctionPvE)]
     protected override bool HealAreaGCD(out IAction? act)
     {
+        act = null;
+
+        // Gate all healing (Area GCD) when HasMacrocosmos
+        if (HasMacrocosmos)
+        {
+            return false;
+        }
+
         if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
             return base.HealAreaGCD(out act);
@@ -656,18 +809,18 @@ if (AspectedBeneficPvE.CanUse(out act)
         return base.HealAreaGCD(out act);
     }
 
-	[RotationDesc(ActionID.AscendPvE)]
-	protected override bool RaiseGCD(out IAction? act)
-	{
-		if (AscendPvE.CanUse(out act))
-		{
-			return true;
-		}
+    [RotationDesc(ActionID.AscendPvE)]
+    protected override bool RaiseGCD(out IAction? act)
+    {
+        if (AscendPvE.CanUse(out act))
+        {
+            return true;
+        }
 
-		return base.RaiseGCD(out act);
-	}
+        return base.RaiseGCD(out act);
+    }
 
-	protected override bool GeneralGCD(out IAction? act)
+    protected override bool GeneralGCD(out IAction? act)
     {
         if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
@@ -682,56 +835,59 @@ if (AspectedBeneficPvE.CanUse(out act)
         {
             return true;
         }
-// Moving Combust refresh (<15s) with timing gate (0.6f)
-{
-    bool canCommitGcdNow = NextAbilityToNextGCD < 0.6f;
 
-    if (InCombat && IsMoving && canCommitGcdNow && CurrentTarget != null)
-    {
-        bool combustLow15 =
-            (CombustIiiPvE.EnoughLevel &&
-                (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
-                 || (CurrentTarget?.WillStatusEnd(15, true, StatusID.CombustIii) ?? false)))
-            ||
-            (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
-                (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
-                 || (CurrentTarget?.WillStatusEnd(15, true, StatusID.CombustIi) ?? false)))
-            ||
-            (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
-                (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
-                 || (CurrentTarget?.WillStatusEnd(15, true, StatusID.Combust) ?? false)));
-
-        if (combustLow15)
+        // Moving Combust refresh (<15s) with timing gate (0.6f)
         {
-            if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-            if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-            if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-        }
-    }
-}
-// Force earlier Combust refresh during Divination: refresh if remaining < 11s
-if (HasDivination && InCombat && CurrentTarget != null)
-{
-    bool combustMissingOrLow =
-        (CombustIiiPvE.EnoughLevel &&
-            (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
-             || (CurrentTarget?.WillStatusEnd(11, true, StatusID.CombustIii) ?? false)))
-        ||
-        (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
-            (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
-             || (CurrentTarget?.WillStatusEnd(11, true, StatusID.CombustIi) ?? false)))
-        ||
-        (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
-            (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
-             || (CurrentTarget?.WillStatusEnd(11, true, StatusID.Combust) ?? false)));
+            bool canCommitGcdNow = NextAbilityToNextGCD < 0.6f;
 
-    if (combustMissingOrLow)
-    {
-        if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-        if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-        if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-    }
-}
+            if (InCombat && IsMoving && canCommitGcdNow && CurrentTarget != null)
+            {
+                bool combustLow15 =
+                    (CombustIiiPvE.EnoughLevel &&
+                        (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
+                         || (CurrentTarget?.WillStatusEnd(15, true, StatusID.CombustIii) ?? false)))
+                    ||
+                    (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
+                        (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
+                         || (CurrentTarget?.WillStatusEnd(15, true, StatusID.CombustIi) ?? false)))
+                    ||
+                    (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
+                        (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
+                         || (CurrentTarget?.WillStatusEnd(15, true, StatusID.Combust) ?? false)));
+
+                if (combustLow15)
+                {
+                    if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+                    if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+                    if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+                }
+            }
+        }
+
+        // Force earlier Combust refresh during Divination: refresh if remaining < 11s
+        if (HasDivination && InCombat && CurrentTarget != null)
+        {
+            bool combustMissingOrLow =
+                (CombustIiiPvE.EnoughLevel &&
+                    (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
+                     || (CurrentTarget?.WillStatusEnd(11, true, StatusID.CombustIii) ?? false)))
+                ||
+                (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
+                    (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
+                     || (CurrentTarget?.WillStatusEnd(11, true, StatusID.CombustIi) ?? false)))
+                ||
+                (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
+                    (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
+                     || (CurrentTarget?.WillStatusEnd(11, true, StatusID.Combust) ?? false)));
+
+            if (combustMissingOrLow)
+            {
+                if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+                if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+                if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+            }
+        }
+
         if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act))
         {
             return true;
@@ -786,6 +942,7 @@ if (HasDivination && InCombat && CurrentTarget != null)
             return base.CanHealSingleSpell && (GCDHeal || aliveHealerCount == 1);
         }
     }
+
     public override bool CanHealAreaSpell
     {
         get
