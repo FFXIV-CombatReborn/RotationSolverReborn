@@ -19,7 +19,7 @@ namespace RotationSolver.SourceGenerators.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -67,7 +67,7 @@ namespace RotationSolver.SourceGenerators.Properties {
         ///
         ////// &lt;summary&gt;
         ////// The Custom Rotation.
-        ////// &lt;br&gt;Number of Actions: 48&lt;/br&gt;
+        ////// &lt;br&gt;Number of Actions: 65&lt;/br&gt;
         ////// &lt;/summary&gt;
         ///public abstract partial class CustomRotation
         ///{
@@ -138,16 +138,11 @@ namespace RotationSolver.SourceGenerators.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /// &lt;summary&gt;
         ////// &lt;see href=&quot;https://garlandtools.org/db/#action/3&quot;&gt;&lt;strong&gt;Sprint&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [3] [System]
-        ////// &lt;para&gt;&lt;/para&gt;
+        ////// &lt;para&gt;Increases movement speed. Duration: 10s (20s when not in combat Additional Effect: Grants Jog when the effect expires Jog Effect: Movement speed is increased Effect ends when enmity is generated. Has no effect in battle. ※Unavailable in PvP.&lt;/para&gt;
         ////// &lt;/summary&gt;
         ///SprintPvE = 3,
         ////// &lt;summary&gt;
-        ////// &lt;see href=&quot;https://garlandtools.org/db/#action/5&quot;&gt;&lt;strong&gt;Teleport&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [5] [System]
-        ////// &lt;para&gt;&lt;/para&gt;
-        ////// &lt;/summary&gt;
-        ///TeleportPvE = 5,
-        ////// &lt;summary&gt;
-        ////// &lt;see href=&quot;https://garlandtools.org/db/#action/6&quot;&gt;&lt;strong&gt;Return&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [6] [Sys [rest of string was truncated]&quot;;.
+        ////// &lt;see href=&quot;https://garlandtools.org/db/#action/5&quot;&gt;&lt;strong&gt;Telepo [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ActionId {
             get {
@@ -210,7 +205,7 @@ namespace RotationSolver.SourceGenerators.Properties {
         ///
         ////// &lt;summary&gt;
         ////// The Custom Rotation.
-        ////// &lt;br&gt;Number of Actions: 388&lt;/br&gt;
+        ////// &lt;br&gt;Number of Actions: 506&lt;/br&gt;
         ////// &lt;/summary&gt;
         ///public abstract partial class DutyRotation
         ///{
@@ -229,7 +224,30 @@ namespace RotationSolver.SourceGenerators.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to /// &lt;summary&gt;
+        //////Actor Control
+        ////// &lt;/summary&gt;
+        ///[Description(&quot;Actor Control&quot;)]
+        ///ActorControl = 492,
+        ////// &lt;summary&gt;
+        //////Actor Control Self
+        ////// &lt;/summary&gt;
+        ///[Description(&quot;Actor Control Self&quot;)]
+        ///ActorControlSelf = 354,
+        ////// &lt;summary&gt;
+        //////Airship Exploration Result
+        ////// &lt;/summary&gt;
+        ///[Description(&quot;Airship Exploration Result&quot;)]
+        ///AirshipExplorationResult = 454,
+        ////// &lt;summary&gt;
+        //////Actor Cast
+        ////// &lt;/summary&gt;
+        ///[Description(&quot;Actor Cast&quot;)]
+        ///ActorCast = 941,
+        ////// &lt;summary&gt;
+        //////Actor Control Target
+        ////// &lt;/summary&gt;
+        ///[Descript [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string OpCode {
             get {
@@ -245,9 +263,9 @@ namespace RotationSolver.SourceGenerators.Properties {
         ///
         ///namespace RotationSolver.Basic.Rotations.Basic;
         ////// &lt;summary&gt;
-        ////// &lt;see href=&quot;https://na.finalfantasyxiv.com/jobguide/paladin&quot;&gt;&lt;strong&gt;Paladin&lt;/strong&gt;&lt;/see&gt;
-        ////// &lt;br&gt;Number of Actions: 46&lt;/br&gt;
-        ////// &lt;br&gt;Number of Traits: 15&lt;/br&gt;
+        ////// &lt;see href=&quot;https://na.finalfantasyxiv.com/jobguide/paladin&quot;&gt;&lt;strong&gt;paladin&lt;/strong&gt;&lt;/see&gt;
+        ////// &lt;br&gt;Number of Actions: 55&lt;/br&gt;
+        ////// &lt;br&gt;Number of Traits: 19&lt;/br&gt;
         ////// &lt;/summary&gt;
         ///[Jobs(Job.PLD, Job.GLA)]
         ///public abstract partial class PaladinRotation : CustomRotation
@@ -262,17 +280,23 @@ namespace RotationSolver.SourceGenerators.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to /// &lt;summary&gt;
+        ////// &lt;para&gt;&lt;/para&gt;
+        ////// &lt;/summary&gt;
+        ///UnnamedStatus_0 = 0,
+        ///
+        ////// &lt;summary&gt;
         ////// &lt;see href=&quot;https://garlandtools.org/db/#status/1&quot;&gt;&lt;strong&gt;Petrification&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
         ////// &lt;para&gt;Stone-like rigidity is preventing the execution of actions.&lt;/para&gt;
         ////// &lt;/summary&gt;
         ///Petrification = 1,
+        ///
         ////// &lt;summary&gt;
         ////// &lt;see href=&quot;https://garlandtools.org/db/#status/2&quot;&gt;&lt;strong&gt;Stun&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
         ////// &lt;para&gt;Unable to execute actions.&lt;/para&gt;
         ////// &lt;/summary&gt;
         ///Stun = 2,
-        ////// &lt;summary&gt;
-        ////// &lt;see href=&quot;https://garlandtools.org/db/#status/3&quot;&gt;&lt;strong&gt;Sleep&lt;/strong&gt; [rest of string was truncated]&quot;;.
+        ///
+        ////// &lt;summary&gt;        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string StatusId {
             get {

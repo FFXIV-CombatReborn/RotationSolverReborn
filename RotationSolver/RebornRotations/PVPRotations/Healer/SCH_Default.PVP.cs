@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Healer;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.41")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.45")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Healer/SCH_Default.PVP.cs")]
 
 public class SCH_DefaultPVP : ScholarRotation
