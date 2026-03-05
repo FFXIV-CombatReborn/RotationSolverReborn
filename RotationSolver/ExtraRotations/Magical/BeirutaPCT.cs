@@ -1,6 +1,6 @@
 namespace RotationSolver.ExtraRotations.Magical;
 
-[Rotation("BeirutaPCT", CombatType.PvE, GameVersion = "7.41")]
+[Rotation("BeirutaPCT", CombatType.PvE, GameVersion = "7.45")]
 [SourceCode(Path = "main/ExtraRotations/Magical/BeirutaPCT.cs")]
 public sealed class BeirutaPCT : PictomancerRotation
 {
@@ -8,8 +8,8 @@ public sealed class BeirutaPCT : PictomancerRotation
 
     public enum HammerEarlyHoldSeconds
     {
-        Sec0  = 0,
-        Sec5  = 5,
+        Sec0 = 0,
+        Sec5 = 5,
         Sec10 = 10,
         Sec15 = 15,
     }
@@ -60,25 +60,27 @@ public sealed class BeirutaPCT : PictomancerRotation
     private bool NextIsMovementSafeGcd(IAction nextGCD) =>
         nextGCD.IsTheSameTo(false, HolyInWhitePvE, CometInBlackPvE);
 
-    // Starry timing helpers (GCD gating)
+    // Calculate the remaining time until Starry Muse is ready.
     private float StarryIn =>
         HasStarryMuse ? 0f : StarryMusePvE.Cooldown.RecastTimeRemainOneCharge;
 
+    // Determine whether Starry Muse will be ready within 3 seconds during burst.
     private bool StarryWithin3 =>
         !HasStarryMuse && StarryIn <= 3f && IsBurst;
 
+    // Determine whether Starry Muse will be ready within 20 seconds but not within 3 seconds during burst.
     private bool StarryWithin20 =>
         !HasStarryMuse && StarryIn <= 20f && StarryIn > 3f && IsBurst;
 
-    // Reserve 2 Paint for Holy/Comet when Starry is soon.
-    // Meaning: do not spend Paint on Holy/Comet if we'd end up at 2 or less.
+    // Determine whether Paint should be reserved for Holy/Comet when Starry Muse is approaching.
     private bool ShouldReservePaintForHolyComet =>
         StarryWithin20 && Paint <= 2 && IsBurst;
 
+    // Determine whether Holy/Comet spending is allowed under the Paint reserve rule.
     private bool HolyCometAllowedByPaintReserve =>
         !ShouldReservePaintForHolyComet && IsBurst;
 
-    // you can also extend this with exceptions if needed
+    // Determine whether Striking Muse should be used to rescue movement when the next GCD is unsafe.
     private bool NeedsStrikingMovementRescue(IAction nextGCD) =>
         InCombat
         && IsMoving
@@ -89,6 +91,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 
     private long _starPrismUsedAtMs = 0;
 
+    // Determine whether actions should be blocked within the delayed window after Star Prism.
     private bool InPostPrismDelayedBlockWindow
     {
         get
@@ -107,19 +110,20 @@ public sealed class BeirutaPCT : PictomancerRotation
         }
     }
 
-    // Overcap protection: about to reach 2 charges within 5s
+    // Determine whether Striking Muse is likely to overcap soon.
     private bool StrikingOvercapSoon30 =>
         StrikingMusePvE.Cooldown.CurrentCharges == 1
         && StrikingMusePvE.Cooldown.WillHaveOneCharge(30f);
 
-    // (meaning: the next charge arrives within 20 seconds)
     private long _holyUsedInOpenerAtMs = 0;
     private long _fangedUsedInStarryAtMs = 0;
     private long _prepStrikingUsedAtMs = 0;
 
+    // Determine whether the Starry Muse burst status is currently active.
     private static bool InBurstStatus =>
         StatusHelper.PlayerHasStatus(true, StatusID.StarryMuse);
 
+    // Determine whether Inspiration is currently active.
     private static bool HasInspiration =>
         StatusHelper.PlayerHasStatus(true, StatusID.Inspiration);
 
@@ -127,7 +131,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 
     #region Countdown logic
 
-    // Defines logic for actions to take during the countdown before combat starts.
+    // Select the appropriate action to use during the countdown before combat begins.
     protected override IAction? CountDownAction(float remainTime)
     {
         IAction act;
@@ -159,7 +163,7 @@ public sealed class BeirutaPCT : PictomancerRotation
     {
         act = null;
 
-        // Same opener timing gate used in AttackAbility()
+        // Apply the opener timing adjustment based on synced level.
         int adjustCombatTimeForOpener = DataCenter.PlayerSyncedLevel() < 92 ? 2 : 5;
 
         if (CombatTime < adjustCombatTimeForOpener
@@ -186,7 +190,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 
         bool isMedicated = StatusHelper.PlayerHasStatus(true, StatusID.Medicated);
 
-        // If Medicated: Swiftcast any creature motif if it is the next GCD.
+        // Apply Swiftcast to creature motifs during Medicated when a motif is queued.
         if (isMedicated)
         {
             bool isCreatureMotif =
@@ -198,22 +202,21 @@ public sealed class BeirutaPCT : PictomancerRotation
             if (isCreatureMotif && SwiftcastPvE.CanUse(out act))
                 return true;
 
-            // Important: do NOT run the normal motif-swift logic while medicated.
             return base.EmergencyAbility(nextGCD, out act);
         }
 
         if (MotifSwiftCastSwift)
         {
             if ((MotifSwiftCast switch
-            {
-                CanvasFlags.Pom => nextGCD.IsTheSameTo(false, PomMotifPvE),
-                CanvasFlags.Wing => nextGCD.IsTheSameTo(false, WingMotifPvE),
-                CanvasFlags.Claw => nextGCD.IsTheSameTo(false, ClawMotifPvE),
-                CanvasFlags.Maw => nextGCD.IsTheSameTo(false, MawMotifPvE),
-                CanvasFlags.Weapon => nextGCD.IsTheSameTo(false, HammerMotifPvE),
-                CanvasFlags.Landscape => nextGCD.IsTheSameTo(false, StarrySkyMotifPvE),
-                _ => false
-            }) && SwiftcastPvE.CanUse(out act))
+                {
+                    CanvasFlags.Pom => nextGCD.IsTheSameTo(false, PomMotifPvE),
+                    CanvasFlags.Wing => nextGCD.IsTheSameTo(false, WingMotifPvE),
+                    CanvasFlags.Claw => nextGCD.IsTheSameTo(false, ClawMotifPvE),
+                    CanvasFlags.Maw => nextGCD.IsTheSameTo(false, MawMotifPvE),
+                    CanvasFlags.Weapon => nextGCD.IsTheSameTo(false, HammerMotifPvE),
+                    CanvasFlags.Landscape => nextGCD.IsTheSameTo(false, StarrySkyMotifPvE),
+                    _ => false
+                }) && SwiftcastPvE.CanUse(out act))
             {
                 return true;
             }
@@ -236,7 +239,7 @@ public sealed class BeirutaPCT : PictomancerRotation
     [RotationDesc(ActionID.TemperaCoatPvE, ActionID.TemperaGrassaPvE, ActionID.AddlePvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        // Mitigations
+        // Use mitigations when not prevented by burst defence rules.
         if ((!BurstDefense || (BurstDefense && !InBurstStatus)) && TemperaCoatPvE.CanUse(out act))
         {
             return true;
@@ -258,7 +261,7 @@ public sealed class BeirutaPCT : PictomancerRotation
     [RotationDesc(ActionID.TemperaCoatPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        // Mitigations
+        // Use single-target mitigation when not prevented by burst defence rules.
         if ((!BurstDefense || (BurstDefense && !InBurstStatus)) && TemperaCoatPvE.CanUse(out act))
         {
             return true;
@@ -273,14 +276,14 @@ public sealed class BeirutaPCT : PictomancerRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        // ---------- Burst / timing helpers ----------
+        // Prepare burst- and opener-timing values used by the priority logic.
         int adjustCombatTimeForOpener = DataCenter.PlayerSyncedLevel() < 92 ? 2 : 5;
 
         long nowMs = Environment.TickCount64;
 
         bool madeenAvailable = RetributionOfTheMadeenPvE.CanUse(out _);
 
-        // Mog overwrite restriction (same as your logic, just grouped)
+        // Determine whether Mog usage is restricted by the Fanged Muse overwrite window.
         bool mogRestrictedWindow =
             _fangedUsedInStarryAtMs != 0
             && (nowMs - _fangedUsedInStarryAtMs) < 160_000;
@@ -288,7 +291,7 @@ public sealed class BeirutaPCT : PictomancerRotation
         bool mogReady = MogOfTheAgesPvE.CanUse(out _);
         bool mogAllowedNow = mogReady && (!mogRestrictedWindow || HasStarryMuse);
 
-        // Starry timing (single source of truth)
+        // Calculate Starry Muse remaining time for burst alignment logic.
         float starryIn = HasStarryMuse ? 0f : StarryMusePvE.Cooldown.RecastTimeRemainOneCharge;
 
         bool starryWithin60 = !HasStarryMuse && starryIn <= 60f && IsBurst;
@@ -297,8 +300,7 @@ public sealed class BeirutaPCT : PictomancerRotation
         bool starryReadySoon10 = !HasStarryMuse && starryIn <= 10f && IsBurst;
         bool starryWithin30 = !HasStarryMuse && starryIn <= 30f && IsBurst;
 
-        // Use your existing prep definition to avoid interfering with the ~10s prep Striking logic.
-        // (You already have starryReadySoon10 defined as WillHaveOneCharge(12f) && IsBurst)
+        // Determine whether hammer dumping is allowed during the 30-second lead-in window.
         bool allowHammerDumpFor30sLead = starryWithin30 && !starryReadySoon10;
 
         bool starryJustUsed1s =
@@ -309,13 +311,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             _starryUsedAtMs != 0
             && (nowMs - _starryUsedAtMs) < 9000;
 
-        // ---------- Striking Muse (HammerTime) reserve logic ----------
-        // Requirement you stated:
-        // "It is OK to be at 0 charges as long as Striking will have 1 charge
-        // at least 10s BEFORE Starry is ready."
-        //
-        // So: we only preserve when spending the last charge would mean we *cannot*
-        // regain a charge by (Starry - 10s).
+        // Determine whether the last Striking Muse charge should be preserved for an upcoming Starry window.
         float strikingNeededIn = MathF.Max(0f, starryIn - 5f);
 
         bool preserveStrikingForStarry =
@@ -323,20 +319,19 @@ public sealed class BeirutaPCT : PictomancerRotation
             && StrikingMusePvE.Cooldown.CurrentCharges == 1
             && StrikingMusePvE.Cooldown.RecastTimeRemainOneCharge > strikingNeededIn;
 
-        // Overcap soon (2 charges) within 10s: spend one unless we're preserving
+        // Determine whether Striking Muse is approaching overcap.
         bool strikingOvercapSoon30 =
             StrikingMusePvE.Cooldown.CurrentCharges == 1
             && StrikingMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30f;
 
-        // Keep at least 1 Living Muse charge if Starry is soon (your existing intent)
+        // Determine whether Living Muse charges should be preserved for an upcoming burst.
         bool preserveLivingForBurst =
             CombatTime > 5f
             && !HasStarryMuse
             && starryWithin40
             && LivingMusePvE.Cooldown.CurrentCharges <= 1;
 
-        // SAFEGUARD: if we are in Starry but somehow have no HammerTime,
-        // force Striking Muse ASAP to enable hammer chain.
+        // Force Striking Muse inside Starry if HammerTime is missing.
         if (HasStarryMuse
             && !HasHammerTime
             && InCombat
@@ -346,7 +341,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             return true;
         }
 
-        // ---------- Palette upkeep ----------
+        // Maintain Subtractive Palette when Starry is not about to begin.
         if (!starryReadySoon15
             && !starryJustUsed1s
             && !HasMonochromeTones
@@ -356,8 +351,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             return true;
         }
 
-        // ---------- Striking usage priorities ----------
-        // 1) Prep: deliberately spend Striking about 10s before Starry (to ensure HammerTime exists)
+        // Use Striking Muse as burst preparation shortly before Starry comes up.
         if (starryReadySoon10
             && CombatTime > adjustCombatTimeForOpener
             && IsBurst
@@ -367,7 +361,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             return true;
         }
 
-        // 2) Overcap protection: spend if we would cap in ~15s (unless preserving for Starry)
+        // Spend Striking Muse to prevent overcap when not preserving for Starry.
         if (strikingOvercapSoon30
             && CombatTime > adjustCombatTimeForOpener
             && !preserveStrikingForStarry
@@ -377,7 +371,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             return true;
         }
 
-        // 3) Movement rescue: spend Striking if moving and next GCD unsafe (unless preserving for Starry)
+        // Spend Striking Muse for movement rescue when not preserving for Starry.
         if (NeedsStrikingMovementRescue(nextGCD)
             && StrikingMusePvE.Cooldown.CurrentCharges > 0
             && !preserveStrikingForStarry
@@ -387,7 +381,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             return true;
         }
 
-        // Madeen (Starry burst): try first
+        // Use Madeen during Starry burst when allowed by timing gates.
         if (HasStarryMuse
             && !starryJustUsed5s
             && IsBurst
@@ -397,7 +391,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             return true;
         }
 
-        // Mog: then try
+        // Use Mog during burst when allowed by overwrite rules and timing gates.
         if (!starryJustUsed5s
             && mogAllowedNow
             && IsBurst
@@ -408,7 +402,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             return true;
         }
 
-        // else: Mog is ready but intentionally held
+        // Use Living Muse actions when allowed by preservation and timing rules.
         if (!preserveLivingForBurst && !starryJustUsed5s && !InPostPrismDelayedBlockWindow && IsBurst)
         {
             if (!madeenAvailable
@@ -430,7 +424,6 @@ public sealed class BeirutaPCT : PictomancerRotation
 
             if (FangedMusePvE.CanUse(out act, usedUp: true))
             {
-                // Only start the 160s Mog restriction window if Fanged was used during Starry Muse.
                 if (HasStarryMuse)
                     _fangedUsedInStarryAtMs = nowMs;
 
@@ -447,7 +440,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        // 1) Swiftcast Rainbow Drip (highest priority)
+        // Prioritise Swiftcast for Rainbow Drip when it is intercepted and queued.
         if (RainbowDripSwift
             && !HasRainbowBright
             && nextGCD.IsTheSameTo(false, RainbowDripPvE)
@@ -456,7 +449,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             return true;
         }
 
-        // 2) Swiftcast only the configured Motif
+        // Apply Swiftcast only to the configured Motif when enabled.
         if (MotifSwiftCastSwift)
         {
             bool shouldSwiftMotif = MotifSwiftCast switch
@@ -481,7 +474,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             return true;
         }
 
-        // Opener pot — absolute priority first 5s
+        // Use opener potion within the first 5 seconds when HammerTime is active.
         if (InCombat && CombatTime <= 5f && HasHammerTime && UseBurstMedicine(out act))
         {
             return true;
@@ -489,12 +482,10 @@ public sealed class BeirutaPCT : PictomancerRotation
 
         bool isMedicated = StatusHelper.PlayerHasStatus(true, StatusID.Medicated);
 
-        // Define "Starry ready soon" similarly to your prep logic
         float starryIn = HasStarryMuse ? 0f : StarryMusePvE.Cooldown.RecastTimeRemainOneCharge;
         bool starryReadySoon5 = !HasStarryMuse && starryIn <= 5f && IsBurst;
 
-        // PRE-POT: use tincture shortly before Starry comes up
-        // (Skip if already Medicated so you don't waste checks / re-issue)
+        // Use pre-potion shortly before Starry becomes available when not already Medicated.
         if (InCombat && !isMedicated && starryReadySoon5 && UseBurstMedicine(out act))
         {
             return true;
@@ -528,7 +519,7 @@ public sealed class BeirutaPCT : PictomancerRotation
         bool blockEarlyHammerStamp = InCombat && CombatTime < 10f && !HasHyperphantasia;
         bool blockEarlyHolyAndLivingMotif = InCombat && CombatTime < 2f && !HasHammerTime;
 
-        //Opener requirements
+        // Apply opener GCD priorities during the initial combat window.
         if (CombatTime < 5f)
         {
             if (!blockEarlyHolyAndLivingMotif && HolyInWhitePvE.CanUse(out act))
@@ -558,11 +549,10 @@ public sealed class BeirutaPCT : PictomancerRotation
             return false;
         }
 
-        // Starry <2s gate
         bool starryReadySoon2 = HasStarryMuse || StarryMusePvE.Cooldown.WillHaveOneCharge(0f);
         bool starryReadySoon10 = !HasStarryMuse && StarryMusePvE.Cooldown.WillHaveOneCharge(12f) && IsBurst;
 
-        // Block hammer chain ONLY after we did the ~5s prep Striking, until Starry <2s
+        // Block hammer chain after the preparation Striking Muse until Starry is almost ready.
         bool blockPrepHammerChain = _prepStrikingUsedAtMs != 0 && InCombat && !starryReadySoon2;
 
         int hyperStacks = StatusHelper.PlayerStatusStack(true, StatusID.Hyperphantasia);
@@ -571,13 +561,12 @@ public sealed class BeirutaPCT : PictomancerRotation
         bool starryWithin30 = !HasStarryMuse && StarryMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30f;
         bool allowHammerDumpFor30sLead = starryWithin30 && !starryReadySoon10;
 
-        // Clear marker once it’s no longer relevant
+        // Clear the preparation marker when it is no longer relevant.
         if (!InCombat || starryReadySoon2)
         {
             _prepStrikingUsedAtMs = 0;
         }
 
-        // some gcd priority
         if (HasStarryMuse && HasInspiration && !reserveHyperForPrism)
         {
             if (CometInBlackPvE.CanUse(out act, skipCastingCheck: true))
@@ -586,8 +575,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             }
         }
 
-        // Extra: Subtractive Inks under Inspiration (before StarPrism)
-        // Rule A: block Subtractive Inks when Starry is within 3s
+        // Use Subtractive Inks under Inspiration when not too close to Starry.
         if (HasInspiration && HasSubtractivePalette && !reserveHyperForPrism && !StarryWithin3)
         {
             if (ThunderInMagentaPvE.CanUse(out act)) return true;
@@ -605,23 +593,19 @@ public sealed class BeirutaPCT : PictomancerRotation
 
         float hammerRemain = HasHammerTime ? StatusHelper.PlayerStatusTime(true, StatusID.HammerTime) : 0f;
 
-        int earlyHoldSec = (int)HammerEarlyHold;         // 5 / 10 / 15
-        float earlyRemainThreshold = 30f - earlyHoldSec; // 25 / 20 / 15
+        int earlyHoldSec = (int)HammerEarlyHold;
+        float earlyRemainThreshold = 30f - earlyHoldSec;
 
-        // Early window = first X seconds after HammerTime starts
-        // i.e., while remaining >= (30 - X)
         bool hammerEarlyWindow = HasHammerTime && hammerRemain >= earlyRemainThreshold;
-
-        // After early window = the rest of HammerTime
         bool hammerAfterWindow = HasHammerTime && hammerRemain > 0f && hammerRemain < earlyRemainThreshold;
 
-        // Helper: whether we are allowed to use hammer chain right now
-        // - During Starry: if moving, ignore (HasInspiration && HasSubtractivePalette)
-        // - Otherwise: keep the restriction
+        // Determine whether the hammer chain is permitted by the Inspiration restriction rule.
         bool hammerAllowedByInspirationRule =
-            HasStarryMuse ? (IsMoving || !(HasInspiration && HasSubtractivePalette)) : !(HasInspiration && HasSubtractivePalette);
+            HasStarryMuse
+                ? (IsMoving || !(HasInspiration && HasSubtractivePalette))
+                : !(HasInspiration && HasSubtractivePalette);
 
-        // 1) During Starry: use hammer chain any time it’s allowed (moving ignores Inspiration rule)
+        // Use the hammer chain during Starry when permitted.
         if (HasStarryMuse && InCombat && !HasSwift && !blockPrepHammerChain && hammerAllowedByInspirationRule)
         {
             if (PolishingHammerPvE.CanUse(out act, skipComboCheck: true)) return true;
@@ -629,7 +613,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             if (!blockEarlyHammerStamp && HammerStampPvE.CanUse(out act, skipComboCheck: true)) return true;
         }
 
-        // 2) Not Starry + first 5s: movement rescue ONLY (commit window), keep restriction
+        // Use the hammer chain for movement rescue during the early HammerTime window.
         if (!HasStarryMuse && hammerEarlyWindow && InCombat && IsMoving && canCommitGcdNow && !HasSwift && !blockPrepHammerChain && hammerAllowedByInspirationRule)
         {
             if (PolishingHammerPvE.CanUse(out act, skipComboCheck: true)) return true;
@@ -637,7 +621,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             if (!blockEarlyHammerStamp && HammerStampPvE.CanUse(out act, skipComboCheck: true)) return true;
         }
 
-        // 3) Not Starry + remaining 30s: spend ASAP (like the old behaviour), keep restriction
+        // Spend the hammer chain outside Starry when permitted by timing and dump rules.
         if (!HasStarryMuse && InCombat && !HasSwift && !blockPrepHammerChain && hammerAllowedByInspirationRule
             && (hammerAfterWindow || StrikingOvercapSoon30 || allowHammerDumpFor30sLead))
         {
@@ -670,15 +654,15 @@ public sealed class BeirutaPCT : PictomancerRotation
             if (RainbowDripPvE.CanUse(out act)) return true;
         }
 
-        // timings for motif casting
+        // Cast motifs within the Scenic Muse preparation window.
         if (ScenicMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30 && !HasStarryMuse && !HasHyperphantasia)
         {
             if (StarrySkyMotifPvE.CanUse(out act) && !HasHyperphantasia) return true;
 
-            // Also prep Weapon motif in the same window
             if (!isMedicated && !WeaponMotifDrawn && HammerMotifPvE.CanUse(out act)) return true;
         }
 
+        // Cast creature motifs when Living Muse is available and not restricted by early combat rules.
         if (!blockEarlyHolyAndLivingMotif
             && (LivingMusePvE.Cooldown.HasOneCharge
                 || LivingMusePvE.Cooldown.RecastTimeRemainOneCharge <= CreatureMotifPvE.Info.CastTime * 1.7)
@@ -690,6 +674,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             if (MawMotifPvE.CanUse(out act)) return true;
         }
 
+        // Cast weapon motif when Steel Muse is available and not restricted by Hyperphantasia.
         if ((SteelMusePvE.Cooldown.HasOneCharge || SteelMusePvE.Cooldown.RecastTimeRemainOneCharge <= WeaponMotifPvE.Info.CastTime)
             && !HasStarryMuse && !HasHyperphantasia)
         {
@@ -699,7 +684,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             }
         }
 
-        // moving Holy/Comet: only when about to commit a GCD (AST moving Combust analogue)
+        // Use Holy/Comet while moving only when the GCD commit timing window is available.
         {
             if (HolyCometMoving && InCombat && IsMoving && canCommitGcdNow && !HasSwift && !HasHammerTime && HolyCometAllowedByPaintReserve)
             {
@@ -708,7 +693,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             }
         }
 
-        // When in swift management
+        // Spend Swiftcast on motif completion according to the selected motif target.
         if (HasSwift && (!LandscapeMotifDrawn || !CreatureMotifDrawn || !WeaponMotifDrawn))
         {
             if (PomMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Pom) && MotifSwiftCast is CanvasFlags.Pom)
@@ -744,7 +729,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             }
         }
 
-        //white paint over cap protection
+        // Use Holy/Comet for Paint overcap protection when configured.
         if (Paint == HolyCometMax && !HasStarryMuse && (UseCapCometHoly || UseCapCometOnly))
         {
             if (CometInBlackPvE.CanUse(out act))
@@ -758,7 +743,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             }
         }
 
-        // AOE Subtractive Inks
+        // Use AOE Subtractive Inks when not too close to Starry.
         if (!StarryWithin3)
         {
             if (ThunderIiInMagentaPvE.CanUse(out act)) return true;
@@ -766,12 +751,11 @@ public sealed class BeirutaPCT : PictomancerRotation
             if (BlizzardIiInCyanPvE.CanUse(out act)) return true;
         }
 
-        //AOE Additive Inks
         if (WaterIiInBluePvE.CanUse(out act)) return true;
         if (AeroIiInGreenPvE.CanUse(out act)) return true;
         if (FireIiInRedPvE.CanUse(out act)) return true;
 
-        //ST Subtractive Inks
+        // Use single-target Subtractive Inks when not too close to Starry.
         if (!StarryWithin3)
         {
             if (ThunderInMagentaPvE.CanUse(out act)) return true;
@@ -779,7 +763,6 @@ public sealed class BeirutaPCT : PictomancerRotation
             if (BlizzardInCyanPvE.CanUse(out act)) return true;
         }
 
-        //ST Additive Inks
         if (WaterInBluePvE.CanUse(out act)) return true;
         if (AeroInGreenPvE.CanUse(out act)) return true;
 
@@ -788,7 +771,7 @@ public sealed class BeirutaPCT : PictomancerRotation
             return true;
         }
 
-        // Extra: Force Holy/Comet in the last 3s before Starry
+        // Force Holy/Comet usage during the final 3 seconds before Starry.
         if (StarryWithin3 && InCombat && CombatTime > 5f)
         {
             if (CometInBlackPvE.CanUse(out act))
@@ -802,7 +785,6 @@ public sealed class BeirutaPCT : PictomancerRotation
             }
         }
 
-        // In comabt fallback in case of no target, allow GCD to roll on motif refresh
         if (PomMotifPvE.CanUse(out act)) return true;
         if (WingMotifPvE.CanUse(out act)) return true;
         if (ClawMotifPvE.CanUse(out act)) return true;

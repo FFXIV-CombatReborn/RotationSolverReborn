@@ -9,15 +9,15 @@ public sealed class BeirutaAST : AstrologianRotation
 {
     #region Config Options
 
-   [RotationConfig(CombatType.PvE, Name =
-    "Please note that this rotation is optimised for high-end encounters.\n" +
-    "• Collective Unconscious, Horoscope, Neutral Sect, and Macrocosmos should generally be used manually or through CD planner\n" +
-    "• Please set Intercept for GCD usage only\n" +
-    "• Disabling AutoBurst is sufficient if you need to delay burst timing in this rotation\n" +
-    "• DoT effects may refresh slightly earlier during burst phases or while moving\n" +
-    "• Lightspeed is managed automatically by the rotation and should not be used manually\n" +
-    "• Single-target healing usage is intentionally more conservative in this rotation\n")]
-public bool RotationNotes { get; set; } = true;
+    [RotationConfig(CombatType.PvE, Name =
+        "Please note that this rotation is optimised for high-end encounters.\n" +
+        "• Collective Unconscious, Horoscope, Neutral Sect, and Macrocosmos should generally be used manually or through CD planner\n" +
+        "• Please set Intercept for GCD usage only\n" +
+        "• Disabling AutoBurst is sufficient if you need to delay burst timing in this rotation\n" +
+        "• DoT effects may refresh slightly earlier during burst phases or while moving\n" +
+        "• Lightspeed is managed automatically by the rotation and should not be used manually\n" +
+        "• Single-target healing usage is intentionally more conservative in this rotation\n")]
+    public bool RotationNotes { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Opener/Burst open window (GCDs)")]
     [Range(0, 2, ConfigUnitType.None, 1)]
@@ -33,6 +33,7 @@ public bool RotationNotes { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Automatically upgrade Horoscope with Helios/Aspected Helios")]
     public bool AutoUpgradeHoroscope { get; set; } = true;
+
     [RotationConfig(CombatType.PvE, Name = "Enable Swiftcast Restriction Logic to attempt to prevent actions other than Raise when you have swiftcast")]
     public bool SwiftLogic { get; set; } = true;
 
@@ -58,17 +59,17 @@ public bool RotationNotes { get; set; } = true;
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to pop Horoscope)")]
     public float HoroscopeHeal { get; set; } = 0.6f;
 
-    // Microcosmos threshold (default 0.3f like Horoscope)
+    // Set the Microcosmos HP threshold used for casting decisions.
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to use Microcosmos")]
     public float MicrocosmosHeal { get; set; } = 0.4f;
 
-    // NEW: Detonate Earthly Star based on PartyMembersAverHP (default 0.7f)
+    // Set the party-average HP threshold required to detonate Earthly Star while holding Giant Dominance.
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to detonate Earthly Star (when Giant Dominance)")]
     public float StellarDetonationHeal { get; set; } = 0.7f;
 
-    // NEW: Celestial Opposition configurable threshold (default 0.7f) AND only when !HasGiantDominance
+    // Set the party-average HP threshold required to use Celestial Opposition when not holding Giant Dominance.
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Celestial Opposition (only when NOT holding Giant Dominance)")]
     public float CelestialOppositionHeal { get; set; } = 0.7f;
@@ -103,9 +104,10 @@ public bool RotationNotes { get; set; } = true;
         [Description("Any charges")]
         AnyCharges,
     }
+
     #endregion
 
-    // Opener window seconds based on GCD selection
+    // Convert the selected opener GCD window into a time value in seconds.
     private float OpenWindowSeconds => OpenWindow switch
     {
         OpenWindowGcd.ZeroGcd => 0f,
@@ -115,56 +117,59 @@ public bool RotationNotes { get; set; } = true;
         _ => 5.5f,
     };
 
-    // Opener/burst open window active?
+    // Determine whether the opener window is currently active.
     private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
 
-// Neutral Sect timing (stamp when buff is gained)
-private long _neutralSectUsedAtMs = 0;
-private bool _neutralSectWasUp = false;
-private const long NeutralSectEarlyMs = 15_000;
+    // Track Neutral Sect activation timing for early-window logic.
+    private long _neutralSectUsedAtMs = 0;
+    private bool _neutralSectWasUp = false;
+    private const long NeutralSectEarlyMs = 15_000;
 
-private bool CardsUnderDivinationOnly { get; set; } = true;
+    private bool CardsUnderDivinationOnly { get; set; } = true;
 
-private void RefreshNeutralSectStamp()
-{
-    bool isUpNow = HasNeutralSect; // use the inherited AstrologianRotation.HasNeutralSect (buff on you)
-
-    // Rising edge: Neutral Sect just became active
-    if (isUpNow && !_neutralSectWasUp)
+    // Update the Neutral Sect timestamp when the buff state changes.
+    private void RefreshNeutralSectStamp()
     {
-        _neutralSectUsedAtMs = Environment.TickCount64;
+        bool isUpNow = HasNeutralSect; // use the inherited AstrologianRotation.HasNeutralSect (buff on you)
+
+        // Record the moment Neutral Sect becomes active.
+        if (isUpNow && !_neutralSectWasUp)
+        {
+            _neutralSectUsedAtMs = Environment.TickCount64;
+        }
+
+        _neutralSectWasUp = isUpNow;
+
+        // Clear the timestamp once Neutral Sect is no longer active.
+        if (!isUpNow)
+        {
+            _neutralSectUsedAtMs = 0;
+        }
     }
 
-    _neutralSectWasUp = isUpNow;
-
-    // Optional hygiene: clear stamp when it falls off
-    if (!isUpNow)
+    // Determine whether we are within the first 15 seconds after Neutral Sect activation.
+    private bool InFirst15sAfterNeutralSect
     {
-        _neutralSectUsedAtMs = 0;
+        get
+        {
+            if (_neutralSectUsedAtMs == 0) return false;
+            return (Environment.TickCount64 - _neutralSectUsedAtMs) <= NeutralSectEarlyMs;
+        }
     }
-}
-
-private bool InFirst15sAfterNeutralSect
-{
-    get
-    {
-        if (_neutralSectUsedAtMs == 0) return false;
-        return (Environment.TickCount64 - _neutralSectUsedAtMs) <= NeutralSectEarlyMs;
-    }
-}
 
     #region Divination / Oracle helpers (timestamp gating)
 
-    // Track when we actually used Divination so we can gate Oracle / early-window logic reliably.
+    // Track Divination activation timing for early-window gating.
     private long _divinationUsedAtMs = 0;
     private const long DivinationFirst5sMs = 5000;
 
     private bool HasHeliosConjunction => StatusHelper.PlayerHasStatus(true, StatusID.HeliosConjunction);
-    private bool HasAspectedHelios    => StatusHelper.PlayerHasStatus(true, StatusID.AspectedHelios);
-    private bool HasDivining          => StatusHelper.PlayerHasStatus(true, StatusID.Divining);
-    private bool HasHoroscopeHelios   => StatusHelper.PlayerHasStatus(true, StatusID.HoroscopeHelios);
-    private bool HasHoroscope   => StatusHelper.PlayerHasStatus(true, StatusID.Horoscope);
+    private bool HasAspectedHelios => StatusHelper.PlayerHasStatus(true, StatusID.AspectedHelios);
+    private bool HasDivining => StatusHelper.PlayerHasStatus(true, StatusID.Divining);
+    private bool HasHoroscopeHelios => StatusHelper.PlayerHasStatus(true, StatusID.HoroscopeHelios);
+    private bool HasHoroscope => StatusHelper.PlayerHasStatus(true, StatusID.Horoscope);
 
+    // Determine whether we are within the first 5 seconds after Divination activation.
     private bool InFirst5sAfterDivination
     {
         get
@@ -175,30 +180,26 @@ private bool InFirst15sAfterNeutralSect
         }
     }
 
-    // Gate Oracle for 5s after using Divination.
+    // Prevent Oracle usage during the first 5 seconds after Divination activation.
     private bool OracleGatedByDivination => InFirst5sAfterDivination;
 
     #endregion
 
     #region Cooldown timing helpers (PCT-style "time until ready")
 
-    // Time until Divination has 1 charge (0 if already active/usable)
+    // Compute the time until Divination has at least one available charge.
     private float DivIn =>
         DivinationPvE.Cooldown.CurrentCharges >= 1
             ? 0f
             : DivinationPvE.Cooldown.RecastTimeRemainOneCharge;
 
-    // Time until Lightspeed gains the next charge:
-    // - If capped (2/2): 0
-    // - If 1/2: time until 2/2
-    // - If 0/2: time until 1/2
+    // Compute the time until Lightspeed gains its next charge.
     private float LightspeedNextChargeIn =>
         LightspeedPvE.Cooldown.CurrentCharges >= LightspeedPvE.Cooldown.MaxCharges
             ? 0f
             : LightspeedPvE.Cooldown.RecastTimeRemainOneCharge;
 
-    // "Burst prep" replaces divReadySoon2, using the real time-to-ready instead of a yes/no.
-    // (4s window)
+    // Determine whether we are within the Divination burst preparation window.
     private bool BurstPrep
     {
         get
@@ -208,28 +209,22 @@ private bool InFirst15sAfterNeutralSect
         }
     }
 
-    // Hold last Lightspeed charge for Divination unless it will naturally regain a charge
-    // at least 4s BEFORE Divination comes up.
+    // Decide whether to hold the last Lightspeed charge for an upcoming Divination window.
     private bool HoldLastLightspeedForDivination
     {
         get
         {
             if (!DivinationPvE.EnoughLevel) return false;
 
-            // only matters when Divination is within a relevant horizon
             bool divSoon60 = DivIn <= 60f;
             if (!divSoon60) return false;
 
-            // don’t bother holding if we’re in the "prep" window already
             if (BurstPrep) return false;
 
-            // only consider holding if we're on the last charge
             if (LightspeedPvE.Cooldown.CurrentCharges != 1) return false;
 
-            // don't hold if Lightspeed buff is already up (we already spent it)
             if (HasLightspeed) return false;
 
-            // Allow spending last LS if LS will regain by (DivIn - 4s)
             float lsMustBeBackBy = MathF.Max(0f, DivIn - 4f);
             bool spendingLastLsIsSafe = LightspeedNextChargeIn <= lsMustBeBackBy;
 
@@ -240,6 +235,7 @@ private bool InFirst15sAfterNeutralSect
     #endregion
 
     #region Tracking Properties
+
     public override void DisplayRotationStatus()
     {
         ImGui.Text($"Suntouched 1: {StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.Suntouched)}");
@@ -248,9 +244,11 @@ private bool InFirst15sAfterNeutralSect
         ImGui.Text($"Suntouched 4: {StatusHelper.PlayerWillStatusEndGCD(4, 0, true, StatusID.Suntouched)}");
         ImGui.Text($"Suntouched Time: {StatusHelper.PlayerStatusTime(true, StatusID.Suntouched)}");
     }
+
     #endregion
 
     #region Countdown Logic
+
     protected override IAction? CountDownAction(float remainTime)
     {
         if (remainTime < MaleficPvE.Info.CastTime + CountDownAhead && MaleficPvE.CanUse(out IAction? act))
@@ -270,9 +268,11 @@ private bool InFirst15sAfterNeutralSect
 
         return remainTime < 30 && AstralDrawPvE.CanUse(out act) ? act : base.CountDownAction(remainTime);
     }
+
     #endregion
 
     #region oGCD Logic
+
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -295,7 +295,6 @@ private bool InFirst15sAfterNeutralSect
             return base.EmergencyAbility(nextGCD, out act);
         }
 
-
         if (SynastryPvE.CanUse(out act))
         {
             if (CanCastSynastry(AspectedBeneficPvE, SynastryPvE, SynastryHeal, nextGCD) ||
@@ -306,7 +305,7 @@ private bool InFirst15sAfterNeutralSect
             }
         }
 
-        // Burst-prep Lightspeed (same as your intent, but BurstPrep is now DivIn<=4)
+        // Use Lightspeed during burst preparation when available.
         if (BurstPrep
             && LightspeedPvE.Cooldown.CurrentCharges >= 1
             && !HasLightspeed
@@ -317,19 +316,20 @@ private bool InFirst15sAfterNeutralSect
             return true;
         }
 
-// Burst-prep potion
-if (!IsOpen
-    && InCombat
-    && IsBurst
-    && BurstPrep
-    && UseBurstMedicine(out act))
-{
-    return true;
-}
-        // Divination here does NOT need !HasLightspeed
+        // Use burst medicine during burst preparation outside the opener window.
+        if (!IsOpen
+            && InCombat
+            && IsBurst
+            && BurstPrep
+            && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
+        // Use Divination during burst windows and record the activation timestamp.
         if (!IsOpen && IsBurst && InCombat && DivinationPvE.CanUse(out act))
         {
-            _divinationUsedAtMs = Environment.TickCount64; // stamp for gating + early window
+            _divinationUsedAtMs = Environment.TickCount64;
             return true;
         }
 
@@ -394,7 +394,7 @@ if (!IsOpen
     {
         act = null;
 
-        // Gate all healing (Single Ability) when HasMacrocosmos
+        // Prevent single-target oGCD healing while Macrocosmos is active under Giant Dominance without Earthly Dominance.
         if (!HasDivining && HasMacrocosmos && HasGiantDominance && !HasEarthlyDominance)
         {
             return false;
@@ -411,7 +411,7 @@ if (!IsOpen
         }
 
         if (InCombat && TheEwerPvE.CanUse(out act)
-        && (TheEwerPvE.Target.Target?.GetHealthRatio() < 0.8f) == true)
+            && (TheEwerPvE.Target.Target?.GetHealthRatio() < 0.8f) == true)
         {
             return true;
         }
@@ -462,13 +462,13 @@ if (!IsOpen
     {
         act = null;
 
-        // Gate all healing (Area Ability) when HasMacrocosmos
+        // Prevent area oGCD healing while Macrocosmos is active.
         if (!HasDivining && HasMacrocosmos)
         {
             return false;
         }
 
-        // NEW: Detonate Earthly Star thresholded by party average HP, only when holding Giant Dominance
+        // Detonate Earthly Star when holding Giant Dominance and party average HP is below the configured threshold.
         if (HasGiantDominance
             && PartyMembersAverHP < StellarDetonationHeal
             && StellarDetonationPvE.CanUse(out act))
@@ -476,7 +476,7 @@ if (!IsOpen
             return true;
         }
 
-        // Microcosmos thresholded (default 0.3f)
+        // Use Microcosmos when party average HP is below the configured threshold.
         if (PartyMembersAverHP < MicrocosmosHeal && MicrocosmosPvE.CanUse(out act))
         {
             return true;
@@ -487,7 +487,7 @@ if (!IsOpen
             return base.HealAreaAbility(nextGCD, out act);
         }
 
-        // NEW: Celestial Opposition thresholded and only when NOT holding Giant Dominance
+        // Use Celestial Opposition when not holding Giant Dominance and party average HP is below the configured threshold.
         if (!HasGiantDominance
             && PartyMembersAverHP < CelestialOppositionHeal
             && CelestialOppositionPvE.CanUse(out act))
@@ -543,7 +543,6 @@ if (!IsOpen
 
         bool divLearned = DivinationPvE.EnoughLevel;
 
-        // Cards gating (default: only under Divination if learned)
         bool burstCardsAllowed =
             CardsUnderDivinationOnly
                 ? (!divLearned || HasDivination)
@@ -554,12 +553,11 @@ if (!IsOpen
             return true;
         }
 
-        // Lord of Crowns usage rules
+        // Spend Lord of Crowns according to the selected card gating rules.
         if (!IsOpen && InCombat && LordOfCrownsPvE.CanUse(out act))
         {
             if (CardsUnderDivinationOnly)
             {
-                // Only under Divination when learned; if not learned, spend freely.
                 if (!divLearned || HasDivination)
                 {
                     return true;
@@ -579,7 +577,6 @@ if (!IsOpen
             }
         }
 
-        // Gate Umbral Draw if we can spend Balance (or Spear) and Lord first
         bool hasBurstCardToPlay =
             InCombat && burstCardsAllowed && (TheBalancePvE.CanUse(out _) || TheSpearPvE.CanUse(out _));
 
@@ -596,7 +593,7 @@ if (!IsOpen
             return true;
         }
 
-        // Gate Oracle for 5s after Divination (timestamp-based)
+        // Use Oracle only when not gated by the Divination early window.
         if (InCombat && !OracleGatedByDivination && OraclePvE.CanUse(out act))
         {
             return true;
@@ -629,14 +626,12 @@ if (!IsOpen
     {
         act = null;
 
-        // Only these GCDs are allowed while moving without needing Lightspeed
         bool nextIsMovementSafeGcd =
             nextGCD.IsTheSameTo(false,
                 MacrocosmosPvE,
                 AspectedBeneficPvE,
                 CombustIiiPvE, CombustIiPvE, CombustPvE);
 
-        // True if Combust is missing or will fall off within 6s
         bool combustSoon6 =
             CurrentTarget != null &&
             (
@@ -661,26 +656,20 @@ if (!IsOpen
             && !HasLightspeed
             && !combustSoon6;
 
-        // First 5 seconds after Divination (timestamp-based, reliable)
         bool divJustStarted = InFirst5sAfterDivination;
 
-        // Use Lightspeed once during opener window
         bool openerLightspeed =
             IsOpen &&
-            InCombat &&
-            !HasLightspeed &&
-            !HoldLastLightspeedForDivination &&
-            LightspeedPvE.Cooldown.CurrentCharges >= 1;
+            !HasLightspeed;
 
-
-        // Divination does NOT need !HasLightspeed
+        // Use Divination during burst windows and record the activation timestamp.
         if (!IsOpen && IsBurst && InCombat && DivinationPvE.CanUse(out act))
         {
-            _divinationUsedAtMs = Environment.TickCount64; // stamp for gating + early window
+            _divinationUsedAtMs = Environment.TickCount64;
             return true;
         }
 
-        // Opener Lightspeed
+        // Use Lightspeed once during the opener window.
         if (openerLightspeed && LightspeedPvE.CanUse(out act, usedUp: true))
         {
             return true;
@@ -691,7 +680,7 @@ if (!IsOpen
             return true;
         }
 
-        // Divination early window Lightspeed (first 5s after Divination)
+        // Use Lightspeed during the initial Divination window when allowed.
         if (!HasLightspeed
             && InCombat
             && HasDivination
@@ -706,7 +695,6 @@ if (!IsOpen
         {
             bool canWeaveNow = NextAbilityToNextGCD < 0.6f;
 
-            // Movement rescue
             if (needsMovementRescue
                 && canWeaveNow
                 && !HoldLastLightspeedForDivination
@@ -715,7 +703,7 @@ if (!IsOpen
                 return true;
             }
 
-            // Earthly Star
+            // Place Earthly Star when neither dominance status is active.
             if (!HasGiantDominance && !HasEarthlyDominance && EarthlyStarPvE.CanUse(out act))
             {
                 return true;
@@ -724,9 +712,11 @@ if (!IsOpen
 
         return base.AttackAbility(nextGCD, out act);
     }
+
     #endregion
 
     #region GCD Logic
+
     protected override bool DefenseSingleGCD(out IAction? act)
     {
         if ((MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150))
@@ -767,7 +757,7 @@ if (!IsOpen
     {
         act = null;
 
-        // Gate all healing (Single GCD) when HasMacrocosmos
+        // Prevent single-target GCD healing while Macrocosmos is active under Giant Dominance without Earthly Dominance.
         if (HasMacrocosmos && HasGiantDominance && !HasEarthlyDominance)
         {
             return false;
@@ -799,20 +789,22 @@ if (!IsOpen
             IsMoving &&
             !HoldLastLightspeedForDivination &&
             NextAbilityToNextGCD < 0.6f &&
+            PartyMembersAverHP > 0.7f &&
             (AspectedBeneficPvE.Target.Target?.GetHealthRatio() < 0.8f) == true;
 
         if (AspectedBeneficPvE.CanUse(out act)
-            && (AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal && PartyMembersAverHP > 0.7f || movingHealWindow))
+            && ((AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal && PartyMembersAverHP > 0.8f) || movingHealWindow)
+            && !HasMacrocosmos && !HasGiantDominance && !HasDivination)
         {
             return true;
         }
 
-        if (PartyMembersAverHP > 0.8f && BeneficIiPvE.CanUse(out act))
+        if (PartyMembersAverHP > 0.8f && BeneficIiPvE.CanUse(out act) && !HasMacrocosmos && !HasGiantDominance && !HasDivination)
         {
             return true;
         }
 
-        if (PartyMembersAverHP > 0.8f && BeneficPvE.CanUse(out act))
+        if (PartyMembersAverHP > 0.8f && BeneficPvE.CanUse(out act) && !HasMacrocosmos && !HasGiantDominance && !HasDivination)
         {
             return true;
         }
@@ -825,7 +817,7 @@ if (!IsOpen
     {
         act = null;
 
-        // Gate all healing (Area GCD) when HasMacrocosmos
+        // Prevent area GCD healing while Macrocosmos is active under Giant Dominance without Earthly Dominance.
         if (HasMacrocosmos && HasGiantDominance && !HasEarthlyDominance)
         {
             return false;
@@ -841,17 +833,38 @@ if (!IsOpen
             return base.HealAreaGCD(out act);
         }
 
-        if (!HasHeliosConjunction && PartyMembersAverHP < 0.6f && HeliosConjunctionPvE.EnoughLevel && HeliosConjunctionPvE.CanUse(out act))
+        if (CelestialOppositionPvE.Cooldown.IsCoolingDown
+            && !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60)
+            && !HasDivination
+            && !HasHeliosConjunction
+            && PartyMembersAverHP < 0.6f
+            && HeliosConjunctionPvE.EnoughLevel
+            && HeliosConjunctionPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (!HasAspectedHelios && PartyMembersAverHP < 0.6f && !HeliosConjunctionPvE.EnoughLevel && AspectedHeliosPvE.CanUse(out act))
+        if (CelestialOppositionPvE.Cooldown.IsCoolingDown
+            && !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60)
+            && !HasMacrocosmos
+            && !HasGiantDominance
+            && !HasDivination
+            && !HasAspectedHelios
+            && PartyMembersAverHP < 0.6f
+            && !HeliosConjunctionPvE.EnoughLevel
+            && AspectedHeliosPvE.CanUse(out act))
         {
             return true;
         }
 
-        if ((HasHeliosConjunction || HasAspectedHelios) && PartyMembersAverHP < 0.5f && HeliosPvE.CanUse(out act))
+        if (CelestialOppositionPvE.Cooldown.IsCoolingDown
+            && !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60)
+            && !HasMacrocosmos
+            && !HasGiantDominance
+            && !HasDivination
+            && (!HasHeliosConjunction || HasAspectedHelios)
+            && PartyMembersAverHP < 0.4f
+            && HeliosPvE.CanUse(out act))
         {
             return true;
         }
@@ -873,34 +886,35 @@ if (!IsOpen
     protected override bool GeneralGCD(out IAction? act)
     {
         RefreshNeutralSectStamp();
+
         if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
             return base.GeneralGCD(out act);
         }
 
-if (AutoUpgradeHoroscope &&
-   ((HasHoroscope && !HasHoroscopeHelios) ||
-    (InFirst15sAfterNeutralSect && !HasHeliosConjunction && !HasAspectedHelios)))
-{
-    // Prefer Helios Conjunction if available
-    if (HeliosConjunctionPvE.EnoughLevel && HeliosConjunctionPvE.CanUse(out act, skipStatusProvideCheck: true))
-        return true;
+        // Upgrade Horoscope using Helios Conjunction or Aspected Helios when eligible.
+        if (AutoUpgradeHoroscope &&
+            ((HasHoroscope && !HasHoroscopeHelios) ||
+             (InFirst15sAfterNeutralSect && !HasHeliosConjunction && !HasAspectedHelios)))
+        {
+            if (HeliosConjunctionPvE.EnoughLevel && HeliosConjunctionPvE.CanUse(out act, skipStatusProvideCheck: true))
+                return true;
 
-    // Otherwise fall back to Aspected Helios
-    if (!HeliosConjunctionPvE.EnoughLevel && AspectedHeliosPvE.CanUse(out act, skipStatusProvideCheck: true))
-        return true;
-}
+            if (!HeliosConjunctionPvE.EnoughLevel && AspectedHeliosPvE.CanUse(out act, skipStatusProvideCheck: true))
+                return true;
+        }
 
         if (GravityIiPvE.EnoughLevel && GravityIiPvE.CanUse(out act))
         {
             return true;
         }
+
         if (!GravityIiPvE.EnoughLevel && GravityPvE.EnoughLevel && GravityPvE.CanUse(out act))
         {
             return true;
         }
 
-        // Moving Combust refresh (<6s) with timing gate (0.6f)
+        // Refresh Combust while moving when it is missing or expiring soon.
         {
             bool canCommitGcdNow = NextAbilityToNextGCD < 0.6f;
 
@@ -928,7 +942,7 @@ if (AutoUpgradeHoroscope &&
             }
         }
 
-        // Force earlier Combust refresh during Divination: refresh if remaining < 11s
+        // Refresh Combust earlier during Divination when it is missing or expiring soon.
         if (HasDivination && InCombat && CurrentTarget != null)
         {
             bool combustMissingOrLow =
@@ -956,10 +970,12 @@ if (AutoUpgradeHoroscope &&
         {
             return true;
         }
+
         if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act))
         {
             return true;
         }
+
         if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act))
         {
             return true;
@@ -969,18 +985,22 @@ if (AutoUpgradeHoroscope &&
         {
             return true;
         }
+
         if (!FallMaleficPvE.EnoughLevel && MaleficIvPvE.EnoughLevel && MaleficIvPvE.CanUse(out act))
         {
             return true;
         }
+
         if (!MaleficIvPvE.EnoughLevel && MaleficIiiPvE.EnoughLevel && MaleficIiiPvE.CanUse(out act))
         {
             return true;
         }
+
         if (!MaleficIiiPvE.EnoughLevel && MaleficIiPvE.EnoughLevel && MaleficIiPvE.CanUse(out act))
         {
             return true;
         }
+
         if (!MaleficIiPvE.Info.EnoughLevelAndQuest() && MaleficPvE.CanUse(out act))
         {
             return true;
@@ -988,9 +1008,11 @@ if (AutoUpgradeHoroscope &&
 
         return base.GeneralGCD(out act);
     }
+
     #endregion
 
     #region Extra Methods
+
     public override bool CanHealSingleSpell
     {
         get
@@ -1022,5 +1044,6 @@ if (AutoUpgradeHoroscope &&
             return base.CanHealAreaSpell && (GCDHeal || aliveHealerCount == 1);
         }
     }
+
     #endregion
 }
