@@ -48,7 +48,7 @@ public bool RotationNotes { get; set; } = true;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Aspected Benefic")]
-    public float AspectedBeneficHeal { get; set; } = 0.6f;
+    public float AspectedBeneficHeal { get; set; } = 0.5f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Synastry")]
@@ -90,7 +90,7 @@ public bool RotationNotes { get; set; } = true;
     public float EssentialDignityLast { get; set; } = 0.6f;
 
     [RotationConfig(CombatType.PvE, Name = "Prioritize Essential Dignity over single target GCD heals when available")]
-    public EssentialPrioStrategy EssentialPrio2 { get; set; } = EssentialPrioStrategy.UseGCDs;
+    public EssentialPrioStrategy EssentialPrio2 { get; set; } = EssentialPrioStrategy.AnyCharges;
 
     public enum EssentialPrioStrategy : byte
     {
@@ -851,7 +851,7 @@ if (!IsOpen
             return true;
         }
 
-        if ((HasHeliosConjunction || HasAspectedHelios) && PartyMembersAverHP < 0.4f && HeliosPvE.CanUse(out act))
+        if ((HasHeliosConjunction || HasAspectedHelios) && PartyMembersAverHP < 0.5f && HeliosPvE.CanUse(out act))
         {
             return true;
         }
