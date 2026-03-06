@@ -159,6 +159,13 @@ internal static class DataCenter
 	internal static ConcurrentQueue<VfxNewData> VfxDataQueue { get; } = new();
 
 	/// <summary>
+	/// Players currently targeted by tankbuster VFX markers (populated from VFX queue).
+	/// </summary>
+	internal static List<IBattleChara> TankbusterTargets { get; } = [];
+
+	private static readonly Lock _tankbusterLock = new();
+
+	/// <summary>
 	/// Only recorded 15s hps.
 	/// </summary>
 	public const int HP_RECORD_TIME = 240;
@@ -541,6 +548,11 @@ internal static class DataCenter
 	/// <summary>
 	/// 
 	/// </summary>
+	public static bool TheMerchantsTaleAdvanced => IsInTerritory(1316);
+
+	/// <summary>
+	/// 
+	/// </summary>
 	public static bool TheMerchantsTale => IsInTerritory(1315);
 
 	/// <summary>
@@ -561,7 +573,7 @@ internal static class DataCenter
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool InVariantDungeon => TheMerchantsTale || AloaloIsland || MountRokkon || SildihnSubterrane;
+	public static bool InVariantDungeon => TheMerchantsTaleAdvanced || TheMerchantsTale || AloaloIsland || MountRokkon || SildihnSubterrane;
 	#endregion
 
 	#region Misc Duty Info
@@ -1750,41 +1762,58 @@ internal static class DataCenter
 		});
 	}
 
-	public static bool IsCastingTankVfx()
-	{
-		return IsCastingVfx(VfxDataQueue, s =>
-		{
-			if (!Player.Available || Player.Object == null)
-			{
-				return false;
-			}
+    public static bool IsCastingTankVfx()
+    {
+        // Populate TankbusterTargets from the VFX queue and return whether any tankbuster VFX was found.
+        lock (_tankbusterLock)
+        {
+            TankbusterTargets.Clear();
+            if (!Player.Available || Player.Object == null) return false;
 
-			if (string.IsNullOrEmpty(s.Path))
-			{
-				return false;
-			}
+            if (VfxDataQueue == null || VfxDataQueue.IsEmpty) return false;
 
-			bool isTank = TargetFilter.PlayerJobCategory(JobRole.Tank);
-			bool isPlayerTarget = s.ObjectId == Player.Object.GameObjectId;
+            bool found = false;
+            bool isTank = TargetFilter.PlayerJobCategory(JobRole.Tank);
 
-			foreach (var p in TankbusterPaths)
-			{
-				if (s.Path.StartsWith(p, PathCmp))
-				{
-					if (!isTank || isPlayerTarget)
-					{
-						if (Service.Config.InDebug)
-						{
-							PluginLog.Debug($"Tank lock-on VFX triggered: {s.Path}, ObjectId: {s.ObjectId}");
-						}
-						return true;
-					}
-				}
-			}
+            foreach (var s in VfxDataQueue)
+            {
+                try
+                {
+                    if (string.IsNullOrEmpty(s.Path)) continue;
 
-			return false;
-		});
-	}
+                    foreach (var p in TankbusterPaths)
+                    {
+                        if (!s.Path.StartsWith(p, PathCmp)) continue;
+
+                        bool isPlayerTarget = s.ObjectId == Player.Object.GameObjectId;
+
+                        if (!isTank || isPlayerTarget)
+                        {
+                            if (Service.Config.InDebug)
+                            {
+                                PluginLog.Debug($"Tank lock-on VFX triggered: {s.Path}, ObjectId: {s.ObjectId}");
+                            }
+
+                            // Try to resolve the object id to a party/alliance member and add to the list
+                            var obj = Svc.Objects.SearchById(s.ObjectId) as IBattleChara;
+                            if (obj != null && obj.IsParty() && !obj.IsDead && !TankbusterTargets.Contains(obj))
+                            {
+                                TankbusterTargets.Add(obj);
+                            }
+
+                            found = true;
+                        }
+                    }
+                }
+                catch (AccessViolationException ex)
+                {
+                    PluginLog.Warning($"AccessViolation in IsCastingTankVfx while scanning VFX: {ex.Message}");
+                }
+            }
+
+            return found;
+        }
+    }
 
 	// Improved shared AOE detection using cached sets, covers both regular and multi-hit stack markers
 	public static bool IsCastingAreaVfx()

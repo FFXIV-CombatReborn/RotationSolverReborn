@@ -364,7 +364,7 @@ public partial class CustomRotation
             return true;
         }
 
-        if (DataCenter.CurrentDutyRotation?.GeneralAbility(nextGCD, out act) == true)
+		if (DataCenter.CurrentDutyRotation?.GeneralAbility(nextGCD, out act) == true)
         {
             return true;
         }
