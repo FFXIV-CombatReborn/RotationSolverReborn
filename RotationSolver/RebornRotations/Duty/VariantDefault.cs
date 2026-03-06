@@ -16,32 +16,8 @@ internal class VariantDefault : VariantRotation
         return base.ProvokeAbility(nextGCD, out act);
     }
 
-    public override bool AttackAbility(IAction nextGCD, out IAction? act)
-    {
-		if (VariantSpiritDartPvE_46940.Info.IsOnSlot)
-		{
-			if (VariantSpiritDartPvE_46940.CanUse(out act, skipAoeCheck: true))
-			{
-				return true;
-			}
-		}
-
-		if (VariantSpiritDartPvE_33863.Info.IsOnSlot)
-        {
-            if (VariantSpiritDartPvE_33863.CanUse(out act, skipAoeCheck: true))
-            {
-                return true;
-            }
-        }
-
-        if (VariantSpiritDartPvE.Info.IsOnSlot)
-        {
-            if (VariantSpiritDartPvE.CanUse(out act, skipAoeCheck: true))
-            {
-                return true;
-            }
-        }
-
+	public override bool AttackAbility(IAction nextGCD, out IAction? act)
+	{
 		if (VariantEagleEyeShotPvE.Info.IsOnSlot)
 		{
 			if (VariantEagleEyeShotPvE.CanUse(out act))
@@ -50,8 +26,32 @@ internal class VariantDefault : VariantRotation
 			}
 		}
 
+		if (VariantSpiritDartPvE_46940.Info.IsOnSlot)
+		{
+			if (VariantSpiritDartPvE_46940.CanUse(out act, skipAoeCheck: true, usedUp: true))
+			{
+				return true;
+			}
+		}
+
+		if (VariantSpiritDartPvE_33863.Info.IsOnSlot)
+		{
+			if (VariantSpiritDartPvE_33863.CanUse(out act, skipAoeCheck: true, usedUp: true))
+			{
+				return true;
+			}
+		}
+
+		if (VariantSpiritDartPvE.Info.IsOnSlot)
+		{
+			if (VariantSpiritDartPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
+			{
+				return true;
+			}
+		}
+
 		return base.AttackAbility(nextGCD, out act);
-    }
+	}
 
     public override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {

@@ -288,9 +288,14 @@ public partial class DutyRotation : IDisposable
     /// </summary>
     public static bool ArkveldEX => DataCenter.ArkveldEX;
 
-    /// <summary>
-    /// 
-    /// </summary>
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool TheMerchantsTaleAdvanced => DataCenter.TheMerchantsTaleAdvanced;
+
+	/// <summary>
+	/// 
+	/// </summary>
 	public static bool TheMerchantsTale => DataCenter.TheMerchantsTale;
 
 	/// <summary>
