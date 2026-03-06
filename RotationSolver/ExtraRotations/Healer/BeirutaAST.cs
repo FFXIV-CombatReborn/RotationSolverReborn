@@ -10,7 +10,7 @@ public sealed class BeirutaAST : AstrologianRotation
     #region Config Options
 
     [RotationConfig(CombatType.PvE, Name =
-        "Please note that this rotation is optimised for high-end encounters.\n" +
+        "Please note that this rotation is optimised for high-end encounters (Only for countdown 8 people fights).\n" +
         "• Collective Unconscious, Horoscope, Neutral Sect, and Macrocosmos should generally be used manually or through CD planner\n" +
         "• Please set Intercept for GCD usage only\n" +
         "• Disabling AutoBurst is sufficient if you need to delay burst timing in this rotation\n" +
@@ -80,15 +80,15 @@ public sealed class BeirutaAST : AstrologianRotation
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Essential Dignity 3rd charge")]
-    public float EssentialDignityThird { get; set; } = 0.8f;
+    public float EssentialDignityThird { get; set; } = 0.7f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Essential Dignity 2nd charge")]
-    public float EssentialDignitySecond { get; set; } = 0.7f;
+    public float EssentialDignitySecond { get; set; } = 0.5f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Essential Dignity last charge")]
-    public float EssentialDignityLast { get; set; } = 0.6f;
+    public float EssentialDignityLast { get; set; } = 0.3f;
 
     [RotationConfig(CombatType.PvE, Name = "Prioritize Essential Dignity over single target GCD heals when available")]
     public EssentialPrioStrategy EssentialPrio2 { get; set; } = EssentialPrioStrategy.AnyCharges;
@@ -395,7 +395,7 @@ public sealed class BeirutaAST : AstrologianRotation
         act = null;
 
         // Prevent single-target oGCD healing while Macrocosmos is active under Giant Dominance without Earthly Dominance.
-        if (!HasDivining && HasMacrocosmos && HasGiantDominance && !HasEarthlyDominance)
+        if (HasDivining || HasMacrocosmos || HasGiantDominance || HasEarthlyDominance)
         {
             return false;
         }
@@ -416,24 +416,27 @@ public sealed class BeirutaAST : AstrologianRotation
             return true;
         }
 
-        if (EssentialDignityPvE.Cooldown.CurrentCharges == 3 &&
-            PartyMembersAverHP > 0.6f &&
+        if (!HasGiantDominance && !HasEarthlyDominance
+            && !HasMacrocosmos && EssentialDignityPvE.Cooldown.CurrentCharges == 3 &&
+            PartyMembersAverHP > 0.7f &&
             EssentialDignityPvE.CanUse(out act, usedUp: true) &&
             EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityThird)
         {
             return true;
         }
 
-        if (EssentialDignityPvE.Cooldown.CurrentCharges == 2 &&
-            PartyMembersAverHP > 0.6f &&
+        if (!HasGiantDominance && !HasEarthlyDominance
+            && !HasMacrocosmos && EssentialDignityPvE.Cooldown.CurrentCharges == 2 &&
+            PartyMembersAverHP > 0.8f &&
             EssentialDignityPvE.CanUse(out act, usedUp: true) &&
             EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignitySecond)
         {
             return true;
         }
 
-        if (EssentialDignityPvE.Cooldown.CurrentCharges == 1 &&
-            PartyMembersAverHP > 0.7f &&
+        if (!HasGiantDominance && !HasEarthlyDominance
+            && !HasMacrocosmos && EssentialDignityPvE.Cooldown.CurrentCharges == 1 &&
+            PartyMembersAverHP > 0.8f &&
             EssentialDignityPvE.CanUse(out act, usedUp: true) &&
             EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityLast)
         {
@@ -448,7 +451,8 @@ public sealed class BeirutaAST : AstrologianRotation
         }
 
         if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 1
-            && (CelestialIntersectionPvE.Target.Target?.GetHealthRatio() < 0.8f) == true
+            && (CelestialIntersectionPvE.Target.Target?.GetHealthRatio() < 0.6f) == true
+            && PartyMembersAverHP > 0.8f 
             && CelestialIntersectionPvE.CanUse(out act, usedUp: true))
         {
             return true;
@@ -488,19 +492,21 @@ public sealed class BeirutaAST : AstrologianRotation
         }
 
         // Use Celestial Opposition when not holding Giant Dominance and party average HP is below the configured threshold.
-        if (!HasGiantDominance
+        if (!HasGiantDominance && !HasEarthlyDominance
+            && !HasMacrocosmos
+            && !HasHoroscopeHelios
             && PartyMembersAverHP < CelestialOppositionHeal
             && CelestialOppositionPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (!HasHoroscope && HasHoroscopeHelios && PartyMembersAverHP < HoroscopeHeal && HoroscopePvE_16558.CanUse(out act))
+        if (!HasMacrocosmos && !HasGiantDominance && !HasEarthlyDominance && !HasHoroscope && HasHoroscopeHelios && PartyMembersAverHP < HoroscopeHeal && HoroscopePvE_16558.CanUse(out act))
         {
             return true;
         }
 
-        if (!HasHoroscope && HasHoroscopeHelios && PartyMembersAverHP < HoroscopeHeal && HoroscopePvE.CanUse(out act))
+        if (!HasMacrocosmos && !HasGiantDominance && !HasEarthlyDominance && !HasHoroscope && HasHoroscopeHelios && PartyMembersAverHP < HoroscopeHeal && HoroscopePvE.CanUse(out act))
         {
             return true;
         }
@@ -758,7 +764,7 @@ public sealed class BeirutaAST : AstrologianRotation
         act = null;
 
         // Prevent single-target GCD healing while Macrocosmos is active under Giant Dominance without Earthly Dominance.
-        if (HasMacrocosmos && HasGiantDominance && !HasEarthlyDominance)
+        if (HasMacrocosmos || HasGiantDominance || HasEarthlyDominance)
         {
             return false;
         }
@@ -786,8 +792,9 @@ public sealed class BeirutaAST : AstrologianRotation
 
         bool movingHealWindow =
             InCombat &&
-            IsMoving &&
             !HoldLastLightspeedForDivination &&
+            IsMoving &&
+            !HasLightspeed &&
             NextAbilityToNextGCD < 0.6f &&
             PartyMembersAverHP > 0.7f &&
             (AspectedBeneficPvE.Target.Target?.GetHealthRatio() < 0.8f) == true;
@@ -818,7 +825,7 @@ public sealed class BeirutaAST : AstrologianRotation
         act = null;
 
         // Prevent area GCD healing while Macrocosmos is active under Giant Dominance without Earthly Dominance.
-        if (HasMacrocosmos && HasGiantDominance && !HasEarthlyDominance)
+        if (HasMacrocosmos || HasGiantDominance || HasEarthlyDominance || HasHoroscopeHelios || (CelestialOppositionPvE.Cooldown.IsCoolingDown && !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60)))
         {
             return false;
         }
