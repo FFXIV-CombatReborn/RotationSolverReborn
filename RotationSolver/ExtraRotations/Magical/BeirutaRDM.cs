@@ -2,30 +2,31 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Magical;
 
-[Rotation("BeirutaRDM", CombatType.PvE, GameVersion = "7.4")]
+[Rotation("BeirutaRDM", CombatType.PvE, GameVersion = "7.45")]
 [SourceCode(Path = "main/ExtraRotations/Magical/BeirutaRDM.cs")]
 [ExtraRotation]
 public sealed class BeirutaRDM : RedMageRotation
-// This rotation is derived from the original Reborn Red Mage rotation and movement logic is inspired by RabbsBLM’s movement-rescue model,
-// (RDM_Reborn) and retains its core decision-making for GCD flow,
-// melee combo logic, and burst alignment.
-// Key features: 
-// Balance standard opener
-// Pot handling
-// Movement handling
-// Buff alignment for Prefulgence/Vice of Thorns
-// Melee combo hold when out of range
-// Prevent cap for mana pooling
-// Prevent wasting Swift/Dual on short casts
-
-
 {
     #region Config Options
+    [RotationConfig(CombatType.PvE, Name =
+        "Please note that this rotation is optimised for Lv100 high-end encounters.\n" +
+        "• Recommend GCD for this rotation is 2.48 or 2.49 and 2.50\n" +
+        "• It is designed for 123 Embolden 456 and 1E23456. However you may see 12E3456 in some cases\n" +
+        "• Try to stay close to the target when Embolden will be ready in ~20s if you selected triple combo before embolden\n" +
+        "• Attempts to pool 73|73 mana for triple melee combo\n" +
+        "• Intentionally maintains an 11 mana gap in certain situations\n" +
+        "• Manually use Reprise if you cannot start a combo at the end of combat\n" +
+        "• Add Embolden / Enchanted Riposte / Manafication to your burst-delay macro\n")]
+    public bool RotationNotes { get; set; } = true;
+
     [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if there are no healers alive in party)")]
     public bool GCDHeal { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Pool Black and White Mana for double combo embolden")]
+    [RotationConfig(CombatType.PvE, Name = "Pool Black and White Mana for burst Embolden")]
     public bool Pooling { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Try triple combo before embolden (You will need to get in melee range 17s before embolden is ready)")]
+    public bool TryTripleCombo { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Prevent healing during burst combos")]
     public bool PreventHeal { get; set; } = true;
@@ -42,8 +43,8 @@ public sealed class BeirutaRDM : RedMageRotation
     [RotationConfig(CombatType.PvE, Name = "Only use Embolden if in Melee range.")]
     public bool AnyonesMeleeRule { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Displacement after Engagement (use at own risk).")]
-    public bool SuicideByDumber { get; set; } = false;
+    [RotationConfig(CombatType.PvE, Name = "Use Swift/Acceleration for oGCD window alignment (Fleche/Contre drift fix, Experimental)")]
+    public bool UseWindowAlignment { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Hold melee combo up to 2s if out of range")]
     public bool HoldMeleeComboIfOutOfRange { get; set; } = true;
@@ -52,115 +53,328 @@ public sealed class BeirutaRDM : RedMageRotation
     public bool DelayBuffOGCDs { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Opener/Burst open window (GCDs)")]
-[Range(1, 3, ConfigUnitType.None, 1)]
-public OpenWindowGcd OpenWindow { get; set; } = OpenWindowGcd.TwoGcd; // default = 2 GCD
+    [Range(1, 3, ConfigUnitType.None, 1)]
+    public OpenWindowGcd OpenWindow { get; set; } = OpenWindowGcd.TwoGcd;
 
-public enum OpenWindowGcd : byte
-{
-    [Description("0 GCD (0.0s)")] ZeroGcd,
-    [Description("1 GCD (2.5s)")] OneGcd,
-    [Description("2 GCD (5.0s)")] TwoGcd,
-}
-
+    public enum OpenWindowGcd : byte
+    {
+        [Description("0 GCD (0.0s)")] ZeroGcd,
+        [Description("1 GCD (2.5s)")] OneGcd,
+        [Description("2 GCD (5.0s)")] TwoGcd,
+    }
     #endregion
 
-private static BaseAction VeraeroPvEStartUp { get; } = new BaseAction(ActionID.VeraeroPvE, false);
+    #region Static actions / constants
+    private static BaseAction VeraeroPvEStartUp { get; } = new BaseAction(ActionID.VeraeroPvE, false);
+    private static BaseAction VerthunderPvEStartUp { get; } = new BaseAction(ActionID.VerthunderPvE, false);
 
-// Hold window end time for melee combo
-private long _meleeHoldUntilMs = 0;
+    private const long BlockManaficationAfterRiposteMs = 4000;
+    private const long HoldMeleeComboMs = 2000;
+    private const long BuffOgcdDelayMs = 5000;
+    private const long AccelLockAfterEmboldenMs = 5000;
 
-// Track when we actually used Embolden so we can delay buff oGCDs consistently.
-private long _emboldenUsedAtMs = 0;
+    // Timing windows
+    private const float PoolStartBeforeEmbolden = 50f;
+    private const float TripleDecisionStart = 17f;
+    private const float UnlockAt = 5f;
 
-// Opener window = first 5 seconds of combat
-private float OpenWindowSeconds => OpenWindow switch
-{
-    OpenWindowGcd.ZeroGcd => 0f,
-    OpenWindowGcd.OneGcd  => 2.2f,
-    _                     => 5.1f, // TwoGcd
-};
+    // Mana thresholds
+    private const int TripleB = 73;
+    private const int TripleW = 73;
+    private const int DoubleB = 42;
+    private const int DoubleW = 31;
+    private const int PoolCapLow = 82;
+    private const int PoolCapHigh = 91;
+    private const int DumpCapHigh = 92;
+    private const int DumpCapLow = 81;
+    private const int TargetManaGap = 11;
 
-// Opener/Burst open window = first N seconds of combat (based on selection)
-private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
-private const float GrandImpactExtraDelaySeconds = 1.0f;
+    private const float GrandImpactExtraDelaySeconds = 3.0f;
+    #endregion
 
-private bool IsOpenForGrandImpact =>
-    InCombat && CombatTime < (OpenWindowSeconds + GrandImpactExtraDelaySeconds);
+    #region Fields
+    private long _meleeHoldUntilMs;
+    private long _emboldenUsedAtMs;
+    private long _enchantedRiposteUsedAtMs;
 
+    // If Riposte is used during the unlocked pooling window, do not gate again
+    // until Embolden has started and then fully ended.
+    private bool _riposteCommitLockActive;
+    private bool _emboldenSeenDuringCommit;
 
+    // Latch: once 73|73 has been reached in the current pooling window,
+    // triple unlock can happen at <= 17s without needing to remain at 73|73.
+    private bool _tripleComboReached;
+    #endregion
 
-// Only checks the *correct next melee step* for the combo we are currently in.
-// - Supports ST chain (Riposte -> Zwerchhau -> Redoublement)
-// - Supports AoE chain (Moulinet -> Moulinet Deux -> Moulinet Trois)
-// - Does NOT "swap" between AoE and ST mid-combo
-private bool TryContinueCurrentMeleeCombo(out IAction? act)
-{
-    act = null;
+    #region Shared state helpers
+    private bool InMeleeRange3 => NumberOfHostilesInRangeOf(3) > 0;
+    private bool InCombatWithTarget => InCombat && (HasHostilesInRange || HasHostilesInMaxRange);
 
-    // --- AoE combo continuation ---
-    // If we are already in AoE chain, ONLY try the next AoE step.
-    if (IsLastGCD(false, EnchantedMoulinetDeuxPvE))
+    private bool NearManaCap =>
+        (BlackMana >= DumpCapHigh && WhiteMana >= DumpCapLow) ||
+        (WhiteMana >= DumpCapHigh && BlackMana >= DumpCapLow);
+
+    private bool NearPoolingCap =>
+        (BlackMana >= PoolCapHigh && WhiteMana >= PoolCapLow) ||
+        (WhiteMana >= PoolCapHigh && BlackMana >= PoolCapLow);
+
+    private float OpenWindowSeconds => OpenWindow switch
     {
-        return EnchantedMoulinetTroisPvE.CanUse(out act);
+        OpenWindowGcd.ZeroGcd => 0f,
+        OpenWindowGcd.OneGcd => 2.2f,
+        _ => 5f,
+    };
+
+    private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
+
+    private bool IsOpenForGrandImpact =>
+        InCombat && CombatTime < (OpenWindowSeconds + GrandImpactExtraDelaySeconds);
+
+    private bool HasInstantBuffToSpend =>
+        HasDualcast || HasSwift || (IsOpen && HasAccelerate);
+
+    private bool HasAnyInstantTool =>
+        HasSwift || HasDualcast || HasAccelerate || (!IsOpenForGrandImpact && CanGrandImpact);
+
+    private bool InFinisherChain()
+    {
+        return
+            ManaStacks == 3 ||
+            IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE, ActionID.ScorchPvE) ||
+            ScorchPvE.CanUse(out _) ||
+            ResolutionPvE.CanUse(out _);
     }
-    if (IsLastGCD(false, EnchantedMoulinetPvE))
+
+    private static float EstimateRemainingSeconds(dynamic cooldown, float maxProbeSeconds, float stepSeconds = 0.5f)
     {
-        return EnchantedMoulinetDeuxPvE.CanUse(out act);
+        if (cooldown.HasOneCharge) return 0f;
+
+        for (float t = 0f; t <= maxProbeSeconds; t += stepSeconds)
+        {
+            if (cooldown.WillHaveOneCharge(t))
+                return t;
+        }
+
+        return -1f;
     }
 
-    // --- ST combo continuation ---
-    // If we are already in ST chain, ONLY try the next ST step.
-    // (Your framework already handles range differences via CanUse on _45960 vs normal.)
-    if (IsLastGCD(true, EnchantedZwerchhauPvE_45961) || IsLastGCD(true, EnchantedZwerchhauPvE))
+    private float EmboldenRem()
     {
-        if (EnchantedRedoublementPvE_45962.CanUse(out act)) return true;
-        if (EnchantedRedoublementPvE.CanUse(out act)) return true;
+        if (!EmboldenPvE.EnoughLevel) return -1f;
+        return EstimateRemainingSeconds(EmboldenPvE.Cooldown, 60f, 0.5f);
+    }
+
+    private bool IsPoolingWindow(float embRem) =>
+        Pooling && InCombat && EmboldenPvE.EnoughLevel && !HasEmbolden && embRem >= 0f && embRem <= PoolStartBeforeEmbolden;
+
+    private void UpdateTripleComboReached(float embRem)
+    {
+        if (!IsPoolingWindow(embRem))
+        {
+            _tripleComboReached = false;
+            return;
+        }
+
+        if (!_tripleComboReached && BlackMana >= TripleB && WhiteMana >= TripleW)
+            _tripleComboReached = true;
+    }
+
+    private bool IsBlockingManaficationAfterRiposte()
+    {
+        long now = Environment.TickCount64;
+        return _enchantedRiposteUsedAtMs != 0
+               && (now - _enchantedRiposteUsedAtMs) < BlockManaficationAfterRiposteMs;
+    }
+
+    private void UpdateRiposteCommitLock()
+    {
+        if (!_riposteCommitLockActive)
+        {
+            _emboldenSeenDuringCommit = false;
+            return;
+        }
+
+        if (HasEmbolden)
+            _emboldenSeenDuringCommit = true;
+
+        if (_emboldenSeenDuringCommit && !HasEmbolden)
+        {
+            _riposteCommitLockActive = false;
+            _emboldenSeenDuringCommit = false;
+        }
+    }
+
+    private bool ShouldGateRiposteAndManafication(float embRem)
+    {
+        if (HasEmbolden) return false;
+        if (_riposteCommitLockActive) return false;
+        if (!IsPoolingWindow(embRem)) return false;
+
+        if (embRem <= UnlockAt) return false;
+        if (TryTripleCombo && embRem <= TripleDecisionStart && _tripleComboReached) return false;
+
+        return true;
+    }
+
+    private bool IsRiposteCommitWindow(float embRem) =>
+        IsPoolingWindow(embRem) && !ShouldGateRiposteAndManafication(embRem);
+
+    private static bool NextGcdIsBlockedForInstants(IAction nextGCD)
+    {
+        return nextGCD.IsTheSameTo(true,
+            ActionID.EnchantedReprisePvE,
+            ActionID.EnchantedRipostePvE, ActionID.EnchantedRipostePvE_45960,
+            ActionID.EnchantedZwerchhauPvE, ActionID.EnchantedZwerchhauPvE_45961,
+            ActionID.EnchantedRedoublementPvE, ActionID.EnchantedRedoublementPvE_45962,
+            ActionID.VerholyPvE, ActionID.VerflarePvE,
+            ActionID.ScorchPvE, ActionID.ResolutionPvE
+        );
+    }
+
+    private static bool NextGcdIsAnyMeleeStep(IAction nextGCD)
+    {
+        return nextGCD.IsTheSameTo(true,
+            ActionID.RipostePvE, ActionID.ZwerchhauPvE, ActionID.RedoublementPvE,
+            ActionID.MoulinetPvE, ActionID.ReprisePvE,
+            ActionID.EnchantedRipostePvE, ActionID.EnchantedRipostePvE_45960,
+            ActionID.EnchantedZwerchhauPvE, ActionID.EnchantedZwerchhauPvE_45961,
+            ActionID.EnchantedRedoublementPvE, ActionID.EnchantedRedoublementPvE_45962,
+            ActionID.EnchantedReprisePvE
+        );
+    }
+    #endregion
+
+    #region Spell selection helpers
+    private bool TrySelectTwoAimingGap11(out IAction? act)
+    {
+        act = null;
+
+        int diff = BlackMana - WhiteMana;
+        int gap = Math.Abs(diff);
+        bool blackLeads = diff >= 0;
+
+        bool TryAero(out IAction? a)
+        {
+            if (VeraeroIiiPvE.CanUse(out a, skipStatusProvideCheck: true)) return true;
+            if (VeraeroPvE.CanUse(out a, skipStatusProvideCheck: true)) return true;
+            a = null;
+            return false;
+        }
+
+        bool TryThunder(out IAction? a)
+        {
+            if (VerthunderIiiPvE.CanUse(out a, skipStatusProvideCheck: true)) return true;
+            if (VerthunderPvE.CanUse(out a, skipStatusProvideCheck: true)) return true;
+            a = null;
+            return false;
+        }
+
+        bool belowDouble = BlackMana < DoubleB || WhiteMana < DoubleW;
+        bool atOrAboveTriple = BlackMana >= TripleB && WhiteMana >= TripleW;
+        bool betweenBands = !belowDouble && !atOrAboveTriple;
+
+        if (betweenBands)
+        {
+            if (diff > 0) return TryAero(out act) || TryThunder(out act);
+            if (diff < 0) return TryThunder(out act) || TryAero(out act);
+            return TryThunder(out act) || TryAero(out act);
+        }
+
+        if (gap > TargetManaGap)
+            return blackLeads ? (TryAero(out act) || TryThunder(out act))
+                              : (TryThunder(out act) || TryAero(out act));
+
+        if (gap < TargetManaGap)
+            return blackLeads ? (TryThunder(out act) || TryAero(out act))
+                              : (TryAero(out act) || TryThunder(out act));
+
+        return blackLeads ? (TryThunder(out act) || TryAero(out act))
+                          : (TryAero(out act) || TryThunder(out act));
+    }
+
+    private bool ShouldHighManaDumpWithEnchantedReprise()
+    {
+        float embRem = EmboldenRem();
+        bool gateRipMana = ShouldGateRiposteAndManafication(embRem);
+
+        return NearManaCap
+               && !gateRipMana
+               && !InMeleeRange3
+               && !CanMagickedSwordplay
+               && !IsInMeleeCombo
+               && !InFinisherChain()
+               && ManaStacks == 0;
+    }
+
+    private bool TryContinueCurrentMeleeCombo(out IAction? act)
+    {
+        act = null;
+
+        if (IsLastGCD(false, EnchantedMoulinetDeuxPvE))
+            return EnchantedMoulinetTroisPvE.CanUse(out act);
+
+        if (IsLastGCD(false, EnchantedMoulinetPvE))
+            return EnchantedMoulinetDeuxPvE.CanUse(out act);
+
+        if (IsLastGCD(true, EnchantedZwerchhauPvE_45961) || IsLastGCD(true, EnchantedZwerchhauPvE))
+            return EnchantedRedoublementPvE_45962.CanUse(out act) || EnchantedRedoublementPvE.CanUse(out act);
+
+        if (IsLastGCD(true, EnchantedRipostePvE_45960) || IsLastGCD(true, EnchantedRipostePvE))
+            return EnchantedZwerchhauPvE_45961.CanUse(out act) || EnchantedZwerchhauPvE.CanUse(out act);
+
         return false;
     }
 
-    if (IsLastGCD(true, EnchantedRipostePvE_45960) || IsLastGCD(true, EnchantedRipostePvE))
+    private bool IsLastRiposteStarter()
     {
-        if (EnchantedZwerchhauPvE_45961.CanUse(out act)) return true;
-        if (EnchantedZwerchhauPvE.CanUse(out act)) return true;
-        return false;
+        return IsLastGCD(true, EnchantedRipostePvE_45960) || IsLastGCD(true, EnchantedRipostePvE);
     }
 
-    // If we're "in melee combo" but last GCD isn't clearly one of the above,
-    // we don't force anything here—just report we can't continue.
-    // (This avoids accidentally starting the wrong chain.)
-    return false;
-}
-private bool InFinisherChain()
-{
-    return
-        ManaStacks == 3 ||
-        IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE, ActionID.ScorchPvE) ||
-        ScorchPvE.CanUse(out _) ||
-        ResolutionPvE.CanUse(out _);
-}
+    private bool TryRiposteStarter(out IAction? act, float embRem)
+    {
+        UpdateRiposteCommitLock();
+
+        if (ShouldGateRiposteAndManafication(embRem))
+        {
+            act = null;
+            return false;
+        }
+
+        if (!HasSwift && !HasDualcast && EnchantedRipostePvE.CanUse(out act))
+        {
+            _enchantedRiposteUsedAtMs = Environment.TickCount64;
+            if (IsRiposteCommitWindow(embRem)) _riposteCommitLockActive = true;
+            return true;
+        }
+
+        if (!HasSwift && !HasDualcast && !InMeleeRange3 && HasManafication && EnchantedRipostePvE_45960.CanUse(out act))
+        {
+            _enchantedRiposteUsedAtMs = Environment.TickCount64;
+            if (IsRiposteCommitWindow(embRem)) _riposteCommitLockActive = true;
+            return true;
+        }
+
+        act = null;
+        return false;
+    }
+    #endregion
 
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
-        if (remainTime < VeraeroPvEStartUp.Info.CastTime + CountDownAhead)
-        {
-            if (VeraeroPvEStartUp.CanUse(out IAction? act))
-            {
-                return act;
-            }
-        }
+        if (HasDualcast && VerthunderPvEStartUp.CanUse(out IAction? act))
+            return act;
 
-        //Remove Swift
+        if (remainTime < VeraeroPvEStartUp.Info.CastTime + CountDownAhead
+            && VeraeroPvEStartUp.CanUse(out act))
+            return act;
 
         if (HasAccelerate && remainTime < 0f)
-        {
             StatusHelper.StatusOff(StatusID.Acceleration);
-        }
 
         if (HasSwift && remainTime < 0f)
-        {
             StatusHelper.StatusOff(StatusID.Swiftcast);
-        }
 
         return base.CountDownAction(remainTime);
     }
@@ -171,9 +385,7 @@ private bool InFinisherChain()
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
         if (CorpsacorpsPvE.CanUse(out act, usedUp: true))
-        {
             return true;
-        }
 
         return base.MoveForwardAbility(nextGCD, out act);
     }
@@ -182,9 +394,7 @@ private bool InFinisherChain()
     protected override bool MoveBackAbility(IAction nextGCD, out IAction? act)
     {
         if (DisplacementPvE.CanUse(out act, usedUp: true))
-        {
             return true;
-        }
 
         return base.MoveBackAbility(nextGCD, out act);
     }
@@ -193,146 +403,145 @@ private bool InFinisherChain()
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
         if (AddlePvE.CanUse(out act))
-        {
             return true;
-        }
 
         if (MagickBarrierPvE.CanUse(out act))
-        {
             return true;
-        }
 
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        bool AnyoneInMeleeRange = NumberOfHostilesInRangeOf(3) > 0;
+        UpdateRiposteCommitLock();
+        float embRem = EmboldenRem();
+        UpdateTripleComboReached(embRem);
 
-		if (!IsOpen
-    && (HasEmbolden || EmboldenPvE.Cooldown.HasOneCharge || (EmboldenPvE.Cooldown.WillHaveOneCharge(4f) && !IsInMeleeCombo)))
-{
-			if (InCombat && HasHostilesInMaxRange && ManaficationPvE.CanUse(out act))
-			{
-				return true;
-			}
-		}
+        bool gateRipMana = ShouldGateRiposteAndManafication(embRem);
+        bool blockManaficationNow = (NearManaCap && InMeleeRange3) || IsBlockingManaficationAfterRiposte();
 
-	if (!AnyonesMeleeRule)
-{
-    if (!IsOpen && IsBurst && InCombat && HasHostilesInRange && EmboldenPvE.CanUse(out act))
-    {
-        _emboldenUsedAtMs = Environment.TickCount64;
-
-        return true;
-    }
-}
-else // AnyonesMeleeRule
-{
-    if (!IsOpen && IsBurst && InCombat && AnyoneInMeleeRange && EmboldenPvE.CanUse(out act))
-    {
-        _emboldenUsedAtMs = Environment.TickCount64;
-        return true;
-    }
-}
-
-
-		return base.EmergencyAbility(nextGCD, out act);
-	}
-
-	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
-{
-    bool Meleecheck = nextGCD.IsTheSameTo(true,
-        ActionID.RipostePvE, ActionID.ZwerchhauPvE, ActionID.RedoublementPvE,
-        ActionID.MoulinetPvE, ActionID.ReprisePvE);
-
-    act = null;
-
-// ---------------------------
-// Finishers window (used for Swift gating etc.)
-// ---------------------------
-bool finisherChain =
-    ManaStacks == 3 ||
-    IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE, ActionID.ScorchPvE) ||
-    ScorchPvE.CanUse(out _) ||
-    ResolutionPvE.CanUse(out _);
-
-bool blockSwift = IsInMeleeCombo || finisherChain;
-
-// ---------------------------
-// Accel hold rules:
-// - Do NOT press Accel when Embolden will be ready within 10s AND we already have 50/50+ mana
-//   (likely holding for burst; Accel may expire before being spent).
-// - Do NOT press Accel for the first 10s after Embolden was used (aligns with your delayed oGCD plan).
-// ---------------------------
-long nowMs = Environment.TickCount64;
-
-bool emboldenSoon =
-    EmboldenPvE.EnoughLevel
-    && !HasEmbolden
-    && EmboldenPvE.Cooldown.WillHaveOneCharge(10f);
-
-bool burstPrepHoldAccel =
-    emboldenSoon
-    && ManaStacks == 0
-    && BlackMana >= 50
-    && WhiteMana >= 50
-    && !IsInMeleeCombo;
-
-const long accelLockAfterEmboldenMs = 5000;
-bool inFirst5sAfterEmbolden =
-    _emboldenUsedAtMs != 0
-    && (nowMs - _emboldenUsedAtMs) < accelLockAfterEmboldenMs;
-
-bool blockAccel = burstPrepHoldAccel || inFirst5sAfterEmbolden;
-
-
-    // "Next GCD is instant" approximation ---
-    bool nextIsInstant = HasDualcast || HasSwift || HasAccelerate || (!IsOpenForGrandImpact && CanGrandImpact);
-bool openerNeedsInstant = IsOpen && !nextIsInstant;
-bool needsMovementRescue =
-    InCombat && HasHostilesInMaxRange && (IsMoving || openerNeedsInstant) && !nextIsInstant;
-
-
-    // ---------------------------
-    // If moving and next GCD isn't instant, force Acceleration/Swift so we don't drop casts.
-    // ---------------------------
-    if (needsMovementRescue)
-    {
-        // Don't interfere with melee steps / melee combo.
-        if (!Meleecheck && !IsInMeleeCombo)
+        if (!blockManaficationNow && !gateRipMana)
         {
-            // Optional: only attempt if we have a safe weave window.
-            // If it prevents usage too often, delete this if+braces.
-            if (IsOpen || NextAbilityToNextGCD < 0.6f)
+            bool canUseManaficationNormally =
+                !IsOpen &&
+                (HasEmbolden || EmboldenPvE.Cooldown.HasOneCharge || (EmboldenPvE.Cooldown.WillHaveOneCharge(4f) && !IsInMeleeCombo));
+
+            if (canUseManaficationNormally && InCombat && HasHostilesInMaxRange && ManaficationPvE.CanUse(out act))
+                return true;
+        }
+
+        bool emboldenAllowed = !IsOpen && IsBurst && InCombat && (AnyonesMeleeRule ? InMeleeRange3 : HasHostilesInRange);
+        if (emboldenAllowed && EmboldenPvE.CanUse(out act))
+        {
+            _emboldenUsedAtMs = Environment.TickCount64;
+            return true;
+        }
+
+        if (UseWindowAlignment)
 {
-if (IsOpen)
+    long now = Environment.TickCount64;
+
+    bool emboldenSoon = EmboldenPvE.EnoughLevel && !HasEmbolden && EmboldenPvE.Cooldown.WillHaveOneCharge(10f);
+    bool burstPrepHoldAccel = emboldenSoon && ManaStacks == 0 && BlackMana >= 50 && WhiteMana >= 50 && !IsInMeleeCombo;
+    bool inFirst5sAfterEmbolden = _emboldenUsedAtMs != 0 && (now - _emboldenUsedAtMs) < AccelLockAfterEmboldenMs;
+    bool blockAccel = burstPrepHoldAccel || inFirst5sAfterEmbolden;
+
+    bool nextIsInstant = HasDualcast || HasSwift || HasAccelerate || (!IsOpenForGrandImpact && CanGrandImpact);
+    bool finisherChain = InFinisherChain();
+    bool meleeStepComing = NextGcdIsAnyMeleeStep(nextGCD);
+    bool blockInstantOgcds = NextGcdIsBlockedForInstants(nextGCD);
+
+    bool allowAlignmentFix =
+        InCombatWithTarget
+        && !IsInMeleeCombo
+        && !finisherChain
+        && !meleeStepComing
+        && !blockInstantOgcds;
+
+    if (allowAlignmentFix && !nextIsInstant)
     {
-        // 1) Swift
+        float flecheRem = EstimateRemainingSeconds(FlechePvE.Cooldown, 25f, 0.5f);
+        float contreRem = EstimateRemainingSeconds(ContreSixtePvE.Cooldown, 35f, 0.5f);
+        const float alignBuffer = 0.15f;
+
+        bool flecheReadyByNextSlot =
+            flecheRem >= 0f &&
+            flecheRem <= NextAbilityToNextGCD + alignBuffer;
+
+        bool contreReadyByNextSlot =
+            contreRem >= 0f &&
+            contreRem <= NextAbilityToNextGCD + alignBuffer;
+
+        if (flecheReadyByNextSlot || contreReadyByNextSlot)
+        {
+            if (AccelerationPvE.EnoughLevel
+                && !blockAccel
+                && !blockInstantOgcds
+                && !HasAccelerate
+                && !CanGrandImpact
+                && AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+                return true;
+
+            if (!HasSwift && SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+                return true;
+        }
+    }
+}
+
+return base.EmergencyAbility(nextGCD, out act);
+    }
+
+    protected override bool AttackAbility(IAction nextGCD, out IAction? act)
+    {
+        act = null;
+
+        bool meleeCheck = NextGcdIsAnyMeleeStep(nextGCD);
+        bool finisherChain = InFinisherChain();
+        bool blockInstantOgcds = NextGcdIsBlockedForInstants(nextGCD);
+        bool blockSwift = IsInMeleeCombo || finisherChain || blockInstantOgcds;
+
+        long now = Environment.TickCount64;
+
+        bool emboldenSoon = EmboldenPvE.EnoughLevel && !HasEmbolden && EmboldenPvE.Cooldown.WillHaveOneCharge(10f);
+        bool burstPrepHoldAccel = emboldenSoon && ManaStacks == 0 && BlackMana >= 50 && WhiteMana >= 50 && !IsInMeleeCombo;
+        bool inFirst5sAfterEmbolden = _emboldenUsedAtMs != 0 && (now - _emboldenUsedAtMs) < AccelLockAfterEmboldenMs;
+        bool blockAccel = burstPrepHoldAccel || inFirst5sAfterEmbolden;
+
+        bool nextIsInstant = HasDualcast || HasSwift || HasAccelerate || (!IsOpenForGrandImpact && CanGrandImpact);
+        bool openerNeedsInstant = IsOpen && !nextIsInstant;
+
+        bool needsMovementRescue =
+            InCombat
+            && HasHostilesInMaxRange
+            && (IsMoving || openerNeedsInstant)
+            && !nextIsInstant;
+
+        if (needsMovementRescue && !meleeCheck && !IsInMeleeCombo)
+{
+    if (IsOpen)
+    {
         if (!blockSwift && SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
             return true;
 
-        // 2) Pot
-        if (InCombat && UseBurstMedicine(out act))
+        if (UseBurstMedicine(out act))
             return true;
 
-        // 3) Fleche
         if (FlechePvE.CanUse(out act))
             return true;
 
-        // 4) Accel
         if (AccelerationPvE.EnoughLevel
             && !blockAccel
+            && !blockInstantOgcds
             && !HasSwift
             && !CanGrandImpact
             && AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
             return true;
     }
-    else
+    else if (NextAbilityToNextGCD < 0.6f)
     {
-        // Normal priority: Accel first, then Swift (your original behaviour)
         if (AccelerationPvE.EnoughLevel
             && !blockAccel
+            && !blockInstantOgcds
             && !HasSwift
             && !CanGrandImpact
             && AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
@@ -342,148 +551,98 @@ if (IsOpen)
             return true;
     }
 }
-        }
-    }
-
-
-// ---------------------------
-// Acceleration usage (skip if movement rescue needed this frame)
-// ---------------------------
-if (!needsMovementRescue && AccelerationPvE.EnoughLevel && !Meleecheck && !blockAccel)
-{
-    if (!CanGrandImpact && InCombat && HasHostilesInMaxRange)
-    {
-            if (!EnhancedAccelerationTrait.EnoughLevel)
+        if (!needsMovementRescue && AccelerationPvE.EnoughLevel && !meleeCheck && !blockAccel && !blockInstantOgcds)
+        {
+            if (!CanGrandImpact && InCombat && HasHostilesInMaxRange)
             {
-                if (HasEmbolden || !EmboldenPvE.EnoughLevel)
+                bool usedUp = HasEmbolden || !EmboldenPvE.EnoughLevel || AccelerationPvE.Cooldown.WillHaveXChargesGCD(2, 1);
+
+                if (!EnhancedAccelerationTrait.EnoughLevel)
                 {
-                    if (AccelerationPvE.CanUse(out act))
+                    if (HasEmbolden || !EmboldenPvE.EnoughLevel)
+                    {
+                        if (AccelerationPvE.CanUse(out act))
+                            return true;
+                    }
+                }
+                else
+                {
+                    if (AccelerationPvE.CanUse(out act, usedUp: usedUp))
                         return true;
                 }
             }
-
-            if (EnhancedAccelerationTrait.EnoughLevel && !EnhancedAccelerationIiTrait.EnoughLevel)
-            {
-                if (AccelerationPvE.CanUse(out act, usedUp: HasEmbolden || !EmboldenPvE.EnoughLevel || AccelerationPvE.Cooldown.WillHaveXChargesGCD(2, 1)))
-                    return true;
-            }
-
-            if (EnhancedAccelerationIiTrait.EnoughLevel)
-            {
-                if (AccelerationPvE.CanUse(out act, usedUp: HasEmbolden || !EmboldenPvE.EnoughLevel || AccelerationPvE.Cooldown.WillHaveXChargesGCD(2, 1)))
-                    return true;
-            }
         }
-    }
-    // ---------------------------
-    // Swiftcast usage (skip if movement rescue needed this frame)
-    // ---------------------------
-    bool swiftHardGate =
-    InCombat
-    && (HasHostilesInMaxRange || HasHostilesInRange) // must have a valid hostile target state
-    && ManaStacks != 3;                              // never during finishers window
 
- if (swiftHardGate
-    && !needsMovementRescue
-    && !blockSwift
-    && !HasSwift
-    && (HasEmbolden || (EmboldenPvE.EnoughLevel && !EmboldenPvE.Cooldown.WillHaveOneCharge(30)) || !EmboldenPvE.EnoughLevel))
-{
-    if (!HasAccelerate && !HasDualcast && !Meleecheck && !CanVerBoth)
-    {
-            if (!CanVerFire && !CanVerStone && IsLastGCD(false, VerthunderPvE, VerthunderIiiPvE, VeraeroPvE, VeraeroIiiPvE))
-            {
-                if (SwiftcastPvE.CanUse(out act))
-                    return true;
-            }
+        bool swiftHardGate = InCombat && InCombatWithTarget && ManaStacks != 3;
 
-            if (!CanVerStone && nextGCD.IsTheSameTo(false, VeraeroPvE, VeraeroIiiPvE))
-            {
-                if (SwiftcastPvE.CanUse(out act))
-                    return true;
-            }
-
-            if (!CanVerFire && nextGCD.IsTheSameTo(false, VerthunderPvE, VerthunderIiiPvE))
-            {
-                if (SwiftcastPvE.CanUse(out act))
-                    return true;
-            }
-        }
-    }
-
-
-    if (FlechePvE.CanUse(out act))
-        return true;
-
-if (!IsOpenForGrandImpact && ContreSixtePvE.CanUse(out act))
-    return true;
-
-
-// ---------------------------
-// Prefulgence / Vice alignment option
-// Off  -> original behaviour
-// On   -> only use during Embolden, and only after ~6s (CD <= 114s)
-//        Prefulgence has a safety: if the ready buff is about to expire, use it.
-// ---------------------------
-
-const long delayMs = 5000; 
-
-bool emboldenDelayOK =
-    !DelayBuffOGCDs ||
-    (_emboldenUsedAtMs == 0) ||
-    (Environment.TickCount64 - _emboldenUsedAtMs >= delayMs);
-
-
-// Prefulgence
-if (!DelayBuffOGCDs)
-{
-    if ((HasEmbolden || StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.PrefulgenceReady))
-        && PrefulgencePvE.CanUse(out act))
-    {
-        return true;
-    }
-}
-else
-{
-    // delayed behaviour: only inside Embolden, ~6s in
-    if (HasEmbolden
-        && (emboldenDelayOK || StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.PrefulgenceReady))
-        && PrefulgencePvE.CanUse(out act))
-    {
-        return true;
-    }
-}
-
-// Vice of Thorns
-if (!DelayBuffOGCDs)
-{
-    if (ViceOfThornsPvE.CanUse(out act))
-    {
-        return true;
-    }
-}
-else
-{
-// delayed behaviour: only inside Embolden, ~6s in
-    if (HasEmbolden && emboldenDelayOK && ViceOfThornsPvE.CanUse(out act))
-    {
-        return true;
-    }
-}
-
-        if (SuicideByDumber && EngagementPvE.Cooldown.CurrentCharges == 1 && DisplacementPvE.CanUse(out act, usedUp: true))
+        if (swiftHardGate
+            && !needsMovementRescue
+            && !blockSwift
+            && !HasSwift
+            && (HasEmbolden || (EmboldenPvE.EnoughLevel && !EmboldenPvE.Cooldown.WillHaveOneCharge(30)) || !EmboldenPvE.EnoughLevel))
         {
-            return true;
+            if (!HasAccelerate && !HasDualcast && !meleeCheck && !CanVerBoth)
+            {
+                if (!CanVerFire && !CanVerStone && IsLastGCD(false, VerthunderPvE, VerthunderIiiPvE, VeraeroPvE, VeraeroIiiPvE))
+                {
+                    if (SwiftcastPvE.CanUse(out act))
+                        return true;
+                }
+
+                if (!CanVerStone && nextGCD.IsTheSameTo(false, VeraeroPvE, VeraeroIiiPvE))
+                {
+                    if (SwiftcastPvE.CanUse(out act))
+                        return true;
+                }
+
+                if (!CanVerFire && nextGCD.IsTheSameTo(false, VerthunderPvE, VerthunderIiiPvE))
+                {
+                    if (SwiftcastPvE.CanUse(out act))
+                        return true;
+                }
+            }
         }
 
-        if (EngagementPvE.CanUse(out act, usedUp: HasEmbolden || !EmboldenPvE.EnoughLevel || EngagementPvE.Cooldown.WillHaveXChargesGCD(2, 1)))
-        {
+        if (FlechePvE.CanUse(out act))
             return true;
+
+        if (!IsOpenForGrandImpact && ContreSixtePvE.CanUse(out act))
+            return true;
+
+        bool emboldenDelayOK =
+            !DelayBuffOGCDs ||
+            _emboldenUsedAtMs == 0 ||
+            (Environment.TickCount64 - _emboldenUsedAtMs >= BuffOgcdDelayMs);
+
+        if (!DelayBuffOGCDs)
+        {
+            if ((HasEmbolden || StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.PrefulgenceReady))
+                && PrefulgencePvE.CanUse(out act))
+                return true;
+
+            if (ViceOfThornsPvE.CanUse(out act))
+                return true;
+        }
+        else
+        {
+            if (HasEmbolden
+                && (emboldenDelayOK || StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.PrefulgenceReady))
+                && PrefulgencePvE.CanUse(out act))
+                return true;
+
+            if (HasEmbolden && emboldenDelayOK && ViceOfThornsPvE.CanUse(out act))
+                return true;
         }
 
-        if (!IsMoving && CorpsacorpsPvE.CanUse(out act, usedUp: HasEmbolden || !EmboldenPvE.EnoughLevel || CorpsacorpsPvE.Cooldown.WillHaveXChargesGCD(2, 1)))
+        if (InCombat && !IsOpen)
         {
-            return true;
+            bool usedUp = HasEmbolden || !EmboldenPvE.EnoughLevel;
+
+            if (!IsOpenForGrandImpact && EngagementPvE.CanUse(out act, usedUp: usedUp || EngagementPvE.Cooldown.WillHaveXChargesGCD(2, 1)))
+                return true;
+
+            if (!IsOpenForGrandImpact && !IsMoving && CorpsacorpsPvE.CanUse(out act, usedUp: usedUp || CorpsacorpsPvE.Cooldown.WillHaveXChargesGCD(2, 1)))
+                return true;
         }
 
         return base.AttackAbility(nextGCD, out act);
@@ -491,16 +650,22 @@ else
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        if (HasEmbolden && InCombat && UseBurstMedicine(out act))
-        {
+        bool emboldenReadyIn15 = EmboldenPvE.EnoughLevel && EmboldenPvE.Cooldown.WillHaveOneCharge(15f);
+
+        if (IsOpen && IsBurst && UseBurstMedicine(out act))
+                    return true;
+
+        if (!IsOpen && IsBurst && InCombat && emboldenReadyIn15 && IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE, ActionID.ScorchPvE) && UseBurstMedicine(out act))
             return true;
-        }
+
+        if (!IsOpen && HasEmbolden && InCombat && UseBurstMedicine(out act))
+            return true;
 
         return base.GeneralAbility(nextGCD, out act);
     }
     #endregion
 
-    #region GCD Logic
+    #region GCD Ladder
     [RotationDesc(ActionID.VercurePvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
@@ -515,9 +680,7 @@ else
         }
 
         if (VercurePvE.CanUse(out act, skipStatusProvideCheck: true))
-        {
             return true;
-        }
 
         return base.HealSingleGCD(out act);
     }
@@ -527,7 +690,7 @@ else
     {
         if (PreventRaising)
         {
-            if (HasManafication || HasEmbolden || ManaStacks == 3 || CanMagickedSwordplay || CanGrandImpact 
+            if (HasManafication || HasEmbolden || ManaStacks == 3 || CanMagickedSwordplay || CanGrandImpact
                 || ScorchPvE.CanUse(out _) || ResolutionPvE.CanUse(out _)
                 || IsLastComboAction(ActionID.RipostePvE, ActionID.ZwerchhauPvE))
             {
@@ -536,651 +699,466 @@ else
         }
 
         if (VerraisePvE.CanUse(out act))
-        {
             return true;
-        }
 
         return base.RaiseGCD(out act);
     }
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        bool hasInstantBuffToSpend = HasDualcast || HasSwift || (IsOpen && HasAccelerate);
+        UpdateRiposteCommitLock();
 
-// ---------------------------
-// Opener: first 5s of combat
-// Countdown already gives Dualcast from Veraero.
-// Spend instants on "2" (Thunder/Aero/Impact), never on "1" or Jolt.
-// ---------------------------
-if (IsOpen
-    && !IsInMeleeCombo
-    && ManaStacks != 3
-    && InCombat
-    && HasHostilesInMaxRange)
-{
-    bool hasInstant = HasDualcast || HasSwift || HasAccelerate;
-    if (hasInstant)
+        float embRem = EmboldenRem();
+        UpdateTripleComboReached(embRem);
+
+        // Final ladder:
+        // 1. opener
+        // 2. finishers
+        // 3. combo continuation
+        // 4. combo starter
+        // 5. reprise
+        // 6. grand impact
+        // 7. long cast 2 / instant 2
+        // 8. proc
+        // 9. filler
+
+        if (TryOpenerGCD(out act)) return true;
+        if (TryFinisherGCD(out act)) return true;
+        if (TryContinueComboGCD(out act)) return true;
+        if (TryStartComboGCD(out act, embRem)) return true;
+        if (TryRepriseGCD(out act)) return true;
+        if (TryGrandImpactGCD(out act)) return true;
+        if (TryLongCastTwoGCD(out act)) return true;
+        if (TryProcGCD(out act)) return true;
+        if (TryFallbackGCD(out act)) return true;
+
+        return base.GeneralGCD(out act);
+    }
+
+    private bool TryOpenerGCD(out IAction? act)
     {
-        int targets = NumberOfHostilesInRangeOf(5);
+        act = null;
 
-        // Opener AoE rule:
-        // - If Accel is up, Impact is worth it at 2+
-        // - Otherwise, only at 3+
+        if (!IsOpen || IsInMeleeCombo || ManaStacks == 3 || !InCombat || !HasHostilesInMaxRange)
+            return false;
+
+        bool hasInstant = HasDualcast || HasSwift || HasAccelerate;
+        if (!hasInstant) return false;
+
+        int targets = NumberOfHostilesInRangeOf(5);
         int impactThreshold = HasAccelerate ? 2 : 3;
 
         if (targets >= impactThreshold && ImpactPvE.CanUse(out act))
             return true;
 
-        // ST opener rule: always Verthunder line (ignore mana/procs)
         if (VerthunderIiiPvE.CanUse(out act)) return true;
         if (VerthunderPvE.CanUse(out act)) return true;
-    }
-}
 
-
-		if (ManaStacks == 3)
-		{
-			int diff = BlackMana - WhiteMana;
-			int gap = Math.Abs(diff);
-
-			bool forceBalance = HasEmbolden || gap >= 19;
-
-			if (forceBalance)
-			{
-				// Balance first
-				if (diff > 0 && VerholyPvE.CanUse(out act)) return true; 
-				if (diff < 0 && VerflarePvE.CanUse(out act)) return true; 
-			}
-			else
-			{
-				// Slight imbalance: proc-aware preference to avoid overwriting existing procs
-				if (CanVerFire && VerholyPvE.CanUse(out act)) return true;
-				if (CanVerStone && VerflarePvE.CanUse(out act)) return true;
-			}
-
-			// Fallbacks
-			if (diff > 0 && VerholyPvE.CanUse(out act)) return true;
-			if (diff < 0 && VerflarePvE.CanUse(out act)) return true;
-
-			if (CanVerFire && !CanVerStone && VerholyPvE.CanUse(out act)) return true;
-			if (CanVerStone && !CanVerFire && VerflarePvE.CanUse(out act)) return true;
-
-			if (VerholyPvE.CanUse(out act)) return true;
-			if (VerflarePvE.CanUse(out act)) return true;
-		}
-
-		if (CanInstantCast && !CanVerEither)
-        {
-            if (ScatterPvE.CanUse(out act))
-            {
-                return true;
-            }
-            if (WhiteMana < BlackMana)
-            {
-                if (VeraeroPvE.CanUse(out act) && BlackMana - WhiteMana != 6)
-                {
-                    return true;
-                }
-            }
-            if (VerthunderPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        // Hardcode Resolution & Scorch to avoid double melee without finishers
-        if (IsLastGCD(ActionID.ScorchPvE))
-        {
-            if (ResolutionPvE.CanUse(out act, skipStatusProvideCheck: true))
-            {
-                return true;
-            }
-        }
-
-        if (IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE))
-        {
-            if (ScorchPvE.CanUse(out act, skipStatusProvideCheck: true))
-            {
-                return true;
-            }
-        }
-// ---------------------------
-// Hold melee combo up to 2s if we cannot continue (usually out of range)
-// Applies to BOTH ST and AoE melee combos.
-// ---------------------------
-if (HoldMeleeComboIfOutOfRange)
-{
-if (IsInMeleeCombo)
-{
-    // 1) If we can continue melee RIGHT NOW, do it immediately.
-    if (TryContinueCurrentMeleeCombo(out act))
-    {
-        _meleeHoldUntilMs = 0;
-        return true;
-    }
-
-    // 2) If we can't continue, start a 2-second hold window (one-shot).
-    long now = Environment.TickCount64;
-
-    // Start the hold window only once (don’t re-arm it repeatedly)
-    if (_meleeHoldUntilMs == 0)
-    {
-        _meleeHoldUntilMs = now + 2000; // 2 seconds
-    }
-
-    // While holding, do not select any other GCD (prevents breaking combo)
-    if (now < _meleeHoldUntilMs)
-    {
-        act = null;
         return false;
     }
 
-    // Hold expired: clear the hold and resume normal behaviour immediately
-    _meleeHoldUntilMs = 0;
-    // fall through to normal GCD selection
-}
-else
-{
-    // Not in melee combo anymore -> make sure no stale hold state remains
-    _meleeHoldUntilMs = 0;
-}
-}
-else
-{
-    _meleeHoldUntilMs = 0;
-}
+    private bool TryFinisherGCD(out IAction? act)
+    {
+        act = null;
 
-//Melee AOE combo
-if (IsLastGCD(false, EnchantedMoulinetDeuxPvE) && EnchantedMoulinetTroisPvE.CanUse(out act))
-{
-    return true;
-}
+        if (ManaStacks == 3)
+        {
+            int diff = BlackMana - WhiteMana;
+            int gap = Math.Abs(diff);
+            bool forceBalance = HasEmbolden || gap >= 19;
 
+            if (forceBalance)
+            {
+                if (diff > 0 && VerholyPvE.CanUse(out act)) return true;
+                if (diff < 0 && VerflarePvE.CanUse(out act)) return true;
+            }
+            else
+            {
+                if (CanVerFire && VerholyPvE.CanUse(out act)) return true;
+                if (CanVerStone && VerflarePvE.CanUse(out act)) return true;
+            }
+
+            if (diff > 0 && VerholyPvE.CanUse(out act)) return true;
+            if (diff < 0 && VerflarePvE.CanUse(out act)) return true;
+            if (CanVerFire && !CanVerStone && VerholyPvE.CanUse(out act)) return true;
+            if (CanVerStone && !CanVerFire && VerflarePvE.CanUse(out act)) return true;
+            if (VerholyPvE.CanUse(out act)) return true;
+            if (VerflarePvE.CanUse(out act)) return true;
+        }
+
+        if (IsLastGCD(ActionID.ScorchPvE) && ResolutionPvE.CanUse(out act, skipStatusProvideCheck: true))
+            return true;
+
+        if (IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE) && ScorchPvE.CanUse(out act, skipStatusProvideCheck: true))
+            return true;
+
+        return false;
+    }
+
+    private bool TryContinueComboGCD(out IAction? act)
+    {
+        act = null;
+
+        if (HoldMeleeComboIfOutOfRange)
+        {
+            if (IsInMeleeCombo)
+            {
+                if (TryContinueCurrentMeleeCombo(out act))
+                {
+                    _meleeHoldUntilMs = 0;
+                    return true;
+                }
+
+                long now = Environment.TickCount64;
+                if (_meleeHoldUntilMs == 0)
+                    _meleeHoldUntilMs = now + HoldMeleeComboMs;
+
+                if (now < _meleeHoldUntilMs)
+                {
+                    act = null;
+                    return false;
+                }
+
+                _meleeHoldUntilMs = 0;
+            }
+            else
+            {
+                _meleeHoldUntilMs = 0;
+            }
+        }
+        else
+        {
+            _meleeHoldUntilMs = 0;
+        }
+
+        if (IsLastGCD(false, EnchantedMoulinetDeuxPvE) && EnchantedMoulinetTroisPvE.CanUse(out act))
+            return true;
 
         if (IsLastGCD(false, EnchantedMoulinetPvE) && EnchantedMoulinetDeuxPvE.CanUse(out act))
-        {
             return true;
-        }
 
-		if (EnchantedRedoublementPvE_45962.CanUse(out act))
-		{
-			return true;
-		}
+        if (EnchantedRedoublementPvE_45962.CanUse(out act)) return true;
+        if (EnchantedRedoublementPvE.CanUse(out act)) return true;
+        if (EnchantedZwerchhauPvE_45961.CanUse(out act)) return true;
+        if (EnchantedZwerchhauPvE.CanUse(out act)) return true;
 
-		if (EnchantedRedoublementPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-		if (EnchantedZwerchhauPvE_45961.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (EnchantedZwerchhauPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-// ---------------------------
-// Pooling cap to prevent overcapping (waste) while waiting for burst.
-// If either side is very high and the other is also high, stop pooling and allow melee.
-// ---------------------------
-bool poolCapReached =
-    (BlackMana >= 92 && WhiteMana >= 81) ||
-    (WhiteMana >= 92 && BlackMana >= 81);
-
-// If pooling is enabled, use pooling threshold unless cap is reached (then behave like no-pooling).
-bool EnoughMana =
-    (!Pooling && EnoughManaComboNoPooling) ||
-    (Pooling && (poolCapReached || EnoughManaComboPooling));
-
-// ---------------------------
-// Check if you can start melee combo
-// ---------------------------
-if (EnoughMana && !InFinisherChain())
-{
-    // Burst-start condition:
-    // - Manafication active is good enough (we're committing to burst sequencing).
-    // - Still allow your original intent: start within ~4 GCDs of Swordplay ending.
-    // - Embolden+Swordplay remains valid, but is no longer required.
-bool burstStartOK =
-    !IsOpen &&
-    (
-        poolCapReached ||
-        HasManafication ||
-        StatusHelper.PlayerWillStatusEndGCD(4, 0, true, StatusID.MagickedSwordplay) ||
-        (HasEmbolden && CanMagickedSwordplay)
-    );
-
-// -----------------------------------------
-// Prefer AoE melee start at 3+ targets
-// -----------------------------------------
-if (NumberOfHostilesInRangeOf(5) >= 3)
-{
-    if (!IsLastGCD(false, EnchantedMoulinetPvE)
-        && EnchantedMoulinetPvE.CanUse(out act))
-    {
-        return true;
+        return false;
     }
-}
 
-// -----------------------------------------
-// Otherwise start ST melee with Riposte
-// -----------------------------------------
-// - Manafication -> prefer extended-range _45960
-// - otherwise -> normal Riposte
-// Treat both as the same starter to avoid double-Riposte issues.
-if (burstStartOK && !IsLastRiposteStarter() && TryRiposteStarter(out act))
-{
-    return true;
-}
-
-}
-
-		//Grand impact usage if not interrupting melee combo
-		if (!IsOpenForGrandImpact && GrandImpactPvE.CanUse(out act, skipStatusProvideCheck: CanGrandImpact, skipCastingCheck: true))
-{
-    return true;
-}
-
-// ============================================================
-// VerBoth + standstill:
-// - If we have Dualcast/Swift, DO NOT spend them on "1" (proc).
-//   Let the later "instant -> force a 2" logic handle it.
-// - Otherwise, use proc "1" first to avoid proc overcap.
-// ============================================================
-
-if (!IsInMeleeCombo
-    && ManaStacks != 3
-    && InCombat
-    && HasHostilesInMaxRange
-    && CanVerBoth
-    && !IsMoving
-    && !hasInstantBuffToSpend)
-{
-    switch (VerEndsFirst)
+    private bool TryStartComboGCD(out IAction? act, float embRem)
     {
-        case "VerFire":
-            if (VerfirePvE.CanUse(out act)) return true;
-            if (VerstonePvE.CanUse(out act)) return true;
-            break;
+        act = null;
 
-        case "VerStone":
-            if (VerstonePvE.CanUse(out act)) return true;
-            if (VerfirePvE.CanUse(out act)) return true;
-            break;
+        bool gateRipMana = ShouldGateRiposteAndManafication(embRem);
+        bool blockMeleeStartersAndReprise = gateRipMana && !NearPoolingCap;
 
-        case "Equal":
-        default:
-            if (WhiteMana < BlackMana)
+        if (blockMeleeStartersAndReprise || InFinisherChain())
+            return false;
+
+        bool enoughToStart;
+        bool burstStartOK;
+
+        if (Pooling)
+        {
+            burstStartOK =
+                !IsOpen &&
+                (NearPoolingCap
+                 || HasManafication
+                 || StatusHelper.PlayerWillStatusEndGCD(4, 0, true, StatusID.MagickedSwordplay)
+                 || (HasEmbolden && CanMagickedSwordplay)
+                 || !gateRipMana);
+
+            enoughToStart = EnoughManaComboPooling || EnoughManaComboNoPooling;
+        }
+        else
+        {
+            bool poolCapReached = NearManaCap;
+            burstStartOK =
+                !IsOpen &&
+                (poolCapReached
+                 || HasManafication
+                 || StatusHelper.PlayerWillStatusEndGCD(4, 0, true, StatusID.MagickedSwordplay)
+                 || (HasEmbolden && CanMagickedSwordplay));
+
+            enoughToStart = EnoughManaComboNoPooling || poolCapReached || EnoughManaComboPooling;
+        }
+
+        if (!enoughToStart) return false;
+
+        if (NumberOfHostilesInRangeOf(5) >= 3)
+        {
+            if (!IsLastGCD(false, EnchantedMoulinetPvE) && EnchantedMoulinetPvE.CanUse(out act))
+                return true;
+        }
+
+        if (burstStartOK && !IsLastRiposteStarter() && TryRiposteStarter(out act, embRem))
+            return true;
+
+        return false;
+    }
+
+    private bool TryGrandImpactGCD(out IAction? act)
+    {
+        act = null;
+
+        if (!IsOpen && !IsOpenForGrandImpact && GrandImpactPvE.CanUse(out act, skipStatusProvideCheck: CanGrandImpact, skipCastingCheck: true))
+            return true;
+
+        return false;
+    }
+
+    private bool TryLongCastTwoGCD(out IAction? act)
+    {
+        act = null;
+
+        // Instant long-cast 2
+        if (CanInstantCast && !CanVerEither)
+        {
+            if (ScatterPvE.CanUse(out act))
+                return true;
+
+            if (TrySelectTwoAimingGap11(out act))
+                return true;
+        }
+
+        // Movement acceleration spend into 2-spells
+        bool finisherChain = InFinisherChain();
+
+        bool canRepriseNow =
+            RangedSwordplay
+            && ManaStacks == 0
+            && (BlackMana < 50 || WhiteMana < 50)
+            && EnchantedReprisePvE.CanUse(out _);
+
+        bool noOtherMoveResources =
+            !CanGrandImpact
+            && !HasSwift
+            && !HasDualcast
+            && !canRepriseNow
+            && !IsInMeleeCombo
+            && !finisherChain
+            && ManaStacks != 3;
+
+        bool shouldSpendAccelOn2Soon =
+            HasAccelerate
+            && InCombat
+            && HasHostilesInMaxRange
+            && !IsInMeleeCombo
+            && !finisherChain
+            && ManaStacks != 3
+            && (!CanVerBoth || (IsMoving && CanVerBoth && noOtherMoveResources));
+
+        if (shouldSpendAccelOn2Soon)
+        {
+            if (NumberOfHostilesInRangeOf(5) >= 2 && ImpactPvE.CanUse(out act))
+                return true;
+
+            if (TrySelectTwoAimingGap11(out act))
+                return true;
+        }
+
+        if (!IsInMeleeCombo
+            && ManaStacks != 3
+            && HasAccelerate
+            && !HasSwift
+            && !HasDualcast
+            && InCombat
+            && HasHostilesInMaxRange
+            && IsMoving)
+        {
+            if (NumberOfHostilesInRangeOf(5) >= 2 && ImpactPvE.CanUse(out act))
+                return true;
+
+            if (TrySelectTwoAimingGap11(out act))
+                return true;
+        }
+
+        if (!IsInMeleeCombo
+            && ManaStacks != 3
+            && InCombat
+            && (HasHostilesInRange || HasHostilesInMaxRange)
+            && HasInstantBuffToSpend)
+        {
+            if (NumberOfHostilesInRangeOf(5) >= 3 && ImpactPvE.CanUse(out act))
+                return true;
+
+            if (TrySelectTwoAimingGap11(out act))
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool TryProcGCD(out IAction? act)
+    {
+        act = null;
+
+        if (!IsInMeleeCombo
+            && ManaStacks != 3
+            && InCombat
+            && HasHostilesInMaxRange
+            && CanVerBoth
+            && !IsMoving
+            && !HasInstantBuffToSpend)
+        {
+            switch (VerEndsFirst)
             {
-                if (VerstonePvE.CanUse(out act)) return true;
-                if (VerfirePvE.CanUse(out act)) return true;
+                case "VerFire":
+                    if (VerfirePvE.CanUse(out act)) return true;
+                    if (VerstonePvE.CanUse(out act)) return true;
+                    break;
+
+                case "VerStone":
+                    if (VerstonePvE.CanUse(out act)) return true;
+                    if (VerfirePvE.CanUse(out act)) return true;
+                    break;
+
+                case "Equal":
+                default:
+                    if (WhiteMana < BlackMana)
+                    {
+                        if (VerstonePvE.CanUse(out act)) return true;
+                        if (VerfirePvE.CanUse(out act)) return true;
+                    }
+                    else
+                    {
+                        if (VerfirePvE.CanUse(out act)) return true;
+                        if (VerstonePvE.CanUse(out act)) return true;
+                    }
+                    break;
+            }
+        }
+
+        if (VerstonePvE.EnoughLevel && !HasInstantBuffToSpend)
+        {
+            if (CanVerBoth)
+            {
+                switch (VerEndsFirst)
+                {
+                    case "VerFire":
+                        if (VerfirePvE.CanUse(out act)) return true;
+                        break;
+
+                    case "VerStone":
+                        if (VerstonePvE.CanUse(out act)) return true;
+                        break;
+
+                    case "Equal":
+                        if (WhiteMana < BlackMana)
+                        {
+                            if (VerstonePvE.CanUse(out act)) return true;
+                        }
+                        else
+                        {
+                            if (VerfirePvE.CanUse(out act)) return true;
+                        }
+                        break;
+                }
             }
             else
             {
                 if (VerfirePvE.CanUse(out act)) return true;
                 if (VerstonePvE.CanUse(out act)) return true;
             }
-            break;
-    }
-}
-
-
-// ============================================================
-// Spend Acceleration on a "2" soon (but after Grand Impact)
-// Conditions:
-// - if NOT VerBoth (0 or 1 proc), OR
-// - if moving + VerBoth and you have NO other movement resources
-// ============================================================
-
-// Treat "finishers window" as a movement resource you don't want to interrupt
-bool finisherChain2 =
-    ManaStacks == 3 ||
-    IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE, ActionID.ScorchPvE) ||
-    ScorchPvE.CanUse(out _) ||
-    ResolutionPvE.CanUse(out _);
-
-// Reprise as a "movement resource"
-bool canRepriseNow2 =
-    RangedSwordplay
-    && ManaStacks == 0
-    && (BlackMana < 50 || WhiteMana < 50)
-    && EnchantedReprisePvE.CanUse(out _);
-
-// "No other moving resources" (your definition)
-bool noOtherMoveResources2 =
-    !CanGrandImpact
-    && !HasSwift
-    && !HasDualcast
-    && !canRepriseNow2
-    && !IsInMeleeCombo
-    && !finisherChain2
-    && ManaStacks != 3;
-
-bool shouldSpendAccelOn2Soon2 =
-    HasAccelerate
-    && InCombat
-    && HasHostilesInMaxRange
-    && !IsInMeleeCombo
-    && !finisherChain2
-    && ManaStacks != 3
-    && (
-        !CanVerBoth
-        || (IsMoving && CanVerBoth && noOtherMoveResources2)
-    );
-
-if (shouldSpendAccelOn2Soon2)
-{
-    // AoE (same idea as your mover spender; adjust threshold if desired)
-    if (NumberOfHostilesInRangeOf(5) >= 2 && ImpactPvE.CanUse(out act))
-        return true;
-
-    int diff = BlackMana - WhiteMana;
-
-    bool TryAero2(out IAction? a)
-    {
-        if (VeraeroIiiPvE.CanUse(out a)) return true;
-        if (VeraeroPvE.CanUse(out a)) return true;
-        a = null;
-        return false;
-    }
-
-    bool TryThunder2(out IAction? a)
-    {
-        if (VerthunderIiiPvE.CanUse(out a)) return true;
-        if (VerthunderPvE.CanUse(out a)) return true;
-        a = null;
-        return false;
-    }
-
-    // Spend Accel on a "2" that helps balance mana
-    if (diff > 0)
-    {
-        if (TryAero2(out act)) return true;
-        if (TryThunder2(out act)) return true;
-    }
-    else
-    {
-        if (TryThunder2(out act)) return true;
-        if (TryAero2(out act)) return true;
-    }
-}
-
-
-if (ManaStacks == 3)
-{
-    return base.GeneralGCD(out act);
-}
-
-// ---------------------------
-// Acceleration mover spender:
-// If we're moving and Acceleration is active (but no Swift/Dual),
-// spend the instant on a "2" immediately instead of letting procs ("1") win.
-// This ensures Acceleration actually helps movement.
-// ---------------------------
-if (!IsInMeleeCombo
-    && ManaStacks != 3
-    && HasAccelerate
-    && !HasSwift
-    && !HasDualcast
-    && InCombat
-    && HasHostilesInMaxRange
-    && IsMoving)
-{
-    int aoeTargets = 2; // Accel makes Impact attractive at low counts
-    if (NumberOfHostilesInRangeOf(5) >= aoeTargets && ImpactPvE.CanUse(out act))
-        return true;
-
-    int diff = BlackMana - WhiteMana;
-
-    bool TryAero2(out IAction? a)
-    {
-        if (VeraeroIiiPvE.CanUse(out a)) return true;
-        if (VeraeroPvE.CanUse(out a)) return true;
-        a = null;
-        return false;
-    }
-
-    bool TryThunder2(out IAction? a)
-    {
-        if (VerthunderIiiPvE.CanUse(out a)) return true;
-        if (VerthunderPvE.CanUse(out a)) return true;
-        a = null;
-        return false;
-    }
-
-    // Spend Accel on a "2" that helps balance mana
-    if (diff > 0)
-    {
-        if (TryAero2(out act)) return true;      // Black leads -> add White
-        if (TryThunder2(out act)) return true;
-    }
-    else
-    {
-        if (TryThunder2(out act)) return true;   // White leads -> add Black
-        if (TryAero2(out act)) return true;
-    }
-}
-
-// Can we fix movement with oGCDs right now?
-// If yes, do NOT burn a GCD on Reprise.
-// Accel hold rules (GCD-side mirror for movement rescue logic
-// ---------------------------
-long nowMsAccel = Environment.TickCount64;
-
-bool emboldenSoonAccel =
-    EmboldenPvE.EnoughLevel
-    && !HasEmbolden
-    && EmboldenPvE.Cooldown.WillHaveOneCharge(10f);
-
-bool burstPrepHoldAccelGcd =
-    emboldenSoonAccel
-    && ManaStacks == 0
-    && BlackMana >= 50
-    && WhiteMana >= 50
-    && !IsInMeleeCombo;
-
-const long accelLockAfterEmboldenMsGcd = 10000;
-bool inFirst5sAfterEmboldenGcd =
-    _emboldenUsedAtMs != 0
-    && (nowMsAccel - _emboldenUsedAtMs) < accelLockAfterEmboldenMsGcd;
-
-bool blockAccelGcd = burstPrepHoldAccelGcd || inFirst5sAfterEmboldenGcd;
-
-// Can we fix movement with oGCDs right now?
-// If yes, do NOT burn a GCD on Reprise.
-bool canRescueMovementWithOgcd =
-    InCombat
-    && HasHostilesInMaxRange
-    && IsMoving
-    && NextAbilityToNextGCD < 0.6f
-    && !IsInMeleeCombo
-    && ManaStacks != 3
-    && (
-        (AccelerationPvE.EnoughLevel
-            && !blockAccelGcd
-            && !CanGrandImpact
-            && AccelerationPvE.CanUse(out _, usedUp: true, skipCastingCheck: true))
-        || SwiftcastPvE.CanUse(out _, usedUp: true, skipCastingCheck: true)
-    );
-
-
-// Define once and reuse for both Reprise + moving gate
-bool hasInstantTools = HasSwift || HasDualcast || HasAccelerate || (!IsOpenForGrandImpact && CanGrandImpact);
-
-// Reprise fallback (ONLY when we truly have no instant tools AND cannot rescue with oGCDs)
-if (IsMoving
-    && RangedSwordplay
-    && ManaStacks == 0
-    && (BlackMana < 50 || WhiteMana < 50)
-    && !hasInstantTools
-    && !canRescueMovementWithOgcd
-    && EnchantedReprisePvE.CanUse(out act))
-{
-    return true;
-}
-
-
-// Moving cast gate:
-// While moving with NO instant tools, do not attempt any casts (1 or 2).
-if (IsMoving
-    && InCombat
-    && HasHostilesInMaxRange
-    && ManaStacks != 3
-    && !hasInstantTools)
-{
-    act = null;
-    return false;
-}
-
-// ============================================================
-// HARD RULE: If Swift/Dualcast is up, NEVER spend it on "1" (proc) or Jolt.
-// Force a "2" (Thunder/Aero, or Impact at AoE threshold) right now.
-// ============================================================
-
-if (!IsInMeleeCombo
-    && ManaStacks != 3
-    && InCombat
-    && (HasHostilesInRange || HasHostilesInMaxRange)
-    && hasInstantBuffToSpend)
-{
-    // AoE: only use Impact when you'd actually want it
-    if (NumberOfHostilesInRangeOf(5) >= 3 && ImpactPvE.CanUse(out act))
-        return true;
-
-    // ST: choose a "2" to help balance mana
-    if (BlackMana > WhiteMana)
-{
-    // Black is leading -> add White
-    if (VeraeroIiiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-    if (VeraeroPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-
-    // fallback
-    if (VerthunderIiiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-    if (VerthunderPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-}
-else
-{
-    // White is leading or equal -> add Black
-    if (VerthunderIiiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-    if (VerthunderPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-
-    // fallback
-    if (VeraeroIiiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-    if (VeraeroPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-}
-}
-
-        // Single Target
-       if (VerstonePvE.EnoughLevel && !hasInstantBuffToSpend)
-{
-            if (CanVerBoth)
-            {
-                switch (VerEndsFirst)
-                {
-                    case "VerFire":
-                        if (VerfirePvE.CanUse(out act))
-                            return true;
-                        break;
-                    case "VerStone":
-                        if (VerstonePvE.CanUse(out act))
-                            return true;
-                        break;
-                    case "Equal":
-                        if (WhiteMana < BlackMana)
-                        {
-                            if (VerstonePvE.CanUse(out act))
-                                return true;
-                        }
-                        if (WhiteMana >= BlackMana)
-                        {
-                            if (VerfirePvE.CanUse(out act))
-                                return true;
-                        }
-                        break;
-                }
-            }
-            if (!CanVerBoth)
-            {
-                if (VerfirePvE.CanUse(out act))
-                {
-                    return true;
-                }
-
-                if (VerstonePvE.CanUse(out act))
-                {
-                    return true;
-                }
-            }
         }
-     if (!VerstonePvE.EnoughLevel && !hasInstantBuffToSpend && VerfirePvE.CanUse(out act))
-{
+
+        if (!VerstonePvE.EnoughLevel && !HasInstantBuffToSpend && VerfirePvE.CanUse(out act))
             return true;
-        }
 
-      if (!CanInstantCast && !CanVerEither)
-{
-    if (NumberOfHostilesInRangeOf(5) >= 3)
-    {
-        // AoE short-cast filler (only at 3+)
-        if (WhiteMana < BlackMana)
-        {
-            if (VeraeroIiPvE.CanUse(out act)) return true;
-            if (VerthunderIiPvE.CanUse(out act)) return true;
-        }
-        else
-        {
-            if (VerthunderIiPvE.CanUse(out act)) return true;
-            if (VeraeroIiPvE.CanUse(out act)) return true;
-        }
+        return false;
     }
 
-    // ST short-cast filler
-    if (!hasInstantBuffToSpend && JoltPvE.CanUse(out act))
-        return true;
-}
+    private bool TryRepriseGCD(out IAction? act)
+    {
+        act = null;
 
+        if (ShouldHighManaDumpWithEnchantedReprise() && InCombat && HasHostilesInRange && EnchantedReprisePvE.CanUse(out act))
+            return true;
+
+        bool canRepriseForMove =
+            RangedSwordplay
+            && IsMoving
+            && ManaStacks == 0
+            && (BlackMana < 50 || WhiteMana < 50)
+            && !HasAnyInstantTool
+            && EnchantedReprisePvE.CanUse(out _);
+
+        if (!canRepriseForMove)
+            return false;
+
+        float embRem = EmboldenRem();
+        UpdateTripleComboReached(embRem);
+
+        bool gateRipMana = ShouldGateRiposteAndManafication(embRem);
+        bool blockMeleeStartersAndReprise = gateRipMana && !NearPoolingCap;
+        if (blockMeleeStartersAndReprise)
+            return false;
+
+        bool canRescueMovementWithOgcd =
+            InCombat
+            && HasHostilesInMaxRange
+            && IsMoving
+            && NextAbilityToNextGCD < 0.6f
+            && !IsInMeleeCombo
+            && ManaStacks != 3
+            && (
+                (AccelerationPvE.EnoughLevel
+                 && !CanGrandImpact
+                 && AccelerationPvE.CanUse(out _, usedUp: true, skipCastingCheck: true))
+                || SwiftcastPvE.CanUse(out _, usedUp: true, skipCastingCheck: true)
+            );
+
+        if (!canRescueMovementWithOgcd && EnchantedReprisePvE.CanUse(out act))
+            return true;
+
+        return false;
+    }
+
+    private bool TryFallbackGCD(out IAction? act)
+    {
+        act = null;
+
+        if (IsMoving && InCombat && HasHostilesInMaxRange && ManaStacks != 3 && !HasAnyInstantTool)
+        {
+            act = null;
+            return false;
+        }
+
+        if (!CanInstantCast && !CanVerEither)
+        {
+            if (NumberOfHostilesInRangeOf(5) >= 3)
+            {
+                if (WhiteMana < BlackMana)
+                {
+                    if (VeraeroIiPvE.CanUse(out act)) return true;
+                    if (VerthunderIiPvE.CanUse(out act)) return true;
+                }
+                else
+                {
+                    if (VerthunderIiPvE.CanUse(out act)) return true;
+                    if (VeraeroIiPvE.CanUse(out act)) return true;
+                }
+            }
+
+            if (!HasInstantBuffToSpend && JoltPvE.CanUse(out act))
+                return true;
+        }
 
         if (UseVercure && !InCombat && VercurePvE.CanUse(out act))
-        {
             return true;
-        }
 
-        return base.GeneralGCD(out act);
+        return false;
     }
     #endregion
 
-// Treat both Riposte variants as the same "starter".
-// _45960 = extended-range version under Manafication.
-private bool IsLastRiposteStarter()
-{
-    return IsLastGCD(true, EnchantedRipostePvE_45960) || IsLastGCD(true, EnchantedRipostePvE);
-}
-
-private bool TryRiposteStarter(out IAction? act)
-{
-    // Prefer the extended-range starter while Manafication is active.
-    if (HasManafication && EnchantedRipostePvE_45960.CanUse(out act))
-        return true;
-
-    // Otherwise use the normal starter.
-    if (EnchantedRipostePvE.CanUse(out act))
-        return true;
-
-    act = null;
-    return false;
-}
     public override bool CanHealSingleSpell
     {
         get
         {
             int aliveHealerCount = 0;
-            IEnumerable<IBattleChara> healers = PartyMembers.GetJobCategory(JobRole.Healer);
-            foreach (IBattleChara h in healers)
+            foreach (IBattleChara healer in PartyMembers.GetJobCategory(JobRole.Healer))
             {
-                if (!h.IsDead)
+                if (!healer.IsDead)
                     aliveHealerCount++;
             }
 
