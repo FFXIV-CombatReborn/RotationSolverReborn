@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Healer;
@@ -16,12 +17,15 @@ public sealed class BeirutaAST : AstrologianRotation
         "• Disabling AutoBurst is sufficient if you need to delay burst timing in this rotation\n" +
         "• DoT effects may refresh slightly earlier during burst phases or while moving\n" +
         "• Lightspeed is managed automatically by the rotation and should not be used manually\n" +
+        "• Earthly Star is used on cooldown in this rotation, disable it in Actions if you want to use CD planner for it\n" +
+        "• This rotation will immediatly follow a Helios Conjunction if Horoscope or Neutral Sect being used \n" +
+        "• Macrocosmos from CD planner (or All GCD actions) is not reliable, please intercept mannually \n" +
         "• Single-target healing usage is intentionally more conservative in this rotation\n")]
     public bool RotationNotes { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Opener/Burst open window (GCDs)")]
     [Range(0, 2, ConfigUnitType.None, 1)]
-    public OpenWindowGcd OpenWindow { get; set; } = OpenWindowGcd.ThreeGcd; // default = 2 GCD
+    public OpenWindowGcd OpenWindow { get; set; } = OpenWindowGcd.ThreeGcd;
 
     public enum OpenWindowGcd : byte
     {
@@ -59,17 +63,14 @@ public sealed class BeirutaAST : AstrologianRotation
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to pop Horoscope)")]
     public float HoroscopeHeal { get; set; } = 0.6f;
 
-    // Set the Microcosmos HP threshold used for casting decisions.
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to use Microcosmos")]
-    public float MicrocosmosHeal { get; set; } = 0.4f;
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to pop Microcosmos")]
+    public float MicrocosmosHeal { get; set; } = 0.5f;
 
-    // Set the party-average HP threshold required to detonate Earthly Star while holding Giant Dominance.
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to detonate Earthly Star (when Giant Dominance)")]
     public float StellarDetonationHeal { get; set; } = 0.7f;
 
-    // Set the party-average HP threshold required to use Celestial Opposition when not holding Giant Dominance.
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Celestial Opposition (only when NOT holding Giant Dominance)")]
     public float CelestialOppositionHeal { get; set; } = 0.7f;
@@ -105,9 +106,35 @@ public sealed class BeirutaAST : AstrologianRotation
         AnyCharges,
     }
 
+    [RotationConfig(CombatType.PvE, Name = "Early moving Combust refresh")]
+public MovingCombustRefreshOption MovingCombustRefresh { get; set; } = MovingCombustRefreshOption.Disable;
+
+public enum MovingCombustRefreshOption : byte
+{
+    [Description("Disable")] Disable,
+    [Description("6 remaining")] Six,
+    [Description("9 remaining")] Nine,
+    [Description("12 remaining")] Twelve,
+}
+
     #endregion
 
-    // Convert the selected opener GCD window into a time value in seconds.
+    #region Constants / Fields
+
+    private const long NeutralSectEarlyMs = 15_000;
+    private const long DivinationFirst5sMs = 5_000;
+    private const float BallparkPercent = 0.08f;
+
+    private long _neutralSectUsedAtMs;
+    private bool _neutralSectWasUp;
+    private long _divinationUsedAtMs;
+
+    private bool CardsUnderDivinationOnly { get; set; } = true;
+
+    #endregion
+
+    #region Simple Properties
+
     private float OpenWindowSeconds => OpenWindow switch
     {
         OpenWindowGcd.ZeroGcd => 0f,
@@ -117,51 +144,17 @@ public sealed class BeirutaAST : AstrologianRotation
         _ => 5.5f,
     };
 
-    // Determine whether the opener window is currently active.
     private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
 
-    // Track Neutral Sect activation timing for early-window logic.
-    private long _neutralSectUsedAtMs = 0;
-    private bool _neutralSectWasUp = false;
-    private const long NeutralSectEarlyMs = 15_000;
+    private bool InFirst15sAfterNeutralSect =>
+        _neutralSectUsedAtMs != 0 &&
+        Environment.TickCount64 - _neutralSectUsedAtMs <= NeutralSectEarlyMs;
 
-    private bool CardsUnderDivinationOnly { get; set; } = true;
+    private bool InFirst5sAfterDivination =>
+        _divinationUsedAtMs != 0 &&
+        Environment.TickCount64 - _divinationUsedAtMs < DivinationFirst5sMs;
 
-    // Update the Neutral Sect timestamp when the buff state changes.
-    private void RefreshNeutralSectStamp()
-    {
-        bool isUpNow = HasNeutralSect; // use the inherited AstrologianRotation.HasNeutralSect (buff on you)
-
-        // Record the moment Neutral Sect becomes active.
-        if (isUpNow && !_neutralSectWasUp)
-        {
-            _neutralSectUsedAtMs = Environment.TickCount64;
-        }
-
-        _neutralSectWasUp = isUpNow;
-
-        // Clear the timestamp once Neutral Sect is no longer active.
-        if (!isUpNow)
-        {
-            _neutralSectUsedAtMs = 0;
-        }
-    }
-
-    // Determine whether we are within the first 15 seconds after Neutral Sect activation.
-    private bool InFirst15sAfterNeutralSect
-    {
-        get
-        {
-            if (_neutralSectUsedAtMs == 0) return false;
-            return (Environment.TickCount64 - _neutralSectUsedAtMs) <= NeutralSectEarlyMs;
-        }
-    }
-
-    #region Divination / Oracle helpers (timestamp gating)
-
-    // Track Divination activation timing for early-window gating.
-    private long _divinationUsedAtMs = 0;
-    private const long DivinationFirst5sMs = 5000;
+    private bool OracleGatedByDivination => InFirst5sAfterDivination;
 
     private bool HasHeliosConjunction => StatusHelper.PlayerHasStatus(true, StatusID.HeliosConjunction);
     private bool HasAspectedHelios => StatusHelper.PlayerHasStatus(true, StatusID.AspectedHelios);
@@ -169,67 +162,275 @@ public sealed class BeirutaAST : AstrologianRotation
     private bool HasHoroscopeHelios => StatusHelper.PlayerHasStatus(true, StatusID.HoroscopeHelios);
     private bool HasHoroscope => StatusHelper.PlayerHasStatus(true, StatusID.Horoscope);
 
-    // Determine whether we are within the first 5 seconds after Divination activation.
-    private bool InFirst5sAfterDivination
-    {
-        get
-        {
-            if (_divinationUsedAtMs == 0) return false;
-            long now = Environment.TickCount64;
-            return (now - _divinationUsedAtMs) < DivinationFirst5sMs;
-        }
-    }
+    private bool HasHealingLockout => HasMacrocosmos || HasGiantDominance || HasEarthlyDominance;
 
-    // Prevent Oracle usage during the first 5 seconds after Divination activation.
-    private bool OracleGatedByDivination => InFirst5sAfterDivination;
+    private bool ShouldHoldRaiseSwift =>
+        (HasSwift || IsLastAction(ActionID.SwiftcastPvE)) &&
+        SwiftLogic &&
+        MergedStatus.HasFlag(AutoStatus.Raise);
 
-    #endregion
-
-    #region Cooldown timing helpers (PCT-style "time until ready")
-
-    // Compute the time until Divination has at least one available charge.
     private float DivIn =>
         DivinationPvE.Cooldown.CurrentCharges >= 1
             ? 0f
             : DivinationPvE.Cooldown.RecastTimeRemainOneCharge;
 
-    // Compute the time until Lightspeed gains its next charge.
     private float LightspeedNextChargeIn =>
         LightspeedPvE.Cooldown.CurrentCharges >= LightspeedPvE.Cooldown.MaxCharges
             ? 0f
             : LightspeedPvE.Cooldown.RecastTimeRemainOneCharge;
 
-    // Determine whether we are within the Divination burst preparation window.
-    private bool BurstPrep
-    {
-        get
-        {
-            if (!DivinationPvE.EnoughLevel) return false;
-            return DivIn <= 4f;
-        }
-    }
+    private bool BurstPrep => DivinationPvE.EnoughLevel && DivIn <= 4f;
 
-    // Decide whether to hold the last Lightspeed charge for an upcoming Divination window.
+    private const float DivinationCombustRefreshSeconds = 11f;
+
+private float MovingCombustRefreshSeconds => MovingCombustRefresh switch
+{
+    MovingCombustRefreshOption.Disable => 0f,
+    MovingCombustRefreshOption.Six => 6f,
+    MovingCombustRefreshOption.Nine => 9f,
+    MovingCombustRefreshOption.Twelve => 12f,
+    _ => 0f,
+};
+
     private bool HoldLastLightspeedForDivination
     {
         get
         {
-            if (!DivinationPvE.EnoughLevel) return false;
+            if (!DivinationPvE.EnoughLevel)
+                return false;
 
-            bool divSoon60 = DivIn <= 60f;
-            if (!divSoon60) return false;
+            if (DivIn > 60f)
+                return false;
 
-            if (BurstPrep) return false;
+            if (BurstPrep)
+                return false;
 
-            if (LightspeedPvE.Cooldown.CurrentCharges != 1) return false;
+            if (LightspeedPvE.Cooldown.CurrentCharges != 1)
+                return false;
 
-            if (HasLightspeed) return false;
+            if (HasLightspeed)
+                return false;
 
             float lsMustBeBackBy = MathF.Max(0f, DivIn - 4f);
             bool spendingLastLsIsSafe = LightspeedNextChargeIn <= lsMustBeBackBy;
 
             return !spendingLastLsIsSafe;
         }
+    }
+
+    #endregion
+
+    #region Tracking / Helper Methods
+
+    private void RefreshNeutralSectStamp()
+    {
+        bool isUpNow = HasNeutralSect;
+
+        if (isUpNow && !_neutralSectWasUp)
+            _neutralSectUsedAtMs = Environment.TickCount64;
+
+        _neutralSectWasUp = isUpNow;
+
+        if (!isUpNow)
+            _neutralSectUsedAtMs = 0;
+    }
+
+    private void StampDivinationUse() => _divinationUsedAtMs = Environment.TickCount64;
+
+    private int AliveHealerCount
+    {
+        get
+        {
+            int count = 0;
+            IEnumerable<IBattleChara> healers = PartyMembers.GetJobCategory(JobRole.Healer);
+
+            foreach (IBattleChara healer in healers)
+            {
+                if (!healer.IsDead)
+                    count++;
+            }
+
+            return count;
+        }
+    }
+
+    private int AlivePartyMemberCount
+    {
+        get
+        {
+            int count = 0;
+            foreach (IBattleChara member in PartyMembers)
+            {
+                if (!member.IsDead)
+                    count++;
+            }
+
+            return count;
+        }
+    }
+
+    private bool IsTank(IBattleChara? target)
+{
+    if (target == null)
+        return false;
+
+    IEnumerable<IBattleChara> tanks = PartyMembers.GetJobCategory(JobRole.Tank);
+    foreach (IBattleChara tank in tanks)
+    {
+        if (tank == target)
+            return true;
+    }
+
+    return false;
+}
+private static bool HasCelestialIntersection(IBattleChara? target)
+{
+    if (target == null)
+        return false;
+
+    try
+    {
+        return target.HasStatus(true, StatusID.Intersection);
+    }
+    catch
+    {
+        return false;
+    }
+}
+    private static bool HasAspectedBeneficFromSelf(IBattleChara? target)
+    {
+        if (target == null)
+            return false;
+
+        try
+        {
+            return target.HasStatus(true, StatusID.AspectedBenefic);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool HasSingleHealLockoutStatus(IBattleChara? target)
+    {
+        if (target == null)
+            return true;
+
+        try
+        {
+            return target.HasStatus(false, StatusID.LivingDead) ||
+                   target.HasStatus(false, StatusID.Holmgang);
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
+    private bool CanUseCurrentCombust(out IAction? act, bool skipStatusProvideCheck = false)
+    {
+        if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+            return true;
+
+        if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+            return true;
+
+        if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+            return true;
+
+        act = null;
+        return false;
+    }
+
+    private bool CanUseCurrentGravity(out IAction? act)
+    {
+        if (GravityIiPvE.EnoughLevel && GravityIiPvE.CanUse(out act))
+            return true;
+
+        if (!GravityIiPvE.EnoughLevel && GravityPvE.EnoughLevel && GravityPvE.CanUse(out act))
+            return true;
+
+        act = null;
+        return false;
+    }
+
+    private bool CanUseCurrentMalefic(out IAction? act)
+    {
+        if (FallMaleficPvE.EnoughLevel && FallMaleficPvE.CanUse(out act))
+            return true;
+
+        if (!FallMaleficPvE.EnoughLevel && MaleficIvPvE.EnoughLevel && MaleficIvPvE.CanUse(out act))
+            return true;
+
+        if (!MaleficIvPvE.EnoughLevel && MaleficIiiPvE.EnoughLevel && MaleficIiiPvE.CanUse(out act))
+            return true;
+
+        if (!MaleficIiiPvE.EnoughLevel && MaleficIiPvE.EnoughLevel && MaleficIiPvE.CanUse(out act))
+            return true;
+
+        if (!MaleficIiPvE.Info.EnoughLevelAndQuest() && MaleficPvE.CanUse(out act))
+            return true;
+
+        act = null;
+        return false;
+    }
+
+    private bool CurrentTargetCombustMissingOrEnding(float remainingSeconds)
+    {
+        if (CurrentTarget == null)
+            return false;
+
+        return
+            (CombustIiiPvE.EnoughLevel &&
+                (!(CurrentTarget.HasStatus(true, StatusID.CombustIii)) ||
+                 CurrentTarget.WillStatusEnd(remainingSeconds, true, StatusID.CombustIii)))
+            ||
+            (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
+                (!(CurrentTarget.HasStatus(true, StatusID.CombustIi)) ||
+                 CurrentTarget.WillStatusEnd(remainingSeconds, true, StatusID.CombustIi)))
+            ||
+            (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
+                (!(CurrentTarget.HasStatus(true, StatusID.Combust)) ||
+                 CurrentTarget.WillStatusEnd(remainingSeconds, true, StatusID.Combust)));
+    }
+
+    private float GetExpectedHpToLive12Seconds()
+    {
+        if (Player == null)
+            return 0f;
+
+        int partyCount = Math.Max(1, AlivePartyMemberCount);
+        return BallparkPercent * Player.MaxHp * partyCount * 12f;
+    }
+
+    private bool CurrentTargetHasEnoughHpForCombust(float expectedHpToLive12Seconds)
+    {
+        return CurrentTarget != null &&
+               CurrentTarget.CurrentHp >= expectedHpToLive12Seconds;
+    }
+
+    private bool CanCastTankSynastry(IBaseAction actionCheck, IAction next)
+    {
+        if (!next.IsTheSameTo(false, actionCheck))
+            return false;
+
+        IBattleChara? target = actionCheck.Target.Target;
+        IBattleChara? synastryTarget = SynastryPvE.Target.Target;
+
+        if (target == null || synastryTarget == null)
+            return false;
+
+        if (target != synastryTarget)
+            return false;
+
+        if (!IsTank(target))
+            return false;
+
+        if (HasSingleHealLockoutStatus(target))
+            return false;
+
+        return target.GetHealthRatio() < SynastryHeal;
     }
 
     #endregion
@@ -252,21 +453,18 @@ public sealed class BeirutaAST : AstrologianRotation
     protected override IAction? CountDownAction(float remainTime)
     {
         if (remainTime < MaleficPvE.Info.CastTime + CountDownAhead && MaleficPvE.CanUse(out IAction? act))
-        {
             return act;
-        }
 
         if (remainTime < 3 && UseBurstMedicine(out act))
-        {
             return act;
-        }
 
         if (remainTime < UseEarthlyStarTime && EarthlyStarPvE.CanUse(out act, skipTTKCheck: true))
-        {
             return act;
-        }
 
-        return remainTime < 30 && AstralDrawPvE.CanUse(out act) ? act : base.CountDownAction(remainTime);
+        return remainTime < 30 && AstralDrawPvE.CanUse(out act)
+            ? act
+            : base.CountDownAction(remainTime);
+        
     }
 
     #endregion
@@ -277,95 +475,79 @@ public sealed class BeirutaAST : AstrologianRotation
     {
         act = null;
 
-        if (!HasLightspeed
-            && InCombat
-            && IsOpen
-            && LightspeedPvE.CanUse(out act, usedUp: true))
+        if (!HasLightspeed &&
+            InCombat &&
+            IsBurst &&
+            IsOpen &&
+            LightspeedPvE.CanUse(out act, usedUp: true))
         {
             return true;
         }
 
         if (MicroPrio && HasMacrocosmos)
-        {
             return base.EmergencyAbility(nextGCD, out act);
-        }
 
         if (!InCombat)
-        {
             return base.EmergencyAbility(nextGCD, out act);
-        }
 
-        if (SynastryPvE.CanUse(out act))
+        if (SynastryPvE.CanUse(out act, targetOverride: TargetType.Tank))
         {
-            if (CanCastSynastry(AspectedBeneficPvE, SynastryPvE, SynastryHeal, nextGCD) ||
-                CanCastSynastry(BeneficIiPvE, SynastryPvE, SynastryHeal, nextGCD) ||
-                CanCastSynastry(BeneficPvE, SynastryPvE, SynastryHeal, nextGCD))
+            if (CanCastTankSynastry(AspectedBeneficPvE, nextGCD) ||
+                CanCastTankSynastry(BeneficIiPvE, nextGCD) ||
+                CanCastTankSynastry(BeneficPvE, nextGCD))
             {
                 return true;
             }
         }
 
-        // Use Lightspeed during burst preparation when available.
-        if (BurstPrep
-            && LightspeedPvE.Cooldown.CurrentCharges >= 1
-            && !HasLightspeed
-            && InCombat
-            && IsBurst
-            && LightspeedPvE.CanUse(out act, usedUp: true))
+        if (BurstPrep &&
+            LightspeedPvE.Cooldown.CurrentCharges >= 1 &&
+            !HasLightspeed &&
+            InCombat &&
+            IsBurst &&
+            LightspeedPvE.CanUse(out act, usedUp: true))
         {
             return true;
         }
 
-        // Use burst medicine during burst preparation outside the opener window.
-        if (!IsOpen
-            && InCombat
-            && IsBurst
-            && BurstPrep
-            && UseBurstMedicine(out act))
+        if (!IsOpen &&
+            InCombat &&
+            IsBurst &&
+            BurstPrep &&
+            UseBurstMedicine(out act))
         {
             return true;
         }
 
-        // Use Divination during burst windows and record the activation timestamp.
         if (!IsOpen && IsBurst && InCombat && DivinationPvE.CanUse(out act))
         {
-            _divinationUsedAtMs = Environment.TickCount64;
+            StampDivinationUse();
             return true;
         }
 
         if (!IsOpen && DivinationPvE.CanUse(out _) && UseBurstMedicine(out act))
-        {
             return true;
-        }
 
         return base.EmergencyAbility(nextGCD, out act);
-
-        static bool CanCastSynastry(IBaseAction actionCheck, IBaseAction synastry, float synastryHp, IAction next)
-            => next.IsTheSameTo(false, actionCheck) &&
-               synastry.Target.Target == actionCheck.Target.Target &&
-               synastry.Target.Target.GetHealthRatio() < synastryHp;
     }
 
-    [RotationDesc(ActionID.ExaltationPvE, ActionID.TheArrowPvE, ActionID.TheSpirePvE, ActionID.TheBolePvE, ActionID.TheEwerPvE)]
+    [RotationDesc(ActionID.ExaltationPvE, ActionID.TheArrowPvE, ActionID.TheSpirePvE, ActionID.TheBolePvE, ActionID.TheEwerPvE, ActionID.CelestialIntersectionPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
         if (!HasDivining && InCombat && TheSpirePvE.CanUse(out act))
-        {
             return true;
-        }
 
         if (!HasDivining && InCombat && TheBolePvE.CanUse(out act))
-        {
             return true;
-        }
 
         if (ExaltationPvE.CanUse(out act))
-        {
             return true;
-        }
 
-        if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 1
-            && CelestialIntersectionPvE.CanUse(out act, usedUp: true))
+        if (CelestialIntersectionPvE.Target.Target != null &&
+            CelestialIntersectionPvE.Cooldown.CurrentCharges == 1 &&
+            CelestialIntersectionPvE.CanUse(out act, usedUp: true, targetOverride: TargetType.Tank) &&
+            !HasCelestialIntersection(CelestialIntersectionPvE.Target.Target) &&
+            !HasSingleHealLockoutStatus(CelestialIntersectionPvE.Target.Target))
         {
             return true;
         }
@@ -377,14 +559,10 @@ public sealed class BeirutaAST : AstrologianRotation
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
         if (SunSignPvE.CanUse(out act))
-        {
             return true;
-        }
 
         if (CollectiveUnconsciousPvE.CanUse(out act))
-        {
             return true;
-        }
 
         return base.DefenseAreaAbility(nextGCD, out act);
     }
@@ -394,66 +572,79 @@ public sealed class BeirutaAST : AstrologianRotation
     {
         act = null;
 
-        // Prevent single-target oGCD healing while Macrocosmos is active under Giant Dominance without Earthly Dominance.
-        if (HasDivining || HasMacrocosmos || HasGiantDominance || HasEarthlyDominance)
-        {
+        if (HasDivining || HasHealingLockout)
             return false;
-        }
 
         if (MicroPrio && HasMacrocosmos)
-        {
             return base.HealSingleAbility(nextGCD, out act);
-        }
 
         if (!IsOpen && InCombat && TheArrowPvE.CanUse(out act))
+            return true;
+
+        if (InCombat &&
+            TheEwerPvE.CanUse(out act) &&
+            TheEwerPvE.Target.Target != null &&
+            !HasSingleHealLockoutStatus(TheEwerPvE.Target.Target) &&
+            TheEwerPvE.Target.Target.GetHealthRatio() < 0.8f)
         {
             return true;
         }
 
-        if (InCombat && TheEwerPvE.CanUse(out act)
-            && (TheEwerPvE.Target.Target?.GetHealthRatio() < 0.8f) == true)
-        {
-            return true;
-        }
-
-        if (!HasGiantDominance && !HasEarthlyDominance
-            && !HasMacrocosmos && EssentialDignityPvE.Cooldown.CurrentCharges == 3 &&
-            PartyMembersAverHP > 0.7f &&
+        if (!HasGiantDominance &&
+            !HasEarthlyDominance &&
+            !HasMacrocosmos &&
+            EssentialDignityPvE.Cooldown.CurrentCharges == 3 &&
             EssentialDignityPvE.CanUse(out act, usedUp: true) &&
+            EssentialDignityPvE.Target.Target != null &&
+            !HasSingleHealLockoutStatus(EssentialDignityPvE.Target.Target) &&
+            (IsTank(EssentialDignityPvE.Target.Target) || PartyMembersAverHP > 0.8f) &&
             EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityThird)
         {
             return true;
         }
 
-        if (!HasGiantDominance && !HasEarthlyDominance
-            && !HasMacrocosmos && EssentialDignityPvE.Cooldown.CurrentCharges == 2 &&
-            PartyMembersAverHP > 0.8f &&
+        if (!HasGiantDominance &&
+            !HasEarthlyDominance &&
+            !HasMacrocosmos &&
+            EssentialDignityPvE.Cooldown.CurrentCharges == 2 &&
             EssentialDignityPvE.CanUse(out act, usedUp: true) &&
+            EssentialDignityPvE.Target.Target != null &&
+            !HasSingleHealLockoutStatus(EssentialDignityPvE.Target.Target) &&
+            (IsTank(EssentialDignityPvE.Target.Target) || PartyMembersAverHP > 0.8f) &&
             EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignitySecond)
         {
             return true;
         }
 
-        if (!HasGiantDominance && !HasEarthlyDominance
-            && !HasMacrocosmos && EssentialDignityPvE.Cooldown.CurrentCharges == 1 &&
-            PartyMembersAverHP > 0.8f &&
-            EssentialDignityPvE.CanUse(out act, usedUp: true) &&
+        if (!HasGiantDominance &&
+            !HasEarthlyDominance &&
+            !HasMacrocosmos &&
+            EssentialDignityPvE.Cooldown.CurrentCharges == 1 &&
+            EssentialDignityPvE.CanUse(out act, usedUp: true, targetOverride: TargetType.Tank) &&
+            EssentialDignityPvE.Target.Target != null &&
+            !HasSingleHealLockoutStatus(EssentialDignityPvE.Target.Target) &&
             EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityLast)
         {
             return true;
         }
 
-        if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 2
-            && (CelestialIntersectionPvE.Target.Target?.GetHealthRatio() < 0.9f) == true
-            && CelestialIntersectionPvE.CanUse(out act, usedUp: true))
+        if (CelestialIntersectionPvE.Target.Target != null &&
+            CelestialIntersectionPvE.Cooldown.CurrentCharges == 2 &&
+            CelestialIntersectionPvE.CanUse(out act, usedUp: true) &&
+            !HasCelestialIntersection(CelestialIntersectionPvE.Target.Target) &&
+            !HasSingleHealLockoutStatus(CelestialIntersectionPvE.Target.Target) &&
+            PartyMembersAverHP > 0.8f &&
+            CelestialIntersectionPvE.Target.Target.GetHealthRatio() < 0.9f)
         {
             return true;
         }
 
-        if (CelestialIntersectionPvE.Cooldown.CurrentCharges == 1
-            && (CelestialIntersectionPvE.Target.Target?.GetHealthRatio() < 0.6f) == true
-            && PartyMembersAverHP > 0.8f 
-            && CelestialIntersectionPvE.CanUse(out act, usedUp: true))
+        if (CelestialIntersectionPvE.Target.Target != null &&
+            CelestialIntersectionPvE.Cooldown.CurrentCharges == 1 &&
+            CelestialIntersectionPvE.CanUse(out act, usedUp: true, targetOverride: TargetType.Tank) &&
+            !HasCelestialIntersection(CelestialIntersectionPvE.Target.Target) &&
+            !HasSingleHealLockoutStatus(CelestialIntersectionPvE.Target.Target) &&
+            CelestialIntersectionPvE.Target.Target.GetHealthRatio() < 0.7f)
         {
             return true;
         }
@@ -466,55 +657,56 @@ public sealed class BeirutaAST : AstrologianRotation
     {
         act = null;
 
-        // Prevent area oGCD healing while Macrocosmos is active.
-        if (!HasDivining && HasMacrocosmos)
-        {
+        if (HasDivining || HasMacrocosmos)
             return false;
-        }
 
-        // Detonate Earthly Star when holding Giant Dominance and party average HP is below the configured threshold.
-        if (HasGiantDominance
-            && PartyMembersAverHP < StellarDetonationHeal
-            && StellarDetonationPvE.CanUse(out act))
+        if (HasGiantDominance &&
+            PartyMembersAverHP < StellarDetonationHeal &&
+            StellarDetonationPvE.CanUse(out act))
         {
             return true;
         }
 
-        // Use Microcosmos when party average HP is below the configured threshold.
         if (PartyMembersAverHP < MicrocosmosHeal && MicrocosmosPvE.CanUse(out act))
-        {
             return true;
-        }
 
         if (MicroPrio && HasMacrocosmos)
-        {
             return base.HealAreaAbility(nextGCD, out act);
-        }
 
-        // Use Celestial Opposition when not holding Giant Dominance and party average HP is below the configured threshold.
-        if (!HasGiantDominance && !HasEarthlyDominance
-            && !HasMacrocosmos
-            && !HasHoroscopeHelios
-            && PartyMembersAverHP < CelestialOppositionHeal
-            && CelestialOppositionPvE.CanUse(out act))
+        if (!HasGiantDominance &&
+            !HasEarthlyDominance &&
+            !HasMacrocosmos &&
+            !HasHoroscopeHelios &&
+            PartyMembersAverHP < CelestialOppositionHeal &&
+            CelestialOppositionPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (!HasMacrocosmos && !HasGiantDominance && !HasEarthlyDominance && !HasHoroscope && HasHoroscopeHelios && PartyMembersAverHP < HoroscopeHeal && HoroscopePvE_16558.CanUse(out act))
+        if (!HasMacrocosmos &&
+            !HasGiantDominance &&
+            !HasEarthlyDominance &&
+            !HasHoroscope &&
+            HasHoroscopeHelios &&
+            PartyMembersAverHP < HoroscopeHeal &&
+            HoroscopePvE_16558.CanUse(out act))
         {
             return true;
         }
 
-        if (!HasMacrocosmos && !HasGiantDominance && !HasEarthlyDominance && !HasHoroscope && HasHoroscopeHelios && PartyMembersAverHP < HoroscopeHeal && HoroscopePvE.CanUse(out act))
+        if (!HasMacrocosmos &&
+            !HasGiantDominance &&
+            !HasEarthlyDominance &&
+            !HasHoroscope &&
+            HasHoroscopeHelios &&
+            PartyMembersAverHP < HoroscopeHeal &&
+            HoroscopePvE.CanUse(out act))
         {
             return true;
         }
 
         if (LadyOfCrownsPvE.CanUse(out act))
-        {
             return true;
-        }
 
         return base.HealAreaAbility(nextGCD, out act);
     }
@@ -523,60 +715,52 @@ public sealed class BeirutaAST : AstrologianRotation
     {
         act = null;
 
+        if (!HasLightspeed &&
+            InCombat &&
+            IsOpen &&
+            LightspeedPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
+
         if (StatusHelper.PlayerHasStatus(true, StatusID.Suntouched) &&
             StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.Suntouched))
         {
             if (SunSignPvE.CanUse(out act, skipAoeCheck: true, skipTTKCheck: true))
-            {
                 return true;
-            }
         }
 
         if (PartyMembersAverHP < LadyOfHeals && LadyOfCrownsPvE.CanUse(out act))
-        {
             return true;
-        }
 
         if (AstralDrawPvE.Cooldown.WillHaveOneCharge(5) && LadyOfCrownsPvE.CanUse(out act))
-        {
             return true;
-        }
 
         if (AstralDrawPvE.CanUse(out act))
-        {
             return true;
-        }
 
         bool divLearned = DivinationPvE.EnoughLevel;
-
         bool burstCardsAllowed =
             CardsUnderDivinationOnly
                 ? (!divLearned || HasDivination)
                 : (HasDivination || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !divLearned);
 
         if (burstCardsAllowed && InCombat && TheBalancePvE.CanUse(out act))
-        {
             return true;
-        }
 
-        // Spend Lord of Crowns according to the selected card gating rules.
         if (!IsOpen && InCombat && LordOfCrownsPvE.CanUse(out act))
         {
             if (CardsUnderDivinationOnly)
             {
                 if (!divLearned || HasDivination)
-                {
                     return true;
-                }
             }
             else
             {
-                bool divinationLearned = divLearned;
-
-                if ((divinationLearned && HasDivination)
-                    || (!divinationLearned)
-                    || (divinationLearned && !DivinationPvE.Cooldown.WillHaveOneCharge(60))
-                    || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3))
+                if ((divLearned && HasDivination) ||
+                    !divLearned ||
+                    (divLearned && !DivinationPvE.Cooldown.WillHaveOneCharge(60)) ||
+                    UmbralDrawPvE.Cooldown.WillHaveOneCharge(3))
                 {
                     return true;
                 }
@@ -584,46 +768,34 @@ public sealed class BeirutaAST : AstrologianRotation
         }
 
         bool hasBurstCardToPlay =
-            InCombat && burstCardsAllowed && (TheBalancePvE.CanUse(out _) || TheSpearPvE.CanUse(out _));
+            InCombat &&
+            burstCardsAllowed &&
+            (TheBalancePvE.CanUse(out _) || TheSpearPvE.CanUse(out _));
 
         bool hasLordToSpend =
-            InCombat && LordOfCrownsPvE.CanUse(out _);
+            InCombat &&
+            LordOfCrownsPvE.CanUse(out _);
 
         if (UmbralDrawPvE.CanUse(out act) && !(hasBurstCardToPlay && hasLordToSpend))
-        {
             return true;
-        }
 
         if (burstCardsAllowed && InCombat && TheSpearPvE.CanUse(out act))
-        {
             return true;
-        }
 
-        // Use Oracle only when not gated by the Divination early window.
         if (InCombat && !OracleGatedByDivination && OraclePvE.CanUse(out act))
-        {
             return true;
-        }
 
         if (!HasDivining && AstralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheEwerPvE.CanUse(out act))
-        {
             return true;
-        }
 
         if (!HasDivining && AstralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheBolePvE.CanUse(out act))
-        {
             return true;
-        }
 
-        if (!HasDivining && !IsOpen && UmbralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheArrowPvE.CanUse(out act))
-        {
+        if (!HasDivining && UmbralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheArrowPvE.CanUse(out act))
             return true;
-        }
 
         if (UmbralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheSpirePvE.CanUse(out act))
-        {
             return true;
-        }
 
         return base.GeneralAbility(nextGCD, out act);
     }
@@ -638,82 +810,67 @@ public sealed class BeirutaAST : AstrologianRotation
                 AspectedBeneficPvE,
                 CombustIiiPvE, CombustIiPvE, CombustPvE);
 
-        bool combustSoon6 =
-            CurrentTarget != null &&
-            (
-                (CombustIiiPvE.EnoughLevel &&
-                    (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
-                     || (CurrentTarget?.WillStatusEnd(6, true, StatusID.CombustIii) ?? false)))
-                ||
-                (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
-                    (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
-                     || (CurrentTarget?.WillStatusEnd(6, true, StatusID.CombustIi) ?? false)))
-                ||
-                (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
-                    (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
-                     || (CurrentTarget?.WillStatusEnd(6, true, StatusID.Combust) ?? false)))
-            );
+        bool combustSoonForMovement =
+    CurrentTarget != null &&
+    MovingCombustRefreshSeconds > 0f &&
+    CurrentTargetCombustMissingOrEnding(MovingCombustRefreshSeconds);
 
         bool needsMovementRescue =
-            InCombat
-            && IsMoving
-            && !nextIsMovementSafeGcd
-            && !HasSwift
-            && !HasLightspeed
-            && !combustSoon6;
+            InCombat &&
+            MovingTime > 1.5f &&
+            !nextIsMovementSafeGcd &&
+            !HasSwift &&
+            !HasLightspeed &&
+            !combustSoonForMovement;
 
         bool divJustStarted = InFirst5sAfterDivination;
+        bool openerLightspeed = IsOpen && !HasLightspeed;
 
-        bool openerLightspeed =
+        if (!HasLightspeed &&
+            InCombat &&
+            IsBurst &&
             IsOpen &&
-            !HasLightspeed;
+            LightspeedPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
 
-        // Use Divination during burst windows and record the activation timestamp.
         if (!IsOpen && IsBurst && InCombat && DivinationPvE.CanUse(out act))
         {
-            _divinationUsedAtMs = Environment.TickCount64;
+            StampDivinationUse();
             return true;
         }
 
-        // Use Lightspeed once during the opener window.
         if (openerLightspeed && LightspeedPvE.CanUse(out act, usedUp: true))
-        {
             return true;
-        }
 
         if (AstralDrawPvE.CanUse(out act, usedUp: IsBurst))
-        {
             return true;
-        }
 
-        // Use Lightspeed during the initial Divination window when allowed.
-        if (!HasLightspeed
-            && InCombat
-            && HasDivination
-            && divJustStarted
-            && !HoldLastLightspeedForDivination
-            && LightspeedPvE.CanUse(out act, usedUp: true))
+        if (!HasLightspeed &&
+            InCombat &&
+            HasDivination &&
+            divJustStarted &&
+            !HoldLastLightspeedForDivination &&
+            LightspeedPvE.CanUse(out act, usedUp: true))
         {
             return true;
         }
 
         if (InCombat)
         {
-            bool canWeaveNow = NextAbilityToNextGCD < 0.6f;
+            bool canWeaveNow = MovingTime > 1.5f;
 
-            if (needsMovementRescue
-                && canWeaveNow
-                && !HoldLastLightspeedForDivination
-                && LightspeedPvE.CanUse(out act, usedUp: true))
+            if (needsMovementRescue &&
+                canWeaveNow &&
+                !HoldLastLightspeedForDivination &&
+                LightspeedPvE.CanUse(out act, usedUp: true))
             {
                 return true;
             }
 
-            // Place Earthly Star when neither dominance status is active.
             if (!HasGiantDominance && !HasEarthlyDominance && EarthlyStarPvE.CanUse(out act))
-            {
                 return true;
-            }
         }
 
         return base.AttackAbility(nextGCD, out act);
@@ -725,14 +882,17 @@ public sealed class BeirutaAST : AstrologianRotation
 
     protected override bool DefenseSingleGCD(out IAction? act)
     {
-        if ((MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150))
-            || (CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)))
+        if ((MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150)) ||
+            (CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)))
         {
             return base.DefenseAreaGCD(out act);
         }
 
         if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) &&
-            AspectedBeneficPvE.CanUse(out act, skipStatusProvideCheck: true))
+            AspectedBeneficPvE.CanUse(out act, skipStatusProvideCheck: true) &&
+            AspectedBeneficPvE.Target.Target != null &&
+            !HasAspectedBeneficFromSelf(AspectedBeneficPvE.Target.Target) &&
+            !HasSingleHealLockoutStatus(AspectedBeneficPvE.Target.Target))
         {
             return true;
         }
@@ -743,8 +903,8 @@ public sealed class BeirutaAST : AstrologianRotation
     [RotationDesc(ActionID.MacrocosmosPvE)]
     protected override bool DefenseAreaGCD(out IAction? act)
     {
-        if ((MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150))
-            || (CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)))
+        if ((MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150)) ||
+            (CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)))
         {
             return base.DefenseAreaGCD(out act);
         }
@@ -763,55 +923,67 @@ public sealed class BeirutaAST : AstrologianRotation
     {
         act = null;
 
-        // Prevent single-target GCD healing while Macrocosmos is active under Giant Dominance without Earthly Dominance.
-        if (HasMacrocosmos || HasGiantDominance || HasEarthlyDominance)
-        {
+        if (HasHealingLockout)
             return false;
-        }
 
-        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
-        {
+        if (ShouldHoldRaiseSwift)
             return base.HealSingleGCD(out act);
-        }
 
         if (MicroPrio && HasMacrocosmos)
-        {
             return base.HealSingleGCD(out act);
-        }
 
-        var shouldUseEssentialDignity =
-            (EssentialPrio2 == EssentialPrioStrategy.AnyCharges && EssentialDignityPvE.EnoughLevel &&
-             EssentialDignityPvE.Cooldown.CurrentCharges > 0) ||
-            (EssentialPrio2 == EssentialPrioStrategy.CappedCharges && EssentialDignityPvE.EnoughLevel &&
+        bool shouldUseEssentialDignity =
+            (EssentialPrio2 == EssentialPrioStrategy.AnyCharges &&
+             EssentialDignityPvE.EnoughLevel &&
+             EssentialDignityPvE.Cooldown.CurrentCharges > 0)
+            ||
+            (EssentialPrio2 == EssentialPrioStrategy.CappedCharges &&
+             EssentialDignityPvE.EnoughLevel &&
              EssentialDignityPvE.Cooldown.CurrentCharges == EssentialDignityPvE.Cooldown.MaxCharges);
 
         if (shouldUseEssentialDignity)
-        {
             return base.HealSingleGCD(out act);
-        }
 
         bool movingHealWindow =
             InCombat &&
             !HoldLastLightspeedForDivination &&
-            IsMoving &&
             !HasLightspeed &&
-            NextAbilityToNextGCD < 0.6f &&
-            PartyMembersAverHP > 0.7f &&
-            (AspectedBeneficPvE.Target.Target?.GetHealthRatio() < 0.8f) == true;
+            MovingTime > 1.0f &&
+            AspectedBeneficPvE.Target.Target != null &&
+            !HasAspectedBeneficFromSelf(AspectedBeneficPvE.Target.Target) &&
+            !HasSingleHealLockoutStatus(AspectedBeneficPvE.Target.Target) &&
+            (IsTank(AspectedBeneficPvE.Target.Target) || PartyMembersAverHP > 0.8f) &&
+            AspectedBeneficPvE.Target.Target.GetHealthRatio() < 0.7f;
 
-        if (AspectedBeneficPvE.CanUse(out act)
-            && ((AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal && PartyMembersAverHP > 0.8f) || movingHealWindow)
-            && !HasMacrocosmos && !HasGiantDominance && !HasDivination)
+        if (AspectedBeneficPvE.CanUse(out act) &&
+            AspectedBeneficPvE.Target.Target != null &&
+            !HasAspectedBeneficFromSelf(AspectedBeneficPvE.Target.Target) &&
+            !HasSingleHealLockoutStatus(AspectedBeneficPvE.Target.Target) &&
+            (((AspectedBeneficPvE.Target.Target.GetHealthRatio() < AspectedBeneficHeal) &&
+              (IsTank(AspectedBeneficPvE.Target.Target) || PartyMembersAverHP > 0.8f)) || movingHealWindow) &&
+            !HasMacrocosmos &&
+            !HasGiantDominance &&
+            !HasDivination)
         {
             return true;
         }
 
-        if (PartyMembersAverHP > 0.8f && BeneficIiPvE.CanUse(out act) && !HasMacrocosmos && !HasGiantDominance && !HasDivination)
+        if (BeneficIiPvE.CanUse(out act, targetOverride: TargetType.Tank) &&
+            BeneficIiPvE.Target.Target != null &&
+            !HasSingleHealLockoutStatus(BeneficIiPvE.Target.Target) &&
+            !HasMacrocosmos &&
+            !HasGiantDominance &&
+            !HasDivination)
         {
             return true;
         }
 
-        if (PartyMembersAverHP > 0.8f && BeneficPvE.CanUse(out act) && !HasMacrocosmos && !HasGiantDominance && !HasDivination)
+        if (BeneficPvE.CanUse(out act, targetOverride: TargetType.Tank) &&
+            BeneficPvE.Target.Target != null &&
+            !HasSingleHealLockoutStatus(BeneficPvE.Target.Target) &&
+            !HasMacrocosmos &&
+            !HasGiantDominance &&
+            !HasDivination)
         {
             return true;
         }
@@ -824,54 +996,53 @@ public sealed class BeirutaAST : AstrologianRotation
     {
         act = null;
 
-        // Prevent area GCD healing while Macrocosmos is active under Giant Dominance without Earthly Dominance.
-        if (HasMacrocosmos || HasGiantDominance || HasEarthlyDominance || HasHoroscopeHelios || (CelestialOppositionPvE.Cooldown.IsCoolingDown && !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60)))
+        if (HasMacrocosmos ||
+            HasGiantDominance ||
+            HasEarthlyDominance ||
+            HasHoroscopeHelios ||
+            (CelestialOppositionPvE.Cooldown.IsCoolingDown && !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60)))
         {
             return false;
         }
 
-        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
-        {
+        if (ShouldHoldRaiseSwift)
             return base.HealAreaGCD(out act);
-        }
 
         if (MicroPrio && HasMacrocosmos)
-        {
             return base.HealAreaGCD(out act);
-        }
 
-        if (CelestialOppositionPvE.Cooldown.IsCoolingDown
-            && !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60)
-            && !HasDivination
-            && !HasHeliosConjunction
-            && PartyMembersAverHP < 0.6f
-            && HeliosConjunctionPvE.EnoughLevel
-            && HeliosConjunctionPvE.CanUse(out act))
+        if (CelestialOppositionPvE.Cooldown.IsCoolingDown &&
+            !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60) &&
+            !HasDivination &&
+            !HasHeliosConjunction &&
+            PartyMembersAverHP < 0.6f &&
+            HeliosConjunctionPvE.EnoughLevel &&
+            HeliosConjunctionPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (CelestialOppositionPvE.Cooldown.IsCoolingDown
-            && !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60)
-            && !HasMacrocosmos
-            && !HasGiantDominance
-            && !HasDivination
-            && !HasAspectedHelios
-            && PartyMembersAverHP < 0.6f
-            && !HeliosConjunctionPvE.EnoughLevel
-            && AspectedHeliosPvE.CanUse(out act))
+        if (CelestialOppositionPvE.Cooldown.IsCoolingDown &&
+            !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60) &&
+            !HasMacrocosmos &&
+            !HasGiantDominance &&
+            !HasDivination &&
+            !HasAspectedHelios &&
+            PartyMembersAverHP < 0.6f &&
+            !HeliosConjunctionPvE.EnoughLevel &&
+            AspectedHeliosPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (CelestialOppositionPvE.Cooldown.IsCoolingDown
-            && !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60)
-            && !HasMacrocosmos
-            && !HasGiantDominance
-            && !HasDivination
-            && (!HasHeliosConjunction || HasAspectedHelios)
-            && PartyMembersAverHP < 0.4f
-            && HeliosPvE.CanUse(out act))
+        if (CelestialOppositionPvE.Cooldown.IsCoolingDown &&
+            !CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60) &&
+            !HasMacrocosmos &&
+            !HasGiantDominance &&
+            !HasDivination &&
+            (HasHeliosConjunction || HasAspectedHelios) &&
+            PartyMembersAverHP < 0.4f &&
+            HeliosPvE.CanUse(out act))
         {
             return true;
         }
@@ -883,135 +1054,68 @@ public sealed class BeirutaAST : AstrologianRotation
     protected override bool RaiseGCD(out IAction? act)
     {
         if (AscendPvE.CanUse(out act))
-        {
             return true;
-        }
 
         return base.RaiseGCD(out act);
     }
 
     protected override bool GeneralGCD(out IAction? act)
     {
+        act = null;
         RefreshNeutralSectStamp();
 
-        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
-        {
+        if (ShouldHoldRaiseSwift)
             return base.GeneralGCD(out act);
-        }
 
-        // Upgrade Horoscope using Helios Conjunction or Aspected Helios when eligible.
         if (AutoUpgradeHoroscope &&
             ((HasHoroscope && !HasHoroscopeHelios) ||
              (InFirst15sAfterNeutralSect && !HasHeliosConjunction && !HasAspectedHelios)))
         {
-            if (HeliosConjunctionPvE.EnoughLevel && HeliosConjunctionPvE.CanUse(out act, skipStatusProvideCheck: true))
-                return true;
-
-            if (!HeliosConjunctionPvE.EnoughLevel && AspectedHeliosPvE.CanUse(out act, skipStatusProvideCheck: true))
-                return true;
-        }
-
-        if (GravityIiPvE.EnoughLevel && GravityIiPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (!GravityIiPvE.EnoughLevel && GravityPvE.EnoughLevel && GravityPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        // Refresh Combust while moving when it is missing or expiring soon.
-        {
-            bool canCommitGcdNow = NextAbilityToNextGCD < 0.6f;
-
-            if (InCombat && IsMoving && canCommitGcdNow && CurrentTarget != null)
+            if (HeliosConjunctionPvE.EnoughLevel &&
+                HeliosConjunctionPvE.CanUse(out act, skipStatusProvideCheck: true))
             {
-                bool combustLow6 =
-                    (CombustIiiPvE.EnoughLevel &&
-                        (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
-                         || (CurrentTarget?.WillStatusEnd(6, true, StatusID.CombustIii) ?? false)))
-                    ||
-                    (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
-                        (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
-                         || (CurrentTarget?.WillStatusEnd(6, true, StatusID.CombustIi) ?? false)))
-                    ||
-                    (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
-                        (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
-                         || (CurrentTarget?.WillStatusEnd(6, true, StatusID.Combust) ?? false)));
+                return true;
+            }
 
-                if (combustLow6)
-                {
-                    if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-                    if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-                    if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-                }
+            if (!HeliosConjunctionPvE.EnoughLevel &&
+                AspectedHeliosPvE.CanUse(out act, skipStatusProvideCheck: true))
+            {
+                return true;
             }
         }
 
-        // Refresh Combust earlier during Divination when it is missing or expiring soon.
-        if (HasDivination && InCombat && CurrentTarget != null)
-        {
-            bool combustMissingOrLow =
-                (CombustIiiPvE.EnoughLevel &&
-                    (!(CurrentTarget?.HasStatus(true, StatusID.CombustIii) ?? false)
-                     || (CurrentTarget?.WillStatusEnd(11, true, StatusID.CombustIii) ?? false)))
-                ||
-                (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel &&
-                    (!(CurrentTarget?.HasStatus(true, StatusID.CombustIi) ?? false)
-                     || (CurrentTarget?.WillStatusEnd(11, true, StatusID.CombustIi) ?? false)))
-                ||
-                (!CombustIiiPvE.EnoughLevel && !CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel &&
-                    (!(CurrentTarget?.HasStatus(true, StatusID.Combust) ?? false)
-                     || (CurrentTarget?.WillStatusEnd(11, true, StatusID.Combust) ?? false)));
+        if (CanUseCurrentGravity(out act))
+            return true;
 
-            if (combustMissingOrLow)
-            {
-                if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-                if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-                if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-            }
-        }
+        float expectedHPToLive12Seconds = GetExpectedHpToLive12Seconds();
 
-        if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act))
+        if (InCombat &&
+    MovingTime > 1.5f &&
+    MovingCombustRefreshSeconds > 0f &&
+    CurrentTargetCombustMissingOrEnding(MovingCombustRefreshSeconds) &&
+    CurrentTargetHasEnoughHpForCombust(expectedHPToLive12Seconds) &&
+    CanUseCurrentCombust(out act, skipStatusProvideCheck: true))
+{
+    return true;
+}
+
+        if (HasDivination &&
+    InCombat &&
+    CurrentTargetCombustMissingOrEnding(DivinationCombustRefreshSeconds) &&
+    CurrentTargetHasEnoughHpForCombust(expectedHPToLive12Seconds) &&
+    CanUseCurrentCombust(out act, skipStatusProvideCheck: true))
+{
+    return true;
+}
+
+        if (CurrentTargetHasEnoughHpForCombust(expectedHPToLive12Seconds) &&
+            CanUseCurrentCombust(out act))
         {
             return true;
         }
 
-        if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act))
-        {
+        if (CanUseCurrentMalefic(out act))
             return true;
-        }
-
-        if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (FallMaleficPvE.EnoughLevel && FallMaleficPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (!FallMaleficPvE.EnoughLevel && MaleficIvPvE.EnoughLevel && MaleficIvPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (!MaleficIvPvE.EnoughLevel && MaleficIiiPvE.EnoughLevel && MaleficIiiPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (!MaleficIiiPvE.EnoughLevel && MaleficIiPvE.EnoughLevel && MaleficIiPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (!MaleficIiPvE.Info.EnoughLevelAndQuest() && MaleficPvE.CanUse(out act))
-        {
-            return true;
-        }
 
         return base.GeneralGCD(out act);
     }
@@ -1020,37 +1124,13 @@ public sealed class BeirutaAST : AstrologianRotation
 
     #region Extra Methods
 
-    public override bool CanHealSingleSpell
-    {
-        get
-        {
-            int aliveHealerCount = 0;
-            IEnumerable<IBattleChara> healers = PartyMembers.GetJobCategory(JobRole.Healer);
-            foreach (IBattleChara h in healers)
-            {
-                if (!h.IsDead)
-                    aliveHealerCount++;
-            }
+    public override bool CanHealSingleSpell =>
+        base.CanHealSingleSpell &&
+        (GCDHeal || AliveHealerCount == 1);
 
-            return base.CanHealSingleSpell && (GCDHeal || aliveHealerCount == 1);
-        }
-    }
-
-    public override bool CanHealAreaSpell
-    {
-        get
-        {
-            int aliveHealerCount = 0;
-            IEnumerable<IBattleChara> healers = PartyMembers.GetJobCategory(JobRole.Healer);
-            foreach (IBattleChara h in healers)
-            {
-                if (!h.IsDead)
-                    aliveHealerCount++;
-            }
-
-            return base.CanHealAreaSpell && (GCDHeal || aliveHealerCount == 1);
-        }
-    }
+    public override bool CanHealAreaSpell =>
+        base.CanHealAreaSpell &&
+        (GCDHeal || AliveHealerCount == 1);
 
     #endregion
 }
