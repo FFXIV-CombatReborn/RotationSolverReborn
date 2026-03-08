@@ -464,6 +464,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         return remainTime < 30 && AstralDrawPvE.CanUse(out act)
             ? act
             : base.CountDownAction(remainTime);
+        
     }
 
     #endregion
@@ -476,6 +477,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
         if (!HasLightspeed &&
             InCombat &&
+            IsBurst &&
             IsOpen &&
             LightspeedPvE.CanUse(out act, usedUp: true))
         {
@@ -713,6 +715,14 @@ private static bool HasCelestialIntersection(IBattleChara? target)
     {
         act = null;
 
+        if (!HasLightspeed &&
+            InCombat &&
+            IsOpen &&
+            LightspeedPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
+
         if (StatusHelper.PlayerHasStatus(true, StatusID.Suntouched) &&
             StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.Suntouched))
         {
@@ -781,7 +791,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         if (!HasDivining && AstralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheBolePvE.CanUse(out act))
             return true;
 
-        if (!HasDivining && !IsOpen && UmbralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheArrowPvE.CanUse(out act))
+        if (!HasDivining && UmbralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheArrowPvE.CanUse(out act))
             return true;
 
         if (UmbralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheSpirePvE.CanUse(out act))
@@ -815,6 +825,15 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
         bool divJustStarted = InFirst5sAfterDivination;
         bool openerLightspeed = IsOpen && !HasLightspeed;
+
+        if (!HasLightspeed &&
+            InCombat &&
+            IsBurst &&
+            IsOpen &&
+            LightspeedPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
 
         if (!IsOpen && IsBurst && InCombat && DivinationPvE.CanUse(out act))
         {

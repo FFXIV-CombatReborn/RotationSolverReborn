@@ -16,7 +16,7 @@ public sealed class BeirutaRDM : RedMageRotation
         "• Attempts to pool 73|73 mana for triple melee combo\n" +
         "• Intentionally maintains an 11 mana gap in certain situations\n" +
         "• Manually use Reprise if you cannot start a combo at the end of combat\n" +
-        "• Add Embolden / Enchanted Riposte / Manafication to your burst-delay macro\n")]
+        "• Auto Burst on/off controls Embolden/Manafication, you may also want to add Enchanted Riposite to your delay macros\n")]
     public bool RotationNotes { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if there are no healers alive in party)")]
@@ -44,7 +44,7 @@ public sealed class BeirutaRDM : RedMageRotation
     public bool AnyonesMeleeRule { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Use Swift/Acceleration for oGCD window alignment (Fleche/Contre drift fix, Experimental)")]
-    public bool UseWindowAlignment { get; set; } = true;
+    public bool UseWindowAlignment { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Hold melee combo up to 2s if out of range")]
     public bool HoldMeleeComboIfOutOfRange { get; set; } = true;
@@ -513,7 +513,7 @@ return base.EmergencyAbility(nextGCD, out act);
         bool needsMovementRescue =
             InCombat
             && HasHostilesInMaxRange
-            && (IsMoving || openerNeedsInstant)
+            && (MovingTime > 3f || openerNeedsInstant)
             && !nextIsInstant;
 
         if (needsMovementRescue && !meleeCheck && !IsInMeleeCombo)
@@ -946,7 +946,7 @@ return base.EmergencyAbility(nextGCD, out act);
             && !IsInMeleeCombo
             && !finisherChain
             && ManaStacks != 3
-            && (!CanVerBoth || (IsMoving && CanVerBoth && noOtherMoveResources));
+            && (!CanVerBoth || (MovingTime > 3f && CanVerBoth && noOtherMoveResources));
 
         if (shouldSpendAccelOn2Soon)
         {
@@ -964,7 +964,7 @@ return base.EmergencyAbility(nextGCD, out act);
             && !HasDualcast
             && InCombat
             && HasHostilesInMaxRange
-            && IsMoving)
+            && MovingTime > 3f)
         {
             if (NumberOfHostilesInRangeOf(5) >= 2 && ImpactPvE.CanUse(out act))
                 return true;
@@ -1077,7 +1077,7 @@ return base.EmergencyAbility(nextGCD, out act);
 
         bool canRepriseForMove =
             RangedSwordplay
-            && IsMoving
+            && MovingTime > 3.5f
             && ManaStacks == 0
             && (BlackMana < 50 || WhiteMana < 50)
             && !HasAnyInstantTool
@@ -1097,7 +1097,6 @@ return base.EmergencyAbility(nextGCD, out act);
         bool canRescueMovementWithOgcd =
             InCombat
             && HasHostilesInMaxRange
-            && IsMoving
             && MovingTime > 3f
             && !IsInMeleeCombo
             && ManaStacks != 3
@@ -1118,7 +1117,7 @@ return base.EmergencyAbility(nextGCD, out act);
     {
         act = null;
 
-        if (IsMoving && InCombat && HasHostilesInMaxRange && ManaStacks != 3 && !HasAnyInstantTool)
+        if (MovingTime > 3f && InCombat && HasHostilesInMaxRange && ManaStacks != 3 && !HasAnyInstantTool)
         {
             act = null;
             return false;

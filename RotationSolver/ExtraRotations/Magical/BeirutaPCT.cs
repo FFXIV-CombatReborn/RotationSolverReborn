@@ -83,11 +83,10 @@ public sealed class BeirutaPCT : PictomancerRotation
     // Determine whether Striking Muse should be used to rescue movement when the next GCD is unsafe.
     private bool NeedsStrikingMovementRescue(IAction nextGCD) =>
         InCombat
-        && IsMoving
         && !NextIsMovementSafeGcd(nextGCD)
         && !HasSwift
         && !HasHammerTime
-        && NextAbilityToNextGCD < 0.6f;
+        && MovingTime > 1.5f;
 
     private long _starPrismUsedAtMs = 0;
 
@@ -151,6 +150,9 @@ public sealed class BeirutaPCT : PictomancerRotation
                 return act;
             }
         }
+
+        if (remainTime is < 1f && StrikingMusePvE.CanUse(out act))
+            return act;
 
         return base.CountDownAction(remainTime);
     }
@@ -614,7 +616,7 @@ public sealed class BeirutaPCT : PictomancerRotation
         }
 
         // Use the hammer chain for movement rescue during the early HammerTime window.
-        if (!HasStarryMuse && hammerEarlyWindow && InCombat && IsMoving && canCommitGcdNow && !HasSwift && !blockPrepHammerChain && hammerAllowedByInspirationRule)
+        if (!HasStarryMuse && hammerEarlyWindow && InCombat && MovingTime > 1.5f && canCommitGcdNow && !HasSwift && !blockPrepHammerChain && hammerAllowedByInspirationRule)
         {
             if (PolishingHammerPvE.CanUse(out act, skipComboCheck: true)) return true;
             if (HammerBrushPvE.CanUse(out act, skipComboCheck: true)) return true;
@@ -686,7 +688,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 
         // Use Holy/Comet while moving only when the GCD commit timing window is available.
         {
-            if (HolyCometMoving && InCombat && IsMoving && canCommitGcdNow && !HasSwift && !HasHammerTime && HolyCometAllowedByPaintReserve)
+            if (HolyCometMoving && InCombat && MovingTime > 1.5f && canCommitGcdNow && !HasSwift && !HasHammerTime && HolyCometAllowedByPaintReserve)
             {
                 if (CometInBlackPvE.CanUse(out act)) return true;
                 if (HolyInWhitePvE.CanUse(out act)) return true;
