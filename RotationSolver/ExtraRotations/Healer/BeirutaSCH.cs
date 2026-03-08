@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace RotationSolver.ExtraRotations.Healer;
 
@@ -21,6 +22,9 @@ public sealed class BeirutaSCH : ScholarRotation
         "• When using the CD planner, please note that after using Dissipation, no fairy abilities or Seraphism can be used for 30 seconds\n" +
         "• Without burst delay, this restriction will occur during the 30-second window at 0s and 180s then every multiple of 180s thereafter\n")]
     public bool RotationNotes { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use first stack of Consolation ASAP when Seraph is out")]
+    public bool UseFirstConsolationAsapWhenSeraphIsOut { get; set; } = true;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Party HP percent threshold to use Emergency Tactics with Succor")]
@@ -52,7 +56,7 @@ public sealed class BeirutaSCH : ScholarRotation
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Average party HP percent to use Emergency Tactics Succor in HealAreaGCD")]
-    public float HealAreaGcdEmergencyTacticsHeal { get; set; } = 0.4f;
+    public float HealAreaGcdEmergencyTacticsHeal { get; set; } = 0.3f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Average party HP percent to use Accession in HealAreaGCD")]
@@ -111,6 +115,38 @@ public sealed class BeirutaSCH : ScholarRotation
     private const int DotOffsetMobs = 1;
     private const int MinimumFairyGaugeForLinkPriority = 70;
 
+    private static float EstimateRemainingSeconds(dynamic cooldown, float maxProbeSeconds, float stepSeconds = 0.5f)
+{
+    if (cooldown.HasOneCharge) return 0f;
+
+    for (float t = 0f; t <= maxProbeSeconds; t += stepSeconds)
+    {
+        if (cooldown.WillHaveOneCharge(t))
+            return t;
+    }
+
+    return -1f;
+}
+
+private float SummonSeraphRem()
+{
+    if (!SummonSeraphPvE.EnoughLevel) return -1f;
+    return EstimateRemainingSeconds(SummonSeraphPvE.Cooldown, 180f, 0.5f);
+}
+
+private float DissipationRem()
+{
+    if (!DissipationPvE.EnoughLevel) return -1f;
+    return EstimateRemainingSeconds(DissipationPvE.Cooldown, 180f, 0.5f);
+}
+
+private bool ShouldUseSummonEos()
+{
+    float summonSeraphRem = SummonSeraphRem();
+    float dissipationRem = DissipationRem();
+
+    return summonSeraphRem < 90f || dissipationRem < 140f;
+}
     private const bool UseDissipationDuringBurst = true;
     private const bool EnableBallparkTtkEstimator = true;
 
@@ -193,6 +229,13 @@ public sealed class BeirutaSCH : ScholarRotation
 
         if (InFirst5sAfterAdloquium && DeploymentTacticsPvE.CanUse(out act))
             return true;
+
+        if (UseFirstConsolationAsapWhenSeraphIsOut &&
+            ConsolationPvE.Cooldown.CurrentCharges == 2 &&
+            ConsolationPvE.CanUse(out act))
+{
+            return true;
+    }
 
         if (ShouldRemoveAetherpact())
         {
@@ -361,6 +404,8 @@ public sealed class BeirutaSCH : ScholarRotation
         return base.SpeedAbility(nextGCD, out act);
     }
 
+    
+
     // Damage-oriented oGCD handling.
     [RotationDesc(
         ActionID.ChainStratagemPvE,
@@ -388,7 +433,7 @@ public sealed class BeirutaSCH : ScholarRotation
         if (!HasAetherflow && AetherflowPvE.CanUse(out act))
             return true;
 
-        if (HasBuffs && UseBurstMedicine(out act))
+        if (HasBuffs && IsBurst &&UseBurstMedicine(out act))
             return true;
 
         if (ShouldUseBanefulImpaction(closeTargetCount, out act))
@@ -425,7 +470,6 @@ public sealed class BeirutaSCH : ScholarRotation
         if (!HasEmergencyTactics &&
             MovingTime >= RuinIIMovementThresholdSeconds &&
             PartyMembersAverHP < HealAreaGcdMovingAccessionHeal &&
-            !NextGcdIsBio() &&
             AccessionPvE.CanUse(out act, skipCastingCheck: true))
         {
             return true;
@@ -478,9 +522,6 @@ public sealed class BeirutaSCH : ScholarRotation
         if (ConcitationPvE.CanUse(out act))
             return true;
 
-        if (SuccorPvE.CanUse(out act))
-            return true;
-
         return base.DefenseAreaGCD(out act);
     }
 
@@ -500,11 +541,14 @@ public sealed class BeirutaSCH : ScholarRotation
         if (ShouldDeferToRaise())
             return base.GeneralGCD(out act);
 
-        if (SummonEosPvE.CanUse(out act))
-            return true;
-
         if (CurrentMp < EmergencyHealingMPThreshold)
             return base.GeneralGCD(out act);
+
+         if (ShouldUseSummonEos() &&
+    SummonEosPvE.CanUse(out act))
+{
+    return true;
+}
 
         if (ShouldUseDeploymentAdloquium() &&
             AdloquiumPvE.CanUse(out act, targetOverride: TargetType.Self))
@@ -626,7 +670,6 @@ public sealed class BeirutaSCH : ScholarRotation
         }
 
         if (MovingTime > RuinIIMovementThresholdSeconds &&
-            !NextGcdIsBio() &&
             RuinIiPvE.CanUse(out act))
         {
             return true;
@@ -638,11 +681,6 @@ public sealed class BeirutaSCH : ScholarRotation
     #endregion
 
     #region Decision Helpers
-
-    // Checks whether the next GCD would want to refresh/apply Bio.
-    private bool NextGcdIsBio() =>
-        CurrentTarget != null &&
-        CurrentTargetBioMissingOrEnding(ChainStratagemDotRefreshSeconds);
 
     // Determines whether Recitation should be used to force a crit shield for Deployment Tactics.
     private bool ShouldUseRecitationForDeploymentTactics()
