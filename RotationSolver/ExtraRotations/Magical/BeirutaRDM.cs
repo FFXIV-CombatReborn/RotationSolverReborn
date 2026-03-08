@@ -424,9 +424,9 @@ public sealed class BeirutaRDM : RedMageRotation
         {
             bool canUseManaficationNormally =
                 !IsOpen &&
-                (HasEmbolden || EmboldenPvE.Cooldown.HasOneCharge || (EmboldenPvE.Cooldown.WillHaveOneCharge(4f) && !IsInMeleeCombo));
+                (HasEmbolden || EmboldenPvE.Cooldown.HasOneCharge || (EmboldenPvE.Cooldown.WillHaveOneCharge(5f) && !IsInMeleeCombo));
 
-            if (canUseManaficationNormally && InCombat && HasHostilesInMaxRange && ManaficationPvE.CanUse(out act))
+            if (canUseManaficationNormally && InCombat && IsBurst && HasHostilesInMaxRange && ManaficationPvE.CanUse(out act))
                 return true;
         }
 
@@ -537,7 +537,7 @@ return base.EmergencyAbility(nextGCD, out act);
             && AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
             return true;
     }
-    else if (NextAbilityToNextGCD < 0.6f)
+    else if (MovingTime > 3f)
     {
         if (AccelerationPvE.EnoughLevel
             && !blockAccel
@@ -1098,7 +1098,7 @@ return base.EmergencyAbility(nextGCD, out act);
             InCombat
             && HasHostilesInMaxRange
             && IsMoving
-            && NextAbilityToNextGCD < 0.6f
+            && MovingTime > 3f
             && !IsInMeleeCombo
             && ManaStacks != 3
             && (

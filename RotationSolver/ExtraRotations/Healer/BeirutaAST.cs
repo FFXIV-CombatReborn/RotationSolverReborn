@@ -17,6 +17,9 @@ public sealed class BeirutaAST : AstrologianRotation
         "• Disabling AutoBurst is sufficient if you need to delay burst timing in this rotation\n" +
         "• DoT effects may refresh slightly earlier during burst phases or while moving\n" +
         "• Lightspeed is managed automatically by the rotation and should not be used manually\n" +
+        "• Earthly Star is used on cooldown in this rotation, disable it in Actions if you want to use CD planner for it\n" +
+        "• This rotation will immediatly follow a Helios Conjunction if Horoscope or Neutral Sect being used \n" +
+        "• Macrocosmos from CD planner (or All GCD actions) is not reliable, please intercept mannually \n" +
         "• Single-target healing usage is intentionally more conservative in this rotation\n")]
     public bool RotationNotes { get; set; } = true;
 
@@ -804,7 +807,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
         bool needsMovementRescue =
             InCombat &&
-            IsMoving &&
+            MovingTime > 1.5f &&
             !nextIsMovementSafeGcd &&
             !HasSwift &&
             !HasLightspeed &&
@@ -837,7 +840,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
         if (InCombat)
         {
-            bool canWeaveNow = NextAbilityToNextGCD < 0.6f;
+            bool canWeaveNow = MovingTime > 1.5f;
 
             if (needsMovementRescue &&
                 canWeaveNow &&
@@ -925,9 +928,8 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         bool movingHealWindow =
             InCombat &&
             !HoldLastLightspeedForDivination &&
-            IsMoving &&
             !HasLightspeed &&
-            NextAbilityToNextGCD < 0.6f &&
+            MovingTime > 1.0f &&
             AspectedBeneficPvE.Target.Target != null &&
             !HasAspectedBeneficFromSelf(AspectedBeneficPvE.Target.Target) &&
             !HasSingleHealLockoutStatus(AspectedBeneficPvE.Target.Target) &&
@@ -1069,8 +1071,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         float expectedHPToLive12Seconds = GetExpectedHpToLive12Seconds();
 
         if (InCombat &&
-    IsMoving &&
-    NextAbilityToNextGCD < 0.6f &&
+    MovingTime > 1.5f &&
     MovingCombustRefreshSeconds > 0f &&
     CurrentTargetCombustMissingOrEnding(MovingCombustRefreshSeconds) &&
     CurrentTargetHasEnoughHpForCombust(expectedHPToLive12Seconds) &&
