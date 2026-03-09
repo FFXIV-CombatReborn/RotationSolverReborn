@@ -638,11 +638,18 @@ internal static class DataCenter
 		{
 			return true;
 		}
+
 		if (Job == Job.RDM && PlayerSyncedLevel() >= 64)
 		{
 			return true;
 		}
+
 		if (DutyRotation.ChemistLevel >= 3)
+		{
+			return true;
+		}
+
+		if (StatusHelper.PlayerHasStatus(false, StatusID.VariantRaiseSet))
 		{
 			return true;
 		}
