@@ -734,11 +734,11 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 2)]
     private static readonly bool _raiseBrinkOfDeath = true;
 
-    [JobConfig, UI("Raise non-Healers from bottom of party list to the top (Light Party 2 Healer Behavior, Experimental)",
+    [JobConfig, UI("Raise non-Healers from bottom of party list to the top (Light Party 2 Healer Behavior)",
         Filter = HealingActionCondition, Section = 2)]
     private static readonly bool _h2 = false;
 
-    [JobConfig, UI("Raise Red Mage and Summoners first if no Tanks or Healers are dead (Experimental)",
+    [JobConfig, UI("Raise Red Mage and Summoners first if no Tanks or Healers are dead",
         Filter = HealingActionCondition, Section = 2)]
     private static readonly bool _offRaiserRaise = false;
 
@@ -749,7 +749,7 @@ internal partial class Configs : IPluginConfiguration
     /// the specified amount of time before your cooldown ends to cast Swiftcast. This is to prevent using your Swiftcast too early and waste it
     /// if your co-healer manages to raise your target within your global cooldown period.
     /// </markdown>
-    [JobConfig, UI("How early before next GCD should RSR use swiftcast for raise (Experimental)",
+    [JobConfig, UI("How early before next GCD should RSR use swiftcast for raise",
         Filter = HealingActionCondition, Section = 2)]
     [Range(0, 1.0f, ConfigUnitType.Seconds, 0.01f)]
     public float SwiftcastBuffer { get; set; } = 0.6f;

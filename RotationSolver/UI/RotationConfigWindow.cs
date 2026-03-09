@@ -14,6 +14,7 @@ using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using ECommons.Reflection;
+using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
@@ -500,7 +501,8 @@ public partial class RotationConfigWindow : Window
         if (clicked)
         {
             ImGui.SetClipboardText(diagInfo.ToString());
-        }
+			Svc.Toasts.ShowQuest($"Diagnostic info copied to clipboard");
+		}
     }
 
     private void DrawSideBar()
