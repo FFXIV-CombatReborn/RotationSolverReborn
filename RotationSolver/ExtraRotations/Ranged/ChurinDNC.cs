@@ -61,6 +61,8 @@ public sealed class ChurinDNC : DancerRotation
         ImGui.Text($"Can Use Technical Step: {CanUseTechnicalStep} - Tech Step Ready?: {_techStepReady}");
         ImGui.Text($"Can Use Standard Step: {CanUseStandardStep} - Standard Step Ready?: {_standardReady}");
         ImGui.Text($"Saber Dance Primed?: {_saberDancePrimed}");
+        ImGui.Text($"Completed Steps: {CompletedSteps}");
+        ImGui.Text($"Potion Condition Met: {ChurinPotions.IsConditionMet()} | Can Use At Time: {ChurinPotions.CanUseAtTime()}");
     }
 
     #endregion
@@ -398,36 +400,48 @@ public sealed class ChurinDNC : DancerRotation
         {
             return potionAct;
         }
+
         if (remainTime > OpenerStandardStepTime)
         {
             return base.CountDownAction(remainTime);
         }
-        if (ChosenOpener == DancerOpener.Standard)
+
+        var act = ChosenOpener switch
         {
-            if (TryUseClosedPosition(out var act)
-             || remainTime <= OpenerStandardStepTime && StandardStepPvE.CanUse(out act)
-             || ExecuteStepGCD(out act)
-             || remainTime <= OpenerFinishTime && DoubleStandardFinishPvE.CanUse(out act))
-            {
-                return act;
-            }
+            DancerOpener.Standard => CountDownStandardOpener(remainTime),
+            DancerOpener.Tech     => CountDownTechOpener(remainTime),
+            _                     => null
+        };
+
+        return act ?? base.CountDownAction(remainTime);
+    }
+
+    private IAction? CountDownStandardOpener(float remainTime)
+    {
+        if (TryUseClosedPosition(out var act)
+            || remainTime <= OpenerStandardStepTime && StandardStepPvE.CanUse(out act)
+            || ExecuteStepGCD(out act)
+            || remainTime <= OpenerFinishTime && DoubleStandardFinishPvE.CanUse(out act))
+        {
+            return act;
         }
 
-        if (ChosenOpener == DancerOpener.Tech)
-        {
-            if (TryUseClosedPosition(out var act)
-                || remainTime > OpenerTechTime && remainTime > 13 && StandardStepPvE.CanUse(out act)
-                || remainTime <= OpenerTechTime && TechnicalStepPvE.CanUse(out act)
-                || ExecuteStepGCD(out act)
-                || remainTime > OpenerTechTime && IsDancing && HasStandardStep && !AreDanceTargetsInRange &&
-                DoubleStandardFinishPvE.CanUse(out act)
-                || remainTime <= OpenerTechFinishTime && TryFinishTheDance(out act))
-            {
-                return act;
-            }
-        }
+        return null;
+    }
 
-        return base.CountDownAction(remainTime);
+    private IAction? CountDownTechOpener(float remainTime)
+    {
+        if (TryUseClosedPosition(out var act)
+            || remainTime > OpenerTechTime && remainTime > 13 && StandardStepPvE.CanUse(out act)
+            || remainTime <= OpenerTechTime && TechnicalStepPvE.CanUse(out act)
+            || ExecuteStepGCD(out act)
+            || remainTime > OpenerTechTime && IsDancing && HasStandardStep && !AreDanceTargetsInRange &&
+            DoubleStandardFinishPvE.CanUse(out act)
+            || remainTime <= OpenerTechFinishTime && TryFinishTheDance(out act))
+        {
+            return act;
+        }
+        return null;
     }
 
     #endregion
@@ -439,17 +453,17 @@ public sealed class ChurinDNC : DancerRotation
     {
         IsSaberDancePrimed();
         if (TryUseDevilment(out act)) return true;
-        if (ChurinPotions.ShouldUsePotion(this, out act)) return true;
         if (SwapDancePartner(out act)) return true;
         if (TryUseClosedPosition(out act)) return true;
 
-        if (CanUseStandardStep || CanUseTechnicalStep || IsDancing)
+        if (!CanUseStandardStep && !CanUseTechnicalStep && !IsDancing)
         {
-            act = null;
-            return false;
+            return base.EmergencyAbility(nextGCD, out act);
         }
 
-        return base.EmergencyAbility(nextGCD, out act);
+        act = null;
+        return false;
+
     }
 
     /// Override the method for handling attack abilities
@@ -469,6 +483,8 @@ public sealed class ChurinDNC : DancerRotation
     /// Override the method for handling general Global Cooldown (GCD) actions
     protected override bool GeneralGCD(out IAction? act)
     {
+        if (ChurinPotions.ShouldUsePotion(this, out act)) return true;
+
         if (IsDancing)
         {
             return TryFinishTheDance(out act);
@@ -903,19 +919,19 @@ public sealed class ChurinDNC : DancerRotation
         act = null;
         if (!InCombat || HasThreefoldFanDance || !FlourishPvE.IsEnabled || !FlourishPvE.EnoughLevel) return false;
 
-        if (FlourishPvE.CanUse(out act))
-        {
-            if (IsBurstPhase)
-            {
-                return true;
-            }
+        if (!FlourishPvE.CanUse(out act)) return false;
 
-            switch (ShouldUseTechStep)
-            {
-                case true when TechnicalStepPvE.Cooldown.IsCoolingDown && !TechnicalStepPvE.Cooldown.WillHaveOneCharge(15):
-                case false:
-                    return true;
-            }
+        if (IsBurstPhase)
+        {
+            return true;
+        }
+
+        switch (ShouldUseTechStep)
+        {
+            case true when TechnicalStepPvE.Cooldown.IsCoolingDown && !TechnicalStepPvE.Cooldown.WillHaveOneCharge(15):
+            case false:
+                act = FlourishPvE;
+                return true;
         }
         return false;
     }
@@ -935,12 +951,14 @@ public sealed class ChurinDNC : DancerRotation
         if (HasFourfoldFanDance && FanDanceIvPvE.CanUse(out act)) return true;
         if (HasThreefoldFanDance && FanDanceIiiPvE.CanUse(out act)) return true;
 
-        if (IsBurstPhase || (hasEnoughFeathers && HasAnyProc && !CanUseTechnicalStep) || IsMedicated && !TechnicalStepPvE.Cooldown.WillHaveOneCharge(10))
+        if (!IsBurstPhase && (!hasEnoughFeathers || !HasAnyProc || CanUseTechnicalStep)
+                          && (!IsMedicated || TechnicalStepPvE.Cooldown.WillHaveOneCharge(10)))
         {
-            if (FanDanceIiPvE.CanUse(out act)) return true;
-            if (FanDancePvE.CanUse(out act)) return true;
+            return false;
         }
-        return false;
+
+        return FanDanceIiPvE.CanUse(out act)
+               || FanDancePvE.CanUse(out act);
     }
 
     #endregion
@@ -952,16 +970,29 @@ public sealed class ChurinDNC : DancerRotation
     /// </summary>
     private class ChurinDNCPotions : Potions
     {
+        private float _step4ReachedTime = -1f;
+
         public override bool IsConditionMet()
         {
-            var churinDNC = new ChurinDNC();
+            float now = DataCenter.CombatTimeRaw;
 
-            if (CompletedSteps <= 0) return false;
+            // Detect when all 4 steps are complete — pot should fire before Tech Finish
+            if (HasTechnicalStep && CompletedSteps > 3)
+            {
+                _step4ReachedTime = now;
+                return true;
+            }
 
-            // Check for Technical Step completion (4+ steps) or Standard Step completion (2+ steps)
-            return (HasTechnicalStep && CompletedSteps > 3)
-                   || (((InCombat && !churinDNC.TechnicalStepPvE.Cooldown.WillHaveOneCharge(30))
-                        || !InCombat) && HasStandardStep && CompletedSteps > 1);
+            // Allow pot for up to 2s after step 4 was registered (catches missed single-frame windows)
+            if (_step4ReachedTime > 0 && now - _step4ReachedTime <= 2f)
+                return true;
+
+            // Standard step equivalent
+            if (HasStandardStep && CompletedSteps > 1)
+                return true;
+
+            _step4ReachedTime = -1f;
+            return false;
         }
 
         protected override bool IsTimingValid(float timing)
@@ -969,9 +1000,14 @@ public sealed class ChurinDNC : DancerRotation
             if (timing > 0 && DataCenter.CombatTimeRaw >= timing &&
                 DataCenter.CombatTimeRaw - timing <= TimingWindowSeconds) return true;
 
-            // Check opener timing: if it's an opener potion and countdown is within configured time
+            // Check opener timing: OpenerPotionTime == 0 means disabled
             var countDown = Service.CountDownTime;
-            return IsOpenerPotion(timing) && countDown > 0 && countDown <= ChurinDNC.OpenerPotionTime;
+            if (IsOpenerPotion(timing))
+            {
+                if (ChurinDNC.OpenerPotionTime == 0f) return false;
+                return countDown > 0f && countDown <= ChurinDNC.OpenerPotionTime;
+            }
+            return false;
         }
     }
 
