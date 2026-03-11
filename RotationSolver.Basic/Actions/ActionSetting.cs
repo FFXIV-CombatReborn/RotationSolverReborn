@@ -39,7 +39,7 @@ public enum SpecialActionType : byte
 /// <summary>
 /// Setting from the developer.
 /// </summary>
-public class ActionSetting()
+public class ActionSetting
 {
     /// <summary>
     /// The Ninjutsu action of this action.

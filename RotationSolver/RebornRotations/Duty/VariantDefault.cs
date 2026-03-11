@@ -57,7 +57,7 @@ internal class VariantDefault : VariantRotation
     {
 		if (VariantRampartPvE_46941.Info.IsOnSlot)
 		{
-			if (VariantRampartPvE_46941.CanUse(out act, skipStatusProvideCheck: true))
+			if (HasHostilesInRange && VariantRampartPvE_46941.CanUse(out act, skipStatusProvideCheck: true))
 			{
 				return true;
 			}
@@ -65,7 +65,7 @@ internal class VariantDefault : VariantRotation
 
 		if (VariantRampartPvE_33864.Info.IsOnSlot)
         {
-            if (VariantRampartPvE_33864.CanUse(out act, skipStatusProvideCheck: true))
+            if (HasHostilesInRange && VariantRampartPvE_33864.CanUse(out act, skipStatusProvideCheck: true))
             {
                 return true;
             }
@@ -73,7 +73,7 @@ internal class VariantDefault : VariantRotation
 
         if (VariantRampartPvE.Info.IsOnSlot)
         {
-            if (VariantRampartPvE.CanUse(out act, skipStatusProvideCheck: true))
+            if (HasHostilesInRange && VariantRampartPvE.CanUse(out act, skipStatusProvideCheck: true))
             {
                 return true;
             }

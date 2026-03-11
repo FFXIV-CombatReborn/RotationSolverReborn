@@ -438,12 +438,48 @@ public partial class DutyRotation : IDisposable
     /// </summary>
     public static AutoStatus CommandStatus => DataCenter.CommandStatus;
 
-    #region Phantom Levels
+	/// <summary>
+	/// Is there any hostile target in range? 25 for ranged jobs and healer, 3 for melee and tank.
+	/// </summary>
+	[Description("Has hostiles in Range")]
+	public static bool HasHostilesInRange => DataCenter.HasHostilesInRange;
 
-    /// <summary>
-    /// Gets the name of the current active Phantom Job, or None if none are active.
-    /// </summary>
-    public static string? ActivePhantomJob => GetPhantomJob().ToString();
+	/// <summary>
+	/// Is there any hostile target in 25 yalms?
+	/// </summary>
+	[Description("Has hostiles in 25 yalms")]
+	public static bool HasHostilesInMaxRange => DataCenter.HasHostilesInMaxRange;
+
+	/// <summary>
+	/// How many hostile targets in range? 25 for ranged jobs and healer, 3 for melee and tank.
+	/// </summary>
+	[Description("The number of hostiles in Range")]
+	public static int NumberOfHostilesInRange => DataCenter.NumberOfHostilesInRange;
+
+	/// <summary>
+	/// How many hostile targets in max range (25 yalms) regardless of job
+	/// </summary>
+	[Description("The number of hostiles in max Range")]
+	public static int NumberOfHostilesInMaxRange => DataCenter.NumberOfHostilesInMaxRange;
+
+	/// <summary>
+	/// How many hostile targets in range? 25 for ranged jobs and healer, 3 for melee and tank. This is all can attack.
+	/// </summary>
+	[Description("The number of all hostiles in Range")]
+	public static int NumberOfAllHostilesInRange => DataCenter.NumberOfAllHostilesInRange;
+
+	/// <summary>
+	/// How many hostile targets in max range (25 yalms) regardless of job. This is all can attack.
+	/// </summary>
+	[Description("The number of all hostiles in max Range")]
+	public static int NumberOfAllHostilesInMaxRange => DataCenter.NumberOfAllHostilesInMaxRange;
+
+	#region Phantom Levels
+
+	/// <summary>
+	/// Gets the name of the current active Phantom Job, or None if none are active.
+	/// </summary>
+	public static string? ActivePhantomJob => GetPhantomJob().ToString();
 
     public static byte FreelancerLevel
     {

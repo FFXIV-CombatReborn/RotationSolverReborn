@@ -106,7 +106,7 @@ public sealed class SMN_Reborn : SummonerRotation
     [RotationDesc(ActionID.RekindlePvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (RekindlePvE.CanUse(out act))
+        if (RekindlePvE.CanUse(out act, targetOverride: TargetType.LowHP))
         {
             return true;
         }
@@ -146,13 +146,10 @@ public sealed class SMN_Reborn : SummonerRotation
 
         if (StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.FirebirdTrance))
         {
-            if (RekindlePvE.CanUse(out act))
+            if (RekindlePvE.CanUse(out act, targetOverride: TargetType.LowHP))
             {
-                if (RekindlePvE.Target.Target == LowestHealthPartyMember)
-                {
-                    return true;
-                }
-            }
+				return true;
+			}
         }
 
         if (HasSearingLight && InCombat && UseBurstMedicine(out act))

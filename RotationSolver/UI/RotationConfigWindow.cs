@@ -61,7 +61,7 @@ public partial class RotationConfigWindow : Window
 
 	private static readonly string[] _supporters =
 	[
-	"A bunch of dots and dashed idk",
+	"ProtectAluna", //128bbd5ef8915c6277eb17433c85a158
 	"Abracon",
 	"Akurosuki",
 	"Aniane",
@@ -73,7 +73,6 @@ public partial class RotationConfigWindow : Window
     "Chris",
 	"DeadCode",
 	"Drama",
-	"Elena",
 	"Endings",
 	"Heathcote",
 	"kaen",
@@ -89,14 +88,12 @@ public partial class RotationConfigWindow : Window
 	"Plogons",
 	"prismagreen",
 	"purrpletime",
-	"Salmon",
 	"sambaggins",
 	"Savage",
 	"smf26",
 	"Toska",
 	"TuckingFypo-",
 	"Vaex_Darastrix",
-	"vivi",
 	"KuwoBlack"
 	];
 
@@ -1509,6 +1506,7 @@ public partial class RotationConfigWindow : Window
 	}
 
 	#endregion
+
 	#region About
 	private static void DrawAbout()
 	{
@@ -1840,51 +1838,6 @@ public partial class RotationConfigWindow : Window
 	private void DrawAutoduty()
     {
         ImGui.TextWrapped("While the RSR Team has made effort to make RSR compatible with Autoduty, please keep in mind that RSR is not designed with botting in mind.");
-        ImGui.Spacing();
-        ImGui.TextWrapped("This menu is for troubleshooting and initial setup purposes and is a good first step to share to get assistance.");
-        ImGui.Spacing();
-        ImGui.TextWrapped("Below are relevant settings and their current states for RSR to work well with AutoDuty mode.");
-        ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
-        // Display the current HostileType
-        ImGui.TextWrapped($"Current Targeting Mode: {GetHostileTypeDescription(DataCenter.CurrentTargetToHostileType)}");
-
-        // Add a button to change the targeting to AllTargetsCanAttack (type 0) aka Autoduty Mode
-        if (ImGui.Button("Change Targeting to Autoduty Mode"))
-        {
-            SetTargetingType(TargetHostileType.AllTargetsCanAttack);
-        }
-
-        // Display the current NPC Heal/Raise Support status
-        ImGui.TextWrapped($"NPC Heal/Raise Support Enabled: {Service.Config.FriendlyPartyNpcHealRaise3}");
-        if (ImGui.Button("Enable NPC Heal/Raise Support"))
-        {
-            Service.Config.FriendlyPartyNpcHealRaise3.Value = true;
-        }
-        ImGui.Spacing();
-        // Display the Auto Off Between Area status
-        ImGui.TextWrapped($"Auto Off Between Areas: {Service.Config.AutoOffBetweenArea}");
-        if (ImGui.Button("Disable Auto Off Between Areas"))
-        {
-            Service.Config.AutoOffBetweenArea.Value = false;
-        }
-        ImGui.Spacing();
-        // Display the Auto Off Cut Scene status
-        ImGui.TextWrapped($"Auto Off During Cutscenes: {Service.Config.AutoOffCutScene}");
-        if (ImGui.Button("Disable Auto Off During Cutscenes"))
-        {
-            Service.Config.AutoOffCutScene.Value = false;
-        }
-        ImGui.Spacing();
-        // Display the Auto Off After Combat Time status
-        ImGui.TextWrapped($"Auto Off After Combat: {Service.Config.AutoOffAfterCombat}");
-        if (ImGui.Button("Disable Auto Off After Combat"))
-        {
-            Service.Config.AutoOffAfterCombat.Value = false;
-        }
-        ImGui.Spacing();
-        ImGui.Separator();
         ImGui.Spacing();
         ImGui.TextWrapped($"Below are plugins used by Autoduty and their current states");
         ImGui.Spacing();
@@ -3389,6 +3342,9 @@ public partial class RotationConfigWindow : Window
 
     private static string _actionSearching = string.Empty;
     private static string _actionPopupSearching = string.Empty;
+    // Caches to avoid recomputing expensive search/sort every frame
+    private static string _lastActionPopupSearching = string.Empty;
+    private static readonly List<(GAction action, float sim)> _cachedPopupFiltered = [];
 
     private static void DrawActionsList(string name, HashSet<uint> actions)
     {
@@ -3473,7 +3429,7 @@ public partial class RotationConfigWindow : Window
     {
         const float InputWidth = 200f;
         const float ChildHeight = 400f;
-        const int MaxDisplayCount = 50;
+        const int MaxDisplayCount = 20;
 
         using ImRaii.IEndObject popup = ImRaii.Popup(popupId);
         if (popup)
@@ -3489,63 +3445,68 @@ public partial class RotationConfigWindow : Window
                 if (string.IsNullOrWhiteSpace(_actionPopupSearching))
                 {
                     ImGui.TextColored(ImGuiColors.DalamudYellow, "Enter a search term to filter actions.");
+                    // Clear cached results when no query
+                    if (!string.IsNullOrEmpty(_lastActionPopupSearching))
+                    {
+                        _lastActionPopupSearching = string.Empty;
+                        _cachedPopupFiltered.Clear();
+                    }
                 }
                 else
                 {
-                    // Manual filtering and sorting (no LINQ)
-                    var filtered = new List<(GAction action, float sim)>();
-                    string searchLower = _actionPopupSearching.Trim().ToLowerInvariant();
-
-                    for (int i = 0; i < AllActions.Length; i++)
+                    // Only recompute the filtered list when the search string changes
+                    if (!string.Equals(_actionPopupSearching, _lastActionPopupSearching, StringComparison.Ordinal))
                     {
-                        GAction a = AllActions[i];
+                        _lastActionPopupSearching = _actionPopupSearching;
+                        _cachedPopupFiltered.Clear();
 
-                        // Skip actions already in the list
-                        bool found = false;
-                        foreach (var id in actions)
+                        string searchLower = _actionPopupSearching.Trim().ToLowerInvariant();
+                        bool useSimilarity = searchLower.Length >= 3;
+
+                        for (int i = 0; i < AllActions.Length; i++)
                         {
-                            if (id == a.RowId)
+                            GAction a = AllActions[i];
+
+                            // Skip actions already in the list
+                            bool found = false;
+                            foreach (var id in actions)
                             {
-                                found = true;
-                                break;
+                                if (id == a.RowId)
+                                {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (found)
+                                continue;
+
+                            string nameLower = a.Name.ToString().ToLowerInvariant();
+                            string idStr = a.RowId.ToString();
+
+                            // Direct substring or ID match gets highest score
+                            if (nameLower.Contains(searchLower) || idStr == searchLower)
+                            {
+                                _cachedPopupFiltered.Add((a, 1000f));
+                            }
+                            else if (useSimilarity)
+                            {
+                                float sim = SearchableCollection.Similarity($"{a.Name} {a.RowId}", _actionPopupSearching);
+                                if (sim > 0f)
+                                    _cachedPopupFiltered.Add((a, sim));
                             }
                         }
-                        if (found)
-                            continue;
 
-                        string nameLower = a.Name.ToString().ToLowerInvariant();
-                        string idStr = a.RowId.ToString();
-
-                        // Direct substring or ID match gets highest score
-                        if (nameLower.Contains(searchLower) || idStr == searchLower)
+                        // Sort descending by similarity score (use List.Sort for efficiency)
+                        if (_cachedPopupFiltered.Count > 1)
                         {
-                            filtered.Add((a, 1000f)); // Arbitrary high score for direct match
-                        }
-                        else
-                        {
-                            float sim = SearchableCollection.Similarity($"{a.Name} {a.RowId}", _actionPopupSearching);
-                            if (sim > 0)
-                                filtered.Add((a, sim));
-                        }
-                    }
-
-                    // Sort descending by score (manual, no LINQ)
-                    int n = filtered.Count;
-                    for (int i = 0; i < n - 1; i++)
-                    {
-                        for (int j = i + 1; j < n; j++)
-                        {
-                            if (filtered[j].sim > filtered[i].sim)
-                            {
-                                (filtered[j], filtered[i]) = (filtered[i], filtered[j]);
-                            }
+                            _cachedPopupFiltered.Sort((x, y) => y.sim.CompareTo(x.sim));
                         }
                     }
 
                     int shown = 0;
-                    for (int i = 0; i < filtered.Count && shown < MaxDisplayCount; i++)
+                    for (int i = 0; i < _cachedPopupFiltered.Count && shown < MaxDisplayCount; i++)
                     {
-                        GAction action = filtered[i].action;
+                        GAction action = _cachedPopupFiltered[i].action;
                         bool selected = ImGui.Selectable($"{action.Name} ({action.RowId})");
                         if (ImGui.IsItemHovered())
                         {
