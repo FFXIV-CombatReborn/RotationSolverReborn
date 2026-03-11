@@ -5,7 +5,6 @@ using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
-
 namespace RotationSolver.Basic.Rotations;
 public partial class CustomRotation
 {
@@ -1071,6 +1070,25 @@ public partial class CustomRotation
     /// 
     /// </summary>
     protected static float WeaponRemain => DataCenter.DefaultGCDRemain;
+
+    // Tracks when the Next GCD action (from IAction/IBaseAction) last changed.
+    private static DateTime _lastNextGCDChange = DateTime.MinValue;
+    private static uint _lastNextGCDId = 0;
+
+    /// <summary>
+    /// The DateTime when the last NextGCD action change occurred. DateTime.MinValue if never changed.
+    /// </summary>
+    public static DateTime LastNextGCDChange => _lastNextGCDChange;
+
+    /// <summary>
+    /// The AdjustedID of the last NextGCD action when it changed (0 if none).
+    /// </summary>
+    public static uint LastNextGCDId => _lastNextGCDId;
+
+    /// <summary>
+    /// Seconds elapsed since the last NextGCD change. Returns a large value if never changed.
+    /// </summary>
+    public static float SecondsSinceLastNextGCDChange => _lastNextGCDChange == DateTime.MinValue ? float.MaxValue : (float)(DateTime.Now - _lastNextGCDChange).TotalSeconds;
 
     /// <summary>
     /// 

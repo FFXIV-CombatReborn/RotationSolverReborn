@@ -25,6 +25,22 @@ public partial class CustomRotation
 
             CountingOfLastUsing = CountingOfCombatTimeUsing = 0;
             newAction = Invoke(out gcdAction);
+            // Track when the next GCD action (IBaseAction) returned by Invoke changes.
+            try
+            {
+                uint gcdId = 0;
+                if (gcdAction is IBaseAction ib)
+                    gcdId = ib.AdjustedID;
+                if (gcdId != _lastNextGCDId)
+                {
+                    _lastNextGCDId = gcdId;
+                    _lastNextGCDChange = DateTime.Now;
+                }
+            }
+            catch
+            {
+                // ignore any errors during tracking
+            }
             if (InCombat || CountOfTracking == 0)
             {
                 AverageCountOfLastUsing =

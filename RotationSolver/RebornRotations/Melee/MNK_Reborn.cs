@@ -303,7 +303,7 @@ public sealed class MNK_Reborn : MonkRotation
         // use bh when bh and rof are ready (opener) or ask bh to wait for rof's cd to be close and then use bh
         if (!CombatElapsedLessGCD(2)
             && ((!BrotherhoodPvE.Cooldown.IsCoolingDown && !RiddleOfFirePvE.Cooldown.IsCoolingDown) || Math.Abs(BrotherhoodPvE.Cooldown.CoolDownGroup - RiddleOfFirePvE.Cooldown.CoolDownGroup) < 3)
-            && BrotherhoodPvE.CanUse(out act))
+            && IsBurst && BrotherhoodPvE.CanUse(out act))
         {
             return true;
         }

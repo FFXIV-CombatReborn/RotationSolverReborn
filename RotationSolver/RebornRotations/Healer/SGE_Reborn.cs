@@ -144,7 +144,7 @@ public sealed class SGE_Reborn : SageRotation
             EukrasianDiagnosisPvE, EukrasianDyskrasiaPvE, EukrasianDosisIiiPvE, EukrasianDosisIiPvE,
             EukrasianDosisPvE) || !InCombat)
         {
-            ClearEukrasia();
+            ClearEukrasia(nextGCD);
         }
 
         if (ChoiceEukrasia(out act))
@@ -454,13 +454,13 @@ public sealed class SGE_Reborn : SageRotation
     }
 
     // Clears the Eukrasia action aim, effectively resetting any planned Eukrasia action.
-    private void ClearEukrasia()
+    private void ClearEukrasia(IAction nextGCD)
     {
         if (_EukrasiaActionAim != null)
         {
             _lastEukrasiaActionAim = _EukrasiaActionAim;
             _EukrasiaActionAim = null;
-            if (HasEukrasia && !InCombat && !HasHostilesInMaxRange)
+            if (HasEukrasia && ((InCombat && HasHostilesInMaxRange && nextGCD == null && SecondsSinceLastNextGCDChange >= 2f) || (!InCombat && !HasHostilesInMaxRange)))
             {
                 StatusHelper.StatusOff(StatusID.Eukrasia);
             }
