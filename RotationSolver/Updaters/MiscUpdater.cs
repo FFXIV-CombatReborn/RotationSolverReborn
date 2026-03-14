@@ -169,10 +169,10 @@ internal static class MiscUpdater
 
 		float remainingCast = MathF.Max(0, Player.Object.TotalCastTime - Player.Object.CurrentCastTime);
 
-		// Cancel if a "no-casting" status will expire before the cast completes and it's soon (<5s)
+		// Cancel if a "no-casting" status will expire before the cast completes and it's soon (<3s)
 		bool stopDueStatus = statusTimes.Length > 0
 			&& minStatusTime <= remainingCast
-			&& minStatusTime < 5;
+			&& minStatusTime < 3f;
 
 		bool shouldStopHealing =
 			Service.Config.StopHealingAfterThresholdExperimental2
@@ -200,7 +200,6 @@ internal static class MiscUpdater
 		{
 			foreach (Dalamud.Game.ClientState.Statuses.IStatus status in Player.Object.StatusList)
 			{
-				// No LINQ used here, Contains is a method on the collection
 				if (OtherConfiguration.NoCastingStatus.Contains(status.StatusId))
 				{
 					statusTimes.Add(status.RemainingTime);

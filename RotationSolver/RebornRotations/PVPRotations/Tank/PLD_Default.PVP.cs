@@ -5,12 +5,24 @@
 
 public sealed class PLD_DefaultPvP : PaladinRotation
 {
-    #region Configurations
+	#region Configurations
+	[RotationConfig(CombatType.PvP, Name = "Use Guardian freely")]
+	public bool GuardianFree { get; set; } = false;
 
-    #endregion
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvP, Name = "Guardian HP Threshold", Parent = nameof(GuardianFree))]
+	public float GuardianThreshold { get; set; } = 0.7f;
 
-    #region oGCDs
-    [RotationDesc(ActionID.HolySheltronPvP)]
+	[RotationConfig(CombatType.PvP, Name = "Use Guardian with only Hallowed Ground")]
+	public bool HallowedGuardianFree { get; set; } = true;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvP, Name = "Hallowed Guardian HP Threshold")]
+	public float HallowedGuardianThreshold { get; set; } = 0.7f;
+	#endregion
+
+	#region oGCDs
+	[RotationDesc(ActionID.HolySheltronPvP)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
         if (RampartPvP.CanUse(out action))
@@ -26,7 +38,34 @@ public sealed class PLD_DefaultPvP : PaladinRotation
         return base.DefenseSingleAbility(nextGCD, out action);
     }
 
-    protected override bool AttackAbility(IAction nextGCD, out IAction? action)
+	protected override bool GeneralAbility(IAction nextGCD, out IAction? action)
+	{
+		if (HasHostilesInMaxRange)
+		{
+			if (GuardianFree)
+			{
+				if (GuardianPvE.CanUse(out action) && GuardianPvP.Target.Target.GetHealthRatio() <= GuardianThreshold)
+				{
+					return true;
+				}
+			}
+
+			if (HallowedGuardianFree)
+			{
+				if (StatusHelper.PlayerHasStatus(true, StatusID.HallowedGround_1302))
+				{
+					if (GuardianPvE.CanUse(out action) && GuardianPvP.Target.Target.GetHealthRatio() <= HallowedGuardianThreshold)
+					{
+						return true;
+					}
+				}
+			}
+		}
+
+		return base.GeneralAbility(nextGCD, out action);
+	}
+
+	protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         if (RampagePvP.CanUse(out action))
         {
@@ -43,12 +82,29 @@ public sealed class PLD_DefaultPvP : PaladinRotation
             return true;
         }
 
-        return base.AttackAbility(nextGCD, out action);
-    }
-    #endregion
+		if (GuardianFree)
+		{
+			if (GuardianPvE.CanUse(out action, targetOverride: TargetType.LowHP))
+			{
+				return true;
+			}
+		}
 
-    #region GCDs
-    protected override bool GeneralGCD(out IAction? action)
+		if (StatusHelper.PlayerHasStatus(true, StatusID.HallowedGround_1302))
+		{
+			if (GuardianPvE.CanUse(out action, targetOverride: TargetType.LowHP))
+			{
+				return true;
+			}
+		}
+
+		return base.AttackAbility(nextGCD, out action);
+    }
+
+	#endregion
+
+	#region GCDs
+	protected override bool GeneralGCD(out IAction? action)
     {
         if (BladeOfFaithPvP.CanUse(out action))
         {
@@ -66,7 +122,7 @@ public sealed class PLD_DefaultPvP : PaladinRotation
         }
 
         if (ConfiteorPvP.CanUse(out action))
-        {
+        { 
             return true;
         }
 
@@ -110,7 +166,12 @@ public sealed class PLD_DefaultPvP : PaladinRotation
             return true;
         }
 
-        return base.GeneralGCD(out action);
+		if (HolySpiritPvP.CanUse(out action, usedUp: true))
+		{
+			return true;
+		}
+
+		return base.GeneralGCD(out action);
     }
     #endregion
 }
