@@ -127,7 +127,7 @@ namespace RotationSolver.Commands
 			if (statusTimesCount > 0 && Player.Object != null)
 			{
 				float remainingCastTime = Player.Object.TotalCastTime - Player.Object.CurrentCastTime;
-				if (minStatusTime > remainingCastTime && minStatusTime < 5)
+				if (minStatusTime > remainingCastTime && minStatusTime < 3f)
 				{
 					return;
 				}

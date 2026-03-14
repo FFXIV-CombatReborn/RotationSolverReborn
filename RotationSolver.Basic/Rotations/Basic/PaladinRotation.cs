@@ -538,5 +538,12 @@ public partial class PaladinRotation
             AoeCount = 1
         };
     }
-    #endregion
+
+	static partial void ModifyGuardianPvP(ref ActionSetting setting)
+	{
+		setting.StatusNeed = [StatusID.HallowedGround_1302];
+        setting.TargetType = TargetType.LowHP;
+        setting.IsFriendly = true;
+	}
+	#endregion
 }
