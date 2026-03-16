@@ -114,11 +114,18 @@ internal static class StateUpdater
 				}
 			}
 
-			if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out EnemyPositional positional)
-                && target?.HasPositional() == true && positional != target.FindEnemyPositional())
-            {
-                return true;
-            }
+			try
+			{
+				if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out EnemyPositional positional)
+                    && target.HasPositional() && positional != target.FindEnemyPositional())
+				{
+					return true;
+				}
+			}
+			catch
+			{
+				return false;
+			}
         }
         return false;
     }

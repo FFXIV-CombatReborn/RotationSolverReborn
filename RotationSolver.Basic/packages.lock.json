@@ -4,9 +4,9 @@
     "net10.0-windows10.0.26100": {
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.1.0.27, )",
-        "resolved": "3.1.0.27",
-        "contentHash": "PkA+aVOf+fHaxxpWM8jZCwBVX3TvNY+rJd7amKYZuVdeF7qpR2jPs0ZYQMejeIY4jUOdRKhaGErqq3ZV9HXZjg=="
+        "requested": "[3.1.0.28, )",
+        "resolved": "3.1.0.28",
+        "contentHash": "9kaA0kobY3IADS3AI4JaVkKUk/Lrvxz+uPyI2qtTuX1kS6yomNuKl/h7EdOI7eDyozuhW0VlgFl80KSGT0xtVw=="
       },
       "Microsoft.CodeAnalysis.CSharp": {
         "type": "Direct",
@@ -30,11 +30,11 @@
       },
       "System.Drawing.Common": {
         "type": "Direct",
-        "requested": "[10.0.4, )",
-        "resolved": "10.0.4",
-        "contentHash": "jaRxGZXTezDxIe18pgnnycQLsZjU6ueZ+lGsODhaX3CXZ13e1T3xbmTnY6CEC+zbsC60TyhRxy+iHk0bXmjMBg==",
+        "requested": "[10.0.5, )",
+        "resolved": "10.0.5",
+        "contentHash": "FYgPPbii/9Prh7RuY1gaxSyik7Ysw594K0uCHggDxHDgl7mfk8c4UlwluKjQoMquVGLce7Jld4DjjsnuYK3m7g==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "10.0.4"
+          "Microsoft.Win32.SystemEvents": "10.0.5"
         }
       },
       "ExCSS": {
@@ -57,8 +57,8 @@
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "10.0.4",
-        "contentHash": "vrZD/q7cibjX1yGULXDnt0G2BXcMqvJ8+ZlggrDIexVjtd0vOJPqW8+I7Y6BwNHDLukge70h3BIZFxD7ccL/eQ=="
+        "resolved": "10.0.5",
+        "contentHash": "a7rC0Qb5JGiA4f4ooqQjsx17LgYkb9feOcMNGyBXGqYmqC4ZoLbrV98zn7Kr5Z39BIU10Bti80Jwm/QAw+45VA=="
       },
       "rotationsolver.sourcegenerators": {
         "type": "Project",
