@@ -127,31 +127,30 @@ public static class ObjectHelper
 
 		unsafe
 		{
-			if (battleChara.Struct() == null)
+			if (battleChara.Struct() != null)
 			{
 				return false;
 			}
 		}
 
 		try
-        {
-            if (battleChara.StatusList == null)
-            {
-                return false;
-            }
-        }
-        catch
-        {
-            // StatusList threw, treat as unavailable
-            return false;
-        }
+		{
+			if (!battleChara.IsEnemy())
+			{
+				return false;
+			}
 
-        if (battleChara.HasStatus(false, StatusID.DirectionalDisregard))
-        {
-            return false;
-        }
+			if (battleChara.HasStatus(false, StatusID.DirectionalDisregard))
+			{
+				return false;
+			}
 
-        return Svc.Data.GetExcelSheet<BNpcBase>().TryGetRow(battleChara.BaseId, out var dataRow) && !dataRow.IsOmnidirectional;
+			return Svc.Data.GetExcelSheet<BNpcBase>().TryGetRow(battleChara.BaseId, out var dataRow) && !dataRow.IsOmnidirectional;
+		}
+		catch
+		{
+			return false;
+		}
     }
 
 	internal static bool IsOthersPlayersMob(this IBattleChara battleChara)
