@@ -127,7 +127,7 @@ public static class ObjectHelper
 
 		unsafe
 		{
-			if (battleChara.Struct() != null)
+			if (battleChara.Struct() == null)
 			{
 				return false;
 			}
