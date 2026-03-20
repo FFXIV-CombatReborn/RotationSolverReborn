@@ -147,10 +147,15 @@ public partial class BlackMageRotation
     /// </summary>
     protected static bool HasPvPUmbralIce => StatusHelper.PlayerHasStatus(true, StatusID.UmbralIce_3214, StatusID.UmbralIceIi_3215, StatusID.UmbralIceIii_3382);
 
-    /// <summary>
-    /// 
-    /// </summary>
-    protected static bool HasFire => StatusHelper.PlayerHasStatus(true, StatusID.Firestarter);
+	/// <summary>
+	/// 
+	/// </summary>
+	protected static bool HasPvPSoulResonance => StatusHelper.PlayerHasStatus(true, StatusID.SoulResonance);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	protected static bool HasFire => StatusHelper.PlayerHasStatus(true, StatusID.Firestarter);
 
 	/// <summary>
 	/// 
@@ -502,12 +507,14 @@ public partial class BlackMageRotation
     static partial void ModifyFirePvP(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Paradox, StatusID.AstralFire_3212];
-    }
+		setting.ActionCheck = () => !HasPvPSoulResonance;
+	}
 
     static partial void ModifyBlizzardPvP(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Paradox, StatusID.UmbralIce_3214];
-    }
+		setting.ActionCheck = () => !HasPvPSoulResonance;
+	}
 
     static partial void ModifyBurstPvP(ref ActionSetting setting)
     {
@@ -551,19 +558,22 @@ public partial class BlackMageRotation
     {
         setting.StatusNeed = [StatusID.AstralFire_3212];
         setting.StatusProvide = [StatusID.AstralFireIi_3213];
-    }
+		setting.ActionCheck = () => !HasPvPSoulResonance;
+	}
 
     static partial void ModifyFireIvPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.AstralFireIi_3213];
         setting.StatusProvide = [StatusID.AstralFireIii_3381];
-    }
+		setting.ActionCheck = () => !HasPvPSoulResonance;
+	}
 
     static partial void ModifyHighFireIiPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.AstralFireIii_3381];
         setting.StatusProvide = [StatusID.AstralFire_3212];
-    }
+		setting.ActionCheck = () => !HasPvPSoulResonance;
+	}
 
     static partial void ModifyFlarePvP(ref ActionSetting setting)
     {
@@ -579,13 +589,15 @@ public partial class BlackMageRotation
     {
         setting.StatusNeed = [StatusID.UmbralIce_3214];
         setting.StatusProvide = [StatusID.UmbralIceIi_3215];
-    }
+		setting.ActionCheck = () => !HasPvPSoulResonance;
+	}
 
     static partial void ModifyBlizzardIvPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.UmbralIceIi_3215];
         setting.StatusProvide = [StatusID.UmbralIceIii_3382];
-    }
+		setting.ActionCheck = () => !HasPvPSoulResonance;
+	}
 
     static partial void ModifyHighBlizzardIiPvP(ref ActionSetting setting)
     {
@@ -596,7 +608,8 @@ public partial class BlackMageRotation
             AoeCount = 1,
             // Removed ShouldCheckStatus = false
         };
-    }
+        setting.ActionCheck = () => !HasPvPSoulResonance;
+	}
 
     static partial void ModifyFreezePvP(ref ActionSetting setting)
     {
