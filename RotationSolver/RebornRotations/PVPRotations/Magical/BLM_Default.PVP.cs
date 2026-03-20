@@ -89,22 +89,36 @@ public class BLM_DefaultPVP : BlackMageRotation
             return true;
         }
 
-        if (FirePvP.CanUse(out action))
-        {
-            return true;
-        }
+		if (HighFireIiPvP.CanUse(out action, skipAoeCheck: true))
+		{
+			return true;
+		}
 
-        if (BlizzardIiiPvP.CanUse(out action))
-        {
-            return true;
-        }
+		if (HighBlizzardIiPvP.CanUse(out action))
+		{
+			return true;
+		}
 
-        if (BlizzardPvP.CanUse(out action))
-        {
-            return true;
-        }
+		if (IsMoving && BlizzardIvPvP.CanUse(out action))
+		{
+			return true;
+		}
 
-        return base.GeneralGCD(out action);
+		if (IsMoving && BlizzardIiiPvP.CanUse(out action))
+		{
+			return true;
+		}
+
+		if (BlizzardPvP.CanUse(out action))
+		{
+			return true;
+		}
+
+		if (FirePvP.CanUse(out action))
+		{
+			return true;
+		}
+		return base.GeneralGCD(out action);
     }
     #endregion
 }
