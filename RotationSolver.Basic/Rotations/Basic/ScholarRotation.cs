@@ -488,8 +488,9 @@ public partial class ScholarRotation
         {
             AoeCount = 1,
         };
-
-    }
+        setting.IsFriendly = false;
+        setting.TargetStatusNeed = [StatusID.Biolysis_3089];
+	}
 
     static partial void ModifyExpedientPvP(ref ActionSetting setting)
     {
