@@ -27,10 +27,13 @@ public class SCH_DefaultPVP : ScholarRotation
             return true;
         }
 
-        if (DeploymentTacticsPvP.CanUse(out action, usedUp: true))
+        if (IsLastAction(false, DeploymentTacticsPvP))
         {
-            return true;
-        }
+			if (DeploymentTacticsPvP.CanUse(out action, usedUp: true))
+			{
+				return true;
+			}
+		}
 
 		if (ExpedientPvP.CanUse(out action, usedUp: true))
 		{
