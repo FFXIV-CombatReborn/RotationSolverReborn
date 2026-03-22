@@ -436,7 +436,7 @@ public sealed class AST_Reborn : AstrologianRotation
             return base.DefenseAreaGCD(out act);
         }
 
-        if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) && AspectedBeneficPvE.CanUse(out act, skipStatusProvideCheck: true))
+        if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) && AspectedBeneficPvE.CanUse(out act))
         {
             return true;
         }

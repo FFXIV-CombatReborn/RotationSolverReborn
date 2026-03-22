@@ -27,7 +27,7 @@ public class SCH_DefaultPVP : ScholarRotation
             return true;
         }
 
-        if (IsLastAction(false, DeploymentTacticsPvP))
+        if (!IsLastAction(false, DeploymentTacticsPvP))
         {
 			if (DeploymentTacticsPvP.CanUse(out action, usedUp: true))
 			{
