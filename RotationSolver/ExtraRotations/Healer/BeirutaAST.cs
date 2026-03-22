@@ -320,7 +320,8 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         try
         {
             return target.HasStatus(false, StatusID.LivingDead) ||
-                   target.HasStatus(false, StatusID.Holmgang);
+                   target.HasStatus(false, StatusID.Holmgang)||
+                   target.HasStatus(false, StatusID.WalkingDead);
         }
         catch
         {
@@ -970,6 +971,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
         if (BeneficIiPvE.CanUse(out act, targetOverride: TargetType.Tank) &&
             BeneficIiPvE.Target.Target != null &&
+            PartyMembersAverHP > 0.9f &&
             !HasSingleHealLockoutStatus(BeneficIiPvE.Target.Target) &&
             !HasMacrocosmos &&
             !HasGiantDominance &&
@@ -980,6 +982,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
         if (BeneficPvE.CanUse(out act, targetOverride: TargetType.Tank) &&
             BeneficPvE.Target.Target != null &&
+            PartyMembersAverHP > 0.9f &&
             !HasSingleHealLockoutStatus(BeneficPvE.Target.Target) &&
             !HasMacrocosmos &&
             !HasGiantDominance &&
@@ -1069,7 +1072,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
         if (AutoUpgradeHoroscope &&
             ((HasHoroscope && !HasHoroscopeHelios) ||
-             (InFirst15sAfterNeutralSect && !HasHeliosConjunction && !HasAspectedHelios)))
+             (InFirst15sAfterNeutralSect && !HasHeliosConjunction && !HasAspectedHelios && !HasDivination)))
         {
             if (HeliosConjunctionPvE.EnoughLevel &&
                 HeliosConjunctionPvE.CanUse(out act, skipStatusProvideCheck: true))
@@ -1101,6 +1104,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
         if (HasDivination &&
     InCombat &&
+    StatusHelper.PlayerStatusTime(true, StatusID.Divination) <= 5f &&
     CurrentTargetCombustMissingOrEnding(DivinationCombustRefreshSeconds) &&
     CurrentTargetHasEnoughHpForCombust(expectedHPToLive12Seconds) &&
     CanUseCurrentCombust(out act, skipStatusProvideCheck: true))
