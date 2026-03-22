@@ -87,11 +87,16 @@ public partial class WhiteMageRotation
     /// Player has Thin Air.
     /// </summary>
     public static bool HasThinAir => StatusHelper.PlayerHasStatus(true, StatusID.ThinAir);
-    #endregion
 
-    #region Debug
-    /// <inheritdoc/>
-    public override void DisplayBaseStatus()
+	/// <summary>
+	/// Player has Presence Of Mind.
+	/// </summary>
+	public static bool HasPresenceOfMind => StatusHelper.PlayerHasStatus(true, StatusID.PresenceOfMind);
+	#endregion
+
+	#region Debug
+	/// <inheritdoc/>
+	public override void DisplayBaseStatus()
     {
         ImGui.Text("SacredSightStacks: " + SacredSightStacks.ToString());
         ImGui.Text("LilyTime: " + LilyTime.ToString());
