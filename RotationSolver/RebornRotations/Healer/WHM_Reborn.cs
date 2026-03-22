@@ -210,7 +210,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
     [RotationDesc(ActionID.AsylumPvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (AquaveilPvE.CanUse(out act))
+        if (AsylumPvE.CanUse(out act))
         {
             return true;
         }

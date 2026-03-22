@@ -68,17 +68,15 @@ public sealed class BeirutaRDM : RedMageRotation
     private static BaseAction VeraeroPvEStartUp { get; } = new BaseAction(ActionID.VeraeroPvE, false);
     private static BaseAction VerthunderPvEStartUp { get; } = new BaseAction(ActionID.VerthunderPvE, false);
 
-    private const long BlockManaficationAfterRiposteMs = 4000;
+    private const long BlockManaficationAfterMeleeStarterMs = 4000;
     private const long HoldMeleeComboMs = 2000;
     private const long BuffOgcdDelayMs = 5000;
     private const long AccelLockAfterEmboldenMs = 5000;
 
-    // Timing windows
     private const float PoolStartBeforeEmbolden = 50f;
     private const float TripleDecisionStart = 17f;
     private const float UnlockAt = 5f;
 
-    // Mana thresholds
     private const int TripleB = 73;
     private const int TripleW = 73;
     private const int DoubleB = 42;
@@ -95,16 +93,22 @@ public sealed class BeirutaRDM : RedMageRotation
     #region Fields
     private long _meleeHoldUntilMs;
     private long _emboldenUsedAtMs;
-    private long _enchantedRiposteUsedAtMs;
+    private long _meleeStarterUsedAtMs;
 
-    // If Riposte is used during the unlocked pooling window, do not gate again
-    // until Embolden has started and then fully ended.
-    private bool _riposteCommitLockActive;
+    private bool _meleeCommitLockActive;
     private bool _emboldenSeenDuringCommit;
 
-    // Latch: once 73|73 has been reached in the current pooling window,
-    // triple unlock can happen at <= 17s without needing to remain at 73|73.
     private bool _tripleComboReached;
+    private MeleeComboTrack _activeMeleeTrack = MeleeComboTrack.None;
+    #endregion
+
+    #region Enums
+    private enum MeleeComboTrack : byte
+    {
+        None = 0,
+        SingleTarget = 1,
+        AoE = 2,
+    }
     #endregion
 
     #region Shared state helpers
@@ -146,6 +150,73 @@ public sealed class BeirutaRDM : RedMageRotation
             ResolutionPvE.CanUse(out _);
     }
 
+    private bool IsAoEDesired() => NumberOfHostilesInRangeOf(5) >= 3;
+
+    private bool IsLastSTComboStep()
+    {
+        return IsLastGCD(true,
+            EnchantedRipostePvE, EnchantedRipostePvE_45960,
+            EnchantedZwerchhauPvE, EnchantedZwerchhauPvE_45961,
+            EnchantedRedoublementPvE, EnchantedRedoublementPvE_45962);
+    }
+
+    private bool IsLastAoEComboStep()
+    {
+        return IsLastGCD(false,
+            EnchantedMoulinetPvE,
+            EnchantedMoulinetDeuxPvE,
+            EnchantedMoulinetTroisPvE);
+    }
+
+    private bool IsAnyMeleeComboInProgress()
+    {
+        return IsInMeleeCombo || IsLastSTComboStep() || IsLastAoEComboStep();
+    }
+
+    private void UpdateActiveMeleeTrack()
+    {
+        if (InFinisherChain() || ManaStacks == 3)
+        {
+            _activeMeleeTrack = MeleeComboTrack.None;
+            return;
+        }
+
+        if (IsLastAoEComboStep())
+        {
+            _activeMeleeTrack = MeleeComboTrack.AoE;
+            return;
+        }
+
+        if (IsLastSTComboStep())
+        {
+            _activeMeleeTrack = MeleeComboTrack.SingleTarget;
+            return;
+        }
+
+        bool hasAoEContinuation =
+            EnchantedMoulinetDeuxPvE.CanUse(out _) ||
+            EnchantedMoulinetTroisPvE.CanUse(out _);
+
+        if (hasAoEContinuation)
+        {
+            _activeMeleeTrack = MeleeComboTrack.AoE;
+            return;
+        }
+
+        bool hasSTContinuation =
+            EnchantedZwerchhauPvE.CanUse(out _) || EnchantedZwerchhauPvE_45961.CanUse(out _) ||
+            EnchantedRedoublementPvE.CanUse(out _) || EnchantedRedoublementPvE_45962.CanUse(out _);
+
+        if (hasSTContinuation)
+        {
+            _activeMeleeTrack = MeleeComboTrack.SingleTarget;
+            return;
+        }
+
+        if (!IsAnyMeleeComboInProgress())
+            _activeMeleeTrack = MeleeComboTrack.None;
+    }
+
     private static float EstimateRemainingSeconds(dynamic cooldown, float maxProbeSeconds, float stepSeconds = 0.5f)
     {
         if (cooldown.HasOneCharge) return 0f;
@@ -180,16 +251,16 @@ public sealed class BeirutaRDM : RedMageRotation
             _tripleComboReached = true;
     }
 
-    private bool IsBlockingManaficationAfterRiposte()
+    private bool IsBlockingManaficationAfterMeleeStarter()
     {
         long now = Environment.TickCount64;
-        return _enchantedRiposteUsedAtMs != 0
-               && (now - _enchantedRiposteUsedAtMs) < BlockManaficationAfterRiposteMs;
+        return _meleeStarterUsedAtMs != 0
+               && (now - _meleeStarterUsedAtMs) < BlockManaficationAfterMeleeStarterMs;
     }
 
-    private void UpdateRiposteCommitLock()
+    private void UpdateMeleeCommitLock()
     {
-        if (!_riposteCommitLockActive)
+        if (!_meleeCommitLockActive)
         {
             _emboldenSeenDuringCommit = false;
             return;
@@ -200,15 +271,15 @@ public sealed class BeirutaRDM : RedMageRotation
 
         if (_emboldenSeenDuringCommit && !HasEmbolden)
         {
-            _riposteCommitLockActive = false;
+            _meleeCommitLockActive = false;
             _emboldenSeenDuringCommit = false;
         }
     }
 
-    private bool ShouldGateRiposteAndManafication(float embRem)
+    private bool ShouldGateMeleeStarterAndManafication(float embRem)
     {
         if (HasEmbolden) return false;
-        if (_riposteCommitLockActive) return false;
+        if (_meleeCommitLockActive) return false;
         if (!IsPoolingWindow(embRem)) return false;
 
         if (embRem <= UnlockAt) return false;
@@ -217,8 +288,8 @@ public sealed class BeirutaRDM : RedMageRotation
         return true;
     }
 
-    private bool IsRiposteCommitWindow(float embRem) =>
-        IsPoolingWindow(embRem) && !ShouldGateRiposteAndManafication(embRem);
+    private bool IsMeleeCommitWindow(float embRem) =>
+        IsPoolingWindow(embRem) && !ShouldGateMeleeStarterAndManafication(embRem);
 
     private static bool NextGcdIsBlockedForInstants(IAction nextGCD)
     {
@@ -227,6 +298,9 @@ public sealed class BeirutaRDM : RedMageRotation
             ActionID.EnchantedRipostePvE, ActionID.EnchantedRipostePvE_45960,
             ActionID.EnchantedZwerchhauPvE, ActionID.EnchantedZwerchhauPvE_45961,
             ActionID.EnchantedRedoublementPvE, ActionID.EnchantedRedoublementPvE_45962,
+            ActionID.EnchantedMoulinetPvE,
+            ActionID.EnchantedMoulinetDeuxPvE,
+            ActionID.EnchantedMoulinetTroisPvE,
             ActionID.VerholyPvE, ActionID.VerflarePvE,
             ActionID.ScorchPvE, ActionID.ResolutionPvE
         );
@@ -240,8 +314,47 @@ public sealed class BeirutaRDM : RedMageRotation
             ActionID.EnchantedRipostePvE, ActionID.EnchantedRipostePvE_45960,
             ActionID.EnchantedZwerchhauPvE, ActionID.EnchantedZwerchhauPvE_45961,
             ActionID.EnchantedRedoublementPvE, ActionID.EnchantedRedoublementPvE_45962,
+            ActionID.EnchantedMoulinetPvE,
+            ActionID.EnchantedMoulinetDeuxPvE,
+            ActionID.EnchantedMoulinetTroisPvE,
             ActionID.EnchantedReprisePvE
         );
+    }
+
+    private bool CanContinueTrackedMeleeCombo(out IAction? act)
+    {
+        act = null;
+
+        switch (_activeMeleeTrack)
+        {
+            case MeleeComboTrack.AoE:
+                if (IsLastGCD(false, EnchantedMoulinetDeuxPvE))
+                    return EnchantedMoulinetTroisPvE.CanUse(out act);
+
+                if (IsLastGCD(false, EnchantedMoulinetPvE))
+                    return EnchantedMoulinetDeuxPvE.CanUse(out act);
+
+                return false;
+
+            case MeleeComboTrack.SingleTarget:
+                if (IsLastGCD(true, EnchantedZwerchhauPvE_45961) || IsLastGCD(true, EnchantedZwerchhauPvE))
+                    return EnchantedRedoublementPvE_45962.CanUse(out act) || EnchantedRedoublementPvE.CanUse(out act);
+
+                if (IsLastGCD(true, EnchantedRipostePvE_45960) || IsLastGCD(true, EnchantedRipostePvE))
+                    return EnchantedZwerchhauPvE_45961.CanUse(out act) || EnchantedZwerchhauPvE.CanUse(out act);
+
+                return false;
+        }
+
+        return false;
+    }
+
+    private void RegisterMeleeStarter(MeleeComboTrack track, float embRem)
+    {
+        _activeMeleeTrack = track;
+        _meleeStarterUsedAtMs = Environment.TickCount64;
+        if (IsMeleeCommitWindow(embRem))
+            _meleeCommitLockActive = true;
     }
     #endregion
 
@@ -296,66 +409,71 @@ public sealed class BeirutaRDM : RedMageRotation
     private bool ShouldHighManaDumpWithEnchantedReprise()
     {
         float embRem = EmboldenRem();
-        bool gateRipMana = ShouldGateRiposteAndManafication(embRem);
+        bool gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
 
         return NearManaCap
-               && !gateRipMana
+               && !gateMelee
                && !InMeleeRange3
                && !CanMagickedSwordplay
-               && !IsInMeleeCombo
+               && !IsAnyMeleeComboInProgress()
                && !InFinisherChain()
                && ManaStacks == 0;
     }
 
-    private bool TryContinueCurrentMeleeCombo(out IAction? act)
+    private bool CanHoldOrWaitForMeleeRange()
     {
-        act = null;
+        if (!HoldMeleeComboIfOutOfRange || InMeleeRange3)
+        {
+            _meleeHoldUntilMs = 0;
+            return false;
+        }
 
-        if (IsLastGCD(false, EnchantedMoulinetDeuxPvE))
-            return EnchantedMoulinetTroisPvE.CanUse(out act);
+        long now = Environment.TickCount64;
+        if (_meleeHoldUntilMs == 0)
+            _meleeHoldUntilMs = now + HoldMeleeComboMs;
 
-        if (IsLastGCD(false, EnchantedMoulinetPvE))
-            return EnchantedMoulinetDeuxPvE.CanUse(out act);
+        if (now < _meleeHoldUntilMs)
+            return true;
 
-        if (IsLastGCD(true, EnchantedZwerchhauPvE_45961) || IsLastGCD(true, EnchantedZwerchhauPvE))
-            return EnchantedRedoublementPvE_45962.CanUse(out act) || EnchantedRedoublementPvE.CanUse(out act);
-
-        if (IsLastGCD(true, EnchantedRipostePvE_45960) || IsLastGCD(true, EnchantedRipostePvE))
-            return EnchantedZwerchhauPvE_45961.CanUse(out act) || EnchantedZwerchhauPvE.CanUse(out act);
-
+        _meleeHoldUntilMs = 0;
         return false;
     }
 
-    private bool IsLastRiposteStarter()
+    private bool TryStartTrackedMeleeStarter(MeleeComboTrack desiredTrack, out IAction? act, float embRem)
     {
-        return IsLastGCD(true, EnchantedRipostePvE_45960) || IsLastGCD(true, EnchantedRipostePvE);
-    }
+        act = null;
 
-    private bool TryRiposteStarter(out IAction? act, float embRem)
-    {
-        UpdateRiposteCommitLock();
+        UpdateMeleeCommitLock();
 
-        if (ShouldGateRiposteAndManafication(embRem))
+        if (ShouldGateMeleeStarterAndManafication(embRem))
+            return false;
+
+        if (CanHoldOrWaitForMeleeRange())
+            return false;
+
+        if (desiredTrack == MeleeComboTrack.AoE)
         {
-            act = null;
+            if (!HasSwift && !HasDualcast && EnchantedMoulinetPvE.CanUse(out act))
+            {
+                RegisterMeleeStarter(MeleeComboTrack.AoE, embRem);
+                return true;
+            }
+
             return false;
         }
 
         if (!HasSwift && !HasDualcast && EnchantedRipostePvE.CanUse(out act))
         {
-            _enchantedRiposteUsedAtMs = Environment.TickCount64;
-            if (IsRiposteCommitWindow(embRem)) _riposteCommitLockActive = true;
+            RegisterMeleeStarter(MeleeComboTrack.SingleTarget, embRem);
             return true;
         }
 
         if (!HasSwift && !HasDualcast && !InMeleeRange3 && HasManafication && EnchantedRipostePvE_45960.CanUse(out act))
         {
-            _enchantedRiposteUsedAtMs = Environment.TickCount64;
-            if (IsRiposteCommitWindow(embRem)) _riposteCommitLockActive = true;
+            RegisterMeleeStarter(MeleeComboTrack.SingleTarget, embRem);
             return true;
         }
 
-        act = null;
         return false;
     }
     #endregion
@@ -413,18 +531,20 @@ public sealed class BeirutaRDM : RedMageRotation
 
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        UpdateRiposteCommitLock();
+        UpdateActiveMeleeTrack();
+        UpdateMeleeCommitLock();
+
         float embRem = EmboldenRem();
         UpdateTripleComboReached(embRem);
 
-        bool gateRipMana = ShouldGateRiposteAndManafication(embRem);
-        bool blockManaficationNow = (NearManaCap && InMeleeRange3) || IsBlockingManaficationAfterRiposte();
+        bool gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
+        bool blockManaficationNow = (NearManaCap && InMeleeRange3) || IsBlockingManaficationAfterMeleeStarter();
 
-        if (!blockManaficationNow && !gateRipMana)
+        if (!blockManaficationNow && !gateMelee)
         {
             bool canUseManaficationNormally =
                 !IsOpen &&
-                (HasEmbolden || EmboldenPvE.Cooldown.HasOneCharge || (EmboldenPvE.Cooldown.WillHaveOneCharge(5f) && !IsInMeleeCombo));
+                (HasEmbolden || EmboldenPvE.Cooldown.HasOneCharge || (EmboldenPvE.Cooldown.WillHaveOneCharge(5f) && !IsAnyMeleeComboInProgress()));
 
             if (canUseManaficationNormally && InCombat && IsBurst && HasHostilesInMaxRange && ManaficationPvE.CanUse(out act))
                 return true;
@@ -438,72 +558,74 @@ public sealed class BeirutaRDM : RedMageRotation
         }
 
         if (UseWindowAlignment)
-{
-    long now = Environment.TickCount64;
-
-    bool emboldenSoon = EmboldenPvE.EnoughLevel && !HasEmbolden && EmboldenPvE.Cooldown.WillHaveOneCharge(10f);
-    bool burstPrepHoldAccel = emboldenSoon && ManaStacks == 0 && BlackMana >= 50 && WhiteMana >= 50 && !IsInMeleeCombo;
-    bool inFirst5sAfterEmbolden = _emboldenUsedAtMs != 0 && (now - _emboldenUsedAtMs) < AccelLockAfterEmboldenMs;
-    bool blockAccel = burstPrepHoldAccel || inFirst5sAfterEmbolden;
-
-    bool nextIsInstant = HasDualcast || HasSwift || HasAccelerate || (!IsOpenForGrandImpact && CanGrandImpact);
-    bool finisherChain = InFinisherChain();
-    bool meleeStepComing = NextGcdIsAnyMeleeStep(nextGCD);
-    bool blockInstantOgcds = NextGcdIsBlockedForInstants(nextGCD);
-
-    bool allowAlignmentFix =
-        InCombatWithTarget
-        && !IsInMeleeCombo
-        && !finisherChain
-        && !meleeStepComing
-        && !blockInstantOgcds;
-
-    if (allowAlignmentFix && !nextIsInstant)
-    {
-        float flecheRem = EstimateRemainingSeconds(FlechePvE.Cooldown, 25f, 0.5f);
-        float contreRem = EstimateRemainingSeconds(ContreSixtePvE.Cooldown, 35f, 0.5f);
-        const float alignBuffer = 0.15f;
-
-        bool flecheReadyByNextSlot =
-            flecheRem >= 0f &&
-            flecheRem <= NextAbilityToNextGCD + alignBuffer;
-
-        bool contreReadyByNextSlot =
-            contreRem >= 0f &&
-            contreRem <= NextAbilityToNextGCD + alignBuffer;
-
-        if (flecheReadyByNextSlot || contreReadyByNextSlot)
         {
-            if (AccelerationPvE.EnoughLevel
-                && !blockAccel
-                && !blockInstantOgcds
-                && !HasAccelerate
-                && !CanGrandImpact
-                && AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
-                return true;
+            long now = Environment.TickCount64;
 
-            if (!HasSwift && SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
-                return true;
+            bool emboldenSoon = EmboldenPvE.EnoughLevel && !HasEmbolden && EmboldenPvE.Cooldown.WillHaveOneCharge(10f);
+            bool burstPrepHoldAccel = emboldenSoon && ManaStacks == 0 && BlackMana >= 50 && WhiteMana >= 50 && !IsAnyMeleeComboInProgress();
+            bool inFirst5sAfterEmbolden = _emboldenUsedAtMs != 0 && (now - _emboldenUsedAtMs) < AccelLockAfterEmboldenMs;
+            bool blockAccel = burstPrepHoldAccel || inFirst5sAfterEmbolden;
+
+            bool nextIsInstant = HasDualcast || HasSwift || HasAccelerate || (!IsOpenForGrandImpact && CanGrandImpact);
+            bool finisherChain = InFinisherChain();
+            bool meleeStepComing = NextGcdIsAnyMeleeStep(nextGCD);
+            bool blockInstantOgcds = NextGcdIsBlockedForInstants(nextGCD);
+
+            bool allowAlignmentFix =
+                InCombatWithTarget
+                && !IsAnyMeleeComboInProgress()
+                && !finisherChain
+                && !meleeStepComing
+                && !blockInstantOgcds;
+
+            if (allowAlignmentFix && !nextIsInstant)
+            {
+                float flecheRem = EstimateRemainingSeconds(FlechePvE.Cooldown, 25f, 0.5f);
+                float contreRem = EstimateRemainingSeconds(ContreSixtePvE.Cooldown, 35f, 0.5f);
+                const float alignBuffer = 0.15f;
+
+                bool flecheReadyByNextSlot =
+                    flecheRem >= 0f &&
+                    flecheRem <= NextAbilityToNextGCD + alignBuffer;
+
+                bool contreReadyByNextSlot =
+                    contreRem >= 0f &&
+                    contreRem <= NextAbilityToNextGCD + alignBuffer;
+
+                if (flecheReadyByNextSlot || contreReadyByNextSlot)
+                {
+                    if (AccelerationPvE.EnoughLevel
+                        && !blockAccel
+                        && !blockInstantOgcds
+                        && !HasAccelerate
+                        && !CanGrandImpact
+                        && AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+                        return true;
+
+                    if (!HasSwift && SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+                        return true;
+                }
+            }
         }
-    }
-}
 
-return base.EmergencyAbility(nextGCD, out act);
+        return base.EmergencyAbility(nextGCD, out act);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
 
+        UpdateActiveMeleeTrack();
+
         bool meleeCheck = NextGcdIsAnyMeleeStep(nextGCD);
         bool finisherChain = InFinisherChain();
         bool blockInstantOgcds = NextGcdIsBlockedForInstants(nextGCD);
-        bool blockSwift = IsInMeleeCombo || finisherChain || blockInstantOgcds;
+        bool blockSwift = IsAnyMeleeComboInProgress() || finisherChain || blockInstantOgcds;
 
         long now = Environment.TickCount64;
 
         bool emboldenSoon = EmboldenPvE.EnoughLevel && !HasEmbolden && EmboldenPvE.Cooldown.WillHaveOneCharge(10f);
-        bool burstPrepHoldAccel = emboldenSoon && ManaStacks == 0 && BlackMana >= 50 && WhiteMana >= 50 && !IsInMeleeCombo;
+        bool burstPrepHoldAccel = emboldenSoon && ManaStacks == 0 && BlackMana >= 50 && WhiteMana >= 50 && !IsAnyMeleeComboInProgress();
         bool inFirst5sAfterEmbolden = _emboldenUsedAtMs != 0 && (now - _emboldenUsedAtMs) < AccelLockAfterEmboldenMs;
         bool blockAccel = burstPrepHoldAccel || inFirst5sAfterEmbolden;
 
@@ -516,41 +638,42 @@ return base.EmergencyAbility(nextGCD, out act);
             && (MovingTime > 3f || openerNeedsInstant)
             && !nextIsInstant;
 
-        if (needsMovementRescue && !meleeCheck && !IsInMeleeCombo)
-{
-    if (IsOpen)
-    {
-        if (!blockSwift && SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
-            return true;
+        if (needsMovementRescue && !meleeCheck && !IsAnyMeleeComboInProgress())
+        {
+            if (IsOpen)
+            {
+                if (!blockSwift && SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+                    return true;
 
-        if (UseBurstMedicine(out act))
-            return true;
+                if (UseBurstMedicine(out act))
+                    return true;
 
-        if (FlechePvE.CanUse(out act))
-            return true;
+                if (FlechePvE.CanUse(out act))
+                    return true;
 
-        if (AccelerationPvE.EnoughLevel
-            && !blockAccel
-            && !blockInstantOgcds
-            && !HasSwift
-            && !CanGrandImpact
-            && AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
-            return true;
-    }
-    else if (MovingTime > 3f)
-    {
-        if (AccelerationPvE.EnoughLevel
-            && !blockAccel
-            && !blockInstantOgcds
-            && !HasSwift
-            && !CanGrandImpact
-            && AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
-            return true;
+                if (AccelerationPvE.EnoughLevel
+                    && !blockAccel
+                    && !blockInstantOgcds
+                    && !HasSwift
+                    && !CanGrandImpact
+                    && AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+                    return true;
+            }
+            else if (MovingTime > 3f)
+            {
+                if (AccelerationPvE.EnoughLevel
+                    && !blockAccel
+                    && !blockInstantOgcds
+                    && !HasSwift
+                    && !CanGrandImpact
+                    && AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+                    return true;
 
-        if (!blockSwift && SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
-            return true;
-    }
-}
+                if (!blockSwift && SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+                    return true;
+            }
+        }
+
         if (!needsMovementRescue && AccelerationPvE.EnoughLevel && !meleeCheck && !blockAccel && !blockInstantOgcds)
         {
             if (!CanGrandImpact && InCombat && HasHostilesInMaxRange)
@@ -653,7 +776,7 @@ return base.EmergencyAbility(nextGCD, out act);
         bool emboldenReadyIn15 = EmboldenPvE.EnoughLevel && EmboldenPvE.Cooldown.WillHaveOneCharge(15f);
 
         if (IsOpen && IsBurst && UseBurstMedicine(out act))
-                    return true;
+            return true;
 
         if (!IsOpen && IsBurst && InCombat && emboldenReadyIn15 && IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE, ActionID.ScorchPvE) && UseBurstMedicine(out act))
             return true;
@@ -706,21 +829,11 @@ return base.EmergencyAbility(nextGCD, out act);
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        UpdateRiposteCommitLock();
+        UpdateActiveMeleeTrack();
+        UpdateMeleeCommitLock();
 
         float embRem = EmboldenRem();
         UpdateTripleComboReached(embRem);
-
-        // Final ladder:
-        // 1. opener
-        // 2. finishers
-        // 3. combo continuation
-        // 4. combo starter
-        // 5. reprise
-        // 6. grand impact
-        // 7. long cast 2 / instant 2
-        // 8. proc
-        // 9. filler
 
         if (TryOpenerGCD(out act)) return true;
         if (TryFinisherGCD(out act)) return true;
@@ -739,7 +852,7 @@ return base.EmergencyAbility(nextGCD, out act);
     {
         act = null;
 
-        if (!IsOpen || IsInMeleeCombo || ManaStacks == 3 || !InCombat || !HasHostilesInMaxRange)
+        if (!IsOpen || IsAnyMeleeComboInProgress() || ManaStacks == 3 || !InCombat || !HasHostilesInMaxRange)
             return false;
 
         bool hasInstant = HasDualcast || HasSwift || HasAccelerate;
@@ -799,48 +912,38 @@ return base.EmergencyAbility(nextGCD, out act);
     {
         act = null;
 
+        UpdateActiveMeleeTrack();
+
+        if (!IsAnyMeleeComboInProgress() || _activeMeleeTrack == MeleeComboTrack.None)
+        {
+            _meleeHoldUntilMs = 0;
+            return false;
+        }
+
+        if (CanContinueTrackedMeleeCombo(out act))
+        {
+            _meleeHoldUntilMs = 0;
+            return true;
+        }
+
         if (HoldMeleeComboIfOutOfRange)
         {
-            if (IsInMeleeCombo)
+            long now = Environment.TickCount64;
+            if (_meleeHoldUntilMs == 0)
+                _meleeHoldUntilMs = now + HoldMeleeComboMs;
+
+            if (now < _meleeHoldUntilMs)
             {
-                if (TryContinueCurrentMeleeCombo(out act))
-                {
-                    _meleeHoldUntilMs = 0;
-                    return true;
-                }
-
-                long now = Environment.TickCount64;
-                if (_meleeHoldUntilMs == 0)
-                    _meleeHoldUntilMs = now + HoldMeleeComboMs;
-
-                if (now < _meleeHoldUntilMs)
-                {
-                    act = null;
-                    return false;
-                }
-
-                _meleeHoldUntilMs = 0;
+                act = null;
+                return false;
             }
-            else
-            {
-                _meleeHoldUntilMs = 0;
-            }
+
+            _meleeHoldUntilMs = 0;
         }
         else
         {
             _meleeHoldUntilMs = 0;
         }
-
-        if (IsLastGCD(false, EnchantedMoulinetDeuxPvE) && EnchantedMoulinetTroisPvE.CanUse(out act))
-            return true;
-
-        if (IsLastGCD(false, EnchantedMoulinetPvE) && EnchantedMoulinetDeuxPvE.CanUse(out act))
-            return true;
-
-        if (EnchantedRedoublementPvE_45962.CanUse(out act)) return true;
-        if (EnchantedRedoublementPvE.CanUse(out act)) return true;
-        if (EnchantedZwerchhauPvE_45961.CanUse(out act)) return true;
-        if (EnchantedZwerchhauPvE.CanUse(out act)) return true;
 
         return false;
     }
@@ -849,8 +952,13 @@ return base.EmergencyAbility(nextGCD, out act);
     {
         act = null;
 
-        bool gateRipMana = ShouldGateRiposteAndManafication(embRem);
-        bool blockMeleeStartersAndReprise = gateRipMana && !NearPoolingCap;
+        UpdateActiveMeleeTrack();
+
+        if (_activeMeleeTrack != MeleeComboTrack.None || IsAnyMeleeComboInProgress())
+            return false;
+
+        bool gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
+        bool blockMeleeStartersAndReprise = gateMelee && !NearPoolingCap;
 
         if (blockMeleeStartersAndReprise || InFinisherChain())
             return false;
@@ -866,7 +974,7 @@ return base.EmergencyAbility(nextGCD, out act);
                  || HasManafication
                  || StatusHelper.PlayerWillStatusEndGCD(4, 0, true, StatusID.MagickedSwordplay)
                  || (HasEmbolden && CanMagickedSwordplay)
-                 || !gateRipMana);
+                 || !gateMelee);
 
             enoughToStart = EnoughManaComboPooling || EnoughManaComboNoPooling;
         }
@@ -883,18 +991,11 @@ return base.EmergencyAbility(nextGCD, out act);
             enoughToStart = EnoughManaComboNoPooling || poolCapReached || EnoughManaComboPooling;
         }
 
-        if (!enoughToStart) return false;
+        if (!enoughToStart || !burstStartOK)
+            return false;
 
-        if (NumberOfHostilesInRangeOf(5) >= 3)
-        {
-            if (!IsLastGCD(false, EnchantedMoulinetPvE) && EnchantedMoulinetPvE.CanUse(out act))
-                return true;
-        }
-
-        if (burstStartOK && !IsLastRiposteStarter() && TryRiposteStarter(out act, embRem))
-            return true;
-
-        return false;
+        MeleeComboTrack desiredTrack = IsAoEDesired() ? MeleeComboTrack.AoE : MeleeComboTrack.SingleTarget;
+        return TryStartTrackedMeleeStarter(desiredTrack, out act, embRem);
     }
 
     private bool TryGrandImpactGCD(out IAction? act)
@@ -911,7 +1012,6 @@ return base.EmergencyAbility(nextGCD, out act);
     {
         act = null;
 
-        // Instant long-cast 2
         if (CanInstantCast && !CanVerEither)
         {
             if (ScatterPvE.CanUse(out act))
@@ -921,7 +1021,6 @@ return base.EmergencyAbility(nextGCD, out act);
                 return true;
         }
 
-        // Movement acceleration spend into 2-spells
         bool finisherChain = InFinisherChain();
 
         bool canRepriseNow =
@@ -935,7 +1034,7 @@ return base.EmergencyAbility(nextGCD, out act);
             && !HasSwift
             && !HasDualcast
             && !canRepriseNow
-            && !IsInMeleeCombo
+            && !IsAnyMeleeComboInProgress()
             && !finisherChain
             && ManaStacks != 3;
 
@@ -943,7 +1042,7 @@ return base.EmergencyAbility(nextGCD, out act);
             HasAccelerate
             && InCombat
             && HasHostilesInMaxRange
-            && !IsInMeleeCombo
+            && !IsAnyMeleeComboInProgress()
             && !finisherChain
             && ManaStacks != 3
             && (!CanVerBoth || (MovingTime > 3f && CanVerBoth && noOtherMoveResources));
@@ -957,7 +1056,7 @@ return base.EmergencyAbility(nextGCD, out act);
                 return true;
         }
 
-        if (!IsInMeleeCombo
+        if (!IsAnyMeleeComboInProgress()
             && ManaStacks != 3
             && HasAccelerate
             && !HasSwift
@@ -973,7 +1072,7 @@ return base.EmergencyAbility(nextGCD, out act);
                 return true;
         }
 
-        if (!IsInMeleeCombo
+        if (!IsAnyMeleeComboInProgress()
             && ManaStacks != 3
             && InCombat
             && (HasHostilesInRange || HasHostilesInMaxRange)
@@ -993,7 +1092,7 @@ return base.EmergencyAbility(nextGCD, out act);
     {
         act = null;
 
-        if (!IsInMeleeCombo
+        if (!IsAnyMeleeComboInProgress()
             && ManaStacks != 3
             && InCombat
             && HasHostilesInMaxRange
@@ -1089,8 +1188,8 @@ return base.EmergencyAbility(nextGCD, out act);
         float embRem = EmboldenRem();
         UpdateTripleComboReached(embRem);
 
-        bool gateRipMana = ShouldGateRiposteAndManafication(embRem);
-        bool blockMeleeStartersAndReprise = gateRipMana && !NearPoolingCap;
+        bool gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
+        bool blockMeleeStartersAndReprise = gateMelee && !NearPoolingCap;
         if (blockMeleeStartersAndReprise)
             return false;
 
@@ -1098,7 +1197,7 @@ return base.EmergencyAbility(nextGCD, out act);
             InCombat
             && HasHostilesInMaxRange
             && MovingTime > 3f
-            && !IsInMeleeCombo
+            && !IsAnyMeleeComboInProgress()
             && ManaStacks != 3
             && (
                 (AccelerationPvE.EnoughLevel

@@ -23,6 +23,9 @@ public sealed class BeirutaSCH : ScholarRotation
         "• Without burst delay, this restriction will occur during the 30-second window at 0s and 180s then every multiple of 180s thereafter\n")]
     public bool RotationNotes { get; set; } = true;
 
+    [RotationConfig(CombatType.PvE, Name = "Enable Energy Drain Gatling Mode")]
+public bool EnableEnergyDrainGatlingMode { get; set; } = false;
+
     [RotationConfig(CombatType.PvE, Name = "Use first stack of Consolation ASAP when Seraph is out")]
     public bool UseFirstConsolationAsapWhenSeraphIsOut { get; set; } = true;
 
@@ -139,7 +142,17 @@ private float DissipationRem()
     if (!DissipationPvE.EnoughLevel) return -1f;
     return EstimateRemainingSeconds(DissipationPvE.Cooldown, 180f, 0.5f);
 }
+private bool CurrentTargetInLast5sOfChainStratagem
+{
+    get
+    {
+        if (CurrentTarget == null)
+            return false;
 
+        return CurrentTarget.HasStatus(true, StatusID.ChainStratagem) &&
+               CurrentTarget.WillStatusEnd(5f, true, StatusID.ChainStratagem);
+    }
+}
 private bool ShouldUseSummonEos()
 {
     float summonSeraphRem = SummonSeraphRem();
@@ -427,13 +440,20 @@ private bool ShouldUseSummonEos()
              DissipationPvE.IsEnabled) ||
             AetherflowPvE.Cooldown.WillHaveOneChargeGCD(3);
 
+        if (EnableEnergyDrainGatlingMode &&
+        InFirst20sAfterChainStratagem &&
+        EnergyDrainPvE.CanUse(out act, usedUp: true))
+    {
+        return true;
+    }
+
         if (CombatTime > 5 && shouldDumpAether && EnergyDrainPvE.CanUse(out act, usedUp: true))
             return true;
 
         if (!HasAetherflow && AetherflowPvE.CanUse(out act))
             return true;
 
-        if (HasBuffs && IsBurst &&UseBurstMedicine(out act))
+        if (ChainStratagemPvE.Cooldown.WillHaveOneCharge(5) && IsBurst &&UseBurstMedicine(out act))
             return true;
 
         if (ShouldUseBanefulImpaction(closeTargetCount, out act))
@@ -562,6 +582,7 @@ private bool ShouldUseSummonEos()
 
         if (InCombat &&
             InFirst20sAfterChainStratagem &&
+            CurrentTargetInLast5sOfChainStratagem &&
             nearbyHostiles < GetAoWBreakevenTargets() &&
             CurrentTargetBioMissingOrEnding(ChainStratagemDotRefreshSeconds) &&
             CurrentTarget != null &&
