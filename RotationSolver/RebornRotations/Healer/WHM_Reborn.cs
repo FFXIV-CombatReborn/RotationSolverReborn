@@ -7,8 +7,11 @@ namespace RotationSolver.RebornRotations.Healer;
 
 public sealed class WHM_Reborn : WhiteMageRotation
 {
-    #region Config Options
-    [RotationConfig(CombatType.PvE, Name = "Limit Liturgy Of The Bell to multihit party stacks")]
+	#region Config Options
+	[RotationConfig(CombatType.PvE, Name = "Use the balance Opener in High-End Duties")]
+	public bool UseOpenerHighEnd { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Limit Liturgy Of The Bell to multihit party stacks")]
     public bool MultiHitRestrict { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Use Tincture/Gemdraught when about to use Presence of Mind")]
@@ -210,7 +213,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
     [RotationDesc(ActionID.AsylumPvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (AquaveilPvE.CanUse(out act))
+        if (AsylumPvE.CanUse(out act))
         {
             return true;
         }
@@ -253,15 +256,22 @@ public sealed class WHM_Reborn : WhiteMageRotation
     {
         if (InCombat)
         {
-            if (PresenceOfMindPvE.CanUse(out act, skipTTKCheck: IsInHighEndDuty))
+            if (!IsInHighEndDuty || !UseOpenerHighEnd || (IsInHighEndDuty && UseOpenerHighEnd && !CombatElapsedLessGCD(3)))
             {
-                return true;
-            }
+				if (PresenceOfMindPvE.CanUse(out act, skipTTKCheck: IsInHighEndDuty))
+				{
+					return true;
+				}
+			}
 
-            if (AssizePvE.CanUse(out act, skipAoeCheck: true))
-            {
-                return true;
-            }
+
+			if (!IsInHighEndDuty || !UseOpenerHighEnd || (IsInHighEndDuty && UseOpenerHighEnd && !CombatElapsedLessGCD(4)))
+			{
+				if (AssizePvE.CanUse(out act, skipAoeCheck: true))
+				{
+					return true;
+				}
+			}
         }
 
         return base.AttackAbility(nextGCD, out act);
@@ -376,16 +386,20 @@ public sealed class WHM_Reborn : WhiteMageRotation
             return base.GeneralGCD(out act);
         }
 
-        //if (NotInCombatDelay && RegenDefense.CanUse(out act)) return true;
+		//if (NotInCombatDelay && RegenDefense.CanUse(out act)) return true;
 
-        if (AfflatusMiseryPvE.CanUse(out act, skipAoeCheck: true))
+		bool liliesNearlyFull = Lily == 2 && LilyTime < LilyOvercapTime;
+		bool liliesFullNoBlood = Lily == 3;
+
+		if (!IsInHighEndDuty || !UseOpenerHighEnd || (IsInHighEndDuty && UseOpenerHighEnd && (HasBuffs || HasPresenceOfMind || ((liliesNearlyFull || liliesFullNoBlood) && !CombatElapsedLessGCD(3)))))
         {
-            return true;
-        }
+			if (AfflatusMiseryPvE.CanUse(out act, skipAoeCheck: true))
+			{
+				return true;
+			}
+		}
 
-        bool liliesNearlyFull = Lily == 2 && LilyTime < LilyOvercapTime;
-        bool liliesFullNoBlood = Lily == 3;
-        if (AfflatusMiseryPvE.EnoughLevel && UseLilyWhenFull && (liliesNearlyFull || liliesFullNoBlood) && AfflatusMiseryPvE.EnoughLevel && BloodLily < 3)
+        if (AfflatusMiseryPvE.EnoughLevel && UseLilyWhenFull && (!IsInHighEndDuty || !UseOpenerHighEnd || (IsInHighEndDuty && UseOpenerHighEnd && !CombatElapsedLessGCD(13))) && (liliesNearlyFull || liliesFullNoBlood) && AfflatusMiseryPvE.EnoughLevel && BloodLily < 3)
         {
             if (AfflatusRapturePvE.CanUse(out act, skipAoeCheck: true))
             {

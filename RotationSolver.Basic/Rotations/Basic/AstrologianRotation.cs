@@ -563,6 +563,7 @@ public partial class AstrologianRotation
     static partial void ModifySunSignPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Suntouched];
+        setting.StatusProvide = [StatusID.SunSign];
         setting.MPOverride = () => 0;
         setting.IsFriendly = true;
         setting.TargetType = TargetType.Self;
