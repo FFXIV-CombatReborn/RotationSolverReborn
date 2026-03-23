@@ -32,7 +32,7 @@ public sealed class BeirutaSGE : SageRotation
     public bool OOCRhizomata { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Limit Panhaima to multihit party stacks")]
-    public bool MultiHitRestrict { get; set; } = false;
+    public bool MultiHitRestrict { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Enable Swiftcast Restriction Logic to attempt to prevent actions other than Raise when you have swiftcast")]
     public bool SwiftLogic { get; set; } = true;
@@ -68,7 +68,7 @@ public sealed class BeirutaSGE : SageRotation
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Average party HP threshold to use Physis")]
-    public float PhysisHeal { get; set; } = 0.7f;
+    public float PhysisHeal { get; set; } = 0.5f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Average party HP threshold to use Pneuma in Single Target")]
@@ -83,8 +83,8 @@ public sealed class BeirutaSGE : SageRotation
     public float EukrasianPrognosisHeal { get; set; } = 0.70f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Health threshold any party member needs to be to use Eukrasian Diagnosis in HealSingleGCD")]
-    public float EukrasianDiagnosisHeal { get; set; } = 0.7f;
+    [RotationConfig(CombatType.PvE, Name = "Health threshold any party member needs to be to use Eukrasian Diagnosis")]
+    public float EukrasianDiagnosisHeal { get; set; } = 0.5f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Average party HP threshold to use Taurochole")]
@@ -111,7 +111,7 @@ public sealed class BeirutaSGE : SageRotation
     #region Constants / Fields
     private const long PsycheDotRefreshMs = 20_000;
     private const float EarlyDotRefreshSeconds = 12f;
-    private const float DotMovementThresholdSeconds = 1.3f;
+    private const float DotMovementThresholdSeconds = 1.1f;
 
     private long _psycheUsedAtMs;
     #endregion
@@ -119,6 +119,23 @@ public sealed class BeirutaSGE : SageRotation
     #region Tracking Properties
     private IBaseAction? _lastEukrasiaActionAim;
     private IBaseAction? _EukrasiaActionAim;
+
+    private static bool HasSingleHealLockoutStatus(IBattleChara? target)
+{
+    if (target == null)
+        return true;
+
+    try
+    {
+        return target.HasStatus(false, StatusID.LivingDead) ||
+               target.HasStatus(false, StatusID.Holmgang) ||
+               target.HasStatus(false, StatusID.WalkingDead);
+    }
+    catch
+    {
+        return true;
+    }
+}
 
     private bool CanUseCountdownEukrasianPrognosis(out IAction? act)
     {
@@ -291,7 +308,7 @@ public sealed class BeirutaSGE : SageRotation
             return true;
         }
 
-        if (HolosPvE.CanUse(out act))
+        if (PartyMembersAverHP < 0.9f && HolosPvE.CanUse(out act))
         {
             return true;
         }
@@ -338,7 +355,7 @@ public sealed class BeirutaSGE : SageRotation
             return true;
         }
 
-        if (PartyMembersAverHP < IxocholeHeal && IxocholePvE.CanUse(out act))
+        if (Addersgall >= 2 && PartyMembersAverHP < IxocholeHeal && IxocholePvE.CanUse(out act))
         {
             return true;
         }
@@ -356,80 +373,94 @@ public sealed class BeirutaSGE : SageRotation
         return base.HealAreaAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.TaurocholePvE, ActionID.DruocholePvE, ActionID.KardiaPvE, ActionID.SoteriaPvE)]
-    protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
+ [RotationDesc(ActionID.TaurocholePvE, ActionID.DruocholePvE, ActionID.KardiaPvE, ActionID.SoteriaPvE)]
+protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
+{
+    act = null;
+
+    IBattleChara? taurocholeTarget = TaurocholePvE.Target.Target;
+    if (!HasSingleHealLockoutStatus(taurocholeTarget) &&
+        PartyMembersAverHP > 0.8f &&
+        Addersgall >= 2 &&
+        taurocholeTarget != null &&
+        taurocholeTarget.GetHealthRatio() < HealSingleTaurocholeHeal &&
+        TaurocholePvE.CanUse(out act))
     {
-        act = null;
+        return true;
+    }
 
-        if (PartyMembersAverHP < HealSingleTaurocholeHeal && TaurocholePvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (PartyMembersAverHP < HealSingleDruocholeHeal
-            && (!TaurocholePvE.EnoughLevel || TaurocholePvE.Cooldown.IsCoolingDown)
-            && DruocholePvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (PartyMembersAverHP < 0.8f && KardiaPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        bool kardionTargetNeedsSoteria = PartyMembers.Any(member =>
-            member.HasStatus(true, StatusID.Kardion) && member.GetHealthRatio() < SoteriaHeal);
-
-        if (PartyMembersAverHP < SoteriaHeal
-            && kardionTargetNeedsSoteria
-            && SoteriaPvE.CanUse(out act))
-        {
-            return true;
-        }
-
+    if (IsLastAction(ActionID.TaurocholePvE))
+    {
         return base.HealSingleAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.KardiaPvE, ActionID.RhizomataPvE, ActionID.SoteriaPvE)]
-    protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
+    IBattleChara? druocholeTarget = DruocholePvE.Target.Target;
+    if (!HasSingleHealLockoutStatus(druocholeTarget) &&
+        PartyMembersAverHP > 0.8f &&
+        Addersgall >= 2 &&
+        druocholeTarget != null &&
+        druocholeTarget.GetHealthRatio() < HealSingleDruocholeHeal &&
+        (!TaurocholePvE.EnoughLevel || TaurocholePvE.Cooldown.IsCoolingDown) &&
+        DruocholePvE.CanUse(out act))
     {
-        act = null;
-
-        if (InCombat || !HasKardia)
-        {
-            if (KardiaPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        if (OOCRhizomata && !InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        bool kardionTargetNeedsHelp = PartyMembers.Any(member =>
-            member.HasStatus(true, StatusID.Kardion) && member.GetHealthRatio() < SoteriaHeal);
-
-        if (kardionTargetNeedsHelp && SoteriaPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (HasBuffs && UseBurstMedicine(out act))
-        {
-            return true;
-        }
-
-        return base.GeneralAbility(nextGCD, out act);
+        return true;
     }
-    #endregion
+
+    IBattleChara? kardiaTarget = KardiaPvE.Target.Target;
+    if (!HasSingleHealLockoutStatus(kardiaTarget) &&
+        PartyMembersAverHP > 0.8f &&
+        kardiaTarget != null &&
+        kardiaTarget.GetHealthRatio() < 0.8f &&
+        KardiaPvE.CanUse(out act))
+    {
+        return true;
+    }
+
+    return base.HealSingleAbility(nextGCD, out act);
+}
+
+[RotationDesc(ActionID.KardiaPvE, ActionID.RhizomataPvE, ActionID.SoteriaPvE)]
+protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
+{
+    act = null;
+
+    if (InCombat || !HasKardia)
+    {
+        if (KardiaPvE.CanUse(out act))
+        {
+            return true;
+        }
+    }
+
+    if (OOCRhizomata && !InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act))
+    {
+        return true;
+    }
+
+    if (InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act))
+    {
+        return true;
+    }
+
+    IBattleChara? soteriaTarget = PartyMembers.FirstOrDefault(member =>
+        member.HasStatus(true, StatusID.Kardion));
+
+    if (PartyMembersAverHP > 0.8f &&
+        soteriaTarget != null &&
+        soteriaTarget.GetHealthRatio() < SoteriaHeal &&
+        SoteriaPvE.CanUse(out act))
+    {
+        return true;
+    }
+
+    if (HasBuffs && UseBurstMedicine(out act))
+    {
+        return true;
+    }
+
+    return base.GeneralAbility(nextGCD, out act);
+}
+#endregion
 
     #region Eukrasia Logic
     private void SetEukrasia(IBaseAction act)
@@ -765,7 +796,7 @@ public sealed class BeirutaSGE : SageRotation
         return base.HealAreaGCD(out act);
     }
 
-    [RotationDesc(ActionID.DiagnosisPvE, ActionID.EukrasianDiagnosisPvE)]
+    [RotationDesc(ActionID.EukrasianDiagnosisPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
         act = null;
@@ -777,18 +808,13 @@ public sealed class BeirutaSGE : SageRotation
             && MergedStatus.HasFlag(AutoStatus.Raise)
             && PartyMembersAverHP > 0.8f
             && !HasBuffs
-            && IsMoving && MovingTime > 1.3f
+            && IsMoving && MovingTime > 1f
             && Addersting <= 2)
         {
             return base.HealSingleGCD(out act);
         }
 
-        if (HasEukrasia && eukrasiaActionHeal && EukrasianDiagnosisPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (EukrasiaPvE.EnoughLevel && !HasEukrasia && eukrasiaActionHeal && EukrasiaPvE.CanUse(out act))
+        if (Addersgall <= 1 && IsMoving && MovingTime > 1f && Addersting <= 2 && !HasBuffs && HasEukrasia && eukrasiaActionHeal && EukrasianDiagnosisPvE.CanUse(out act))
         {
             return true;
         }
@@ -878,12 +904,12 @@ public sealed class BeirutaSGE : SageRotation
             && IsBurst
             && PhlegmaPvE.CanUse(out act, usedUp: HasBuffs
                 || PhlegmaPvE.Cooldown.WillHaveXChargesGCD(2, 2)
-                || (IsMoving && MovingTime > 1.3f && PhlegmaPvE.Cooldown.WillHaveXChargesGCD(2, 4))))
+                || (IsMoving && MovingTime > 1f && PhlegmaPvE.Cooldown.WillHaveXChargesGCD(2, 4))))
         {
             return true;
         }
 
-        if (IsMoving && MovingTime > 1.3f && ToxikonPvE.CanUse(out act))
+        if (IsMoving && MovingTime > 1.1f && ToxikonPvE.CanUse(out act))
         {
             return true;
         }
