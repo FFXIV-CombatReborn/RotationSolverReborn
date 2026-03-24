@@ -12,7 +12,7 @@ public sealed class BeirutaAST : AstrologianRotation
 
     [RotationConfig(CombatType.PvE, Name =
         "Please note that this rotation is optimised for high-end encounters (Only for countdown 8 people fights).\n" +
-        "• Collective Unconscious, Horoscope, Neutral Sect, and Macrocosmos should generally be used manually or through CD planner\n" +
+        "• Only the actions lsited in the description will be automatically used and everything else should be used manually or through CD planner\n" +
         "• Please set Intercept for GCD usage only\n" +
         "• Disabling AutoBurst is sufficient if you need to delay burst timing in this rotation\n" +
         "• DoT effects may refresh slightly earlier during burst phases or while moving\n" +
@@ -40,6 +40,16 @@ public sealed class BeirutaAST : AstrologianRotation
 
     [RotationConfig(CombatType.PvE, Name = "Enable Swiftcast Restriction Logic to attempt to prevent actions other than Raise when you have swiftcast")]
     public bool SwiftLogic { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Lightspeed for movement (Still reserve for burst)")]
+    public bool UseLightspeedForMovement { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Swiftcast for movement")]
+    public bool UseSwiftcastForMovement { get; set; } = true;
+
+    [Range(0, 5, ConfigUnitType.Seconds, 0.1f)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum movement time before allowing movement-based actions")]
+    public float MovementTimeThreshold { get; set; } = 0.9f;
 
     [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if you are the only healer in party)")]
     public bool GCDHeal { get; set; } = true;
@@ -107,15 +117,15 @@ public sealed class BeirutaAST : AstrologianRotation
     }
 
     [RotationConfig(CombatType.PvE, Name = "Early moving Combust refresh")]
-public MovingCombustRefreshOption MovingCombustRefresh { get; set; } = MovingCombustRefreshOption.Disable;
+    public MovingCombustRefreshOption MovingCombustRefresh { get; set; } = MovingCombustRefreshOption.Disable;
 
-public enum MovingCombustRefreshOption : byte
-{
-    [Description("Disable")] Disable,
-    [Description("6 remaining")] Six,
-    [Description("9 remaining")] Nine,
-    [Description("12 remaining")] Twelve,
-}
+    public enum MovingCombustRefreshOption : byte
+    {
+        [Description("Disable")] Disable,
+        [Description("6 remaining")] Six,
+        [Description("9 remaining")] Nine,
+        [Description("12 remaining")] Twelve,
+    }
 
     #endregion
 
@@ -124,10 +134,19 @@ public enum MovingCombustRefreshOption : byte
     private const long NeutralSectEarlyMs = 15_000;
     private const long DivinationFirst5sMs = 5_000;
     private const float BallparkPercent = 0.08f;
+    private const float DivinationCombustRefreshSeconds = 11f;
+    private const float MovementLeadSeconds = 0.5f;
+    private const float LightspeedLocksSwiftcastSeconds = 18f;
+    private const float SwiftcastLocksLightspeedSeconds = 3f;
+    private const float MovementPreferredActionLockSeconds = 2f;
 
     private long _neutralSectUsedAtMs;
     private bool _neutralSectWasUp;
     private long _divinationUsedAtMs;
+
+    private float _lastLightspeedUseCombatTime = float.MinValue;
+    private float _lastSwiftcastUseCombatTime = float.MinValue;
+    private float _lastMovementPreferredLockingActionCombatTime = float.MinValue;
 
     private bool CardsUnderDivinationOnly { get; set; } = true;
 
@@ -164,6 +183,25 @@ public enum MovingCombustRefreshOption : byte
 
     private bool HasHealingLockout => HasMacrocosmos || HasGiantDominance || HasEarthlyDominance;
 
+    private bool HasSufficientMovement =>
+        IsMoving &&
+        MovingTime > MovementTimeThreshold;
+
+    private bool IsLightspeedLockingSwiftcastActive =>
+        InCombat &&
+        _lastLightspeedUseCombatTime > float.MinValue / 2 &&
+        CombatTime - _lastLightspeedUseCombatTime <= LightspeedLocksSwiftcastSeconds;
+
+    private bool IsSwiftcastLockingLightspeedActive =>
+        InCombat &&
+        _lastSwiftcastUseCombatTime > float.MinValue / 2 &&
+        CombatTime - _lastSwiftcastUseCombatTime <= SwiftcastLocksLightspeedSeconds;
+
+    private bool IsMovementPreferredActionLockActive =>
+        InCombat &&
+        _lastMovementPreferredLockingActionCombatTime > float.MinValue / 2 &&
+        CombatTime - _lastMovementPreferredLockingActionCombatTime <= MovementPreferredActionLockSeconds;
+
     private bool ShouldHoldRaiseSwift =>
         (HasSwift || IsLastAction(ActionID.SwiftcastPvE)) &&
         SwiftLogic &&
@@ -181,16 +219,14 @@ public enum MovingCombustRefreshOption : byte
 
     private bool BurstPrep => DivinationPvE.EnoughLevel && DivIn <= 4f;
 
-    private const float DivinationCombustRefreshSeconds = 11f;
-
-private float MovingCombustRefreshSeconds => MovingCombustRefresh switch
-{
-    MovingCombustRefreshOption.Disable => 0f,
-    MovingCombustRefreshOption.Six => 6f,
-    MovingCombustRefreshOption.Nine => 9f,
-    MovingCombustRefreshOption.Twelve => 12f,
-    _ => 0f,
-};
+    private float MovingCombustRefreshSeconds => MovingCombustRefresh switch
+    {
+        MovingCombustRefreshOption.Disable => 0f,
+        MovingCombustRefreshOption.Six => 6f,
+        MovingCombustRefreshOption.Nine => 9f,
+        MovingCombustRefreshOption.Twelve => 12f,
+        _ => 0f,
+    };
 
     private bool HoldLastLightspeedForDivination
     {
@@ -237,6 +273,32 @@ private float MovingCombustRefreshSeconds => MovingCombustRefresh switch
 
     private void StampDivinationUse() => _divinationUsedAtMs = Environment.TickCount64;
 
+    private void UpdateMovementCooldownTracking()
+    {
+        if (!InCombat)
+        {
+            _lastLightspeedUseCombatTime = float.MinValue;
+            _lastSwiftcastUseCombatTime = float.MinValue;
+            _lastMovementPreferredLockingActionCombatTime = float.MinValue;
+            return;
+        }
+
+        if (IsLastAction(ActionID.LightspeedPvE))
+            _lastLightspeedUseCombatTime = CombatTime;
+
+        if (IsLastAction(ActionID.SwiftcastPvE))
+            _lastSwiftcastUseCombatTime = CombatTime;
+
+        if (IsLastAction(ActionID.AspectedBeneficPvE) ||
+            IsLastAction(ActionID.MacrocosmosPvE) ||
+            IsLastAction(ActionID.CombustPvE) ||
+            IsLastAction(ActionID.CombustIiPvE) ||
+            IsLastAction(ActionID.CombustIiiPvE))
+        {
+            _lastMovementPreferredLockingActionCombatTime = CombatTime;
+        }
+    }
+
     private int AliveHealerCount
     {
         get
@@ -270,33 +332,35 @@ private float MovingCombustRefreshSeconds => MovingCombustRefresh switch
     }
 
     private bool IsTank(IBattleChara? target)
-{
-    if (target == null)
-        return false;
-
-    IEnumerable<IBattleChara> tanks = PartyMembers.GetJobCategory(JobRole.Tank);
-    foreach (IBattleChara tank in tanks)
     {
-        if (tank == target)
-            return true;
-    }
+        if (target == null)
+            return false;
 
-    return false;
-}
-private static bool HasCelestialIntersection(IBattleChara? target)
-{
-    if (target == null)
-        return false;
+        IEnumerable<IBattleChara> tanks = PartyMembers.GetJobCategory(JobRole.Tank);
+        foreach (IBattleChara tank in tanks)
+        {
+            if (tank == target)
+                return true;
+        }
 
-    try
-    {
-        return target.HasStatus(true, StatusID.Intersection);
-    }
-    catch
-    {
         return false;
     }
-}
+
+    private static bool HasCelestialIntersection(IBattleChara? target)
+    {
+        if (target == null)
+            return false;
+
+        try
+        {
+            return target.HasStatus(true, StatusID.Intersection);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private static bool HasAspectedBeneficFromSelf(IBattleChara? target)
     {
         if (target == null)
@@ -320,7 +384,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         try
         {
             return target.HasStatus(false, StatusID.LivingDead) ||
-                   target.HasStatus(false, StatusID.Holmgang)||
+                   target.HasStatus(false, StatusID.Holmgang) ||
                    target.HasStatus(false, StatusID.WalkingDead);
         }
         catch
@@ -434,6 +498,58 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         return target.GetHealthRatio() < SynastryHeal;
     }
 
+    private bool IsMovementPreferredNextGCD(IAction nextGCD)
+    {
+        if (nextGCD.IsTheSameTo(false, AspectedBeneficPvE, MacrocosmosPvE))
+            return true;
+
+        if (CanUseCurrentCombust(out IAction? combustAct) &&
+            nextGCD == combustAct)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool ShouldUseSwiftcastForMovement(IAction nextGCD)
+    {
+        if (!UseSwiftcastForMovement ||
+            !InCombat ||
+            !HasSufficientMovement ||
+            MovingTime <= MovementTimeThreshold + MovementLeadSeconds ||
+            HasSwift ||
+            HasLightspeed ||
+            IsLastAction(ActionID.SwiftcastPvE) ||
+            ShouldHoldRaiseSwift ||
+            IsLightspeedLockingSwiftcastActive ||
+            IsMovementPreferredActionLockActive)
+        {
+            return false;
+        }
+
+        return !IsMovementPreferredNextGCD(nextGCD);
+    }
+
+    private bool ShouldUseLightspeedForMovement(IAction nextGCD)
+    {
+        if (!UseLightspeedForMovement ||
+            !InCombat ||
+            !HasSufficientMovement ||
+            MovingTime <= MovementTimeThreshold + MovementLeadSeconds ||
+            HasLightspeed ||
+            HasSwift ||
+            IsLastAction(ActionID.LightspeedPvE) ||
+            HoldLastLightspeedForDivination ||
+            IsSwiftcastLockingLightspeedActive ||
+            IsMovementPreferredActionLockActive)
+        {
+            return false;
+        }
+
+        return !IsMovementPreferredNextGCD(nextGCD);
+    }
+
     #endregion
 
     #region Tracking Properties
@@ -465,7 +581,6 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         return remainTime < 30 && AstralDrawPvE.CanUse(out act)
             ? act
             : base.CountDownAction(remainTime);
-        
     }
 
     #endregion
@@ -474,6 +589,8 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
+        UpdateMovementCooldownTracking();
+
         act = null;
 
         if (!HasLightspeed &&
@@ -535,6 +652,8 @@ private static bool HasCelestialIntersection(IBattleChara? target)
     [RotationDesc(ActionID.ExaltationPvE, ActionID.TheArrowPvE, ActionID.TheSpirePvE, ActionID.TheBolePvE, ActionID.TheEwerPvE, ActionID.CelestialIntersectionPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
+        UpdateMovementCooldownTracking();
+
         if (!HasDivining && InCombat && TheSpirePvE.CanUse(out act))
             return true;
 
@@ -556,21 +675,83 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         return base.DefenseSingleAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.CollectiveUnconsciousPvE, ActionID.SunSignPvE)]
+    [RotationDesc(ActionID.SunSignPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (SunSignPvE.CanUse(out act))
-            return true;
+        UpdateMovementCooldownTracking();
 
-        if (CollectiveUnconsciousPvE.CanUse(out act))
+        if (SunSignPvE.CanUse(out act))
             return true;
 
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
+    [RotationDesc(ActionID.CelestialOppositionPvE, ActionID.StellarDetonationPvE, ActionID.HoroscopePvE, ActionID.HoroscopePvE_16558, ActionID.LadyOfCrownsPvE)]
+    protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
+    {
+        UpdateMovementCooldownTracking();
+
+        act = null;
+
+        if (HasDivining || HasMacrocosmos)
+            return false;
+
+        if (HasGiantDominance &&
+            PartyMembersAverHP < StellarDetonationHeal &&
+            StellarDetonationPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (PartyMembersAverHP < MicrocosmosHeal && MicrocosmosPvE.CanUse(out act))
+            return true;
+
+        if (MicroPrio && HasMacrocosmos)
+            return base.HealAreaAbility(nextGCD, out act);
+
+        if (!HasGiantDominance &&
+            !HasEarthlyDominance &&
+            !HasMacrocosmos &&
+            !HasHoroscopeHelios &&
+            PartyMembersAverHP < CelestialOppositionHeal &&
+            CelestialOppositionPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!HasMacrocosmos &&
+            !HasGiantDominance &&
+            !HasEarthlyDominance &&
+            !HasHoroscope &&
+            HasHoroscopeHelios &&
+            PartyMembersAverHP < HoroscopeHeal &&
+            HoroscopePvE_16558.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!HasMacrocosmos &&
+            !HasGiantDominance &&
+            !HasEarthlyDominance &&
+            !HasHoroscope &&
+            HasHoroscopeHelios &&
+            PartyMembersAverHP < HoroscopeHeal &&
+            HoroscopePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (LadyOfCrownsPvE.CanUse(out act))
+            return true;
+
+        return base.HealAreaAbility(nextGCD, out act);
+    }
+
     [RotationDesc(ActionID.TheArrowPvE, ActionID.TheEwerPvE, ActionID.EssentialDignityPvE, ActionID.CelestialIntersectionPvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
+        UpdateMovementCooldownTracking();
+
         act = null;
 
         if (HasDivining || HasHealingLockout)
@@ -653,67 +834,10 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         return base.HealSingleAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.CelestialOppositionPvE, ActionID.StellarDetonationPvE, ActionID.HoroscopePvE, ActionID.HoroscopePvE_16558, ActionID.LadyOfCrownsPvE)]
-    protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null;
-
-        if (HasDivining || HasMacrocosmos)
-            return false;
-
-        if (HasGiantDominance &&
-            PartyMembersAverHP < StellarDetonationHeal &&
-            StellarDetonationPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (PartyMembersAverHP < MicrocosmosHeal && MicrocosmosPvE.CanUse(out act))
-            return true;
-
-        if (MicroPrio && HasMacrocosmos)
-            return base.HealAreaAbility(nextGCD, out act);
-
-        if (!HasGiantDominance &&
-            !HasEarthlyDominance &&
-            !HasMacrocosmos &&
-            !HasHoroscopeHelios &&
-            PartyMembersAverHP < CelestialOppositionHeal &&
-            CelestialOppositionPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (!HasMacrocosmos &&
-            !HasGiantDominance &&
-            !HasEarthlyDominance &&
-            !HasHoroscope &&
-            HasHoroscopeHelios &&
-            PartyMembersAverHP < HoroscopeHeal &&
-            HoroscopePvE_16558.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (!HasMacrocosmos &&
-            !HasGiantDominance &&
-            !HasEarthlyDominance &&
-            !HasHoroscope &&
-            HasHoroscopeHelios &&
-            PartyMembersAverHP < HoroscopeHeal &&
-            HoroscopePvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (LadyOfCrownsPvE.CanUse(out act))
-            return true;
-
-        return base.HealAreaAbility(nextGCD, out act);
-    }
-
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
+        UpdateMovementCooldownTracking();
+
         act = null;
 
         if (!HasLightspeed &&
@@ -803,29 +927,14 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
+        UpdateMovementCooldownTracking();
+
         act = null;
 
-        bool nextIsMovementSafeGcd =
-            nextGCD.IsTheSameTo(false,
-                MacrocosmosPvE,
-                AspectedBeneficPvE,
-                CombustIiiPvE, CombustIiPvE, CombustPvE);
-
         bool combustSoonForMovement =
-    CurrentTarget != null &&
-    MovingCombustRefreshSeconds > 0f &&
-    CurrentTargetCombustMissingOrEnding(MovingCombustRefreshSeconds);
-
-        bool needsMovementRescue =
-            InCombat &&
-            MovingTime > 1.5f &&
-            !nextIsMovementSafeGcd &&
-            !HasSwift &&
-            !HasLightspeed &&
-            !combustSoonForMovement;
-
-        bool divJustStarted = InFirst5sAfterDivination;
-        bool openerLightspeed = IsOpen && !HasLightspeed;
+            CurrentTarget != null &&
+            MovingCombustRefreshSeconds > 0f &&
+            CurrentTargetCombustMissingOrEnding(MovingCombustRefreshSeconds);
 
         if (!HasLightspeed &&
             InCombat &&
@@ -842,6 +951,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
             return true;
         }
 
+        bool openerLightspeed = IsOpen && !HasLightspeed;
         if (openerLightspeed && LightspeedPvE.CanUse(out act, usedUp: true))
             return true;
 
@@ -851,7 +961,7 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         if (!HasLightspeed &&
             InCombat &&
             HasDivination &&
-            divJustStarted &&
+            InFirst5sAfterDivination &&
             !HoldLastLightspeedForDivination &&
             LightspeedPvE.CanUse(out act, usedUp: true))
         {
@@ -860,12 +970,16 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
         if (InCombat)
         {
-            bool canWeaveNow = MovingTime > 1.5f;
+            if (ShouldUseSwiftcastForMovement(nextGCD) &&
+                !combustSoonForMovement &&
+                SwiftcastPvE.CanUse(out act))
+            {
+                return true;
+            }
 
-            if (needsMovementRescue &&
-                canWeaveNow &&
-                !HoldLastLightspeedForDivination &&
-                LightspeedPvE.CanUse(out act, usedUp: true))
+            if (ShouldUseLightspeedForMovement(nextGCD) &&
+                !combustSoonForMovement &&
+                LightspeedPvE.CanUse(out act, usedUp: LightspeedPvE.Cooldown.CurrentCharges > 1))
             {
                 return true;
             }
@@ -881,122 +995,11 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
     #region GCD Logic
 
-    protected override bool DefenseSingleGCD(out IAction? act)
-    {
-        if ((MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150)) ||
-            (CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)))
-        {
-            return base.DefenseAreaGCD(out act);
-        }
-
-        if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) &&
-            AspectedBeneficPvE.CanUse(out act, skipStatusProvideCheck: true) &&
-            AspectedBeneficPvE.Target.Target != null &&
-            !HasAspectedBeneficFromSelf(AspectedBeneficPvE.Target.Target) &&
-            !HasSingleHealLockoutStatus(AspectedBeneficPvE.Target.Target))
-        {
-            return true;
-        }
-
-        return base.DefenseAreaGCD(out act);
-    }
-
-    [RotationDesc(ActionID.MacrocosmosPvE)]
-    protected override bool DefenseAreaGCD(out IAction? act)
-    {
-        if ((MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150)) ||
-            (CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)))
-        {
-            return base.DefenseAreaGCD(out act);
-        }
-
-        if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) &&
-            HeliosConjunctionPvE.CanUse(out act, skipStatusProvideCheck: true))
-        {
-            return true;
-        }
-
-        return base.DefenseAreaGCD(out act);
-    }
-
-    [RotationDesc(ActionID.AspectedBeneficPvE, ActionID.BeneficIiPvE, ActionID.BeneficPvE)]
-    protected override bool HealSingleGCD(out IAction? act)
-    {
-        act = null;
-
-        if (HasHealingLockout)
-            return false;
-
-        if (ShouldHoldRaiseSwift)
-            return base.HealSingleGCD(out act);
-
-        if (MicroPrio && HasMacrocosmos)
-            return base.HealSingleGCD(out act);
-
-        bool shouldUseEssentialDignity =
-            (EssentialPrio2 == EssentialPrioStrategy.AnyCharges &&
-             EssentialDignityPvE.EnoughLevel &&
-             EssentialDignityPvE.Cooldown.CurrentCharges > 0)
-            ||
-            (EssentialPrio2 == EssentialPrioStrategy.CappedCharges &&
-             EssentialDignityPvE.EnoughLevel &&
-             EssentialDignityPvE.Cooldown.CurrentCharges == EssentialDignityPvE.Cooldown.MaxCharges);
-
-        if (shouldUseEssentialDignity)
-            return base.HealSingleGCD(out act);
-
-        bool movingHealWindow =
-            InCombat &&
-            !HoldLastLightspeedForDivination &&
-            !HasLightspeed &&
-            MovingTime > 1.0f &&
-            AspectedBeneficPvE.Target.Target != null &&
-            !HasAspectedBeneficFromSelf(AspectedBeneficPvE.Target.Target) &&
-            !HasSingleHealLockoutStatus(AspectedBeneficPvE.Target.Target) &&
-            (IsTank(AspectedBeneficPvE.Target.Target) || PartyMembersAverHP > 0.8f) &&
-            AspectedBeneficPvE.Target.Target.GetHealthRatio() < 0.7f;
-
-        if (AspectedBeneficPvE.CanUse(out act) &&
-            AspectedBeneficPvE.Target.Target != null &&
-            !HasAspectedBeneficFromSelf(AspectedBeneficPvE.Target.Target) &&
-            !HasSingleHealLockoutStatus(AspectedBeneficPvE.Target.Target) &&
-            (((AspectedBeneficPvE.Target.Target.GetHealthRatio() < AspectedBeneficHeal) &&
-              (IsTank(AspectedBeneficPvE.Target.Target) || PartyMembersAverHP > 0.8f)) || movingHealWindow) &&
-            !HasMacrocosmos &&
-            !HasGiantDominance &&
-            !HasDivination)
-        {
-            return true;
-        }
-
-        if (BeneficIiPvE.CanUse(out act, targetOverride: TargetType.Tank) &&
-            BeneficIiPvE.Target.Target != null &&
-            PartyMembersAverHP > 0.9f &&
-            !HasSingleHealLockoutStatus(BeneficIiPvE.Target.Target) &&
-            !HasMacrocosmos &&
-            !HasGiantDominance &&
-            !HasDivination)
-        {
-            return true;
-        }
-
-        if (BeneficPvE.CanUse(out act, targetOverride: TargetType.Tank) &&
-            BeneficPvE.Target.Target != null &&
-            PartyMembersAverHP > 0.9f &&
-            !HasSingleHealLockoutStatus(BeneficPvE.Target.Target) &&
-            !HasMacrocosmos &&
-            !HasGiantDominance &&
-            !HasDivination)
-        {
-            return true;
-        }
-
-        return base.HealSingleGCD(out act);
-    }
-
     [RotationDesc(ActionID.AspectedHeliosPvE, ActionID.HeliosPvE, ActionID.HeliosConjunctionPvE)]
     protected override bool HealAreaGCD(out IAction? act)
     {
+        UpdateMovementCooldownTracking();
+
         act = null;
 
         if (HasMacrocosmos ||
@@ -1053,9 +1056,78 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         return base.HealAreaGCD(out act);
     }
 
+    [RotationDesc(ActionID.AspectedBeneficPvE, ActionID.BeneficIiPvE)]
+    protected override bool HealSingleGCD(out IAction? act)
+    {
+        UpdateMovementCooldownTracking();
+
+        act = null;
+
+        if (HasHealingLockout)
+            return false;
+
+        if (ShouldHoldRaiseSwift)
+            return base.HealSingleGCD(out act);
+
+        if (MicroPrio && HasMacrocosmos)
+            return base.HealSingleGCD(out act);
+
+        bool shouldUseEssentialDignity =
+            (EssentialPrio2 == EssentialPrioStrategy.AnyCharges &&
+             EssentialDignityPvE.EnoughLevel &&
+             EssentialDignityPvE.Cooldown.CurrentCharges > 0)
+            ||
+            (EssentialPrio2 == EssentialPrioStrategy.CappedCharges &&
+             EssentialDignityPvE.EnoughLevel &&
+             EssentialDignityPvE.Cooldown.CurrentCharges == EssentialDignityPvE.Cooldown.MaxCharges);
+
+        if (shouldUseEssentialDignity)
+            return base.HealSingleGCD(out act);
+
+        bool movingHealWindow =
+            InCombat &&
+            !HoldLastLightspeedForDivination &&
+            !HasLightspeed &&
+            !HasSwift &&
+            HasSufficientMovement &&
+            AspectedBeneficPvE.Target.Target != null &&
+            !HasAspectedBeneficFromSelf(AspectedBeneficPvE.Target.Target) &&
+            !HasSingleHealLockoutStatus(AspectedBeneficPvE.Target.Target) &&
+            (IsTank(AspectedBeneficPvE.Target.Target) || PartyMembersAverHP > 0.8f) &&
+            AspectedBeneficPvE.Target.Target.GetHealthRatio() < 0.7f;
+
+        if (AspectedBeneficPvE.CanUse(out act) &&
+            AspectedBeneficPvE.Target.Target != null &&
+            !HasAspectedBeneficFromSelf(AspectedBeneficPvE.Target.Target) &&
+            !HasSingleHealLockoutStatus(AspectedBeneficPvE.Target.Target) &&
+            (((AspectedBeneficPvE.Target.Target.GetHealthRatio() < AspectedBeneficHeal) &&
+              (IsTank(AspectedBeneficPvE.Target.Target) || PartyMembersAverHP > 0.8f)) || movingHealWindow) &&
+            !HasMacrocosmos &&
+            !HasGiantDominance &&
+            !HasDivination)
+        {
+            return true;
+        }
+
+        if (BeneficIiPvE.CanUse(out act, targetOverride: TargetType.Tank) &&
+            BeneficIiPvE.Target.Target != null &&
+            PartyMembersAverHP > 0.9f &&
+            !HasSingleHealLockoutStatus(BeneficIiPvE.Target.Target) &&
+            !HasMacrocosmos &&
+            !HasGiantDominance &&
+            !HasDivination)
+        {
+            return true;
+        }
+
+        return base.HealSingleGCD(out act);
+    }
+
     [RotationDesc(ActionID.AscendPvE)]
     protected override bool RaiseGCD(out IAction? act)
     {
+        UpdateMovementCooldownTracking();
+
         if (AscendPvE.CanUse(out act))
             return true;
 
@@ -1064,6 +1136,8 @@ private static bool HasCelestialIntersection(IBattleChara? target)
 
     protected override bool GeneralGCD(out IAction? act)
     {
+        UpdateMovementCooldownTracking();
+
         act = null;
         RefreshNeutralSectStamp();
 
@@ -1093,24 +1167,24 @@ private static bool HasCelestialIntersection(IBattleChara? target)
         float expectedHPToLive12Seconds = GetExpectedHpToLive12Seconds();
 
         if (InCombat &&
-    MovingTime > 1.5f &&
-    MovingCombustRefreshSeconds > 0f &&
-    CurrentTargetCombustMissingOrEnding(MovingCombustRefreshSeconds) &&
-    CurrentTargetHasEnoughHpForCombust(expectedHPToLive12Seconds) &&
-    CanUseCurrentCombust(out act, skipStatusProvideCheck: true))
-{
-    return true;
-}
+            HasSufficientMovement &&
+            MovingCombustRefreshSeconds > 0f &&
+            CurrentTargetCombustMissingOrEnding(MovingCombustRefreshSeconds) &&
+            CurrentTargetHasEnoughHpForCombust(expectedHPToLive12Seconds) &&
+            CanUseCurrentCombust(out act, skipStatusProvideCheck: true))
+        {
+            return true;
+        }
 
         if (HasDivination &&
-    InCombat &&
-    StatusHelper.PlayerStatusTime(true, StatusID.Divination) <= 5f &&
-    CurrentTargetCombustMissingOrEnding(DivinationCombustRefreshSeconds) &&
-    CurrentTargetHasEnoughHpForCombust(expectedHPToLive12Seconds) &&
-    CanUseCurrentCombust(out act, skipStatusProvideCheck: true))
-{
-    return true;
-}
+            InCombat &&
+            StatusHelper.PlayerStatusTime(true, StatusID.Divination) <= 5f &&
+            CurrentTargetCombustMissingOrEnding(DivinationCombustRefreshSeconds) &&
+            CurrentTargetHasEnoughHpForCombust(expectedHPToLive12Seconds) &&
+            CanUseCurrentCombust(out act, skipStatusProvideCheck: true))
+        {
+            return true;
+        }
 
         if (CurrentTargetHasEnoughHpForCombust(expectedHPToLive12Seconds) &&
             CanUseCurrentCombust(out act))
