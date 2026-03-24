@@ -9,37 +9,44 @@ public sealed class WHM_Reborn : WhiteMageRotation
 {
     #region Config Options
 
-     [RotationConfig(CombatType.PvE, Name =
+    [RotationConfig(CombatType.PvE, Name =
         "Please note that this rotation is optimised for high-end encounters.\n" +
-        "• Temperance, Plenary Indulgence and Liturgy of the Bell should generally be used manually or through CD planner\n" +
+        "• Only the actions lsited in the description will be automatically used and everything else should be used manually or through CD planner\n" +
         "• Please set Intercept for GCD usage only\n" +
         "• Disabling AutoBurst is sufficient if you need to delay burst timing in this rotation\n" +
-        "• Dia refresh slightly earlier during burst phases or while moving\n" +
+        "• Dia refresh slightly earlier during burst phases, during movement, and for 20s after Presence of Mind\n" +
         "• Afflatus Misery will ONLY be used during burst phases, blue lily overcap is not a damage down\n" +
         "• After 6s in combats Assize is used on cooldown in this rotation, disable it in Actions if you want to use CD planner for it\n" +
         "• Will start dumping blue lilies if not having 3 blood lilies 15 before burst\n" +
-        "• Single-target healing usage is intentionally more conservative in this rotation\n")]
+        "• Single-target healing usage is intentionally more conservative in this rotation\n" +
+        "• If you turn off AutoBurst, Assize will not be used automatically\n" +
+        "• For 20s after using Presence of Mind, Cure III, Medica II, Medica III, Afflatus Solace, Afflatus Rapture and Regen are locked\n" +
+        "• You can potentially use <tt> or <me> macros for Asylum and disable it in Actions\n")]
     public bool RotationNotes { get; set; } = true;
-
-    [RotationConfig(CombatType.PvE, Name = "Limit Liturgy Of The Bell to multihit party stacks")]
-    public bool MultiHitRestrict { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Enable Swiftcast Restriction Logic to attempt to prevent actions other than Raise when you have swiftcast")]
     public bool SwiftLogic { get; set; } = true;
 
+    [RotationConfig(CombatType.PvE, Name = "Use swiftcast for movement")]
+    public bool UseSwiftcastForMovement { get; set; } = true;
+
     [RotationConfig(CombatType.PvE, Name = "Use Divine Caress as soon as its available")]
-    public bool UseDivine { get; set; } = false;
+    public bool UseDivine { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Only use Benediction on tanks")]
     public bool BenedictionTankOnly { get; set; } = true;
 
+    [Range(0, 20, ConfigUnitType.Seconds, 0.5f)]
+    [RotationConfig(CombatType.PvE, Name = "For this many seconds after Presence of Mind starts, only use Afflatus Misery and Glare IV while actually moving")]
+    public float PoMMovementOnlyLockSeconds { get; set; } = 8f;
+
+    [Range(0, 5, ConfigUnitType.Seconds, 0.1f)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum movement time before allowing movement-based actions")]
+    public float MovementTimeThreshold { get; set; } = 0.8f;
+
     [Range(0, 10000, ConfigUnitType.None, 100)]
     [RotationConfig(CombatType.PvE, Name = "Casting cost requirement for Thin Air to be used")]
     public float ThinAirNeed { get; set; } = 1000;
-
-    [Range(0, 5, ConfigUnitType.Seconds, 0.1f)]
-    [RotationConfig(CombatType.PvE, Name = "Minimum movement time before allowing early Dia refresh")]
-    public float MovingDiaRefreshTime { get; set; } = 1f;
 
     [RotationConfig(CombatType.PvE, Name = "How to manage the last thin air charge")]
     public ThinAirUsageStrategy ThinAirLastChargeUsage { get; set; } = ThinAirUsageStrategy.ReserveLastChargeForRaise;
@@ -61,32 +68,44 @@ public sealed class WHM_Reborn : WhiteMageRotation
     public float BenedictionHeal { get; set; } = 0.1f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Tetragrammaton")]
-    public float TetragrammatonHeal { get; set; } = 0.6f;
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Tetragrammaton 2nd charge")]
+    public float TetragrammatonSecond { get; set; } = 0.7f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Afflatus Solace")]
-    public float SolaceHeal { get; set; } = 0.7f;
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Tetragrammaton last charge")]
+    public float TetragrammatonLast { get; set; } = 0.6f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Regen")]
-    public float RegenHeal { get; set; } = 0.6f;
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Afflatus Solace at 0 Blood Lily stacks")]
+    public float SolaceHeal0 { get; set; } = 0.7f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Afflatus Rapture")]
-    public float RaptureHeal { get; set; } = 0.7f;
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Afflatus Solace at 1 Blood Lily stack")]
+    public float SolaceHeal1 { get; set; } = 0.6f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Medica III")]
-    public float MedicaIIIHeal { get; set; } = 0.5f;
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Afflatus Solace at 2 Blood Lily stacks")]
+    public float SolaceHeal2 { get; set; } = 0.5f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Medica II")]
-    public float MedicaIIHeal { get; set; } = 0.5f;
+    [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Afflatus Rapture at 0 Blood Lily stacks")]
+    public float RaptureHeal0 { get; set; } = 0.8f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Afflatus Rapture at 1 Blood Lily stacks")]
+    public float RaptureHeal1 { get; set; } = 0.7f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Afflatus Rapture at 2 Blood Lily stacks")]
+    public float RaptureHeal2 { get; set; } = 0.6f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Medica III / Medica II")]
+    public float MedicaHeal { get; set; } = 0.5f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Cure III")]
-    public float CureIIIHeal { get; set; } = 0.4f;
+    public float CureIIIHeal { get; set; } = 0.5f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Asylum")]
@@ -97,13 +116,35 @@ public sealed class WHM_Reborn : WhiteMageRotation
     #region Helpers
 
     private const float PresenceOfMindDiaRefreshSeconds = 11f;
-    private const float MovingDiaRefreshSeconds = 21f;
+    private const float MovingDiaRefreshSeconds = 11f;
+    private const float PresenceOfMindLockWindowSeconds = 20f;
+    private const float SwiftcastPostActionLockSeconds = 2f;
 
-    private bool HasPresenceOfMind => StatusHelper.PlayerHasStatus(true, StatusID.PresenceOfMind);
+    private float _lastPresenceOfMindUseCombatTime = float.MinValue;
+    private float _lastSwiftcastLockingActionCombatTime = float.MinValue;
+
+
+    private float PresenceOfMindRemainingTime =>
+        HasPresenceOfMind
+            ? StatusHelper.PlayerStatusTime(true, StatusID.PresenceOfMind)
+            : 0f;
 
     private bool InLast5sOfPresenceOfMind =>
         HasPresenceOfMind &&
-        StatusHelper.PlayerStatusTime(true, StatusID.PresenceOfMind) <= 5f;
+        PresenceOfMindRemainingTime <= 5f;
+
+    private bool InConfiguredMovementOnlyWindowOfPresenceOfMind =>
+        HasPresenceOfMind &&
+        PresenceOfMindRemainingTime > (15f - PoMMovementOnlyLockSeconds);
+
+    private bool HasSufficientMovement =>
+        IsMoving &&
+        MovingTime > MovementTimeThreshold;
+
+    private bool AllowPoMRestrictedMovementGCDs =>
+        PoMMovementOnlyLockSeconds <= 0f ||
+        !InConfiguredMovementOnlyWindowOfPresenceOfMind ||
+        HasSufficientMovement;
 
     private bool HasAsylum => StatusHelper.PlayerHasStatus(true, StatusID.Asylum);
 
@@ -111,12 +152,51 @@ public sealed class WHM_Reborn : WhiteMageRotation
 
     private bool HasMedicaIii => StatusHelper.PlayerHasStatus(true, StatusID.MedicaIii);
 
+    private bool HasSacredSight => StatusHelper.PlayerHasStatus(true, StatusID.SacredSight);
+
     private bool HasHealingLockout => HasAsylum || HasLiturgyOfTheBell;
 
     private bool ShouldHoldRaiseSwift =>
         (HasSwift || IsLastAction(ActionID.SwiftcastPvE)) &&
         SwiftLogic &&
         MergedStatus.HasFlag(AutoStatus.Raise);
+
+    private bool InFirst20sAfterPresenceOfMind =>
+        InCombat &&
+        _lastPresenceOfMindUseCombatTime > float.MinValue / 2 &&
+        CombatTime - _lastPresenceOfMindUseCombatTime <= PresenceOfMindLockWindowSeconds;
+
+    private bool IsPresenceOfMindHealLockActive => InFirst20sAfterPresenceOfMind;
+
+    private bool IsSwiftcastPostActionLockActive =>
+        InCombat &&
+        _lastSwiftcastLockingActionCombatTime > float.MinValue / 2 &&
+        CombatTime - _lastSwiftcastLockingActionCombatTime <= SwiftcastPostActionLockSeconds;
+
+    private void UpdateActionTracking()
+    {
+        if (!InCombat)
+        {
+            _lastPresenceOfMindUseCombatTime = float.MinValue;
+            _lastSwiftcastLockingActionCombatTime = float.MinValue;
+            return;
+        }
+
+        if (IsLastAction(ActionID.PresenceOfMindPvE))
+        {
+            _lastPresenceOfMindUseCombatTime = CombatTime;
+        }
+
+        if (IsLastAction(ActionID.DiaPvE) ||
+            IsLastAction(ActionID.AeroIiPvE) ||
+            IsLastAction(ActionID.AeroPvE) ||
+            IsLastAction(ActionID.AfflatusMiseryPvE) ||
+            IsLastAction(ActionID.GlareIvPvE) ||
+            IsLastAction(ActionID.EsunaPvE))
+        {
+            _lastSwiftcastLockingActionCombatTime = CombatTime;
+        }
+    }
 
     private bool IsTank(IBattleChara? target)
     {
@@ -161,6 +241,53 @@ public sealed class WHM_Reborn : WhiteMageRotation
         }
     }
 
+    private bool CanUseRaptureByBloodLily(out float threshold)
+    {
+        threshold = 0f;
+
+        switch (BloodLily)
+        {
+            case 0:
+                threshold = RaptureHeal0;
+                return true;
+            case 1:
+                threshold = RaptureHeal1;
+                return true;
+            case 2:
+                threshold = RaptureHeal2;
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private bool CanUseSolaceByBloodLily(out float threshold)
+    {
+        threshold = 0f;
+
+        switch (BloodLily)
+        {
+            case 0:
+                threshold = SolaceHeal0;
+                return true;
+            case 1:
+                threshold = SolaceHeal1;
+                return true;
+            case 2:
+                threshold = SolaceHeal2;
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private float CurrentTetragrammatonThreshold => TetragrammatonPvE.Cooldown.CurrentCharges switch
+    {
+        2 => TetragrammatonSecond,
+        1 => TetragrammatonLast,
+        _ => TetragrammatonLast,
+    };
+
     private bool CurrentTargetDiaMissingOrEnding(float remainingSeconds)
     {
         if (CurrentTarget == null)
@@ -202,25 +329,61 @@ public sealed class WHM_Reborn : WhiteMageRotation
         return false;
     }
 
+    private bool IsMovementPreferredNextGCD(IAction nextGCD)
+    {
+        if (nextGCD == AfflatusMiseryPvE ||
+            nextGCD == GlareIvPvE ||
+            nextGCD == AfflatusRapturePvE ||
+            nextGCD == AfflatusSolacePvE)
+        {
+            return true;
+        }
+
+        if (CanUseCurrentDia(out IAction? diaAct) &&
+            nextGCD == diaAct)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool ShouldSwiftcastForMovement(IAction nextGCD)
+    {
+        if (!UseSwiftcastForMovement ||
+            !InCombat ||
+            !HasSufficientMovement ||
+            HasSwift ||
+            HasSacredSight ||
+            IsLastAction(ActionID.SwiftcastPvE) ||
+            ShouldHoldRaiseSwift ||
+            IsSwiftcastPostActionLockActive)
+        {
+            return false;
+        }
+
+        return !IsMovementPreferredNextGCD(nextGCD);
+    }
+
     #endregion
 
     #region Countdown Logic
 
     protected override IAction? CountDownAction(float remainTime)
-{
-    IAction? act;
-
-    if (remainTime < 3 && UseBurstMedicine(out act))
-        return act;
-
-    if (remainTime < StonePvE.Info.CastTime + CountDownAhead &&
-        StonePvE.CanUse(out act))
     {
-        return act;
-    }
+        IAction? act;
 
-    return base.CountDownAction(remainTime);
-}
+        if (remainTime < 3 && UseBurstMedicine(out act))
+            return act;
+
+        if (remainTime < StonePvE.Info.CastTime + CountDownAhead &&
+            StonePvE.CanUse(out act))
+        {
+            return act;
+        }
+
+        return base.CountDownAction(remainTime);
+    }
 
     #endregion
 
@@ -228,6 +391,8 @@ public sealed class WHM_Reborn : WhiteMageRotation
 
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
+        UpdateActionTracking();
+
         bool useLastThinAirCharge =
             ThinAirLastChargeUsage == ThinAirUsageStrategy.UseAllCharges ||
             (ThinAirLastChargeUsage == ThinAirUsageStrategy.ReserveLastChargeForRaise && nextGCD == RaisePvE);
@@ -262,20 +427,13 @@ public sealed class WHM_Reborn : WhiteMageRotation
             return base.EmergencyAbility(nextGCD, out act);
         }
 
-        if (nextGCD.IsTheSameTo(true, AfflatusRapturePvE, MedicaPvE, MedicaIiPvE, CureIiiPvE) &&
-            (MergedStatus.HasFlag(AutoStatus.HealAreaSpell) || MergedStatus.HasFlag(AutoStatus.HealSingleSpell)))
-        {
-            if (PlenaryIndulgencePvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
         return base.EmergencyAbility(nextGCD, out act);
     }
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
+        UpdateActionTracking();
+
         if (UseDivine && DivineCaressPvE.CanUse(out act))
         {
             return true;
@@ -284,44 +442,14 @@ public sealed class WHM_Reborn : WhiteMageRotation
         return base.GeneralAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.TemperancePvE, ActionID.LiturgyOfTheBellPvE)]
+    [RotationDesc(ActionID.DivineCaressPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if ((TemperancePvE.Cooldown.IsCoolingDown && !TemperancePvE.Cooldown.WillHaveOneCharge(100)) ||
-            (LiturgyOfTheBellPvE.Cooldown.IsCoolingDown && !LiturgyOfTheBellPvE.Cooldown.WillHaveOneCharge(160)))
-        {
-            return base.DefenseAreaAbility(nextGCD, out act);
-        }
-
-        if (MultiHitRestrict && IsCastingMultiHit)
-        {
-            if (LiturgyOfTheBellPvE.CanUse(out act, skipAoeCheck: true))
-            {
-                return true;
-            }
-        }
-
-        if (PlenaryIndulgencePvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (TemperancePvE.CanUse(out act))
-        {
-            return true;
-        }
+        UpdateActionTracking();
 
         if (DivineCaressPvE.CanUse(out act))
         {
             return true;
-        }
-
-        if ((MultiHitRestrict && IsCastingMultiHit) || !MultiHitRestrict)
-        {
-            if (LiturgyOfTheBellPvE.CanUse(out act, skipAoeCheck: true))
-            {
-                return true;
-            }
         }
 
         return base.DefenseAreaAbility(nextGCD, out act);
@@ -330,6 +458,8 @@ public sealed class WHM_Reborn : WhiteMageRotation
     [RotationDesc(ActionID.DivineBenisonPvE, ActionID.AquaveilPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
+        UpdateActionTracking();
+
         if ((DivineBenisonPvE.Cooldown.IsCoolingDown && !DivineBenisonPvE.Cooldown.WillHaveOneCharge(15)) ||
             (AquaveilPvE.Cooldown.IsCoolingDown && !AquaveilPvE.Cooldown.WillHaveOneCharge(52)))
         {
@@ -352,10 +482,9 @@ public sealed class WHM_Reborn : WhiteMageRotation
     [RotationDesc(ActionID.AsylumPvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
+        UpdateActionTracking();
 
-        if (HasHealingLockout)
-            return false;
+        act = null;
 
         if (PartyMembersAverHP < AsylumHeal &&
             AsylumPvE.CanUse(out act))
@@ -369,18 +498,31 @@ public sealed class WHM_Reborn : WhiteMageRotation
     [RotationDesc(ActionID.BenedictionPvE, ActionID.TetragrammatonPvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
+        UpdateActionTracking();
+
         act = null;
 
         if (HasHealingLockout)
             return false;
 
-        IBattleChara? benedictionTarget = RegenPvE.Target.Target;
+        IBattleChara? benisonTarget = DivineBenisonPvE.Target.Target;
 
-        if (!HasSingleHealLockoutStatus(benedictionTarget) &&
+        if (benisonTarget != null &&
+            IsTank(benisonTarget) &&
+            benisonTarget.GetHealthRatio() < 0.9f &&
+            DivineBenisonPvE.Cooldown.CurrentCharges == 2 &&
+            DivineBenisonPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        IBattleChara? benedictionTarget = BenedictionPvE.Target.Target;
+
+        if (benedictionTarget != null &&
+            !HasSingleHealLockoutStatus(benedictionTarget) &&
             BenedictionTargetAllowed(benedictionTarget) &&
             PartyMembersAverHP > 0.8f &&
             BenedictionPvE.CanUse(out act) &&
-            benedictionTarget != null &&
             benedictionTarget.GetHealthRatio() < BenedictionHeal)
         {
             return true;
@@ -391,13 +533,13 @@ public sealed class WHM_Reborn : WhiteMageRotation
             return base.HealSingleAbility(nextGCD, out act);
         }
 
-        IBattleChara? tetraTarget = RegenPvE.Target.Target;
+        IBattleChara? tetraTarget = TetragrammatonPvE.Target.Target;
 
-        if (!HasSingleHealLockoutStatus(tetraTarget) &&
+        if (tetraTarget != null &&
+            !HasSingleHealLockoutStatus(tetraTarget) &&
             PartyMembersAverHP > 0.8f &&
             TetragrammatonPvE.CanUse(out act, usedUp: true) &&
-            tetraTarget != null &&
-            tetraTarget.GetHealthRatio() < TetragrammatonHeal)
+            tetraTarget.GetHealthRatio() < CurrentTetragrammatonThreshold)
         {
             return true;
         }
@@ -407,6 +549,8 @@ public sealed class WHM_Reborn : WhiteMageRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
+        UpdateActionTracking();
+
         if (InCombat)
         {
             if (IsBurst && CombatTime > 6f && PresenceOfMindPvE.CanUse(out act, skipTTKCheck: IsInHighEndDuty))
@@ -416,12 +560,20 @@ public sealed class WHM_Reborn : WhiteMageRotation
 
             if (!HasHealingLockout &&
                 CombatTime > 6f &&
+                IsBurst &&
                 AssizePvE.CanUse(out act, skipAoeCheck: true))
             {
                 return true;
             }
 
             if (CombatTime > 6f && AssizePvE.CanUse(out act, skipAoeCheck: true))
+            {
+                return true;
+            }
+
+            if (ShouldSwiftcastForMovement(nextGCD) &&
+                MovingTime > MovementTimeThreshold + 0.5f &&
+                SwiftcastPvE.CanUse(out act))
             {
                 return true;
             }
@@ -434,27 +586,31 @@ public sealed class WHM_Reborn : WhiteMageRotation
 
     #region GCD Logic
 
-    [RotationDesc(ActionID.AfflatusRapturePvE, ActionID.MedicaIiPvE, ActionID.CureIiiPvE, ActionID.MedicaPvE)]
+    [RotationDesc(ActionID.AfflatusRapturePvE, ActionID.MedicaIiPvE, ActionID.CureIiiPvE)]
     protected override bool HealAreaGCD(out IAction? act)
     {
+        UpdateActionTracking();
+
         act = null;
 
-        if (HasHealingLockout || HasPresenceOfMind)
+        if (HasHealingLockout)
             return false;
 
         if (ShouldHoldRaiseSwift)
             return base.HealAreaGCD(out act);
 
-        if (BloodLily != 3 &&
-    MovingTime > 1f &&
-    PartyMembersAverHP < 0.8f &&
-    AfflatusRapturePvE.CanUse(out act))
-{
-    return true;
-}
+        if (!IsPresenceOfMindHealLockActive &&
+            BloodLily != 3 &&
+            HasSufficientMovement &&
+            PartyMembersAverHP < 0.8f &&
+            AfflatusRapturePvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (BloodLily != 3 &&
-            PartyMembersAverHP < RaptureHeal &&
+        if (!IsPresenceOfMindHealLockActive &&
+            CanUseRaptureByBloodLily(out float raptureThreshold) &&
+            PartyMembersAverHP < raptureThreshold &&
             AfflatusRapturePvE.CanUse(out act))
         {
             return true;
@@ -475,10 +631,10 @@ public sealed class WHM_Reborn : WhiteMageRotation
             partyCount++;
         }
 
-        if (MedicaIiPvE.EnoughLevel)
+        if (!IsPresenceOfMindHealLockActive && MedicaIiPvE.EnoughLevel)
         {
             if (MedicaIiiPvE.EnoughLevel &&
-                PartyMembersAverHP < MedicaIIIHeal &&
+                PartyMembersAverHP < MedicaHeal &&
                 MedicaIiiPvE.CanUse(out act) &&
                 hasMedica2 < partyCount / 2 &&
                 !IsLastAction(true, MedicaIiPvE))
@@ -487,7 +643,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
             }
 
             if (!MedicaIiiPvE.EnoughLevel &&
-                PartyMembersAverHP < MedicaIIHeal &&
+                PartyMembersAverHP < MedicaHeal &&
                 MedicaIiPvE.CanUse(out act) &&
                 hasMedica2 < partyCount / 2 &&
                 !IsLastAction(true, MedicaIiPvE))
@@ -496,14 +652,10 @@ public sealed class WHM_Reborn : WhiteMageRotation
             }
         }
 
-        if (HasMedicaIii && PartyMembersAverHP < CureIIIHeal &&
+        if (!IsPresenceOfMindHealLockActive &&
+            HasMedicaIii &&
+            PartyMembersAverHP < CureIIIHeal &&
             CureIiiPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (HasMedicaIii && PartyMembersAverHP < 0.3f &&
-            MedicaPvE.CanUse(out act))
         {
             return true;
         }
@@ -511,91 +663,67 @@ public sealed class WHM_Reborn : WhiteMageRotation
         return base.HealAreaGCD(out act);
     }
 
-    [RotationDesc(ActionID.AfflatusSolacePvE, ActionID.RegenPvE, ActionID.CureIiPvE, ActionID.CurePvE)]
-protected override bool HealSingleGCD(out IAction? act)
-{
-    act = null;
+    [RotationDesc(ActionID.AfflatusSolacePvE, ActionID.RegenPvE)]
+    protected override bool HealSingleGCD(out IAction? act)
+    {
+        UpdateActionTracking();
 
-    if (HasHealingLockout || HasPresenceOfMind)
-        return false;
+        act = null;
 
-    if (ShouldHoldRaiseSwift)
+        if (HasHealingLockout)
+            return false;
+
+        if (ShouldHoldRaiseSwift)
+            return base.HealSingleGCD(out act);
+
+        IBattleChara? solaceTarget = AfflatusSolacePvE.Target.Target;
+
+        if (!IsPresenceOfMindHealLockActive &&
+            !HasSingleHealLockoutStatus(solaceTarget) &&
+            solaceTarget != null &&
+            PartyMembersAverHP > 0.8f &&
+            HasSufficientMovement &&
+            BloodLily <= 1 &&
+            solaceTarget.GetHealthRatio() < 0.75f &&
+            AfflatusSolacePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!IsPresenceOfMindHealLockActive &&
+            CanUseSolaceByBloodLily(out float solaceThreshold) &&
+            !HasSingleHealLockoutStatus(solaceTarget) &&
+            PartyMembersAverHP > 0.8f &&
+            solaceTarget != null &&
+            solaceTarget.GetHealthRatio() < solaceThreshold &&
+            AfflatusSolacePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        IBattleChara? regenTarget = RegenPvE.Target.Target;
+
+        if (!IsPresenceOfMindHealLockActive &&
+            !HasSingleHealLockoutStatus(regenTarget) &&
+            regenTarget != null &&
+            IsTank(regenTarget) &&
+            !regenTarget.HasStatus(true, StatusID.Regen) &&
+            HasSufficientMovement &&
+            BloodLily == 3 &&
+            regenTarget.GetHealthRatio() < 0.8f &&
+            RegenPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.HealSingleGCD(out act);
-
-    IBattleChara? solaceTarget = AfflatusSolacePvE.Target.Target;
-
-    // Movement-based loose Solace (any target)
-    if (!HasSingleHealLockoutStatus(solaceTarget) &&
-        solaceTarget != null &&
-        PartyMembersAverHP > 0.8f &&
-        MovingTime > 1f &&
-        BloodLily != 3 &&
-        solaceTarget.GetHealthRatio() < 0.75f &&
-        AfflatusSolacePvE.CanUse(out act))
-    {
-        return true;
     }
-
-    // Normal Solace logic
-    if (!HasSingleHealLockoutStatus(solaceTarget) &&
-        PartyMembersAverHP > 0.8f &&
-        BloodLily != 3 &&
-        solaceTarget != null &&
-        solaceTarget.GetHealthRatio() < SolaceHeal &&
-        AfflatusSolacePvE.CanUse(out act))
-    {
-        return true;
-    }
-
-    IBattleChara? regenTarget = RegenPvE.Target.Target;
-
-    // Movement-based loose Regen (tank only)
-    if (!HasSingleHealLockoutStatus(regenTarget) &&
-        regenTarget != null &&
-        IsTank(regenTarget) &&
-        MovingTime > 1f &&
-        regenTarget.GetHealthRatio() < 0.8f &&
-        RegenPvE.CanUse(out act))
-    {
-        return true;
-    }
-
-    // Normal Regen logic
-    if (!HasSingleHealLockoutStatus(regenTarget) &&
-        PartyMembersAverHP > 0.8f &&
-        regenTarget != null &&
-        regenTarget.GetHealthRatio() < RegenHeal &&
-        RegenPvE.CanUse(out act))
-    {
-        return true;
-    }
-
-    IBattleChara? cure2Target = CureIiPvE.Target.Target;
-    if (!HasSingleHealLockoutStatus(cure2Target) &&
-        PartyMembersAverHP > 0.9f &&
-        cure2Target != null &&
-        cure2Target.GetHealthRatio() < 0.3f &&
-        CureIiPvE.CanUse(out act))
-    {
-        return true;
-    }
-
-    IBattleChara? cure1Target = CurePvE.Target.Target;
-    if (!HasSingleHealLockoutStatus(cure1Target) &&
-        PartyMembersAverHP > 0.9f &&
-        cure1Target != null &&
-        cure1Target.GetHealthRatio() < 0.3f &&
-        CurePvE.CanUse(out act))
-    {
-        return true;
-    }
-
-    return base.HealSingleGCD(out act);
-}
 
     [RotationDesc(ActionID.RaisePvE)]
     protected override bool RaiseGCD(out IAction? act)
     {
+        UpdateActionTracking();
+
         if (RaisePvE.CanUse(out act))
         {
             return true;
@@ -606,6 +734,8 @@ protected override bool HealSingleGCD(out IAction? act)
 
     protected override bool GeneralGCD(out IAction? act)
     {
+        UpdateActionTracking();
+
         act = null;
 
         if (HasThinAir && MergedStatus.HasFlag(AutoStatus.Raise))
@@ -617,7 +747,7 @@ protected override bool HealSingleGCD(out IAction? act)
             return base.GeneralGCD(out act);
 
         if (!HasHealingLockout &&
-            !HasPresenceOfMind &&
+            !IsPresenceOfMindHealLockActive &&
             IsBurst &&
             BloodLily < 3 &&
             PresenceOfMindPvE.Cooldown.WillHaveOneCharge(15) &&
@@ -626,27 +756,29 @@ protected override bool HealSingleGCD(out IAction? act)
             return true;
         }
 
-        if (HasPresenceOfMind && AfflatusMiseryPvE.CanUse(out act, skipAoeCheck: true))
+        if (HasPresenceOfMind &&
+            AllowPoMRestrictedMovementGCDs &&
+            AfflatusMiseryPvE.CanUse(out act, skipAoeCheck: true))
         {
             return true;
         }
 
-        if (GlareIvPvE.CanUse(out act))
+        if (AllowPoMRestrictedMovementGCDs &&
+            GlareIvPvE.CanUse(out act))
         {
             return true;
         }
 
         if (!HasHealingLockout &&
-            !HasPresenceOfMind &&
+            !IsPresenceOfMindHealLockActive &&
             BloodLily != 3 &&
             StatusHelper.PlayerHasStatus(true, StatusID.Confession) &&
-            StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.Confession))
+            StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.Confession) &&
+            CanUseRaptureByBloodLily(out float raptureThreshold) &&
+            PartyMembersAverHP < raptureThreshold &&
+            AfflatusRapturePvE.CanUse(out act))
         {
-            if (PartyMembersAverHP < RaptureHeal &&
-                AfflatusRapturePvE.CanUse(out act))
-            {
-                return true;
-            }
+            return true;
         }
 
         if (HolyPvE.EnoughLevel)
@@ -663,6 +795,14 @@ protected override bool HealSingleGCD(out IAction? act)
         }
 
         if (InCombat &&
+            InFirst20sAfterPresenceOfMind &&
+            CurrentTargetDiaMissingOrEnding(PresenceOfMindDiaRefreshSeconds) &&
+            CanUseCurrentDia(out act, skipStatusProvideCheck: true))
+        {
+            return true;
+        }
+
+        if (InCombat &&
             InLast5sOfPresenceOfMind &&
             CurrentTargetDiaMissingOrEnding(PresenceOfMindDiaRefreshSeconds) &&
             CanUseCurrentDia(out act, skipStatusProvideCheck: true))
@@ -671,7 +811,7 @@ protected override bool HealSingleGCD(out IAction? act)
         }
 
         if (InCombat &&
-            MovingTime >= MovingDiaRefreshTime &&
+            HasSufficientMovement &&
             CurrentTargetDiaMissingOrEnding(MovingDiaRefreshSeconds) &&
             CanUseCurrentDia(out act, skipStatusProvideCheck: true))
         {
