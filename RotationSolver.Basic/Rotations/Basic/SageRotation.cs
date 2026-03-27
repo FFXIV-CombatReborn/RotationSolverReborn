@@ -404,6 +404,7 @@ public partial class SageRotation
         {
             AoeCount = 1,
         };
+        setting.IsFriendly = false;
     }
 
     static partial void ModifyPsychePvE(ref ActionSetting setting)
