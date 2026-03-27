@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace RotationSolver.ExtraRotations.Healer;
 
-[Rotation("BeirutaSGE", CombatType.PvE, GameVersion = "7.45")]
+[Rotation("BeirutaSGE", CombatType.PvE, GameVersion = "7.45", Description = "Semi-Automatic Savage/Ultimate rotation, need to used with CD planner or manual inputs")]
 [SourceCode(Path = "main/ExtraRotations/Healer/BeirutaSGE.cs")]
 public sealed class BeirutaSGE : SageRotation
 {
@@ -13,7 +13,7 @@ public sealed class BeirutaSGE : SageRotation
     [RotationConfig(CombatType.PvE, Name =
         "Please note that this rotation is optimised for high-end encounters.\n" +
         "• Healing actions are designed to be used automatically, while mitigation is kept minimal to better support CD planner or manual input\n" +
-          "• Only the actions lsited in the description will be automatically used and everything else should be used manually or through CD planner\n" +
+        "• Only the actions listed in the description will be automatically used and everything else should be used manually or through CD planner\n" +
         "• If no raid buffs in the team, please set Intercept to GCD usage and use last stack of Phlegma manually where required\n" +
         "• Disabling AutoBurst is sufficient if you need to delay burst timing in this rotation\n" +
         "• Applying Zoe to yourself will be treated as a signal to use Pneuma or Eukrasian Prognosis depending on average party HP settings\n" +
@@ -604,6 +604,8 @@ public sealed class BeirutaSGE : SageRotation
         }
         else if (EukrasianDiagnosisPvE.EnoughLevel
             && EukrasianDiagnosisPvE.IsEnabled
+            && Addersting < 3
+            && MovingTime > MovementTimeThreshold
             && MergedStatus.HasFlag(AutoStatus.DefenseSingle)
             && EukrasianDiagnosisPvE.CanUse(out _))
         {

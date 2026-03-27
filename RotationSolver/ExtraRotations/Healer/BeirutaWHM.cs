@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Healer;
 
-[Rotation("BeirutaWHM", CombatType.PvE, GameVersion = "7.45")]
+[Rotation("BeirutaWHM", CombatType.PvE, GameVersion = "7.45", Description = "Semi-Automatic Savage/Ultimate rotation, need to used with CD planner or manual inputs")]
 [SourceCode(Path = "main/ExtraRotations/Healer/BeirutaWHM.cs")]
 public sealed class WHM_Reborn : WhiteMageRotation
 {
@@ -11,7 +11,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 
     [RotationConfig(CombatType.PvE, Name =
         "Please note that this rotation is optimised for high-end encounters.\n" +
-        "• Only the actions lsited in the description will be automatically used and everything else should be used manually or through CD planner\n" +
+        "• Only the actions listed in the description will be automatically used and everything else should be used manually or through CD planner\n" +
         "• Please set Intercept for GCD usage only\n" +
         "• Disabling AutoBurst is sufficient if you need to delay burst timing in this rotation\n" +
         "• Dia refresh slightly earlier during burst phases, during movement, and for 20s after Presence of Mind\n" +

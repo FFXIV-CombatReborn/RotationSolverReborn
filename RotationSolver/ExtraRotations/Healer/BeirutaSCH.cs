@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace RotationSolver.ExtraRotations.Healer;
 
-[Rotation("BeirutaSCH", CombatType.PvE, GameVersion = "7.45")]
+[Rotation("BeirutaSCH", CombatType.PvE, GameVersion = "7.45", Description = "Semi-Automatic Savage/Ultimate rotation, need to used with CD planner or manual inputs")]
 [SourceCode(Path = "main/ExtraRotations/Healer/BeirutaSCH.cs")]
 public sealed class BeirutaSCH : ScholarRotation
 {
