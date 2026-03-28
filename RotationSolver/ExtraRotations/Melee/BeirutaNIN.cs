@@ -140,7 +140,7 @@ public sealed class BeirutaNIN : NinjaRotation
         !HasTenChiJin &&
         !HasKassatsu &&
         (ShouldPrepBurstSuitonOrHuton ||
-         (BurstActionIsCoolingDown && BurstActionRecastRemain < 22f));
+         (BurstActionIsCoolingDown && BurstActionRecastRemain < 21f));
 
     private bool InBurstPhase =>
         InCombat &&

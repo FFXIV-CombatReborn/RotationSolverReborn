@@ -18,7 +18,7 @@ public sealed class BeirutaPCT : PictomancerRotation
         "Please note that this rotation is optimised for combats that start with a countdown Rainbow Drip cast.\n" +
         "• Recommended gcd is 2.48/2.49/2.50 depends on your ping\n" +
         "• 2.48gcd will have higher chance of fitting rainbowdrip inside starry muse\n" +
-        "• Ideally do not incert defence ability during first 5s of the fights or burst\n" +
+        "• Ideally do not intercept defence ability during first 5s of the fights or burst\n" +
         "• Enable Spell Intercept to manually use Rainbow Drip before the boss becomes untargetable.\n" +
         "• This rotation is designed to align Madeen within burst windows.\n" +
         "• Hyperphantasia is prioritised early in burst to allow earlier movement flexibility.\n" +

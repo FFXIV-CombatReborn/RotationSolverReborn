@@ -68,22 +68,8 @@ public class SMN_DefaultPvP : SummonerRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        if (AstralImpulsePvP.CanUse(out action))
-        {
-            return true;
-        }
-
-        if (FountainOfFirePvP.CanUse(out action))
-        {
-            return true;
-        }
-
-        if (CrimsonStrikePvP.CanUse(out action))
-        {
-            return true;
-        }
-
-        if (CrimsonCyclonePvP.CanUse(out action))
+        
+        if (SlipstreamPvP.CanUse(out action))
         {
             return true;
         }
@@ -93,10 +79,21 @@ public class SMN_DefaultPvP : SummonerRotation
             return true;
         }
 
-        if (SlipstreamPvP.CanUse(out action))
+        if (CrimsonStrikePvP.CanUse(out action))
         {
             return true;
         }
+
+        if (AstralImpulsePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (FountainOfFirePvP.CanUse(out action))
+        {
+            return true;
+        }
+        
 
         if (RuinIiiPvP.CanUse(out action))
         {
