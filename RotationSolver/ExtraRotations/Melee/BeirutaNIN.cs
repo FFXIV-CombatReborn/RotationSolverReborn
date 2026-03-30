@@ -17,6 +17,7 @@ public sealed class BeirutaNIN : NinjaRotation
     "• Please start fights from flank, or True North may disrupt weaving\n" +
     "• Use rotation Settings AutoBurst False AT LEAST 5 seconds BEFORE Kassatsu ready to delay burst\n" +
     "• Use rotation Settings AutoBurst True to resume burst or toggle via macro\n" +
+    "• You must stay close for Kunai's Bane before suiton buff expires\n" +
     "• Intercept Forked Raiju manually if desired\n" +
     "• Use ac Shukuchi gtoff macro for movement\n\n" +
     
@@ -30,15 +31,19 @@ public sealed class BeirutaNIN : NinjaRotation
     "• Uses explicit AoE target counting for actions around targets/self\n")]
     public bool RotationNotes { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Raiton/Katon for uptime while disengaged")]
+    [RotationConfig(CombatType.PvE, Name = "Use Raiton/Katon for uptime while disengaged (Moving one raiton/katon from 60s for uptime)")]
     public bool UseRaitonDisengageFallback { get; set; } = true;
 
     [Range(0, 20, ConfigUnitType.Yalms, 1)]
     [RotationConfig(CombatType.PvE, Name = "Minimum target distance for disengage fallback")]
     public float RaitonFallbackMinDistance { get; set; } = 3.0f;
 
+    [RotationConfig(CombatType.PvE, Name = "Attempt to weave Kunai's Bane/Trick attack second half of GCD (Disable if you miss weaving)")]
+    public bool RequireLateWeaveForBurstBuff { get; set; } = true;
+
     [RotationConfig(CombatType.PvE, Name = "Which Opener to Use")]
     [Range(0, 2, ConfigUnitType.None, 1)]
+
     public BurstTimingOption BurstTiming { get; set; } = BurstTimingOption.StandardFourthGcd;
 
     public enum BurstTimingOption : byte
@@ -124,6 +129,10 @@ public sealed class BeirutaNIN : NinjaRotation
     private static bool NoActiveNinjutsu => IsCurrentNinjutsu(ActionID.NinjutsuPvE);
     private static bool RabbitMediumCurrent => IsCurrentNinjutsu(ActionID.RabbitMediumPvE);
 
+    private bool KassatsuExpiringSoon =>
+    HasKassatsu &&
+    StatusHelper.PlayerWillStatusEndGCD(2, 0, true, StatusID.Kassatsu);
+
     private float BurstActionRecastRemain =>
         KunaisBanePvE.EnoughLevel
             ? KunaisBanePvE.Cooldown.RecastTimeRemain
@@ -140,7 +149,7 @@ public sealed class BeirutaNIN : NinjaRotation
         !HasTenChiJin &&
         !HasKassatsu &&
         (ShouldPrepBurstSuitonOrHuton ||
-         (BurstActionIsCoolingDown && BurstActionRecastRemain < 21f));
+         (BurstActionIsCoolingDown && BurstActionRecastRemain < 18f));
 
     private bool InBurstPhase =>
         InCombat &&
@@ -372,7 +381,9 @@ public sealed class BeirutaNIN : NinjaRotation
             !IsBurst ||
             CombatElapsedLess(BurstBuffOpenTiming) ||
             HasKassatsu ||
-            HasTenChiJin)
+            HasTenChiJin ||
+            (ShouldPrepBurstSuitonOrHuton ||
+         (BurstActionIsCoolingDown && BurstActionRecastRemain < 25f)))
         {
             return false;
         }
@@ -578,7 +589,11 @@ public sealed class BeirutaNIN : NinjaRotation
     {
         act = null;
 
-        if (CombatElapsedLess(BurstBuffOpenTiming) || !CanLateWeave) return false;
+        if (CombatElapsedLess(BurstBuffOpenTiming)) return false;
+
+        if (CombatElapsedLess(BurstBuffOpenTiming)) return false;
+
+        if (RequireLateWeaveForBurstBuff && !CanLateWeave) return false;
 
         if (!KunaisBanePvE.EnoughLevel)
         {
@@ -761,7 +776,7 @@ public sealed class BeirutaNIN : NinjaRotation
         _ninActionAim = null;
     }
 
-    private bool ChoiceNinjutsu(out IAction? act)
+   private bool ChoiceNinjutsu(out IAction? act)
 {
     act = null;
 
@@ -770,11 +785,46 @@ public sealed class BeirutaNIN : NinjaRotation
     bool gokaAoe = IsTargetAoe3Plus(GokaMekkyakuPvE);
     bool hutonAoe = IsTargetAoe3Plus(HutonPvE);
     bool canQueueDamageMudra =
-    _ninActionAim == null &&
-    ShouldSpendDamageMudraNow;
+        _ninActionAim == null &&
+        ShouldSpendDamageMudraNow;
 
     if (HasKassatsu)
     {
+        // Expiry protection: force the Kassatsu ninjutsu immediately.
+        if (KassatsuExpiringSoon)
+        {
+            if (gokaAoe &&
+                GokaMekkyakuPvE.EnoughLevel &&
+                !IsLastAction(false, GokaMekkyakuPvE) &&
+                GokaMekkyakuPvE.IsEnabled &&
+                ChiPvE.Info.IsQuestUnlocked())
+            {
+                SetNinjutsu(GokaMekkyakuPvE);
+            }
+            else if (!gokaAoe &&
+                     HyoshoRanryuPvE.EnoughLevel &&
+                     !IsLastAction(false, HyoshoRanryuPvE) &&
+                     HyoshoRanryuPvE.IsEnabled &&
+                     JinPvE.Info.IsQuestUnlocked())
+            {
+                SetNinjutsu(HyoshoRanryuPvE);
+            }
+            else if (katonAoe &&
+                     !HyoshoRanryuPvE.EnoughLevel &&
+                     ReadyChiAoe(KatonPvE))
+            {
+                SetNinjutsu(KatonPvE);
+            }
+            else if (!katonAoe &&
+                     !HyoshoRanryuPvE.EnoughLevel &&
+                     ReadyChiAoe(RaitonPvE))
+            {
+                SetNinjutsu(RaitonPvE);
+            }
+
+            return false;
+        }
+
         if (gokaAoe &&
             GokaMekkyakuPvE.EnoughLevel &&
             !IsLastAction(false, GokaMekkyakuPvE) &&
@@ -874,42 +924,44 @@ public sealed class BeirutaNIN : NinjaRotation
     }
 
     private bool DoHyoshoRanryu(out IAction? act)
+{
+    act = null;
+
+    if (!KassatsuExpiringSoon &&
+        (!TrickAttackPvE.Cooldown.IsCoolingDown ||
+         TrickAttackPvE.Cooldown.WillHaveOneCharge(StatusHelper.PlayerStatusTime(true, StatusID.Kassatsu))) &&
+        !IsExecutingMudra)
     {
-        act = null;
-
-        if ((!TrickAttackPvE.Cooldown.IsCoolingDown ||
-             TrickAttackPvE.Cooldown.WillHaveOneCharge(StatusHelper.PlayerStatusTime(true, StatusID.Kassatsu))) &&
-            !IsExecutingMudra)
-        {
-            return false;
-        }
-
-        if (!Q(HyoshoRanryuPvE)) return false;
-        if (RabbitMediumCurrent) { ClearNinjutsu(); return false; }
-        if (C(ActionID.HyoshoRanryuPvE)) return HyoshoRanryuPvE.CanUse(out act, skipAoeCheck: true);
-        if (C(ActionID.FumaShurikenPvE)) return JinPvE_18807.CanUse(out act, usedUp: true);
-        if (NoActiveNinjutsu) return ChiPvE_18806.CanUse(out act, usedUp: true);
         return false;
     }
+
+    if (!Q(HyoshoRanryuPvE)) return false;
+    if (RabbitMediumCurrent) { ClearNinjutsu(); return false; }
+    if (C(ActionID.HyoshoRanryuPvE)) return HyoshoRanryuPvE.CanUse(out act, skipAoeCheck: true);
+    if (C(ActionID.FumaShurikenPvE)) return JinPvE_18807.CanUse(out act, usedUp: true);
+    if (NoActiveNinjutsu) return ChiPvE_18806.CanUse(out act, usedUp: true);
+    return false;
+}
 
     private bool DoGokaMekkyaku(out IAction? act)
+{
+    act = null;
+
+    if (!KassatsuExpiringSoon &&
+        (!TrickAttackPvE.Cooldown.IsCoolingDown ||
+         TrickAttackPvE.Cooldown.WillHaveOneCharge(StatusHelper.PlayerStatusTime(true, StatusID.Kassatsu))) &&
+        !IsExecutingMudra)
     {
-        act = null;
-
-        if ((!TrickAttackPvE.Cooldown.IsCoolingDown ||
-             TrickAttackPvE.Cooldown.WillHaveOneCharge(StatusHelper.PlayerStatusTime(true, StatusID.Kassatsu))) &&
-            !IsExecutingMudra)
-        {
-            return false;
-        }
-
-        if (!Q(GokaMekkyakuPvE)) return false;
-        if (RabbitMediumCurrent) { ClearNinjutsu(); return false; }
-        if (C(ActionID.GokaMekkyakuPvE)) return GokaMekkyakuPvE.CanUse(out act, skipAoeCheck: true);
-        if (C(ActionID.FumaShurikenPvE)) return TenPvE_18805.CanUse(out act, usedUp: true);
-        if (NoActiveNinjutsu) return ChiPvE_18806.CanUse(out act, usedUp: true);
         return false;
     }
+
+    if (!Q(GokaMekkyakuPvE)) return false;
+    if (RabbitMediumCurrent) { ClearNinjutsu(); return false; }
+    if (C(ActionID.GokaMekkyakuPvE)) return GokaMekkyakuPvE.CanUse(out act, skipAoeCheck: true);
+    if (C(ActionID.FumaShurikenPvE)) return TenPvE_18805.CanUse(out act, usedUp: true);
+    if (NoActiveNinjutsu) return ChiPvE_18806.CanUse(out act, usedUp: true);
+    return false;
+}
 
     private bool DoSuiton(out IAction? act) => ExecuteStandardQueuedNinjutsu(SuitonDef, out act);
     private bool DoDoton(out IAction? act) => ExecuteStandardQueuedNinjutsu(DotonDef, out act);
