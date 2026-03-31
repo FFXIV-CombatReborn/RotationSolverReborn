@@ -352,24 +352,40 @@ public sealed class BeirutaRDM : RedMageRotation
         ActionID.EnchantedReprisePvE);
 
     private bool CanContinueTrackedMeleeCombo(out IAction? act)
+{
+    act = null;
+
+    // Give up immediately if combo is effectively over or in finisher chain
+    if (InFinisherChain() ||
+        (ManaStacks == 0 && !ScorchPvE.CanUse(out _) && !ResolutionPvE.CanUse(out _)))
     {
-        act = null;
-
-        return _activeMeleeTrack switch
-        {
-            MeleeComboTrack.AoE =>
-                (IsLastGCD(false, EnchantedMoulinetDeuxPvE) && EnchantedMoulinetTroisPvE.CanUse(out act)) ||
-                (IsLastGCD(false, EnchantedMoulinetPvE) && EnchantedMoulinetDeuxPvE.CanUse(out act)),
-
-            MeleeComboTrack.SingleTarget =>
-                ((IsLastGCD(true, EnchantedZwerchhauPvE_45961) || IsLastGCD(true, EnchantedZwerchhauPvE)) &&
-                    (EnchantedRedoublementPvE_45962.CanUse(out act) || EnchantedRedoublementPvE.CanUse(out act))) ||
-                ((IsLastGCD(true, EnchantedRipostePvE_45960) || IsLastGCD(true, EnchantedRipostePvE)) &&
-                    (EnchantedZwerchhauPvE_45961.CanUse(out act) || EnchantedZwerchhauPvE.CanUse(out act))),
-
-            _ => false,
-        };
+        _activeMeleeTrack = MeleeComboTrack.None;
+        return false;
     }
+
+    return _activeMeleeTrack switch
+    {
+        MeleeComboTrack.AoE =>
+            // Step 3
+            ((IsLastGCD(false, EnchantedMoulinetDeuxPvE) || ManaStacks == 2) &&
+                EnchantedMoulinetTroisPvE.CanUse(out act)) ||
+
+            // Step 2
+            ((IsLastGCD(false, EnchantedMoulinetPvE) || ManaStacks == 1) &&
+                EnchantedMoulinetDeuxPvE.CanUse(out act)),
+
+        MeleeComboTrack.SingleTarget =>
+            // Step 3
+            (((IsLastGCD(true, EnchantedZwerchhauPvE_45961) || IsLastGCD(true, EnchantedZwerchhauPvE)) || ManaStacks == 2) &&
+                (EnchantedRedoublementPvE_45962.CanUse(out act) || EnchantedRedoublementPvE.CanUse(out act))) ||
+
+            // Step 2
+            (((IsLastGCD(true, EnchantedRipostePvE_45960) || IsLastGCD(true, EnchantedRipostePvE)) || ManaStacks == 1) &&
+                (EnchantedZwerchhauPvE_45961.CanUse(out act) || EnchantedZwerchhauPvE.CanUse(out act))),
+
+        _ => false,
+    };
+}
 
     private void RegisterMeleeStarter(MeleeComboTrack track, float embRem)
     {
@@ -715,6 +731,15 @@ public sealed class BeirutaRDM : RedMageRotation
         UpdateTripleComboReached(embRem);
 
         bool gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
+
+         if (IsOpen && IsBurst)
+        {
+            if (SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+                return true;
+
+            if (CombatTime > 1f && UseBurstMedicine(out act))
+                return true;
+        }
 
         if (CanUseManaficationNow(gateMelee) && ManaficationPvE.CanUse(out act))
             return true;

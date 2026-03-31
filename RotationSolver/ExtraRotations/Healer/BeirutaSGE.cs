@@ -82,7 +82,7 @@ public sealed class BeirutaSGE : SageRotation
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Average party HP threshold to use Pneuma in Single Target")]
-    public float PneumaHeal { get; set; } = 0.50f;
+    public float PneumaHeal { get; set; } = 0.40f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Average party HP threshold to use Pneuma in Multi Targets")]
@@ -98,7 +98,7 @@ public sealed class BeirutaSGE : SageRotation
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Average party HP threshold to use Zoe on Pneuma (if lower) or Eukrasian Prognosis (if higher)")]
-    public float ZoePneumaHeal { get; set; } = 0.50f;
+    public float ZoePneumaHeal { get; set; } = 0.40f;
 
     public enum OpenerStrategy : byte
     {
@@ -113,7 +113,7 @@ public sealed class BeirutaSGE : SageRotation
 
     #region Constants / Fields
 
-    private const long PsycheDotRefreshMs = 20_000;
+    private const long PsycheDotRefreshMs = 15_000;
     private const float EarlyDotRefreshSeconds = 12f;
     private const float SwiftcastPostActionLockSeconds = 2f;
     private const float MovementLeadSeconds = 0.5f;
@@ -377,7 +377,7 @@ public sealed class BeirutaSGE : SageRotation
             return true;
         }
 
-        if (IsBurst && CombatTime > 6f && PsychePvE.CanUse(out act))
+        if (IsBurst && CombatTime > 9f && PsychePvE.CanUse(out act))
         {
             StampPsycheUse();
             return true;
@@ -398,8 +398,7 @@ public sealed class BeirutaSGE : SageRotation
             return true;
         }
 
-        if (Addersgall <= 1
-            && HaimaPvE.CanUse(out act))
+        if (HaimaPvE.CanUse(out act))
         {
             return true;
         }
@@ -432,17 +431,17 @@ public sealed class BeirutaSGE : SageRotation
             return true;
         }
 
-        if (Addersgall >= 2 && PartyMembersAverHP < IxocholeHeal && IxocholePvE.CanUse(out act))
+        if (Addersgall > 1 && PartyMembersAverHP < IxocholeHeal && IxocholePvE.CanUse(out act))
         {
             return true;
         }
 
-        if (PartyMembersAverHP < PhysisHeal && PhysisIiPvE.CanUse(out act))
+        if (Addersgall <= 1 && PartyMembersAverHP < PhysisHeal && PhysisIiPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (PartyMembersAverHP < PhysisHeal && !PhysisIiPvE.EnoughLevel && PhysisPvE.CanUse(out act))
+        if (Addersgall <= 1 &&PartyMembersAverHP < PhysisHeal && !PhysisIiPvE.EnoughLevel && PhysisPvE.CanUse(out act))
         {
             return true;
         }
@@ -459,6 +458,15 @@ public sealed class BeirutaSGE : SageRotation
 
         if (HasHealingLockout)
             return false;
+
+        IBattleChara? druocholeTarget = DruocholePvE.Target.Target;
+        if (Addersgall > 2 &&
+            druocholeTarget != null &&
+            druocholeTarget.GetHealthRatio() < 0.9f &&
+            DruocholePvE.CanUse(out act))
+        {
+            return true;
+        }
 
         if (KrasisPvE.CanUse(out act))
         {
@@ -481,10 +489,11 @@ public sealed class BeirutaSGE : SageRotation
             return base.HealSingleAbility(nextGCD, out act);
         }
 
-        IBattleChara? druocholeTarget = DruocholePvE.Target.Target;
+        
+
         if (!HasSingleHealLockoutStatus(druocholeTarget) &&
             PartyMembersAverHP > 0.8f &&
-            Addersgall >= 2 &&
+            Addersgall < 3 &&
             druocholeTarget != null &&
             druocholeTarget.GetHealthRatio() < HealSingleDruocholeHeal &&
             (!TaurocholePvE.EnoughLevel || TaurocholePvE.Cooldown.IsCoolingDown) &&
@@ -587,6 +596,9 @@ public sealed class BeirutaSGE : SageRotation
 
         if (EukrasianPrognosisIiPvE.EnoughLevel
             && EukrasianPrognosisIiPvE.IsEnabled
+            && Addersting < 3
+            && !HasBuffs
+            && MovingTime > MovementTimeThreshold
             && MergedStatus.HasFlag(AutoStatus.DefenseArea)
             && EukrasianPrognosisIiPvE.CanUse(out _))
         {
@@ -596,6 +608,9 @@ public sealed class BeirutaSGE : SageRotation
         else if (!EukrasianPrognosisIiPvE.EnoughLevel
             && EukrasianPrognosisPvE.EnoughLevel
             && EukrasianPrognosisPvE.IsEnabled
+            && Addersting < 3
+            && !HasBuffs
+            && MovingTime > MovementTimeThreshold
             && MergedStatus.HasFlag(AutoStatus.DefenseArea)
             && EukrasianPrognosisPvE.CanUse(out _))
         {
@@ -605,6 +620,7 @@ public sealed class BeirutaSGE : SageRotation
         else if (EukrasianDiagnosisPvE.EnoughLevel
             && EukrasianDiagnosisPvE.IsEnabled
             && Addersting < 3
+            && !HasBuffs
             && MovingTime > MovementTimeThreshold
             && MergedStatus.HasFlag(AutoStatus.DefenseSingle)
             && EukrasianDiagnosisPvE.CanUse(out _))
@@ -753,7 +769,7 @@ public sealed class BeirutaSGE : SageRotation
             return EukrasiaPvE.CanUse(out act);
         }
 
-        return EukrasianDosisIiiPvE.CanUse(out act, skipStatusProvideCheck: true);
+        return EukrasianDosisIiiPvE.CanUse(out act);
     }
 
     private bool DoEukrasianDosisIi(out IAction? act)
@@ -770,7 +786,7 @@ public sealed class BeirutaSGE : SageRotation
             return EukrasiaPvE.CanUse(out act);
         }
 
-        return EukrasianDosisIiPvE.CanUse(out act, skipStatusProvideCheck: true);
+        return EukrasianDosisIiPvE.CanUse(out act);
     }
 
     private bool DoEukrasianDosis(out IAction? act)
@@ -787,7 +803,7 @@ public sealed class BeirutaSGE : SageRotation
             return EukrasiaPvE.CanUse(out act);
         }
 
-        return EukrasianDosisPvE.CanUse(out act, skipStatusProvideCheck: true);
+        return EukrasianDosisPvE.CanUse(out act);
     }
 
     #endregion
@@ -873,7 +889,7 @@ public sealed class BeirutaSGE : SageRotation
 
         act = null;
 
-        if (HasHealingLockout)
+        if (HasHealingLockout || HasBuffs)
             return false;
 
         if (ShouldDeferToRaise())
@@ -1008,10 +1024,10 @@ public sealed class BeirutaSGE : SageRotation
             return true;
         }
 
-        if (CombatTime > 6f
+        if (CombatTime > 9f
             && IsBurst
             && PhlegmaPvE.CanUse(out act, usedUp: HasBuffs
-                || PhlegmaPvE.Cooldown.WillHaveXChargesGCD(2, 2)
+                || PhlegmaPvE.Cooldown.WillHaveXChargesGCD(2, 1)
                 || (HasSufficientMovement && PhlegmaPvE.Cooldown.WillHaveXChargesGCD(2, 4))))
         {
             return true;
