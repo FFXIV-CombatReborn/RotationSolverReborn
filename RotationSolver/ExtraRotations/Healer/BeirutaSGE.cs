@@ -459,6 +459,15 @@ public sealed class BeirutaSGE : SageRotation
         if (HasHealingLockout)
             return false;
 
+        IBattleChara? druocholeTarget = DruocholePvE.Target.Target;
+        if (Addersgall > 2 &&
+            druocholeTarget != null &&
+            druocholeTarget.GetHealthRatio() < 0.9f &&
+            DruocholePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         if (KrasisPvE.CanUse(out act))
         {
             return true;
@@ -480,16 +489,7 @@ public sealed class BeirutaSGE : SageRotation
             return base.HealSingleAbility(nextGCD, out act);
         }
 
-        IBattleChara? druocholeTarget = DruocholePvE.Target.Target;
-        if (!HasSingleHealLockoutStatus(druocholeTarget) &&
-            Addersgall > 2 &&
-            druocholeTarget != null &&
-            druocholeTarget.GetHealthRatio() < 0.8f &&
-            (!TaurocholePvE.EnoughLevel || TaurocholePvE.Cooldown.IsCoolingDown) &&
-            DruocholePvE.CanUse(out act))
-        {
-            return true;
-        }
+        
 
         if (!HasSingleHealLockoutStatus(druocholeTarget) &&
             PartyMembersAverHP > 0.8f &&
