@@ -414,7 +414,8 @@ public partial class WhiteMageRotation
     {
         setting.TargetStatusNeed = StatusHelper.PurifyPvPStatuses;
         setting.IsFriendly = true;
-    }
+        setting.TargetType = TargetType.Dispel;
+	}
 
     static partial void ModifyMiracleOfNaturePvP(ref ActionSetting setting)
     {

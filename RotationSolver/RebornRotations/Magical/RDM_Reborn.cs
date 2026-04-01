@@ -185,7 +185,7 @@ public sealed class RDM_Reborn : RedMageRotation
 
                 if (EnhancedAccelerationTrait.EnoughLevel && !EnhancedAccelerationIiTrait.EnoughLevel)
                 {
-                    if (AccelerationPvE.CanUse(out act, usedUp: HasEmbolden || !EmboldenPvE.EnoughLevel || AccelerationPvE.Cooldown.WillHaveXChargesGCD(2, 1)))
+                    if (AccelerationPvE.CanUse(out act, usedUp: HasEmbolden || !EmboldenPvE.EnoughLevel || AccelerationPvE.Cooldown.WillHaveXChargesGCD(2, 1) || AccelerationPvE.Cooldown.CurrentCharges == 2))
                     {
                         return true;
                     }
@@ -193,8 +193,8 @@ public sealed class RDM_Reborn : RedMageRotation
 
                 if (EnhancedAccelerationIiTrait.EnoughLevel)
                 {
-                    if (AccelerationPvE.CanUse(out act, usedUp: HasEmbolden || !EmboldenPvE.EnoughLevel || AccelerationPvE.Cooldown.WillHaveXChargesGCD(2, 1)))
-                    {
+					if (AccelerationPvE.CanUse(out act, usedUp: HasEmbolden || !EmboldenPvE.EnoughLevel || AccelerationPvE.Cooldown.WillHaveXChargesGCD(2, 1) || AccelerationPvE.Cooldown.CurrentCharges == 2))
+					{
                         return true;
                     }
                 }
@@ -345,25 +345,19 @@ public sealed class RDM_Reborn : RedMageRotation
             }
         }
 
-        // Hardcode Resolution & Scorch to avoid double melee without finishers
-        if (IsLastGCD(ActionID.ScorchPvE))
-        {
-            if (ResolutionPvE.CanUse(out act, skipStatusProvideCheck: true))
-            {
-                return true;
-            }
-        }
+		// Hardcode Resolution & Scorch to avoid double melee without finishers
+		if (ResolutionPvE.CanUse(out act, skipStatusProvideCheck: true))
+		{
+			return true;
+		}
 
-        if (IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE))
-        {
-            if (ScorchPvE.CanUse(out act, skipStatusProvideCheck: true))
-            {
-                return true;
-            }
-        }
+		if (ScorchPvE.CanUse(out act, skipStatusProvideCheck: true))
+		{
+			return true;
+		}
 
-        //Melee AOE combo
-        if (IsLastGCD(false, EnchantedMoulinetDeuxPvE) && EnchantedMoulinetTroisPvE.CanUse(out act))
+		//Melee AOE combo
+		if (IsLastGCD(false, EnchantedMoulinetDeuxPvE) && EnchantedMoulinetTroisPvE.CanUse(out act))
         {
             return true;
         }

@@ -460,7 +460,8 @@ public partial class BardRotation
     {
         setting.TargetStatusNeed = StatusHelper.PurifyPvPStatuses;
         setting.IsFriendly = true;
-    }
+		setting.TargetType = TargetType.Dispel;
+	}
 
     #endregion
 }
