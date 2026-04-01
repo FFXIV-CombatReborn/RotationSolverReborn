@@ -115,7 +115,12 @@ public sealed class PLD_Reborn : PaladinRotation
 
         if ((HasHostilesInRange && MeleeFoF) || !MeleeFoF)
         {
-            if (!RiotBladePvE.EnoughLevel && nextGCD.IsTheSameTo(true, FastBladePvE) && FightOrFlightPvE.CanUse(out act))
+			if (!FastBladePvE.IsEnabled && FightOrFlightPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (!RiotBladePvE.EnoughLevel && nextGCD.IsTheSameTo(true, FastBladePvE) && FightOrFlightPvE.CanUse(out act))
             {
                 return true;
             }
