@@ -464,7 +464,8 @@ public partial class RedMageRotation
     static partial void ModifyVerflarePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => ManaStacks == 3;
-        setting.CreateConfig = () => new ActionConfig()
+		setting.ComboIds = [ActionID.RedoublementPvE, ActionID.EnchantedRedoublementPvE, ActionID.EnchantedRedoublementPvE_45962, ActionID.EnchantedMoulinetDeuxPvE];
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -474,7 +475,8 @@ public partial class RedMageRotation
     {
         setting.UnlockedByQuestID = 68123;
         setting.ActionCheck = () => ManaStacks == 3;
-        setting.CreateConfig = () => new ActionConfig()
+        setting.ComboIds = [ActionID.RedoublementPvE, ActionID.EnchantedRedoublementPvE, ActionID.EnchantedRedoublementPvE_45962, ActionID.EnchantedMoulinetDeuxPvE];
+		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -574,11 +576,13 @@ public partial class RedMageRotation
 	static partial void ModifyEnchantedZwerchhauPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
-    }
+		setting.ComboIds = [ActionID.EnchantedRipostePvE];
+	}
 
 	static partial void ModifyEnchantedZwerchhauPvE_45961(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => HasManafication && (HasEnoughManaFor23Combo || CanMagickedSwordplay);
+		setting.ComboIds = [ActionID.EnchantedRipostePvE_45960];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -588,11 +592,13 @@ public partial class RedMageRotation
 	static partial void ModifyEnchantedRedoublementPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
-    }
+		setting.ComboIds = [ActionID.EnchantedZwerchhauPvE];
+	}
 
 	static partial void ModifyEnchantedRedoublementPvE_45962(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => HasManafication && (HasEnoughManaFor23Combo || CanMagickedSwordplay);
+		setting.ComboIds = [ActionID.EnchantedZwerchhauPvE_45961];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -607,14 +613,16 @@ public partial class RedMageRotation
     static partial void ModifyEnchantedMoulinetDeuxPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
-    }
+		setting.ComboIds = [ActionID.EnchantedMoulinetPvE];
+	}
 
     static partial void ModifyEnchantedMoulinetTroisPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
-    }
+		setting.ComboIds = [ActionID.EnchantedMoulinetDeuxPvE];
+	}
 
-    static partial void ModifyEnchantedReprisePvE(ref ActionSetting setting)
+	static partial void ModifyEnchantedReprisePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HasEnoughManaFor4Combo || CanMagickedSwordplay;
     }
