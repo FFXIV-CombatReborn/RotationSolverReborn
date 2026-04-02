@@ -23,7 +23,11 @@ public sealed class SAM_Reborn : SamuraiRotation
     [RotationConfig(CombatType.PvE, Name = "Health threshold needed to use Tengentsu/ThirdEye outside of AOE mit scenarios.")]
     public float TengentsuHealth { get; set; } = 0.5f;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Hagakure or Midare/Tendo Setsugekka when going from single target to AOE scenarios")]
+	[Range(0, 1, ConfigUnitType.Seconds)]
+	[RotationConfig(CombatType.PvE, Name = "Meikyo Shisui countdown timing.")]
+	public float MeikyoShisuiCountdown { get; set; } = 14f;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Hagakure or Midare/Tendo Setsugekka when going from single target to AOE scenarios")]
     public STtoAOEStrategy STtoAOE { get; set; } = STtoAOEStrategy.Hagakure;
     #endregion
 
@@ -31,7 +35,7 @@ public sealed class SAM_Reborn : SamuraiRotation
 
     protected override IAction? CountDownAction(float remainTime)
     {
-        if (remainTime <= 14 && MeikyoShisuiPvE.CanUse(out IAction? act))
+        if (remainTime <= MeikyoShisuiCountdown && MeikyoShisuiPvE.CanUse(out IAction? act))
         {
             return act;
         }

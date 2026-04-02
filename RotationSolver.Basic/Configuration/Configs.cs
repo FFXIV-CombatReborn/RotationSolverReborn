@@ -379,7 +379,7 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Simulate the effect of pressing abilities",
         Filter = UiInformation)]
-    private static readonly bool _keyBoardNoise = true;
+    private static readonly bool _keyboardNoise = true;
 
     [ConditionBool, UI("Activate auto mode when countdown starts",
         Filter = BasicAutoSwitch, Section = 1)]
@@ -1100,8 +1100,8 @@ internal partial class Configs : IPluginConfiguration
     public ConsoleModifiers PoslockModifier { get; set; }
 
     [Range(0, 5, ConfigUnitType.None, 1)]
-    [UI("Random range of simulated presses per action", Parent = nameof(KeyBoardNoise))]
-    public Vector2Int KeyboardNoise { get; set; } = new(2, 3);
+    [UI("Random range of simulated presses per action", Parent = nameof(KeyboardNoise))]
+    public Vector2Int KeyboardNoisePresses { get; set; } = new(2, 3);
 
     [Range(0, 10, ConfigUnitType.None)]
     public int TargetingIndex { get; set; }
