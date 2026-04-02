@@ -145,11 +145,11 @@ namespace RotationSolver.Commands
 
 			if (nextAction is BaseAction baseAct2)
 			{
-				if (baseAct2.Target.Target != null && baseAct2.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
+				if (baseAct2.Target.Target != null && baseAct2.Target.Target is IBattleChara target && target != Player.Object && (Service.Config.SwitchTargetFriendly2 || target.IsEnemy()))
 				{
 					DataCenter.HostileTarget = target;
 					if (!DataCenter.IsManual &&
-						(Service.Config.SwitchTargetFriendly
+						(Service.Config.SwitchTargetFriendly2
 						|| (Svc.Targets.Target?.IsEnemy() ?? true)
 						|| (Svc.Targets.Target?.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
 					{
@@ -319,11 +319,11 @@ namespace RotationSolver.Commands
 			IAction? nextAction = ActionUpdater.NextAction;
 			if (nextAction is BaseAction baseAct)
 			{
-				if (baseAct.Target.Target != null && baseAct.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
+				if (baseAct.Target.Target != null && baseAct.Target.Target is IBattleChara target && target != Player.Object && (Service.Config.SwitchTargetFriendly2 || target.IsEnemy()))
 				{
 					DataCenter.HostileTarget = target;
 					if (!DataCenter.IsManual &&
-						(Service.Config.SwitchTargetFriendly || ((Svc.Targets.Target?.IsEnemy() ?? true)
+						(Service.Config.SwitchTargetFriendly2 || ((Svc.Targets.Target?.IsEnemy() ?? true)
 						|| Svc.Targets.Target?.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
 					{
 						Svc.Targets.Target = target;

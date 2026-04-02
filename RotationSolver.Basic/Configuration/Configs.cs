@@ -1003,9 +1003,9 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig, Section = 2)]
     private static readonly bool _moveAreaActionFarthest = false;
 
-    [ConditionBool, UI("Hard Target enemies for hostile actions", Description = "If this is disabled, RSR will only soft-target allies for heals, shields, etc.",
-        Filter = TargetConfig, Section = 3)]
-    private static readonly bool _switchTargetFriendly = false;
+	[ConditionBool, UI("Hard Target for all actions", Description = "If this is disabled, RSR will only use the game's built-in soft-targeting for allies for heals, shields, etc.",
+		Filter = TargetConfig, Section = 3)]
+    private static readonly bool _switchTargetFriendly2 = false;
 
     [ConditionBool, UI("Set target to closest targetable enemy if no valid action target nearby and target not set (This works in Manual mode as well)",
         Filter = TargetConfig, Section = 3)]
