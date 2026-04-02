@@ -36,9 +36,6 @@ public sealed class MNK_Reborn : MonkRotation
     [RotationConfig(CombatType.PvE, Name = "Use Howling Fist/Enlightenment as a ranged attack verses single target enemies")]
     public bool HowlingSingle2 { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
-    public bool EnableTEAChecker { get; set; } = false;
-
     [RotationConfig(CombatType.PvE, Name = "Use Masterful Blitz abilites as soon as they are available.")]
     public MasterfulBlitzUse MBAbilities { get; set; } = MasterfulBlitzUse.RiddleOfFireUse;
 
@@ -88,11 +85,6 @@ public sealed class MNK_Reborn : MonkRotation
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (EnableTEAChecker && Target.Name.ToString() == "Jagd Doll" && Target.GetHealthRatio() < 0.25)
-        {
-            return base.EmergencyAbility(nextGCD, out act);
-        }
-
         // PerfectBalancePvE after first gcd + TheForbiddenChakraPvE after second gcd
         // fail to weave both after first gcd - rsr doesn't have enough time to react to both spells
         // you pot -2s (real world -3s) prepull or after 2nd gcd!!! 
@@ -227,11 +219,6 @@ public sealed class MNK_Reborn : MonkRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        if (EnableTEAChecker && Target.Name.ToString() == "Jagd Doll" && Target.GetHealthRatio() < 0.25)
-        {
-            return base.AttackAbility(nextGCD, out act);
-        }
-
         if (RiddleOfFirePvE.CanUse(out _))
         {
             switch (ROFFirst)
@@ -421,11 +408,6 @@ public sealed class MNK_Reborn : MonkRotation
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        if (EnableTEAChecker && Target.Name.ToString() == "Jagd Doll" && Target.GetHealthRatio() < 0.25)
-        {
-            return base.GeneralGCD(out act);
-        }
-
         if (!BeastChakrasContains(BeastChakra.None))
         {
             switch (MBAbilities)

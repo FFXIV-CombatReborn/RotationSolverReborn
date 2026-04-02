@@ -19,9 +19,6 @@ public sealed class SAM_Reborn : SamuraiRotation
     [RotationConfig(CombatType.PvE, Name = "Prevent Higanbana use if theres more than one target")]
     public bool HiganbanaTargets { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
-    public bool EnableTEAChecker { get; set; } = false;
-
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Health threshold needed to use Tengentsu/ThirdEye outside of AOE mit scenarios.")]
     public float TengentsuHealth { get; set; } = 0.5f;
@@ -115,11 +112,6 @@ public sealed class SAM_Reborn : SamuraiRotation
         bool MeleeMeditationcheck = nextGCD.IsTheSameTo(true, ActionID.OgiNamikiriPvE, ActionID.HiganbanaPvE, ActionID.TenkaGokenPvE, ActionID.MidareSetsugekkaPvE, ActionID.TendoGokenPvE, ActionID.TendoSetsugekkaPvE, ActionID.TendoGokenPvE);
         bool isTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
         bool isTargetDying = CurrentTarget?.IsDying() ?? false;
-
-        if (EnableTEAChecker && Target.Name.ToString() == "Jagd Doll" && Target.GetHealthRatio() < 0.25)
-        {
-            return base.AttackAbility(nextGCD, out act);
-        }
 
         if (MeikyoShisuiPvE.CanUse(out act, usedUp: !EnhancedMeikyoShisuiTrait.EnoughLevel || (EnhancedMeikyoShisuiTrait.EnoughLevel && MeikyoShisuiPvE.Cooldown.WillHaveXChargesGCD(2, 1)) || TsubamegaeshiActionReady)
             && HasHostilesInRange && (!HasFugetsuAndFuka || (isTargetBoss && isTargetDying) || (CurrentTarget?.HasStatus(true, StatusID.Higanbana) ?? false) && !(CurrentTarget?.WillStatusEndGCD(HiganbanaPvE.Config.StatusGcdCount, 0, true, StatusID.Higanbana) ?? false)))
