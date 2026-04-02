@@ -183,7 +183,7 @@ namespace RotationSolver.Commands
 
 				if (nextAction is BaseAction finalAct)
 				{
-					if (Service.Config.KeyBoardNoise)
+					if (Service.Config.KeyboardNoise)
 					{
 						PulseSimulation(nextAction.AdjustedID);
 						if (Service.Config.EnableClickingCount)
@@ -214,7 +214,7 @@ namespace RotationSolver.Commands
 			started = true;
 			try
 			{
-				int pulseCount = random.Next(Service.Config.KeyboardNoise.X, Service.Config.KeyboardNoise.Y);
+				int pulseCount = random.Next(Service.Config.KeyboardNoisePresses.X, Service.Config.KeyboardNoisePresses.Y);
 				PulseAction(id, pulseCount);
 			}
 			catch (Exception ex)
