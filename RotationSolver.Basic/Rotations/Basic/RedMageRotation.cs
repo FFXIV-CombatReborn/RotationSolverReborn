@@ -464,7 +464,7 @@ public partial class RedMageRotation
     static partial void ModifyVerflarePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => ManaStacks == 3;
-		setting.ComboIds = [ActionID.RedoublementPvE, ActionID.EnchantedRedoublementPvE, ActionID.EnchantedRedoublementPvE_45962, ActionID.EnchantedMoulinetDeuxPvE];
+		setting.ComboIds = [ActionID.RedoublementPvE, ActionID.EnchantedRedoublementPvE, ActionID.EnchantedRedoublementPvE_45962, ActionID.EnchantedMoulinetTroisPvE];
 		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -475,7 +475,7 @@ public partial class RedMageRotation
     {
         setting.UnlockedByQuestID = 68123;
         setting.ActionCheck = () => ManaStacks == 3;
-        setting.ComboIds = [ActionID.RedoublementPvE, ActionID.EnchantedRedoublementPvE, ActionID.EnchantedRedoublementPvE_45962, ActionID.EnchantedMoulinetDeuxPvE];
+        setting.ComboIds = [ActionID.RedoublementPvE, ActionID.EnchantedRedoublementPvE, ActionID.EnchantedRedoublementPvE_45962, ActionID.EnchantedMoulinetTroisPvE];
 		setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -614,12 +614,20 @@ public partial class RedMageRotation
     {
         setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
 		setting.ComboIds = [ActionID.EnchantedMoulinetPvE];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
     static partial void ModifyEnchantedMoulinetTroisPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
 		setting.ComboIds = [ActionID.EnchantedMoulinetDeuxPvE];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyEnchantedReprisePvE(ref ActionSetting setting)
