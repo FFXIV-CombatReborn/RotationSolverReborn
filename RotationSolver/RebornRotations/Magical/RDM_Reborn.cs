@@ -357,12 +357,12 @@ public sealed class RDM_Reborn : RedMageRotation
 		}
 
 		//Melee AOE combo
-		if (IsLastGCD(false, EnchantedMoulinetDeuxPvE) && EnchantedMoulinetTroisPvE.CanUse(out act))
+		if (EnchantedMoulinetTroisPvE.CanUse(out act, skipAoeCheck: true))
         {
             return true;
         }
 
-        if (IsLastGCD(false, EnchantedMoulinetPvE) && EnchantedMoulinetDeuxPvE.CanUse(out act))
+        if (EnchantedMoulinetDeuxPvE.CanUse(out act, skipAoeCheck: true))
         {
             return true;
         }
