@@ -129,6 +129,8 @@ public sealed class BeirutaNIN : NinjaRotation
     private static bool NoActiveNinjutsu => IsCurrentNinjutsu(ActionID.NinjutsuPvE);
     private static bool RabbitMediumCurrent => IsCurrentNinjutsu(ActionID.RabbitMediumPvE);
 
+    private bool HasMeisui => StatusHelper.PlayerHasStatus(true, StatusID.Meisui);
+
     private bool KassatsuExpiringSoon =>
     HasKassatsu &&
     StatusHelper.PlayerWillStatusEndGCD(2, 0, true, StatusID.Kassatsu);
@@ -404,13 +406,13 @@ public sealed class BeirutaNIN : NinjaRotation
     }
 
     private bool TryUseNinkiSpender(out IAction? act) =>
-        TryUseAoeOrSingleTarget(
-            IsTargetAoe3Plus(HellfrogMediumPvE),
-            (out IAction? a) => DeathfrogMediumPvE.CanUse(out a, skipAoeCheck: true),
-            (out IAction? a) => HellfrogMediumPvE.CanUse(out a, skipAoeCheck: true),
-            (out IAction? a) => ZeshoMeppoPvE.CanUse(out a),
-            (out IAction? a) => BhavacakraPvE.CanUse(out a),
-            out act);
+    TryUseAoeOrSingleTarget(
+        ShouldUseAoeNinkiSpender(),
+        (out IAction? a) => DeathfrogMediumPvE.CanUse(out a, skipAoeCheck: true),
+        (out IAction? a) => HellfrogMediumPvE.CanUse(out a, skipAoeCheck: true),
+        (out IAction? a) => ZeshoMeppoPvE.CanUse(out a),
+        (out IAction? a) => BhavacakraPvE.CanUse(out a),
+        out act);
 
     #endregion
 
@@ -492,6 +494,13 @@ public sealed class BeirutaNIN : NinjaRotation
     }
 
     private bool IsTargetAoe3Plus(IBaseAction action) => GetTargetAoeCount(action) >= AoeThreshold;
+    private int NinkiSpenderAoeThreshold => HasMeisui ? 3 : 2;
+
+    private bool IsTargetAoeAtLeast(IBaseAction action, int threshold) =>
+    GetTargetAoeCount(action) >= threshold;
+
+    private bool ShouldUseAoeNinkiSpender() =>
+    IsTargetAoeAtLeast(HellfrogMediumPvE, NinkiSpenderAoeThreshold);
 
     private bool IsSelfAoe3PlusForTcj() =>
         IsSelfAoe3Plus(DeathBlossomPvE) ||
