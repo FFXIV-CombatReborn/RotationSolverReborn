@@ -37,7 +37,7 @@ public sealed class BeirutaSGE : SageRotation
 
     [Range(0, 5, ConfigUnitType.Seconds, 0.1f)]
     [RotationConfig(CombatType.PvE, Name = "Minimum movement time before allowing movement-based actions")]
-    public float MovementTimeThreshold { get; set; } = 0.9f;
+    public float MovementTimeThreshold { get; set; } = 0.8f;
 
     [RotationConfig(CombatType.PvE, Name = "Lock healing actions while Macrocosmos is active")]
     public bool LockHealingActionsDuringMacrocosmos { get; set; } = true;
@@ -108,10 +108,14 @@ public sealed class BeirutaSGE : SageRotation
 
     #region Constants / Fields
 
-    private const long PsycheDotRefreshMs = 15_000;
+    private const long PsycheDotRefreshMs = 18_000;
     private const float EarlyDotRefreshSeconds = 12f;
     private const float SwiftcastPostActionLockSeconds = 2f;
     private const float MovementLeadSeconds = 0.5f;
+    private static bool IsPartyMedicated =>
+    PartyMembers?.Any(member =>
+        member?.StatusList?.Any(status => status.StatusId == (uint)StatusID.Medicated) == true
+    ) == true;
 
     private long _psycheUsedAtMs;
     private float _lastSwiftcastLockingActionCombatTime = float.MinValue;
@@ -127,6 +131,7 @@ public sealed class BeirutaSGE : SageRotation
     private bool HasZoe => StatusHelper.PlayerHasStatus(true, StatusID.Zoe);
     private bool HasMacrocosmos => StatusHelper.PlayerHasStatus(true, StatusID.Macrocosmos);
     private bool HasEukrasianPrognosis => StatusHelper.PlayerHasStatus(true, StatusID.EukrasianPrognosis);
+    private bool HasMedicated => StatusHelper.PlayerHasStatus(true, StatusID.Medicated);
 
     private const int PneumaAoeThreshold = 2;
 
@@ -464,78 +469,80 @@ private bool IsPhlegmaAoeAtLeast(int threshold)
     }
 
     [RotationDesc(ActionID.KrasisPvE, ActionID.TaurocholePvE, ActionID.DruocholePvE, ActionID.KardiaPvE, ActionID.SoteriaPvE)]
-    protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
+protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
+{
+    UpdateActionTracking();
+
+    act = null;
+
+    if (HasHealingLockout)
+        return false;
+
+    IBattleChara? taurocholeTarget = TaurocholePvE.Target.Target;
+    IBattleChara? druocholeTarget = DruocholePvE.Target.Target;
+    IBattleChara? kardiaTarget = KardiaPvE.Target.Target;
+
+    // Krasis always first
+    if (KrasisPvE.CanUse(out act))
+        return true;
+
+    // Addersgall > 2: spend freely, prefer Taurochole first, but do not use it under Kerachole
+    if (Addersgall > 2)
     {
-        UpdateActionTracking();
+        if (!HasKerachole && TaurocholePvE.CanUse(out act))
+            return true;
 
-        act = null;
+        if (DruocholePvE.CanUse(out act))
+            return true;
+    }
 
-        if (HasHealingLockout)
-            return false;
+    // Prevent immediately chaining another single-target heal after Taurochole
+    if (IsLastAction(ActionID.TaurocholePvE))
+        return base.HealSingleAbility(nextGCD, out act);
 
-        
-        if (Addersgall > 2 &&
+    IBattleChara? soteriaTarget = PartyMembers.FirstOrDefault(member =>
+    member.HasStatus(true, StatusID.Kardion));
+
+if (PartyMembersAverHP > 0.85f &&
+    soteriaTarget != null &&
+    soteriaTarget.GetHealthRatio() < SoteriaHeal &&
+    SoteriaPvE.CanUse(out act))
+{
+    return true;
+}
+
+
+    // Addersgall == 2: more restrictive
+    if (Addersgall == 2 && PartyMembersAverHP > 0.85f)
+    {
+        if (!HasKerachole &&
+            taurocholeTarget != null &&
+            taurocholeTarget.GetHealthRatio() < HealSingleTaurocholeHeal &&
+            TaurocholePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (druocholeTarget != null &&
+            !HasSingleHealLockoutStatus(druocholeTarget) &&
+            druocholeTarget.GetHealthRatio() < HealSingleDruocholeHeal &&
             DruocholePvE.CanUse(out act))
         {
             return true;
         }
+    }
 
-        if (KrasisPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (PartyMembersAverHP > 0.8f &&
-        Addersgall >= 2 &&
-        !HasKerachole &&
-        TaurocholePvE.CanUse(out act))
-{
-    IBattleChara? taurocholeTarget = TaurocholePvE.Target.Target;
-
-    if (taurocholeTarget != null &&
-        PartyMembersAverHP > 0.85f &&
-        Addersgall > 1 &&
-        taurocholeTarget.GetHealthRatio() < HealSingleTaurocholeHeal)
+    if (PartyMembersAverHP > 0.85f &&
+        kardiaTarget != null &&
+        !HasSingleHealLockoutStatus(kardiaTarget) &&
+        kardiaTarget.GetHealthRatio() < 0.8f &&
+        KardiaPvE.CanUse(out act))
     {
         return true;
     }
-}
 
-        if (IsLastAction(ActionID.TaurocholePvE))
-{
     return base.HealSingleAbility(nextGCD, out act);
 }
-
-if (PartyMembersAverHP > 0.85f &&
-    Addersgall < 3 &&
-    (!TaurocholePvE.EnoughLevel || TaurocholePvE.Cooldown.IsCoolingDown) &&
-    DruocholePvE.CanUse(out act))
-{
-    IBattleChara? druocholeTarget = DruocholePvE.Target.Target;
-
-    if (druocholeTarget != null &&
-        !HasSingleHealLockoutStatus(druocholeTarget) &&
-        druocholeTarget.GetHealthRatio() < HealSingleDruocholeHeal)
-    {
-        return true;
-    }
-}
-
-if (PartyMembersAverHP > 0.85f &&
-    KardiaPvE.CanUse(out act))
-{
-    IBattleChara? kardiaTarget = KardiaPvE.Target.Target;
-
-    if (kardiaTarget != null &&
-        !HasSingleHealLockoutStatus(kardiaTarget) &&
-        kardiaTarget.GetHealthRatio() < 0.8f)
-    {
-        return true;
-    }
-}
-
-        return base.HealSingleAbility(nextGCD, out act);
-    }
 
     [RotationDesc(ActionID.KardiaPvE, ActionID.RhizomataPvE, ActionID.SoteriaPvE)]
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
@@ -573,7 +580,7 @@ if (PartyMembersAverHP > 0.85f &&
             return true;
         }
 
-        if (HasBuffs && UseBurstMedicine(out act))
+        if (IsPartyMedicated && UseBurstMedicine(out act))
         {
             return true;
         }
@@ -618,6 +625,8 @@ if (PartyMembersAverHP > 0.85f &&
 
         if (EukrasianPrognosisIiPvE.EnoughLevel
             && EukrasianPrognosisIiPvE.IsEnabled
+            && !HasBuffs
+            && !HasMedicated
             && MergedStatus.HasFlag(AutoStatus.DefenseArea)
             && EukrasianPrognosisIiPvE.CanUse(out _))
         {
@@ -626,6 +635,8 @@ if (PartyMembersAverHP > 0.85f &&
         }
         else if (!EukrasianPrognosisIiPvE.EnoughLevel
             && EukrasianPrognosisPvE.EnoughLevel
+            && !HasBuffs
+            && !HasMedicated
             && EukrasianPrognosisPvE.IsEnabled
             && MergedStatus.HasFlag(AutoStatus.DefenseArea)
             && EukrasianPrognosisPvE.CanUse(out _))
@@ -637,6 +648,7 @@ if (PartyMembersAverHP > 0.85f &&
             && EukrasianDiagnosisPvE.IsEnabled
             && Addersting < 3
             && !HasBuffs
+            && !HasMedicated
             && MovingTime > MovementTimeThreshold
             && MergedStatus.HasFlag(AutoStatus.DefenseSingle)
             && EukrasianDiagnosisPvE.CanUse(out _))
@@ -859,7 +871,7 @@ if (PartyMembersAverHP > 0.85f &&
             return false;
         }
 
-        return MovingTime > MovementTimeThreshold || (HasBuffs && InFirst20sAfterPsyche);
+        return MovingTime > MovementTimeThreshold || (HasBuffs && InFirst20sAfterPsyche) || HasMedicated;
     }
 
     private bool PrepareEarlyEukrasianDosisRefresh(out IAction? act)
@@ -1046,6 +1058,7 @@ if (PartyMembersAverHP > 0.85f &&
     && IsBurst
     && PhlegmaPvE.CanUse(out act, usedUp:
         HasBuffs
+        || HasMedicated
         || IsPhlegmaAoeAtLeast(2)
         || PhlegmaPvE.Cooldown.WillHaveXChargesGCD(2, 1)
         || (HasSufficientMovement && PhlegmaPvE.Cooldown.WillHaveXChargesGCD(2, 4))))
