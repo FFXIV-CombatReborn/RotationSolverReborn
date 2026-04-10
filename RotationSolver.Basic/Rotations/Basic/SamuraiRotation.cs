@@ -386,7 +386,7 @@ public partial class SamuraiRotation
 static partial void ModifyIkishotenPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.OgiNamikiriReady, StatusID.ZanshinReady];
-        setting.ActionCheck = () => InCombat && Kenki >= 50;
+        setting.ActionCheck = () => InCombat && Kenki <= 50;
         setting.IsFriendly = true;
     }
 
