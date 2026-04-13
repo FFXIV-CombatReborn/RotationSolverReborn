@@ -512,7 +512,7 @@ public sealed class RDM_Reborn : RedMageRotation
 			}
 		}
 
-		if (UseVercure && !InCombat && VercurePvE.CanUse(out act))
+		if (UseVercure && !InCombat && !HasDualcast && VercurePvE.CanUse(out act))
 		{
 			return true;
 		}

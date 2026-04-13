@@ -7,7 +7,6 @@ using ECommons.Reflection;
 
 namespace RotationSolver.IPC
 {
-	using ECommons.GameFunctions;
 	using System.ComponentModel;
 
 	//internal static class BossModReborn_IPCSubscriber

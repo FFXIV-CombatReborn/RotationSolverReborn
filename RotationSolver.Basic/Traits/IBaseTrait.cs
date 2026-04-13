@@ -5,8 +5,8 @@
 /// </summary>
 public interface IBaseTrait : IEnoughLevel, ITexture
 {
-    /// <summary>
-    /// Gets the ID of the trait.
-    /// </summary>
-    uint ID { get; }
+	/// <summary>
+	/// Gets the ID of the trait.
+	/// </summary>
+	uint ID { get; }
 }

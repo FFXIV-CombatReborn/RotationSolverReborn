@@ -16,22 +16,22 @@ namespace RotationSolver.UI.HighlightTeachingMode;
 /// </summary>
 public sealed class HotbarDisabledColor : DrawingHighlightHotbarBase
 {
-    private readonly HashSet<uint> _disabledBaseActionIds = [];
+	private readonly HashSet<uint> _disabledBaseActionIds = [];
 
-    protected override void Dispose(bool disposing)
-    {
-        base.Dispose(disposing);
-    }
+	protected override void Dispose(bool disposing)
+	{
+		base.Dispose(disposing);
+	}
 
-    private protected override unsafe IEnumerable<IDrawing2D> To2D()
-    {
-        return [];
-    }
+	private protected override unsafe IEnumerable<IDrawing2D> To2D()
+	{
+		return [];
+	}
 
-    protected override unsafe void UpdateOnFrame()
-    {
-        ApplyFrame();
-    }
+	protected override unsafe void UpdateOnFrame()
+	{
+		ApplyFrame();
+	}
 
 	public static unsafe void ApplyFrame()
 	{
@@ -146,108 +146,108 @@ public sealed class HotbarDisabledColor : DrawingHighlightHotbarBase
 	}
 
 	private static unsafe void ApplyIconReddening(AtkComponentIcon* iconComponent, bool redden)
-    {
-        if (iconComponent == null) return;
-        if (iconComponent->IconImage == null) return;
+	{
+		if (iconComponent == null) return;
+		if (iconComponent->IconImage == null) return;
 
-        if (redden)
-        {
-            var tint = Service.Config.HotbarDisabledTintColor;
-            byte r = (byte)Math.Clamp((int)(tint.X * 255f), 0, 255);
-            byte g = (byte)Math.Clamp((int)(tint.Y * 255f), 0, 255);
-            byte b = (byte)Math.Clamp((int)(tint.Z * 255f), 0, 255);
-            iconComponent->IconImage->Color.R = r;
-            iconComponent->IconImage->Color.G = g;
-            iconComponent->IconImage->Color.B = b;
-        }
-        else
-        {
-            iconComponent->IconImage->Color.R = 0xFF;
-            iconComponent->IconImage->Color.G = 0xFF;
-            iconComponent->IconImage->Color.B = 0xFF;
-        }
-    }
+		if (redden)
+		{
+			var tint = Service.Config.HotbarDisabledTintColor;
+			byte r = (byte)Math.Clamp((int)(tint.X * 255f), 0, 255);
+			byte g = (byte)Math.Clamp((int)(tint.Y * 255f), 0, 255);
+			byte b = (byte)Math.Clamp((int)(tint.Z * 255f), 0, 255);
+			iconComponent->IconImage->Color.R = r;
+			iconComponent->IconImage->Color.G = g;
+			iconComponent->IconImage->Color.B = b;
+		}
+		else
+		{
+			iconComponent->IconImage->Color.R = 0xFF;
+			iconComponent->IconImage->Color.G = 0xFF;
+			iconComponent->IconImage->Color.B = 0xFF;
+		}
+	}
 
-    private static unsafe void ResetAllHotbarIconColors()
-    {
-        foreach (nint intPtr in EnumerateHotbarAddons())
-        {
-            var actionBar = (AddonActionBarBase*)intPtr;
-            if (actionBar == null || !IsVisible(actionBar->AtkUnitBase))
-                continue;
+	private static unsafe void ResetAllHotbarIconColors()
+	{
+		foreach (nint intPtr in EnumerateHotbarAddons())
+		{
+			var actionBar = (AddonActionBarBase*)intPtr;
+			if (actionBar == null || !IsVisible(actionBar->AtkUnitBase))
+				continue;
 
-            foreach (ActionBarSlot slot in actionBar->ActionBarSlotVector.AsSpan())
-            {
-                AtkComponentIcon* iconComponent = (AtkComponentIcon*)slot.Icon->Component;
-                if (iconComponent == null || iconComponent->IconImage == null) continue;
-                iconComponent->IconImage->Color.R = 0xFF;
-                iconComponent->IconImage->Color.G = 0xFF;
-                iconComponent->IconImage->Color.B = 0xFF;
-            }
-        }
-    }
+			foreach (ActionBarSlot slot in actionBar->ActionBarSlotVector.AsSpan())
+			{
+				AtkComponentIcon* iconComponent = (AtkComponentIcon*)slot.Icon->Component;
+				if (iconComponent == null || iconComponent->IconImage == null) continue;
+				iconComponent->IconImage->Color.R = 0xFF;
+				iconComponent->IconImage->Color.G = 0xFF;
+				iconComponent->IconImage->Color.B = 0xFF;
+			}
+		}
+	}
 
-    private static unsafe bool IsVisible(AtkUnitBase unit)
-    {
-        if (!unit.IsVisible)
-            return false;
-        return unit.VisibilityFlags != 1 && IsVisible(unit.RootNode);
-    }
+	private static unsafe bool IsVisible(AtkUnitBase unit)
+	{
+		if (!unit.IsVisible)
+			return false;
+		return unit.VisibilityFlags != 1 && IsVisible(unit.RootNode);
+	}
 
-    private static unsafe bool IsVisible(AtkResNode* node)
-    {
-        while (node != null)
-        {
-            if (!node->IsVisible())
-                return false;
-            node = node->ParentNode;
-        }
-        return true;
-    }
+	private static unsafe bool IsVisible(AtkResNode* node)
+	{
+		while (node != null)
+		{
+			if (!node->IsVisible())
+				return false;
+			node = node->ParentNode;
+		}
+		return true;
+	}
 
-    private static IEnumerable<nint> EnumerateHotbarAddons()
-    {
-        foreach (var a in GetAddons<AddonActionBar>()) yield return a;
-        foreach (var a in GetAddons<AddonActionBarX>()) yield return a;
-        foreach (var a in GetAddons<AddonActionCross>()) yield return a;
-        foreach (var a in GetAddons<AddonActionDoubleCrossBase>()) yield return a;
-    }
+	private static IEnumerable<nint> EnumerateHotbarAddons()
+	{
+		foreach (var a in GetAddons<AddonActionBar>()) yield return a;
+		foreach (var a in GetAddons<AddonActionBarX>()) yield return a;
+		foreach (var a in GetAddons<AddonActionCross>()) yield return a;
+		foreach (var a in GetAddons<AddonActionDoubleCrossBase>()) yield return a;
+	}
 
-    private static HashSet<uint> CollectDisabledActionIds()
-    {
-        HashSet<uint> baseIds = [];
+	private static HashSet<uint> CollectDisabledActionIds()
+	{
+		HashSet<uint> baseIds = [];
 
-        Collect(DataCenter.CurrentRotation?.AllActions);
-        Collect(DataCenter.CurrentDutyRotation?.AllActions);
+		Collect(DataCenter.CurrentRotation?.AllActions);
+		Collect(DataCenter.CurrentDutyRotation?.AllActions);
 
-        void Collect(IEnumerable<IAction>? actions)
-        {
-            if (actions == null) return;
-            foreach (var a in actions)
-            {
-                if (a is IBaseAction ba && !ba.IsEnabled)
-                {
-                    baseIds.Add(ba.ID);
-                }
-            }
-        }
+		void Collect(IEnumerable<IAction>? actions)
+		{
+			if (actions == null) return;
+			foreach (var a in actions)
+			{
+				if (a is IBaseAction ba && !ba.IsEnabled)
+				{
+					baseIds.Add(ba.ID);
+				}
+			}
+		}
 
-        return baseIds;
-    }
+		return baseIds;
+	}
 
-    private static unsafe List<nint> GetAddons<T>() where T : struct
-    {
-        var attr = typeof(T).GetCustomAttribute<AddonAttribute>();
-        if (attr is not AddonAttribute on)
-            return [];
+	private static unsafe List<nint> GetAddons<T>() where T : struct
+	{
+		var attr = typeof(T).GetCustomAttribute<AddonAttribute>();
+		if (attr is not AddonAttribute on)
+			return [];
 
-        List<nint> result = [];
-        foreach (var str in on.AddonIdentifiers)
-        {
-            var ptr = Svc.GameGui.GetAddonByName(str, 1);
-            if (ptr != nint.Zero)
-                result.Add(ptr);
-        }
-        return result;
-    }
+		List<nint> result = [];
+		foreach (var str in on.AddonIdentifiers)
+		{
+			var ptr = Svc.GameGui.GetAddonByName(str, 1);
+			if (ptr != nint.Zero)
+				result.Add(ptr);
+		}
+		return result;
+	}
 }

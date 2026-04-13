@@ -7,53 +7,53 @@ namespace RotationSolver.Basic.Actions;
 /// </summary>
 public interface IBaseAction : IAction
 {
-    internal static TargetType? TargetOverride { get; set; } = null;
-    internal static bool ForceEnable { get; set; } = false;
-    internal static bool AutoHealCheck { get; set; } = false;
-    internal static bool ActionPreview { get; set; } = false;
-    internal static bool IgnoreClipping { get; set; } = false;
-    internal static bool AllEmpty { get; set; } = false;
-    internal static bool ShouldEndSpecial { get; set; } = false;
+	internal static TargetType? TargetOverride { get; set; } = null;
+	internal static bool ForceEnable { get; set; } = false;
+	internal static bool AutoHealCheck { get; set; } = false;
+	internal static bool ActionPreview { get; set; } = false;
+	internal static bool IgnoreClipping { get; set; } = false;
+	internal static bool AllEmpty { get; set; } = false;
+	internal static bool ShouldEndSpecial { get; set; } = false;
 
-    /// <summary>
-    /// The action itself.
-    /// </summary>
-    Action Action { get; }
+	/// <summary>
+	/// The action itself.
+	/// </summary>
+	Action Action { get; }
 
-    /// <summary>
-    /// The target to use on.
-    /// </summary>
-    TargetResult Target { get; set; }
+	/// <summary>
+	/// The target to use on.
+	/// </summary>
+	TargetResult Target { get; set; }
 
-    /// <summary>
-    /// The target for preview.
-    /// </summary>
-    TargetResult? PreviewTarget { get; }
+	/// <summary>
+	/// The target for preview.
+	/// </summary>
+	TargetResult? PreviewTarget { get; }
 
-    /// <summary>
-    /// The information about the target.
-    /// </summary>
-    ActionTargetInfo TargetInfo { get; }
+	/// <summary>
+	/// The information about the target.
+	/// </summary>
+	ActionTargetInfo TargetInfo { get; }
 
-    /// <summary>
-    /// The basic information of this action.
-    /// </summary>
-    ActionBasicInfo Info { get; }
+	/// <summary>
+	/// The basic information of this action.
+	/// </summary>
+	ActionBasicInfo Info { get; }
 
-    /// <summary>
-    /// The cd information.
-    /// </summary>
-    new ActionCooldownInfo Cooldown { get; }
+	/// <summary>
+	/// The cd information.
+	/// </summary>
+	new ActionCooldownInfo Cooldown { get; }
 
-    /// <summary>
-    /// The setting to use this action.
-    /// </summary>
-    ActionSetting Setting { get; set; }
+	/// <summary>
+	/// The setting to use this action.
+	/// </summary>
+	ActionSetting Setting { get; set; }
 
-    /// <summary>
-    /// The current setting for this action.
-    /// </summary>
-    ActionConfig Config { get; }
+	/// <summary>
+	/// The current setting for this action.
+	/// </summary>
+	ActionConfig Config { get; }
 
 	/// <summary>
 	/// Can I use this action.

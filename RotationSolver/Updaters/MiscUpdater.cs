@@ -10,7 +10,6 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
-using RotationSolver.Helpers;
 
 namespace RotationSolver.Updaters;
 

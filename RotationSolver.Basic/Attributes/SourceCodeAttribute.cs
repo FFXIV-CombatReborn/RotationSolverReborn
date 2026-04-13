@@ -6,8 +6,8 @@
 [AttributeUsage(AttributeTargets.Class)]
 public class SourceCodeAttribute : Attribute
 {
-    /// <summary>
-    /// The link to the source code.
-    /// </summary>
-    public string? Path { get; set; }
+	/// <summary>
+	/// The link to the source code.
+	/// </summary>
+	public string? Path { get; set; }
 }

@@ -5,21 +5,21 @@
 /// </summary>
 public interface ICooldown
 {
-    internal float RecastTimeOneChargeRaw { get; }
-    internal float RecastTimeElapsedRaw { get; }
+	internal float RecastTimeOneChargeRaw { get; }
+	internal float RecastTimeElapsedRaw { get; }
 
-    /// <summary>
-    /// Is still in cooling down.
-    /// </summary>
-    bool IsCoolingDown { get; }
+	/// <summary>
+	/// Is still in cooling down.
+	/// </summary>
+	bool IsCoolingDown { get; }
 
-    /// <summary>
-    /// The mac charges.
-    /// </summary>
-    ushort MaxCharges { get; }
+	/// <summary>
+	/// The mac charges.
+	/// </summary>
+	ushort MaxCharges { get; }
 
-    /// <summary>
-    /// The current charges.
-    /// </summary>
-    ushort CurrentCharges { get; }
+	/// <summary>
+	/// The current charges.
+	/// </summary>
+	ushort CurrentCharges { get; }
 }

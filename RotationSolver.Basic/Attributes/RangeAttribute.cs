@@ -10,25 +10,25 @@
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public class RangeAttribute(float minValue, float maxValue, ConfigUnitType unitType, float speed = 0.005f) : Attribute
 {
-    /// <summary>
-    /// Min Value
-    /// </summary>
-    public float MinValue => minValue;
+	/// <summary>
+	/// Min Value
+	/// </summary>
+	public float MinValue => minValue;
 
-    /// <summary>
-    /// Max Value
-    /// </summary>
-    public float MaxValue => maxValue;
+	/// <summary>
+	/// Max Value
+	/// </summary>
+	public float MaxValue => maxValue;
 
-    /// <summary>
-    /// Speed
-    /// </summary>
-    public float Speed => speed;
+	/// <summary>
+	/// Speed
+	/// </summary>
+	public float Speed => speed;
 
-    /// <summary>
-    /// The unit type.
-    /// </summary>
-    public ConfigUnitType UnitType => unitType;
+	/// <summary>
+	/// The unit type.
+	/// </summary>
+	public ConfigUnitType UnitType => unitType;
 }
 
 /// <summary>
@@ -36,38 +36,38 @@ public class RangeAttribute(float minValue, float maxValue, ConfigUnitType unitT
 /// </summary>
 public enum ConfigUnitType : byte
 {
-    /// <summary>
-    /// None unit type.
-    /// </summary>
-    None,
+	/// <summary>
+	/// None unit type.
+	/// </summary>
+	None,
 
-    /// <summary>
-    /// 
-    /// </summary>
-    [Description("Time Unit, in seconds.")]
-    Seconds,
+	/// <summary>
+	/// 
+	/// </summary>
+	[Description("Time Unit, in seconds.")]
+	Seconds,
 
-    /// <summary>
-    /// 
-    /// </summary>
-    [Description("Angle Unit, in degrees.")]
-    Degree,
+	/// <summary>
+	/// 
+	/// </summary>
+	[Description("Angle Unit, in degrees.")]
+	Degree,
 
-    /// <summary>
-    /// 
-    /// </summary>
-    [Description("Distance Unit, in yalms.")]
-    Yalms,
+	/// <summary>
+	/// 
+	/// </summary>
+	[Description("Distance Unit, in yalms.")]
+	Yalms,
 
-    /// <summary>
-    /// 
-    /// </summary>
-    [Description("Ratio Unit, as percentage.")]
-    Percent,
+	/// <summary>
+	/// 
+	/// </summary>
+	[Description("Ratio Unit, as percentage.")]
+	Percent,
 
-    /// <summary>
-    /// 
-    /// </summary>
-    [Description("Display Unit, in pixels.")]
-    Pixels,
+	/// <summary>
+	/// 
+	/// </summary>
+	[Description("Display Unit, in pixels.")]
+	Pixels,
 }

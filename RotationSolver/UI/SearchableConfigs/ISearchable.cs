@@ -2,12 +2,12 @@
 
 internal interface ISearchable
 {
-    JobFilter PvPFilter { get; set; }
-    JobFilter PvEFilter { get; set; }
-    CheckBoxSearch? Parent { get; set; }
+	JobFilter PvPFilter { get; set; }
+	JobFilter PvEFilter { get; set; }
+	CheckBoxSearch? Parent { get; set; }
 
-    string SearchingKeys { get; }
-    bool ShowInChild { get; }
+	string SearchingKeys { get; }
+	bool ShowInChild { get; }
 
-    void Draw();
+	void Draw();
 }

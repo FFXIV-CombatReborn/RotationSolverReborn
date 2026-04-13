@@ -17,7 +17,7 @@ internal class TabSkipAttribute : Attribute
 [AttributeUsage(AttributeTargets.Field)]
 internal class TabIconAttribute : Attribute
 {
-    public uint Icon { get; init; }
+	public uint Icon { get; init; }
 }
 
 /// <summary>
@@ -25,47 +25,71 @@ internal class TabIconAttribute : Attribute
 /// </summary>
 internal enum RotationConfigWindowTab : byte
 {
-    [TabSkip] About,
-    [TabSkip] Rotation,
+	[TabSkip] About,
+	[TabSkip] Rotation,
 
-    [Description("Useful information and macro list.")]
-    [TabIcon(Icon = 4)] Main,
+	[Description("Useful information and macro list.")]
+	[TabIcon(Icon = 4)] Main,
 
-    [Description("Rotation specific configs.")]
-    [TabIcon(Icon = 4)] Job,
+	[Description("Rotation specific configs.")]
+	[TabIcon(Icon = 4)] Job,
 
-    [Description("Configure Duty Rotation.")]
-    [TabIcon(Icon = 4)] DutyRotation,
+	[Description("Configure Duty Rotation.")]
+	[TabIcon(Icon = 4)] DutyRotation,
 
-    [Description("Configure abilities and custom conditions for your current job.")]
-    [TabIcon(Icon = 4)] Actions,
+	[Description("Configure abilities and custom conditions for your current job.")]
+	[TabIcon(Icon = 4)] Actions,
 
-    [Description("Configure reactive actions and status effect lists.")]
-    [TabIcon(Icon = 21)] List,
+	[Description("Configure reactive actions and status effect lists.")]
+	[TabIcon(Icon = 21)] List,
 
-    [Description("Configure basic settings.")]
-    [TabIcon(Icon = 14)] Basic,
+	[Description("Configure basic settings.")]
+	[TabIcon(Icon = 14)] Basic,
 
-    [Description("Configure user interface settings.")]
-    [TabIcon(Icon = 42)] UI,
+	[Description("Configure user interface settings.")]
+	[TabIcon(Icon = 42)] UI,
 
-    [Description("Configure general action usage and control settings.")]
-    [TabIcon(Icon = 29)] Auto,
+	[Description("Configure general action usage and control settings.")]
+	[TabIcon(Icon = 29)] Auto,
 
-    [Description("Configure targeting settings.")]
-    [TabIcon(Icon = 16)] Target,
+	[Description("Configure targeting settings.")]
+	[TabIcon(Icon = 16)] Target,
 
 	[Description("Duty specific settings.")]
 	[TabIcon(Icon = 16)] Duty,
 
 	[Description("Configure optional helpful features.")]
-    [TabIcon(Icon = 51)] Extra,
+	[TabIcon(Icon = 51)] Extra,
 
-    [Description("Debug options for developers and rotation writers (disable when not in use).")]
-    [TabIcon(Icon = 5)] Debug,
+	[Description("Debug options for developers and rotation writers (disable when not in use).")]
+	[TabIcon(Icon = 5)] Debug,
 
-    [Description("Configure AutoDuty settings and view related information.")]
-    [TabIcon(Icon = 4)] AutoDuty,
+	[Description("Configure AutoDuty settings and view related information.")]
+	[TabIcon(Icon = 4)] AutoDuty,
+}
+
+internal static class RotationConfigWindowTabExtensions
+{
+	public static string CNString(this RotationConfigWindowTab rotationConfigWindowTab)
+	{
+		return rotationConfigWindowTab switch
+		{
+			RotationConfigWindowTab.About => "关于",
+			RotationConfigWindowTab.Rotation => "循环",
+			RotationConfigWindowTab.Main => "主窗口",
+			RotationConfigWindowTab.Job => "职业",
+			RotationConfigWindowTab.Duty => "任务",
+			RotationConfigWindowTab.Actions => "技能",
+			RotationConfigWindowTab.List => "列表",
+			RotationConfigWindowTab.Basic => "基础",
+			RotationConfigWindowTab.UI => "界面",
+			RotationConfigWindowTab.Auto => "自动",
+			RotationConfigWindowTab.Target => "目标",
+			RotationConfigWindowTab.Extra => "额外",
+			RotationConfigWindowTab.Debug => "调试",
+			_ => rotationConfigWindowTab.ToString()
+		};
+	}
 }
 
 /// <summary>
@@ -73,54 +97,54 @@ internal enum RotationConfigWindowTab : byte
 /// </summary>
 public readonly struct IncompatiblePlugin
 {
-    public string Name { get; init; }
-    public string Icon { get; init; }
-    public string Url { get; init; }
-    public string Features { get; init; }
+	public string Name { get; init; }
+	public string Icon { get; init; }
+	public string Url { get; init; }
+	public string Features { get; init; }
 
-    /// <summary>
-    /// Checks if the plugin is enabled.
-    /// </summary>
-    [JsonIgnore]
-    public readonly bool IsEnabled
-    {
-        get
-        {
-            string name = Name;
-            IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
-            {
-                if ((x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
+	/// <summary>
+	/// Checks if the plugin is enabled.
+	/// </summary>
+	[JsonIgnore]
+	public readonly bool IsEnabled
+	{
+		get
+		{
+			string name = Name;
+			IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
+			foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
+			{
+				if ((x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 
-    /// <summary>
-    /// Checks if the plugin is installed.
-    /// </summary>
-    [JsonIgnore]
-    public readonly bool IsInstalled
-    {
-        get
-        {
-            string name = Name;
-            IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
-            {
-                if (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
+	/// <summary>
+	/// Checks if the plugin is installed.
+	/// </summary>
+	[JsonIgnore]
+	public readonly bool IsInstalled
+	{
+		get
+		{
+			string name = Name;
+			IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
+			foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
+			{
+				if (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 
-    public CompatibleType Type { get; init; }
+	public CompatibleType Type { get; init; }
 }
 
 /// <summary>
@@ -128,52 +152,52 @@ public readonly struct IncompatiblePlugin
 /// </summary>
 public readonly struct AutoDutyPlugin
 {
-    public string Name { get; init; }
-    public string Icon { get; init; }
-    public string Url { get; init; }
-    public string Features { get; init; }
+	public string Name { get; init; }
+	public string Icon { get; init; }
+	public string Url { get; init; }
+	public string Features { get; init; }
 
-    /// <summary>
-    /// Checks if the plugin is enabled.
-    /// </summary>
-    [JsonIgnore]
-    public readonly bool IsEnabled
-    {
-        get
-        {
-            string name = Name;
-            IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
-            {
-                if ((x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
+	/// <summary>
+	/// Checks if the plugin is enabled.
+	/// </summary>
+	[JsonIgnore]
+	public readonly bool IsEnabled
+	{
+		get
+		{
+			string name = Name;
+			IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
+			foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
+			{
+				if ((x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 
-    /// <summary>
-    /// Checks if the plugin is installed.
-    /// </summary>
-    [JsonIgnore]
-    public readonly bool IsInstalled
-    {
-        get
-        {
-            string name = Name;
-            IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
-            {
-                if (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
+	/// <summary>
+	/// Checks if the plugin is installed.
+	/// </summary>
+	[JsonIgnore]
+	public readonly bool IsInstalled
+	{
+		get
+		{
+			string name = Name;
+			IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
+			foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
+			{
+				if (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
 }
 
 /// <summary>
@@ -182,8 +206,8 @@ public readonly struct AutoDutyPlugin
 [Flags]
 public enum CompatibleType : byte
 {
-    Skill_Usage = 1 << 0,
-    Skill_Selection = 1 << 1,
-    Crash = 1 << 2,
-    Broken = 1 << 3,
+	Skill_Usage = 1 << 0,
+	Skill_Selection = 1 << 1,
+	Crash = 1 << 2,
+	Broken = 1 << 3,
 }

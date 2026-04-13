@@ -52,17 +52,17 @@ internal static class DataCenter
 		{
 			return false;
 		}
-		
+
 		return Svc.Condition[ConditionFlag.DutyRecorderPlayback];
 	}
 
 	private static ulong _hostileTargetId = 0;
 
-    // Tracking fields for Tyrant special sequence (Scythe/Axe -> Charybdistopia)
-    private static bool _hasCastScythe = false;
-    private static bool _hasCastAxe = false;
-    private static bool _wasCastingCharyb = false;
-    private static bool _tyrantShouldStopHealing = false;
+	// Tracking fields for Tyrant special sequence (Scythe/Axe -> Charybdistopia)
+	private static bool _hasCastScythe = false;
+	private static bool _hasCastAxe = false;
+	private static bool _wasCastingCharyb = false;
+	private static bool _tyrantShouldStopHealing = false;
 
 	public static bool ResetActionConfigs { get; set; } = false;
 
@@ -793,6 +793,35 @@ internal static class DataCenter
 
 		CharacterManager* characterManager = CharacterManager.Instance();
 		return characterManager == null ? (BattleChara*)null : characterManager->LookupBuddyByOwnerObject(playerBattleChara);
+	}
+
+	/// <summary>
+	/// Gets the players pet
+	/// </summary>
+	/// <returns>IBattleChara? pet</returns>
+	public static IBattleChara? GetPet()
+	{
+		return Svc.Buddies.PetBuddy?.GameObject as IBattleChara;
+	}
+
+	/// <summary>
+	/// The distance from <paramref name="battleChara"/> to the player's pet
+	/// </summary>
+	/// <param name="battleChara"></param>
+	/// <returns></returns>
+	public static float DistanceToPet(IBattleChara battleChara)
+	{
+		if (battleChara == null)
+		{
+			return float.MaxValue;
+		}
+		var pet = GetPet();
+		if (pet == null)
+		{
+			return float.MaxValue;
+		}
+
+		return Vector3.Distance(pet.Position, battleChara.Position) - (battleChara.HitboxRadius);
 	}
 	#endregion
 
@@ -1559,7 +1588,7 @@ internal static class DataCenter
 
 	// Cached, case-insensitive path sets modeled after WrathCombo VFX.cs
 	private static readonly FrozenSet<string> TankbusterPaths = FrozenSet.ToFrozenSet(
-    [
+	[
 		"vfx/lockon/eff/tank_lockon",
 		"vfx/lockon/eff/tank_laser",
 		"vfx/lockon/eff/x6fe_fan100_50_0t1",     // Necron Blue Shockwave - Cone Tankbuster
@@ -1572,8 +1601,8 @@ internal static class DataCenter
 	], StringComparer.OrdinalIgnoreCase);
 
 	private static readonly FrozenSet<string> MultiHitSharedPaths = FrozenSet.ToFrozenSet(
-    [
-        "vfx/lockon/eff/com_share4a1",
+	[
+		"vfx/lockon/eff/com_share4a1",
 		"vfx/lockon/eff/com_share5a1",
 		"vfx/lockon/eff/com_share6m7s_1v",
 		"vfx/lockon/eff/com_share8s_0v",
@@ -1583,8 +1612,8 @@ internal static class DataCenter
 	], StringComparer.OrdinalIgnoreCase);
 
 	private static readonly FrozenSet<string> SharedDamagePaths = FrozenSet.ToFrozenSet(
-    [
-        "vfx/lockon/eff/coshare",
+	[
+		"vfx/lockon/eff/coshare",
 		"vfx/lockon/eff/share_laser",
 		"vfx/lockon/eff/com_share",
 		// Duty-specific AOE share markers
@@ -1769,37 +1798,37 @@ internal static class DataCenter
 		});
 	}
 
-    public static bool IsCastingTankVfx()
-    {
-        // Populate TankbusterTargets from the VFX queue and return whether any tankbuster VFX was found.
-        lock (_tankbusterLock)
-        {
-            TankbusterTargets.Clear();
-            if (!Player.Available || Player.Object == null) return false;
+	public static bool IsCastingTankVfx()
+	{
+		// Populate TankbusterTargets from the VFX queue and return whether any tankbuster VFX was found.
+		lock (_tankbusterLock)
+		{
+			TankbusterTargets.Clear();
+			if (!Player.Available || Player.Object == null) return false;
 
-            if (VfxDataQueue == null || VfxDataQueue.IsEmpty) return false;
+			if (VfxDataQueue == null || VfxDataQueue.IsEmpty) return false;
 
-            bool found = false;
-            bool isTank = TargetFilter.PlayerJobCategory(JobRole.Tank);
+			bool found = false;
+			bool isTank = TargetFilter.PlayerJobCategory(JobRole.Tank);
 
-            foreach (var s in VfxDataQueue)
-            {
-                try
-                {
-                    if (string.IsNullOrEmpty(s.Path)) continue;
+			foreach (var s in VfxDataQueue)
+			{
+				try
+				{
+					if (string.IsNullOrEmpty(s.Path)) continue;
 
-                    foreach (var p in TankbusterPaths)
-                    {
-                        if (!s.Path.StartsWith(p, PathCmp)) continue;
+					foreach (var p in TankbusterPaths)
+					{
+						if (!s.Path.StartsWith(p, PathCmp)) continue;
 
-                        bool isPlayerTarget = s.ObjectId == Player.Object.GameObjectId;
+						bool isPlayerTarget = s.ObjectId == Player.Object.GameObjectId;
 
-                        if (!isTank || isPlayerTarget)
-                        {
-                            if (Service.Config.InDebug)
-                            {
-                                PluginLog.Debug($"Tank lock-on VFX triggered: {s.Path}, ObjectId: {s.ObjectId}");
-                            }
+						if (!isTank || isPlayerTarget)
+						{
+							if (Service.Config.InDebug)
+							{
+								PluginLog.Debug($"Tank lock-on VFX triggered: {s.Path}, ObjectId: {s.ObjectId}");
+							}
 
 							// Try to resolve the object id to a party/alliance member and add to the list
 							if (Svc.Objects.SearchById(s.ObjectId) is IBattleChara obj && obj.IsParty() && !obj.IsDead && !TankbusterTargets.Contains(obj))
@@ -1808,18 +1837,18 @@ internal static class DataCenter
 							}
 
 							found = true;
-                        }
-                    }
-                }
-                catch (AccessViolationException ex)
-                {
-                    PluginLog.Warning($"AccessViolation in IsCastingTankVfx while scanning VFX: {ex.Message}");
-                }
-            }
+						}
+					}
+				}
+				catch (AccessViolationException ex)
+				{
+					PluginLog.Warning($"AccessViolation in IsCastingTankVfx while scanning VFX: {ex.Message}");
+				}
+			}
 
-            return found;
-        }
-    }
+			return found;
+		}
+	}
 
 	// Improved shared AOE detection using cached sets, covers both regular and multi-hit stack markers
 	public static bool IsCastingAreaVfx()
@@ -1992,6 +2021,80 @@ internal static class DataCenter
 			PluginLog.Warning($"AccessViolation in IsHostileCastingBase for obj {h?.GameObjectId}: {ex.Message}");
 			return false;
 		}
+	}
+	#endregion
+
+	#region BossModReborn Timeline Integration
+
+	public static bool BMREndabled
+	{
+		get
+		{
+			string name = "BossModReborn";
+			IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
+			foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
+			{
+				if ((x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	public static bool BMRHasActiveModule { get; set; }
+	public static string? BMRActiveModuleName { get; set; }
+	public static float BMRNextRaidwideIn { get; set; } = float.MaxValue;
+	public static float BMRNextTankbusterIn { get; set; } = float.MaxValue;
+	public static float BMRNextKnockbackIn { get; set; } = float.MaxValue;
+	public static float BMRNextDowntimeIn { get; set; } = float.MaxValue;
+	public static float BMRNextDowntimeEndIn { get; set; } = float.MaxValue;
+	public static float BMRNextVulnerableIn { get; set; } = float.MaxValue;
+	public static float BMRNextVulnerableEndIn { get; set; } = float.MaxValue;
+	public static float BMRNextDamageIn { get; set; } = float.MaxValue;
+	public static int BMRNextDamageType { get; set; }
+	public static float BMRSpecialModeIn { get; set; } = float.MaxValue;
+	public static int BMRSpecialModeType { get; set; }
+
+	// Debug diagnostics
+	public static float BMRDebugTimelineRaidwide { get; set; } = float.MaxValue;
+	public static float BMRDebugTimelineTankbuster { get; set; } = float.MaxValue;
+	public static float BMRDebugHintsRaidwide { get; set; } = float.MaxValue;
+	public static float BMRDebugHintsTankbuster { get; set; } = float.MaxValue;
+	public static float BMRDebugGenericDamageIn { get; set; } = float.MaxValue;
+	public static int BMRDebugGenericDamageType { get; set; }
+	public static bool BMRDebugTimelineRwFunc { get; set; }
+	public static bool BMRDebugTimelineTbFunc { get; set; }
+	public static bool BMRDebugHintsRwFunc { get; set; }
+	public static bool BMRDebugHintsTbFunc { get; set; }
+	public static string? BMRDebugTimelineWalk { get; set; }
+	public static void ResetBmrData()
+	{
+		BMRHasActiveModule = false;
+		BMRActiveModuleName = null;
+		BMRNextRaidwideIn = float.MaxValue;
+		BMRNextTankbusterIn = float.MaxValue;
+		BMRNextKnockbackIn = float.MaxValue;
+		BMRNextDowntimeIn = float.MaxValue;
+		BMRNextDowntimeEndIn = float.MaxValue;
+		BMRNextVulnerableIn = float.MaxValue;
+		BMRNextVulnerableEndIn = float.MaxValue;
+		BMRNextDamageIn = float.MaxValue;
+		BMRNextDamageType = 0;
+		BMRSpecialModeIn = float.MaxValue;
+		BMRSpecialModeType = 0;
+		BMRDebugTimelineRaidwide = float.MaxValue;
+		BMRDebugTimelineTankbuster = float.MaxValue;
+		BMRDebugHintsRaidwide = float.MaxValue;
+		BMRDebugHintsTankbuster = float.MaxValue;
+		BMRDebugGenericDamageIn = float.MaxValue;
+		BMRDebugGenericDamageType = 0;
+		BMRDebugTimelineRwFunc = false;
+		BMRDebugTimelineTbFunc = false;
+		BMRDebugHintsRwFunc = false;
+		BMRDebugHintsTbFunc = false;
+		BMRDebugTimelineWalk = null;
 	}
 	#endregion
 }
