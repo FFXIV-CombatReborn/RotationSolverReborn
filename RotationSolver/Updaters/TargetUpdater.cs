@@ -462,7 +462,11 @@ internal static partial class TargetUpdater
 			{
 				deathHealers.Add(chara);
 			}
-			else if (Service.Config.OffRaiserRaise && chara.IsJobs(Job.SMN, Job.RDM))
+			else if (Service.Config.OffRaiserRaise && chara.IsJobs(Job.SMN))
+			{
+				deathOffHealers.Add(chara);
+			}
+			else if (Service.Config.OffRaiserRaise && chara.IsJobs(Job.RDM))
 			{
 				deathOffHealers.Add(chara);
 			}
@@ -479,6 +483,8 @@ internal static partial class TargetUpdater
 
 		if (Service.Config.H2)
 		{
+			deathTanks.Reverse();
+			deathHealers.Reverse();
 			deathOffHealers.Reverse();
 			deathOthers.Reverse();
 		}

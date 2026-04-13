@@ -5,13 +5,13 @@
 /// </summary>
 public interface IEnoughLevel
 {
-    /// <summary>
-    /// Gets a value indicating whether the player's level is sufficient for this action's usage.
-    /// </summary>
-    bool EnoughLevel { get; }
+	/// <summary>
+	/// Gets a value indicating whether the player's level is sufficient for this action's usage.
+	/// </summary>
+	bool EnoughLevel { get; }
 
-    /// <summary>
-    /// Gets the required level for the action.
-    /// </summary>
-    byte Level { get; }
+	/// <summary>
+	/// Gets the required level for the action.
+	/// </summary>
+	byte Level { get; }
 }

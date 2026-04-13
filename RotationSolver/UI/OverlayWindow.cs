@@ -12,49 +12,49 @@ namespace RotationSolver.UI;
 /// </summary>
 internal class OverlayWindow : Window
 {
-    private const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoBackground
-    | ImGuiWindowFlags.NoBringToFrontOnFocus
-    | ImGuiWindowFlags.NoDecoration
-    | ImGuiWindowFlags.NoDocking
-    | ImGuiWindowFlags.NoFocusOnAppearing
-    | ImGuiWindowFlags.NoInputs
-    | ImGuiWindowFlags.NoNav;
+	private const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoBackground
+	| ImGuiWindowFlags.NoBringToFrontOnFocus
+	| ImGuiWindowFlags.NoDecoration
+	| ImGuiWindowFlags.NoDocking
+	| ImGuiWindowFlags.NoFocusOnAppearing
+	| ImGuiWindowFlags.NoInputs
+	| ImGuiWindowFlags.NoNav;
 
-    // Async update support and throttling for sync path
-    private IDrawing2D[]? _elements;
-    private readonly Stopwatch _throttle = Stopwatch.StartNew();
-    private const int SyncUpdateMs = 33; // ~30 FPS updates in sync mode
+	// Async update support and throttling for sync path
+	private IDrawing2D[]? _elements;
+	private readonly Stopwatch _throttle = Stopwatch.StartNew();
+	private const int SyncUpdateMs = 33; // ~30 FPS updates in sync mode
 
-    public OverlayWindow()
-        : base(nameof(OverlayWindow), BaseFlags, true)
-    {
-        IsOpen = true;
-        AllowClickthrough = true;
-        RespectCloseHotkey = false;
-    }
+	public OverlayWindow()
+		: base(nameof(OverlayWindow), BaseFlags, true)
+	{
+		IsOpen = true;
+		AllowClickthrough = true;
+		RespectCloseHotkey = false;
+	}
 
-    public override void PreDraw()
-    {
-        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
-        ImGuiHelpers.SetNextWindowPosRelativeMainViewport(Vector2.Zero);
-        ImGui.SetNextWindowSize(ImGuiHelpers.MainViewport.Size);
+	public override void PreDraw()
+	{
+		ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+		ImGuiHelpers.SetNextWindowPosRelativeMainViewport(Vector2.Zero);
+		ImGui.SetNextWindowSize(ImGuiHelpers.MainViewport.Size);
 
-        base.PreDraw();
-    }
+		base.PreDraw();
+	}
 
-    public override unsafe void Draw()
-    {
-        if (!HotbarHighlightManager.Enable || Svc.ClientState == null || Svc.Objects.LocalPlayer == null)
-        {
-            return;
-        }
+	public override unsafe void Draw()
+	{
+		if (!HotbarHighlightManager.Enable || Svc.ClientState == null || Svc.Objects.LocalPlayer == null)
+		{
+			return;
+		}
 
-        // Save and disable AA fill for performance of large overlays
-        bool prevAAFill = ImGui.GetStyle().AntiAliasedFill;
-        ImGui.GetStyle().AntiAliasedFill = false;
+		// Save and disable AA fill for performance of large overlays
+		bool prevAAFill = ImGui.GetStyle().AntiAliasedFill;
+		ImGui.GetStyle().AntiAliasedFill = false;
 
-        try
-        {
+		try
+		{
 			if (_throttle.ElapsedMilliseconds >= SyncUpdateMs)
 			{
 				var result = HotbarHighlightManager.To2DAsync().GetAwaiter().GetResult() ?? [];
@@ -65,44 +65,44 @@ internal class OverlayWindow : Window
 			}
 
 			ImDrawListPtr drawList = ImGui.GetWindowDrawList();
-            if (drawList.Handle == null)
-            {
-                PluginLog.Warning($"{nameof(OverlayWindow)}: Window draw list is null.");
-                return;
-            }
+			if (drawList.Handle == null)
+			{
+				PluginLog.Warning($"{nameof(OverlayWindow)}: Window draw list is null.");
+				return;
+			}
 
-            var elements = _elements;
-            if (elements != null)
-            {
-                foreach (IDrawing2D item in elements)
-                {
-                    item.Draw();
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            PluginLog.Warning($"{nameof(OverlayWindow)} failed to draw on Screen. {ex.Message}");
-        }
-        finally
-        {
-            ImGui.GetStyle().AntiAliasedFill = prevAAFill;
-        }
-    }
+			var elements = _elements;
+			if (elements != null)
+			{
+				foreach (IDrawing2D item in elements)
+				{
+					item.Draw();
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			PluginLog.Warning($"{nameof(OverlayWindow)} failed to draw on Screen. {ex.Message}");
+		}
+		finally
+		{
+			ImGui.GetStyle().AntiAliasedFill = prevAAFill;
+		}
+	}
 
-    private static int GetDrawingOrder(object drawing)
-    {
-        return drawing switch
-        {
-            PolylineDrawing poly => poly._thickness == 0 ? 0 : 1,
-            ImageDrawing => 1,
-            _ => 2,
-        };
-    }
+	private static int GetDrawingOrder(object drawing)
+	{
+		return drawing switch
+		{
+			PolylineDrawing poly => poly._thickness == 0 ? 0 : 1,
+			ImageDrawing => 1,
+			_ => 2,
+		};
+	}
 
-    public override void PostDraw()
-    {
-        ImGui.PopStyleVar();
-        base.PostDraw();
-    }
+	public override void PostDraw()
+	{
+		ImGui.PopStyleVar();
+		base.PostDraw();
+	}
 }

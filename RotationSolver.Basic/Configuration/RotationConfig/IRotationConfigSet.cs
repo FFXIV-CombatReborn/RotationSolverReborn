@@ -5,8 +5,8 @@
 /// </summary>
 public interface IRotationConfigSet : IEnumerable<IRotationConfig>
 {
-    /// <summary>
-    /// Gets the collection of rotation configurations.
-    /// </summary>
-    HashSet<IRotationConfig> Configs { get; }
+	/// <summary>
+	/// Gets the collection of rotation configurations.
+	/// </summary>
+	HashSet<IRotationConfig> Configs { get; }
 }

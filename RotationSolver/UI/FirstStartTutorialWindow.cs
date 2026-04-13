@@ -6,15 +6,15 @@ namespace RotationSolver.UI;
 
 internal sealed class FirstStartTutorialWindow : Window
 {
-    private const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoResize;
-    private int _stepIndex;
+	private const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoResize;
+	private int _stepIndex;
 
-    private static readonly string[] StarterMacros =
-    [
+	private static readonly string[] StarterMacros =
+	[
 		"/rotation Settings AoEType Full\r\n/rotation Auto",
 		"/rotation Settings AoEType Cleave\r\n/rotation Manual",
-        "/rotation Off",
-    ];
+		"/rotation Off",
+	];
 
 	private static readonly TutorialStep[] Steps =
 	[
@@ -129,12 +129,12 @@ internal sealed class FirstStartTutorialWindow : Window
 	];
 
 	public FirstStartTutorialWindow()
-        : base("RSR First Start Tutorial", BaseFlags)
-    {
-        Size = new Vector2(720, 530);
-        SizeCondition = ImGuiCond.FirstUseEver;
-        RespectCloseHotkey = true;
-    }
+		: base("RSR First Start Tutorial", BaseFlags)
+	{
+		Size = new Vector2(720, 530);
+		SizeCondition = ImGuiCond.FirstUseEver;
+		RespectCloseHotkey = true;
+	}
 
 	public override bool DrawConditions()
 	{
@@ -196,7 +196,7 @@ internal sealed class FirstStartTutorialWindow : Window
 
 	public override void OnClose()
 	{
-        MarkTutorialComplete();
+		MarkTutorialComplete();
 		base.OnClose();
 	}
 
@@ -216,37 +216,37 @@ internal sealed class FirstStartTutorialWindow : Window
 	}
 
 	private void DrawNavigation()
-    {
-        ImGui.BeginDisabled(_stepIndex == 0);
-        if (ImGui.Button("Back"))
-        {
-            _stepIndex = Math.Max(0, _stepIndex - 1);
-        }
-        ImGui.EndDisabled();
+	{
+		ImGui.BeginDisabled(_stepIndex == 0);
+		if (ImGui.Button("Back"))
+		{
+			_stepIndex = Math.Max(0, _stepIndex - 1);
+		}
+		ImGui.EndDisabled();
 
-        ImGui.SameLine();
+		ImGui.SameLine();
 
-        if (_stepIndex < Steps.Length - 1)
-        {
-            if (ImGui.Button("Next"))
-            {
-                _stepIndex = Math.Min(Steps.Length - 1, _stepIndex + 1);
-            }
-        }
-        else
-        {
-            if (ImGui.Button("Finish"))
-            {
-                FinishTutorial();
-            }
-        }
-    }
+		if (_stepIndex < Steps.Length - 1)
+		{
+			if (ImGui.Button("Next"))
+			{
+				_stepIndex = Math.Min(Steps.Length - 1, _stepIndex + 1);
+			}
+		}
+		else
+		{
+			if (ImGui.Button("Finish"))
+			{
+				FinishTutorial();
+			}
+		}
+	}
 
-    private void FinishTutorial()
-    {
-        MarkTutorialComplete();
-        IsOpen = false;
-    }
+	private void FinishTutorial()
+	{
+		MarkTutorialComplete();
+		IsOpen = false;
+	}
 
 	private static void MarkTutorialComplete()
 	{
@@ -254,10 +254,10 @@ internal sealed class FirstStartTutorialWindow : Window
 		Service.Config.Save();
 	}
 
-    private sealed record TutorialStep(
-        string Title,
-        string Description,
-        RotationConfigWindowTab? Tab = null,
-        string[]? Bullets = null,
-        string[]? RecommendedMacros = null);
+	private sealed record TutorialStep(
+		string Title,
+		string Description,
+		RotationConfigWindowTab? Tab = null,
+		string[]? Bullets = null,
+		string[]? RecommendedMacros = null);
 }

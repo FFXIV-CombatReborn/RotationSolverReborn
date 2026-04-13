@@ -5,18 +5,18 @@
 /// </summary>
 public enum StatusCategory : byte
 {
-    /// <summary>
-    /// No specific category.
-    /// </summary>
-    None = 0,
+	/// <summary>
+	/// No specific category.
+	/// </summary>
+	None = 0,
 
-    /// <summary>
-    /// A beneficial status effect.
-    /// </summary>
-    Beneficial = 1,
+	/// <summary>
+	/// A beneficial status effect.
+	/// </summary>
+	Beneficial = 1,
 
-    /// <summary>
-    /// A detrimental status effect.
-    /// </summary>
-    Detrimental = 2,
+	/// <summary>
+	/// A detrimental status effect.
+	/// </summary>
+	Detrimental = 2,
 }

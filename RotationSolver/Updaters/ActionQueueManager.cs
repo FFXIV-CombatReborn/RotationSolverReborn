@@ -139,25 +139,41 @@ namespace RotationSolver.Updaters
 							{
 								//PluginLog.Debug($"[ActionQueueManager] Matching action decided: {matchingAction.Name} (ID: {matchingAction.ID}, AdjustedID: {matchingAction.AdjustedID})");
 
-								if (matchingAction.IsIntercepted && ((ActionUpdater.NextAction != null && matchingAction != ActionUpdater.NextAction) || ActionUpdater.NextAction == null))
+								if (_useActionHook?.Original != null && matchingAction.IsIntercepted && ((ActionUpdater.NextAction != null && matchingAction != ActionUpdater.NextAction) || ActionUpdater.NextAction == null))
 								{
 									if (!matchingAction.EnoughLevel)
 									{
 										//PluginLog.Debug($"[ActionQueueManager] Not intercepting: insufficient level for {matchingAction.Name}.");
+										if (Service.Config.InterceptPassing)
+										{
+											return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
+										}
 									}
 									else if (!CanInterceptAction(matchingAction))
 									{
 										//PluginLog.Debug($"[ActionQueueManager] Not intercepting: cooldown/window check failed for {matchingAction.Name}.");
+										if (Service.Config.InterceptPassing)
+										{
+											return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
+										}
 									}
 									else
 									{
 										HandleInterceptedAction(matchingAction, actionID);
-										return false; // Block the original action
+										if (Service.Config.InterceptPassing)
+										{
+											return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
+										}
+										return false;
 									}
 								}
 								else
 								{
 									//PluginLog.Debug($"[ActionQueueManager] Not intercepting: {matchingAction.Name} is not marked for interception.");
+									if (_useActionHook?.Original != null)
+									{
+										return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
+									}
 								}
 							}
 						}

@@ -5,73 +5,73 @@
 
 public class BLM_DefaultPVP : BlackMageRotation
 {
-    #region Configurations
-    [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvP, Name = "Upper HP threshold you need to be to use Xenoglossy as a damage oGCD")]
-    public float XenoglossyHighHP { get; set; } = 0.8f;
+	#region Configurations
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvP, Name = "Upper HP threshold you need to be to use Xenoglossy as a damage oGCD")]
+	public float XenoglossyHighHP { get; set; } = 0.8f;
 
-    [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvP, Name = "Lower HP threshold you need to be to use Xenoglossy as a heal oGCD")]
-    public float XenoglossyLowHP { get; set; } = 0.5f;
-    #endregion
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvP, Name = "Lower HP threshold you need to be to use Xenoglossy as a heal oGCD")]
+	public float XenoglossyLowHP { get; set; } = 0.5f;
+	#endregion
 
-    #region oGCDs
-    [RotationDesc(ActionID.WreathOfIcePvP)]
-    protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
-    {
-        if (WreathOfIcePvP.CanUse(out action))
-        {
-            return true;
-        }
+	#region oGCDs
+	[RotationDesc(ActionID.WreathOfIcePvP)]
+	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
+	{
+		if (WreathOfIcePvP.CanUse(out action))
+		{
+			return true;
+		}
 
-        return base.DefenseSingleAbility(nextGCD, out action);
-    }
+		return base.DefenseSingleAbility(nextGCD, out action);
+	}
 
-    protected override bool AttackAbility(IAction nextGCD, out IAction? action)
-    {
-        //if (CometPvP.CanUse(out action)) return true;
-        if (RustPvP.CanUse(out action))
-        {
-            return true;
-        }
+	protected override bool AttackAbility(IAction nextGCD, out IAction? action)
+	{
+		//if (CometPvP.CanUse(out action)) return true;
+		if (RustPvP.CanUse(out action))
+		{
+			return true;
+		}
 
-        if (PhantomDartPvP.CanUse(out action))
-        {
-            return true;
-        }
+		if (PhantomDartPvP.CanUse(out action))
+		{
+			return true;
+		}
 
-        if (LethargyPvP.CanUse(out action))
-        {
-            return true;
-        }
+		if (LethargyPvP.CanUse(out action))
+		{
+			return true;
+		}
 
-        return base.AttackAbility(nextGCD, out action);
-    }
+		return base.AttackAbility(nextGCD, out action);
+	}
 
-    protected override bool GeneralAbility(IAction nextGCD, out IAction? action)
-    {
-        if (WreathOfFirePvP.CanUse(out action) && InCombat)
-        {
-            return true;
-        }
+	protected override bool GeneralAbility(IAction nextGCD, out IAction? action)
+	{
+		if (WreathOfFirePvP.CanUse(out action) && InCombat)
+		{
+			return true;
+		}
 
-        return base.GeneralAbility(nextGCD, out action);
-    }
+		return base.GeneralAbility(nextGCD, out action);
+	}
 
-    #endregion
+	#endregion
 
-    #region GCDs
-    protected override bool GeneralGCD(out IAction? action)
-    {
+	#region GCDs
+	protected override bool GeneralGCD(out IAction? action)
+	{
 		if (FlareStarPvP.CanUse(out action))
-        {
-            return true;
-        }
+		{
+			return true;
+		}
 
-        if (FrostStarPvP.CanUse(out action))
-        {
-            return true;
-        }
+		if (FrostStarPvP.CanUse(out action))
+		{
+			return true;
+		}
 
 		if (FlarePvP.CanUse(out action))
 		{
@@ -90,14 +90,14 @@ public class BLM_DefaultPVP : BlackMageRotation
 		}
 
 		if (ParadoxPvP.CanUse(out action))
-        {
-            return true;
-        }
+		{
+			return true;
+		}
 
-        if (NumberOfHostilesInRangeOf(6) > 0 && BurstPvP.CanUse(out action))
-        {
-            return true;
-        }
+		if (NumberOfHostilesInRangeOf(6) > 0 && BurstPvP.CanUse(out action))
+		{
+			return true;
+		}
 
 		if (HighFireIiPvP.CanUse(out action, skipAoeCheck: true))
 		{
@@ -129,6 +129,6 @@ public class BLM_DefaultPVP : BlackMageRotation
 			return true;
 		}
 		return base.GeneralGCD(out action);
-    }
-    #endregion
+	}
+	#endregion
 }
