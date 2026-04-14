@@ -31,6 +31,9 @@ public sealed class BeirutaSCH : ScholarRotation
     [RotationConfig(CombatType.PvE, Name = "Use Swiftcast for movement")]
     public bool UseSwiftcastForMovement { get; set; } = true;
 
+    [RotationConfig(CombatType.PvE, Name = "Use Swiftcast on Adloquium")]
+    public bool UseSwiftcastOnAdloquium { get; set; } = true;
+
     [Range(0, 5, ConfigUnitType.Seconds, 0.1f)]
     [RotationConfig(CombatType.PvE, Name = "Minimum movement time before allowing movement-based actions")]
     public float MovementTimeThreshold { get; set; } = 0.9f;
@@ -88,11 +91,27 @@ public sealed class BeirutaSCH : ScholarRotation
     [RotationConfig(CombatType.PvE, Name = "Enable Swiftcast restriction: only allow Raise while Swiftcast is active")]
     public bool SwiftLogic { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Recitation during the countdown opener")]
-    public bool UseRecitationInOpener { get; set; } = true;
+    [RotationConfig(CombatType.PvE, Name = "Countdown opener configuration")]
+public CountdownOpenerStrategy CountdownOpener { get; set; } =
+    CountdownOpenerStrategy.RecitationAdloquiumDeploymentTactics;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Adloquium during the countdown opener")]
-    public bool AdloquiumDuringCountdown { get; set; } = true;
+public enum CountdownOpenerStrategy : byte
+{
+    [Description("Recitation - Adloquium - Deployment Tactics")]
+    RecitationAdloquiumDeploymentTactics = 0,
+
+    [Description("Adloquium - Deployment Tactics")]
+    AdloquiumDeploymentTactics = 1,
+
+    [Description("Concitation/Succor")]
+    ConcitationOrSuccor = 2,
+
+    [Description("Recitation - Concitation/Succor")]
+    RecitationConcitationOrSuccor = 3,
+
+    [Description("None (no defensive countdown actions)")]
+    None = 4,
+}
 
     [RotationConfig(CombatType.PvE, Name = "How to control Deployment Tactics usage")]
     public DeploymentTacticsUsageStrategy DeploymentTacticsUsage { get; set; } = DeploymentTacticsUsageStrategy.ProtractionControl;
@@ -125,7 +144,6 @@ public sealed class BeirutaSCH : ScholarRotation
     private const float AetherpactStartHpThreshold = 0.8f;
     private const float ExcogHealHpThreshold = 0.4f;
     private const float BallparkDamagePercent = 0.08f;
-    private const float SwiftcastPostActionLockSeconds = 2f;
 
     private const int DotOffsetMobs = 1;
     private const int MinimumFairyGaugeForLinkPriority = 70;
@@ -144,6 +162,7 @@ public sealed class BeirutaSCH : ScholarRotation
     private bool HasGalvanize => StatusHelper.PlayerHasStatus(true, StatusID.Galvanize);
     private bool HasProtraction => StatusHelper.PlayerHasStatus(true, StatusID.Protraction);
     private bool HasMacrocosmos => StatusHelper.PlayerHasStatus(true, StatusID.Macrocosmos);
+    private bool HasSeraphism => StatusHelper.PlayerHasStatus(true, StatusID.Seraphism);
 
     private bool HasWhisperingDawn => HasPartyMemberWithOwnStatus(StatusID.WhisperingDawn);
     private bool HasAngelsWhisper => HasPartyMemberWithOwnStatus(StatusID.AngelsWhisper);
@@ -167,12 +186,45 @@ public sealed class BeirutaSCH : ScholarRotation
     private bool InFirst5sAfterAdloquium =>
         _adloquiumUsedAtMs != 0 &&
         Environment.TickCount64 - _adloquiumUsedAtMs < DeploymentTacticsAfterAdloquiumWindowMs;
+    private bool CountdownUsesRecitation =>
+    CountdownOpener is
+        CountdownOpenerStrategy.RecitationAdloquiumDeploymentTactics or
+        CountdownOpenerStrategy.RecitationConcitationOrSuccor;
 
-    private bool IsSwiftcastPostActionLockActive =>
-        InCombat &&
-        _lastSwiftcastLockingActionCombatTime > float.MinValue / 2 &&
-        CombatTime - _lastSwiftcastLockingActionCombatTime <= SwiftcastPostActionLockSeconds;
+private bool CountdownUsesDeploymentAdlo =>
+    CountdownOpener is
+        CountdownOpenerStrategy.RecitationAdloquiumDeploymentTactics or
+        CountdownOpenerStrategy.AdloquiumDeploymentTactics;
 
+private bool CountdownUsesConcitationSuccor =>
+    CountdownOpener is
+        CountdownOpenerStrategy.ConcitationOrSuccor or
+        CountdownOpenerStrategy.RecitationConcitationOrSuccor;
+    private bool ShouldSwiftcastForAdloquium()
+{
+    return UseSwiftcastOnAdloquium &&
+           !HasSeraphism &&
+           HasSufficientMovement &&
+           !HasSwift &&
+           !IsLastAction(ActionID.SwiftcastPvE) &&
+           !ShouldDeferToRaise() &&
+           ShouldUseDeploymentAdloquium();
+}
+    private static bool IsPartyMedicated =>
+    PartyMembers?.Any(member =>
+        member?.StatusList?.Any(status => status.StatusId == (uint)StatusID.Medicated) == true
+    ) == true;
+private bool CanUseCountdownShieldGCD(out IAction? act)
+{
+    if (ConcitationPvE.CanUse(out act))
+        return true;
+
+    if (SuccorPvE.CanUse(out act))
+        return true;
+
+    act = null;
+    return false;
+}
     #endregion
 
     #region Helper Methods
@@ -219,7 +271,7 @@ public sealed class BeirutaSCH : ScholarRotation
         float summonSeraphRem = SummonSeraphRem();
         float dissipationRem = DissipationRem();
 
-        return summonSeraphRem < 90f || dissipationRem < 140f;
+        return summonSeraphRem < 90f && dissipationRem < 140f;
     }
 
     private void UpdateActionTracking()
@@ -266,8 +318,7 @@ public sealed class BeirutaSCH : ScholarRotation
             !HasSufficientMovement ||
             HasSwift ||
             IsLastAction(ActionID.SwiftcastPvE) ||
-            ShouldDeferToRaise() ||
-            IsSwiftcastPostActionLockActive)
+            ShouldDeferToRaise())
         {
             return false;
         }
@@ -280,31 +331,71 @@ public sealed class BeirutaSCH : ScholarRotation
     #region Countdown Logic
 
     protected override IAction? CountDownAction(float remainTime)
+{
+    if ((remainTime is < 14f and > 7f || remainTime is < 4f and > 3f) && SummonEosPvE.CanUse(out IAction? act))
+        return act;
+
+    if (remainTime < RuinPvE.Info.CastTime + CountDownAhead && RuinPvE.CanUse(out act))
+        return act;
+
+    if (remainTime < 3f && UseBurstMedicine(out act))
+        return act;
+
+    switch (CountdownOpener)
     {
-        if (SummonEosPvE.CanUse(out IAction? act))
-            return act;
+        case CountdownOpenerStrategy.RecitationAdloquiumDeploymentTactics:
+            if (remainTime is < 4f and > 3f && DeploymentTacticsPvE.CanUse(out act))
+                return act;
 
-        if (remainTime < RuinPvE.Info.CastTime + CountDownAhead && RuinPvE.CanUse(out act))
-            return act;
+            if (remainTime is < 7f and > 6f &&
+                AdloquiumPvE.CanUse(out act, targetOverride: TargetType.Tank))
+            {
+                StampAdloquiumUse();
+                return act;
+            }
 
-        if (remainTime < 3f && UseBurstMedicine(out act))
-            return act;
+            if (remainTime is < 14f and > 9f &&
+                RecitationPvE.CanUse(out act))
+            {
+                return act;
+            }
+            break;
 
-        if (remainTime is < 4f and > 3f && DeploymentTacticsPvE.CanUse(out act))
-            return act;
+        case CountdownOpenerStrategy.AdloquiumDeploymentTactics:
+            if (remainTime is < 4f and > 3f && DeploymentTacticsPvE.CanUse(out act))
+                return act;
 
-        if (remainTime is < 7f and > 6f && AdloquiumDuringCountdown &&
-            AdloquiumPvE.CanUse(out act, targetOverride: TargetType.Tank))
-        {
-            StampAdloquiumUse();
-            return act;
-        }
+            if (remainTime is < 7f and > 6f &&
+                AdloquiumPvE.CanUse(out act, targetOverride: TargetType.Tank))
+            {
+                StampAdloquiumUse();
+                return act;
+            }
+            break;
 
-        if (remainTime <= 15f && UseRecitationInOpener && RecitationPvE.CanUse(out act))
-            return act;
+        case CountdownOpenerStrategy.ConcitationOrSuccor:
+            if (remainTime is < 7f and > 6f && CanUseCountdownShieldGCD(out act))
+                return act;
+            break;
 
-        return base.CountDownAction(remainTime);
+        case CountdownOpenerStrategy.RecitationConcitationOrSuccor:
+            if (remainTime is < 7f and > 6f && CanUseCountdownShieldGCD(out act))
+                return act;
+
+            if (remainTime is < 14f and > 9f &&
+                RecitationPvE.CanUse(out act))
+            {
+                return act;
+            }
+            break;
+
+        case CountdownOpenerStrategy.None:
+        default:
+            break;
     }
+
+    return base.CountDownAction(remainTime);
+}
 
     #endregion
 
@@ -332,7 +423,13 @@ public sealed class BeirutaSCH : ScholarRotation
         }
 
         if (ShouldUseRecitationForDeploymentTactics() && RecitationPvE.CanUse(out act))
-            return true;
+    return true;
+
+if (ShouldSwiftcastForAdloquium() &&
+    SwiftcastPvE.CanUse(out act))
+{
+    return true;
+}
 
         if (PartyMembersAverHP < HealAreaGcdEmergencyTacticsHeal &&
             EmergencyTacticsPvE.CanUse(out act) &&
@@ -533,7 +630,6 @@ public sealed class BeirutaSCH : ScholarRotation
         int closeTargetCount = NumberOfHostilesInRangeOf(5);
 
         if (ShouldSwiftcastForMovement(nextGCD) &&
-        !IsSwiftcastPostActionLockActive &&
             MovingTime > MovementTimeThreshold + 0.5f &&
             SwiftcastPvE.CanUse(out act))
         {
@@ -563,8 +659,12 @@ public sealed class BeirutaSCH : ScholarRotation
         if (!HasAetherflow && AetherflowPvE.CanUse(out act))
             return true;
 
-        if (ChainStratagemPvE.Cooldown.WillHaveOneCharge(5) && IsBurst && UseBurstMedicine(out act))
-            return true;
+       if (IsBurst &&
+    (IsPartyMedicated || ChainStratagemPvE.Cooldown.WillHaveOneCharge(5)) &&
+    UseBurstMedicine(out act))
+{
+    return true;
+}
 
         if (ShouldUseBanefulImpaction(closeTargetCount, out act))
             return true;
@@ -591,6 +691,7 @@ public sealed class BeirutaSCH : ScholarRotation
             return base.HealAreaGCD(out act);
 
         if (HasEmergencyTactics &&
+            !HasRecitation &&
             PartyMembersAverHP < HealAreaGcdEmergencyTacticsHeal &&
             SuccorPvE.CanUse(out act, skipStatusProvideCheck: true))
         {
@@ -598,6 +699,7 @@ public sealed class BeirutaSCH : ScholarRotation
         }
 
         if (!HasEmergencyTactics &&
+            !HasRecitation &&
             PartyMembersAverHP < HealAreaGcdAccessionHeal &&
             AccessionPvE.CanUse(out act, skipCastingCheck: true))
         {
@@ -822,8 +924,6 @@ public sealed class BeirutaSCH : ScholarRotation
 
         if (HasSufficientMovement &&
     !HasSwift &&
-    (!UseSwiftcastForMovement || !SwiftcastPvE.CanUse(out _)) &&
-    !IsSwiftcastPostActionLockActive &&
     RuinIiPvE.CanUse(out act))
 {
     return true;
@@ -837,25 +937,24 @@ public sealed class BeirutaSCH : ScholarRotation
     #region Decision Helpers
 
     private bool ShouldUseRecitationForDeploymentTactics()
+{
+    if (!OnlyUseDeploymentTacticsOnCriticalShields ||
+        !RecitationPvE.EnoughLevel ||
+        HasRecitation ||
+        HasGalvanize ||
+        !DeploymentTacticsPvE.Cooldown.WillHaveOneChargeGCD(2))
     {
-        if (!OnlyUseDeploymentTacticsOnCriticalShields ||
-            !RecitationPvE.EnoughLevel ||
-            HasRecitation ||
-            HasGalvanize ||
-            !DeploymentTacticsPvE.Cooldown.WillHaveOneChargeGCD(2))
-        {
-            return false;
-        }
-
-        return DeploymentTacticsUsage switch
-        {
-            DeploymentTacticsUsageStrategy.ProtractionControl => HasProtraction,
-            DeploymentTacticsUsageStrategy.RecitationControl => true,
-            DeploymentTacticsUsageStrategy.BothControl => false,
-            _ => false,
-        };
+        return false;
     }
 
+    return DeploymentTacticsUsage switch
+    {
+        DeploymentTacticsUsageStrategy.ProtractionControl => HasProtraction,
+        DeploymentTacticsUsageStrategy.RecitationControl => false,
+        DeploymentTacticsUsageStrategy.BothControl => false,
+        _ => false,
+    };
+}
     private bool ShouldUseDeploymentAdloquium()
     {
         if (!DeploymentTacticsPvE.Cooldown.WillHaveOneChargeGCD(2) || HasGalvanize)

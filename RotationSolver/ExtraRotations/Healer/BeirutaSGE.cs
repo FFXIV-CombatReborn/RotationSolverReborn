@@ -322,19 +322,19 @@ private bool IsPhlegmaAoeAtLeast(int threshold)
             return act;
         }
 
-        if (remainTime <= 15f
+        if (remainTime is < 14f and > 9f
             && UseZoeInOpener
             && ZoePvE.CanUse(out act))
         {
             return act;
         }
 
-        if (remainTime <= 5f && EukrasiaPvE.CanUse(out act))
+        if (remainTime < 4f && EukrasiaPvE.CanUse(out act))
         {
             return act;
         }
 
-        if (remainTime <= 15f && KardiaPvE.CanUse(out act))
+        if (remainTime is < 14f and > 9f && KardiaPvE.CanUse(out act))
         {
             return act;
         }
