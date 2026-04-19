@@ -873,8 +873,8 @@ public partial class CustomRotation
 		{
 			act = null;
 
-			if (!Enabled)
-				return false;
+            if (!Enabled || StatusHelper.PlayerHasStatus(true, StatusID.Medicated))
+                return false;
 
 			// Check if conditions are met for potion usage
 			if (!IsConditionMet())
@@ -1101,29 +1101,31 @@ public partial class CustomRotation
 	#endregion
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	public static float LateWeaveWindow => WeaponTotal * 0.45f;
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	public static bool EnoughWeaveTime => WeaponRemain > DataCenter.CalculatedActionAhead && WeaponRemain < WeaponTotal;
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	public static bool CanLateWeave => WeaponRemain <= LateWeaveWindow && EnoughWeaveTime && CanWeave;
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	public static bool CanEarlyWeave => (!HasWeaved() || WeaponRemain > LateWeaveWindow) && CanWeave;
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
-	public static bool CanWeave => WeaponRemain >= DataCenter.CalculatedActionAhead && DataCenter.DefaultGCDElapsed > 0 && DataCenter.DefaultGCDElapsed >= DataCenter.CalculatedActionAhead;
+	public static bool CanWeave => WeaponRemain >= DataCenter.CalculatedActionAhead
+	                               && DataCenter.DefaultGCDElapsed > 0
+	                               && DataCenter.DefaultGCDElapsed >= DataCenter.CalculatedActionAhead;
 
 	/// <summary>
 	/// Counts how many party members (alive and not full HP) are within range of the pet.
@@ -1188,7 +1190,7 @@ public partial class CustomRotation
 	public virtual bool CanHealSingleSpell => true;
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	public static int RaiseMPMinimum => Service.Config.LessMPNoRaise;
 
