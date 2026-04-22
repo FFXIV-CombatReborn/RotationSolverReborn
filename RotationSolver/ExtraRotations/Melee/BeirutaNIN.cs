@@ -153,8 +153,10 @@ public sealed class BeirutaNIN : NinjaRotation
         !IsShadowWalking &&
         !HasTenChiJin &&
         !HasKassatsu &&
-        BurstActionIsCoolingDown &&
-        BurstActionRecastRemain < BurstPrepThreshold;
+         (
+        !BurstActionIsCoolingDown || 
+        BurstActionRecastRemain < BurstPrepThreshold
+        );
 
     private bool InBurstPhase =>
         InCombat &&
