@@ -868,8 +868,9 @@ public partial class CustomRotation
 		/// </summary>
 		/// <param name="rotation">The custom rotation instance</param>
 		/// <param name="act">The action to use if potion usage is recommended</param>
+		/// <param name="clippingCheck">Whether to perform a clipping check when using the potion</param>
 		/// <returns>True if both conditions and timing are met for potion usage</returns>
-		public bool ShouldUsePotion(CustomRotation rotation, out IAction? act)
+		public bool ShouldUsePotion(CustomRotation rotation, out IAction? act, bool clippingCheck = true)
 		{
 			act = null;
 
@@ -877,15 +878,18 @@ public partial class CustomRotation
                 return false;
 
 			// Check if conditions are met for potion usage
-			if (!IsConditionMet())
-				return false;
+			if (!IsConditionMet()) return false;
 
 			// Check if current time aligns with strategy timing
-			if (!CanUseAtTime())
-				return false;
+			if (!CanUseAtTime()) return false;
 
 			// Finally, attempt to use the burst medicine
-			return IsConditionMet() && CanUseAtTime() && rotation.UseBurstMedicine(out act);
+			if (IsConditionMet() && CanUseAtTime())
+			{
+				return rotation.UseBurstMedicine(out act, clippingCheck);
+			};
+
+			return false;
 		}
 
 		/// <summary>

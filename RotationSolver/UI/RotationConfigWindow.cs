@@ -2231,65 +2231,91 @@ public partial class RotationConfigWindow : Window
 	}
 
 	/// <summary>
-	/// Checks if a rotation config should be visible based on parent-child relationships.
-	/// </summary>
-	/// <param name="config">The configuration to check.</param>
-	/// <param name="configSet">The set of all configurations.</param>
-	/// <returns>True if the config should be shown, false otherwise.</returns>
-	private static bool ShouldShowRotationConfig(IRotationConfig config, IRotationConfigSet configSet)
+/// Checks if a rotation config should be visible based on parent-child relationships.
+/// A config is visible only if all ancestors in its parent chain are visible and its direct parent condition matches.
+/// </summary>
+/// <param name="config">The configuration to check.</param>
+/// <param name="configSet">The set of all configurations.</param>
+/// <returns>True if the config should be shown, false otherwise.</returns>
+private static bool ShouldShowRotationConfig(IRotationConfig config, IRotationConfigSet configSet)
+{
+	return ShouldShowRotationConfigInternal(config, configSet, new HashSet<string>(StringComparer.Ordinal));
+}
+
+private static bool ShouldShowRotationConfigInternal(
+	IRotationConfig config,
+	IRotationConfigSet configSet,
+	HashSet<string> visiting)
+{
+	if (string.IsNullOrEmpty(config.Parent))
 	{
-		if (string.IsNullOrEmpty(config.Parent))
-		{
-			return true;
-		}
+		return true;
+	}
 
-		IRotationConfig? parentConfig = null;
-		foreach (var c in configSet.Configs)
-		{
-			if (c.Name == config.Parent)
-			{
-				parentConfig = c;
-				break;
-			}
-		}
+	// Guard against accidental parent cycles.
+	if (!visiting.Add(config.Name))
+	{
+		return false;
+	}
 
-		if (parentConfig == null)
+	IRotationConfig? parentConfig = null;
+	foreach (var c in configSet.Configs)
+	{
+		if (c.Name == config.Parent)
 		{
-			return true;
+			parentConfig = c;
+			break;
 		}
+	}
 
-		if (parentConfig is RotationConfigBoolean parentBool)
+	if (parentConfig == null)
+	{
+		visiting.Remove(config.Name);
+		return true;
+	}
+
+	// If the parent itself is hidden (because of its own parent), this child must be hidden too.
+	if (!ShouldShowRotationConfigInternal(parentConfig, configSet, visiting))
+	{
+		visiting.Remove(config.Name);
+		return false;
+	}
+
+	if (parentConfig is RotationConfigBoolean parentBool)
+	{
+		if (!bool.TryParse(parentBool.Value, out var isEnabled) || !isEnabled)
 		{
-			if (!bool.TryParse(parentBool.Value, out var isEnabled) || !isEnabled)
-			{
-				return false;
-			}
+			visiting.Remove(config.Name);
+			return false;
 		}
-		else
+	}
+	else
+	{
+		var parentValueProperty = config.GetType().GetProperty("ParentValue");
+		if (parentValueProperty != null)
 		{
-			var parentValueProperty = config.GetType().GetProperty("ParentValue");
-			if (parentValueProperty != null)
+			var parentValue = parentValueProperty.GetValue(config);
+			if (parentValue != null)
 			{
-				var parentValue = parentValueProperty.GetValue(config);
-				if (parentValue != null)
+				var parentValueStr = parentValue.ToString();
+				if (parentValue.GetType().IsEnum && parentValueStr != null && parentValueStr.Contains('.'))
 				{
-					var parentValueStr = parentValue.ToString();
-					if (parentValue.GetType().IsEnum && parentValueStr != null && parentValueStr.Contains('.'))
-					{
-						parentValueStr = parentValueStr.Split('.').Last();
-					}
+					parentValueStr = parentValueStr.Split('.').Last();
+				}
 
-					if (parentConfig.Value == null ||
-						!string.Equals(parentConfig.Value.Trim(), parentValueStr?.Trim(), StringComparison.OrdinalIgnoreCase))
-					{
-						return false;
-					}
+				if (parentConfig.Value == null ||
+					!string.Equals(parentConfig.Value.Trim(), parentValueStr?.Trim(), StringComparison.OrdinalIgnoreCase))
+				{
+					visiting.Remove(config.Name);
+					return false;
 				}
 			}
 		}
-
-		return true;
 	}
+
+	visiting.Remove(config.Name);
+	return true;
+}
 
 	private static void DrawRotationConfiguration()
 	{
