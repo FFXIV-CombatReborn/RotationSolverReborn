@@ -348,7 +348,9 @@ public partial class ReaperRotation
 
 	static partial void ModifyArcaneCirclePvE(ref ActionSetting setting)
 	{
-		setting.StatusProvide = [StatusID.BloodsownCircle_2972];
+		setting.StatusProvide = [StatusID.ArcaneCircle, StatusID.BloodsownCircle_2972];
+		setting.StatusFromSelf = false;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			TimeToKill = 10,

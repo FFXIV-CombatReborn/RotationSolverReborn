@@ -318,16 +318,20 @@ public partial class NinjaRotation
 	{
 		setting.UnlockedByQuestID = 65681;
 		setting.ActionCheck = () => IsLongerThan(10);
+		setting.TargetStatusProvide = [StatusID.Mug];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			TimeToKill = 10,
 		};
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyTrickAttackPvE(ref ActionSetting setting)
 	{
 		setting.StatusNeed = [StatusID.ShadowWalker, StatusID.Hidden];
 		setting.TargetStatusProvide = [StatusID.TrickAttack_3254];
+		setting.StatusFromSelf = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			TimeToKill = 10,
@@ -400,14 +404,15 @@ public partial class NinjaRotation
 
 	static partial void ModifyDokumoriPvE(ref ActionSetting setting)
 	{
-		setting.StatusProvide = [StatusID.Higi];
-		setting.TargetStatusProvide = [StatusID.Dokumori];
 		setting.ActionCheck = () => Ninki <= 60 && IsLongerThan(10) && !HasTenChiJin;
+		setting.TargetStatusProvide = [StatusID.Dokumori];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			TimeToKill = 10,
 			AoeCount = 1,
 		};
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyBhavacakraPvE(ref ActionSetting setting)

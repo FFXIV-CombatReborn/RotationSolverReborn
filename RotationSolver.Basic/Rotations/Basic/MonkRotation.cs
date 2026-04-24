@@ -472,6 +472,8 @@ public partial class MonkRotation
 	static partial void ModifyBrotherhoodPvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.Brotherhood, StatusID.MeditativeBrotherhood];
+		setting.StatusFromSelf = false;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			TimeToKill = 10,

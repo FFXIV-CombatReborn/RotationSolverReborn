@@ -18,6 +18,9 @@ public sealed class BRD_Reborn : BardRotation
 	[RotationConfig(CombatType.PvE, Name = "Only use DOTs on targets with Boss Icon")]
 	public bool DOTBoss { get; set; } = false;
 
+	[RotationConfig(CombatType.PvE, Name = "Skip DOT check for Barrage usage")]
+	public bool DOTBarrage { get; set; } = false;
+
 	[Range(80, 100, ConfigUnitType.None, 5)]
 	[RotationConfig(CombatType.PvE, Name = "Soul Voice Threshold for Apex Arrow")]
 	public float SoulVoiceConfig { get; set; } = 100;
@@ -219,7 +222,7 @@ public sealed class BRD_Reborn : BardRotation
 		{
 			if (((!RadiantFinalePvE.EnoughLevel && !RagingStrikesPvE.Cooldown.IsCoolingDown)
 					|| (RadiantFinalePvE.EnoughLevel && !RadiantFinalePvE.Cooldown.IsCoolingDown && RagingStrikesPvE.EnoughLevel && (!RagingStrikesPvE.Cooldown.IsCoolingDown || RagingStrikesPvE.Cooldown.WillHaveOneCharge(BuffAlignment))))
-					&& CurrentTarget?.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == true && CurrentTarget?.HasStatus(true, StatusID.VenomousBite, StatusID.CausticBite) == true && BattleVoicePvE.CanUse(out act))
+					&& ((CurrentTarget?.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == true && CurrentTarget?.HasStatus(true, StatusID.VenomousBite, StatusID.CausticBite) == true) || DOTBarrage) && BattleVoicePvE.CanUse(out act))
 			{
 				return true;
 			}

@@ -10,28 +10,7 @@ namespace RotationSolver.ExtraRotations.Magical;
 public sealed class ChurinSMN : SummonerRotation
 {
     #region Properties
-    private bool CanBurst => MergedStatus.HasFlag(AutoStatus.Burst) && SearingLightPvE.IsEnabled;
-    private bool InBigSummon => !SummonBahamutPvE.EnoughLevel || InBahamut || InPhoenix || InSolarBahamut;
-    private static bool HasFurtherRuin => StatusHelper.PlayerHasStatus(true, StatusID.FurtherRuin_2701);
-    private static bool HasCrimsonStrike => StatusHelper.PlayerHasStatus(true, StatusID.CrimsonStrikeReady_4403);
-    private static bool HasRadiantAegis => StatusHelper.PlayerHasStatus(true, StatusID.RadiantAegis);
-    private static bool HasGarudaFavor => StatusHelper.PlayerHasStatus(true, StatusID.GarudasFavor);
-    private static bool HasIfritFavor => StatusHelper.PlayerHasStatus(true, StatusID.IfritsFavor);
-    private static bool HasTitanFavor => StatusHelper.PlayerHasStatus(true, StatusID.TitansFavor);
-    private static bool NoPrimalReady => !IsIfritReady && !IsGarudaReady && !IsTitanReady;
-    private static bool AnyPrimalReady => IsIfritReady || IsGarudaReady || IsTitanReady;
-    private static bool HasAnyFavor => HasGarudaFavor || HasIfritFavor || HasTitanFavor;
-    private static bool HasAnyAttunement => InGaruda || InIfrit || InTitan;
-    private static bool NoAttunement => !InIfrit && !InGaruda && !InTitan;
-    private static bool InSolar => DataCenter.PlayerSyncedLevel() == 100 ? !InBahamut && !InPhoenix && InSolarBahamut : InBahamut && !InPhoenix;
-    private bool BahamutBurst => ((SummonSolarBahamutPvE.EnoughLevel && InSolarBahamut) 
-    || (SummonSolarBahamutPvE.EnoughLevel && (InBahamut || InPhoenix)) 
-    || (!SummonSolarBahamutPvE.EnoughLevel && InBahamut) 
-    || !SummonBahamutPvE.EnoughLevel) && CanBurst;
     private static SMNGauge SummonerGauge => Svc.Gauges.Get<SMNGauge>();
-    private static double LateWeaveWindow => (float)(WeaponTotal * 0.45);
-    private static bool CanWeave => WeaponRemain > AnimationLock;
-    private static bool CanLateWeave => WeaponRemain < LateWeaveWindow && CanWeave;
     private static float SummonTimer => SummonerGauge.SummonTimerRemaining / 1000f;
     #endregion
 

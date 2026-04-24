@@ -410,12 +410,63 @@ public partial class DancerRotation
 		setting.UnlockedByQuestID = 68790;
 	}
 
-	static partial void ModifyDoubleTechnicalFinishPvE(ref ActionSetting setting)
+	static partial void ModifyTechnicalFinishPvE(ref ActionSetting setting)
 	{
-		setting.StatusProvide = [StatusID.StandardStep, StatusID.TechnicalStep, StatusID.DanceOfTheDawnReady];
+		setting.StatusProvide = [StatusID.StandardStep, StatusID.TechnicalFinish, StatusID.DanceOfTheDawnReady];
+		setting.StatusFromSelf = false;
+		setting.TargetType = TargetType.Self;
+		setting.ActionCheck = () => HasTechnicalStep && IsDancing && CompletedSteps == 0 && Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.TechnicalFinishPvE;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			TimeToKill = 20,
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifySingleTechnicalFinishPvE(ref ActionSetting setting)
+	{
+		setting.StatusProvide = [StatusID.StandardStep, StatusID.TechnicalFinish, StatusID.DanceOfTheDawnReady];
+		setting.StatusFromSelf = false;
+		setting.TargetType = TargetType.Self;
+		setting.ActionCheck = () => HasTechnicalStep && IsDancing && CompletedSteps == 1 && Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.SingleTechnicalFinishPvE;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			TimeToKill = 20,
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyDoubleTechnicalFinishPvE(ref ActionSetting setting)
+	{
+		setting.StatusProvide = [StatusID.StandardStep, StatusID.TechnicalStep, StatusID.DanceOfTheDawnReady];
+		setting.StatusFromSelf = false;
+		setting.ActionCheck = () => HasTechnicalStep && IsDancing && CompletedSteps == 2 && Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.DoubleTechnicalFinishPvE;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			TimeToKill = 20,
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyTripleTechnicalFinishPvE(ref ActionSetting setting)
+	{
+		setting.StatusProvide = [StatusID.StandardStep, StatusID.TechnicalFinish, StatusID.DanceOfTheDawnReady];
+		setting.StatusFromSelf = false;
+		setting.ActionCheck = () => HasTechnicalStep && IsDancing && CompletedSteps == 3 && Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.TripleTechnicalFinishPvE;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			TimeToKill = 20,
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyQuadrupleTechnicalFinishPvE(ref ActionSetting setting)
+	{
+		setting.StatusProvide = [StatusID.StandardStep, StatusID.TechnicalFinish, StatusID.DanceOfTheDawnReady];
+		setting.StatusFromSelf = false;
+		setting.ActionCheck = () => HasTechnicalStep && IsDancing && CompletedSteps == 4 && Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.QuadrupleTechnicalFinishPvE;
+		setting.CreateConfig = () => new ActionConfig()
+		{
 			AoeCount = 1,
 		};
 	}
@@ -425,17 +476,6 @@ public partial class DancerRotation
 		//setting.StatusNeed = [StatusID.StandardStep];
 		setting.StatusProvide = [StatusID.LastDanceReady];
 		setting.ActionCheck = () => HasStandardStep && IsDancing && CompletedSteps == 2 && Service.GetAdjustedActionId(ActionID.StandardStepPvE) == ActionID.DoubleStandardFinishPvE;
-		setting.CreateConfig = () => new ActionConfig()
-		{
-			AoeCount = 1,
-		};
-	}
-
-	static partial void ModifyQuadrupleTechnicalFinishPvE(ref ActionSetting setting)
-	{
-		//setting.StatusNeed = [StatusID.TechnicalStep];
-		setting.StatusProvide = [StatusID.DanceOfTheDawnReady];
-		setting.ActionCheck = () => HasTechnicalStep && IsDancing && CompletedSteps == 4 && Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.QuadrupleTechnicalFinishPvE;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,

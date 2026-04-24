@@ -440,6 +440,9 @@ public partial class RedMageRotation
 
 	static partial void ModifyEmboldenPvE(ref ActionSetting setting)
 	{
+		setting.StatusProvide = [StatusID.Embolden];
+		setting.StatusFromSelf = false;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			TimeToKill = 10,

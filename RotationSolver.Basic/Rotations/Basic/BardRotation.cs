@@ -234,6 +234,8 @@ public partial class BardRotation
 	static partial void ModifyBattleVoicePvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.BattleVoice];
+		setting.StatusFromSelf = false;
+		setting.TargetType = TargetType.Self;
 		setting.UnlockedByQuestID = 66626;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -288,8 +290,8 @@ public partial class BardRotation
 
 	static partial void ModifyTroubadourPvE(ref ActionSetting setting)
 	{
-		setting.StatusFromSelf = false;
 		setting.StatusProvide = StatusHelper.RangePhysicalDefense;
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -378,7 +380,9 @@ public partial class BardRotation
 	static partial void ModifyRadiantFinalePvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => JobGauge.Coda.Any(s => s != Song.None);
-		setting.StatusProvide = [StatusID.RadiantEncoreReady];
+		setting.StatusProvide = [StatusID.RadiantFinale_2964, StatusID.RadiantEncoreReady];
+		setting.StatusFromSelf = false;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			TimeToKill = 10,

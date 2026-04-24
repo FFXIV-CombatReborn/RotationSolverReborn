@@ -287,13 +287,13 @@ public partial class ScholarRotation
 	static partial void ModifyChainStratagemPvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => InCombat;
-		setting.StatusProvide = [StatusID.ImpactImminent];
 		setting.TargetStatusProvide = [StatusID.ChainStratagem];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			TimeToKill = 10,
 		};
-		setting.IsFriendly = true;
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyAetherpactPvE(ref ActionSetting setting)
@@ -389,6 +389,7 @@ public partial class ScholarRotation
 			StatusID.EukrasianPrognosis,
 			StatusID.Galvanize
 		];
+		setting.StatusFromSelf = false;
 		setting.IsFriendly = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -411,6 +412,7 @@ public partial class ScholarRotation
 			StatusID.EukrasianPrognosis,
 			StatusID.Galvanize
 		];
+		setting.StatusFromSelf = false;
 		setting.IsFriendly = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -427,6 +429,7 @@ public partial class ScholarRotation
 			StatusID.EukrasianPrognosis,
 			StatusID.Galvanize
 		];
+		setting.StatusFromSelf = false;
 		setting.IsFriendly = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{

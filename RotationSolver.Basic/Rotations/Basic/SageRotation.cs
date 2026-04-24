@@ -162,7 +162,8 @@ public partial class SageRotation
 
 	static partial void ModifyEukrasianPrognosisPvE(ref ActionSetting setting)
 	{
-		setting.StatusProvide = [StatusID.EukrasianPrognosis];
+		setting.StatusProvide = [StatusID.EukrasianPrognosis, StatusID.Galvanize];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -417,7 +418,8 @@ public partial class SageRotation
 
 	static partial void ModifyEukrasianPrognosisIiPvE(ref ActionSetting setting)
 	{
-		setting.StatusProvide = [StatusID.EukrasianPrognosis];
+		setting.StatusProvide = [StatusID.EukrasianPrognosis, StatusID.Galvanize];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,

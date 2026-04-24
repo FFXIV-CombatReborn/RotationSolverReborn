@@ -444,6 +444,8 @@ public partial class SummonerRotation
 	static partial void ModifySearingLightPvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.SearingLight];
+		setting.StatusFromSelf = false;
+		setting.TargetType = TargetType.Self;
 		setting.ActionCheck = () => InCombat;
 		setting.CreateConfig = () => new ActionConfig()
 		{

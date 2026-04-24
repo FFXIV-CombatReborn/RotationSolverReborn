@@ -23,9 +23,6 @@ public sealed class ChurinMCH: MachinistRotation
 
     #endregion
     #region  Logic Booleans
-
-    private static bool CanLateWeave => WeaponRemain <= LateWeaveWindow && EnoughWeaveTime;
-    private static bool EnoughWeaveTime => WeaponRemain >= DefaultAnimationLock;
     private bool BurstSoon => WildfirePvE.Cooldown.IsCoolingDown && WildfirePvE.Cooldown.WillHaveOneCharge(40);
     private bool InFiller => !AreToolsComingOffCooldown() && !BurstSoon && WildfirePvE.Cooldown.IsCoolingDown && WildfirePvE.Cooldown.ElapsedAfter(30);
     //private bool InRebuildPhase => (CombatTime % 120 >= 70 && CombatTime % 120 <= 90) && !InBurstPrepPhase;
@@ -39,7 +36,6 @@ public sealed class ChurinMCH: MachinistRotation
     private static double RecastTime => ActionManager.GetAdjustedRecastTime(ActionType.Action, (uint)ActionID.HeatedCleanShotPvE, false) / 1000.00;
 
     private const float DefaultAnimationLock = 0.6f;
-    private static float LateWeaveWindow => (float)(RecastTime * 0.5f);
     #endregion
 
     #region Potion Properties

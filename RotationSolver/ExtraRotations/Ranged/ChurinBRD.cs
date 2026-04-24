@@ -56,13 +56,6 @@ public sealed class ChurinBRD : BardRotation
     private float MageRemainTime => 45f - MageTime;
     private float ArmyRemainTime => 45f - ArmyTime;
 
-    private static bool EnoughWeaveTime =>
-        WeaponRemain > DataCenter.CalculatedActionAhead && WeaponRemain < WeaponTotal;
-
-    private static bool CanLateWeave => WeaponRemain <= LateWeaveWindow && EnoughWeaveTime;
-    private static bool CanEarlyWeave => !HasWeaved() || WeaponRemain > LateWeaveWindow;
-    private static float LateWeaveWindow => WeaponTotal * 0.45f;
-
     private static bool TargetHasDoTs =>
         CurrentTarget?.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == true &&
         CurrentTarget.HasStatus(true, StatusID.VenomousBite, StatusID.CausticBite);
@@ -78,8 +71,6 @@ public sealed class ChurinBRD : BardRotation
 
     private static bool IsMedicated => StatusHelper.PlayerHasStatus(true, StatusID.Medicated) &&
                                        !StatusHelper.PlayerWillStatusEnd(0f, true, StatusID.Medicated);
-
-    private static bool HasResonantArrow => StatusHelper.PlayerHasStatus(true, StatusID.ResonantArrowReady);
     private static bool InOddMinuteWindow => InMages && SongTime > 15f;
 
     private static float AnimLock => Math.Max(AnimationLock, WeaponTotal * 0.25f);
