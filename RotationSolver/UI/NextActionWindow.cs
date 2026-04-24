@@ -1,5 +1,6 @@
 ﻿using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
+using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using RotationSolver.Updaters;
@@ -79,9 +80,63 @@ internal class NextActionWindow : Window
 		}
 
 		_ = ControlWindow.DrawIAction(ActionUpdater.NextAction, width, percent);
+
+		// Teaching Mode: show a target hint if the rotation wants a different target
+		if (Service.Config.TeachingMode && Service.Config.TeachingModeShowTargetHint)
+		{
+			DrawTeachingModeTargetHint(width);
+		}
 	}
 
-	public static unsafe void DrawGcdCooldown(float width, bool drawTitle)
+	private static void DrawTeachingModeTargetHint(float width)
+	{
+		IBattleChara? suggestedTarget = null;
+		if (ActionUpdater.NextAction is BaseAction baseAct)
+		{
+			suggestedTarget = baseAct.Target.Target;
+		}
+
+		if (suggestedTarget == null)
+		{
+			return;
+		}
+
+		string name = suggestedTarget.Name.TextValue;
+		if (string.IsNullOrEmpty(name))
+		{
+			return;
+		}
+
+		bool isCurrentTarget = Svc.Targets.Target?.GameObjectId == suggestedTarget.GameObjectId;
+		bool isSelf = suggestedTarget.GameObjectId == (Player.Object?.GameObjectId ?? 0);
+
+		string label = $"Target: {name}";
+		Vector4 color = isSelf
+			? ImGuiColors.DalamudWhite
+			: isCurrentTarget
+				? ImGuiColors.HealerGreen
+				: ImGuiColors.DalamudOrange;
+
+		float textWidth = ImGui.CalcTextSize(label).X;
+		float offsetX = (width - textWidth) / 2f;
+		ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, offsetX));
+
+		ImGui.PushStyleColor(ImGuiCol.Text, color);
+		ImGui.Selectable(label, false, ImGuiSelectableFlags.None, new Vector2(textWidth, 0));
+		ImGui.PopStyleColor();
+
+		if (ImGui.IsItemClicked() && !isSelf)
+		{
+			Svc.Targets.Target = suggestedTarget;
+		}
+
+		if (ImGui.IsItemHovered() && !isSelf)
+		{
+			ImGui.SetTooltip("Click to target");
+		}
+	}
+
+	public static void DrawGcdCooldown(float width, bool drawTitle)
 	{
 		float remain = DataCenter.DefaultGCDRemain;
 		float total = DataCenter.DefaultGCDTotal;
