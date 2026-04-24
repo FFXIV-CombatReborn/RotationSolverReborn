@@ -56,13 +56,65 @@ public readonly struct ActionBasicInfo
 
 	/// <summary>
 	/// Gets the attack type of the action.
+	/// Returns <see cref="ActionSetting.AttackTypeOverride"/> when set; otherwise falls back to the game data value.
+	/// For multi-type actions use <see cref="AttackTypes"/> or <see cref="HasAttackType"/>.
 	/// </summary>
-	public readonly AttackType AttackType => (AttackType)(_action.Action.AttackType.RowId != 0 ? _action.Action.AttackType.RowId : byte.MaxValue);
+	public AttackType AttackType => _action.Setting.AttackTypeOverride ?? (AttackType)(_action.Action.AttackType.RowId != 0 ? _action.Action.AttackType.RowId : byte.MaxValue);
+
+	/// <summary>
+	/// Gets all attack types for this action, including any additional types set via
+	/// <see cref="ActionSetting.AdditionalAttackTypes"/>.
+	/// </summary>
+	public IReadOnlyList<AttackType> AttackTypes
+	{
+		get
+		{
+			var additional = _action.Setting.AdditionalAttackTypes;
+			if (additional == null || additional.Length == 0)
+				return [AttackType];
+			var result = new AttackType[1 + additional.Length];
+			result[0] = AttackType;
+			additional.CopyTo(result, 1);
+			return result;
+		}
+	}
+
+	/// <summary>
+	/// Returns <see langword="true"/> if this action has the specified attack type,
+	/// accounting for all values in <see cref="AttackTypes"/>.
+	/// </summary>
+	public bool HasAttackType(AttackType attackType) => AttackTypes.Contains(attackType);
 
 	/// <summary>
 	/// Gets the aspect of the action.
+	/// Returns <see cref="ActionSetting.AspectOverride"/> when set; otherwise falls back to the game data value.
+	/// For multi-aspect actions use <see cref="Aspects"/> or <see cref="HasAspect"/>.
 	/// </summary>
-	public Aspect Aspect { get; }
+	public Aspect Aspect => _action.Setting.AspectOverride ?? (Aspect)_action.Action.Aspect;
+
+	/// <summary>
+	/// Gets all aspects for this action, including any additional aspects set via
+	/// <see cref="ActionSetting.AdditionalAspects"/>.
+	/// </summary>
+	public IReadOnlyList<Aspect> Aspects
+	{
+		get
+		{
+			var additional = _action.Setting.AdditionalAspects;
+			if (additional == null || additional.Length == 0)
+				return [Aspect];
+			var result = new Aspect[1 + additional.Length];
+			result[0] = Aspect;
+			additional.CopyTo(result, 1);
+			return result;
+		}
+	}
+
+	/// <summary>
+	/// Returns <see langword="true"/> if this action has the specified aspect,
+	/// accounting for all values in <see cref="Aspects"/>.
+	/// </summary>
+	public bool HasAspect(Aspect aspect) => Aspects.Contains(aspect);
 
 	/// <summary>
 	/// Gets the level required to use the action.
@@ -128,12 +180,12 @@ public readonly struct ActionBasicInfo
 	/// <summary>
 	/// Gets the casting time of the action.
 	/// </summary>
-	public readonly unsafe float CastTime => ((ActionID)AdjustedID).GetCastTime();
+	public readonly float CastTime => ((ActionID)AdjustedID).GetCastTime();
 
 	/// <summary>
 	/// Gets the MP required to use the action.
 	/// </summary>
-	public readonly unsafe uint MPNeed
+	public readonly uint MPNeed
 	{
 		get
 		{
@@ -232,7 +284,6 @@ public readonly struct ActionBasicInfo
 		IsSystemAction = (ActionCate?)_action.Action.ActionCategory.Value.RowId
 			is ActionCate.System or ActionCate.System_11;
 		IsDutyAction = isDutyAction;
-		Aspect = (Aspect)_action.Action.Aspect;
 	}
 
 	/// <summary>

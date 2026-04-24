@@ -253,6 +253,8 @@ public partial class CustomRotation
 	static partial void ModifySmitePvP(ref ActionSetting setting)
 	{
 		setting.StatusNeed = [StatusID.PvPRoleActionSmite];
+		setting.IsFriendly = false;
+		setting.TargetType = TargetType.LowHPPercent;
 	}
 
 	#endregion

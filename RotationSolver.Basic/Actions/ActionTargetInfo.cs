@@ -111,14 +111,14 @@ public struct ActionTargetInfo(IBaseAction action)
 			if (!DataCenter.IsManual || IsTargetFriendly || target.GameObjectId == Svc.Targets.Target?.GameObjectId || target.GameObjectId == Player.Object.GameObjectId)
 			{
 				var view = TargetOnScreen(target);
-				var canUse = CanUseTo(target);
-				var asCanTarget = action.Setting.CanTarget(target);
-				var MinHPPass = !action.MinHPFeature || (action.MinHPFeature && target.GetHealthRatio() > action.MinHPPercent);
+					var canUse = CanUseTo(target);
+					var asCanTarget = action.Setting.CanTarget(target);
+					var MinHPPass = !action.MinHPFeature || (action.MinHPFeature && target.GetHealthRatio() > action.MinHPPercent);
 
-				if (view && canUse && asCanTarget && MinHPPass)
-				{
-					validTargets.Add(target);
-				}
+					if (view && canUse && asCanTarget && MinHPPass)
+					{
+						validTargets.Add(target);
+					}
 			}
 		}
 
@@ -363,16 +363,112 @@ public struct ActionTargetInfo(IBaseAction action)
 			return false;
 		}
 
+		if (DataCenter.IsInMaskedCarnivale)
+		{
+			if (Service.Config.BlockflatdamagedeathimmuneBlu && action.Setting.IsFlatDamageDeath
+			&& !MaskedCarnivaleHelper.IsVulnerableToFlatOrDeath(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to flat/death — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockslowimmuneBlu && action.Setting.IsSlowSpell
+			&& !MaskedCarnivaleHelper.IsVulnerableToSlow(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to slow — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockpetrificationimmuneBlu && action.Setting.IsPetrificationSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToPetrification(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to petrification — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockparalysisimmuneBlu && action.Setting.IsParalysisSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToParalysis(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to paralysis — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockblindimmuneBlu && action.Setting.IsBlindSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToBlind(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to blind — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockstunimmuneBlu && action.Setting.IsStunSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToStun(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to stun — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlocksleepimmuneBlu && action.Setting.IsSleepSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToSleep(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to sleep — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockbindimmuneBlu && action.Setting.IsBindSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToBind(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to bind — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockheavyimmuneBlu && action.Setting.IsHeavySpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToHeavy(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to heavy — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlocknonweakBlu && !MaskedCarnivaleHelper.HasNoResistancesOrImmunities(battleChara))
+			{
+				if (Service.Config.BlockimmuneBlu && !MaskedCarnivaleHelper.IsActionAspectAllowed(battleChara, action))
+				{
+					if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is immune to action {action.Info.Name} aspect (BlockimmuneBLU).");
+					return false;
+				}
+
+				// shouldCheckWeakness is true if the action has at least one non-unaspected aspect
+				// (or any aspect when AllowunaspectedBlu is off).
+				// When AllowunaspectedBlu is on, purely unaspected actions leave this false,
+				// bypassing BlocknonweakBlu so they are always allowed regardless of mob weakness.
+				bool shouldCheckWeakness = false;
+				if (action.Info.Aspects != null)
+				{
+					for (int i = 0; i < action.Info.Aspects.Count; i++)
+					{
+						if ((action.Info.Aspects[i] != Aspect.Unaspected && Service.Config.AllowunaspectedBlu) || !Service.Config.AllowunaspectedBlu)
+						{
+							shouldCheckWeakness = true;
+							break;
+						}
+					}
+				}
+				if (shouldCheckWeakness && !MaskedCarnivaleHelper.IsActionAspectWeak(battleChara, action))
+				{
+					return false;
+				}
+			}
+		}
+
 		try
 		{
-			if (action.Info.AttackType == AttackType.Magic)
+			if (action.Info.HasAttackType(AttackType.Magic))
 			{
 				if (battleChara.HasStatus(false, StatusHelper.MagicResistance))
 				{
 					return false;
 				}
 			}
-			else if (action.Info.Aspect != Aspect.Piercing) // Physical
+			if (action.Info.HasAttackType(AttackType.Physical) || action.Info.HasAttackType(AttackType.Slashing) || action.Info.HasAttackType(AttackType.Piercing) || action.Info.HasAttackType(AttackType.Blunt)) // Physical
 			{
 				if (battleChara.HasStatus(false, StatusHelper.PhysicalResistance))
 				{
@@ -417,7 +513,8 @@ public struct ActionTargetInfo(IBaseAction action)
 		}
 
 		float time = b.GetTTK();
-		return float.IsNaN(time) || time >= action.Config.TimeToKill;
+		bool result = float.IsNaN(time) || time >= action.Config.TimeToKill;
+		return result;
 	}
 
 	#endregion
@@ -452,6 +549,28 @@ public struct ActionTargetInfo(IBaseAction action)
 		}
 
 		TargetType type = action.Setting.TargetType;
+
+		// For self-cast area/cone hostile actions (Range == 0, EffectRange > 0), such as Surpanakha,
+		// the attack fires a cone from the player's position toward the current target direction.
+		// There is no explicit enemy to "target" at range 0, so bypass the normal target-finding
+		// path and source candidates directly from GetCanAffects (enemies within EffectRange).
+		if (Range == 0 && EffectRange > 0 && !IsSingleTarget && !IsTargetArea && !action.Setting.IsFriendly)
+		{
+			if (Service.Config.AoEType == AoEType.Off)
+				return null;
+
+			int required = skipAoeCheck ? 0 : action.Config.AoeCount;
+
+			// Mirror the cleave check in GetMostCanTargetObjects: in Cleave mode, block if aoeCount > 1
+			if (required > 1 && (Service.Config.AoEType == AoEType.Cleave || (DataCenter.IsInM9S && Service.Config.M9SCleaveOnly)))
+				return null;
+
+			List<IBattleChara> selfAffects = GetCanAffects(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
+			if (selfAffects.Count < Math.Max(1, required))
+				return null;
+
+			return new TargetResult(Player.Object, [.. selfAffects], Player.Object.Position);
+		}
 
 		IEnumerable<IBattleChara> canTargets = GetCanTargets(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
 		List<IBattleChara> canAffects = GetCanAffects(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
@@ -494,6 +613,13 @@ public struct ActionTargetInfo(IBaseAction action)
 			affectedTargets = [];
 		}
 
+		if (Service.Config.InDebug)
+		{
+			if (target == null)
+				PluginLog.Debug($"[FindTarget] No target found for action {action.Info.ID}.");
+			else
+				PluginLog.Debug($"[FindTarget] Selected target {target.Name} for action {action.Info.ID} with {affectedTargets.Length} affected.");
+		}
 		return target == null ? null : new TargetResult(target, affectedTargets, target.Position);
 	}
 

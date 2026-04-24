@@ -423,6 +423,8 @@ internal static class DataCenter
 
 	public static bool IsPvP => Territory?.IsPvP ?? false;
 
+	public static bool IsInMaskedCarnivale => Territory?.ContentType == TerritoryContentType.TheMaskedCarnivale;
+
 	public static bool IsInDuty => Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56];
 
 	public static bool IsInAllianceRaid
@@ -1030,8 +1032,7 @@ internal static class DataCenter
 	private static readonly Queue<ActionRec> _actions = new(QUEUECAPACITY);
 	private static readonly Queue<DamageRec> _damages = new(QUEUECAPACITY);
 
-	internal static CombatRole? BluRole => (CurrentRotation as BlueMageRotation)?.BlueId;
-
+	internal static CombatRole? BluRole => CurrentRotation is BlueMageRotation ? BlueMageRotation.BlueId : null;
 	public static float DPSTaken
 	{
 		get

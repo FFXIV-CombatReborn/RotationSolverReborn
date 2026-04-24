@@ -93,7 +93,6 @@ public sealed class ChurinDNC : DancerRotation
     private bool ShouldUseTechStep => TechnicalStepPvE.IsEnabled && TechnicalStepPvE.EnoughLevel  && MergedStatus.HasFlag(AutoStatus.Burst);
     private bool ShouldUseStandardStep => StandardStepPvE.IsEnabled && StandardStepPvE.EnoughLevel &&!HasLastDance;
     private bool ShouldUseFinishingMove => FinishingMovePvE.IsEnabled && FinishingMovePvE.EnoughLevel && !HasLastDance;
-    private static bool CanWeave => WeaponRemain >= DataCenter.CalculatedActionAhead && DataCenter.DefaultGCDElapsed > 0 && DataCenter.DefaultGCDElapsed >= DataCenter.CalculatedActionAhead;
 
     private bool StandardSoon => (StandardStepPvE.Cooldown.WillHaveOneCharge(5)
                                   || HasFinishingMove && FinishingMovePvE.Cooldown.WillHaveOneCharge(5)

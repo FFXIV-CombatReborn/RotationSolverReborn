@@ -6,6 +6,11 @@
 public enum Aspect : byte
 {
 	/// <summary>
+	/// Unaspected.
+	/// </summary>
+	Unaspected = 0,
+
+	/// <summary>
 	/// Fire aspect.
 	/// </summary>
 	Fire = 1,
@@ -36,7 +41,22 @@ public enum Aspect : byte
 	Water = 6,
 
 	/// <summary>
+	/// Physical aspect.
+	/// </summary>
+	Physical = 7,
+
+	/// <summary>
+	/// Slashing aspect.
+	/// </summary>
+	Slashing = 8,
+
+	/// <summary>
 	/// Piercing aspect.
 	/// </summary>
-	Piercing = 7,
+	Piercing = 9,
+
+	/// <summary>
+	/// Blunt aspect.
+	/// </summary>
+	Blunt = 10,
 }

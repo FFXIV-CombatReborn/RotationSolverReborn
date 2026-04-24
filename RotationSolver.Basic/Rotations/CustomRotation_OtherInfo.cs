@@ -2,6 +2,7 @@
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
+using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
@@ -20,6 +21,24 @@ public partial class CustomRotation
 	/// </summary>
 	[Description("IsCasting")]
 	public static bool IsCasting => Player?.IsCasting ?? false;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static int AliveOtherPartyMemberCount
+	{
+		get
+		{
+			int count = 0;
+			foreach (IBattleChara member in PartyMembers)
+			{
+				if (!member.IsDead && member.ObjectId != Player?.ObjectId)
+					count++;
+			}
+
+			return count;
+		}
+	}
 
 	/// <summary>
 	/// 
@@ -365,6 +384,12 @@ public partial class CustomRotation
 	/// </summary>
 	[Description("Has companion")]
 	public static bool HasCompanion => DataCenter.HasCompanion;
+
+	/// <summary>
+	/// True if the player has their chocobo companion out.
+	/// </summary>
+	[Description("Has Chocobo")]
+	public static bool HasChocobo => Svc.Buddies.CompanionBuddy != null;
 
 	/// <summary>
 	/// Party member.

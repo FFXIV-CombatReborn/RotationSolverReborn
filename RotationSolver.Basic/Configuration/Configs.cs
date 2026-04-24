@@ -13,6 +13,8 @@ internal partial class Configs : IPluginConfiguration
 	public const string
 		BasicTimer = "BasicTimer",
 		BasicAutoSwitch = "BasicAutoSwitch",
+		DutySpecifcCrucibleOfTheUnbroken = "DutySpecifcCrucibleOfTheUnbroken",
+		DutySpecifcTheMaskedCarnivale = "DutySpecifcTheMaskedCarnivale",
 		DutySpecifcPvP = "DutySpecifcPvP",
 		DutySpecifcFieldOps = "DutySpecifcFieldOps",
 		DutySpecifcAlliance = "DutySpecifcAlliance",
@@ -54,6 +56,42 @@ internal partial class Configs : IPluginConfiguration
 	public MacroInfo DutyEnd { get; set; } = new MacroInfo();
 
 	#region Duty Specific
+	[ConditionBool, UI("Prevent specific Flat Damage/Death actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockflatdamagedeathimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Slow actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockslowimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Petrification actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockpetrificationimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Paralysis actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockparalysisimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Blind actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockblindimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Stun actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockstunimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Sleep actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blocksleepimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Bind actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockbindimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Heavy actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockheavyimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific aspected actions from being used against mobs that are immune to that aspect.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockimmuneBLU = true;
+
+	[ConditionBool, UI("If a mob is weak to a specific aspect, only use actions of that aspect.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blocknonweakBLU = true;
+
+	[ConditionBool, UI("Still allow unaspected actions.", Filter = DutySpecifcTheMaskedCarnivale, Parent = nameof(BlocknonweakBlu))]
+	private static readonly bool _allowunaspectedBLU = true;
+
 	[ConditionBool, UI("O12S - Packet Filter logic.",
 	Description = "Treat OmegaM/OmegaF as immune if you have their corresponding Packet Filter status (also applies to Normal).",
 	Filter = DutySpecifcSavage)]

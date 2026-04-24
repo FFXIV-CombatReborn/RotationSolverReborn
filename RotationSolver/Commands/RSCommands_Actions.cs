@@ -138,6 +138,11 @@ namespace RotationSolver.Commands
 				return;
 			}
 
+			if (StatusHelper.PlayerHasStatus(false, StatusID.WaningNocturne))
+			{
+				return;
+			}
+
 #if DEBUG
 			// if (nextAction is BaseAction debugAct)
 			//     PluginLog.Debug($"Will Do {debugAct}");
