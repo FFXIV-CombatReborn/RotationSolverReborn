@@ -181,6 +181,13 @@ internal static class MajorUpdater
 				RSCommands.UpdateTargetFromNextAction();
 			}
 
+			// In Teaching Mode with auto-target enabled, also update the player's target so it matches
+			// the rotation's suggestion (important for tanks/healers where the optimal target varies).
+			if (!DataCenter.IsTargetOnly && Service.Config.TeachingMode && Service.Config.TeachingModeAutoTarget && DataCenter.InCombat)
+			{
+				RSCommands.UpdateTargetFromNextAction();
+			}
+
 			Wrath_IPCSubscriber.DisableAutoRotation();
 		}
 		catch (Exception ex)

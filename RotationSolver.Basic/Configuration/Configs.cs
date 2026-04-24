@@ -419,6 +419,16 @@ internal partial class Configs : IPluginConfiguration
 	[ConditionBool, UI("Teaching mode", Filter = UiInformation)]
 	private static readonly bool _teachingMode = false;
 
+	[ConditionBool, UI("Auto-target in teaching mode while in combat",
+		Description = "When teaching mode is active, automatically switch your target to match the rotation's suggested action target. Useful for tanks and healers where the optimal target may differ from your current selection.",
+		Parent = nameof(TeachingMode))]
+	private static readonly bool _teachingModeAutoTarget = false;
+
+	[ConditionBool, UI("Show target hint in Next Action window",
+		Description = "When teaching mode is active, display the rotation's suggested target name below the Next Action icon. Shown in orange if you don't have that target selected, green if you do.",
+		Parent = nameof(TeachingMode))]
+	private static readonly bool _teachingModeShowTargetHint = false;
+
 	[ConditionBool, UI("Simulate the effect of pressing abilities",
 		Filter = UiInformation)]
 	private static readonly bool _keyboardNoise = true;
