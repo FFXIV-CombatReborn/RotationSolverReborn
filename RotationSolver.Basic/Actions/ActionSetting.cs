@@ -180,6 +180,11 @@ public class ActionSetting
 	public bool IsParalysisSpell { get; set; } = false;
 
 	/// <summary>
+	/// Does this action care about the Interrupt check on masked carnivale mobs.
+	/// </summary>
+	public bool IsInterruptSpell { get; set; } = false;
+
+	/// <summary>
 	/// Does this action primarily apply <b>Blind</b>? When true, it is skipped against mobs not vulnerable to Blind in the Masked Carnivale.
 	/// </summary>
 	public bool IsBlindSpell { get; set; } = false;

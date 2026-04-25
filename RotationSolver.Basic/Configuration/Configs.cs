@@ -68,6 +68,9 @@ internal partial class Configs : IPluginConfiguration
 	[ConditionBool, UI("Prevent specific Paralysis actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
 	private static readonly bool _blockparalysisimmuneBLU = false;
 
+	[ConditionBool, UI("Prevent specific Interrupt actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockinterruptimmuneBLU = false;
+
 	[ConditionBool, UI("Prevent specific Blind actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
 	private static readonly bool _blockblindimmuneBLU = false;
 
@@ -87,7 +90,7 @@ internal partial class Configs : IPluginConfiguration
 	private static readonly bool _blockimmuneBLU = true;
 
 	[ConditionBool, UI("If a mob is weak to a specific aspect, only use actions of that aspect.", Filter = DutySpecifcTheMaskedCarnivale)]
-	private static readonly bool _blocknonweakBLU = true;
+	private static readonly bool _blocknonweakBLU = false;
 
 	[ConditionBool, UI("Still allow unaspected actions.", Filter = DutySpecifcTheMaskedCarnivale, Parent = nameof(BlocknonweakBlu))]
 	private static readonly bool _allowunaspectedBLU = true;

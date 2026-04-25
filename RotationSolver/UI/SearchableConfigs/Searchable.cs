@@ -52,6 +52,10 @@ internal readonly struct JobFilter
 					JobRole.Melee,
 					JobRole.RangedPhysical,
 				];
+				Jobs =
+				[
+					Job.BLU,
+				];
 				break;
 
 			case JobFilterType.Dispel:

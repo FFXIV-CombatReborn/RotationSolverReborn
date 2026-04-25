@@ -310,6 +310,7 @@ public partial class BlueMageRotation
 		//setting.TargetType = TargetType.Interrupt;
 		setting.AttackTypeOverride = AttackType.Physical;
 		setting.AspectOverride = Aspect.Piercing;
+		setting.IsInterruptSpell = true;
 	}
 
 	static partial void ModifySnortPvE(ref ActionSetting setting)
@@ -317,9 +318,27 @@ public partial class BlueMageRotation
 		setting.AttackTypeOverride = AttackType.Magic;
 		setting.AspectOverride = Aspect.Wind;
 		setting.IsFriendly = false;
+		setting.IsInterruptSpell = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
+		};
+		setting.ActionCheck = () =>
+		{
+			if (Player == null) return false;
+			var playerFace = Player.GetFaceVector();
+			var playerPos = Player.Position;
+			const float snortRange = 6f;
+			const double coneHalfAngle = Math.PI / 4; // 45 degrees each side = 90 degree cone
+			foreach (var target in DataCenter.AllHostileTargets)
+			{
+				if (!target.CanInterrupt()) continue;
+				if (target.DistanceToPlayer() > snortRange) continue;
+				var dir = Vector3.Normalize(target.Position - playerPos);
+				var angle = playerFace.AngleTo(dir);
+				if (angle <= coneHalfAngle) return true;
+			}
+			return false;
 		};
 	}
 
