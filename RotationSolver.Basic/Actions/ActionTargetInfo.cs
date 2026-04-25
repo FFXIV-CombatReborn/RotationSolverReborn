@@ -393,6 +393,13 @@ public struct ActionTargetInfo(IBaseAction action)
 				return false;
 			}
 
+			if (Service.Config.BlockinterruptimmuneBlu && action.Setting.IsInterruptSpell
+			&& !MaskedCarnivaleHelper.IsVulnerableToInterruption(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to interruption — skipping {action.Info.Name}.");
+				return false;
+			}
+
 			if (Service.Config.BlockblindimmuneBlu && action.Setting.IsBlindSpell
 				&& !MaskedCarnivaleHelper.IsVulnerableToBlind(battleChara))
 			{
@@ -428,13 +435,14 @@ public struct ActionTargetInfo(IBaseAction action)
 				return false;
 			}
 
+			if (Service.Config.BlockimmuneBlu && !MaskedCarnivaleHelper.IsActionAspectAllowed(battleChara, action))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is immune to action {action.Info.Name} aspect (BlockimmuneBLU).");
+				return false;
+			}
+
 			if (Service.Config.BlocknonweakBlu && !MaskedCarnivaleHelper.HasNoResistancesOrImmunities(battleChara))
 			{
-				if (Service.Config.BlockimmuneBlu && !MaskedCarnivaleHelper.IsActionAspectAllowed(battleChara, action))
-				{
-					if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is immune to action {action.Info.Name} aspect (BlockimmuneBLU).");
-					return false;
-				}
 
 				// shouldCheckWeakness is true if the action has at least one non-unaspected aspect
 				// (or any aspect when AllowunaspectedBlu is off).

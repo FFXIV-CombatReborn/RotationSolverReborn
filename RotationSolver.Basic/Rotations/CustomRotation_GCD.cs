@@ -71,7 +71,7 @@ public partial class CustomRotation
 				return act;
 			}
 
-			if (DataCenter.CommandStatus.HasFlag(AutoStatus.Interrupt))
+			if (DataCenter.MergedStatus.HasFlag(AutoStatus.Interrupt))
 			{
 				if (DataCenter.CurrentDutyRotation?.MyInterruptGCD(out act) == true)
 				{

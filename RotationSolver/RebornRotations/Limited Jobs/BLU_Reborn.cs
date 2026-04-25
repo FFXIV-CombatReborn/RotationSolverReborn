@@ -280,7 +280,7 @@ public sealed class BLU_Reborn : BlueMageRotation
 
 		if (UseSnort)
 		{
-			if (SnortPvE.CanUse(out act, targetOverride: TargetType.Interrupt))
+			if (SnortPvE.CanUse(out act))
 			{
 				return true;
 			}
