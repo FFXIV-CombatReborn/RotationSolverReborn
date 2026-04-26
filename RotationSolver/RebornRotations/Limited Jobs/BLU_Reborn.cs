@@ -114,6 +114,21 @@ public sealed class BLU_Reborn : BlueMageRotation
 			}
 		}
 
+		if (SeaShantyPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (PhantomFlurryPvE_23289.CanUse(out act) && StatusHelper.PlayerWillStatusEnd(1, true, StatusID.PhantomFlurry))
+		{
+			return true;
+		}
+
+		if (PhantomFlurryPvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		if (FeatherRainPvE.CanUse(out act))
 		{
 			return true;

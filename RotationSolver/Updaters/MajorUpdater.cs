@@ -21,6 +21,12 @@ internal static class MajorUpdater
 	private static bool _isActivatedThisCycle;
 	private static bool _rotationsLoaded;
 
+	// Cached GeneralAction sheet lookup (RowId -> GeneralAction RowId) for teaching mode highlighting
+	private static Dictionary<uint, uint>? _generalActionLookup;
+
+	// Reusable list for VFX cleanup to avoid per-frame allocations
+	private static readonly List<VfxNewData> _vfxRemaining = [];
+
 	public static bool IsValid
 	{
 		get
@@ -146,14 +152,13 @@ internal static class MajorUpdater
 
 		try
 		{
-			if (autoOnEnabled)
+			// Only call UpdateTargets once — cover both the auto-on check and the activated path
+			if (autoOnEnabled || _isActivatedThisCycle)
 			{
 				TargetUpdater.UpdateTargets();
 			}
 			if (!_isActivatedThisCycle)
 				return;
-
-			TargetUpdater.UpdateTargets();
 
 			// Target updater always needs to be first to update
 			MacroUpdater.UpdateMacro();
@@ -299,7 +304,7 @@ internal static class MajorUpdater
 				// That could leave finished entries behind if an unfinished entry was at the front.
 				// To reliably remove finished VFX entries, drain the queue and re-enqueue only
 				// the unfinished items.
-				var remaining = new List<VfxNewData>();
+				_vfxRemaining.Clear();
 				while (DataCenter.VfxDataQueue.TryDequeue(out var vfx))
 				{
 					try
@@ -311,24 +316,24 @@ internal static class MajorUpdater
 						if (vfx.Duration >= 0.5f)
 						{
 							if (vfx.TimeDuration.TotalSeconds <= vfx.Duration)
-								remaining.Add(vfx);
+								_vfxRemaining.Add(vfx);
 						}
 						else
 						{
 							// Unknown / very short duration: keep for up to 5 seconds by default
 							if (vfx.TimeDuration.TotalSeconds <= 5.0)
-								remaining.Add(vfx);
+								_vfxRemaining.Add(vfx);
 						}
 					}
 					catch
 					{
 						// On any unexpected error, keep the item to avoid data loss
-						remaining.Add(vfx);
+						_vfxRemaining.Add(vfx);
 					}
 				}
 
 				// Re-enqueue items that are still active
-				foreach (var item in remaining)
+				foreach (var item in _vfxRemaining)
 				{
 					DataCenter.VfxDataQueue.Enqueue(item);
 				}
@@ -410,12 +415,11 @@ internal static class MajorUpdater
 							{
 								Svc.Targets.Target = closestEnemy;
 							}
-							// Respect TargetDelay before auto-targeting the closest enemy
-							if (Service.Config.TargetDelayEnable)
+							else
 							{
+								// Respect TargetDelay before auto-targeting the closest enemy
 								RSCommands.SetTargetWithDelay(closestEnemy);
 							}
-							PluginLog.Information($"Targeting {closestEnemy}");
 						}
 					}
 				}
@@ -437,21 +441,25 @@ internal static class MajorUpdater
 
 	private static HotbarID? GetGeneralActionHotbarID(IBaseAction baseAction)
 	{
-		Lumina.Excel.ExcelSheet<GeneralAction> generalActions = Svc.Data.GetExcelSheet<GeneralAction>();
-		if (generalActions == null)
+		// Build the lookup once and cache it to avoid a full sheet scan every frame
+		if (_generalActionLookup == null)
 		{
-			return null;
-		}
+			var sheet = Svc.Data.GetExcelSheet<GeneralAction>();
+			if (sheet == null)
+				return null;
 
-		foreach (GeneralAction gAct in generalActions)
-		{
-			if (gAct.Action.RowId == baseAction.ID)
+			_generalActionLookup = [];
+			foreach (GeneralAction gAct in sheet)
 			{
-				return new HotbarID(HotbarSlotType.GeneralAction, gAct.RowId);
+				var actionRowId = gAct.Action.RowId;
+				if (actionRowId != 0)
+					_generalActionLookup.TryAdd(actionRowId, gAct.RowId);
 			}
 		}
 
-		return null;
+		return _generalActionLookup.TryGetValue(baseAction.ID, out uint generalActionRowId)
+			? new HotbarID(HotbarSlotType.GeneralAction, generalActionRowId)
+			: null;
 	}
 
 	private static void LogOnce(string context, Exception ex)

@@ -363,7 +363,7 @@ public struct ActionTargetInfo(IBaseAction action)
 			return false;
 		}
 
-		if (DataCenter.IsInMaskedCarnivale)
+		if (DataCenter.Job == Job.BLU && DataCenter.IsInMaskedCarnivale)
 		{
 			if (Service.Config.BlockflatdamagedeathimmuneBlu && action.Setting.IsFlatDamageDeath
 			&& !MaskedCarnivaleHelper.IsVulnerableToFlatOrDeath(battleChara))

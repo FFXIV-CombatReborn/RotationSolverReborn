@@ -13,6 +13,12 @@ public sealed class DRG_Reborn : DragoonRotation
 	[RotationConfig(CombatType.PvE, Name = "Max distance you need to be from the target for Stardiver useage")]
 	public float StardiverDistance { get; set; } = 20;
 
+	[RotationConfig(CombatType.PvE, Name = "Use Stardiver while moving")]
+	public bool StardiverMoving { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Dragonfire Dive while moving")]
+	public bool DragonfireDiveMoving { get; set; } = true;
+
 	[Range(1, 20, ConfigUnitType.Yalms)]
 	[RotationConfig(CombatType.PvE, Name = "Max distance you need to be from the target for Dragonfire Dive useage")]
 	public float DragonfireDiveDistance { get; set; } = 20;
@@ -69,7 +75,7 @@ public sealed class DRG_Reborn : DragoonRotation
 	#region oGCD Logic
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
 	{
-		if (IsLastAction() == IsLastGCD())
+		if (IsLastAction() == IsLastGCD() && (StardiverMoving || (!StardiverMoving && !IsMoving)))
 		{
 			if (StardiverPvE.CanUse(out act))
 			{
@@ -150,7 +156,7 @@ public sealed class DRG_Reborn : DragoonRotation
 
 		if ((BattleLitanyPvE.EnoughLevel && HasBattleLitany) || (!BattleLitanyPvE.EnoughLevel))
 		{
-			if (DragonfireDivePvE.CanUse(out act))
+			if ((DragonfireDiveMoving || (!DragonfireDiveMoving && !IsMoving)) && DragonfireDivePvE.CanUse(out act))
 			{
 				if (DragonfireDivePvE.Target.Target.DistanceToPlayer() <= DragonfireDiveDistance)
 				{
