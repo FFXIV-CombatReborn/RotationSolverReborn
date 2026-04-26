@@ -144,7 +144,9 @@ public sealed class WAR_Reborn : WarriorRotation
 
 	protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
 	{
-		if ((InCombat && Player?.GetHealthRatio() < HealIntuition && NumberOfHostilesInRange > 0) || (InCombat && PartyMembers.Count() is 1 && NumberOfHostilesInRange > 0))
+		int _partyCount = 0;
+		foreach (var _ in PartyMembers) _partyCount++;
+		if ((InCombat && Player?.GetHealthRatio() < HealIntuition && NumberOfHostilesInRange > 0) || (InCombat && _partyCount == 1 && NumberOfHostilesInRange > 0))
 		{
 			if (BloodwhettingPvE.CanUse(out act))
 			{

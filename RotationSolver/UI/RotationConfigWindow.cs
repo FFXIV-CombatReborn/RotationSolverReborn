@@ -1959,8 +1959,14 @@ public partial class RotationConfigWindow : Window
 		];
 
 		// Check if "Boss Mod" and "BossMod Reborn" are enabled
-		bool isBossModEnabled = pluginsToCheck.Any(plugin => plugin.Name == "Boss Mod" && plugin.IsEnabled);
-		bool isBossModRebornEnabled = pluginsToCheck.Any(plugin => plugin.Name == "BossModReborn" && plugin.IsEnabled);
+		bool isBossModEnabled = false;
+		bool isBossModRebornEnabled = false;
+		foreach (var plugin in pluginsToCheck)
+		{
+			if (plugin.Name == "Boss Mod" && plugin.IsEnabled) isBossModEnabled = true;
+			if (plugin.Name == "BossModReborn" && plugin.IsEnabled) isBossModRebornEnabled = true;
+			if (isBossModEnabled && isBossModRebornEnabled) break;
+		}
 
 		// Iterate through the list and check if each plugin is installed and enabled
 		foreach (AutoDutyPlugin plugin in pluginsToCheck)

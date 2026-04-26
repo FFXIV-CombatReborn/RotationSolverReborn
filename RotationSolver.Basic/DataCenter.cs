@@ -1122,7 +1122,6 @@ internal static class DataCenter
 
 	internal static void ResetAllRecords()
 	{
-		PluginLog.Information("Resetting all action and damage records.");
 		LastAction = 0;
 		LastGCD = 0;
 		LastAbility = 0;

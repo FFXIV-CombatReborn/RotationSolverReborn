@@ -379,7 +379,15 @@ public partial class BardRotation
 
 	static partial void ModifyRadiantFinalePvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => JobGauge.Coda.Any(s => s != Song.None);
+		setting.ActionCheck = () =>
+		{
+			var coda = JobGauge.Coda;
+			for (int i = 0; i < coda.Length; i++)
+			{
+				if (coda[i] != Song.None) return true;
+			}
+			return false;
+		};
 		setting.StatusProvide = [StatusID.RadiantFinale_2964, StatusID.RadiantEncoreReady];
 		setting.StatusFromSelf = false;
 		setting.TargetType = TargetType.Self;

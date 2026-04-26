@@ -1139,6 +1139,19 @@ public partial class BlueMageRotation
 		};
 	}
 
+	static partial void ModifyPhantomFlurryPvE_23289(ref ActionSetting setting)
+	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
+		setting.IsFriendly = false;
+		setting.ActionCheck = () => !IsMoving;
+		setting.StatusNeed = [StatusID.PhantomFlurry];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
 	static partial void ModifyNightbloomPvE(ref ActionSetting setting)
 	{
 		setting.AttackTypeOverride = AttackType.Magic;
