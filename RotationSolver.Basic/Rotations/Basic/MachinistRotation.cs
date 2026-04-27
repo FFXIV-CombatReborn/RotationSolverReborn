@@ -282,6 +282,7 @@ public partial class MachinistRotation
 	{
 		setting.UnlockedByQuestID = 67244;
 		setting.StatusProvide = StatusHelper.RangePhysicalDefense;
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -306,8 +307,7 @@ public partial class MachinistRotation
 	static partial void ModifyDismantlePvE(ref ActionSetting setting)
 	{
 		setting.TargetStatusProvide = [StatusID.Dismantled];
-		// Pretty sure this will work as intended, but commented out cause I want a 2nd opinion ~ Kirbo
-		//setting.ActionCheck = () => CurrentTarget != null && !CurrentTarget.HasStatus(false, StatusID.Dismantled);
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -469,6 +469,7 @@ public partial class MachinistRotation
 	static partial void ModifyDrillPvP(ref ActionSetting setting)
 	{
 		setting.StatusNeed = [StatusID.DrillPrimed];
+		setting.IgnoreGuard = true;
 	}
 
 	static partial void ModifyBioblasterPvP(ref ActionSetting setting)

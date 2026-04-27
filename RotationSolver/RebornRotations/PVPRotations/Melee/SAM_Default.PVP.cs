@@ -45,9 +45,9 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
 			return true;
 		}
 
-		if (SmitePvP.CanUse(out action) && SmitePvP.Target.Target.GetHealthRatio() <= SmitePvPPercent)
+		if (SmitePvP.CanUse(out action, usedUp: true) && SmitePvP.Target.Target.GetHealthRatio() <= SmitePvPPercent)
 		{
-			return false;
+			return true;
 		}
 
 		if (HissatsuSotenPvP.CanUse(out action, usedUp: true))

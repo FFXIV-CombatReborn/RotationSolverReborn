@@ -346,6 +346,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
 	public async Task Dispose()
 	{
+		Service.Config.Save();
+		await OtherConfiguration.Save();
+
 		RSCommands.Disable();
 		Watcher.Disable();
 		ActionQueueManager.Disable();
@@ -362,10 +365,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 		MiscUpdater.Dispose();
 		HotbarHighlightManager.Dispose();
 		ActionTimelineManager.Instance.Dispose();
-		await OtherConfiguration.Save();
 
 		ECommonsMain.Dispose();
-
-		Service.Config.Save();
 	}
 }

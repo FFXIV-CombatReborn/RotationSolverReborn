@@ -128,13 +128,20 @@ internal static class ActionUpdater
 			return;
 		}
 
-		for (int i = 0; i < DataCenter.BluSlots.Length; i++)
+		if (DataCenter.Job == ECommons.ExcelServices.Job.BLU)
 		{
-			DataCenter.BluSlots[i] = actionManager->GetActiveBlueMageActionInSlot(i);
+			for (int i = 0; i < DataCenter.BluSlots.Length; i++)
+			{
+				DataCenter.BluSlots[i] = actionManager->GetActiveBlueMageActionInSlot(i);
+			}
 		}
-		for (ushort i = 0; i < DataCenter.DutyActions.Length; i++)
+
+		if (DataCenter.IsInDuty)
 		{
-			DataCenter.DutyActions[i] = DutyActionManager.GetDutyActionId(i);
+			for (ushort i = 0; i < DataCenter.DutyActions.Length; i++)
+			{
+				DataCenter.DutyActions[i] = DutyActionManager.GetDutyActionId(i);
+			}
 		}
 	}
 
@@ -240,7 +247,13 @@ internal static class ActionUpdater
 		}
 
 		var player = Player.Object;
-		if (player == null || IsPlayerOccupied() || player.CurrentHp == 0)
+		if (player == null || player.CurrentHp == 0)
+		{
+			return false;
+		}
+
+		bool isPvPPurifyNeeded = DataCenter.IsPvP && StatusHelper.PlayerHasStatus(false, StatusHelper.PurifyPvPStatuses);
+		if (!isPvPPurifyNeeded && IsPlayerOccupied())
 		{
 			return false;
 		}

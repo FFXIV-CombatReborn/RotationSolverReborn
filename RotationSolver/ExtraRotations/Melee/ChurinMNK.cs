@@ -96,10 +96,6 @@ public sealed class ChurinMNK : MonkRotation
     private bool IsLastGCDMasterfulBlitz => IsLastGCD(true, ElixirBurstPvE, PhantomRushPvE, RisingPhoenixPvE);
     private bool IsLastGCDOpo => IsLastGCD( true, DragonKickPvE, LeapingOpoPvE, BootshinePvE, ShadowOfTheDestroyerPvE, ArmOfTheDestroyerPvE);
     private static bool PerfectBalanceStacks(int stacks) => StatusHelper.PlayerStatusStack(true, StatusID.PerfectBalance) == stacks;
-    private static bool CanLateWeave => WeaponRemain <= LateWeaveWindow;
-    private static bool CanEarlyWeave => WeaponRemain >= LateWeaveWindow;
-    private const float LateWeaveWindow = 1.15f;
-    private static bool EnoughWeaveTime => WeaponRemain > 0.75f;
     private static bool IsOpenerStart => InCombat && CombatTime < 5.0f;
     private static bool HasBothNadi => HasLunar && HasSolar;
     private static bool HasNoNadi => !HasLunar && !HasSolar;

@@ -111,14 +111,14 @@ public struct ActionTargetInfo(IBaseAction action)
 			if (!DataCenter.IsManual || IsTargetFriendly || target.GameObjectId == Svc.Targets.Target?.GameObjectId || target.GameObjectId == Player.Object.GameObjectId)
 			{
 				var view = TargetOnScreen(target);
-				var canUse = CanUseTo(target);
-				var asCanTarget = action.Setting.CanTarget(target);
-				var MinHPPass = !action.MinHPFeature || (action.MinHPFeature && target.GetHealthRatio() > action.MinHPPercent);
+					var canUse = CanUseTo(target);
+					var asCanTarget = action.Setting.CanTarget(target);
+					var MinHPPass = !action.MinHPFeature || (action.MinHPFeature && target.GetHealthRatio() > action.MinHPPercent);
 
-				if (view && canUse && asCanTarget && MinHPPass)
-				{
-					validTargets.Add(target);
-				}
+					if (view && canUse && asCanTarget && MinHPPass)
+					{
+						validTargets.Add(target);
+					}
 			}
 		}
 
@@ -363,16 +363,127 @@ public struct ActionTargetInfo(IBaseAction action)
 			return false;
 		}
 
+		if (DataCenter.Job == Job.BLU && DataCenter.IsInMaskedCarnivale)
+		{
+			if (Service.Config.BlockflatdamagedeathimmuneBlu && action.Setting.IsFlatDamageDeath
+			&& !MaskedCarnivaleHelper.IsVulnerableToFlatOrDeath(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to flat/death — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockslowimmuneBlu && action.Setting.IsSlowSpell
+			&& !MaskedCarnivaleHelper.IsVulnerableToSlow(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to slow — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockpetrificationimmuneBlu && action.Setting.IsPetrificationSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToPetrification(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to petrification — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockparalysisimmuneBlu && action.Setting.IsParalysisSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToParalysis(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to paralysis — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockinterruptimmuneBlu && action.Setting.IsInterruptSpell
+			&& !MaskedCarnivaleHelper.IsVulnerableToInterruption(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to interruption — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockblindimmuneBlu && action.Setting.IsBlindSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToBlind(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to blind — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockstunimmuneBlu && action.Setting.IsStunSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToStun(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to stun — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlocksleepimmuneBlu && action.Setting.IsSleepSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToSleep(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to sleep — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockbindimmuneBlu && action.Setting.IsBindSpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToBind(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to bind — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockheavyimmuneBlu && action.Setting.IsHeavySpell
+				&& !MaskedCarnivaleHelper.IsVulnerableToHeavy(battleChara))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is not vulnerable to heavy — skipping {action.Info.Name}.");
+				return false;
+			}
+
+			if (Service.Config.BlockimmuneBlu && !MaskedCarnivaleHelper.IsActionAspectAllowed(battleChara, action))
+			{
+				if (Service.Config.InDebug) PluginLog.Debug($"[CheckResistance] {battleChara.Name} is immune to action {action.Info.Name} aspect (BlockimmuneBLU).");
+				return false;
+			}
+
+			if (Service.Config.BlocknonweakBlu && !MaskedCarnivaleHelper.HasNoResistancesOrImmunities(battleChara))
+			{
+
+				// shouldCheckWeakness is true if the action has at least one non-unaspected aspect
+				// (or any aspect when AllowunaspectedBlu is off).
+				// When AllowunaspectedBlu is on, purely unaspected actions leave this false,
+				// bypassing BlocknonweakBlu so they are always allowed regardless of mob weakness.
+				bool shouldCheckWeakness = false;
+				if (action.Info.Aspects != null)
+				{
+					for (int i = 0; i < action.Info.Aspects.Count; i++)
+					{
+						if ((action.Info.Aspects[i] != Aspect.Unaspected && Service.Config.AllowunaspectedBlu) || !Service.Config.AllowunaspectedBlu)
+						{
+							shouldCheckWeakness = true;
+							break;
+						}
+					}
+				}
+				if (shouldCheckWeakness && !MaskedCarnivaleHelper.IsActionAspectWeak(battleChara, action))
+				{
+					return false;
+				}
+			}
+		}
+
 		try
 		{
-			if (action.Info.AttackType == AttackType.Magic)
+			if (DataCenter.IsPvP && (!action.Setting.IgnoreGuard || (DataCenter.Job == Job.BLM && StatusHelper.PlayerHasStatus(true, StatusID.WreathOfFire))))
+			{
+				if (battleChara.HasStatus(false, StatusID.Guard))
+				{
+					return false;
+				}
+			}
+			if (action.Info.HasAttackType(AttackType.Magic))
 			{
 				if (battleChara.HasStatus(false, StatusHelper.MagicResistance))
 				{
 					return false;
 				}
 			}
-			else if (action.Info.Aspect != Aspect.Piercing) // Physical
+			if (action.Info.HasAttackType(AttackType.Physical) || action.Info.HasAttackType(AttackType.Slashing) || action.Info.HasAttackType(AttackType.Piercing) || action.Info.HasAttackType(AttackType.Blunt)) // Physical
 			{
 				if (battleChara.HasStatus(false, StatusHelper.PhysicalResistance))
 				{
@@ -417,7 +528,8 @@ public struct ActionTargetInfo(IBaseAction action)
 		}
 
 		float time = b.GetTTK();
-		return float.IsNaN(time) || time >= action.Config.TimeToKill;
+		bool result = float.IsNaN(time) || time >= action.Config.TimeToKill;
+		return result;
 	}
 
 	#endregion
@@ -452,6 +564,32 @@ public struct ActionTargetInfo(IBaseAction action)
 		}
 
 		TargetType type = action.Setting.TargetType;
+
+		// For self-cast area/cone hostile actions (Range == 0, EffectRange > 0), such as Surpanakha,
+			// the attack fires a cone from the player's position toward the current target direction.
+			// There is no explicit enemy to "target" at range 0, so bypass the normal target-finding
+			// path and source candidates directly from GetCanAffects (enemies within EffectRange).
+			if (Range == 0 && EffectRange > 0 && !IsSingleTarget && !IsTargetArea && !action.Setting.IsFriendly)
+			{
+				if (Service.Config.AoEType == AoEType.Off)
+					return null;
+
+				int required = skipAoeCheck ? 0 : action.Config.AoeCount;
+
+				// Mirror the cleave check in GetMostCanTargetObjects: in Cleave mode, block if aoeCount > 1
+				if (required > 1 && (Service.Config.AoEType == AoEType.Cleave || (DataCenter.IsInM9S && Service.Config.M9SCleaveOnly)))
+					return null;
+
+				List<IBattleChara> selfAffects = GetCanAffects(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
+				// For directional self-cast AOEs (Cone, StraightLine), only count enemies that are
+				// actually within the player's current facing direction. Without this, the action would
+				// fire even when no enemies are in the cone (e.g. Breath of Magic spamming infinitely).
+				selfAffects = FilterAffectsByFacing(selfAffects);
+				if (selfAffects.Count < Math.Max(1, required))
+					return null;
+
+				return new TargetResult(Player.Object, [.. selfAffects], Player.Object.Position);
+			}
 
 		IEnumerable<IBattleChara> canTargets = GetCanTargets(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
 		List<IBattleChara> canAffects = GetCanAffects(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
@@ -494,6 +632,13 @@ public struct ActionTargetInfo(IBaseAction action)
 			affectedTargets = [];
 		}
 
+		if (Service.Config.InDebug)
+		{
+			if (target == null)
+				PluginLog.Debug($"[FindTarget] No target found for action {action.Info.ID}.");
+			else
+				PluginLog.Debug($"[FindTarget] Selected target {target.Name} for action {action.Info.ID} with {affectedTargets.Length} affected.");
+		}
 		return target == null ? null : new TargetResult(target, affectedTargets, target.Position);
 	}
 
@@ -945,6 +1090,74 @@ public struct ActionTargetInfo(IBaseAction action)
 	}
 
 	/// <summary>
+	/// Filters a list of candidates to only those actually inside the player's facing cone/line for
+	/// self-cast directional AOEs (Cone and StraightLine cast types), and for Donut cast types
+	/// excludes enemies inside the hollow centre (inner radius = 8y), matching the geometry used in
+	/// <see cref="GetCanTarget"/>. Circle AOEs are omnidirectional with no inner exclusion and also pass through unfiltered.
+	/// </summary>
+	private readonly List<IBattleChara> FilterAffectsByFacing(List<IBattleChara> candidates)
+	{
+		if (Player.Object == null || candidates.Count == 0)
+			return candidates;
+
+		CastType castType = (CastType)action.Action.CastType;
+		if (castType != CastType.Cone && castType != CastType.StraightLine && castType != CastType.Donut)
+			return candidates; // Circle is omnidirectional with no inner exclusion — pass through unfiltered.
+
+		Vector3 playerPos = Player.Object.Position;
+		Vector3 faceVec = Vector3.Normalize(Player.Object.GetFaceVector());
+		faceVec.Y = 0;
+
+		List<IBattleChara> result = [];
+		foreach (IBattleChara t in candidates)
+		{
+			Vector3 toTarget = t.Position - playerPos;
+			toTarget.Y = 0;
+			float dist = toTarget.Length();
+			if (dist <= 0.001f)
+			{
+				result.Add(t); // On top of player — include
+				continue;
+			}
+
+			if (castType == CastType.Cone)
+			{
+				// Use the same cone half-angle (_alpha = π/3) as GetCanTarget
+				float cos = Vector3.Dot(faceVec, toTarget / dist);
+				if (cos >= (float)Math.Cos(_alpha))
+					result.Add(t);
+			}
+			else if (castType == CastType.StraightLine)
+			{
+				// Only include enemies in front of the player (positive dot product)
+				// and within lateral beam width (matches GetCanTarget line logic)
+				if (Vector3.Dot(faceVec, toTarget) < 0)
+					continue;
+
+				// Perpendicular distance in yalms: Cross(unit_faceVec_xz, toTarget_xz).Length()
+				// = |toTarget_xz| * sin(angle). Do NOT divide by dist — that would give
+				// dimensionless sin(angle) which is always < halfWidth and passes every target.
+				Vector3 faceXZ = Vector3.Normalize(new Vector3(faceVec.X, 0, faceVec.Z));
+				Vector3 toTargetXZ = new(toTarget.X, 0, toTarget.Z);
+				float perp = Vector3.Cross(faceXZ, toTargetXZ).Length();
+				float halfWidth = action.Action.XAxisModifier > 0 ? action.Action.XAxisModifier / 2f : 2f;
+				float width = halfWidth + t.HitboxRadius;
+				if (perp <= width)
+					result.Add(t);
+			}
+			else if (castType == CastType.Donut) // omnidirectional ring; exclude enemies inside the hollow centre
+			{
+				// Mirror the GetCanTarget Donut check: distance minus hitbox radius must be >= inner radius
+				float innerRadius = action.Action.XAxisModifier > 0 ? action.Action.XAxisModifier : 8f;
+				float d = dist - t.HitboxRadius;
+				if (d >= innerRadius)
+					result.Add(t);
+			}
+		}
+		return result;
+	}
+
+	/// <summary>
 	/// Gets the characters that are affected by the specified target.
 	/// </summary>
 	/// <param name="tar">The target character.</param>
@@ -1089,24 +1302,37 @@ public struct ActionTargetInfo(IBaseAction action)
 		float dirLen = dir.Length();
 		float tdirLen = tdir.Length();
 
+
 		// If the main target is essentially on top of the player, avoid divide-by-zero and
 		// approximate using radial checks so we don't drop AoE entirely in degenerate cases.
 		if (dirLen <= 0.001f)
 		{
-			switch (action.Action.CastType)
+			switch ((CastType)action.Action.CastType)
 			{
-				case 2: // Circle (centered at target)
+				case CastType.Circle: // Circle (centered at target)
 					return Vector3.Distance(target.Position, subTarget.Position) - subTarget.HitboxRadius <= EffectRange;
 
-				case 10: // Donut (centered at target)
+				case CastType.Cone: // Cone (cast from player)
+						return (tdirLen - subTarget.HitboxRadius) <= EffectRange;
+
+					case CastType.StraightLine: // Line (beam from player in facing direction — degenerate: target on top of player)
 					{
-						float d = Vector3.Distance(target.Position, subTarget.Position) - subTarget.HitboxRadius;
-						return d <= EffectRange && d >= 8f;
+						if (tdirLen - subTarget.HitboxRadius > EffectRange) return false;
+						Vector3 lineDir2 = Player.Object != null
+							? Vector3.Normalize(new Vector3(Player.Object.GetFaceVector().X, 0, Player.Object.GetFaceVector().Z))
+							: Vector3.UnitZ;
+						Vector3 tdirXZ2 = new(tdir.X, 0, tdir.Z);
+						float perp2 = Vector3.Cross(lineDir2, tdirXZ2).Length();
+						float halfWidth2 = action.Action.XAxisModifier > 0 ? action.Action.XAxisModifier / 2f : 2f;
+						return perp2 <= halfWidth2 + subTarget.HitboxRadius && Vector3.Dot(lineDir2, tdirXZ2) >= 0;
 					}
 
-				case 3: // Sector (fallback: radial gate from player)
-				case 4: // Line (fallback: radial gate from player)
-					return (tdirLen - subTarget.HitboxRadius) <= EffectRange;
+				case CastType.Donut: // Donut (centered at target)
+					{
+						float d = Vector3.Distance(target.Position, subTarget.Position) - subTarget.HitboxRadius;
+						float innerRadius = action.Action.XAxisModifier > 0 ? action.Action.XAxisModifier : 8f;
+						return d <= EffectRange && d >= innerRadius;
+					}
 
 				default:
 					if (Service.Config.InDebug)
@@ -1117,12 +1343,12 @@ public struct ActionTargetInfo(IBaseAction action)
 			}
 		}
 
-		switch (action.Action.CastType)
+		switch ((CastType)action.Action.CastType)
 		{
-			case 2: // Circle (centered at target)
+			case CastType.Circle: // Circle (centered at target)
 				return Vector3.Distance(target.Position, subTarget.Position) - subTarget.HitboxRadius <= EffectRange;
 
-			case 3: // Sector (cone from player toward target)
+			case CastType.Cone: // Cone (cast from player)
 				{
 					// Quick radial gate with hitbox
 					if (tdirLen - subTarget.HitboxRadius > EffectRange)
@@ -1146,27 +1372,37 @@ public struct ActionTargetInfo(IBaseAction action)
 					return cos >= Math.Cos(_alpha);
 				}
 
-			case 4: // Line (beam from player toward target)
+			case CastType.StraightLine: // Line (beam from player in the player's facing direction)
 				{
-					// Distance gate with hitbox allowance
+					// Distance gate: sub-target must be within beam length (EffectRange) of player
 					if (tdirLen - subTarget.HitboxRadius > EffectRange)
 					{
 						return false;
 					}
 
-					// Perpendicular distance from line
-					float perp = Vector3.Cross(dir, tdir).Length() / dirLen;
+					// StraightLine fires in the direction the player is currently facing,
+					// not necessarily toward the selected target.
+					Vector3 lineDir = Player.Object != null
+						? Vector3.Normalize(new Vector3(Player.Object.GetFaceVector().X, 0, Player.Object.GetFaceVector().Z))
+						: dir / dirLen;
 
-					// Allow a bit of thickness: base 2 + both hitboxes
-					float width = 2f + target.HitboxRadius + subTarget.HitboxRadius;
+					// Perpendicular distance in yalms: project both vectors to XZ so Y height
+					// differences don't inflate the cross product length.
+					Vector3 tdirXZ = new(tdir.X, 0, tdir.Z);
+					float perp = Vector3.Cross(lineDir, tdirXZ).Length();
 
-					return perp <= width && Vector3.Dot(dir, tdir) >= 0;
+					// Beam half-width from XAxisModifier + sub-target hitbox radius
+					float halfWidth = action.Action.XAxisModifier > 0 ? action.Action.XAxisModifier / 2f : 2f;
+					float width = halfWidth + subTarget.HitboxRadius;
+
+					return perp <= width && Vector3.Dot(lineDir, tdirXZ) >= 0;
 				}
 
-			case 10: // Donut (centered at target)
+			case CastType.Donut: // Donut (centered at target)
 				{
 					float dis = Vector3.Distance(target.Position, subTarget.Position) - subTarget.HitboxRadius;
-					return dis <= EffectRange && dis >= 8f;
+					float innerRadius = action.Action.XAxisModifier > 0 ? action.Action.XAxisModifier : 8f;
+					return dis <= EffectRange && dis >= innerRadius;
 				}
 
 			default:

@@ -13,6 +13,8 @@ internal partial class Configs : IPluginConfiguration
 	public const string
 		BasicTimer = "BasicTimer",
 		BasicAutoSwitch = "BasicAutoSwitch",
+		DutySpecifcCrucibleOfTheUnbroken = "DutySpecifcCrucibleOfTheUnbroken",
+		DutySpecifcTheMaskedCarnivale = "DutySpecifcTheMaskedCarnivale",
 		DutySpecifcPvP = "DutySpecifcPvP",
 		DutySpecifcFieldOps = "DutySpecifcFieldOps",
 		DutySpecifcAlliance = "DutySpecifcAlliance",
@@ -54,6 +56,45 @@ internal partial class Configs : IPluginConfiguration
 	public MacroInfo DutyEnd { get; set; } = new MacroInfo();
 
 	#region Duty Specific
+	[ConditionBool, UI("Prevent specific Flat Damage/Death actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockflatdamagedeathimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Slow actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockslowimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Petrification actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockpetrificationimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Paralysis actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockparalysisimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Interrupt actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockinterruptimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Blind actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockblindimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Stun actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockstunimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Sleep actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blocksleepimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Bind actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockbindimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific Heavy actions from being used against mobs that are immune to those effects.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockheavyimmuneBLU = false;
+
+	[ConditionBool, UI("Prevent specific aspected actions from being used against mobs that are immune to that aspect.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blockimmuneBLU = true;
+
+	[ConditionBool, UI("If a mob is weak to a specific aspect, only use actions of that aspect.", Filter = DutySpecifcTheMaskedCarnivale)]
+	private static readonly bool _blocknonweakBLU = false;
+
+	[ConditionBool, UI("Still allow unaspected actions.", Filter = DutySpecifcTheMaskedCarnivale, Parent = nameof(BlocknonweakBlu))]
+	private static readonly bool _allowunaspectedBLU = true;
+
 	[ConditionBool, UI("O12S - Packet Filter logic.",
 	Description = "Treat OmegaM/OmegaF as immune if you have their corresponding Packet Filter status (also applies to Normal).",
 	Filter = DutySpecifcSavage)]
@@ -209,9 +250,33 @@ internal partial class Configs : IPluginConfiguration
 		 Filter = DutySpecifcPvP)]
 	private static readonly bool _pvpStateControl = false;
 
-	[ConditionBool, UI("Don't use any actions while in Guard (Experimental).",
+	[ConditionBool, UI("Don't use any actions while in Guard.",
 		 Filter = DutySpecifcPvP)]
 	private static readonly bool _pvpGuardControl = true;
+
+	[ConditionBool, UI("Use Purify to remove Stun debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifyStun = true;
+
+	[ConditionBool, UI("Use Purify to remove Silence debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifySilence = true;
+
+	[ConditionBool, UI("Use Purify to remove Deep Freeze debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifyDeepFreeze = true;
+
+	[ConditionBool, UI("Use Purify to remove Miracle of Nature debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifyMiracleOfNature = true;
+
+	[ConditionBool, UI("Use Purify to remove Heavy debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifyHeavy = false;
+
+	[ConditionBool, UI("Use Purify to remove Bind debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifyBind = false;
 
 	[ConditionBool, UI("Lock out GCD cycle if you are below 50% HP and have over 2000 MP for heals (Experimental).",
 		 Filter = DutySpecifcPvP)]
@@ -380,6 +445,16 @@ internal partial class Configs : IPluginConfiguration
 
 	[ConditionBool, UI("Teaching mode", Filter = UiInformation)]
 	private static readonly bool _teachingMode = false;
+
+	[ConditionBool, UI("Auto-target in teaching mode while in combat",
+		Description = "When teaching mode is active, automatically switch your target to match the rotation's suggested action target. Useful for tanks and healers where the optimal target may differ from your current selection.",
+		Parent = nameof(TeachingMode))]
+	private static readonly bool _teachingModeAutoTarget = false;
+
+	[ConditionBool, UI("Show target hint in Next Action window",
+		Description = "When teaching mode is active, display the rotation's suggested target name below the Next Action icon. Shown in orange if you don't have that target selected, green if you do.",
+		Parent = nameof(TeachingMode))]
+	private static readonly bool _teachingModeShowTargetHint = false;
 
 	[ConditionBool, UI("Simulate the effect of pressing abilities",
 		Filter = UiInformation)]
@@ -1048,7 +1123,7 @@ internal partial class Configs : IPluginConfiguration
 		Filter = TargetConfig, Section = 1)]
 	private static readonly bool _targetQuestPriority = true;
 
-	[ConditionBool, UI("Block targeting quest mobs belonging to other players (Broken).",
+	[ConditionBool, UI("Block targeting quest mobs belonging to other players (Experimental).",
 		Filter = TargetConfig, Section = 1)]
 	private static readonly bool targetQuestThings2 = false;
 

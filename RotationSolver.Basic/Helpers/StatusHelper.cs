@@ -29,6 +29,7 @@ public static class StatusHelper
 	public static StatusID[] PhysicalResistance { get; } =
 	[
 		StatusID.IceSpikes_1720,
+		StatusID.IceSpikes_1307
 	];
 
 	/// <summary>
@@ -45,6 +46,7 @@ public static class StatusHelper
 	public static StatusID[] MagicResistance { get; } =
 	[
 		StatusID.MagicResistance,
+		StatusID.MagicResistance_3621,
 		StatusID.RepellingSpray_556,
 		StatusID.MagitekField_2166,
 	];

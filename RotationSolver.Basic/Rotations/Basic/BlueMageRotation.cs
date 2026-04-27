@@ -1,129 +1,60 @@
-using ECommons.Logging;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
-
 namespace RotationSolver.Basic.Rotations.Basic;
 
 public partial class BlueMageRotation
 {
+	#region Status Tracking
 	/// <summary>
 	/// 
 	/// </summary>
-
-	public enum BluDPSSpell : byte
-	{
-		/// <summary>
-		/// 
-		/// </summary>
-		WaterCannon,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		SonicBoom,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		GoblinPunch,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		SharpenedKnife,
-	}
+	public static bool WaxingNocturneWillEnd => HasWaxingNocturne && StatusHelper.PlayerWillStatusEndGCD(2, 0, false, StatusID.WaxingNocturne);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public enum BluAOESpell : byte
-	{
-		/// <summary>
-		/// 
-		/// </summary>
-		Glower,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		FlyingFrenzy,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		FlameThrower,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		DrillCannons,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		Plaincracker,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		HighVoltage,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		MindBlast,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		ThousandNeedles,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		ChocoMeteor,
-
-		/// <summary>
-		///
-		/// </summary>
-		FeatherRain,
-	}
+	public static bool HasWaxingNocturne => StatusHelper.PlayerHasStatus(true, StatusID.WaxingNocturne);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public enum BluHealSpell : byte
-	{
-		/// <summary>
-		/// 
-		/// </summary>
-		WhiteWind,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		AngelsSnack,
-
-		/// <summary>
-		/// 
-		/// </summary>
-		PomCure,
-	}
+	public static bool HasWaningNocturne => StatusHelper.PlayerHasStatus(true, StatusID.WaningNocturne);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public Dictionary<BluDPSSpell, IBaseAction> BluDPSSpellActions = [];
+	public static bool HasBasicInstinct => StatusHelper.PlayerHasStatus(true, StatusID.BasicInstinct);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public Dictionary<BluAOESpell, IBaseAction> BluAOESpellActions = [];
+	public static bool HasSurpanakhasFury => StatusHelper.PlayerHasStatus(true, StatusID.SurpanakhasFury);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public Dictionary<BluHealSpell, IBaseAction> BluHealSpellActions = [];
+	public static bool HasHarmonizedBoost => StatusHelper.PlayerHasStatus(true, StatusID.Boost_1716) || StatusHelper.PlayerHasStatus(true, StatusID.Harmonized);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsTank => StatusHelper.PlayerHasStatus(true, StatusID.AethericMimicryTank);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsDPS => StatusHelper.PlayerHasStatus(true, StatusID.AethericMimicryDps);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsHealer => StatusHelper.PlayerHasStatus(true, StatusID.AethericMimicryHealer);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool NoMimicry => !IsTank && !IsDPS && !IsHealer;
+	#endregion
+
 
 	/// <summary>
 	/// 
@@ -134,144 +65,20 @@ public partial class BlueMageRotation
 	private protected sealed override IBaseAction TankStance => MightyGuardPvE;
 
 	/// <summary>
-	/// Represents the collection of active abilities or actions that are currently configured
-	/// for the Blue Mage's rotation. This property determines which abilities are available
-	/// and used in the rotation solver logic.
-	/// The actions stored in this property are of type <see cref="IBaseAction"/>
-	/// and are managed to ensure they comply with game constraints, such
-	/// as the maximum and minimum number of active actions.
-	/// Custom setter logic validates and applies the selected Blue Mage actions,
-	/// returning whether the operation was successful. For instance, it ensures
-	/// the number of actions is within valid boundaries and synchronizes with the game state when necessary.
-	/// Any errors encountered during the set operation (e.g., exceeding allowable actions
-	/// or synchronization issues) are logged for debugging purposes.
-	/// </summary>
-	protected abstract IBaseAction[] ActiveActions { get; }
-
-	/// <summary>
 	/// 
 	/// </summary>
-	public BlueMageRotation()
-	{
-		//_ = SetBlueMageActions(); disabled for now while i figure out what is causing it to crash to desktop
-	}
-
-	private uint[] _lastAppliedBluActions = [];
-
-	/// <summary>
-	/// Attempts to set the actions for the Blue Mage character.
-	/// </summary>
-	/// <returns>True if successfully applied or already matching; otherwise false.</returns>
-	protected unsafe bool SetBlueMageActions()
-	{
-		try
-		{
-			// Config / state guards
-			if (!Service.Config.SetBluActions2) return false;
-			if (!DataCenter.PlayerAvailable()) return false;
-
-			var active = ActiveActions;
-			if (active is null || active.Length is 0 or > 24)
-			{
-				PluginLog.Error($"Active actions count {active?.Length ?? 0} is invalid (must be 1 - {24}).");
-				return false;
-			}
-
-			Span<uint> unlockedIdsSpan = active.Length <= 24
-				? stackalloc uint[active.Length]
-				: new uint[active.Length];
-
-			int count = 0;
-			foreach (var a in active)
-			{
-				if (a == null) continue;
-
-				if (a.Info.IsQuestUnlocked())
-				{
-					unlockedIdsSpan[count++] = a.Action.RowId;
-				}
-			}
-
-			if (count == 0)
-			{
-				PluginLog.Warning("No unlocked Blue Mage actions from ActiveActions; skipping SetBlueMageActions.");
-				return false;
-			}
-
-			var newIds = unlockedIdsSpan[..count].ToArray();
-
-			// Compare against last applied (cache) first to avoid native calls
-			if (_lastAppliedBluActions.AsSpan().SequenceEqual(newIds))
-			{
-				return true; // Already applied by our logic
-			}
-
-			// Retrieve current in-game actions
-			var current = GetBlueMageActionsInternal();
-			if (current.AsSpan().SequenceEqual(newIds))
-			{
-				_lastAppliedBluActions = newIds;
-				return true;
-			}
-
-			ActionManager* actionManager = ActionManager.Instance();
-			if (actionManager == null)
-			{
-				PluginLog.Error("ActionManager instance is null; cannot set BLU actions.");
-				return false;
-			}
-
-			fixed (uint* idsPtr = newIds)
-			{
-				bool ok = actionManager->SetBlueMageActions(idsPtr);
-				if (ok)
-				{
-					_lastAppliedBluActions = newIds;
-				}
-				else
-				{
-					PluginLog.Warning("SetBlueMageActions native call returned false.");
-				}
-				return ok;
-			}
-		}
-		catch (Exception ex)
-		{
-			PluginLog.Error($"Failed to set Blue Mage actions. Exception: {ex}");
-			return false;
-		}
-	}
-
-	private unsafe uint[] GetBlueMageActionsInternal()
-	{
-		ActionManager* actionManager = ActionManager.Instance();
-		if (actionManager == null) return [];
-
-		Span<uint> buffer = stackalloc uint[24];
-		int count = 0;
-		for (int slot = 0; slot < 24; slot++)
-		{
-			uint id = actionManager->GetActiveBlueMageActionInSlot(slot);
-			if (id != 0)
-			{
-				buffer[count++] = id;
-			}
-		}
-		return buffer[..count].ToArray();
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public CombatRole BlueId { get; protected set; } = CombatRole.DPS;
+	public static CombatRole BlueId => IsTank ? CombatRole.Tank : IsHealer ? CombatRole.Healer : CombatRole.DPS;
 
 	static partial void ModifyWaterCannonPvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Water;
 	}
 
 	static partial void ModifyFlameThrowerPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Fire;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -281,6 +88,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyAquaBreathPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Water;
 		setting.TargetStatusProvide = [StatusID.Dropsy_1736];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
@@ -292,6 +101,8 @@ public partial class BlueMageRotation
 	static partial void ModifyFlyingFrenzyPvE(ref ActionSetting setting)
 	{
 		//setting.SpecialType = SpecialActionType.MovingForward;
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
@@ -300,15 +111,23 @@ public partial class BlueMageRotation
 
 	static partial void ModifyDrillCannonsPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Piercing;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
 		};
+		setting.IsFriendly = false;
+		setting.TargetStatusNeed = [StatusID.Petrification, StatusID.Petrification_1511, StatusID.Petrification_3007, StatusID.Petrification_4445, StatusID.Petrification];
 	}
 
 	static partial void ModifyHighVoltagePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Lightning;
+		setting.IsParalysisSpell = true;
 		setting.TargetStatusProvide = [StatusID.Paralysis];
+		setting.TargetStatusNeed = [StatusID.Dropsy_1736];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -319,6 +138,8 @@ public partial class BlueMageRotation
 	static partial void ModifyLoomPvE(ref ActionSetting setting)
 	{
 		//setting.SpecialType = SpecialActionType.MovingForward;
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Lightning;
 		setting.IsFriendly = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -328,6 +149,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyFinalStingPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Piercing;
 		setting.ActionCheck = () => !StatusHelper.PlayerHasStatus(true, StatusID.BrushWithDeath);
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -337,11 +160,16 @@ public partial class BlueMageRotation
 
 	static partial void ModifySongOfTormentPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.TargetStatusProvide = [StatusID.Bleeding_1714];
 	}
 
 	static partial void ModifyGlowerPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Lightning;
+		setting.IsParalysisSpell = true;
 		setting.TargetStatusProvide = [StatusID.Paralysis];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -351,6 +179,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyPlaincrackerPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Earth;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -378,6 +208,9 @@ public partial class BlueMageRotation
 
 	static partial void ModifyLevel5PetrifyPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsPetrificationSpell = true;
 		setting.TargetStatusProvide = [StatusID.Petrification];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
@@ -388,22 +221,31 @@ public partial class BlueMageRotation
 
 	static partial void ModifySharpenedKnifePvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Slashing;
+		setting.TargetStatusNeed = [StatusID.Stun, StatusID.Stun_1343, StatusID.Stun_142, StatusID.Stun_149, StatusID.Stun_1513, StatusID.Stun_1521, StatusID.Stun_1522, StatusID.Stun_201, StatusID.Stun_2656, StatusID.Stun_2953, StatusID.Stun_3408, StatusID.Stun_4163, StatusID.Stun_4374, StatusID.Stun_4378, StatusID.Stun_4433, StatusID.Stun_5043];
 	}
 
 	static partial void ModifyIceSpikesPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Ice;
 		setting.StatusProvide = [StatusID.IceSpikes_1720, StatusID.VeilOfTheWhorl_1724, StatusID.Schiltron];
-		setting.IsFriendly = false;
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 	}
 
 	static partial void ModifyBloodDrainPvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 	}
 
 	static partial void ModifyAcornBombPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsSleepSpell = true;
 		setting.TargetStatusProvide = [StatusID.Sleep];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -413,7 +255,11 @@ public partial class BlueMageRotation
 
 	static partial void ModifyBombTossPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Fire;
+		setting.IsStunSpell = true;
 		setting.TargetStatusProvide = [StatusID.Stun];
+		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -422,12 +268,17 @@ public partial class BlueMageRotation
 
 	static partial void ModifyOffguardPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.TargetStatusProvide = [StatusID.Offguard];
 	}
 
 	static partial void ModifySelfdestructPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Fire;
 		setting.ActionCheck = () => !StatusHelper.PlayerHasStatus(true, StatusID.BrushWithDeath);
+		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -436,11 +287,17 @@ public partial class BlueMageRotation
 
 	static partial void ModifyTransfusionPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.ActionCheck = () => !StatusHelper.PlayerHasStatus(true, StatusID.BrushWithDeath);
+		setting.IsFriendly = true;
 	}
 
 	static partial void ModifyFazePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsStunSpell = true;
 		setting.TargetStatusProvide = [StatusID.Stun];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -451,15 +308,45 @@ public partial class BlueMageRotation
 	static partial void ModifyFlyingSardinePvE(ref ActionSetting setting)
 	{
 		//setting.TargetType = TargetType.Interrupt;
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Piercing;
+		setting.IsInterruptSpell = true;
 	}
 
 	static partial void ModifySnortPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Wind;
 		setting.IsFriendly = false;
+		setting.IsInterruptSpell = true;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+		setting.ActionCheck = () =>
+		{
+			if (Player == null) return false;
+			var playerFace = Player.GetFaceVector();
+			var playerPos = Player.Position;
+			const float snortRange = 6f;
+			const double coneHalfAngle = Math.PI / 4; // 45 degrees each side = 90 degree cone
+			foreach (var target in DataCenter.AllHostileTargets)
+			{
+				if (!target.CanInterrupt()) continue;
+				if (target.DistanceToPlayer() > snortRange) continue;
+				var dir = Vector3.Normalize(target.Position - playerPos);
+				var angle = playerFace.AngleTo(dir);
+				if (angle <= coneHalfAngle) return true;
+			}
+			return false;
+		};
 	}
 
 	static partial void Modify_4TonzeWeightPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
+		setting.IsHeavySpell = true;
 		setting.TargetStatusProvide = [StatusID.Heavy];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -469,6 +356,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyTheLookPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.IsFriendly = false;
 		//setting.TargetType = TargetType.Provoke;
 		setting.CreateConfig = () => new ActionConfig()
@@ -479,6 +368,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyBadBreathPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.IsFriendly = false;
 		setting.TargetStatusProvide = [StatusID.Slow, StatusID.Heavy, StatusID.Blind, StatusID.Paralysis, StatusID.Poison, StatusID.Malodorous];
 		setting.CreateConfig = () => new ActionConfig()
@@ -504,6 +395,9 @@ public partial class BlueMageRotation
 
 	static partial void ModifyStickyTonguePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
+		setting.IsStunSpell = true;
 		setting.TargetStatusProvide = [StatusID.Stun];
 	}
 
@@ -515,6 +409,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyTheRamsVoicePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Ice;
 		setting.TargetStatusProvide = [StatusID.DeepFreeze_1731];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
@@ -525,7 +421,11 @@ public partial class BlueMageRotation
 
 	static partial void ModifyTheDragonsVoicePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Lightning;
+		setting.IsParalysisSpell = true;
 		setting.TargetStatusProvide = [StatusID.Paralysis];
+		setting.TargetStatusNeed = [StatusID.DeepFreeze_1731];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -535,11 +435,17 @@ public partial class BlueMageRotation
 
 	static partial void ModifyMissilePvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.TargetType = TargetType.HighHPPercent;
+		setting.IsFlatDamageDeath = true;
 	}
 
 	static partial void Modify_1000NeedlesPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Piercing;
+		setting.TargetType = TargetType.LowHP;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -548,6 +454,9 @@ public partial class BlueMageRotation
 
 	static partial void ModifyInkJetPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsBlindSpell = true;
 		setting.TargetStatusProvide = [StatusID.Blind];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
@@ -558,6 +467,9 @@ public partial class BlueMageRotation
 
 	static partial void ModifyFireAngonPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Piercing;
+		setting.AdditionalAspects = [Aspect.Fire];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -572,12 +484,17 @@ public partial class BlueMageRotation
 
 	static partial void ModifyTailScrewPvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsFlatDamageDeath = true;
 	}
 
 	static partial void ModifyMindBlastPvE(ref ActionSetting setting)
 	{
-		//setting.TargetStatusProvide = [StatusID.Paralysis];
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsParalysisSpell = true;
+		setting.TargetStatusProvide = [StatusID.Paralysis];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -587,11 +504,15 @@ public partial class BlueMageRotation
 
 	static partial void ModifyDoomPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.TargetStatusProvide = [StatusID.Doom_1738];
 	}
 
 	static partial void ModifyPeculiarLightPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.TargetStatusProvide = [StatusID.PeculiarLight];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
@@ -602,6 +523,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyFeatherRainPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Wind;
 		setting.TargetStatusProvide = [StatusID.Windburn_1723];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
@@ -612,6 +535,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyEruptionPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Fire;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -620,6 +545,9 @@ public partial class BlueMageRotation
 
 	static partial void ModifyMountainBusterPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
+		setting.AdditionalAspects = [Aspect.Earth];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -629,6 +557,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyShockStrikePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Lightning;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -637,6 +567,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyGlassDancePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Ice;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -646,7 +578,11 @@ public partial class BlueMageRotation
 
 	static partial void ModifyVeilOfTheWhorlPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Water;
 		setting.StatusProvide = [StatusID.IceSpikes_1720, StatusID.VeilOfTheWhorl_1724, StatusID.Schiltron];
+		setting.TargetType = TargetType.Self;
+		setting.IsFriendly = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -655,6 +591,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyAlpineDraftPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Wind;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -663,6 +601,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyProteanWavePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Water;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -672,6 +612,20 @@ public partial class BlueMageRotation
 
 	static partial void ModifyNortherliesPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Ice;
+		setting.TargetStatusNeed = [StatusID.Dropsy_1736];
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyElectrogenesisPvE(ref ActionSetting setting)
+	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Lightning;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -681,6 +635,9 @@ public partial class BlueMageRotation
 
 	static partial void ModifyKaltstrahlPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Slashing;
+		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -689,11 +646,17 @@ public partial class BlueMageRotation
 
 	static partial void ModifyAbyssalTransfixionPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Piercing;
+		setting.IsParalysisSpell = true;
 		setting.TargetStatusProvide = [StatusID.Paralysis];
 	}
 
 	static partial void ModifyChirpPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsSleepSpell = true;
 		setting.TargetStatusProvide = [StatusID.Sleep];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -703,6 +666,9 @@ public partial class BlueMageRotation
 
 	static partial void ModifyEerieSoundwavePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.TargetStatusNeed = [StatusID.VulnerabilityDown, StatusID.CriticalStrikes_1797];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -717,6 +683,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyGobskinPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.StatusProvide = [StatusID.Gobskin];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -726,6 +694,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyMagicHammerPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.StatusProvide = [StatusID.Conked];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -740,6 +710,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyFrogLegsPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.TargetType = TargetType.Provoke;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -749,7 +721,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifySonicBoomPvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Wind;
 	}
 
 	static partial void ModifyWhistlePvE(ref ActionSetting setting)
@@ -760,7 +733,11 @@ public partial class BlueMageRotation
 
 	static partial void ModifyWhiteKnightsTourPvE(ref ActionSetting setting)
 	{
-		setting.TargetStatusProvide = [StatusID.Blind];
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsSlowSpell = true;
+		setting.TargetStatusProvide = [StatusID.Slow];
+		setting.TargetStatusNeed = [StatusID.Blind];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -769,7 +746,11 @@ public partial class BlueMageRotation
 
 	static partial void ModifyBlackKnightsTourPvE(ref ActionSetting setting)
 	{
-		setting.TargetStatusProvide = [StatusID.Slow];
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsBlindSpell = true;
+		setting.TargetStatusProvide = [StatusID.Blind];
+		setting.TargetStatusNeed = [StatusID.Slow];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -778,7 +759,10 @@ public partial class BlueMageRotation
 
 	static partial void ModifyLevel5DeathPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.IsFriendly = false;
+		setting.IsFlatDamageDeath = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -787,7 +771,10 @@ public partial class BlueMageRotation
 
 	static partial void ModifyLauncherPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.IsFriendly = false;
+		setting.IsFlatDamageDeath = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -796,8 +783,10 @@ public partial class BlueMageRotation
 
 	static partial void ModifyPerpetualRayPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsStunSpell = true;
 		setting.TargetStatusProvide = [StatusID.Stun];
-
 	}
 
 	static partial void ModifyCactguardPvE(ref ActionSetting setting)
@@ -808,12 +797,14 @@ public partial class BlueMageRotation
 
 	static partial void ModifyRevengeBlastPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => Player?.GetHealthRatio() > 0.2;
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
+		setting.ActionCheck = () => Player?.GetHealthRatio() > 0.2f;
 	}
 
 	static partial void ModifyAngelWhisperPvE(ref ActionSetting setting)
 	{
-
+		setting.TargetType = TargetType.Death;
 	}
 
 	static partial void ModifyExuviationPvE(ref ActionSetting setting)
@@ -827,16 +818,23 @@ public partial class BlueMageRotation
 
 	static partial void ModifyRefluxPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Lightning;
+		setting.IsHeavySpell = true;
 		setting.TargetStatusProvide = [StatusID.Heavy];
 	}
 
 	static partial void ModifyDevourPvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.StatusProvide = [StatusID.HpBoost_2120];
 	}
 
 	static partial void ModifyCondensedLibraPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.TargetStatusProvide = [StatusID.PhysicalAttenuation, StatusID.AstralAttenuation, StatusID.UmbralAttenuation];
 	}
 
@@ -850,7 +848,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifySurpanakhaPvE(ref ActionSetting setting)
 	{
-		setting.StatusProvide = [StatusID.SurpanakhasFury];
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Earth;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -860,6 +859,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyQuasarPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -869,6 +870,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyJKickPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
 		setting.ActionCheck = () => !StatusHelper.PlayerHasStatus(false, StatusID.Bind);
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -878,11 +881,14 @@ public partial class BlueMageRotation
 
 	static partial void ModifyTripleTridentPvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Piercing;
 	}
 
 	static partial void ModifyTinglePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Lightning;
 		setting.StatusProvide = [StatusID.Tingling];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -892,6 +898,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyTatamigaeshiPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.TargetStatusProvide = [StatusID.Tingling];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -908,12 +916,29 @@ public partial class BlueMageRotation
 
 	static partial void ModifyWhiteDeathPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Ice;
 		setting.StatusNeed = [StatusID.TouchOfFrost];
+		setting.RequiredBluSlotActionId = 23267; // ColdFogPvE
 		setting.TargetStatusProvide = [StatusID.DeepFreeze_1731];
 	}
 
 	static partial void ModifyStotramPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsFriendly = false;
+		setting.ActionCheck = () => !IsHealer;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 3,
+		};
+	}
+
+	static partial void ModifyStotramPvE_23416(ref ActionSetting setting)
+	{
+		setting.IsFriendly = true;
+		setting.ActionCheck = () => IsHealer;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -922,14 +947,18 @@ public partial class BlueMageRotation
 
 	static partial void ModifySaintlyBeamPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.CreateConfig = () => new ActionConfig()
 		{
-			AoeCount = 3,
+			AoeCount = 1,
 		};
 	}
 
 	static partial void ModifyFeculentFloodPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Earth;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -938,6 +967,7 @@ public partial class BlueMageRotation
 
 	static partial void ModifyAngelsSnackPvE(ref ActionSetting setting)
 	{
+		setting.StatusProvide = [StatusID.AngelsSnack];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -947,6 +977,7 @@ public partial class BlueMageRotation
 	static partial void ModifyChelonianGatePvE(ref ActionSetting setting)
 	{
 		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 		setting.StatusProvide = [StatusID.ChelonianGate];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -956,7 +987,10 @@ public partial class BlueMageRotation
 
 	static partial void ModifyDivineCataractPvE(ref ActionSetting setting)
 	{
-		setting.StatusProvide = [StatusID.AuspiciousTrance];
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Water;
+		setting.StatusNeed = [StatusID.AuspiciousTrance];
+		setting.RequiredBluSlotActionId = 23273; // ChelonianGatePvE
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -966,32 +1000,28 @@ public partial class BlueMageRotation
 
 	static partial void ModifyTheRoseOfDestructionPvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyBasicInstinctPvE(ref ActionSetting setting)
 	{
 		setting.IsFriendly = true;
 		setting.StatusProvide = [StatusID.BasicInstinct];
-		setting.ActionCheck = () =>
-		{
-			int pmCount = 0;
-			if (PartyMembers != null)
-			{
-				foreach (var _ in PartyMembers)
-				{
-					pmCount++;
-					if (pmCount > 1) break;
-				}
-			}
-			return IsInDuty && pmCount <= 1 && DataCenter.Territory?.ContentType != TerritoryContentType.TheMaskedCarnivale;
-		};
+		setting.ActionCheck = () => IsInDuty && AliveOtherPartyMemberCount == 0 && DataCenter.Territory?.ContentType != TerritoryContentType.TheMaskedCarnivale;
 	}
 
 	static partial void ModifyUltravibrationPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.TargetStatusNeed = [StatusID.DeepFreeze_1731, StatusID.Petrification];
 		setting.IsFriendly = false;
+		setting.IsFlatDamageDeath = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1000,6 +1030,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyBlazePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Ice;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1008,6 +1040,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyMustardBombPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Fire;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1017,16 +1051,25 @@ public partial class BlueMageRotation
 	static partial void ModifyDragonForcePvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.DragonForce];
-		setting.IsFriendly = false;
+		setting.TargetType = TargetType.Self;
+		setting.IsFriendly = true;
 	}
 
 	static partial void ModifyAetherialSparkPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.StatusProvide = [StatusID.Bleeding_1714];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyHydroPullPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Water;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -1036,7 +1079,10 @@ public partial class BlueMageRotation
 
 	static partial void ModifyMaledictionOfWaterPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Water;
 		setting.IsFriendly = false;
+		setting.ActionCheck	= () => InCombat;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1045,6 +1091,8 @@ public partial class BlueMageRotation
 
 	static partial void ModifyChocoMeteorPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1053,25 +1101,37 @@ public partial class BlueMageRotation
 
 	static partial void ModifyMatraMagicPvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 	}
 
 	static partial void ModifyPeripheralSynthesisPvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
+		setting.StatusProvide = [StatusID.Lightheaded_2501];
+		setting.StatusNeed = [StatusID.Lightheaded_2501];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyBothEndsPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
-			AoeCount = 3,
+			AoeCount = 1,
 		};
 	}
 
 	static partial void ModifyPhantomFlurryPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
 		setting.IsFriendly = false;
 		setting.ActionCheck = () => !IsMoving;
 		setting.StatusProvide = [StatusID.PhantomFlurry];
@@ -1081,8 +1141,23 @@ public partial class BlueMageRotation
 		};
 	}
 
+	static partial void ModifyPhantomFlurryPvE_23289(ref ActionSetting setting)
+	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
+		setting.IsFriendly = false;
+		setting.ActionCheck = () => !IsMoving;
+		setting.StatusNeed = [StatusID.PhantomFlurry];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
 	static partial void ModifyNightbloomPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.IsFriendly = false;
 		setting.TargetStatusProvide = [StatusID.Bleeding_1714];
 		setting.CreateConfig = () => new ActionConfig()
@@ -1093,26 +1168,43 @@ public partial class BlueMageRotation
 
 	static partial void ModifyGoblinPunchPvE(ref ActionSetting setting)
 	{
-
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
+		setting.StatusNeed = [StatusID.MightyGuard];
 	}
 
 	static partial void ModifyRightRoundPvE(ref ActionSetting setting)
 	{
 		//Need data
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
+		setting.ActionCheck = () => InCombat;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifySchiltronPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.StatusProvide = [StatusID.IceSpikes_1720, StatusID.VeilOfTheWhorl_1724, StatusID.Schiltron];
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 	}
 
 	static partial void ModifyRehydrationPvE(ref ActionSetting setting)
 	{
 		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 	}
 
 	static partial void ModifyBreathOfMagicPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.TargetStatusProvide = [StatusID.BreathOfMagic];
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
@@ -1124,48 +1216,103 @@ public partial class BlueMageRotation
 	static partial void ModifyWildRagePvE(ref ActionSetting setting)
 	{
 		//Need data
-	}
-
-	static partial void ModifyPeatPeltPvE(ref ActionSetting setting)
-	{
-		//Need data
-	}
-
-	static partial void ModifyDeepCleanPvE(ref ActionSetting setting)
-	{
-		//Need data
-	}
-
-	static partial void ModifyRubyDynamicsPvE(ref ActionSetting setting)
-	{
-		//Need data
-	}
-
-	static partial void ModifyDivinationRunePvE(ref ActionSetting setting)
-	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
+		setting.ActionCheck = () => Player?.GetEffectiveHpPercent() > 50f;
+		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
 		};
 	}
 
+	static partial void ModifyPeatPeltPvE(ref ActionSetting setting)
+	{
+		//Need data
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Earth;
+		setting.TargetStatusProvide = [StatusID.Begrimed];
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyDeepCleanPvE(ref ActionSetting setting)
+	{
+		//Need data
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Blunt;
+		setting.TargetStatusNeed = [StatusID.Begrimed];
+		setting.ActionCheck = () => StatusHelper.PlayerStatusStack(true, StatusID.Spickandspan) < 6;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyRubyDynamicsPvE(ref ActionSetting setting)
+	{
+		//Need data
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Slashing;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyDivinationRunePvE(ref ActionSetting setting)
+	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 3,
+		};
+		setting.IsFriendly = false;
+	}
+
 	static partial void ModifyDimensionalShiftPvE(ref ActionSetting setting)
 	{
 		//Need data
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyConvictionMarcatoPvE(ref ActionSetting setting)
 	{
 		//Need data
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyForceFieldPvE(ref ActionSetting setting)
 	{
 		//Need data
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 	}
 
 	static partial void ModifyWingedReprobationPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Physical;
+		setting.AspectOverride = Aspect.Piercing;
 		setting.StatusProvide = [StatusID.WingedReprobation, StatusID.WingedRedemption];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -1176,10 +1323,19 @@ public partial class BlueMageRotation
 	static partial void ModifyLaserEyePvE(ref ActionSetting setting)
 	{
 		//Need data
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyCandyCanePvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.TargetStatusProvide = [StatusID.CandyCane];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -1190,20 +1346,43 @@ public partial class BlueMageRotation
 	static partial void ModifyMortalFlamePvE(ref ActionSetting setting)
 	{
 		//Need data
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Fire;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifySeaShantyPvE(ref ActionSetting setting)
 	{
 		//Need data
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Water;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyApokalypsisPvE(ref ActionSetting setting)
 	{
 		//Need data
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyBeingMortalPvE(ref ActionSetting setting)
 	{
+		setting.AttackTypeOverride = AttackType.Magic;
+		setting.AspectOverride = Aspect.Unaspected;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -1217,10 +1396,5 @@ public partial class BlueMageRotation
 	public override void DisplayBaseStatus()
 	{
 		ImGui.TextWrapped($"Aetheric Mimicry Role: {BlueId}");
-		ImGui.Text($"This rotation requires the following actions:");
-		foreach (IBaseAction action in ActiveActions)
-		{
-			ImGui.Text($" - {action.Name}");
-		}
 	}
 }

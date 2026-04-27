@@ -365,8 +365,9 @@ public partial class AstrologianRotation
 
 	static partial void ModifyDivinationPvE(ref ActionSetting setting)
 	{
-		setting.TargetStatusProvide = [StatusID.Divination];
-		setting.StatusProvide = [StatusID.Divining]; //need to double check this status
+		setting.StatusProvide = [StatusID.Divination, StatusID.Divining];
+		setting.StatusFromSelf = false;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			TimeToKill = 10,

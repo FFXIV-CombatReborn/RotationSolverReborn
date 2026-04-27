@@ -71,7 +71,7 @@ public partial class CustomRotation
 				return act;
 			}
 
-			if (DataCenter.CommandStatus.HasFlag(AutoStatus.Interrupt))
+			if (DataCenter.MergedStatus.HasFlag(AutoStatus.Interrupt))
 			{
 				if (DataCenter.CurrentDutyRotation?.MyInterruptGCD(out act) == true)
 				{
@@ -91,6 +91,19 @@ public partial class CustomRotation
 					return act;
 				}
 				if (DispelGCD(out IAction? action))
+				{
+					return action;
+				}
+			}
+
+			IBaseAction.TargetOverride = TargetType.Provoke;
+			if (DataCenter.MergedStatus.HasFlag(AutoStatus.Provoke))
+			{
+				if (DataCenter.CurrentDutyRotation?.ProvokeGCD(out act) == true)
+				{
+					return act;
+				}
+				if (ProvokeGCD(out IAction? action))
 				{
 					return action;
 				}
@@ -605,6 +618,20 @@ public partial class CustomRotation
 	}
 
 	/// <summary>
+	///
+	/// </summary>
+	protected virtual bool ProvokeGCD(out IAction? act)
+	{
+		if (DataCenter.CommandStatus.HasFlag(AutoStatus.Provoke))
+		{
+			IBaseAction.ShouldEndSpecial = true;
+		}
+
+		IBaseAction.ShouldEndSpecial = false;
+		act = null; return false;
+	}
+
+	/// <summary>
 	/// Attempts to use the Emergency GCD action.
 	/// </summary>
 	/// <param name="act">The action to be performed.</param>
@@ -616,7 +643,35 @@ public partial class CustomRotation
 		{
 			if (PurifyPvP.CanUse(out act))
 			{
-				return true;
+				if (Service.Config.PvpPurifyStun && StatusHelper.PlayerHasStatus(false, StatusID.Stun_1343))
+				{
+					return true;
+				}
+
+				if (Service.Config.PvpPurifyHeavy && StatusHelper.PlayerHasStatus(false, StatusID.Heavy_1344))
+				{
+					return true;
+				}
+
+				if (Service.Config.PvpPurifyBind && StatusHelper.PlayerHasStatus(false, StatusID.Bind_1345))
+				{
+					return true;
+				}
+
+				if (Service.Config.PvpPurifySilence && StatusHelper.PlayerHasStatus(false, StatusID.Silence_1347))
+				{
+					return true;
+				}
+
+				if (Service.Config.PvpPurifyDeepFreeze && StatusHelper.PlayerHasStatus(false, StatusID.DeepFreeze_3219))
+				{
+					return true;
+				}
+
+				if (Service.Config.PvpPurifyMiracleOfNature && StatusHelper.PlayerHasStatus(false, StatusID.MiracleOfNature))
+				{
+					return true;
+				}
 			}
 
 			if (GuardPvP.CanUse(out act) && Player?.GetHealthRatio() <= Service.Config.HealthForGuard && !StatusHelper.PlayerHasStatus(true, StatusID.UndeadRedemption) && !StatusHelper.PlayerHasStatus(true, StatusID.InnerRelease_1303))

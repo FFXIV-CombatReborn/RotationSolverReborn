@@ -272,7 +272,14 @@ internal class EasterEggWindow : Window
 		return (false, 0);
 	}
 
-	private static bool IsDraw(Cell[] board) => !board.Any(c => c == Cell.Empty);
+	private static bool IsDraw(Cell[] board)
+	{
+		for (int i = 0; i < board.Length; i++)
+		{
+			if (board[i] == Cell.Empty) return false;
+		}
+		return true;
+	}
 
 	private static bool CheckWin(Cell[] board, Cell who)
 	{

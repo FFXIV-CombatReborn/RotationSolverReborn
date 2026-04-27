@@ -959,24 +959,28 @@ public partial class ViperRotation
 	static partial void ModifyDeathRattlePvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.DeathRattlePvP;
+		setting.IgnoreGuard = true;
 		setting.MPOverride = () => 0;
 	}
 
 	static partial void ModifyTwinfangBitePvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.TwinfangBitePvP;
+		setting.IgnoreGuard = true;
 		setting.MPOverride = () => 0;
 	}
 
 	static partial void ModifyTwinbloodBitePvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.TwinbloodBitePvP;
+		setting.IgnoreGuard = true;
 		setting.MPOverride = () => 0;
 	}
 
 	static partial void ModifyUncoiledTwinfangPvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.UncoiledTwinfangPvP;
+		setting.IgnoreGuard = true;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -987,6 +991,7 @@ public partial class ViperRotation
 	static partial void ModifyUncoiledTwinbloodPvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.UncoiledTwinbloodPvP;
+		setting.IgnoreGuard = true;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -997,6 +1002,7 @@ public partial class ViperRotation
 	static partial void ModifyFirstLegacyPvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.FirstLegacyPvP;
+		setting.IgnoreGuard = true;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -1007,6 +1013,7 @@ public partial class ViperRotation
 	static partial void ModifySecondLegacyPvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.SecondLegacyPvP;
+		setting.IgnoreGuard = true;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -1017,6 +1024,7 @@ public partial class ViperRotation
 	static partial void ModifyThirdLegacyPvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.ThirdLegacyPvP;
+		setting.IgnoreGuard = true;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -1027,6 +1035,7 @@ public partial class ViperRotation
 	static partial void ModifyFourthLegacyPvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.FourthLegacyPvP;
+		setting.IgnoreGuard = true;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
 		{

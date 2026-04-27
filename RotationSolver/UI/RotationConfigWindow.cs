@@ -1551,6 +1551,8 @@ public partial class RotationConfigWindow : Window
 		{ UiString.ConfigWindow_Duty_VariantDungeon.GetDescription, DrawDutySpecifcVariantDungeon },
 		{ UiString.ConfigWindow_Duty_FieldOps.GetDescription, DrawDutySpecifcFieldOps },
 		{ UiString.ConfigWindow_Duty_PvP.GetDescription, DrawDutySpecifcPvP },
+		{ UiString.ConfigWindow_Duty_TheMaskedCarnivale.GetDescription, DrawDutySpecifcTheMaskedCarnivale },
+		{ UiString.ConfigWindow_Duty_CrucibleOfTheUnbroken.GetDescription, DrawDutySpecifcCrucibleOfTheUnbroken },
 	})
 	{
 		HeaderSize = HeaderSize,
@@ -1595,6 +1597,14 @@ public partial class RotationConfigWindow : Window
 	private static void DrawDutySpecifcPvP()
 	{
 		_allSearchable.DrawItems(Configs.DutySpecifcPvP);
+	}
+	private static void DrawDutySpecifcTheMaskedCarnivale()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcTheMaskedCarnivale);
+	}
+	private static void DrawDutySpecifcCrucibleOfTheUnbroken()
+	{
+		_allSearchable.DrawItems(Configs.DutySpecifcCrucibleOfTheUnbroken);
 	}
 
 	#endregion
@@ -1949,8 +1959,14 @@ public partial class RotationConfigWindow : Window
 		];
 
 		// Check if "Boss Mod" and "BossMod Reborn" are enabled
-		bool isBossModEnabled = pluginsToCheck.Any(plugin => plugin.Name == "Boss Mod" && plugin.IsEnabled);
-		bool isBossModRebornEnabled = pluginsToCheck.Any(plugin => plugin.Name == "BossModReborn" && plugin.IsEnabled);
+		bool isBossModEnabled = false;
+		bool isBossModRebornEnabled = false;
+		foreach (var plugin in pluginsToCheck)
+		{
+			if (plugin.Name == "Boss Mod" && plugin.IsEnabled) isBossModEnabled = true;
+			if (plugin.Name == "BossModReborn" && plugin.IsEnabled) isBossModRebornEnabled = true;
+			if (isBossModEnabled && isBossModRebornEnabled) break;
+		}
 
 		// Iterate through the list and check if each plugin is installed and enabled
 		foreach (AutoDutyPlugin plugin in pluginsToCheck)
@@ -2970,6 +2986,7 @@ private static bool ShouldShowRotationConfigInternal(
 					ImGui.Text("Can Use: " + action.CanUse(out _));
 					ImGui.Spacing();
 					ImGui.Text("ID: " + action.Info.ID);
+					ImGui.Text("Cast Type: " + action.Info.CastType);
 					ImGui.Text("GCDSingleHeal: " + action.Config.GCDSingleHeal);
 					ImGui.Text("MinHPPercent: " + action.MinHPPercent);
 					ImGui.Text("AdjustedID: " + Service.GetAdjustedActionId(action.Info.ID));
@@ -2981,9 +2998,9 @@ private static bool ShouldShowRotationConfigInternal(
 					}
 					ImGui.Text("ShouldCheckStatus: " + action.Config.ShouldCheckStatus);
 					ImGui.Text("ShouldCheckTargetStatus: " + action.Config.ShouldCheckTargetStatus);
+					ImGui.Text("StatusFromSelf: " + action.Setting.StatusFromSelf);
 					ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD);
 					ImGui.Text("Is PvP Action: " + action.Info.IsPvP);
-					ImGui.Text("Cast Type: " + action.Info.CastType);
 
 					// Ensure ActionManager.Instance() is not null and action.AdjustedID is valid
 					if (ActionManager.Instance() != null && action.AdjustedID != 0)
@@ -2998,7 +3015,7 @@ private static bool ShouldShowRotationConfigInternal(
 					ImGui.Text("Level: " + action.Info.Level);
 					ImGui.Text("Range: " + action.Info.Range);
 					ImGui.Text("EffectRange: " + action.Info.EffectRange);
-					ImGui.Text("Aspect: " + action.Info.Aspect);
+					ImGui.Text("Aspects: " + string.Join(", ", action.Info.Aspects));
 					ImGui.Text("Has One:" + action.Cooldown.HasOneCharge);
 					ImGui.Text("Recast One: " + action.Cooldown.RecastTimeOneChargeRaw);
 					ImGui.Text("Recast Elapsed: " + action.Cooldown.RecastTimeElapsed);
@@ -3007,7 +3024,9 @@ private static bool ShouldShowRotationConfigInternal(
 					ImGui.Text($"Charges: {action.Cooldown.CurrentCharges} / {action.Cooldown.MaxCharges}");
 
 					ImGui.Text("IgnoreCastCheck:" + action.CanUse(out _, skipCastingCheck: true));
-					ImGui.Text("Target Name: " + action.Target.Target?.Name ?? string.Empty);
+						action.CanUse(out _, skipCastingCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipAoeCheck: true);
+						ImGui.Text("Target Name: " + action.Target.Target?.Name ?? string.Empty);
+						ImGui.Text("AffectedTarget Count: " + (action.Target.AffectedTargets?.Length ?? 0));
 				}
 				catch (Exception ex)
 				{
@@ -4324,6 +4343,31 @@ private static bool ShouldShowRotationConfigInternal(
 			ImGui.Text($"BattleNPCSubKind: {battleChara.GetBattleNPCSubKind()}");
 			ImGui.Text($"Is Top Priority Hostile: {battleChara.IsTopPriorityHostile()}");
 			ImGui.Text($"Targetable: {battleChara.Struct()->Character.GameObject.TargetableStatus}");
+
+			if (DataCenter.IsInMaskedCarnivale)
+			{
+				ImGui.Spacing();
+				ImGui.Text($"Aspect Resistance (Fire): {MaskedCarnivaleHelper.GetAspectResistance(battleChara, Aspect.Fire)}");
+				ImGui.Text($"Aspect Resistance (Ice): {MaskedCarnivaleHelper.GetAspectResistance(battleChara, Aspect.Ice)}");
+				ImGui.Text($"Aspect Resistance (Wind): {MaskedCarnivaleHelper.GetAspectResistance(battleChara, Aspect.Wind)}");
+				ImGui.Text($"Aspect Resistance (Earth): {MaskedCarnivaleHelper.GetAspectResistance(battleChara, Aspect.Earth)}");
+				ImGui.Text($"Aspect Resistance (Lightning): {MaskedCarnivaleHelper.GetAspectResistance(battleChara, Aspect.Lightning)}");
+				ImGui.Text($"Aspect Resistance (Water): {MaskedCarnivaleHelper.GetAspectResistance(battleChara, Aspect.Water)}");
+				ImGui.Text($"Aspect Resistance (Slashing): {MaskedCarnivaleHelper.GetAspectResistance(battleChara, Aspect.Slashing)}");
+				ImGui.Text($"Aspect Resistance (Piercing): {MaskedCarnivaleHelper.GetAspectResistance(battleChara, Aspect.Piercing)}");
+				ImGui.Text($"Aspect Resistance (Blunt): {MaskedCarnivaleHelper.GetAspectResistance(battleChara, Aspect.Blunt)}");
+				ImGui.Spacing();
+				ImGui.Text($"IsVulnerableToSlow: {MaskedCarnivaleHelper.IsVulnerableToSlow(battleChara)}");
+				ImGui.Text($"IsVulnerableToPetrification: {MaskedCarnivaleHelper.IsVulnerableToPetrification(battleChara)}");
+				ImGui.Text($"IsVulnerableToParalysis: {MaskedCarnivaleHelper.IsVulnerableToParalysis(battleChara)}");
+				ImGui.Text($"IsVulnerableToInterruption: {MaskedCarnivaleHelper.IsVulnerableToInterruption(battleChara)}");
+				ImGui.Text($"IsVulnerableToBlind: {MaskedCarnivaleHelper.IsVulnerableToBlind(battleChara)}");
+				ImGui.Text($"IsVulnerableToStun: {MaskedCarnivaleHelper.IsVulnerableToStun(battleChara)}");
+				ImGui.Text($"IsVulnerableToSleep: {MaskedCarnivaleHelper.IsVulnerableToSleep(battleChara)}");
+				ImGui.Text($"IsVulnerableToBind: {MaskedCarnivaleHelper.IsVulnerableToBind(battleChara)}");
+				ImGui.Text($"IsVulnerableToHeavy: {MaskedCarnivaleHelper.IsVulnerableToHeavy(battleChara)}");
+				ImGui.Text($"IsVulnerableToFlatOrDeath: {MaskedCarnivaleHelper.IsVulnerableToFlatOrDeath(battleChara)}");
+			}
 			ImGui.Spacing();
 			ImGui.Text($"Statuses:");
 			foreach (Dalamud.Game.ClientState.Statuses.IStatus status in battleChara.StatusList)

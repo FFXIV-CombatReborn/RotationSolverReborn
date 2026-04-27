@@ -18,15 +18,7 @@ internal static class StateUpdater
 	{
 		DataCenter.CommandStatus = StatusFromCmdOrCondition();
 		DataCenter.AutoStatus = StatusFromAutomatic();
-		int attackedTargetsCount = 0;
-		if (DataCenter.AttackedTargets != null)
-		{
-			foreach ((ulong id, DateTime time) in DataCenter.AttackedTargets)
-			{
-				attackedTargetsCount++;
-			}
-		}
-		if (!DataCenter.InCombat && attackedTargetsCount > 0)
+		if (!DataCenter.InCombat && DataCenter.AttackedTargets.Count > 0)
 		{
 			DataCenter.ResetAllRecords();
 		}
@@ -177,7 +169,7 @@ internal static class StateUpdater
 			bool movingHere = false;
 			if (DataCenter.NumberOfHostilesInMaxRange != 0)
 			{
-				movingHere = DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
+				movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
 			}
 
 			int tarOnMeCount = 0;
@@ -197,7 +189,7 @@ internal static class StateUpdater
 			bool attacked = false;
 			if (tarOnMeCount != 0)
 			{
-				attacked = attackedCount / tarOnMeCount > 0f;
+				attacked = (float)attackedCount / tarOnMeCount > 0f;
 			}
 
 			if (tarOnMeCount >= Service.Config.AutoDefenseNumber
@@ -213,9 +205,9 @@ internal static class StateUpdater
 				return true;
 			}
 
-			if (Service.Config.UseBmrTimeline && DataCenter.Role == JobRole.Tank
-			&& DataCenter.BMRNextTankbusterIn > 0.6f
-			&& DataCenter.BMRNextTankbusterIn <= Service.Config.BMRTankbusterMitWindow)
+			if (Service.Config.UseBmrTimeline
+				&& DataCenter.BMRNextTankbusterIn > 0.6f
+				&& DataCenter.BMRNextTankbusterIn <= Service.Config.BMRTankbusterMitWindow)
 				return true;
 
 		}
@@ -356,8 +348,16 @@ internal static class StateUpdater
 
 			if (!canHealAreaSpell)
 			{
-				canHealAreaSpell = DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
-				&& DataCenter.PartyMembersAverHP < Lerp(Service.Config.HealthAreaSpell, Service.Config.HealthAreaSpellHot, ratio);
+				if (DataCenter.PartyMembers.Count > 4)
+				{
+					canHealAreaSpell = DataCenter.LowestPartyMembersDifferHP < Service.Config.HealthDifference
+									 && DataCenter.LowestPartyMembersAverHP < Lerp(Service.Config.HealthAreaSpell, Service.Config.HealthAreaSpellHot, ratio);
+				}
+				else
+				{
+					canHealAreaSpell = DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
+									 && DataCenter.PartyMembersAverHP < Lerp(Service.Config.HealthAreaSpell, Service.Config.HealthAreaSpellHot, ratio);
+				}
 			}
 		}
 

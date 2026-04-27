@@ -490,6 +490,12 @@ namespace RotationSolver.Data
 		[Description("PvP")]
 		ConfigWindow_Duty_PvP,
 
+		[Description("The Masked Carnivale")]
+		ConfigWindow_Duty_TheMaskedCarnivale,
+
+		[Description("Crucible of the Unbroken")]
+		ConfigWindow_Duty_CrucibleOfTheUnbroken,
+
 		[Description("Delay its transition to true")]
 		ActionSequencer_Delay_Description,
 

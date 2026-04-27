@@ -1030,8 +1030,8 @@ public sealed class BeirutaRDM : RedMageRotation
         float embRem = EmboldenRem();
         UpdateTripleComboReached(embRem);
 
-        if (TryOpenerGCD(out act)) return true;
         if (TryFinisherGCD(out act)) return true;
+        if (TryOpenerGCD(out act)) return true;
         if (TryContinueComboGCD(out act)) return true;
         if (TryStartComboGCD(out act, embRem)) return true;
         if (TryRepriseGCD(out act)) return true;

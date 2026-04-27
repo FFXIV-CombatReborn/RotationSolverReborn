@@ -647,7 +647,6 @@ public partial class SamuraiRotation
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.MeikyoShisuiPvP) == ActionID.TendoKaeshiSetsugekkaPvP;
 	}
 
-
 	static partial void ModifyHissatsuSotenPvP(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.Kaiten_3201];

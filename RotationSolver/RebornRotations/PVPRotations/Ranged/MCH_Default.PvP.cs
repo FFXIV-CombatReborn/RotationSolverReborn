@@ -26,9 +26,9 @@ public sealed class MCH_DefaultPvP : MachinistRotation
 
 	protected override bool AttackAbility(IAction nextGCD, out IAction? action)
 	{
-		if (AnalysisPvP.CanUse(out action, usedUp: true))
+		if (nextGCD.IsTheSameTo(false, ActionID.DrillPvP, ActionID.BioblasterPvP, ActionID.AirAnchorPvP, ActionID.ChainSawPvP))
 		{
-			if (nextGCD.IsTheSameTo(false, ActionID.DrillPvP, ActionID.BioblasterPvP, ActionID.AirAnchorPvP, ActionID.ChainSawPvP))
+			if (AnalysisPvP.CanUse(out action, usedUp: true))
 			{
 				return true;
 			}

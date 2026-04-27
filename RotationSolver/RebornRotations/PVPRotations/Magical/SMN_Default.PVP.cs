@@ -23,6 +23,16 @@ public class SMN_DefaultPvP : SummonerRotation
 
 	protected override bool AttackAbility(IAction nextGCD, out IAction? action)
 	{
+		if (RustPvP.CanUse(out action))
+		{
+			return true;
+		}
+
+		if (PhantomDartPvP.CanUse(out action))
+		{
+			return true;
+		}
+
 		if (DeathflarePvP.CanUse(out action))
 		{
 			return true;
@@ -44,17 +54,6 @@ public class SMN_DefaultPvP : SummonerRotation
 	[RotationDesc(ActionID.CrimsonCyclonePvP)]
 	protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
 	{
-		//if (CometPvP.CanUse(out action)) return true;
-		if (RustPvP.CanUse(out action))
-		{
-			return true;
-		}
-
-		if (PhantomDartPvP.CanUse(out action))
-		{
-			return true;
-		}
-
 		if (CrimsonCyclonePvP.CanUse(out action) && Target.DistanceToPlayer() < 5)
 		{
 			return true;
@@ -68,6 +67,10 @@ public class SMN_DefaultPvP : SummonerRotation
 	#region GCDs
 	protected override bool GeneralGCD(out IAction? action)
 	{
+		if (CometPvP.CanUse(out action))
+		{
+			return true;
+		}
 
 		if (SlipstreamPvP.CanUse(out action))
 		{

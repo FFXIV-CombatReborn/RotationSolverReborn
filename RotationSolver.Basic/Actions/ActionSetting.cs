@@ -47,6 +47,15 @@ public class ActionSetting
 	public IBaseAction[]? Ninjutsu { get; set; } = null;
 
 	/// <summary>
+	/// For BLU morph actions: the action ID of the parent BLU action that must be in an
+	/// active BLU slot for this action to appear in the UI.
+	/// For example, Cold Fog (23267) for White Death, Chelonian Gate (23273) for Divine Cataract.
+	/// When non-zero, <see cref="ActionBasicInfo.IsOnSlot"/> delegates to whether this ID is in
+	/// <see cref="DataCenter.BluSlots"/> instead of checking the morph action's own ID.
+	/// </summary>
+	public uint RequiredBluSlotActionId { get; set; } = 0;
+
+	/// <summary>
 	/// The override of the <see cref="ActionBasicInfo.MPNeed"/>.
 	/// </summary>
 	public Func<uint?>? MPOverride { get; set; } = null;
@@ -160,8 +169,103 @@ public class ActionSetting
 	public bool EndSpecial { get; set; }
 
 	/// <summary>
+	/// Does this action care about the Flat Damage/Death check on masked carnivale mobs.
+	/// </summary>
+	public bool IsFlatDamageDeath { get; set; } = false;
+
+	/// <summary>
+	/// Does this action primarily apply <b>Slow</b>? When true, it is skipped against mobs not vulnerable to Slow in the Masked Carnivale.
+	/// </summary>
+	public bool IsSlowSpell { get; set; } = false;
+
+	/// <summary>
+	/// When true, this action bypasses bad status checks (e.g. stun, silence) that would normally prevent it from being used.
+	/// Use for actions like PurifyPvP that are specifically designed to be usable while under crowd-control effects.
+	/// </summary>
+	public bool IgnoresBadStatus { get; set; } = false;
+
+	/// <summary>
+	/// Does this action primarily apply <b>Petrification</b>? When true, it is skipped against mobs not vulnerable to Petrification in the Masked Carnivale.
+	/// </summary>
+	public bool IsPetrificationSpell { get; set; } = false;
+
+	/// <summary>
+	/// Does this action primarily apply <b>Paralysis</b>? When true, it is skipped against mobs not vulnerable to Paralysis in the Masked Carnivale.
+	/// </summary>
+	public bool IsParalysisSpell { get; set; } = false;
+
+	/// <summary>
+	/// Does this action care about the Interrupt check on masked carnivale mobs.
+	/// </summary>
+	public bool IsInterruptSpell { get; set; } = false;
+
+	/// <summary>
+	/// Does this action primarily apply <b>Blind</b>? When true, it is skipped against mobs not vulnerable to Blind in the Masked Carnivale.
+	/// </summary>
+	public bool IsBlindSpell { get; set; } = false;
+
+	/// <summary>
+	/// Does this action primarily apply <b>Stun</b>? When true, it is skipped against mobs not vulnerable to Stun in the Masked Carnivale.
+	/// </summary>
+	public bool IsStunSpell { get; set; } = false;
+
+	/// <summary>
+	/// Does this action primarily apply <b>Sleep</b>? When true, it is skipped against mobs not vulnerable to Sleep in the Masked Carnivale.
+	/// </summary>
+	public bool IsSleepSpell { get; set; } = false;
+
+	/// <summary>
+	/// Does this action primarily apply <b>Bind</b>? When true, it is skipped against mobs not vulnerable to Bind in the Masked Carnivale.
+	/// </summary>
+	public bool IsBindSpell { get; set; } = false;
+
+	/// <summary>
+	/// Does this action primarily apply <b>Heavy</b>? When true, it is skipped against mobs not vulnerable to Heavy in the Masked Carnivale.
+	/// </summary>
+	public bool IsHeavySpell { get; set; } = false;
+
+	/// <summary>
+	/// Overrides the <see cref="ActionBasicInfo.Aspect"/> reported for this action.
+	/// When set, this value is returned instead of the game data aspect.
+	/// Useful for physical actions (e.g., <see cref="Aspect.Physical"/>) where
+	/// the actual damage type (Slashing, Piercing, Blunt) should be exposed.
+	/// </summary>
+	public Aspect? AspectOverride { get; set; } = null;
+
+	/// <summary>
+	/// Additional aspects for this action beyond the primary <see cref="AspectOverride"/>.
+	/// Use when a spell deals damage of more than one aspect simultaneously.
+	/// Combined with <see cref="AspectOverride"/> (or the game data aspect when that is not set)
+	/// and exposed via <see cref="ActionBasicInfo.Aspects"/> and <see cref="ActionBasicInfo.HasAspect"/>.
+	/// </summary>
+	public Aspect[]? AdditionalAspects { get; set; } = null;
+
+	/// <summary>
+	/// Overrides the <see cref="ActionBasicInfo.AttackType"/> reported for this action.
+	/// When set, this value is returned instead of the game data attack type.
+	/// Useful when the raw game data attack type differs from the intended damage type
+	/// (e.g., overriding a generic <see cref="AttackType.Physical"/> to <see cref="AttackType.Slashing"/>,
+	/// <see cref="AttackType.Piercing"/>, or <see cref="AttackType.Blunt"/>).
+	/// </summary>
+	public AttackType? AttackTypeOverride { get; set; } = null;
+
+	/// <summary>
+	/// Additional attack types for this action beyond the primary <see cref="AttackTypeOverride"/>.
+	/// Use when an action can inflict damage of more than one attack type simultaneously.
+	/// Combined with <see cref="AttackTypeOverride"/> (or the game data attack type when that is not set)
+	/// and exposed via <see cref="ActionBasicInfo.AttackTypes"/> and <see cref="ActionBasicInfo.HasAttackType"/>.
+	/// </summary>
+	public AttackType[]? AdditionalAttackTypes { get; set; } = null;
+
+	/// <summary>
 	/// The quest ID that unlocks this action.
 	/// 0 means no quest.
 	/// </summary>
-	public uint UnlockedByQuestID { get; set; } = 0;
+	 public uint UnlockedByQuestID { get; set; } = 0;
+
+	/// <summary>
+	/// When true, this action can be used against targets that have the Guard status in PvP.
+	/// By default, actions are blocked when the target has Guard in PvP.
+	/// </summary>
+	public bool IgnoreGuard { get; set; } = false;
 }

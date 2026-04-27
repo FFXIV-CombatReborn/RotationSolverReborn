@@ -322,19 +322,19 @@ private bool IsPhlegmaAoeAtLeast(int threshold)
             return act;
         }
 
-        if (remainTime <= 15f
+        if (remainTime is < 14f and > 9f
             && UseZoeInOpener
             && ZoePvE.CanUse(out act))
         {
             return act;
         }
 
-        if (remainTime <= 5f && EukrasiaPvE.CanUse(out act))
+        if (remainTime < 4f && EukrasiaPvE.CanUse(out act))
         {
             return act;
         }
 
-        if (remainTime <= 15f && KardiaPvE.CanUse(out act))
+        if (remainTime is < 14f and > 9f && KardiaPvE.CanUse(out act))
         {
             return act;
         }
@@ -625,8 +625,6 @@ if (PartyMembersAverHP > 0.85f &&
 
         if (EukrasianPrognosisIiPvE.EnoughLevel
             && EukrasianPrognosisIiPvE.IsEnabled
-            && !HasBuffs
-            && !HasMedicated
             && MergedStatus.HasFlag(AutoStatus.DefenseArea)
             && EukrasianPrognosisIiPvE.CanUse(out _))
         {
@@ -635,8 +633,6 @@ if (PartyMembersAverHP > 0.85f &&
         }
         else if (!EukrasianPrognosisIiPvE.EnoughLevel
             && EukrasianPrognosisPvE.EnoughLevel
-            && !HasBuffs
-            && !HasMedicated
             && EukrasianPrognosisPvE.IsEnabled
             && MergedStatus.HasFlag(AutoStatus.DefenseArea)
             && EukrasianPrognosisPvE.CanUse(out _))
@@ -647,8 +643,6 @@ if (PartyMembersAverHP > 0.85f &&
         else if (EukrasianDiagnosisPvE.EnoughLevel
             && EukrasianDiagnosisPvE.IsEnabled
             && Addersting < 3
-            && !HasBuffs
-            && !HasMedicated
             && MovingTime > MovementTimeThreshold
             && MergedStatus.HasFlag(AutoStatus.DefenseSingle)
             && EukrasianDiagnosisPvE.CanUse(out _))

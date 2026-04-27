@@ -213,6 +213,8 @@ public partial class DragoonRotation
 	static partial void ModifyBattleLitanyPvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.BattleLitany];
+		setting.StatusFromSelf = false;
+		setting.TargetType = TargetType.Self;
 		setting.UnlockedByQuestID = 67226;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -394,6 +396,7 @@ public partial class DragoonRotation
 
 	static partial void ModifyChaoticSpringPvP(ref ActionSetting setting)
 	{
+		setting.IgnoreGuard = true;
 	}
 
 	static partial void ModifyGeirskogulPvP(ref ActionSetting setting)
