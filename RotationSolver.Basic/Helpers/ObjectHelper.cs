@@ -155,18 +155,41 @@ public static class ObjectHelper
 
 	internal static bool IsOthersPlayersMob(this IBattleChara battleChara)
 	{
-		//SpecialType but no NamePlateIcon
-		bool isEventType = false;
+		if (battleChara == null)
+		{
+			return false;
+		}
+
+		// If the mob has a nameplate icon it is tagged as belonging to the current player's quest/leve/treasure.
+		if (battleChara.GetNamePlateIcon() != 0)
+		{
+			return false;
+		}
+
+		// If the mob is actively targeting the player or the player's pet it cannot be treated as
+		// another player's mob regardless of event type — it is a direct threat to us.
+		if (battleChara.TargetObject == Player.Object)
+		{
+			return false;
+		}
+
+		if (Player.Object != null && battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId)
+		{
+			return false;
+		}
+
+		// SpecialType but no NamePlateIcon — check whether the mob's event type matches one of the
+		// player-owned content directors that can produce mobs belonging to OTHER players.
 		var ev = battleChara.GetEventType();
 		for (int i = 0; i < _eventType.Length; i++)
 		{
 			if (_eventType[i] == ev)
 			{
-				isEventType = true;
-				break;
+				return true;
 			}
 		}
-		return isEventType && battleChara.GetNamePlateIcon() == 0;
+
+		return false;
 	}
 
 	internal static bool IsAttackable(this IBattleChara battleChara)
@@ -1758,7 +1781,7 @@ public static class ObjectHelper
 		Lumina.Excel.Sheets.Action act = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(battleChara.CastActionId);
 		return act.RowId == 0
 			? (_effectRangeCheck[battleChara.CastActionId] = false)
-			: act.CastType == 3 || act.CastType == 4 || (act.EffectRange > 0 && act.EffectRange < 8)
+			: (CastType)act.CastType == CastType.Cone || (CastType)act.CastType == CastType.Donut || (act.EffectRange > 0 && act.EffectRange < 8)
 			? (_effectRangeCheck[battleChara.CastActionId] = false)
 			: (_effectRangeCheck[battleChara.CastActionId] = true);
 	}

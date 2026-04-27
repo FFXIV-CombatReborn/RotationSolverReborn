@@ -122,12 +122,12 @@ public readonly struct ActionBasicInfo
 	public readonly byte Level => _action.Action.ClassJobLevel;
 
 	/// <summary>
-	/// 
+	/// Gets the row ID of the unlock link associated with this action, used to check quest or unlock requirements.
 	/// </summary>
 	public readonly uint UnlockLink => _action.Action.UnlockLink.RowId;
 
 	/// <summary>
-	/// 
+	/// Determines whether the action has been unlocked by completing any associated quests or unlock links.
 	/// </summary>
 	public unsafe bool IsQuestUnlocked()
 	{
@@ -155,7 +155,7 @@ public readonly struct ActionBasicInfo
 	public readonly bool EnoughLevel => DataCenter.PlayerSyncedLevel() >= Level;
 
 	/// <summary>
-	/// 
+	/// Determines whether the player meets both the level requirement and has unlocked this action via its associated quest.
 	/// </summary>
 	public bool EnoughLevelAndQuest()
 	{
@@ -168,14 +168,74 @@ public readonly struct ActionBasicInfo
 	}
 
 	/// <summary>
-	/// Determines whether the action is a PvP action.
+	/// Gets a value indicating whether this action is a PvP action.
 	/// </summary>
 	public readonly bool IsPvP => _action.Action.IsPvP;
 
 	/// <summary>
+	/// Gets a value indicating whether this action can target the player themselves.
+	/// </summary>
+	public readonly bool CanTargetSelf => _action.Action.CanTargetSelf;
+
+	/// <summary>
+	/// Gets a value indicating whether this action can target party members.
+	/// </summary>
+	public readonly bool CanTargetParty => _action.Action.CanTargetParty;
+
+	/// <summary>
+	/// Gets a value indicating whether this action can target alliance members outside the player's party.
+	/// </summary>
+	public readonly bool CanTargetAlliance => _action.Action.CanTargetAlliance;
+
+	/// <summary>
+	/// Gets a value indicating whether this action can target hostile (enemy) entities.
+	/// </summary>
+	public readonly bool CanTargetHostile => _action.Action.CanTargetHostile;
+
+	/// <summary>
+	/// Gets a value indicating whether this action can target friendly (ally) entities.
+	/// </summary>
+	public readonly bool CanTargetAlly => _action.Action.CanTargetAlly;
+
+	/// <summary>
+	/// Gets a value indicating whether this action can target the player's own pet.
+	/// </summary>
+	public readonly bool CanTargetOwnPet => _action.Action.CanTargetOwnPet;
+
+	/// <summary>
+	/// Gets a value indicating whether this action can target a party member's pet.
+	/// </summary>
+	public readonly bool CanTargetPartyPet => _action.Action.CanTargetPartyPet;
+
+	/// <summary>
+	/// Gets a value indicating whether using this action will break an active combo chain.
+	/// </summary>
+	public readonly bool BreaksCombo => !_action.Action.PreservesCombo;
+
+	/// <summary>
+	/// Gets a value indicating whether this action targets a ground area rather than a specific entity.
+	/// </summary>
+	public readonly bool TargetAreaAction => _action.Action.TargetArea;
+
+	/// <summary>
+	/// Gets a value indicating whether this action requires an unobstructed line of sight to its target.
+	/// </summary>
+	public readonly bool RequiresLineOfSight => _action.Action.RequiresLineOfSight;
+
+	/// <summary>
+	/// Gets a value indicating whether the player must be facing the target to use this action.
+	/// </summary>
+	public readonly bool NeedToFaceTarget => _action.Action.NeedToFaceTarget;
+
+	/// <summary>
+	/// Determines if the action has the "Raise" behavior, which allows it to target dead allies for resurrection.
+	/// </summary>
+	public readonly bool RaiseAction => _action.Action.DeadTargetBehaviour == 1;
+
+	/// <summary>
 	/// Gets the cast type of the action.
 	/// </summary>
-	public readonly byte CastType => _action.Action.CastType;
+	public readonly CastType CastType => (CastType)_action.Action.CastType;
 
 	/// <summary>
 	/// Gets the casting time of the action.
@@ -212,9 +272,21 @@ public readonly struct ActionBasicInfo
 	/// <summary>
 	/// Determines whether the action is on the player's hotbar or slot.
 	/// </summary>
-	public readonly bool IsOnSlot => _action.Action.ClassJob.RowId == (uint)Job.BLU
+	public readonly bool IsOnSlot
+	{
+		get
+		{
+			// BLU morph actions: only visible when their parent action is in an active BLU slot
+			if (_action.Setting.RequiredBluSlotActionId != 0)
+			{
+				return DataCenter.BluSlots.Contains(_action.Setting.RequiredBluSlotActionId);
+			}
+
+			return _action.Action.ClassJob.RowId == (uint)Job.BLU
 				? DataCenter.BluSlots.Contains(ID)
 				: IsDutyAction ? DataCenter.DutyActions.Contains(ID) : IsPvP == DataCenter.IsPvP;
+		}
+	}
 
 	/// <summary>
 	/// Determines whether the action is a limit break action.
@@ -227,22 +299,22 @@ public readonly struct ActionBasicInfo
 	public bool IsPvPLimitBreak { get; }
 
 	/// <summary>
-	/// 
+	/// Gets a value indicating whether this action is a mount action.
 	/// </summary>
 	public bool IsMountAction { get; }
 
 	/// <summary>
-	/// 
+	/// Gets a value indicating whether this action belongs to the Special action category.
 	/// </summary>
 	public bool IsSpecialAction { get; }
 
 	/// <summary>
-	/// 
+	/// Gets a value indicating whether this action belongs to a System action category.
 	/// </summary>
 	public bool IsSystemAction { get; }
 
 	/// <summary>
-	/// 
+	/// Gets a value indicating whether this action is an off-global-cooldown ability.
 	/// </summary>
 	public bool IsAbility { get; }
 
@@ -320,19 +392,22 @@ public readonly struct ActionBasicInfo
 		}
 
 		var type = ActionHelper.GetActionCate(_action.Action);
-		if (type is ActionCate.Weaponskill)
+		if (!_action.Setting.IgnoresBadStatus)
 		{
-			if (StatusHelper.PlayerHasStatus(false, StatusID.Pacification_620))
+			if (type is ActionCate.Weaponskill)
 			{
-				return false;
+				if (StatusHelper.PlayerHasStatus(false, StatusID.Pacification_620))
+				{
+					return false;
+				}
 			}
-		}
 
-		if (type is ActionCate.Spell)
-		{
-			if (StatusHelper.PlayerHasStatus(false, StatusID.Silence))
+			if (type is ActionCate.Spell)
 			{
-				return false;
+				if (StatusHelper.PlayerHasStatus(false, StatusID.Silence))
+				{
+					return false;
+				}
 			}
 		}
 
@@ -358,19 +433,22 @@ public readonly struct ActionBasicInfo
 			return false;
 		}
 
-		if (IsRealGCD)
+		if (!_action.Setting.IgnoresBadStatus)
 		{
-			if (ConfigurationHelper.BadStatusGCD.Contains(ActionManager.Instance()->GetActionStatus(ActionType.Action, AdjustedID)))
+			if (IsRealGCD)
 			{
-				return false;
+				if (ConfigurationHelper.BadStatusGCD.Contains(ActionManager.Instance()->GetActionStatus(ActionType.Action, AdjustedID)))
+				{
+					return false;
+				}
 			}
-		}
 
-		if (IsAbility && !IsRealGCD)
-		{
-			if (ConfigurationHelper.BadStatusAbility.Contains(ActionManager.Instance()->GetActionStatus(ActionType.EventAction, AdjustedID)))
+			if (IsAbility && !IsRealGCD)
 			{
-				return false;
+				if (ConfigurationHelper.BadStatusAbility.Contains(ActionManager.Instance()->GetActionStatus(ActionType.EventAction, AdjustedID)))
+				{
+					return false;
+				}
 			}
 		}
 
@@ -381,7 +459,7 @@ public readonly struct ActionBasicInfo
 		}
 
 		// Combo and role checks
-		if (!IsComboValid(skipComboCheck))
+		if (_action.Info.BreaksCombo && !IsComboValid(skipComboCheck))
 		{
 			return false;
 		}

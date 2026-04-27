@@ -29,7 +29,6 @@ public class BLM_DefaultPVP : BlackMageRotation
 
 	protected override bool AttackAbility(IAction nextGCD, out IAction? action)
 	{
-		//if (CometPvP.CanUse(out action)) return true;
 		if (RustPvP.CanUse(out action))
 		{
 			return true;
@@ -63,6 +62,11 @@ public class BLM_DefaultPVP : BlackMageRotation
 	#region GCDs
 	protected override bool GeneralGCD(out IAction? action)
 	{
+		if (CometPvP.CanUse(out action))
+		{
+			return true;
+		}
+
 		if (FlareStarPvP.CanUse(out action))
 		{
 			return true;

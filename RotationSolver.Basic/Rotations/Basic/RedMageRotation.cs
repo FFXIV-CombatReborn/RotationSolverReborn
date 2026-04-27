@@ -671,18 +671,21 @@ public partial class RedMageRotation
 	{
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.EnchantedRipostePvP) == ActionID.EnchantedRipostePvP;
 		setting.StatusProvide = [StatusID.EnchantedRiposte];
+		setting.IgnoreGuard = true;
 	}
 
 	static partial void ModifyEnchantedZwerchhauPvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => IsLastComboAction(ActionID.EnchantedRipostePvP);
 		setting.StatusProvide = [StatusID.EnchantedZwerchhau_3238];
+		setting.IgnoreGuard = true;
 	}
 
 	static partial void ModifyEnchantedRedoublementPvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => IsLastComboAction(ActionID.EnchantedZwerchhauPvP);
 		setting.StatusProvide = [StatusID.EnchantedRedoublement_3239];
+		setting.IgnoreGuard = true;
 	}
 
 	static partial void ModifyScorchPvP(ref ActionSetting setting)

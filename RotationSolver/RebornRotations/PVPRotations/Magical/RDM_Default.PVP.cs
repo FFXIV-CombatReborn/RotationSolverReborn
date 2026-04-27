@@ -23,7 +23,6 @@ public class RDM_DefaultPvP : RedMageRotation
 
 	protected override bool AttackAbility(IAction nextGCD, out IAction? action)
 	{
-		//if (CometPvP.CanUse(out action)) return true;
 		if (RustPvP.CanUse(out action))
 		{
 			return true;
@@ -54,6 +53,11 @@ public class RDM_DefaultPvP : RedMageRotation
 	#region GCDs
 	protected override bool GeneralGCD(out IAction? action)
 	{
+		if (CometPvP.CanUse(out action))
+		{
+			return true;
+		}
+
 		if (PrefulgencePvP.CanUse(out action))
 		{
 			return true;

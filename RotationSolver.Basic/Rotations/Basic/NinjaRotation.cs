@@ -640,6 +640,7 @@ public partial class NinjaRotation
 	static partial void ModifyAssassinatePvP(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SpinningEdgePvP) == ActionID.AssassinatePvP;
+		setting.IgnoreGuard = true;
 	}
 
 	static partial void ModifyForkedRaijuPvP(ref ActionSetting setting)

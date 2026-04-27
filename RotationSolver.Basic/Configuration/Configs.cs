@@ -250,9 +250,33 @@ internal partial class Configs : IPluginConfiguration
 		 Filter = DutySpecifcPvP)]
 	private static readonly bool _pvpStateControl = false;
 
-	[ConditionBool, UI("Don't use any actions while in Guard (Experimental).",
+	[ConditionBool, UI("Don't use any actions while in Guard.",
 		 Filter = DutySpecifcPvP)]
 	private static readonly bool _pvpGuardControl = true;
+
+	[ConditionBool, UI("Use Purify to remove Stun debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifyStun = true;
+
+	[ConditionBool, UI("Use Purify to remove Silence debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifySilence = true;
+
+	[ConditionBool, UI("Use Purify to remove Deep Freeze debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifyDeepFreeze = true;
+
+	[ConditionBool, UI("Use Purify to remove Miracle of Nature debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifyMiracleOfNature = true;
+
+	[ConditionBool, UI("Use Purify to remove Heavy debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifyHeavy = false;
+
+	[ConditionBool, UI("Use Purify to remove Bind debuff",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpPurifyBind = false;
 
 	[ConditionBool, UI("Lock out GCD cycle if you are below 50% HP and have over 2000 MP for heals (Experimental).",
 		 Filter = DutySpecifcPvP)]
@@ -1099,7 +1123,7 @@ internal partial class Configs : IPluginConfiguration
 		Filter = TargetConfig, Section = 1)]
 	private static readonly bool _targetQuestPriority = true;
 
-	[ConditionBool, UI("Block targeting quest mobs belonging to other players (Broken).",
+	[ConditionBool, UI("Block targeting quest mobs belonging to other players (Experimental).",
 		Filter = TargetConfig, Section = 1)]
 	private static readonly bool targetQuestThings2 = false;
 

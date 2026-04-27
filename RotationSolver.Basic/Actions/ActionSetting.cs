@@ -47,6 +47,15 @@ public class ActionSetting
 	public IBaseAction[]? Ninjutsu { get; set; } = null;
 
 	/// <summary>
+	/// For BLU morph actions: the action ID of the parent BLU action that must be in an
+	/// active BLU slot for this action to appear in the UI.
+	/// For example, Cold Fog (23267) for White Death, Chelonian Gate (23273) for Divine Cataract.
+	/// When non-zero, <see cref="ActionBasicInfo.IsOnSlot"/> delegates to whether this ID is in
+	/// <see cref="DataCenter.BluSlots"/> instead of checking the morph action's own ID.
+	/// </summary>
+	public uint RequiredBluSlotActionId { get; set; } = 0;
+
+	/// <summary>
 	/// The override of the <see cref="ActionBasicInfo.MPNeed"/>.
 	/// </summary>
 	public Func<uint?>? MPOverride { get; set; } = null;
@@ -170,6 +179,12 @@ public class ActionSetting
 	public bool IsSlowSpell { get; set; } = false;
 
 	/// <summary>
+	/// When true, this action bypasses bad status checks (e.g. stun, silence) that would normally prevent it from being used.
+	/// Use for actions like PurifyPvP that are specifically designed to be usable while under crowd-control effects.
+	/// </summary>
+	public bool IgnoresBadStatus { get; set; } = false;
+
+	/// <summary>
 	/// Does this action primarily apply <b>Petrification</b>? When true, it is skipped against mobs not vulnerable to Petrification in the Masked Carnivale.
 	/// </summary>
 	public bool IsPetrificationSpell { get; set; } = false;
@@ -246,5 +261,11 @@ public class ActionSetting
 	/// The quest ID that unlocks this action.
 	/// 0 means no quest.
 	/// </summary>
-	public uint UnlockedByQuestID { get; set; } = 0;
+	 public uint UnlockedByQuestID { get; set; } = 0;
+
+	/// <summary>
+	/// When true, this action can be used against targets that have the Guard status in PvP.
+	/// By default, actions are blocked when the target has Guard in PvP.
+	/// </summary>
+	public bool IgnoreGuard { get; set; } = false;
 }

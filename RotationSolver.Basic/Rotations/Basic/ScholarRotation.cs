@@ -452,6 +452,7 @@ public partial class ScholarRotation
 	static partial void ModifyChainStratagemPvP(ref ActionSetting setting)
 	{
 		setting.IsFriendly = false;
+		setting.IgnoreGuard = true;
 	}
 
 	static partial void ModifySummonSeraphPvP(ref ActionSetting setting)
