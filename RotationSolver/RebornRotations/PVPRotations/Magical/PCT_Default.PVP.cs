@@ -31,7 +31,6 @@ public class PCT_DefaultPvP : PictomancerRotation
 
 	protected override bool AttackAbility(IAction nextGCD, out IAction? action)
 	{
-		//if (CometPvP.CanUse(out action)) return true;
 		if (RustPvP.CanUse(out action))
 		{
 			return true;
@@ -92,6 +91,11 @@ public class PCT_DefaultPvP : PictomancerRotation
 	#region GCDs
 	protected override bool GeneralGCD(out IAction? action)
 	{
+		if (CometPvP.CanUse(out action))
+		{
+			return true;
+		}
+
 		if (StarPrismPvP.CanUse(out action))
 		{
 			return true;

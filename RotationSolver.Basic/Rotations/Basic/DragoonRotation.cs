@@ -396,6 +396,7 @@ public partial class DragoonRotation
 
 	static partial void ModifyChaoticSpringPvP(ref ActionSetting setting)
 	{
+		setting.IgnoreGuard = true;
 	}
 
 	static partial void ModifyGeirskogulPvP(ref ActionSetting setting)

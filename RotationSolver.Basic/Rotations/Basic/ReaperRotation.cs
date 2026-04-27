@@ -123,6 +123,16 @@ public partial class ReaperRotation
 	/// <summary>
 	/// 
 	/// </summary>
+	public static bool HasDeathWarrantPvP => StatusHelper.PlayerHasStatus(true, StatusID.DeathWarrant_4308);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool WillDeathWarrantPvPEnd => StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.DeathWarrant_4308);
+
+	/// <summary>
+	/// 
+	/// </summary>
 	public static bool NotInActiveCombo => !HasSoulReaver && !HasEnshrouded && !HasExecutioner;
 	#endregion
 
@@ -509,6 +519,7 @@ public partial class ReaperRotation
 
 	static partial void ModifyDeathWarrantPvP(ref ActionSetting setting)
 	{
+		setting.StatusProvide = [StatusID.DeathWarrant_4308];
 	}
 
 	static partial void ModifyHellsIngressPvP(ref ActionSetting setting)
@@ -566,12 +577,16 @@ public partial class ReaperRotation
 
 	static partial void ModifyFateSealedPvP(ref ActionSetting setting)
 	{
+		setting.IgnoreGuard = true;
+		setting.StatusNeed = [StatusID.DeathWarrant_4308];
 	}
 
 	static partial void ModifyPerfectioPvP(ref ActionSetting setting)
 	{
 		setting.StatusNeed = [StatusID.PerfectioParata_4309];
 		setting.IsFriendly = false;
+		setting.TargetType = TargetType.LowHPPercent;
+		setting.IgnoreGuard = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,

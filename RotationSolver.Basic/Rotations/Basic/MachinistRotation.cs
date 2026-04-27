@@ -469,6 +469,7 @@ public partial class MachinistRotation
 	static partial void ModifyDrillPvP(ref ActionSetting setting)
 	{
 		setting.StatusNeed = [StatusID.DrillPrimed];
+		setting.IgnoreGuard = true;
 	}
 
 	static partial void ModifyBioblasterPvP(ref ActionSetting setting)

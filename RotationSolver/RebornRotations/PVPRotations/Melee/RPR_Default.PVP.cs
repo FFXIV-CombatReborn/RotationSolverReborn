@@ -14,6 +14,10 @@ public sealed class RPR_DefaultPvP : ReaperRotation
 	[RotationConfig(CombatType.PvP, Name = "Enemy health threshold needed for Smite use")]
 	public float SmitePvPPercent { get; set; } = 0.25f;
 
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvP, Name = "Enemy health threshold needed for Perfectio use")]
+	public float PerfectioPvPPercent { get; set; } = 0.25f;
+
 	[RotationConfig(CombatType.PvP, Name = "Use Communio immediately after Enshroud (For frontline)")]
 	public bool UseCommunioImmediately { get; set; } = false;
 	#endregion
@@ -21,6 +25,11 @@ public sealed class RPR_DefaultPvP : ReaperRotation
 	#region oGCDs
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
 	{
+		if (FateSealedPvP.CanUse(out action) && HasDeathWarrantPvP && WillDeathWarrantPvPEnd)
+		{
+			return true;
+		}
+
 		if (BloodbathPvP.CanUse(out action))
 		{
 			if (Player?.GetHealthRatio() < BloodBathPvPPercent)
@@ -95,7 +104,7 @@ public sealed class RPR_DefaultPvP : ReaperRotation
 			}
 		}
 
-		if (PerfectioPvP.CanUse(out action))
+		if (PerfectioPvP.CanUse(out action) && PerfectioPvP.Target.Target.GetHealthRatio() <= PerfectioPvPPercent)
 		{
 			return true;
 		}

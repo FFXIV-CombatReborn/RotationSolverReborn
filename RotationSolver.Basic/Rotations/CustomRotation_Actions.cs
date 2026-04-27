@@ -143,6 +143,7 @@ public partial class CustomRotation
 		setting.ActionCheck = () => StatusHelper.PlayerHasStatus(false, StatusHelper.PurifyPvPStatuses);
 		setting.IsFriendly = true;
 		setting.TargetType = TargetType.Self;
+		setting.IgnoresBadStatus = true;
 	}
 
 	static partial void ModifySprintPvP(ref ActionSetting setting)
@@ -171,6 +172,7 @@ public partial class CustomRotation
 	static partial void ModifyEagleEyeShotPvP(ref ActionSetting setting)
 	{
 		setting.StatusNeed = [StatusID.PvPRoleActionEagleEyeShot];
+		setting.IgnoreGuard = true;
 	}
 
 	static partial void ModifyCometPvP(ref ActionSetting setting)
@@ -214,6 +216,7 @@ public partial class CustomRotation
 	static partial void ModifyFullSwingPvP(ref ActionSetting setting)
 	{
 		setting.StatusNeed = [StatusID.PvPRoleActionFullSwing];
+		setting.IgnoreGuard = true;
 	}
 
 	static partial void ModifyHaelanPvP(ref ActionSetting setting)
