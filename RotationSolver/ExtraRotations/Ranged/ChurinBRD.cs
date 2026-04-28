@@ -71,6 +71,7 @@ public sealed class ChurinBRD : BardRotation
 
     private static bool IsMedicated => StatusHelper.PlayerHasStatus(true, StatusID.Medicated) &&
                                        !StatusHelper.PlayerWillStatusEnd(0f, true, StatusID.Medicated);
+
     private static bool InOddMinuteWindow => InMages && SongTime > 15f;
 
     private static float AnimLock => Math.Max(AnimationLock, WeaponTotal * 0.25f);
@@ -291,11 +292,15 @@ public sealed class ChurinBRD : BardRotation
     private bool TryUseIronJaws(out IAction? act)
     {
         if (IronJawsPvE.CanUse(out act, true)
-            && (IronJawsPvE.Target.Target?.WillStatusEnd(30f, true, IronJawsPvE.Setting.TargetStatusProvide ?? []) ??
-                false))
-            if (InBurst && StatusHelper.PlayerWillStatusEndGCD(1, 1, true, StatusID.BattleVoice, StatusID.RadiantFinale,
-                    StatusID.RagingStrikes) && !BlastArrowPvE.CanUse(out _))
+            && (IronJawsPvE.Target.Target?.WillStatusEnd(30f, true, IronJawsPvE.Setting.TargetStatusProvide ?? []) ?? false))
+        {
+            if (InBurst &&
+                StatusHelper.PlayerWillStatusEndGCD(1, 1, true, StatusID.BattleVoice, StatusID.RadiantFinale, StatusID.RagingStrikes)
+                && !BlastArrowPvE.CanUse(out _))
+            {
                 return true;
+            }
+        }
 
         return IronJawsPvE.CanUse(out act);
     }

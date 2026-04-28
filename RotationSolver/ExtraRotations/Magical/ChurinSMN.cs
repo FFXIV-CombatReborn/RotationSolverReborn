@@ -84,41 +84,44 @@ public sealed class ChurinSMN : SummonerRotation
     private static float OpenerPotionTime { get => ChurinPotions.OpenerPotionTime; set => ChurinPotions.OpenerPotionTime = value; }
 
     [Range(0, 1200, ConfigUnitType.Seconds, 0)]
-    [RotationConfig(CombatType.PvE, Name = "Use 1st Potion at (value in seconds - leave at 0 if using in opener)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    [RotationConfig(CombatType.PvE, Name = "Use 1st Potion at (value in seconds - leave at 0 if using in opener)",
+        Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
     private float FirstPotionTiming
     {
-        get => _firstPotionTiming;
+        get;
         set
         {
-            _firstPotionTiming = value;
+            field = value;
             UpdateCustomTimings();
         }
     }
 
     [Range(0, 1200, ConfigUnitType.Seconds, 0)]
-    [RotationConfig(CombatType.PvE, Name = "Use 2nd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    [RotationConfig(CombatType.PvE, Name = "Use 2nd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets),
+        ParentValue = "Use custom potion timings")]
     private float SecondPotionTiming
     {
-        get => _secondPotionTiming;
+        get;
         set
         {
-            _secondPotionTiming = value;
+            field = value;
             UpdateCustomTimings();
         }
     }
 
     [Range(0, 1200, ConfigUnitType.Seconds, 0)]
-    [RotationConfig(CombatType.PvE, Name = "Use 3rd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    [RotationConfig(CombatType.PvE, Name = "Use 3rd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets),
+        ParentValue = "Use custom potion timings")]
     private float ThirdPotionTiming
     {
-        get => _thirdPotionTiming;
+        get;
         set
         {
-            _thirdPotionTiming = value;
+            field = value;
             UpdateCustomTimings();
         }
     }
-    
+
     [RotationConfig(CombatType.PvE, Name = "Enable Fight Presets? (Experimental)")]
     private bool EnableFightPresets {get; set;}
 
@@ -153,13 +156,13 @@ public sealed class ChurinSMN : SummonerRotation
                 ImGui.Text($"#{kv.Key}:");
                 ImGui.SameLine();
                 var primals = GetPrimalsFromOrder(kv.Value);
-                const float IconSize = 22f;
+                const float iconSize = 22f;
                 for (var i = 0; i < primals.Length; i++)
                 {
                     var act = primals[i];
                     if (act.GetTexture(out var tex) && tex.Handle != IntPtr.Zero)
                     {
-                        ImGui.Image(tex.Handle, new Vector2(IconSize, IconSize));
+                        ImGui.Image(tex.Handle, new Vector2(iconSize, iconSize));
                         if (ImGui.IsItemHovered()) ImGui.SetTooltip(act?.Name ?? kv.Value.ToString());
                     }
                     else
@@ -1081,13 +1084,7 @@ public sealed class ChurinSMN : SummonerRotation
     }
     
     private static readonly ChurinSMNPotions ChurinPotions = new();
-    
-    private float _firstPotionTiming;
-   
-    private float _secondPotionTiming;
-    
-    private float _thirdPotionTiming;
-    
+
     /// <summary>
     /// SMN-specific potion manager that extends base potion logic with job-specific conditions.
     /// </summary>
@@ -1335,7 +1332,7 @@ public sealed class ChurinSMN : SummonerRotation
 
     private void M4SInPrimals()
     {
-		var isCastingRubyRite = Player != null && Player.CastActionId == (uint)ActionID.RubyRitePvE;
+		var isCastingRubyRite = Player is { CastActionId: (uint)ActionID.RubyRitePvE };
 		var castAlmostFinished = Player != null && IsCasting && isCastingRubyRite && WeaponRemain < 1f;
 		var attunementUsedUp = (HasIfritFavor && !InIfrit) || (Player != null && IsLastGCD(ActionID.RubyRitePvE) && castAlmostFinished && AttunementCount <= 1);
 		var hasOneAttunementLeft = (castAlmostFinished && AttunementCount <= 2) || (Player != null && IsLastGCD(ActionID.RubyRitePvE) && AttunementCount == 1);

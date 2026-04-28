@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using FFXIVClientStructs.FFXIV.Client.Game;
+﻿using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace RotationSolver.ExtraRotations.Ranged;
 
@@ -41,10 +40,6 @@ public sealed class ChurinMCH: MachinistRotation
     #region Potion Properties
     private readonly ChurinMCHPotions _churinPotions = new();
 
-    private float _firstPotionTiming = 0;
-    private float _secondPotionTiming = 0;
-    private float _thirdPotionTiming = 0;
-
     private void UpdateCustomTimings()
     {
         _churinPotions.CustomTimings = new Potions.CustomTimingsData
@@ -80,37 +75,40 @@ public sealed class ChurinMCH: MachinistRotation
     private float OpenerPotionTime { get => _churinPotions.OpenerPotionTime; set => _churinPotions.OpenerPotionTime = value; }
 
     [Range(0, 1200, ConfigUnitType.Seconds, 0)]
-    [RotationConfig(CombatType.PvE, Name = "Use 1st Potion at (value in seconds - leave at 0 if using in opener)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    [RotationConfig(CombatType.PvE, Name = "Use 1st Potion at (value in seconds - leave at 0 if using in opener)",
+        Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
     private float FirstPotionTiming
     {
-        get => _firstPotionTiming;
+        get;
         set
         {
-            _firstPotionTiming = value;
+            field = value;
             UpdateCustomTimings();
         }
     }
 
     [Range(0, 1200, ConfigUnitType.Seconds, 0)]
-    [RotationConfig(CombatType.PvE, Name = "Use 2nd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    [RotationConfig(CombatType.PvE, Name = "Use 2nd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets),
+        ParentValue = "Use custom potion timings")]
     private float SecondPotionTiming
     {
-        get => _secondPotionTiming;
+        get;
         set
         {
-            _secondPotionTiming = value;
+            field = value;
             UpdateCustomTimings();
         }
     }
 
     [Range(0, 1200, ConfigUnitType.Seconds, 0)]
-    [RotationConfig(CombatType.PvE, Name = "Use 3rd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    [RotationConfig(CombatType.PvE, Name = "Use 3rd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets),
+        ParentValue = "Use custom potion timings")]
     private float ThirdPotionTiming
     {
-        get => _thirdPotionTiming;
+        get;
         set
         {
-            _thirdPotionTiming = value;
+            field = value;
             UpdateCustomTimings();
         }
     }
@@ -500,7 +498,8 @@ public sealed class ChurinMCH: MachinistRotation
         // Check if we want to limit Wildfire to boss targets only
         if (WildfireBoss)
         {
-            var isTargetBoss = WildfirePvE.Target.Target?.IsBossFromIcon() ?? false;
+            var isTargetBoss = WildfirePvE.Target.Target.IsBossFromIcon();
+
             if (!isTargetBoss)
             {
                 return false;

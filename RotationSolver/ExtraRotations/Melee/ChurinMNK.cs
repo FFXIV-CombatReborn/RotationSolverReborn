@@ -54,11 +54,11 @@ public sealed class ChurinMNK : MonkRotation
     private static bool IsReadySoon(IBaseAction action, int maxGCD)
     {
         var gcdTotal = WeaponTotal;
-        const float Buffer = 0.6f;
+        const float buffer = 0.6f;
 
         for (var i = 0; i <= maxGCD; i++)
         {
-            var deadLine = gcdTotal * i + (gcdTotal - Math.Abs(WeaponRemain - Buffer));
+            var deadLine = gcdTotal * i + (gcdTotal - Math.Abs(WeaponRemain - buffer));
             if (action.Cooldown.WillHaveOneCharge(deadLine)) return true;
         }
         return false;
@@ -66,11 +66,11 @@ public sealed class ChurinMNK : MonkRotation
     private static int IsReadyIndex(IBaseAction action, int maxGCDs)
     {
         var gcdTotal = WeaponTotal;
-        const float Buffer = 0.6f;
+        const float buffer = 0.6f;
 
         for (var i = 0; i <= maxGCDs; i++)
         {
-            var deadline = gcdTotal * i + (gcdTotal - Buffer + WeaponRemain);
+            var deadline = gcdTotal * i + (gcdTotal - buffer + WeaponRemain);
             if (action.Cooldown.RecastTimeRemain <= deadline) return i;
         }
         return -1;
@@ -96,6 +96,9 @@ public sealed class ChurinMNK : MonkRotation
     private bool IsLastGCDMasterfulBlitz => IsLastGCD(true, ElixirBurstPvE, PhantomRushPvE, RisingPhoenixPvE);
     private bool IsLastGCDOpo => IsLastGCD( true, DragonKickPvE, LeapingOpoPvE, BootshinePvE, ShadowOfTheDestroyerPvE, ArmOfTheDestroyerPvE);
     private static bool PerfectBalanceStacks(int stacks) => StatusHelper.PlayerStatusStack(true, StatusID.PerfectBalance) == stacks;
+
+    private new const float LateWeaveWindow = 1.15f;
+    private new static bool EnoughWeaveTime => WeaponRemain > 0.75f;
     private static bool IsOpenerStart => InCombat && CombatTime < 5.0f;
     private static bool HasBothNadi => HasLunar && HasSolar;
     private static bool HasNoNadi => !HasLunar && !HasSolar;
