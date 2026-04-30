@@ -127,6 +127,7 @@ internal static class MiscUpdater
 			Job.ARC => BitmapFontIcon.Archer,
 			Job.THM => BitmapFontIcon.Thaumaturge,
 			Job.ACN => BitmapFontIcon.Arcanist,
+			//Job.BST => BitmapFontIcon.Beastmaster,
 			_ => BitmapFontIcon.ExclamationRectangle,
 		};
 	}
@@ -289,7 +290,7 @@ internal static class MiscUpdater
 					}
 
 					actionBar->PulseActionBarSlot(slotIndex);
-					UIGlobals.PlaySoundEffect(12, 0, 0, 0);
+					UIGlobals.PlaySoundEffect(12);
 				}
 				slotIndex++;
 				index++;

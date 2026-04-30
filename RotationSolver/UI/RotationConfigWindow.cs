@@ -1,4 +1,4 @@
-﻿using Dalamud.Common;
+using Dalamud.Common;
 using Dalamud.Common.Game;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
@@ -62,11 +62,13 @@ public partial class RotationConfigWindow : Window
 
 	private static readonly string[] _supporters =
 	[
-	"Abracon",
+	"????",
+	"ABA",
 	"Akurosuki",
+	"Alex",
+	"Anguish",
 	"Aniane",
-	"Baliha",
-	"BangPowNyoom",
+	"Bang Pow Nyoom",
 	"Biscuit",
 	"catfourteen",
 	"Chaos_co",
@@ -77,24 +79,35 @@ public partial class RotationConfigWindow : Window
 	"Elena",
 	"Endings",
 	"Enyo",
+	"Falling_Leaves",
+	"Goku",
+	"Hawa",
+	"Headrushed",
 	"Hex",
 	"kaen",
 	"Kialdir",
 	"kuromiromi",
 	"Lemon",
 	"LouBird",
-	"Lyn Undercroft",
 	"Miracle Ace",
 	"Miri",
 	"Moniika",
-	"Nekomimi Bakeneko",
+	"mossysaurus",
+	"No",
 	"Papaya",
 	"Plogons",
-	"prismagreen",
-	"purrpletime",
+	"purrrrrrrrrrpletime",
+	"Rabbs",
+	"Rey Alex",
+	"Riph",
+	"RustySpoon",
 	"Savage",
 	"smf26",
 	"Vaex_Darastrix",
+	"vivi",
+	"yang",
+	"Yana",
+	"Zyllius",
 	"KuwoBlack"
 	];
 
@@ -358,7 +371,7 @@ public partial class RotationConfigWindow : Window
 		}
 
 		// This affects framed widgets and child windows you create below
-		using ImRaii.Style selectableAlign = ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
+		using var selectableAlign = ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
 		using var framePad = ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(4, 3) * Scale);
 		using var childWinPad = ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, new Vector2(12, 12) * Scale);
 		using var frameCellPadding = ImRaii.PushStyle(ImGuiStyleVar.CellPadding, new Vector2(4, 2) * Scale);
@@ -376,7 +389,7 @@ public partial class RotationConfigWindow : Window
 		using var frameTabRounding = ImRaii.PushStyle(ImGuiStyleVar.TabRounding, 11f * Scale);
 		try
 		{
-			using ImRaii.IEndObject table = ImRaii.Table("Rotation Config Table", 2, ImGuiTableFlags.Resizable);
+			using var table = ImRaii.Table("Rotation Config Table", 2, ImGuiTableFlags.Resizable);
 			if (table)
 			{
 				ImGui.TableSetupColumn("Rotation Config Side Bar", ImGuiTableColumnFlags.WidthFixed, 100 * Scale);
@@ -550,7 +563,7 @@ public partial class RotationConfigWindow : Window
 
 	private void DrawSideBar()
 	{
-		using ImRaii.IEndObject child = ImRaii.Child("Rotation Solver Side bar", -Vector2.One, false, ImGuiWindowFlags.NoScrollbar);
+		using var child = ImRaii.Child("Rotation Solver Side bar", -Vector2.One, false, ImGuiWindowFlags.NoScrollbar);
 		if (child)
 		{
 			float wholeWidth = ImGui.GetWindowSize().X;
@@ -888,7 +901,7 @@ public partial class RotationConfigWindow : Window
 		ImGui.SetNextItemWidth(comboSize);
 		const string popUp = "Rotation Solver Select Rotation";
 		var rotationColor = rotation.GetColor();
-		using (ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, rotation.IsExtra() ? ImGuiColors.DalamudViolet : ImGuiColors.DalamudWhite))
+		using (var color = ImRaii.PushColor(ImGuiCol.Text, rotation.IsExtra() ? ImGuiColors.DalamudViolet : ImGuiColors.DalamudWhite))
 		{
 			if (ImGui.Selectable(_curRotationAttribute.Name + "##RotationName:" + rotation.Name))
 			{
@@ -898,7 +911,7 @@ public partial class RotationConfigWindow : Window
 				}
 			}
 		}
-		using (ImRaii.IEndObject popup = ImRaii.Popup(popUp))
+		using (var popup = ImRaii.Popup(popUp))
 		{
 			if (popup)
 			{
@@ -1008,7 +1021,7 @@ public partial class RotationConfigWindow : Window
 
 				foreach (string warning in DataCenter.SystemWarnings.Keys)
 				{
-					using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange));
+					using var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange));
 					ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
 
 					// Calculate the required height for the button
@@ -1086,8 +1099,8 @@ public partial class RotationConfigWindow : Window
 			_cachedTipIndex = _hintIndex;
 		}
 
-		using (ImRaii.Font _ = ImRaii.PushFont(FontManager.GetFont(12)))
-		using (ImRaii.Color __ = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow)))
+		using (var _ = ImRaii.PushFont(FontManager.GetFont(12)))
+		using (var __ = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow)))
 		{
 			float avail = ImGui.GetContentRegionAvail().X;
 			ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + avail);
@@ -1122,7 +1135,7 @@ public partial class RotationConfigWindow : Window
 		ImGui.SetCursorPos(ImGui.GetCursorPos() + (Vector2.One * 8 * Scale));
 
 		// Create a child window for the body content
-		using ImRaii.IEndObject child = ImRaii.Child("Rotation Solver Body", -Vector2.One);
+		using var child = ImRaii.Child("Rotation Solver Body", -Vector2.One);
 		if (child)
 		{
 			// Hints bar at the top of the body (hide when search is active)
@@ -1135,9 +1148,9 @@ public partial class RotationConfigWindow : Window
 			if (_searchResults != null && _searchResults.Length != 0)
 			{
 				// Display search results header
-				using (ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(18)))
+				using (var font = ImRaii.PushFont(FontManager.GetFont(18)))
 				{
-					using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow));
+					using var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow));
 					ImGui.TextWrapped(UiString.ConfigWindow_Search_Result.GetDescription());
 				}
 
@@ -1613,9 +1626,9 @@ public partial class RotationConfigWindow : Window
 	private static void DrawAbout()
 	{
 		// Draw the punchline with a specific font and color
-		using (ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(18)))
+		using (var font = ImRaii.PushFont(FontManager.GetFont(18)))
 		{
-			using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow));
+			using var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow));
 			ImGui.TextWrapped(UiString.ConfigWindow_About_Punchline.GetDescription());
 		}
 
@@ -1627,7 +1640,7 @@ public partial class RotationConfigWindow : Window
 		ImGui.Spacing();
 
 		// Draw the warning with a specific color
-		using (ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
+		using (var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
 		{
 			ImGui.TextWrapped(UiString.ConfigWindow_About_Warning.GetDescription());
 		}
@@ -1657,7 +1670,7 @@ public partial class RotationConfigWindow : Window
 		if (clickingCount > 0)
 		{
 			// Draw the clicking count with a specific color
-			using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, new Vector4(0.2f, 0.6f, 0.95f, 1));
+			using var color = ImRaii.PushColor(ImGuiCol.Text, new Vector4(0.2f, 0.6f, 0.95f, 1));
 			string countStr = UiString.ConfigWindow_About_ClickingCount.GetDescription();
 			if (countStr != null)
 			{
@@ -1702,8 +1715,8 @@ public partial class RotationConfigWindow : Window
 		}
 
 		// Header text
-		using (ImRaii.Font _ = ImRaii.PushFont(FontManager.GetFont(16)))
-		using (ImRaii.Color __ = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.ParsedGreen)))
+		using (var _ = ImRaii.PushFont(FontManager.GetFont(16)))
+		using (var __ = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.ParsedGreen)))
 		{
 			ImGui.TextWrapped($"Special thanks to the {_supporters.Length} supporters (including those not listed here):");
 		}
@@ -1712,7 +1725,7 @@ public partial class RotationConfigWindow : Window
 
 		// Layout: table of supporter names (multi-column, wraps nicely)
 		const int columns = 3;
-		using ImRaii.IEndObject table = ImRaii.Table("SupportersTable", columns, ImGuiTableFlags.SizingStretchProp);
+		using var table = ImRaii.Table("SupportersTable", columns, ImGuiTableFlags.SizingStretchProp);
 		if (!table)
 			return;
 
@@ -1750,7 +1763,7 @@ public partial class RotationConfigWindow : Window
 	private static void DrawAboutMacros()
 	{
 		// Adjust item spacing for better layout
-		using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
+		using var style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
 
 		// Display command help for different state commands
 		DisplayCommandHelp(StateCommandType.Auto);
@@ -1784,7 +1797,7 @@ public partial class RotationConfigWindow : Window
 	private static void DrawAboutSettingsCommands()
 	{
 		// Adjust item spacing for better layout
-		using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
+		using var style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
 		ImGui.NewLine();
 		ImGui.TextWrapped("These commands can be used to open or change plugin settings directly from chat or macros.");
 		ImGui.NewLine();
@@ -1807,7 +1820,7 @@ public partial class RotationConfigWindow : Window
 		float iconSize = 40 * Scale;
 
 		// Create a table to display incompatible plugins
-		using ImRaii.IEndObject table = ImRaii.Table("Incompatible plugin", 5, ImGuiTableFlags.BordersInner
+		using var table = ImRaii.Table("Incompatible plugin", 5, ImGuiTableFlags.BordersInner
 			| ImGuiTableFlags.Resizable
 			| ImGuiTableFlags.SizingStretchProp);
 		if (table)
@@ -2083,7 +2096,7 @@ public partial class RotationConfigWindow : Window
 		string desc = rotation.Description;
 		if (!string.IsNullOrEmpty(desc))
 		{
-			using ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(15));
+			using var font = ImRaii.PushFont(FontManager.GetFont(15));
 			ImGuiEx.TextWrappedCopy(desc);
 		}
 
@@ -2128,7 +2141,7 @@ public partial class RotationConfigWindow : Window
 			attrs.Add(RotationDescAttribute.MergeToOne(m.GetCustomAttributes<RotationDescAttribute>()));
 		}
 
-		using ImRaii.IEndObject table = ImRaii.Table("Rotation Description", 2, ImGuiTableFlags.Borders
+		using var table = ImRaii.Table("Rotation Description", 2, ImGuiTableFlags.Borders
 			| ImGuiTableFlags.Resizable
 			| ImGuiTableFlags.SizingStretchProp);
 		if (table)
@@ -2595,7 +2608,7 @@ public partial class RotationConfigWindow : Window
 
 		if (Player.Available && DataCenter.PartyMembers != null && Player.Object != null && Player.Object.IsJobs(Job.AST))
 		{
-			using ImRaii.IEndObject table = ImRaii.Table("AstCardPriorityTable", 2, ImGuiTableFlags.SizingStretchProp);
+			using var table = ImRaii.Table("AstCardPriorityTable", 2, ImGuiTableFlags.SizingStretchProp);
 			if (!table)
 				return;
 
@@ -2709,7 +2722,7 @@ public partial class RotationConfigWindow : Window
 	{
 		ImGui.TextWrapped(UiString.ConfigWindow_Actions_Description.GetDescription());
 
-		using ImRaii.IEndObject table = ImRaii.Table("Rotation Solver Actions", 2, ImGuiTableFlags.Resizable);
+		using var table = ImRaii.Table("Rotation Solver Actions", 2, ImGuiTableFlags.Resizable);
 
 		if (table)
 		{
@@ -3138,7 +3151,7 @@ public partial class RotationConfigWindow : Window
 		ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
 		_ = ImGui.InputTextWithHint("##Searching the action", UiString.ConfigWindow_List_StatusNameOrId.GetDescription(), ref _statusSearching, 50);
 
-		using ImRaii.IEndObject table = ImRaii.Table("Rotation Solver List Statuses", 4, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
+		using var table = ImRaii.Table("Rotation Solver List Statuses", 4, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
 		if (table)
 		{
 			ImGui.TableSetupScrollFreeze(0, 1);
@@ -3317,7 +3330,7 @@ public partial class RotationConfigWindow : Window
 		const float ChildHeight = 400f;
 		const int InputTextLength = 128;
 
-		using ImRaii.IEndObject popup = ImRaii.Popup(popupId);
+		using var popup = ImRaii.Popup(popupId);
 		if (popup)
 		{
 			ImGui.SetNextItemWidth(InputWidth * Scale);
@@ -3325,7 +3338,7 @@ public partial class RotationConfigWindow : Window
 
 			ImGui.Spacing();
 
-			using ImRaii.IEndObject child = ImRaii.Child("Rotation Solver Reborn Add Status", new Vector2(-1, ChildHeight * Scale));
+			using var child = ImRaii.Child("Rotation Solver Reborn Add Status", new Vector2(-1, ChildHeight * Scale));
 			if (child)
 			{
 				int count = Math.Max(1, (int)MathF.Floor(ImGui.GetWindowWidth() / ((size * 3 / 4 * Scale) + ImGui.GetStyle().ItemSpacing.X)));
@@ -3394,7 +3407,7 @@ public partial class RotationConfigWindow : Window
 		ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
 		_ = ImGui.InputTextWithHint("##Searching the action", UiString.ConfigWindow_List_ActionNameOrId.GetDescription(), ref _actionSearching, 50);
 
-		using ImRaii.IEndObject table = ImRaii.Table("Rotation Solver List Actions", 4, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
+		using var table = ImRaii.Table("Rotation Solver List Actions", 4, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
 		if (table)
 		{
 			ImGui.TableSetupScrollFreeze(0, 1);
@@ -3542,7 +3555,7 @@ public partial class RotationConfigWindow : Window
 		const float ChildHeight = 400f;
 		const int MaxDisplayCount = 20;
 
-		using ImRaii.IEndObject popup = ImRaii.Popup(popupId);
+		using var popup = ImRaii.Popup(popupId);
 		if (popup)
 		{
 			ImGui.SetNextItemWidth(InputWidth * Scale);
@@ -3550,7 +3563,7 @@ public partial class RotationConfigWindow : Window
 
 			ImGui.Spacing();
 
-			using ImRaii.IEndObject child = ImRaii.Child("Rotation Solver Add action", new Vector2(-1, ChildHeight * Scale));
+			using var child = ImRaii.Child("Rotation Solver Add action", new Vector2(-1, ChildHeight * Scale));
 			if (child)
 			{
 				if (string.IsNullOrWhiteSpace(_actionPopupSearching))
@@ -3645,9 +3658,9 @@ public partial class RotationConfigWindow : Window
 	private static void DrawListTerritories()
 	{
 		if (Svc.ClientState == null) return;
-		ushort territoryId = Svc.ClientState.TerritoryType;
+		uint territoryId = Svc.ClientState.TerritoryType;
 
-		using ImRaii.IEndObject table = ImRaii.Table("Rotation Solver List Territories", 4,
+		using var table = ImRaii.Table("Rotation Solver List Territories", 4,
 			ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
 		if (table)
 		{

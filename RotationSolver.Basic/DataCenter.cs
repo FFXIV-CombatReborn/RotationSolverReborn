@@ -419,7 +419,7 @@ internal static class DataCenter
 	#region Territory Info Tracking
 
 	public static Data.TerritoryInfo? Territory { get; set; }
-	public static ushort TerritoryID => Svc.ClientState.TerritoryType;
+	public static uint TerritoryID => (ushort)Svc.ClientState.TerritoryType;
 
 	public static bool IsPvP => Territory?.IsPvP ?? false;
 
@@ -433,7 +433,7 @@ internal static class DataCenter
 		{
 			ushort[] allianceTerritoryIds =
 			[
-				151, 174, 372, 508, 556, 627, 734, 776, 826, 882, 917, 966, 1054, 1118, 1178, 1248, 1241
+				151, 174, 372, 508, 556, 627, 734, 776, 826, 882, 917, 966, 1054, 1118, 1178, 1248, 1304, 1368
 			];
 
 			for (int i = 0; i < allianceTerritoryIds.Length; i++)
@@ -446,6 +446,14 @@ internal static class DataCenter
 		}
 	}
 
+	public static bool IsInTerritory(ushort territoryId)
+	{
+		return TerritoryID == territoryId;
+	}
+
+	#endregion
+
+	#region Ultimate
 	public static bool IsInUCoB => TerritoryID == 733;
 	public static bool IsInUwU => TerritoryID == 777;
 	public static bool IsInTEA => TerritoryID == 887;
@@ -453,18 +461,17 @@ internal static class DataCenter
 	public static bool IsInTOP => TerritoryID == 1122;
 	public static bool IsInFRU => TerritoryID == 1238;
 	public static bool IsInCOD => TerritoryID == 1241;
+	#endregion
 
+	#region Savage
 	public static bool IsInM9S => TerritoryID == 1321;
 	public static bool IsInM10S => TerritoryID == 1323;
 	public static bool IsInM11S => TerritoryID == 1327;
 	public static bool IsInM12S => TerritoryID == 1325;
+	#endregion
 
-
-	public static bool IsInTerritory(ushort territoryId)
-	{
-		return TerritoryID == territoryId;
-	}
-
+	#region Alliance Raid
+	public static bool IsInWindurst => TerritoryID == 1368;
 	#endregion
 
 	#region FATE
@@ -662,6 +669,11 @@ internal static class DataCenter
 	{
 		get
 		{
+			if (CurrentRotation is BlueMageRotation)
+			{
+				return BlueMageRotation.Role;
+			}
+
 			ClassJob classJob = Service.GetSheet<ClassJob>().GetRow((uint)Job);
 			return classJob.RowId != 0 ? classJob.GetJobRole() : JobRole.None;
 		}

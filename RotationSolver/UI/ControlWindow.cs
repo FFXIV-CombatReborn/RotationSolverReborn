@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface.Colors;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.DalamudServices;
@@ -39,7 +39,7 @@ internal class ControlWindow : CtrlWindow
 
 	public override unsafe void Draw()
 	{
-		using ImRaii.Style selectableAlign = ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
+		using var selectableAlign = ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
 		using var framePad = ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(4, 3));
 		using var childWinPad = ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, new Vector2(12, 12));
 		using var frameCellPadding = ImRaii.PushStyle(ImGuiStyleVar.CellPadding, new Vector2(4, 2));
@@ -210,12 +210,9 @@ internal class ControlWindow : CtrlWindow
 
 		ImGui.SameLine();
 
-		using ImRaii.IEndObject group = ImRaii.Group();
-		if (group)
-		{
-			ImGui.Text(DataCenter.CurrentTargetToHostileType.GetDescription());
-			ImGui.Text("Auto: " + DataCenter.AutoStatus.ToString());
-		}
+		using var group = ImRaii.Group();
+		ImGui.Text(DataCenter.CurrentTargetToHostileType.GetDescription());
+		ImGui.Text("Auto: " + DataCenter.AutoStatus.ToString());
 	}
 
 	private static void DrawCommandAction(IAction? gcd, IAction? ability, SpecialCommandType command, Vector4 color)
@@ -228,56 +225,49 @@ internal class ControlWindow : CtrlWindow
 
 		Vector2 pos = ImGui.GetCursorPos();
 
-		using ImRaii.IEndObject group = ImRaii.Group();
-		if (!group)
-		{
-			return;
-		}
+		using var group = ImRaii.Group();
 
-		using (ImRaii.IEndObject subGroup = ImRaii.Group())
+		using (var subGroup = ImRaii.Group())
 		{
-			if (subGroup)
+			ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(2, (width / 2) - (strWidth / 2)));
+			ImGui.TextColored(color, str);
+
+			string help = command.GetDescription();
+			if (ability != null)
 			{
-				ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(2, (width / 2) - (strWidth / 2)));
-				ImGui.TextColored(color, str);
+				help = help + "\n" + $"({ability.Name})";
+			}
+			string baseId = "ImgButton" + command.ToString();
 
-				string help = command.GetDescription();
-				if (ability != null)
+			ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (strWidth / 2) - (width / 2)));
+
+			if (IconSet.GetTexture(gcd, out IDalamudTextureWrap? texture))
+			{
+				float y = ImGui.GetCursorPosY();
+
+				string gcdHelp = help;
+				if (gcd != null)
 				{
-					help = help + "\n" + $"({ability.Name})";
+					gcdHelp += "\n" + gcd.ToString();
 				}
-				string baseId = "ImgButton" + command.ToString();
-
-				ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (strWidth / 2) - (width / 2)));
-
-				if (IconSet.GetTexture(gcd, out IDalamudTextureWrap? texture))
+				if (texture?.Handle != null)
 				{
-					float y = ImGui.GetCursorPosY();
+					DrawIAction(texture, baseId + nameof(gcd), gcdW, command, gcdHelp);
+				}
+				if (IconSet.GetTexture(ability, out texture))
+				{
+					ImGui.SameLine();
 
-					string gcdHelp = help;
-					if (gcd != null)
+					ImGui.SetCursorPosY(y);
+
+					string abilityHelp = help;
+					if (ability != null)
 					{
-						gcdHelp += "\n" + gcd.ToString();
+						abilityHelp += "\n" + ability.ToString();
 					}
 					if (texture?.Handle != null)
 					{
-						DrawIAction(texture, baseId + nameof(gcd), gcdW, command, gcdHelp);
-					}
-					if (IconSet.GetTexture(ability, out texture))
-					{
-						ImGui.SameLine();
-
-						ImGui.SetCursorPosY(y);
-
-						string abilityHelp = help;
-						if (ability != null)
-						{
-							abilityHelp += "\n" + ability.ToString();
-						}
-						if (texture?.Handle != null)
-						{
-							DrawIAction(texture, baseId + nameof(ability), abilityW, command, abilityHelp);
-						}
+						DrawIAction(texture, baseId + nameof(ability), abilityW, command, abilityHelp);
 					}
 				}
 			}
@@ -331,31 +321,24 @@ internal class ControlWindow : CtrlWindow
 
 		Vector2 pos = ImGui.GetCursorPos();
 
-		using ImRaii.IEndObject group = ImRaii.Group();
-		if (!group)
-		{
-			return;
-		}
+		using var group = ImRaii.Group();
 
-		using (ImRaii.IEndObject subGroup = ImRaii.Group())
+		using (var subGroup = ImRaii.Group())
 		{
-			if (subGroup)
+			ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (width / 2) - (strWidth / 2)));
+			ImGui.TextColored(color, str);
+
+			string help = command.GetDescription();
+			if (!string.IsNullOrEmpty(helpAddition))
 			{
-				ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (width / 2) - (strWidth / 2)));
-				ImGui.TextColored(color, str);
+				help += "\n" + helpAddition;
+			}
+			string baseId = "ImgButton" + command.ToString();
 
-				string help = command.GetDescription();
-				if (!string.IsNullOrEmpty(helpAddition))
-				{
-					help += "\n" + helpAddition;
-				}
-				string baseId = "ImgButton" + command.ToString();
-
-				ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (strWidth / 2) - (width / 2)));
-				if (texture?.Handle != null)
-				{
-					DrawIAction(texture, baseId, abilityW, command, help);
-				}
+			ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (strWidth / 2) - (width / 2)));
+			if (texture?.Handle != null)
+			{
+				DrawIAction(texture, baseId, abilityW, command, help);
 			}
 		}
 
@@ -384,22 +367,18 @@ internal class ControlWindow : CtrlWindow
 
 		Vector2 pos = ImGui.GetCursorPos();
 
-		using (ImRaii.IEndObject group = ImRaii.Group())
+		using (var group = ImRaii.Group())
 		{
-			if (group)
+			ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (width / 2) - (strWidth / 2)) - 3.5f);
+			ImGui.TextColored(color, str);
+
+			string help = command.GetDescription();
+			string baseId = "ImgButton" + command.ToString();
+
+			if (IconSet.GetTexture(iconId, out IDalamudTextureWrap? texture) && texture?.Handle != null)
 			{
-				ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (width / 2) - (strWidth / 2)) - 3.5f);
-				ImGui.TextColored(color, str);
-
-				string help = command.GetDescription();
-				string baseId = "ImgButton" + command.ToString();
-
-				if (IconSet.GetTexture(iconId, out IDalamudTextureWrap? texture) && texture?.Handle != null)
-				{
-					ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (strWidth / 2) - (width / 2)));
-					DrawIAction(texture, baseId, abilityW, command, help);
-				}
-
+				ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (strWidth / 2) - (width / 2)));
+				DrawIAction(texture, baseId, abilityW, command, help);
 			}
 		}
 
@@ -522,7 +501,7 @@ internal class ControlWindow : CtrlWindow
 					ImGui.GetWindowDrawList().AddLine(startPos, startPos + new Vector2(0, size.Y), ImGuiHelper.Black);
 				}
 
-				using ImRaii.Font font = ImRaii.PushFont(ImGui.GetFont());
+				using var font = ImRaii.PushFont(ImGui.GetFont());
 				string time = recast == 0 ? "0" : ((int)(recast - (elapsed % recast)) + 1).ToString();
 				Vector2 strSize = ImGui.CalcTextSize(time);
 				Vector2 fontPos = new Vector2(pos.X + (size.X / 2) - (strSize.X / 2), pos.Y + (size.Y / 2) - (strSize.Y / 2)) + winPos;
@@ -544,11 +523,7 @@ internal class ControlWindow : CtrlWindow
 
 	private static unsafe void DrawNextAction(float gcd, float ability, float width)
 	{
-		using ImRaii.IEndObject group = ImRaii.Group();
-		if (!group)
-		{
-			return;
-		}
+		using var group = ImRaii.Group();
 
 		string str = "Next Action";
 		ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (width / 2) - (ImGui.CalcTextSize(str).X / 2));

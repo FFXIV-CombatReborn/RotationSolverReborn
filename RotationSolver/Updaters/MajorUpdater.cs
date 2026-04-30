@@ -150,54 +150,127 @@ internal static class MajorUpdater
 			|| Service.Config.StartOnFieldOpInCombat2
 			|| Service.Config.StartOnPartyIsInCombat2) && !DataCenter.IsInDutyReplay();
 
-		try
+		// Only call UpdateTargets once — cover both the auto-on check and the activated path
+		if (autoOnEnabled || _isActivatedThisCycle)
 		{
-			// Only call UpdateTargets once — cover both the auto-on check and the activated path
-			if (autoOnEnabled || _isActivatedThisCycle)
+			try
 			{
 				TargetUpdater.UpdateTargets();
 			}
-			if (!_isActivatedThisCycle)
-				return;
+			catch (Exception ex)
+			{
+				LogOnce("(RSRActivatedCore): TargetUpdater.UpdateTargets Exception", ex);
+			}
+		}
 
-			// Target updater always needs to be first to update
+		if (!_isActivatedThisCycle)
+			return;
+
+		// Target updater always needs to be first to update
+		try
+		{
 			MacroUpdater.UpdateMacro();
+		}
+		catch (Exception ex)
+		{
+			LogOnce("(RSRActivatedCore): MacroUpdater.UpdateMacro Exception", ex);
+		}
 
-			if (DataCenter.BMREndabled)
+		if (DataCenter.BMREndabled)
+		{
+			try
 			{
 				BossModUpdater.Update();
 			}
+			catch (Exception ex)
+			{
+				LogOnce("(RSRActivatedCore): BossModUpdater.Update Exception", ex);
+			}
+		}
 
+		try
+		{
 			StateUpdater.UpdateState();
+		}
+		catch (Exception ex)
+		{
+			LogOnce("(RSRActivatedCore): StateUpdater.UpdateState Exception", ex);
+		}
 
+		try
+		{
 			ActionUpdater.UpdateNextAction();
+		}
+		catch (Exception ex)
+		{
+			LogOnce("(RSRActivatedCore): ActionUpdater.UpdateNextAction Exception", ex);
+		}
 
-			bool canDoAction = ActionUpdater.CanDoAction();
+		bool canDoAction = false;
+		try
+		{
+			canDoAction = ActionUpdater.CanDoAction();
+		}
+		catch (Exception ex)
+		{
+			LogOnce("(RSRActivatedCore): ActionUpdater.CanDoAction Exception", ex);
+		}
+
+		try
+		{
 			MovingUpdater.UpdateCanMove(canDoAction);
+		}
+		catch (Exception ex)
+		{
+			LogOnce("(RSRActivatedCore): MovingUpdater.UpdateCanMove Exception", ex);
+		}
 
-			if (canDoAction)
+		if (canDoAction)
+		{
+			try
 			{
 				RSCommands.DoAction();
 			}
+			catch (Exception ex)
+			{
+				LogOnce("(RSRActivatedCore): RSCommands.DoAction Exception", ex);
+			}
+		}
 
-			// In Target-Only mode, update the player's target from the computed next action without executing it.
-			if (DataCenter.IsTargetOnly)
+		// In Target-Only mode, update the player's target from the computed next action without executing it.
+		if (DataCenter.IsTargetOnly)
+		{
+			try
 			{
 				RSCommands.UpdateTargetFromNextAction();
 			}
+			catch (Exception ex)
+			{
+				LogOnce("(RSRActivatedCore): RSCommands.UpdateTargetFromNextAction (TargetOnly) Exception", ex);
+			}
+		}
 
-			// In Teaching Mode with auto-target enabled, also update the player's target so it matches
-			// the rotation's suggestion (important for tanks/healers where the optimal target varies).
-			if (!DataCenter.IsTargetOnly && Service.Config.TeachingMode && Service.Config.TeachingModeAutoTarget && DataCenter.InCombat)
+		// In Teaching Mode with auto-target enabled, also update the player's target so it matches
+		// the rotation's suggestion (important for tanks/healers where the optimal target varies).
+		if (!DataCenter.IsTargetOnly && Service.Config.TeachingMode && Service.Config.TeachingModeAutoTarget && DataCenter.InCombat)
+		{
+			try
 			{
 				RSCommands.UpdateTargetFromNextAction();
 			}
+			catch (Exception ex)
+			{
+				LogOnce("(RSRActivatedCore): RSCommands.UpdateTargetFromNextAction (TeachingMode) Exception", ex);
+			}
+		}
 
+		try
+		{
 			Wrath_IPCSubscriber.DisableAutoRotation();
 		}
 		catch (Exception ex)
 		{
-			LogOnce("RSRUpdate DC Exception", ex);
+			LogOnce("(RSRActivatedCore): Wrath_IPCSubscriber.DisableAutoRotation Exception", ex);
 		}
 	}
 

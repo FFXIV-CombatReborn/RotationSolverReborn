@@ -82,7 +82,7 @@ internal static partial class Util
 	public static string ToPascalCase(this string input)
 	{
 		string cleaned = InvalidCharsRgx().Replace(WhiteSpace().Replace(input, "_"), string.Empty);
-		string[] parts = cleaned.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
+		string[] parts = cleaned.Split(['_'], StringSplitOptions.RemoveEmptyEntries);
 		var sb = new StringBuilder();
 		foreach (string w0 in parts)
 		{

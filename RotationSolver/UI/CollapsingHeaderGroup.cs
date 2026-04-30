@@ -89,7 +89,7 @@ internal class CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
 				ImGui.Separator();
 				bool selected = index == _openedIndex;
 				bool changed = false;
-				using (ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(18)))
+				using (var font = ImRaii.PushFont(FontManager.GetFont(18)))
 				{
 					changed = ImGui.Selectable(name, selected, ImGuiSelectableFlags.DontClosePopups);
 				}

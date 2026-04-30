@@ -162,6 +162,11 @@ internal static class StateUpdater
 					return true;
 				}
 			}
+
+			if (Service.Config.UseBmrTimeline
+				&& DataCenter.BMRNextTankbusterIn > 0.6f
+				&& DataCenter.BMRNextTankbusterIn <= Service.Config.BMRTankbusterMitWindow)
+				return true;
 		}
 
 		if (DataCenter.Role == JobRole.Tank)
@@ -301,14 +306,14 @@ internal static class StateUpdater
 
 		if (DataCenter.IsInM9S)
 		{
-			StatusID HellInACell1 = (StatusID)4731;
-			StatusID HellInACell2 = (StatusID)4732;
-			StatusID HellInACell3 = (StatusID)4733;
-			StatusID HellInACell4 = (StatusID)4734;
-			StatusID HellInACell5 = (StatusID)4735;
-			StatusID HellInACell6 = (StatusID)4736;
-			StatusID HellInACell7 = (StatusID)4737;
-			StatusID HellInACell8 = (StatusID)4738;
+			StatusID HellInACell1 = StatusID.HellInACell;
+			StatusID HellInACell2 = StatusID.HellInACell_4732;
+			StatusID HellInACell3 = StatusID.HellInACell_4733;
+			StatusID HellInACell4 = StatusID.HellInACell_4734;
+			StatusID HellInACell5 = StatusID.HellInACell_4735;
+			StatusID HellInACell6 = StatusID.HellInACell_4736;
+			StatusID HellInACell7 = StatusID.HellInACell_4737;
+			StatusID HellInACell8 = StatusID.HellInACell_4738;
 
 			if (StatusHelper.PlayerHasStatus(false, HellInACell1, HellInACell2, HellInACell3, HellInACell4, HellInACell5, HellInACell6, HellInACell7, HellInACell8))
 			{

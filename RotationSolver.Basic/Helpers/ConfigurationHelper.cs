@@ -277,6 +277,26 @@ internal static class ConfigurationHelper
 			return true;
 		}
 
-		return job == Job.SGE && cat.SGE || (job == Job.VPR && cat.VPR) || (job == Job.PCT && cat.PCT);
+		if (job == Job.SGE && cat.SGE)
+		{
+			return true;
+		}
+
+		if (job == Job.VPR && cat.VPR)
+		{
+			return true;
+		}
+
+		if (job == Job.PCT && cat.PCT)
+		{
+			return true;
+		}
+
+		//if (job == Job.BST && cat.BST)
+		//{
+		//	return true;
+		//}
+
+		return false;
 	}
 }
