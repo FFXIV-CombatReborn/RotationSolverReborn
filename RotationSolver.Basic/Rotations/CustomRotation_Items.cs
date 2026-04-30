@@ -235,8 +235,31 @@ public partial class CustomRotation
 		HpPotionItem? best = null;
 		foreach (var a in HpPotions)
 		{
-			bool isDeepDungeons = DataCenter.Territory?.ContentType == TerritoryContentType.DeepDungeons;
-			if (a.CanUse(out _, true) && (a.ID != 47102 || (a.ID == 47102 && isDeepDungeons) || (a.ID == 20309 && isDeepDungeons && !StatusHelper.PlayerHasStatus(false, StatusID.Rehabilitation_648))))
+			if (a.ID != 47102 && a.ID != 22306 && a.ID != 20309 && a.CanUse(out _, true))
+			{
+				if (best == null || a.MaxHp >= best.MaxHp)
+				{
+					best = a;
+				}
+			}
+
+			if ((DataCenter.IsInPilgrimsTraverse || DataCenter.IsInTheFinalVerse) && a.ID == 47102 && a.CanUse(out _, true) && !StatusHelper.PlayerHasStatus(false, StatusID.Rehabilitation_4191))
+			{
+				if (best == null || a.MaxHp >= best.MaxHp)
+				{
+					best = a;
+				}
+			}
+
+			if (DataCenter.IsInEurekaFieldOp && a.ID == 22306 && !StatusHelper.PlayerHasStatus(false, StatusID.Rehabilitation_648) && a.CanUse(out _, true))
+			{
+				if (best == null || a.MaxHp >= best.MaxHp)
+				{
+					best = a;
+				}
+			}
+
+			if (DataCenter.IsInPalaceOfTheDead && a.ID == 20309 && !StatusHelper.PlayerHasStatus(false, StatusID.Rehabilitation_648) && a.CanUse(out _, true))
 			{
 				if (best == null || a.MaxHp >= best.MaxHp)
 				{
