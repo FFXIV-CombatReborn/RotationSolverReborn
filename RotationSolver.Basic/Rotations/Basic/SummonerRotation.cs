@@ -1,5 +1,4 @@
 using Dalamud.Interface.Colors;
-using FFXIVClientStructs.FFXIV.Client.Game.Gauge;
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
@@ -60,17 +59,17 @@ public partial class SummonerRotation
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool GarudaActive => JobGauge.AttunementType == SummonAttunement.Aetherflow;
+	public static bool GarudaActive => JobGauge.AttunementType == SummonAttunement.Garuda;
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool IfritActive => JobGauge.AttunementType == SummonAttunement.Aetherflow1;
+	public static bool IfritActive => JobGauge.AttunementType == SummonAttunement.Ifrit;
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool TitanActive => JobGauge.AttunementType == SummonAttunement.Aetherflow2;
+	public static bool TitanActive => JobGauge.AttunementType == SummonAttunement.Titan;
 
 	/// <summary>
 	/// 
