@@ -32,8 +32,8 @@ internal static class StateUpdater
 			status |= AutoStatus.NoCasting;
 		if (ShouldAddDispel())
 			status |= AutoStatus.Dispel;
-		if (ShouldAddInterrupt())
-			status |= AutoStatus.Interrupt;
+		//if (ShouldAddInterrupt())
+		//	status |= AutoStatus.Interrupt;
 		if (ShouldAddAntiKnockback())
 			status |= AutoStatus.AntiKnockback;
 		if (ShouldAddPositional())
