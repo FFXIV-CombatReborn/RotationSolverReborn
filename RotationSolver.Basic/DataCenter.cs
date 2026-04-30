@@ -423,6 +423,13 @@ internal static class DataCenter
 
 	public static bool IsPvP => Territory?.IsPvP ?? false;
 
+	/// <summary>
+	/// When set to <c>true</c> by an external plugin via IPC, the TargetFreely behaviour is
+	/// activated for the current session without modifying the user's <c>TargetFreely</c>
+	/// config value.  Reset to <c>false</c> by calling the corresponding IPC method.
+	/// </summary>
+	public static bool TargetFreelyOverride { get; set; }
+
 	public static bool IsInMaskedCarnivale => Territory?.ContentType == TerritoryContentType.TheMaskedCarnivale;
 
 	public static bool IsInDuty => Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56];
