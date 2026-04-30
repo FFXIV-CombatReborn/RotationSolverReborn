@@ -189,5 +189,26 @@ namespace RotationSolver.IPC
 			RSCommands.DoActionCommand($"{combinedString}");
 			PluginLog.Debug($"IPC ActionCommand was called. Action Name:{action}, Time:{time}");
 		}
+
+		/// <summary>
+		/// Temporarily enables the TargetFreely behaviour via IPC without changing the user's config.
+		/// Call <see cref="DisableTargetFreelyOverride"/> to revert.
+		/// </summary>
+		[EzIPC]
+		public void EnableTargetFreelyOverride()
+		{
+			DataCenter.TargetFreelyOverride = true;
+			PluginLog.Debug("IPC EnableTargetFreelyOverride was called.");
+		}
+
+		/// <summary>
+		/// Disables the IPC-driven TargetFreely override, restoring normal config-based behaviour.
+		/// </summary>
+		[EzIPC]
+		public void DisableTargetFreelyOverride()
+		{
+			DataCenter.TargetFreelyOverride = false;
+			PluginLog.Debug("IPC DisableTargetFreelyOverride was called.");
+		}
 	}
 }
