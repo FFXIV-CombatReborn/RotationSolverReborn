@@ -469,7 +469,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
 		try
 		{
-			if (DataCenter.IsPvP && (!action.Setting.IgnoreGuard || (DataCenter.Job == Job.BLM && StatusHelper.PlayerHasStatus(true, StatusID.WreathOfFire))))
+			if (DataCenter.IsPvP && (!action.Setting.IgnoreGuard || (DataCenter.Job == Job.BLM && !action.Setting.IgnoreGuard && !StatusHelper.PlayerHasStatus(true, StatusID.WreathOfFire))))
 			{
 				if (battleChara.HasStatus(false, StatusID.Guard))
 				{
