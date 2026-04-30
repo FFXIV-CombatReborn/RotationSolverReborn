@@ -64,11 +64,6 @@ public sealed class ChurinBRD : BardRotation
         StatusID.Stormbite,
         StatusID.VenomousBite, StatusID.CausticBite) ?? false;
 
-    private static bool InWanderers => Song == Song.Wanderer;
-    private static bool InMages => Song == Song.Mage;
-    private static bool InArmys => Song == Song.Army;
-    private static bool NoSong => Song == Song.None;
-
     private static bool IsMedicated => StatusHelper.PlayerHasStatus(true, StatusID.Medicated) &&
                                        !StatusHelper.PlayerWillStatusEnd(0f, true, StatusID.Medicated);
     private static bool InOddMinuteWindow => InMages && SongTime > 15f;
@@ -463,12 +458,12 @@ public sealed class ChurinBRD : BardRotation
                     : EnoughWeaveTime,
                 (SongTiming.AdjustedStandard, _) => (InWanderers && CanLateWeave)
                                                     || ((InMages || InArmys) && EnoughWeaveTime),
-                (SongTiming.Cycle369, Song.Wanderer) => (HasRagingStrikes && EnoughWeaveTime) ||
+                (SongTiming.Cycle369, Song.WanderersMinuet) => (HasRagingStrikes && EnoughWeaveTime) ||
                                                         (RagingStrikesPvE.Cooldown.IsCoolingDown &&
                                                          !RagingStrikesPvE.Cooldown.WillHaveOneCharge(1f) &&
                                                          EnoughWeaveTime),
-                (SongTiming.Cycle369, Song.Mage) => IsFirstCycle ? EnoughWeaveTime : !SongEndAfter(MageRemainTime),
-                (SongTiming.Cycle369, Song.Army) => EnoughWeaveTime,
+                (SongTiming.Cycle369, Song.MagesBallad) => IsFirstCycle ? EnoughWeaveTime : !SongEndAfter(MageRemainTime),
+                (SongTiming.Cycle369, Song.ArmysPaeon) => EnoughWeaveTime,
                 _ => false
             };
         return false;
@@ -696,7 +691,7 @@ public sealed class ChurinBRD : BardRotation
     {
         act = null;
         if ((!InBurst && !RagingStrikesPvE.Cooldown.IsCoolingDown) || ShouldEnterSandbagMode() ||
-            Song != Song.Wanderer) return false;
+            Song != Song.WanderersMinuet) return false;
 
         if (PitchPerfectPvE.CanUse(out act))
         {
@@ -721,7 +716,7 @@ public sealed class ChurinBRD : BardRotation
 
     private bool ShouldEnterSandbagMode()
     {
-        return EnableSandbagMode && (!InBurst || Song != Song.Wanderer) &&
+        return EnableSandbagMode && (!InBurst || Song != Song.WanderersMinuet) &&
                ((IsFirstCycle && !RadiantFinalePvE.Cooldown.HasOneCharge && !BattleVoicePvE.Cooldown.HasOneCharge &&
                  !RagingStrikesPvE.Cooldown.HasOneCharge &&
                  RadiantFinalePvE.Cooldown.IsCoolingDown && BattleVoicePvE.Cooldown.IsCoolingDown &&

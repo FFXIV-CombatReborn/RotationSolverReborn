@@ -1,4 +1,5 @@
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.DutyState;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
@@ -13,6 +14,7 @@ using RotationSolver.Commands;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
 using RotationSolver.IPC;
+//using KamiToolKit;
 using RotationSolver.UI;
 using RotationSolver.UI.HighlightTeachingMode;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
@@ -32,6 +34,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 	private static CooldownWindow? _cooldownWindow;
 	private static ActionTimelineWindow? _actionTimelineWindow;
 	private static OverlayWindow? _overlayWindow;
+	//private static NativeControlWindow? _nativeControlWindow;
 	private static EasterEggWindow? _easterEggWindow;
 	private static FirstStartTutorialWindow? _firstStartTutorialWindow;
 
@@ -47,6 +50,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 	public RotationSolverPlugin(IDalamudPluginInterface pluginInterface)
 	{
 		ECommonsMain.Init(pluginInterface, this, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
+		//KamiToolKitLibrary.Initialize(pluginInterface);
 		_ = Svc.Framework.RunOnTick(() =>
 		{
 			_ = ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
@@ -91,6 +95,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 		_cooldownWindow = new();
 		_actionTimelineWindow = new();
 		_overlayWindow = new();
+		//_nativeControlWindow = new();
 		_easterEggWindow = new();
 		_firstStartTutorialWindow = new();
 
@@ -140,7 +145,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 		Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
 		ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
 
-		static void DutyState_DutyCompleted(object? sender, ushort e)
+		static void DutyState_DutyCompleted(IDutyStateEventArgs e)
 		{
 			TimeSpan delay = TimeSpan.FromSeconds(_random.Next(4, 6));
 			_ = Svc.Framework.RunOnTick(() =>
@@ -154,7 +159,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 			}, delay);
 		}
 
-		static void ClientState_TerritoryChanged(ushort id)
+		static void ClientState_TerritoryChanged(uint id)
 		{
 			DataCenter.ResetAllRecords();
 
@@ -179,7 +184,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 			}
 		}
 
-		static void DutyState_DutyStarted(object? sender, ushort e)
+		static void DutyState_DutyStarted(IDutyStateEventArgs e)
 		{
 			if (!Player.Available)
 			{
@@ -198,7 +203,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 			}
 		}
 
-		static void DutyState_DutyWiped(object? sender, ushort e)
+		static void DutyState_DutyWiped(IDutyStateEventArgs e)
 		{
 			if (!Player.Available)
 			{
@@ -300,6 +305,15 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 				|| AnyHostileTargetWithinDistance(25);
 
 		_controlWindow!.IsOpen = isValid && Service.Config.ShowControlWindow;
+		//if (isValid && Service.Config.ShowControlWindow)
+		//{
+		//	if (!(_nativeControlWindow?.IsOpen ?? false))
+		//		_nativeControlWindow?.Open();
+		//}
+		//else
+		//{
+		//	_nativeControlWindow?.Close();
+		//}
 		_cooldownWindow!.IsOpen = isValid && Service.Config.ShowCooldownWindow;
 		_nextActionWindow!.IsOpen = isValid && Service.Config.ShowNextActionWindow;
 		_interceptedActionWindow!.IsOpen = isValid && Service.Config.ShowInterceptedActionWindow;
@@ -361,6 +375,8 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 		}
 		_dis.Clear();
 
+		//_nativeControlWindow?.Close();
+		//KamiToolKitLibrary.Dispose();
 		MajorUpdater.Dispose();
 		MiscUpdater.Dispose();
 		HotbarHighlightManager.Dispose();

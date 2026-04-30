@@ -69,6 +69,11 @@ public partial class BlueMageRotation
 	/// </summary>
 	public static CombatRole BlueId => IsTank ? CombatRole.Tank : IsHealer ? CombatRole.Healer : CombatRole.DPS;
 
+	/// <summary>
+	/// Gets the job role based on the current Aetheric Mimicry status.
+	/// </summary>
+	public new static JobRole Role => IsTank ? JobRole.Tank : IsHealer ? JobRole.Healer : JobRole.RangedMagical;
+
 	static partial void ModifyWaterCannonPvE(ref ActionSetting setting)
 	{
 		setting.AttackTypeOverride = AttackType.Magic;

@@ -31,7 +31,7 @@ public partial class MonkRotation
 	/// <summary>
 	/// .
 	/// </summary>
-	public static bool NoNadi => JobGauge.Nadi.HasFlag(Nadi.None);
+	public static bool NoNadi => !JobGauge.Nadi.HasFlag(Nadi.Lunar) && !JobGauge.Nadi.HasFlag(Nadi.Solar);
 
 	/// <summary>
 	/// Gets the amount of available Opo-opo Fury stacks.

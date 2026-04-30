@@ -6,21 +6,15 @@ namespace RotationSolver.GameData.Getters;
 /// <summary>
 /// Provides methods to generate rotation code for a specific job.
 /// </summary>
-internal class RotationGetter
+/// <remarks>
+/// Initializes a new instance of the <see cref="RotationGetter"/> class.
+/// </remarks>
+/// <param name="gameData">The game data.</param>
+/// <param name="job">The job.</param>
+internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 {
-	private readonly Lumina.GameData gameData;
-	private readonly ClassJob job;
-
-	/// <summary>
-	/// Initializes a new instance of the <see cref="RotationGetter"/> class.
-	/// </summary>
-	/// <param name="gameData">The game data.</param>
-	/// <param name="job">The job.</param>
-	public RotationGetter(Lumina.GameData gameData, ClassJob job)
-	{
-		this.gameData = gameData;
-		this.job = job;
-	}
+	private readonly Lumina.GameData gameData = gameData;
+	private readonly ClassJob job = job;
 
 	/// <summary>
 	/// Gets the name of the rotation.
@@ -148,6 +142,7 @@ internal class RotationGetter
 			"RDM" => category.RDM,
 			"PCT" => category.PCT,
 			"BLU" => category.BLU,
+			// "BST" => category.BST,
 			_ => false
 		};
 	}
@@ -170,7 +165,8 @@ internal class RotationGetter
 	/// Gets the job gauge code.
 	/// </summary>
 	/// <returns>The job gauge code.</returns>
-	private string GetJobGauge() => job.Abbreviation == "BLU" ? string.Empty : $"static {job.Abbreviation}Gauge JobGauge => Svc.Gauges.Get<{job.Abbreviation}Gauge>();";
+	private string GetJobGauge() => (job.Abbreviation == "BLU" || job.Abbreviation == "BLU") ? string.Empty : $"static {job.Abbreviation}Gauge JobGauge => Svc.Gauges.Get<{job.Abbreviation}Gauge>();";
+	//TODO: Remove BST exception when the class releases to allow BST rotation data to be generated
 
 	/// <summary>
 	/// Gets the limit break code for a specific action.

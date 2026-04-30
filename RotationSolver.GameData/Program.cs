@@ -108,7 +108,8 @@ public class Program
 			var rotationList = new List<string>();
 			foreach (var job in rotationsSheet)
 			{
-				if (job.JobIndex > 0)
+				//TODO: Remove BST exception when the class releases to allow BST rotation data to be generated
+				if (job.JobIndex > 0 && job.Abbreviation.ToString() != "BST")
 				{
 					rotationList.Add(new RotationGetter(gameData, job).GetCode());
 				}

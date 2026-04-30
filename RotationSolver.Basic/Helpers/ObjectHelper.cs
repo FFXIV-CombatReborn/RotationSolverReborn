@@ -266,7 +266,7 @@ public static class ObjectHelper
 
 			if (isInCE)
 			{
-				if (!battleChara.IsBozjanCEMob() && battleChara.GetBattleNPCSubKind() != BattleNpcSubKind.BattleNpcPart)
+				if (!battleChara.IsBozjanCEMob() && battleChara.GetBattleNPCSubKind() != BattleNpcSubKind.BNpcPart)
 				{
 					return false;
 				}
@@ -744,7 +744,7 @@ public static class ObjectHelper
 
 	internal static bool IsPlayerCharacterChocobo(this IBattleChara battleChara)
 	{
-		return battleChara.GetBattleNPCSubKind() == BattleNpcSubKind.Chocobo;
+		return battleChara.GetBattleNPCSubKind() == BattleNpcSubKind.Buddy;
 	}
 
 	internal static bool IsFocusTarget(this IBattleChara battleChara)
@@ -967,7 +967,7 @@ public static class ObjectHelper
 		//71244 Leve Target
 
 		// Quest
-		if (Service.Config.TargetQuestPriority && (icon == 71204 || icon == 71144 || icon == 71224 || icon == 71344 || battleChara.GetEventType() == EventHandlerContent.Quest))
+		if (Service.Config.TargetQuestPriority && (icon == 71204 || icon == 71144 || icon == 71224 || icon == 71344 || (battleChara.GetEventType() == EventHandlerContent.Quest) && battleChara.GetNamePlateIcon() != 0))
 		{
 			return true;
 		}
@@ -977,7 +977,7 @@ public static class ObjectHelper
 		//71344 Major Quest
 
 		// Check if the object is a BattleNpcPart
-		if (Service.Config.PrioEnemyParts && battleChara.GetBattleNPCSubKind() == BattleNpcSubKind.BattleNpcPart)
+		if (Service.Config.PrioEnemyParts && battleChara.GetBattleNPCSubKind() == BattleNpcSubKind.BNpcPart)
 		{
 			return true;
 		}
@@ -1014,29 +1014,29 @@ public static class ObjectHelper
 			if (CharnelCell)
 			{
 				// Heel (on target) vs Hell (on player) pairs
-				StatusID HeelInACell1 = (StatusID)4739;
-				StatusID HellInACell1 = (StatusID)4731;
+				StatusID HeelInACell1 = StatusID.HeelOfTheCell;
+				StatusID HellInACell1 = StatusID.HellInACell;
 
-				StatusID HeelInACell2 = (StatusID)4740;
-				StatusID HellInACell2 = (StatusID)4732;
+				StatusID HeelInACell2 = StatusID.HeelOfTheCell_4740;
+				StatusID HellInACell2 = StatusID.HellInACell_4732;
 
-				StatusID HeelInACell3 = (StatusID)4741;
-				StatusID HellInACell3 = (StatusID)4733;
+				StatusID HeelInACell3 = StatusID.HeelOfTheCell_4741;
+				StatusID HellInACell3 = StatusID.HellInACell_4733;
 
-				StatusID HeelInACell4 = (StatusID)4742;
-				StatusID HellInACell4 = (StatusID)4734;
+				StatusID HeelInACell4 = StatusID.HeelOfTheCell_4742;
+				StatusID HellInACell4 = StatusID.HellInACell_4734;
 
-				StatusID HeelInACell5 = (StatusID)4743;
-				StatusID HellInACell5 = (StatusID)4735;
+				StatusID HeelInACell5 = StatusID.HeelOfTheCell_4743;
+				StatusID HellInACell5 = StatusID.HellInACell_4735;
 
-				StatusID HeelInACell6 = (StatusID)4744;
-				StatusID HellInACell6 = (StatusID)4736;
+				StatusID HeelInACell6 = StatusID.HeelOfTheCell_4744;
+				StatusID HellInACell6 = StatusID.HellInACell_4736;
 
-				StatusID HeelInACell7 = (StatusID)4745;
-				StatusID HellInACell7 = (StatusID)4737;
+				StatusID HeelInACell7 = StatusID.HeelOfTheCell_4745;
+				StatusID HellInACell7 = StatusID.HellInACell_4737;
 
-				StatusID HeelInACell8 = (StatusID)4746;
-				StatusID HellInACell8 = (StatusID)4738;
+				StatusID HeelInACell8 = StatusID.HeelOfTheCell_4746;
+				StatusID HellInACell8 = StatusID.HellInACell_4738;
 
 				// Iterate all Heel/Hell pairs; priority if target has Heel and player does have corresponding Hell
 				foreach (var (heel, hell) in new (StatusID heel, StatusID hell)[]
@@ -1798,7 +1798,8 @@ public static class ObjectHelper
 	/// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
 	public static bool IsSpecialImmune(this IBattleChara battleChara)
 	{
-		return battleChara.IsOrbonneImmune()
+		return battleChara.IsWindurstAlexanderImmune()
+			|| battleChara.IsOrbonneImmune()
 			|| battleChara.IsM9SavageImmune()
 			|| battleChara.IsColossusRubricatusImmune()
 			|| battleChara.IsTrueHeartImmune()
@@ -1818,6 +1819,39 @@ public static class ObjectHelper
 			|| battleChara.IsOmegaImmune()
 			|| battleChara.IsLimitlessBlue()
 			|| battleChara.IsHanselorGretelShielded();
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsWindurstAlexanderImmune(this IBattleChara battleChara)
+	{
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (Service.Config.AlexanderImmune && DataCenter.IsInWindurst)
+		{
+			if (battleChara.HasStatus(false, StatusID.PerfectDefense))
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsWindurstAlexanderImmune: PerfectDefense detected");
+				}
+				return true;
+			}
+			if (battleChara.HasStatus(false, StatusID.PerfectDefense_5377))
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsWindurstAlexanderImmune: PerfectDefense_5377 detected");
+				}
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/// <summary>
@@ -2227,15 +2261,11 @@ public static class ObjectHelper
 	{
 		if (Service.Config.M8SWindStone && DataCenter.TerritoryID == 1263)
 		{
-			// Numeric values used instead of name as Lumina does not provide name yet, and may update to change name
-			StatusID WindPack = (StatusID)4389; // Numeric value for "Rsv43891100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
-			StatusID StonePack = (StatusID)4390; // Numeric value for "Rsv43901100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Stone
-
 			var WolfOfWind = battleChara.NameId == 13846;
 			var WolfOfStone = battleChara.NameId == 13847;
 
-			var WindPackPlayer = StatusHelper.PlayerHasStatus(false, WindPack);
-			var StonePackPlayer = StatusHelper.PlayerHasStatus(false, StonePack);
+			var WindPackPlayer = StatusHelper.PlayerHasStatus(false, StatusID.Windpack);
+			var StonePackPlayer = StatusHelper.PlayerHasStatus(false, StatusID.Stonepack);
 
 			if (WolfOfWind && WindPackPlayer)
 			{
