@@ -205,6 +205,11 @@ internal partial class Configs : IPluginConfiguration
 	Filter = DutySpecifcAlliance)]
 	private static readonly bool _jeunoBossImmune = true;
 
+	[ConditionBool, UI("Windurst: The Third Walk - Alexander Resurrected logic.",
+	Description = "Treat Alexander and/or Gordius Systems as immune if they have Perfect Defense.",
+	Filter = DutySpecifcAlliance)]
+	private static readonly bool _alexanderImmune = true;
+
 	[ConditionBool, UI("Cloud of Darkness - Ads phase logic.",
 	Description = "Treat Cloud of Darkness/Stygian as immune if you don't have corresponding buff.",
 	Filter = DutySpecifcChaoticAlliance)]

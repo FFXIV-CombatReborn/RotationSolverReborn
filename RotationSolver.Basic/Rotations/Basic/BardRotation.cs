@@ -19,6 +19,26 @@ public partial class BardRotation
 	protected static Song Song => JobGauge.Song;
 
 	/// <summary>
+	/// 
+	/// </summary>
+	public static bool InWanderers => Song == Song.WanderersMinuet;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool InMages => Song == Song.MagesBallad;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool InArmys => Song == Song.ArmysPaeon;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool NoSong => Song == Song.None;
+
+	/// <summary>
 	/// Gets the type of song that was last played
 	/// </summary>
 	protected static Song LastSong => JobGauge.LastSong;
@@ -255,7 +275,7 @@ public partial class BardRotation
 
 	static partial void ModifyPitchPerfectPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => Song == Song.Wanderer && Repertoire > 0;
+		setting.ActionCheck = () => Song == Song.WanderersMinuet && Repertoire > 0;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,

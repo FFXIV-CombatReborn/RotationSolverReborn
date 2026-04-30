@@ -1,4 +1,4 @@
-﻿using Dalamud.Game.ClientState.Keys;
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
@@ -109,7 +109,7 @@ internal static class ImGuiHelper
 			ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
 		}
 
-		using ImRaii.IEndObject popUp = ImRaii.Popup(popId);
+		using var popUp = ImRaii.Popup(popId);
 		if (!popUp.Success)
 		{
 			return;
@@ -136,26 +136,35 @@ internal static class ImGuiHelper
 
 		ImGui.Spacing();
 
-		ImRaii.IEndObject? child = null;
 		if (members.Count >= 15)
 		{
 			ImGui.SetNextWindowSizeConstraints(new Vector2(0, 300), new Vector2(500, 300));
-			child = ImRaii.Child(popId);
-			if (!child)
+			using var child = ImRaii.Child(popId);
+			if (!child.Success)
 			{
 				return;
 			}
-		}
 
-		foreach ((T, string) member in members)
-		{
-			if (ImGui.Selectable(member.Item2))
+			foreach ((T, string) member in members)
 			{
-				selectAction?.Invoke(member.Item1);
-				ImGui.CloseCurrentPopup();
+				if (ImGui.Selectable(member.Item2))
+				{
+					selectAction?.Invoke(member.Item1);
+					ImGui.CloseCurrentPopup();
+				}
 			}
 		}
-		child?.Dispose();
+		else
+		{
+			foreach ((T, string) member in members)
+			{
+				if (ImGui.Selectable(member.Item2))
+				{
+					selectAction?.Invoke(member.Item1);
+					ImGui.CloseCurrentPopup();
+				}
+			}
+		}
 	}
 
 	private static float GetMaxButtonSize<T>(List<(T, string)> members)
@@ -492,8 +501,8 @@ internal static class ImGuiHelper
 	#region PopUp
 	public static void DrawHotKeysPopup(string key, string command, params (string name, Action action, string[] keys)[] pairs)
 	{
-		using ImRaii.IEndObject popup = ImRaii.Popup(key);
-		if (popup)
+		using var popup = ImRaii.Popup(key);
+		if (popup.Success)
 		{
 			if (ImGui.BeginTable(key, 2, ImGuiTableFlags.BordersOuter))
 			{

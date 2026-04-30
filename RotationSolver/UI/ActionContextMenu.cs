@@ -49,30 +49,30 @@ internal static class ActionContextMenu
 
 	private static void OnHoveredActionChanged(object? sender, HoveredAction hoveredAction)
 	{
-		currentHoveredActionId = hoveredAction.ActionID;
+		currentHoveredActionId = hoveredAction.ActionId;
 		if (!Service.Config.ShowContext)
 		{
 			currentContextAction = null;
 			return;
 		}
 
-		Svc.Log.Verbose($"HoveredAction changed: {hoveredAction.ActionKind}");
+		Svc.Log.Verbose($"HoveredAction changed: {hoveredAction.DetailKind}");
 
 		if (!Player.Available)
 		{
 			currentContextAction = null;
 			return;
 		}
-		if (hoveredAction.ActionKind != HoverActionKind.Action)
+		if (hoveredAction.DetailKind != DetailKind.Action)
 		{
 			currentContextAction = null;
 			return;
 		}
-		if (hoveredAction.ActionID != 0)
+		if (hoveredAction.ActionId != 0)
 		{
 			try
 			{
-				currentContextAction = new BaseAction((ActionID)hoveredAction.ActionID);
+				currentContextAction = new BaseAction((ActionID)hoveredAction.ActionId);
 			}
 			catch
 			{

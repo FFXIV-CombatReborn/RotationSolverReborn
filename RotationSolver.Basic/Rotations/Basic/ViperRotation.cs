@@ -113,9 +113,14 @@ public partial class ViperRotation
 	public static SerpentCombo SerpentCombo => JobGauge.SerpentCombo;
 
 	/// <summary>
-	/// Indicates if base no abilities are ready.
+	/// 
 	/// </summary>
-	public static bool NoAbilityReady => JobGauge.SerpentCombo.HasFlag(SerpentCombo.None);
+	public static byte SerpentComboByte => (byte)JobGauge.SerpentCombo;
+
+	/// <summary>
+	/// Gets Max stacks of Anguine Tribute.
+	/// </summary>
+	public static bool NoAbilityReady => SerpentComboByte == 0;
 
 	/// <summary>
 	/// Indicates if base Death Rattle oGCD is ready.

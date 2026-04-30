@@ -15,34 +15,77 @@ public partial class SummonerRotation
 	/// <summary>
 	/// 
 	/// </summary>
-	public static SummonPet ReturnSummons => JobGauge.ReturnSummon;
+	public static ushort SummonTimerRemaining => JobGauge.SummonTimerRemaining;
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool HasAetherflowStacks => JobGauge.HasAetherflowStacks;
+	public static ushort AttunementTimerRemaining => JobGauge.AttunementTimerRemaining;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static SummonPet ReturnSummon => JobGauge.ReturnSummon;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static byte Attunement => JobGauge.Attunement;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool RubyAttunement => JobGauge.Attunement == 5 || JobGauge.Attunement == 9;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool TopazAttunement => JobGauge.Attunement == 6 || JobGauge.Attunement == 10 || JobGauge.Attunement == 14 || JobGauge.Attunement == 18;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool EmeraldAttunement => JobGauge.Attunement == 7 || JobGauge.Attunement == 11 || JobGauge.Attunement == 15 || JobGauge.Attunement == 19;
 
 	/// <summary>
 	/// 
 	/// </summary>
 	public static byte AttunementCount => JobGauge.AttunementCount;
 
-
+	/// <summary>
+	/// 
+	/// </summary>
+	public static SummonAttunement AttunementType => JobGauge.AttunementType;
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool IsSolarBahamutReady => JobGauge.AetherFlags.HasFlag((AetherFlags)8) || JobGauge.AetherFlags.HasFlag((AetherFlags)12);
+	public static bool GarudaActive => JobGauge.AttunementType == SummonAttunement.Aetherflow;
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool IsBahamutReady => !IsPhoenixReady && !IsSolarBahamutReady;
+	public static bool IfritActive => JobGauge.AttunementType == SummonAttunement.Aetherflow1;
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool IsPhoenixReady => JobGauge.AetherFlags.HasFlag((AetherFlags)4) && !JobGauge.AetherFlags.HasFlag((AetherFlags)8);
+	public static bool TitanActive => JobGauge.AttunementType == SummonAttunement.Aetherflow2;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static AetherFlags AetherFlags => JobGauge.AetherFlags;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsBahamutReady => JobGauge.IsBahamutReady;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsPhoenixReady => JobGauge.IsPhoenixReady;
 
 	/// <summary>
 	/// 
@@ -62,27 +105,22 @@ public partial class SummonerRotation
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool InTitan => JobGauge.IsTitanAttuned;
+	public static bool HasAetherflowStacks => JobGauge.HasAetherflowStacks;
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool InIfrit => JobGauge.IsIfritAttuned;
+	public static byte AetherflowStacks => JobGauge.AetherflowStacks;
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool InGaruda => JobGauge.IsGarudaAttuned;
+	public static bool IsSolarBahamutReady => JobGauge.AetherFlags.HasFlag((AetherFlags)8) || JobGauge.AetherFlags.HasFlag((AetherFlags)12);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool NoElementalSummon => !InGaruda && !InIfrit && !InTitan && !InIfrit && !InPhoenix && !InBahamut && !InSolarBahamut;
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static byte SMNAetherflowStacks => JobGauge.AetherflowStacks;
+	public static bool NoElementalSummon => JobGauge.Attunement == 0 && !InPhoenix && !InBahamut && !InSolarBahamut;
 
 	/// <summary>
 	/// 
@@ -176,12 +214,12 @@ public partial class SummonerRotation
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool HasAnyAttunement => InGaruda || InIfrit || InTitan;
+	public static bool HasAnyAttunement => EmeraldAttunement || RubyAttunement || TopazAttunement;
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool NoAttunement => !InIfrit && !InGaruda && !InTitan;
+	public static bool NoAttunement => !RubyAttunement && !EmeraldAttunement && !TopazAttunement;
 
 	/// <summary>
 	/// 
@@ -268,31 +306,39 @@ public partial class SummonerRotation
 	/// <inheritdoc/>
 	public override void DisplayBaseStatus()
 	{
-		ImGui.Text("ReturnSummons: " + ReturnSummons.ToString());
+		ImGui.Text("ReturnSummon: " + ReturnSummon.ToString());
+		ImGui.Text("SummonTime: " + SummonTime.ToString());
+		ImGui.Text("HasSummon: " + HasSummon.ToString());
+		ImGui.Spacing();
 		ImGui.Text("HasAetherflowStacks: " + HasAetherflowStacks.ToString());
-		ImGui.Text("Attunement: " + AttunementCount.ToString());
+		ImGui.Text("AetherflowStacks: " + AetherflowStacks.ToString());
+		ImGui.Spacing();
+		ImGui.Text("Attunement: " + Attunement.ToString());
+		ImGui.TextColored(RubyAttunement ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "RubyAttunement: " + RubyAttunement.ToString());
+		ImGui.TextColored(EmeraldAttunement ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "EmeraldAttunement: " + EmeraldAttunement.ToString());
+		ImGui.TextColored(TopazAttunement ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "TopazAttunement: " + TopazAttunement.ToString());
+		ImGui.Text("AttunementCount: " + AttunementCount.ToString());
+		ImGui.Text("AttunmentTime: " + AttunmentTime.ToString());
+		ImGui.Spacing();
+		ImGui.TextColored(IfritActive ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IfritActive: " + IfritActive.ToString());
+		ImGui.TextColored(GarudaActive ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "GarudaActive: " + GarudaActive.ToString());
+		ImGui.TextColored(TitanActive ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "TitanActive: " + TitanActive.ToString());
+		ImGui.Text("AttunementType: " + AttunementType.ToString());
+		ImGui.Spacing();
+		ImGui.TextColored(IsIfritReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IsIfritReady: " + IsIfritReady.ToString());
+		ImGui.TextColored(IsGarudaReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IsGarudaReady: " + IsGarudaReady.ToString());
+		ImGui.TextColored(IsTitanReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IsTitanReady: " + IsTitanReady.ToString());
 		ImGui.Spacing();
 		ImGui.TextColored(IsSolarBahamutReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IsSolarBahamutReady: " + IsSolarBahamutReady.ToString());
 		ImGui.TextColored(IsBahamutReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IsBahamutReady: " + IsBahamutReady.ToString());
 		ImGui.TextColored(IsPhoenixReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IsPhoenixReady: " + IsPhoenixReady.ToString());
-		ImGui.TextColored(IsIfritReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IsIfritReady: " + InGaruda.ToString());
-		ImGui.TextColored(IsTitanReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IsTitanReady: " + IsTitanReady.ToString());
-		ImGui.TextColored(IsGarudaReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "IsGarudaReady: " + IsGarudaReady.ToString());
 		ImGui.Spacing();
 		ImGui.TextColored(InSolarBahamut ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "InSolarBahamut: " + InSolarBahamut.ToString());
 		ImGui.TextColored(InBahamut ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "InBahamut: " + InBahamut.ToString());
 		ImGui.TextColored(InPhoenix ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "InPhoenix: " + InPhoenix.ToString());
-		ImGui.TextColored(InIfrit ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "InIfrit: " + InIfrit.ToString());
-		ImGui.TextColored(InTitan ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "InTitan: " + InTitan.ToString());
-		ImGui.TextColored(InGaruda ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "InGaruda: " + InGaruda.ToString());
 		ImGui.Spacing();
-		ImGui.Text("SMNAetherflowStacks: " + SMNAetherflowStacks.ToString());
-		ImGui.Text("SummonTime: " + SummonTime.ToString());
-		ImGui.Text("AttunmentTime: " + AttunmentTime.ToString());
-		ImGui.Text("HasSummon: " + HasSummon.ToString());
 		ImGui.Text("Can Heal Single Spell: " + CanHealSingleSpell.ToString());
 		ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
-		ImGui.TextColored(InBahamut ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "InBahamut: " + InBahamut.ToString());
 		ImGui.TextColored(SummonPhoenixPvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "SummonPhoenixPvEReady: " + SummonPhoenixPvEReady.ToString());
 		ImGui.TextColored(EnkindlePhoenixPvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "EnkindlePhoenixPvEReady: " + EnkindlePhoenixPvEReady.ToString());
 	}
@@ -345,7 +391,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyFesterPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => SMNAetherflowStacks > 0;
+		setting.ActionCheck = () => AetherflowStacks > 0;
 	}
 
 	static partial void ModifyEnergyDrainPvE(ref ActionSetting setting)
@@ -490,7 +536,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyNecrotizePvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => SMNAetherflowStacks > 0;
+		setting.ActionCheck = () => AetherflowStacks > 0;
 	}
 
 	static partial void ModifySearingFlashPvE(ref ActionSetting setting)
@@ -551,67 +597,67 @@ public partial class SummonerRotation
 
 	static partial void ModifyRubyRuinPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinPvE.GetCastTime()) && InIfrit;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinPvE.GetCastTime()) && RubyAttunement;
 	}
 
 	static partial void ModifyEmeraldRuinPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InGaruda;
+		setting.ActionCheck = () => EmeraldAttunement;
 	}
 
 	static partial void ModifyTopazRuinPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InTitan;
+		setting.ActionCheck = () => TopazAttunement;
 	}
 
 	static partial void ModifyRubyRuinIiPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinIiPvE.GetCastTime()) && InIfrit;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinIiPvE.GetCastTime()) && RubyAttunement;
 	}
 
 	static partial void ModifyEmeraldRuinIiPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InGaruda;
+		setting.ActionCheck = () => EmeraldAttunement;
 	}
 
 	static partial void ModifyTopazRuinIiPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InTitan;
+		setting.ActionCheck = () => TopazAttunement;
 	}
 
 	static partial void ModifyRubyRuinIiiPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinIiiPvE.GetCastTime()) && InIfrit;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRuinIiiPvE.GetCastTime()) && RubyAttunement;
 	}
 
 	static partial void ModifyEmeraldRuinIiiPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InGaruda;
+		setting.ActionCheck = () => EmeraldAttunement;
 	}
 
 	static partial void ModifyTopazRuinIiiPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InTitan;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.TopazRuinIiiPvE.GetCastTime()) && TopazAttunement;
 	}
 
 	static partial void ModifyRubyRitePvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRitePvE.GetCastTime()) && InIfrit;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyRitePvE.GetCastTime()) && RubyAttunement;
 	}
 
 	static partial void ModifyEmeraldRitePvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => AttunementCount > 0 && InGaruda;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.EmeraldRitePvE.GetCastTime()) && EmeraldAttunement;
 	}
 
 	static partial void ModifyTopazRitePvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InTitan;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.TopazRitePvE.GetCastTime()) && TopazAttunement;
 	}
 
 	static partial void ModifyRubyOutburstPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyOutburstPvE.GetCastTime()) && InIfrit;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyOutburstPvE.GetCastTime()) && RubyAttunement;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
@@ -620,7 +666,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyEmeraldOutburstPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InGaruda;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.EmeraldOutburstPvE.GetCastTime()) && EmeraldAttunement;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
@@ -629,7 +675,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyTopazOutburstPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InTitan;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.TopazOutburstPvE.GetCastTime()) && TopazAttunement;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
@@ -638,7 +684,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyRubyDisasterPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyDisasterPvE.GetCastTime()) && InIfrit;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyDisasterPvE.GetCastTime()) && RubyAttunement;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
@@ -647,7 +693,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyEmeraldDisasterPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InGaruda;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.EmeraldDisasterPvE.GetCastTime()) && EmeraldAttunement;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
@@ -656,7 +702,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyTopazDisasterPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InTitan;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.TopazDisasterPvE.GetCastTime()) && TopazAttunement;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
@@ -665,7 +711,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyRubyCatastrophePvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyCatastrophePvE.GetCastTime()) && InIfrit;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.RubyCatastrophePvE.GetCastTime()) && RubyAttunement;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
@@ -674,7 +720,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyEmeraldCatastrophePvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InGaruda;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.EmeraldCatastrophePvE.GetCastTime()) && EmeraldAttunement;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
@@ -683,7 +729,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyTopazCatastrophePvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InTitan;
+		setting.ActionCheck = () => AttunementCount > 0 && !AttunmentTimeEndAfter(ActionID.TopazCatastrophePvE.GetCastTime()) && TopazAttunement;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
@@ -853,6 +899,7 @@ public partial class SummonerRotation
 			AoeCount = 1,
 		};
 		setting.TargetStatusProvide = [StatusID.Stun_1343];
+		setting.StatusProvide = [StatusID.MountainBuster];
 	}
 
 	static partial void ModifySlipstreamPvP(ref ActionSetting setting)

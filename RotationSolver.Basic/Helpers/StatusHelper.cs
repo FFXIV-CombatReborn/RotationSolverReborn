@@ -163,6 +163,7 @@ public static class StatusHelper
 	public static StatusID[] DoomHealStatus { get; } =
 	[
 		StatusID.Doom_1769,
+		StatusID.Doom_5473
 	];
 
 	/// <summary>

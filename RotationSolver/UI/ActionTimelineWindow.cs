@@ -72,7 +72,7 @@ internal class ActionTimelineWindow : Window
 			return;
 		}
 
-		using ImRaii.Style selectableAlign = ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
+		using var selectableAlign = ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
 		using var framePad = ImRaii.PushStyle(ImGuiStyleVar.FramePadding, new Vector2(4, 3));
 		using var childWinPad = ImRaii.PushStyle(ImGuiStyleVar.WindowPadding, new Vector2(12, 12));
 		using var frameCellPadding = ImRaii.PushStyle(ImGuiStyleVar.CellPadding, new Vector2(4, 2));

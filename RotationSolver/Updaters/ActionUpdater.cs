@@ -299,7 +299,7 @@ internal static class ActionUpdater
 		{
 			if (!DataCenter.IsPvP)
 			{
-				if (status != null && status.GameData.Value.LockActions == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain)
+				if (status != null && StatusHelper.LockActions(status) == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain)
 					return true;
 			}
 		}

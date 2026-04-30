@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Ranged;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.45",
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.5",
 	Description = "Please make sure that the three song times add up to 120 seconds, Wanderers default first song for now.")]
 [SourceCode(Path = "main/RebornRotations/Ranged/BRD_Reborn.cs")]
 
@@ -38,7 +38,7 @@ public sealed class BRD_Reborn : BardRotation
 	public float ARMYTime { get; set; } = 34;
 
 	[RotationConfig(CombatType.PvE, Name = "First Song")]
-	private Song FirstSong { get; set; } = Song.Wanderer;
+	private Song FirstSong { get; set; } = Song.WanderersMinuet;
 
 	[RotationConfig(CombatType.PvE, Name = "Use Warden's Paean on other players")]
 	public bool BRDEsuna { get; set; } = true;
@@ -140,12 +140,12 @@ public sealed class BRD_Reborn : BardRotation
 
 		if (MagesBalladPvE.CanUse(out act) && InCombat && !IsLastAbility(ActionID.ArmysPaeonPvE) && !IsLastAbility(ActionID.TheWanderersMinuetPvE))
 		{
-			if (Song == Song.Wanderer && SongEndAfter(WANDRemainTime) && (Repertoire == 0 || !HasHostilesInMaxRange))
+			if (Song == Song.WanderersMinuet && SongEndAfter(WANDRemainTime) && (Repertoire == 0 || !HasHostilesInMaxRange))
 			{
 				return true;
 			}
 
-			if (Song == Song.Army && SongEndAfterGCD(2) && TheWanderersMinuetPvE.Cooldown.IsCoolingDown)
+			if (Song == Song.ArmysPaeon && SongEndAfterGCD(2) && TheWanderersMinuetPvE.Cooldown.IsCoolingDown)
 			{
 				return true;
 			}
@@ -153,12 +153,12 @@ public sealed class BRD_Reborn : BardRotation
 
 		if (ArmysPaeonPvE.CanUse(out act) && InCombat && !IsLastAbility(ActionID.MagesBalladPvE) && !IsLastAbility(ActionID.TheWanderersMinuetPvE))
 		{
-			if (TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(MAGERemainTime) && Song == Song.Mage)
+			if (TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(MAGERemainTime) && Song == Song.MagesBallad)
 			{
 				return true;
 			}
 
-			if (TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2) && MagesBalladPvE.Cooldown.IsCoolingDown && Song == Song.Wanderer)
+			if (TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2) && MagesBalladPvE.Cooldown.IsCoolingDown && Song == Song.WanderersMinuet)
 			{
 				return true;
 			}
@@ -173,7 +173,7 @@ public sealed class BRD_Reborn : BardRotation
 		{
 			switch (FirstSong)
 			{
-				case Song.Wanderer:
+				case Song.WanderersMinuet:
 					if (TheWanderersMinuetPvE.CanUse(out act))
 					{
 						return true;
@@ -181,7 +181,7 @@ public sealed class BRD_Reborn : BardRotation
 
 					break;
 
-				case Song.Army:
+				case Song.ArmysPaeon:
 					if (ArmysPaeonPvE.CanUse(out act))
 					{
 						return true;
@@ -189,7 +189,7 @@ public sealed class BRD_Reborn : BardRotation
 
 					break;
 
-				case Song.Mage:
+				case Song.MagesBallad:
 					if (MagesBalladPvE.CanUse(out act))
 					{
 						return true;
@@ -314,7 +314,7 @@ public sealed class BRD_Reborn : BardRotation
 		}
 
 		// Prevents Bloodletter bumpcapping when MAGE is the song due to Repetoire procs
-		if (BloodletterPvE.Cooldown.WillHaveXCharges(BloodletterMax, 7.5f) && Song == Song.Mage)
+		if (BloodletterPvE.Cooldown.WillHaveXCharges(BloodletterMax, 7.5f) && Song == Song.MagesBallad)
 		{
 			if (RainOfDeathPvE.CanUse(out act, usedUp: true))
 			{
@@ -523,7 +523,7 @@ public sealed class BRD_Reborn : BardRotation
 			return false;
 		}
 
-		if (Song == Song.Wanderer && SoulVoice >= 80 && !HasRagingStrikes)
+		if (Song == Song.WanderersMinuet && SoulVoice >= 80 && !HasRagingStrikes)
 		{
 			return false;
 		}
@@ -543,7 +543,7 @@ public sealed class BRD_Reborn : BardRotation
 			return true;
 		}
 
-		if (Song == Song.Mage && SoulVoice >= 80 && SongEndAfter(22) && SongEndAfter(18))
+		if (Song == Song.MagesBallad && SoulVoice >= 80 && SongEndAfter(22) && SongEndAfter(18))
 		{
 			return true;
 		}

@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Tank;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.45")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.5")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/PLD_Default.PvP.cs")]
 
 public sealed class PLD_DefaultPvP : PaladinRotation

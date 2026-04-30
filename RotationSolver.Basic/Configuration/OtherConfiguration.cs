@@ -93,7 +93,6 @@ internal class OtherConfiguration
 	/// If you have any of the statuses listed, RSR will stop taking any actions.
 	/// </markdown>
 	public static HashSet<uint> NoCastingStatus = [];
-	public static HashSet<string> SupportersList = [];
 	public static List<Job> DancePartnerPriority = [];
 	public static List<Job> TheSpearPriority = [];
 	public static List<Job> TheBalancePriority = [];
@@ -124,7 +123,6 @@ internal class OtherConfiguration
 		_ = Task.Run(() => InitOne(ref NoCastingStatus, nameof(NoCastingStatus)));
 		_ = Task.Run(() => InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback)));
 		_ = Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)));
-		_ = Task.Run(() => InitOne(ref SupportersList, nameof(SupportersList)));
 	}
 
 	public static Task Save()
