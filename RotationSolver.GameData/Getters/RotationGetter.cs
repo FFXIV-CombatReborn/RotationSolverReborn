@@ -165,8 +165,8 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 	/// Gets the job gauge code.
 	/// </summary>
 	/// <returns>The job gauge code.</returns>
-	private string GetJobGauge() => (job.Abbreviation == "BLU" || job.Abbreviation == "BLU") ? string.Empty : $"static {job.Abbreviation}Gauge JobGauge => Svc.Gauges.Get<{job.Abbreviation}Gauge>();";
-	//TODO: Remove BST exception when the class releases to allow BST rotation data to be generated
+	private string GetJobGauge() => (job.Abbreviation == "BLU" || job.Abbreviation == "BST") ? string.Empty : $"static {job.Abbreviation}Gauge JobGauge => Svc.Gauges.Get<{job.Abbreviation}Gauge>();";
+	//TODO: Remove BST exception when the class releases to allow BST gauge data to be generated
 
 	/// <summary>
 	/// Gets the limit break code for a specific action.
