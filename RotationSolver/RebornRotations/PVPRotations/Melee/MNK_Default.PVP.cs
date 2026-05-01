@@ -13,6 +13,10 @@ public sealed class MNK_DefaultPvP : MonkRotation
 	[Range(0, 1, ConfigUnitType.Percent)]
 	[RotationConfig(CombatType.PvP, Name = "Enemy health threshold needed for Smite use")]
 	public float SmitePvPPercent { get; set; } = 0.25f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvP, Name = "Enemy health threshold needed for Earth's Reply use")]
+	public float EarthsReplyPercent { get; set; } = 0.5f;
 	#endregion
 
 	#region oGCDs
@@ -25,12 +29,9 @@ public sealed class MNK_DefaultPvP : MonkRotation
 
 		if (EarthsReplyPvP.CanUse(out action))
 		{
-			if (StatusHelper.PlayerHasStatus(true, StatusID.EarthResonance) && StatusHelper.PlayerWillStatusEnd(1, true, StatusID.EarthResonance))
+			if (Player?.GetHealthRatio() <= EarthsReplyPercent || StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.EarthResonance))
 			{
-				if (Player?.GetHealthRatio() < 0.5 || StatusHelper.PlayerWillStatusEnd(1, true, StatusID.EarthResonance))
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 

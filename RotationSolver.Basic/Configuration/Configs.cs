@@ -1108,7 +1108,7 @@ internal partial class Configs : IPluginConfiguration
 		Filter = TargetConfig, Section = 3)]
 	private static readonly bool _switchTargetFriendly2 = false;
 
-	[ConditionBool, UI("Set target to closest targetable enemy if no valid action target nearby and target not set (This works in Manual mode as well)",
+	[ConditionBool, UI("Set target to closest targetable enemy if no valid action target nearby and target not set while in combat (This works in Manual mode as well)",
 		Filter = TargetConfig, Section = 3)]
 	private static readonly bool _targetFreely = false;
 

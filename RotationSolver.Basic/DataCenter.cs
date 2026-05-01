@@ -423,6 +423,13 @@ internal static class DataCenter
 
 	public static bool IsPvP => Territory?.IsPvP ?? false;
 
+	/// <summary>
+	/// When set to <c>true</c> by an external plugin via IPC, the TargetFreely behaviour is
+	/// activated for the current session without modifying the user's <c>TargetFreely</c>
+	/// config value.  Reset to <c>false</c> by calling the corresponding IPC method.
+	/// </summary>
+	public static bool TargetFreelyOverride { get; set; }
+
 	public static bool IsInMaskedCarnivale => Territory?.ContentType == TerritoryContentType.TheMaskedCarnivale;
 
 	public static bool IsInDuty => Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56];
@@ -586,6 +593,47 @@ internal static class DataCenter
 	#endregion
 
 	#region Misc Duty Info
+
+	/// <summary>
+	///
+	/// </summary>
+	public static bool IsInEurekaFieldOp => Territory?.ContentType == TerritoryContentType.Eureka;
+
+	/// <summary>
+	///
+	/// </summary>
+	public static bool IsInDeepDungeons => Territory?.ContentType == TerritoryContentType.DeepDungeons;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsInPilgrimsTraverse => IsInTerritory(1281) 
+	|| IsInTerritory(1282) || IsInTerritory(1283) 
+	|| IsInTerritory(1284) || IsInTerritory(1285) 
+	|| IsInTerritory(1286) || IsInTerritory(1287) 
+	|| IsInTerritory(1288) || IsInTerritory(1289) 
+	|| IsInTerritory(1290);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsInPalaceOfTheDead => IsInTerritory(561)
+	|| IsInTerritory(562) || IsInTerritory(563)
+	|| IsInTerritory(564) || IsInTerritory(565)
+	|| IsInTerritory(593) || IsInTerritory(594)
+	|| IsInTerritory(595) || IsInTerritory(596)
+	|| IsInTerritory(597) || IsInTerritory(598)
+	|| IsInTerritory(599) || IsInTerritory(600)
+	|| IsInTerritory(601) || IsInTerritory(602)
+	|| IsInTerritory(603) || IsInTerritory(604)
+	|| IsInTerritory(605) || IsInTerritory(606)
+	|| IsInTerritory(607);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsInTheFinalVerse => IsInTerritory(1311) || IsInTerritory(1333);
+
 	/// <summary>
 	/// Determines if the current content is a Monster Hunter duty
 	/// </summary>
