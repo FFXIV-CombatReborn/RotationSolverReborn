@@ -648,7 +648,10 @@ public partial class MonkRotation
 
 	static partial void ModifyFiresReplyPvP(ref ActionSetting setting)
 	{
-
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 
 	static partial void ModifyEarthsReplyPvP(ref ActionSetting setting)

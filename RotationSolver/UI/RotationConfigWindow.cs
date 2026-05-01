@@ -4055,7 +4055,8 @@ public partial class RotationConfigWindow : Window
 			string source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
 			byte stacks = Player.Object.StatusStack(true, (StatusID)status.StatusId);
 			string stackDisplay = stacks == byte.MaxValue ? "N/A" : stacks.ToString(); // Convert 255 to "N/A"
-			ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source} Stacks: {stackDisplay}");
+			string timeDisplay = status.RemainingTime <= 0f ? "Perm" : $"{status.RemainingTime:F1}s";
+			ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source} Stacks: {stackDisplay} Time: {timeDisplay}");
 		}
 	}
 
