@@ -133,6 +133,12 @@ namespace RotationSolver.Commands
 				}
 			}
 
+			if (StatusHelper.PlayerHasStatus(false, StatusID.MotionTracker))
+			{
+				PluginLog.Information("Player has Motion Tracker status, skipping action use to avoid potential issues.");
+				return;
+			}
+
 			if (StatusHelper.PlayerHasStatus(false, StatusID.Transcendent))
 			{
 				return;
