@@ -21,16 +21,16 @@ public static class DownloadHelper
 
 	public static IncompatiblePlugin[] IncompatiblePlugins { get; private set; } = [];
 
-	public static async Task DownloadAsync()
+	public static async Task DownloadAsync(CancellationToken cancellationToken = default)
 	{
-		IncompatiblePlugins = await DownloadOneAsync<IncompatiblePlugin[]>($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/IncompatiblePlugins.json") ?? [];
+		IncompatiblePlugins = await DownloadOneAsync<IncompatiblePlugin[]>($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/IncompatiblePlugins.json", cancellationToken) ?? [];
 	}
 
-	private static async Task<T?> DownloadOneAsync<T>(string url)
+	private static async Task<T?> DownloadOneAsync<T>(string url, CancellationToken cancellationToken = default)
 	{
 		try
 		{
-			string str = await Http.GetStringAsync(url);
+			string str = await Http.GetStringAsync(url, cancellationToken);
 			return JsonConvert.DeserializeObject<T>(str);
 		}
 		catch (Exception ex)

@@ -23,7 +23,7 @@ using Player = ECommons.GameHelpers.Player;
 
 namespace RotationSolver;
 
-public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
+public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 {
 	private readonly WindowSystem windowSystem;
 
@@ -51,40 +51,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 	{
 		ECommonsMain.Init(pluginInterface, this, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
 		//KamiToolKitLibrary.Initialize(pluginInterface);
-		_ = Svc.Framework.RunOnTick(() =>
-		{
-			_ = ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
-		});
 		IconSet.Init();
 
 		_dis.Add(new Service());
-		try
-		{
-			// Check if the config file exists before attempting to read and deserialize it
-			if (File.Exists(Svc.PluginInterface.ConfigFile.FullName))
-			{
-				Configs oldConfigs = JsonConvert.DeserializeObject<Configs>(
-					File.ReadAllText(Svc.PluginInterface.ConfigFile.FullName))
-					?? new Configs();
-
-				// Check version and migrate or reset if necessary
-				Configs newConfigs = Configs.Migrate(oldConfigs);
-				if (newConfigs.Version != Configs.CurrentVersion)
-				{
-					newConfigs = new Configs(); // Reset to default if versions do not match
-				}
-				Service.Config = newConfigs;
-			}
-			else
-			{
-				Service.Config = new Configs();
-			}
-		}
-		catch (Exception ex)
-		{
-			PluginLog.Warning($"Failed to load config: {ex.Message}");
-			Service.Config = new Configs();
-		}
 
 		IPCProvider = new();
 
@@ -129,113 +98,149 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 		Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
 		Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
 		Svc.PluginInterface.UiBuilder.Draw += OnDraw;
+	}
 
-		//HotbarHighlightDrawerManager.Init();
-
-		MajorUpdater.Enable();
-		Watcher.Enable();
-		ActionQueueManager.Enable();
-		OtherConfiguration.Init();
-		ActionContextMenu.Init();
-		HotbarHighlightManager.Init();
-
-		Svc.DutyState.DutyStarted += DutyState_DutyStarted;
-		Svc.DutyState.DutyWiped += DutyState_DutyWiped;
-		Svc.DutyState.DutyCompleted += DutyState_DutyCompleted;
-		Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
-		ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
-
-		static void DutyState_DutyCompleted(IDutyStateEventArgs e)
+	public async Task LoadAsync(CancellationToken cancellationToken)
+	{
+		// Warm up texture cache on framework thread
+		await Svc.Framework.Run(() =>
 		{
-			TimeSpan delay = TimeSpan.FromSeconds(_random.Next(4, 6));
-			_ = Svc.Framework.RunOnTick(() =>
-			{
-				_ = Service.Config.DutyEnd.AddMacro();
+			_ = ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
+		});
 
-				if (Service.Config.AutoOffWhenDutyCompleted)
+		// Load main config asynchronously (off main thread)
+		try
+		{
+			if (File.Exists(Svc.PluginInterface.ConfigFile.FullName))
+			{
+				string json = await File.ReadAllTextAsync(Svc.PluginInterface.ConfigFile.FullName, cancellationToken);
+				Configs oldConfigs = JsonConvert.DeserializeObject<Configs>(json) ?? new Configs();
+
+				Configs newConfigs = Configs.Migrate(oldConfigs);
+				if (newConfigs.Version != Configs.CurrentVersion)
 				{
-					RSCommands.CancelState();
+					newConfigs = new Configs();
 				}
-			}, delay);
-		}
-
-		static void ClientState_TerritoryChanged(uint id)
-		{
-			DataCenter.ResetAllRecords();
-
-			// Check if the id is valid before proceeding
-			if (id == 0)
-			{
-				PluginLog.Information("Invalid territory id: 0");
-				return;
+				Service.Config = newConfigs;
 			}
-
-			TerritoryType territory = Service.GetSheet<TerritoryType>().GetRow(id);
-
-			DataCenter.Territory = new TerritoryInfo(territory);
-
-			try
+			else
 			{
-				DataCenter.CurrentRotation?.OnTerritoryChanged();
-			}
-			catch (Exception ex)
-			{
-				PluginLog.Warning($"Failed on Territory changed: {ex.Message}");
+				Service.Config = new Configs();
 			}
 		}
-
-		static void DutyState_DutyStarted(IDutyStateEventArgs e)
+		catch (Exception ex)
 		{
-			if (!Player.Available)
-			{
-				return;
-			}
-
-			if (!TargetFilter.PlayerJobCategory(JobRole.Tank) && !TargetFilter.PlayerJobCategory(JobRole.Healer))
-			{
-				return;
-			}
-
-			if (DataCenter.Territory?.IsHighEndDuty ?? false)
-			{
-				string warning = string.Format(UiString.HighEndWarning.GetDescription(), DataCenter.Territory.ContentFinderName);
-				BasicWarningHelper.AddSystemWarning(warning);
-			}
+			PluginLog.Warning($"Failed to load config: {ex.Message}");
+			Service.Config = new Configs();
 		}
 
-		static void DutyState_DutyWiped(IDutyStateEventArgs e)
+		// Load OtherConfiguration files and download incompatible plugin list concurrently
+		await Task.WhenAll(
+			OtherConfiguration.InitAsync(cancellationToken),
+			DownloadHelper.DownloadAsync(cancellationToken)
+		);
+
+		// The following must run on the main/framework thread
+		await Svc.Framework.Run(() =>
 		{
-			if (!Player.Available)
+			//HotbarHighlightDrawerManager.Init();
+
+			MajorUpdater.Enable();
+			Watcher.Enable();
+			ActionQueueManager.Enable();
+			ActionContextMenu.Init();
+			HotbarHighlightManager.Init();
+
+			Svc.DutyState.DutyStarted += DutyState_DutyStarted;
+			Svc.DutyState.DutyWiped += DutyState_DutyWiped;
+			Svc.DutyState.DutyCompleted += DutyState_DutyCompleted;
+			Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
+			ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
+
+			ChangeUITranslation();
+
+			OpenLinkPayload = Svc.Chat.AddChatLinkHandler(0, (guid, seString) =>
 			{
-				return;
-			}
-
-			DataCenter.ResetAllRecords();
-		}
-
-		ChangeUITranslation();
-
-		OpenLinkPayload = Svc.Chat.AddChatLinkHandler(0, (guid, seString) =>
-		{
-			if (guid == 0)
+				if (guid == 0)
+				{
+					OpenConfigWindow();
+				}
+			});
+			HideWarningLinkPayload = Svc.Chat.AddChatLinkHandler(1, (guid, seString) =>
 			{
-				OpenConfigWindow();
-			}
+				if (guid == 0)
+				{
+					Service.Config.HideWarning.Value = true;
+					Svc.Chat.Print("Warning has been hidden.");
+				}
+			});
 		});
-		HideWarningLinkPayload = Svc.Chat.AddChatLinkHandler(1, (guid, seString) =>
-		{
-			if (guid == 0)
-			{
-				Service.Config.HideWarning.Value = true;
-				Svc.Chat.Print("Warning has been hidden.");
-			}
-		});
+	}
 
-		// Load rotations on startup
-		_ = Task.Run(async () =>
+	private static void DutyState_DutyCompleted(IDutyStateEventArgs e)
+	{
+		TimeSpan delay = TimeSpan.FromSeconds(_random.Next(4, 6));
+		_ = Svc.Framework.RunOnTick(() =>
 		{
-			await DownloadHelper.DownloadAsync();
-		});
+			_ = Service.Config.DutyEnd.AddMacro();
+
+			if (Service.Config.AutoOffWhenDutyCompleted)
+			{
+				RSCommands.CancelState();
+			}
+		}, delay);
+	}
+
+	private static void ClientState_TerritoryChanged(uint id)
+	{
+		DataCenter.ResetAllRecords();
+
+		if (id == 0)
+		{
+			PluginLog.Information("Invalid territory id: 0");
+			return;
+		}
+
+		TerritoryType territory = Service.GetSheet<TerritoryType>().GetRow(id);
+		DataCenter.Territory = new TerritoryInfo(territory);
+
+		try
+		{
+			DataCenter.CurrentRotation?.OnTerritoryChanged();
+		}
+		catch (Exception ex)
+		{
+			PluginLog.Warning($"Failed on Territory changed: {ex.Message}");
+		}
+	}
+
+	private static void DutyState_DutyStarted(IDutyStateEventArgs e)
+	{
+		if (!Player.Available)
+		{
+			return;
+		}
+
+		if (!TargetFilter.PlayerJobCategory(JobRole.Tank) && !TargetFilter.PlayerJobCategory(JobRole.Healer))
+		{
+			return;
+		}
+
+		if (DataCenter.Territory?.IsHighEndDuty ?? false)
+		{
+			string warning = string.Format(UiString.HighEndWarning.GetDescription(), DataCenter.Territory.ContentFinderName);
+			BasicWarningHelper.AddSystemWarning(warning);
+		}
+	}
+
+	private static void DutyState_DutyWiped(IDutyStateEventArgs e)
+	{
+		if (!Player.Available)
+		{
+			return;
+		}
+
+		DataCenter.ResetAllRecords();
 	}
 
 	private void OnDraw()
@@ -353,12 +358,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 		return false;
 	}
 
-	void IDisposable.Dispose()
-	{
-		Dispose().GetAwaiter().GetResult();
-	}
-
-	public async Task Dispose()
+	public async ValueTask DisposeAsync()
 	{
 		Service.Config.Save();
 		await OtherConfiguration.Save();
