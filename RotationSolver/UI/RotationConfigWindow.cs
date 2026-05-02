@@ -2305,7 +2305,8 @@ public partial class RotationConfigWindow : Window
 					var parentValueStr = parentValue.ToString();
 					if (parentValue.GetType().IsEnum && parentValueStr != null && parentValueStr.Contains('.'))
 					{
-						parentValueStr = parentValueStr.Split('.').Last();
+						int dotIndex = parentValueStr.LastIndexOf('.');
+						parentValueStr = dotIndex >= 0 ? parentValueStr[(dotIndex + 1)..] : parentValueStr;
 					}
 
 					if (parentConfig.Value == null ||
@@ -3011,9 +3012,9 @@ public partial class RotationConfigWindow : Window
 					ImGui.Text($"Charges: {action.Cooldown.CurrentCharges} / {action.Cooldown.MaxCharges}");
 
 					ImGui.Text("IgnoreCastCheck:" + action.CanUse(out _, skipCastingCheck: true));
-						action.CanUse(out _, skipCastingCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipAoeCheck: true);
-						ImGui.Text("Target Name: " + action.Target.Target?.Name ?? string.Empty);
-						ImGui.Text("AffectedTarget Count: " + (action.Target.AffectedTargets?.Length ?? 0));
+					action.CanUse(out _, skipCastingCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipAoeCheck: true);
+					ImGui.Text("Target Name: " + action.Target.Target?.Name ?? string.Empty);
+					ImGui.Text("AffectedTarget Count: " + (action.Target.AffectedTargets?.Length ?? 0));
 				}
 				catch (Exception ex)
 				{
@@ -4065,16 +4066,16 @@ public partial class RotationConfigWindow : Window
 		ImGui.Text($"Can Raise: {DataCenter.CanRaise()}");
 		ImGui.Text($"Death Target: {DataCenter.DeathTarget}");
 
-		IEnumerable<IBattleChara> deadPartyMembers = DataCenter.PartyMembers.GetDeath();
-		bool hasDeadParty = false;
-		using (var enumerator = deadPartyMembers.GetEnumerator())
+		var deadPartyMembersList = new List<IBattleChara>();
+		foreach (var member in DataCenter.PartyMembers.GetDeath())
 		{
-			if (enumerator.MoveNext()) hasDeadParty = true;
+			deadPartyMembersList.Add(member);
 		}
-		if (hasDeadParty)
+
+		if (deadPartyMembersList.Count > 0)
 		{
 			ImGui.Text("Dead Party Members:");
-			foreach (var member in deadPartyMembers)
+			foreach (var member in deadPartyMembersList)
 			{
 				ImGui.Text($"- {member.Name}");
 			}
@@ -4084,16 +4085,16 @@ public partial class RotationConfigWindow : Window
 			ImGui.Text("Dead Party Members: None");
 		}
 
-		IEnumerable<IBattleChara> deadAllianceMembers = DataCenter.AllianceMembers.GetDeath();
-		bool hasDeadAlliance = false;
-		using (var enumerator = deadAllianceMembers.GetEnumerator())
+		var deadAllianceMembersList = new List<IBattleChara>();
+		foreach (var member in DataCenter.AllianceMembers.GetDeath())
 		{
-			if (enumerator.MoveNext()) hasDeadAlliance = true;
+			deadAllianceMembersList.Add(member);
 		}
-		if (hasDeadAlliance)
+
+		if (deadAllianceMembersList.Count > 0)
 		{
 			ImGui.Text("Dead Alliance Members:");
-			foreach (var member in deadAllianceMembers)
+			foreach (var member in deadAllianceMembersList)
 			{
 				ImGui.Text($"- {member.Name}");
 			}

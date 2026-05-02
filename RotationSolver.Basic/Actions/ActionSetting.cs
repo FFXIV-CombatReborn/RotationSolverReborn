@@ -261,7 +261,7 @@ public class ActionSetting
 	/// The quest ID that unlocks this action.
 	/// 0 means no quest.
 	/// </summary>
-	 public uint UnlockedByQuestID { get; set; } = 0;
+	public uint UnlockedByQuestID { get; set; } = 0;
 
 	/// <summary>
 	/// When true, this action can be used against targets that have the Guard status in PvP.
