@@ -272,7 +272,7 @@ public partial class ReaperRotation
 
 	static partial void ModifyHarpePvE(ref ActionSetting setting)
 	{
-		setting.SpecialType = SpecialActionType.MeleeRange;
+		setting.SpecialType = SpecialActionType.MeleeRangedAttack;
 	}
 
 	static partial void ModifyHellsIngressPvE(ref ActionSetting setting)

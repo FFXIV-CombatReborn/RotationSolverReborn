@@ -203,7 +203,7 @@ public partial class DarkKnightRotation
 
 	static partial void ModifyUnmendPvE(ref ActionSetting setting)
 	{
-		setting.SpecialType = SpecialActionType.MeleeRange;
+		setting.SpecialType = SpecialActionType.MeleeRangedAttack;
 	}
 
 	static partial void ModifySouleaterPvE(ref ActionSetting setting)

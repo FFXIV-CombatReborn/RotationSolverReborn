@@ -311,7 +311,7 @@ public partial class NinjaRotation
 	static partial void ModifyThrowingDaggerPvE(ref ActionSetting setting)
 	{
 		setting.UnlockedByQuestID = 65680;
-		setting.SpecialType = SpecialActionType.MeleeRange;
+		setting.SpecialType = SpecialActionType.MeleeRangedAttack;
 	}
 
 	static partial void ModifyMugPvE(ref ActionSetting setting)

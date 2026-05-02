@@ -269,7 +269,7 @@ internal static class DataCenter
 				Service.Config.TargetingTypes.Add(TargetingType.LowHP);
 				Service.Config.TargetingTypes.Add(TargetingType.HighHP);
 				Service.Config.TargetingTypes.Add(TargetingType.Small);
-				Service.Config.TargetingTypes.Add(TargetingType.Big);
+			 Service.Config.TargetingTypes.Add(TargetingType.Big);
 				Service.Config.Save();
 			}
 
@@ -2113,9 +2113,9 @@ internal static class DataCenter
 	public static float BMRNextVulnerableIn { get; set; } = float.MaxValue;
 	public static float BMRNextVulnerableEndIn { get; set; } = float.MaxValue;
 	public static float BMRNextDamageIn { get; set; } = float.MaxValue;
-	public static int BMRNextDamageType { get; set; }
+	public static PredictedDamageType BMRNextDamageType { get; set; } = PredictedDamageType.None;
 	public static float BMRSpecialModeIn { get; set; } = float.MaxValue;
-	public static int BMRSpecialModeType { get; set; }
+	public static SpecialMode BMRSpecialModeType { get; set; } = SpecialMode.Normal;
 
 	// Debug diagnostics
 	public static float BMRDebugTimelineRaidwide { get; set; } = float.MaxValue;

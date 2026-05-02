@@ -271,7 +271,7 @@ public partial class GunbreakerRotation
 
 	static partial void ModifyLightningShotPvE(ref ActionSetting setting)
 	{
-		setting.SpecialType = SpecialActionType.MeleeRange;
+		setting.SpecialType = SpecialActionType.MeleeRangedAttack;
 	}
 
 	static partial void ModifyDangerZonePvE(ref ActionSetting setting)

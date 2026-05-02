@@ -207,7 +207,7 @@ public class BaseAction : IBaseAction
 			return false;
 		}
 
-		if (Setting.SpecialType == SpecialActionType.MeleeRange && IActionHelper.IsLastAction(IActionHelper.MovingActions))
+		if (Setting.SpecialType == SpecialActionType.MeleeRangedAttack && IActionHelper.IsLastAction(IActionHelper.MovingActions))
 		{
 			return false; // No range actions after moving.
 		}
