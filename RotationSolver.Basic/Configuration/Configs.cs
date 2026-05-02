@@ -261,7 +261,7 @@ internal partial class Configs : IPluginConfiguration
 
 	[ConditionBool, UI("Cancel cast in PvP if the target gains Guard and the action does not ignore Guard.",
 		 Filter = DutySpecifcPvP)]
-	private static readonly bool _pvpGuardCancel= false;
+	private static readonly bool _pvpGuardCancel = false;
 
 	[ConditionBool, UI("Use Purify to remove Stun debuff",
 		 Filter = DutySpecifcPvP)]

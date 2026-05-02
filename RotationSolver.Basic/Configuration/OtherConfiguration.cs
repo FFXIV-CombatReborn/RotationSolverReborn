@@ -385,12 +385,7 @@ internal class OtherConfiguration
 				{
 					TypeNameHandling = TypeNameHandling.None,
 					Converters = [new StringEnumConverter()] // Add this line
-				})!;
-				if (value == null)
-				{
-					throw new Exception("Deserialized value is null.");
-				}
-
+				})! ?? throw new Exception("Deserialized value is null.");
 				PluginLog.Information($"Loaded {name} from local file.");
 			}
 			catch (Exception ex)
@@ -411,11 +406,7 @@ internal class OtherConfiguration
 				{
 					TypeNameHandling = TypeNameHandling.None,
 					Converters = [new StringEnumConverter()] // Add this line
-				})!;
-				if (value == null)
-				{
-					throw new Exception("Deserialized value is null.");
-				}
+				})! ?? throw new Exception("Deserialized value is null.");
 
 				PluginLog.Information($"Downloaded and loaded {name} from GitHub.");
 			}

@@ -6,7 +6,6 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
-using Windows.ApplicationModel.Activation;
 
 namespace RotationSolver.Updaters
 {

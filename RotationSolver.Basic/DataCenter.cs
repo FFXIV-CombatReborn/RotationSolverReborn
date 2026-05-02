@@ -607,11 +607,11 @@ internal static class DataCenter
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool IsInPilgrimsTraverse => IsInTerritory(1281) 
-	|| IsInTerritory(1282) || IsInTerritory(1283) 
-	|| IsInTerritory(1284) || IsInTerritory(1285) 
-	|| IsInTerritory(1286) || IsInTerritory(1287) 
-	|| IsInTerritory(1288) || IsInTerritory(1289) 
+	public static bool IsInPilgrimsTraverse => IsInTerritory(1281)
+	|| IsInTerritory(1282) || IsInTerritory(1283)
+	|| IsInTerritory(1284) || IsInTerritory(1285)
+	|| IsInTerritory(1286) || IsInTerritory(1287)
+	|| IsInTerritory(1288) || IsInTerritory(1289)
 	|| IsInTerritory(1290);
 
 	/// <summary>
