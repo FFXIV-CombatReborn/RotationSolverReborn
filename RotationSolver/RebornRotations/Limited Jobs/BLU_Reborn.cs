@@ -441,12 +441,7 @@ public sealed class BLU_Reborn : BlueMageRotation
 			return true;
 		}
 
-		if (WingedReprobationPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (WingedReprobationPvE.CanUse(out act))
+		if (WingedReprobationPvE.CanUse(out act, skipStatusProvideCheck: true, usedUp: true))
 		{
 			return true;
 		}

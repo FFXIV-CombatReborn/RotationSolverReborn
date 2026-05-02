@@ -232,8 +232,8 @@ public static class TargetFilter
 
 		foreach (T obj in objects)
 		{
-			if (obj.DistanceToPlayer() < radius)
-				yield return obj;
+			if (obj.DistanceToPlayer() <= radius)
+					yield return obj;
 		}
 	}
 }

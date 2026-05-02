@@ -793,11 +793,11 @@ internal partial class Configs : IPluginConfiguration
 	/// This setting exists to leave you time to approach and enter in melee range of the enemy without wasting
 	/// a GCD.
 	/// </markdown>
-	[UI("Melee Range action using offset",
+	[UI("Melee Ranged action usage offset",
 		Filter = AutoActionUsage, Section = 3,
 		PvEFilter = JobFilterType.Melee, PvPFilter = JobFilterType.Melee)]
 	[Range(0, 5, ConfigUnitType.Yalms, 0.02f)]
-	public float MeleeRangeOffset { get; set; } = 1;
+	public float MeleeRangedOffset { get; set; } = 1;
 
 	[UI("When their minimum HP is lower than this.", Parent = nameof(HealWhenNothingTodo))]
 	[Range(0, 1, ConfigUnitType.Percent, 0.002f)]

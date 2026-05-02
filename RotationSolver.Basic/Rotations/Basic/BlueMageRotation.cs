@@ -1064,7 +1064,7 @@ public partial class BlueMageRotation
 	{
 		setting.AttackTypeOverride = AttackType.Magic;
 		setting.AspectOverride = Aspect.Unaspected;
-		setting.StatusProvide = [StatusID.Bleeding_1714];
+		setting.TargetStatusProvide = [StatusID.Bleeding_1714];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,

@@ -1587,12 +1587,12 @@ public struct ActionTargetInfo(IBaseAction action)
 
 		switch (actionType)
 		{
-			case SpecialActionType.MeleeRange:
+			case SpecialActionType.MeleeRangedAttack:
 				{
 					var filtered = new List<IBattleChara>();
 					foreach (var t in battleChara)
 					{
-						if (t.DistanceToPlayer() >= 3 + (Service.Config?.MeleeRangeOffset ?? 0))
+						if (t.DistanceToPlayer() >= 3f + (Service.Config?.MeleeRangedOffset ?? 0f))
 						{
 							filtered.Add(t);
 						}

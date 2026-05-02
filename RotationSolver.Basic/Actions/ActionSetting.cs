@@ -13,7 +13,7 @@ public enum SpecialActionType : byte
 	/// <summary>
 	/// 
 	/// </summary>
-	MeleeRange,
+	MeleeRangedAttack,
 
 	/// <summary>
 	/// 

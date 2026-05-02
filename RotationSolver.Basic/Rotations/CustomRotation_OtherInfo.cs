@@ -1068,7 +1068,7 @@ public partial class CustomRotation
 	/// The type of the next predicted damage event (0=None, 1=Tankbuster, 2=Raidwide, 3=Shared).
 	/// </summary>
 	[Description("Next predicted damage type")]
-	public static int BMRDamageType => DataCenter.BMRNextDamageType;
+	public static PredictedDamageType BMRDamageType => DataCenter.BMRNextDamageType;
 
 	/// <summary>
 	/// Seconds until the boss becomes untargetable (downtime starts).

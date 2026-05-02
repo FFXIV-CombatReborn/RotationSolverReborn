@@ -153,6 +153,11 @@ namespace RotationSolver.Updaters
 					return true;
 				}
 
+				if (DataCenter.BMRSpecialModeType == SpecialMode.Pyretic)
+				{
+					return true;
+				}
+
 				foreach (var status in Player.Object.StatusList)
 				{
 					if (noCastingStatus.Contains(status.StatusId))

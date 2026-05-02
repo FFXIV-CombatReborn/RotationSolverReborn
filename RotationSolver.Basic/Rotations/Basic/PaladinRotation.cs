@@ -177,7 +177,7 @@ public partial class PaladinRotation
 
 	static partial void ModifyShieldLobPvE(ref ActionSetting setting)
 	{
-		setting.SpecialType = SpecialActionType.MeleeRange;
+		setting.SpecialType = SpecialActionType.MeleeRangedAttack;
 		setting.UnlockedByQuestID = 65798;
 	}
 

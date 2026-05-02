@@ -134,7 +134,7 @@ public partial class DragoonRotation
 
 	static partial void ModifyPiercingTalonPvE(ref ActionSetting setting)
 	{
-		setting.SpecialType = SpecialActionType.MeleeRange;
+		setting.SpecialType = SpecialActionType.MeleeRangedAttack;
 		setting.UnlockedByQuestID = 65591;
 	}
 

@@ -126,7 +126,7 @@ public partial class WarriorRotation
 
 	static partial void ModifyTomahawkPvE(ref ActionSetting setting)
 	{
-		setting.SpecialType = SpecialActionType.MeleeRange;
+		setting.SpecialType = SpecialActionType.MeleeRangedAttack;
 		setting.UnlockedByQuestID = 65852;
 	}
 

@@ -267,7 +267,7 @@ public partial class SamuraiRotation
 
 	static partial void ModifyEnpiPvE(ref ActionSetting setting)
 	{
-		setting.SpecialType = SpecialActionType.MeleeRange;
+		setting.SpecialType = SpecialActionType.MeleeRangedAttack;
 	}
 
 	static partial void ModifyThirdEyePvE(ref ActionSetting setting)
