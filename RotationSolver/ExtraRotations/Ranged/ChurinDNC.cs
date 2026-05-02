@@ -12,7 +12,6 @@ namespace RotationSolver.ExtraRotations.Ranged;
 [SourceCode(Path = "main/ExtraRotations/Ranged/ChurinDNC.cs")]
 [ExtraRotation]
 
-#pragma warning disable CA1827
 public sealed class ChurinDNC : DancerRotation
 {
     #region Properties
@@ -225,7 +224,7 @@ public sealed class ChurinDNC : DancerRotation
         {
             if (!InCombat && !IsDancing) return false;
 
-            if (AllHostileTargets == null || AllHostileTargets.Count() == 0) return false;
+            if (AllHostileTargets == null) return false;
 
             foreach (var target in AllHostileTargets)
             {
@@ -257,7 +256,7 @@ public sealed class ChurinDNC : DancerRotation
     /// </returns>
     private static bool HasAvailableDancePartner(bool restrictToDps)
     {
-        if (PartyMembers == null || PartyMembers.Count() == 0) return false;
+        if (PartyMembers == null) return false;
 
         foreach (var member in PartyMembers)
         {
@@ -1419,4 +1418,3 @@ public sealed class ChurinDNC : DancerRotation
     #endregion
 
 }
-#pragma warning restore CA1827
