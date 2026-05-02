@@ -45,7 +45,7 @@ namespace RotationSolver.Basic.Helpers
 			List<IBattleChara> targets = capacity > 0 ? new List<IBattleChara>(capacity) : [];
 
 			var blacklisted = new HashSet<uint>(DataCenter.BlacklistedNameIds);
-			HashSet<long> stopTargets = Service.Config.FilterStopMark
+			HashSet<long> stopTargets = Service.Config.FilterStopMark2
 				? [.. MarkingHelper.GetStopTargets()]
 				: s_emptyStopTargets;
 
@@ -177,7 +177,7 @@ namespace RotationSolver.Basic.Helpers
 			if (battleChara.IsEnemy() && !battleChara.IsAttackable()) return false;
 
 			// Respect stop marks only when configured
-			if (Service.Config.FilterStopMark && battleChara.IsEnemy())
+			if (Service.Config.FilterStopMark2 && battleChara.IsEnemy())
 			{
 				foreach (var stopTargetId in stopTargets)
 				{

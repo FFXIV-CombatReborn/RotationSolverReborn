@@ -199,6 +199,15 @@ internal static class MajorUpdater
 
 		try
 		{
+			ActionQueueManager.Update();
+		}
+		catch (Exception ex)
+		{
+			LogOnce("(RSRActivatedCore): ActionQueueManager.Update Exception", ex);
+		}
+
+		try
+		{
 			ActionUpdater.UpdateNextAction();
 		}
 		catch (Exception ex)
