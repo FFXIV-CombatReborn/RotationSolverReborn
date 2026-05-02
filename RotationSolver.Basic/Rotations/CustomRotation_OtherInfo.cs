@@ -912,7 +912,7 @@ public partial class CustomRotation
 			if (IsConditionMet() && CanUseAtTime())
 			{
 				return rotation.UseBurstMedicine(out act, clippingCheck);
-			};
+			}
 
 			return false;
 		}
