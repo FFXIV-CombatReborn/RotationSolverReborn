@@ -2260,39 +2260,44 @@ public partial class RotationConfigWindow : Window
 	}
 
 	/// <summary>
-	/// Checks if a rotation config should be visible based on parent-child relationships.
-	/// </summary>
-	/// <param name="config">The configuration to check.</param>
-	/// <param name="configSet">The set of all configurations.</param>
-	/// <returns>True if the config should be shown, false otherwise.</returns>
+/// Checks if a rotation config should be visible based on parent-child relationships.
+/// A config is visible only if all ancestors in its parent chain are visible and its direct parent condition matches.
+/// </summary>
+/// <param name="config">The configuration to check.</param>
+/// <param name="configSet">The set of all configurations.</param>
+/// <returns>True if the config should be shown, false otherwise.</returns>
 	private static bool ShouldShowRotationConfig(IRotationConfig config, IRotationConfigSet configSet)
 	{
-		if (string.IsNullOrEmpty(config.Parent))
-		{
-			return true;
-		}
+		return ShouldShowRotationConfigInternal(config, configSet, new HashSet<string>(StringComparer.Ordinal));
+	}
+
+	private static bool ShouldShowRotationConfigInternal(
+		IRotationConfig config,
+		IRotationConfigSet configSet,
+		HashSet<string> visiting)
+	{
+		if (string.IsNullOrEmpty(config.Parent)) return true;
+
+		// Guard against accidental parent cycles.
+		if (!visiting.Add(config.Name)) return false;
 
 		IRotationConfig? parentConfig = null;
 		foreach (var c in configSet.Configs)
-		{
 			if (c.Name == config.Parent)
 			{
 				parentConfig = c;
 				break;
 			}
-		}
 
 		if (parentConfig == null)
 		{
+			visiting.Remove(config.Name);
 			return true;
 		}
 
 		if (parentConfig is RotationConfigBoolean parentBool)
 		{
-			if (!bool.TryParse(parentBool.Value, out var isEnabled) || !isEnabled)
-			{
-				return false;
-			}
+			if (!bool.TryParse(parentBool.Value, out var isEnabled) || !isEnabled) return false;
 		}
 		else
 		{
@@ -2305,19 +2310,22 @@ public partial class RotationConfigWindow : Window
 					var parentValueStr = parentValue.ToString();
 					if (parentValue.GetType().IsEnum && parentValueStr != null && parentValueStr.Contains('.'))
 					{
-						int dotIndex = parentValueStr.LastIndexOf('.');
+						var dotIndex = parentValueStr.LastIndexOf('.');
 						parentValueStr = dotIndex >= 0 ? parentValueStr[(dotIndex + 1)..] : parentValueStr;
 					}
 
 					if (parentConfig.Value == null ||
-						!string.Equals(parentConfig.Value.Trim(), parentValueStr?.Trim(), StringComparison.OrdinalIgnoreCase))
+					    !string.Equals(parentConfig.Value.Trim(), parentValueStr?.Trim(),
+						    StringComparison.OrdinalIgnoreCase))
 					{
+						visiting.Remove(config.Name);
 						return false;
 					}
 				}
 			}
 		}
 
+		visiting.Remove(config.Name);
 		return true;
 	}
 

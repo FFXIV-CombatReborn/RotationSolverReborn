@@ -217,7 +217,7 @@ public class BaseItem : IBaseItem
 
 		float remain = Cooldown.RecastTimeOneChargeRaw - Cooldown.RecastTimeElapsedRaw;
 
-		return remain <= DataCenter.DefaultGCDRemain && (ItemCheck == null || ItemCheck()) && HasIt;
+		return (remain <= DataCenter.DefaultGCDRemain || !clippingCheck) && (ItemCheck == null || ItemCheck()) && HasIt;
 	}
 
 	/// <summary>

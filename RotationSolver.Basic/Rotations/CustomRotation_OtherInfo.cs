@@ -893,24 +893,28 @@ public partial class CustomRotation
 		/// </summary>
 		/// <param name="rotation">The custom rotation instance</param>
 		/// <param name="act">The action to use if potion usage is recommended</param>
+		/// <param name="clippingCheck">Whether to perform a clipping check when using the potion</param>
 		/// <returns>True if both conditions and timing are met for potion usage</returns>
-		public bool ShouldUsePotion(CustomRotation rotation, out IAction? act)
+		public bool ShouldUsePotion(CustomRotation rotation, out IAction? act, bool clippingCheck = true)
 		{
 			act = null;
 
-			if (!Enabled)
-				return false;
+            if (!Enabled || StatusHelper.PlayerHasStatus(true, StatusID.Medicated))
+                return false;
 
 			// Check if conditions are met for potion usage
-			if (!IsConditionMet())
-				return false;
+			if (!IsConditionMet()) return false;
 
 			// Check if current time aligns with strategy timing
-			if (!CanUseAtTime())
-				return false;
+			if (!CanUseAtTime()) return false;
 
 			// Finally, attempt to use the burst medicine
-			return IsConditionMet() && CanUseAtTime() && rotation.UseBurstMedicine(out act);
+			if (IsConditionMet() && CanUseAtTime())
+			{
+				return rotation.UseBurstMedicine(out act, clippingCheck);
+			}
+
+			return false;
 		}
 
 		/// <summary>
@@ -923,7 +927,6 @@ public partial class CustomRotation
 			if (!Enabled)
 				return false;
 
-			// Null-safe check for custom timings: ensure array exists and has non-zero values (no LINQ)
 			if (Strategy == PotionStrategy.Custom)
 			{
 				var timingsArr = CustomTimings.Timings;
@@ -1123,37 +1126,37 @@ public partial class CustomRotation
 	/// </summary>
 	public static bool BMRTankbusterWithin(float seconds)
 		=> BMRActive && BMRTankbusterIn is > 0f and < float.MaxValue && BMRTankbusterIn <= seconds;
-	#endregion
+    #endregion
 
-	/// <summary>
-	/// 
-	/// </summary>
-	public static float LateWeaveWindow => WeaponTotal * 0.45f;
+    /// <summary>
+    /// The threshold (in seconds) that defines the start of a late weave window.
+    /// </summary>
+    public static float LateWeaveWindow => WeaponTotal * 0.45f;
 
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool EnoughWeaveTime => WeaponRemain > DataCenter.CalculatedActionAhead && WeaponRemain < WeaponTotal;
+    /// <summary>
+    /// Checks if there is enough remaining time in the current GCD to execute an off-global action without clipping.
+    /// </summary>
+    public static bool EnoughWeaveTime => WeaponRemain > DataCenter.CalculatedActionAhead + Math.Max(AnimationLock, 0.6f) && WeaponRemain < WeaponTotal;
 
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool CanLateWeave => WeaponRemain <= LateWeaveWindow && EnoughWeaveTime && CanWeave;
+    /// <summary>
+    /// Indicates whether the player can currently execute a late weave.
+    /// </summary>
+    public static bool CanLateWeave => WeaponRemain <= LateWeaveWindow && CanWeave;
 
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool CanEarlyWeave => (!HasWeaved() || WeaponRemain > LateWeaveWindow) && CanWeave;
+    /// <summary>
+    /// Indicates whether the player can currently execute an early weave.
+    /// </summary>
+    public static bool CanEarlyWeave => (!HasWeaved() || WeaponRemain > LateWeaveWindow) && CanWeave;
 
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool CanWeave => WeaponRemain >= DataCenter.CalculatedActionAhead && DataCenter.DefaultGCDElapsed > 0 && DataCenter.DefaultGCDElapsed >= DataCenter.CalculatedActionAhead;
+    /// <summary>
+    /// Safely verifies that the player is in the middle of a GCD and has enough time to weave an oGCD.
+    /// </summary>
+    public static bool CanWeave => EnoughWeaveTime && DataCenter.DefaultGCDElapsed > 0;
 
-	/// <summary>
-	/// Counts how many party members (alive and not full HP) are within range of the pet.
-	/// </summary>
-	public static int InRangeOfPet(float range)
+    /// <summary>
+    /// Counts how many party members (alive and not full HP) are within range of the pet.
+    /// </summary>
+    public static int InRangeOfPet(float range)
 	{
 		if (!DataCenter.HasPet())
 		{
@@ -1213,7 +1216,7 @@ public partial class CustomRotation
 	public virtual bool CanHealSingleSpell => true;
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	public static int RaiseMPMinimum => Service.Config.LessMPNoRaise;
 
