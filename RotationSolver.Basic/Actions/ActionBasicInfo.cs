@@ -1,7 +1,6 @@
 ﻿using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
-using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
@@ -83,7 +82,16 @@ public readonly struct ActionBasicInfo
 	/// Returns <see langword="true"/> if this action has the specified attack type,
 	/// accounting for all values in <see cref="AttackTypes"/>.
 	/// </summary>
-	public bool HasAttackType(AttackType attackType) => AttackTypes.Contains(attackType);
+	public bool HasAttackType(AttackType attackType)
+	{
+		var attackTypes = AttackTypes;
+		for (int i = 0; i < attackTypes.Count; i++)
+		{
+			if (attackTypes[i] == attackType)
+				return true;
+		}
+		return false;
+	}
 
 	/// <summary>
 	/// Gets the aspect of the action.
@@ -114,7 +122,16 @@ public readonly struct ActionBasicInfo
 	/// Returns <see langword="true"/> if this action has the specified aspect,
 	/// accounting for all values in <see cref="Aspects"/>.
 	/// </summary>
-	public bool HasAspect(Aspect aspect) => Aspects.Contains(aspect);
+	public bool HasAspect(Aspect aspect)
+	{
+		var aspects = Aspects;
+		for (int i = 0; i < aspects.Count; i++)
+		{
+			if (aspects[i] == aspect)
+				return true;
+		}
+		return false;
+	}
 
 	/// <summary>
 	/// Gets the level required to use the action.
@@ -279,12 +296,35 @@ public readonly struct ActionBasicInfo
 			// BLU morph actions: only visible when their parent action is in an active BLU slot
 			if (_action.Setting.RequiredBluSlotActionId != 0)
 			{
-				return DataCenter.BluSlots.Contains(_action.Setting.RequiredBluSlotActionId);
+				foreach (var slotId in DataCenter.BluSlots)
+				{
+					if (slotId == _action.Setting.RequiredBluSlotActionId)
+						return true;
+				}
+				return false;
 			}
 
-			return _action.Action.ClassJob.RowId == (uint)Job.BLU
-				? DataCenter.BluSlots.Contains(ID)
-				: IsDutyAction ? DataCenter.DutyActions.Contains(ID) : IsPvP == DataCenter.IsPvP;
+			if (_action.Action.ClassJob.RowId == (uint)Job.BLU)
+			{
+				foreach (var slotId in DataCenter.BluSlots)
+				{
+					if (slotId == ID)
+						return true;
+				}
+				return false;
+			}
+
+			if (IsDutyAction)
+			{
+				foreach (var actionId in DataCenter.DutyActions)
+				{
+					if (actionId == ID)
+						return true;
+				}
+				return false;
+			}
+
+			return IsPvP == DataCenter.IsPvP;
 		}
 	}
 
@@ -437,7 +477,17 @@ public readonly struct ActionBasicInfo
 		{
 			if (IsRealGCD)
 			{
-				if (ConfigurationHelper.BadStatusGCD.Contains(ActionManager.Instance()->GetActionStatus(ActionType.Action, AdjustedID)))
+				var status = ActionManager.Instance()->GetActionStatus(ActionType.Action, AdjustedID);
+				bool statusFound = false;
+				foreach (var badStatus in ConfigurationHelper.BadStatusGCD)
+				{
+					if (badStatus == status)
+					{
+						statusFound = true;
+						break;
+					}
+				}
+				if (statusFound)
 				{
 					return false;
 				}
@@ -445,7 +495,17 @@ public readonly struct ActionBasicInfo
 
 			if (IsAbility && !IsRealGCD)
 			{
-				if (ConfigurationHelper.BadStatusAbility.Contains(ActionManager.Instance()->GetActionStatus(ActionType.EventAction, AdjustedID)))
+				var status = ActionManager.Instance()->GetActionStatus(ActionType.EventAction, AdjustedID);
+				bool statusFound = false;
+				foreach (var badStatus in ConfigurationHelper.BadStatusAbility)
+				{
+					if (badStatus == status)
+					{
+						statusFound = true;
+						break;
+					}
+				}
+				if (statusFound)
 				{
 					return false;
 				}
@@ -496,7 +556,7 @@ public readonly struct ActionBasicInfo
 			return false;
 
 		// Must not be in the no-cast list
-		if (ActionsNoNeedCasting.Contains(ID))
+		if (Array.IndexOf(ActionsNoNeedCasting, ID) >= 0)
 			return false;
 
 		// Must be in a state where casting is not possible
@@ -610,9 +670,12 @@ public readonly struct ActionBasicInfo
 
 		if (_action.Setting.ComboIdsNot != null)
 		{
-			if (_action.Setting.ComboIdsNot.Contains(DataCenter.LastComboAction))
+			foreach (var comboIdNot in _action.Setting.ComboIdsNot)
 			{
-				return false;
+				if (comboIdNot == DataCenter.LastComboAction)
+				{
+					return false;
+				}
 			}
 		}
 
@@ -627,7 +690,17 @@ public readonly struct ActionBasicInfo
 
 		if (comboActions.Length > 0)
 		{
-			if (comboActions.Contains(DataCenter.LastComboAction))
+			bool foundCombo = false;
+			foreach (var comboAction in comboActions)
+			{
+				if (comboAction == DataCenter.LastComboAction)
+				{
+					foundCombo = true;
+					break;
+				}
+			}
+
+			if (foundCombo)
 			{
 				if (DataCenter.ComboTime < DataCenter.DefaultGCDRemain)
 				{

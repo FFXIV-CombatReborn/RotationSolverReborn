@@ -534,7 +534,7 @@ public sealed class BLU_Reborn : BlueMageRotation
 		{
 			return true;
 		}
-		
+
 		if (GoblinPunchPvE.CanUse(out act))
 		{
 			if (GoblinPunchPvE.Target.Target != null && CanHitPositional(EnemyPositional.Front, GoblinPunchPvE.Target.Target))

@@ -2266,85 +2266,68 @@ public partial class RotationConfigWindow : Window
 /// <param name="config">The configuration to check.</param>
 /// <param name="configSet">The set of all configurations.</param>
 /// <returns>True if the config should be shown, false otherwise.</returns>
-private static bool ShouldShowRotationConfig(IRotationConfig config, IRotationConfigSet configSet)
-{
-	return ShouldShowRotationConfigInternal(config, configSet, new HashSet<string>(StringComparer.Ordinal));
-}
-
-private static bool ShouldShowRotationConfigInternal(
-	IRotationConfig config,
-	IRotationConfigSet configSet,
-	HashSet<string> visiting)
-{
-	if (string.IsNullOrEmpty(config.Parent))
+	private static bool ShouldShowRotationConfig(IRotationConfig config, IRotationConfigSet configSet)
 	{
-		return true;
+		return ShouldShowRotationConfigInternal(config, configSet, new HashSet<string>(StringComparer.Ordinal));
 	}
 
-	// Guard against accidental parent cycles.
-	if (!visiting.Add(config.Name))
+	private static bool ShouldShowRotationConfigInternal(
+		IRotationConfig config,
+		IRotationConfigSet configSet,
+		HashSet<string> visiting)
 	{
-		return false;
-	}
+		if (string.IsNullOrEmpty(config.Parent)) return true;
 
-	IRotationConfig? parentConfig = null;
-	foreach (var c in configSet.Configs)
-	{
-		if (c.Name == config.Parent)
-		{
-			parentConfig = c;
-			break;
-		}
-	}
+		// Guard against accidental parent cycles.
+		if (!visiting.Add(config.Name)) return false;
 
-	if (parentConfig == null)
-	{
-		visiting.Remove(config.Name);
-		return true;
-	}
+		IRotationConfig? parentConfig = null;
+		foreach (var c in configSet.Configs)
+			if (c.Name == config.Parent)
+			{
+				parentConfig = c;
+				break;
+			}
 
-	// If the parent itself is hidden (because of its own parent), this child must be hidden too.
-	if (!ShouldShowRotationConfigInternal(parentConfig, configSet, visiting))
-	{
-		visiting.Remove(config.Name);
-		return false;
-	}
-
-	if (parentConfig is RotationConfigBoolean parentBool)
-	{
-		if (!bool.TryParse(parentBool.Value, out var isEnabled) || !isEnabled)
+		if (parentConfig == null)
 		{
 			visiting.Remove(config.Name);
-			return false;
+			return true;
 		}
-	}
-	else
-	{
-		var parentValueProperty = config.GetType().GetProperty("ParentValue");
-		if (parentValueProperty != null)
-		{
-			var parentValue = parentValueProperty.GetValue(config);
-			if (parentValue != null)
-			{
-				var parentValueStr = parentValue.ToString();
-				if (parentValue.GetType().IsEnum && parentValueStr != null && parentValueStr.Contains('.'))
-				{
-					parentValueStr = parentValueStr.Split('.').Last();
-				}
 
-				if (parentConfig.Value == null ||
-					!string.Equals(parentConfig.Value.Trim(), parentValueStr?.Trim(), StringComparison.OrdinalIgnoreCase))
+		if (parentConfig is RotationConfigBoolean parentBool)
+		{
+			if (!bool.TryParse(parentBool.Value, out var isEnabled) || !isEnabled) return false;
+		}
+		else
+		{
+			var parentValueProperty = config.GetType().GetProperty("ParentValue");
+			if (parentValueProperty != null)
+			{
+				var parentValue = parentValueProperty.GetValue(config);
+				if (parentValue != null)
 				{
-					visiting.Remove(config.Name);
-					return false;
+					var parentValueStr = parentValue.ToString();
+					if (parentValue.GetType().IsEnum && parentValueStr != null && parentValueStr.Contains('.'))
+					{
+						var dotIndex = parentValueStr.LastIndexOf('.');
+						parentValueStr = dotIndex >= 0 ? parentValueStr[(dotIndex + 1)..] : parentValueStr;
+					}
+
+					if (parentConfig.Value == null ||
+					    !string.Equals(parentConfig.Value.Trim(), parentValueStr?.Trim(),
+						    StringComparison.OrdinalIgnoreCase))
+					{
+						visiting.Remove(config.Name);
+						return false;
+					}
 				}
 			}
 		}
-	}
 
-	visiting.Remove(config.Name);
-	return true;
-}
+		visiting.Remove(config.Name);
+		return true;
+	}
 
 	private static void DrawRotationConfiguration()
 	{
@@ -3037,9 +3020,9 @@ private static bool ShouldShowRotationConfigInternal(
 					ImGui.Text($"Charges: {action.Cooldown.CurrentCharges} / {action.Cooldown.MaxCharges}");
 
 					ImGui.Text("IgnoreCastCheck:" + action.CanUse(out _, skipCastingCheck: true));
-						action.CanUse(out _, skipCastingCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipAoeCheck: true);
-						ImGui.Text("Target Name: " + action.Target.Target?.Name ?? string.Empty);
-						ImGui.Text("AffectedTarget Count: " + (action.Target.AffectedTargets?.Length ?? 0));
+					action.CanUse(out _, skipCastingCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipAoeCheck: true);
+					ImGui.Text("Target Name: " + action.Target.Target?.Name ?? string.Empty);
+					ImGui.Text("AffectedTarget Count: " + (action.Target.AffectedTargets?.Length ?? 0));
 				}
 				catch (Exception ex)
 				{
@@ -4081,7 +4064,8 @@ private static bool ShouldShowRotationConfigInternal(
 			string source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
 			byte stacks = Player.Object.StatusStack(true, (StatusID)status.StatusId);
 			string stackDisplay = stacks == byte.MaxValue ? "N/A" : stacks.ToString(); // Convert 255 to "N/A"
-			ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source} Stacks: {stackDisplay}");
+			string timeDisplay = status.RemainingTime <= 0f ? "Perm" : $"{status.RemainingTime:F1}s";
+			ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source} Stacks: {stackDisplay} Time: {timeDisplay}");
 		}
 	}
 
@@ -4090,16 +4074,16 @@ private static bool ShouldShowRotationConfigInternal(
 		ImGui.Text($"Can Raise: {DataCenter.CanRaise()}");
 		ImGui.Text($"Death Target: {DataCenter.DeathTarget}");
 
-		IEnumerable<IBattleChara> deadPartyMembers = DataCenter.PartyMembers.GetDeath();
-		bool hasDeadParty = false;
-		using (var enumerator = deadPartyMembers.GetEnumerator())
+		var deadPartyMembersList = new List<IBattleChara>();
+		foreach (var member in DataCenter.PartyMembers.GetDeath())
 		{
-			if (enumerator.MoveNext()) hasDeadParty = true;
+			deadPartyMembersList.Add(member);
 		}
-		if (hasDeadParty)
+
+		if (deadPartyMembersList.Count > 0)
 		{
 			ImGui.Text("Dead Party Members:");
-			foreach (var member in deadPartyMembers)
+			foreach (var member in deadPartyMembersList)
 			{
 				ImGui.Text($"- {member.Name}");
 			}
@@ -4109,16 +4093,16 @@ private static bool ShouldShowRotationConfigInternal(
 			ImGui.Text("Dead Party Members: None");
 		}
 
-		IEnumerable<IBattleChara> deadAllianceMembers = DataCenter.AllianceMembers.GetDeath();
-		bool hasDeadAlliance = false;
-		using (var enumerator = deadAllianceMembers.GetEnumerator())
+		var deadAllianceMembersList = new List<IBattleChara>();
+		foreach (var member in DataCenter.AllianceMembers.GetDeath())
 		{
-			if (enumerator.MoveNext()) hasDeadAlliance = true;
+			deadAllianceMembersList.Add(member);
 		}
-		if (hasDeadAlliance)
+
+		if (deadAllianceMembersList.Count > 0)
 		{
 			ImGui.Text("Dead Alliance Members:");
-			foreach (var member in deadAllianceMembers)
+			foreach (var member in deadAllianceMembersList)
 			{
 				ImGui.Text($"- {member.Name}");
 			}

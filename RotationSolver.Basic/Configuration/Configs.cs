@@ -259,6 +259,10 @@ internal partial class Configs : IPluginConfiguration
 		 Filter = DutySpecifcPvP)]
 	private static readonly bool _pvpGuardControl = true;
 
+	[ConditionBool, UI("Cancel cast in PvP if the target gains Guard and the action does not ignore Guard.",
+		 Filter = DutySpecifcPvP)]
+	private static readonly bool _pvpGuardCancel = false;
+
 	[ConditionBool, UI("Use Purify to remove Stun debuff",
 		 Filter = DutySpecifcPvP)]
 	private static readonly bool _pvpPurifyStun = true;
@@ -1088,7 +1092,7 @@ internal partial class Configs : IPluginConfiguration
 	[ConditionBool, UI("Never attack targets with stop markers.",
 	Description = "Targets with stop markers will not be attacked.",
 	Filter = TargetConfig)]
-	private static readonly bool _filterStopMark = true;
+	private static readonly bool _filterStopMark2 = false;
 
 	[ConditionBool, UI("Treat 1hp targets as invincible.",
 	Description = "Targets with only 1 HP will be treated as invincible and ignored; for rare cases where target is invincible but is not given a status for it.",

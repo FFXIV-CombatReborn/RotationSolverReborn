@@ -111,14 +111,14 @@ public struct ActionTargetInfo(IBaseAction action)
 			if (!DataCenter.IsManual || IsTargetFriendly || target.GameObjectId == Svc.Targets.Target?.GameObjectId || target.GameObjectId == Player.Object.GameObjectId)
 			{
 				var view = TargetOnScreen(target);
-					var canUse = CanUseTo(target);
-					var asCanTarget = action.Setting.CanTarget(target);
-					var MinHPPass = !action.MinHPFeature || (action.MinHPFeature && target.GetHealthRatio() > action.MinHPPercent);
+				var canUse = CanUseTo(target);
+				var asCanTarget = action.Setting.CanTarget(target);
+				var MinHPPass = !action.MinHPFeature || (action.MinHPFeature && target.GetHealthRatio() > action.MinHPPercent);
 
-					if (view && canUse && asCanTarget && MinHPPass)
-					{
-						validTargets.Add(target);
-					}
+				if (view && canUse && asCanTarget && MinHPPass)
+				{
+					validTargets.Add(target);
+				}
 			}
 		}
 
@@ -471,7 +471,7 @@ public struct ActionTargetInfo(IBaseAction action)
 		{
 			if (DataCenter.IsPvP && (!action.Setting.IgnoreGuard || (DataCenter.Job == Job.BLM && !action.Setting.IgnoreGuard && !StatusHelper.PlayerHasStatus(true, StatusID.WreathOfFire))))
 			{
-				if (battleChara.HasStatus(false, StatusID.Guard))
+				if (battleChara.HasStatus(false, StatusID.Guard) && !battleChara.WillStatusEnd((float)action.Info.CastTime, false, StatusID.Guard))
 				{
 					return false;
 				}
@@ -566,30 +566,30 @@ public struct ActionTargetInfo(IBaseAction action)
 		TargetType type = action.Setting.TargetType;
 
 		// For self-cast area/cone hostile actions (Range == 0, EffectRange > 0), such as Surpanakha,
-			// the attack fires a cone from the player's position toward the current target direction.
-			// There is no explicit enemy to "target" at range 0, so bypass the normal target-finding
-			// path and source candidates directly from GetCanAffects (enemies within EffectRange).
-			if (Range == 0 && EffectRange > 0 && !IsSingleTarget && !IsTargetArea && !action.Setting.IsFriendly)
-			{
-				if (Service.Config.AoEType == AoEType.Off)
-					return null;
+		// the attack fires a cone from the player's position toward the current target direction.
+		// There is no explicit enemy to "target" at range 0, so bypass the normal target-finding
+		// path and source candidates directly from GetCanAffects (enemies within EffectRange).
+		if (Range == 0 && EffectRange > 0 && !IsSingleTarget && !IsTargetArea && !action.Setting.IsFriendly)
+		{
+			if (Service.Config.AoEType == AoEType.Off)
+				return null;
 
-				int required = skipAoeCheck ? 0 : action.Config.AoeCount;
+			int required = skipAoeCheck ? 0 : action.Config.AoeCount;
 
-				// Mirror the cleave check in GetMostCanTargetObjects: in Cleave mode, block if aoeCount > 1
-				if (required > 1 && (Service.Config.AoEType == AoEType.Cleave || (DataCenter.IsInM9S && Service.Config.M9SCleaveOnly)))
-					return null;
+			// Mirror the cleave check in GetMostCanTargetObjects: in Cleave mode, block if aoeCount > 1
+			if (required > 1 && (Service.Config.AoEType == AoEType.Cleave || (DataCenter.IsInM9S && Service.Config.M9SCleaveOnly)))
+				return null;
 
-				List<IBattleChara> selfAffects = GetCanAffects(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
-				// For directional self-cast AOEs (Cone, StraightLine), only count enemies that are
-				// actually within the player's current facing direction. Without this, the action would
-				// fire even when no enemies are in the cone (e.g. Breath of Magic spamming infinitely).
-				selfAffects = FilterAffectsByFacing(selfAffects);
-				if (selfAffects.Count < Math.Max(1, required))
-					return null;
+			List<IBattleChara> selfAffects = GetCanAffects(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
+			// For directional self-cast AOEs (Cone, StraightLine), only count enemies that are
+			// actually within the player's current facing direction. Without this, the action would
+			// fire even when no enemies are in the cone (e.g. Breath of Magic spamming infinitely).
+			selfAffects = FilterAffectsByFacing(selfAffects);
+			if (selfAffects.Count < Math.Max(1, required))
+				return null;
 
-				return new TargetResult(Player.Object, [.. selfAffects], Player.Object.Position);
-			}
+			return new TargetResult(Player.Object, [.. selfAffects], Player.Object.Position);
+		}
 
 		IEnumerable<IBattleChara> canTargets = GetCanTargets(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
 		List<IBattleChara> canAffects = GetCanAffects(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
@@ -1313,9 +1313,9 @@ public struct ActionTargetInfo(IBaseAction action)
 					return Vector3.Distance(target.Position, subTarget.Position) - subTarget.HitboxRadius <= EffectRange;
 
 				case CastType.Cone: // Cone (cast from player)
-						return (tdirLen - subTarget.HitboxRadius) <= EffectRange;
+					return (tdirLen - subTarget.HitboxRadius) <= EffectRange;
 
-					case CastType.StraightLine: // Line (beam from player in facing direction — degenerate: target on top of player)
+				case CastType.StraightLine: // Line (beam from player in facing direction — degenerate: target on top of player)
 					{
 						if (tdirLen - subTarget.HitboxRadius > EffectRange) return false;
 						Vector3 lineDir2 = Player.Object != null
@@ -3144,7 +3144,7 @@ public struct ActionTargetInfo(IBaseAction action)
 			}
 
 			// Filter out characters marked with stop markers
-			if (Service.Config.FilterStopMark && !DataCenter.IsPvP)
+			if (Service.Config.FilterStopMark2 && !DataCenter.IsPvP)
 			{
 				IEnumerable<IBattleChara> filteredCharacters = MarkingHelper.FilterStopCharacters(battleChara);
 				// Manual Any() check

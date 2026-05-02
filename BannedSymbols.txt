@@ -1,0 +1,4 @@
+## Banned LINQ methods - use manual loops or span-based alternatives for performance
+T:System.Linq.Enumerable;Do not use LINQ - use manual loops or span-based alternatives
+T:System.Linq.Queryable;Do not use LINQ - use manual loops or span-based alternatives
+T:System.Linq.ParallelEnumerable;Do not use LINQ - use manual loops or span-based alternatives

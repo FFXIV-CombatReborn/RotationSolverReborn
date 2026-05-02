@@ -156,6 +156,13 @@ internal static class MiscUpdater
 		// Cancel raise cast if target already has Raise status
 		bool tarHasRaise = castTarget != null && castTarget.HasStatus(false, StatusID.Raise);
 
+		// Cancel cast in PvP if the target gains Guard and the action does not ignore Guard
+		bool tarHasGuard = DataCenter.IsPvP && Service.Config.PvpGuardCancel
+			&& castTarget != null
+			&& castTarget.HasStatus(false, StatusID.Guard)
+			&& !(((ActionID)Player.Object.CastActionId).GetActionFromID(true, RotationUpdater.CurrentRotationActions)
+				is IBaseAction guardCheckAction && (!guardCheckAction.Setting.IgnoreGuard || (DataCenter.Job == Job.BLM && !guardCheckAction.Setting.IgnoreGuard && !StatusHelper.PlayerHasStatus(true, StatusID.WreathOfFire))));
+
 		float[] statusTimes = GetStatusTimes();
 
 		float minStatusTime = float.MaxValue;
@@ -169,8 +176,11 @@ internal static class MiscUpdater
 
 		float remainingCast = MathF.Max(0, Player.Object.TotalCastTime - Player.Object.CurrentCastTime);
 
+		// Cancel immediately if the player currently has any active NoCastingStatus
+		bool hasNoCastingStatus = statusTimes.Length > 0;
+
 		// Cancel if a "no-casting" status will expire before the cast completes and it's soon (<3s)
-		bool stopDueStatus = statusTimes.Length > 0
+		bool stopDueStatus = hasNoCastingStatus
 			&& minStatusTime <= remainingCast
 			&& minStatusTime < 3f;
 
@@ -183,7 +193,7 @@ internal static class MiscUpdater
 				is IBaseAction { Setting.GCDSingleHeal: true }
 			&& (DataCenter.MergedStatus & (AutoStatus.HealAreaSpell | AutoStatus.HealSingleSpell)) == 0;
 
-		if (_tarStopCastDelay.Delay(tarDead) || stopDueStatus || tarHasRaise || shouldStopHealing)
+		if (_tarStopCastDelay.Delay(tarDead) || hasNoCastingStatus || stopDueStatus || tarHasRaise || tarHasGuard || shouldStopHealing)
 		{
 			UIState* uiState = UIState.Instance();
 			if (uiState != null)

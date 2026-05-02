@@ -1087,7 +1087,7 @@ public partial class BlueMageRotation
 		setting.AttackTypeOverride = AttackType.Magic;
 		setting.AspectOverride = Aspect.Water;
 		setting.IsFriendly = false;
-		setting.ActionCheck	= () => InCombat;
+		setting.ActionCheck = () => InCombat;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,

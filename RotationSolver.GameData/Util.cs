@@ -124,12 +124,14 @@ internal static partial class Util
 	/// <returns>The generated property code.</returns>
 	public static string ArrayNames(string propertyName, string propertyType, string modifier, params string[] items)
 	{
+		var itemsPart = items.Length > 0 ? string.Join(", ", items) + "," : string.Empty;
+		var basePart = modifier.Contains("override") ? $"..base.{propertyName}," : string.Empty;
 		var thisItems = $"""
-            [
-                {string.Join(", ", items)},
-                {(modifier.Contains("override") ? $"..base.{propertyName}," : string.Empty)}
-            ]
-            """;
+			[
+				{itemsPart}
+				{basePart}
+			]
+			""";
 		return $$"""
         private {{propertyType}}[] _{{propertyName}} = null;
 
