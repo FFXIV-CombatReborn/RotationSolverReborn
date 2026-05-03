@@ -233,9 +233,9 @@ public sealed class BeirutaNIN : NinjaRotation
 	private new static bool EnoughWeaveTime =>
     WeaponRemain > DataCenter.CalculatedActionAhead && WeaponRemain < WeaponTotal;
 
-private new static float LateWeaveWindow => WeaponTotal * 0.4f;
+    private new static float LateWeaveWindow => WeaponTotal * 0.4f;
 
-private new static bool CanLateWeave =>
+    private new static bool CanLateWeave =>
     WeaponRemain <= LateWeaveWindow && EnoughWeaveTime;
 
 	#endregion
