@@ -1839,7 +1839,7 @@ public static class ObjectHelper
 			var Aggressive = battleChara.NameId == 14756;
 			var Soothing = battleChara.NameId == 14757;
 
-			// GauntletTaken (on target) vs GauntletThrown (on player) pairs
+			// GauntletThrown (on target) vs GauntletTaken (on player) pairs
 			StatusID GauntletTaken1 = StatusID.GauntletTaken;
 			StatusID GauntletThrown1 = StatusID.GauntletThrown;
 
@@ -1866,7 +1866,7 @@ public static class ObjectHelper
 
 			if (Looming || Protective || Aggressive || Soothing)
 			{
-				// Iterate all GauntletTaken/GauntletThrown pairs; immune if target has GauntletTaken and player does NOT have corresponding GauntletThrown
+				// Iterate all GauntletTaken/GauntletThrown pairs; immune if target has GauntletThrown and player does NOT have corresponding GauntletTaken
 				foreach (var (taken, thrown) in new (StatusID taken, StatusID thrown)[]
 				{
 					(GauntletTaken1, GauntletThrown1),
@@ -1879,7 +1879,7 @@ public static class ObjectHelper
 					(GauntletTaken8, GauntletThrown8),
 				})
 				{
-					if (battleChara.HasStatus(false, taken) && !StatusHelper.PlayerHasStatus(false, thrown))
+					if (battleChara.HasStatus(false, thrown) && !StatusHelper.PlayerHasStatus(false, taken))
 					{
 						if (Service.Config.InDebug)
 						{
@@ -1888,7 +1888,7 @@ public static class ObjectHelper
 						return true;
 					}
 
-					if (StatusHelper.PlayerHasStatus(false, thrown) && !battleChara.HasStatus(false, taken))
+					if (StatusHelper.PlayerHasStatus(false, taken) && !battleChara.HasStatus(false, thrown))
 					{
 						if (Service.Config.InDebug)
 						{
