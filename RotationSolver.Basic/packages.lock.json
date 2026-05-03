@@ -4,9 +4,9 @@
     "net10.0-windows10.0.26100": {
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.2.0.15, )",
-        "resolved": "3.2.0.15",
-        "contentHash": "f7IoU8fYDjVqetKKCSBDPK4Up585DTgVRfNHTkVWq6Q2xZgvrhsjR8RCG1RYIyUp4pqjFekr34NjW570k9Lmng=="
+        "requested": "[3.2.0.16, )",
+        "resolved": "3.2.0.16",
+        "contentHash": "nbWQqETgnryEWedkZSxNValCgTdylNOibwkaYNYvGoY7XBXWK1KzKVgAroPQpGGrF2Q3NX1mbhoDczAaePYc8w=="
       },
       "Microsoft.CodeAnalysis.BannedApiAnalyzers": {
         "type": "Direct",
