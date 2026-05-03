@@ -1798,7 +1798,8 @@ public static class ObjectHelper
 	/// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
 	public static bool IsSpecialImmune(this IBattleChara battleChara)
 	{
-		return battleChara.IsWindurstAlexanderImmune()
+		return battleChara.IsEnuoGauntletImmune()
+			|| battleChara.IsWindurstAlexanderImmune()
 			|| battleChara.IsOrbonneImmune()
 			|| battleChara.IsM9SavageImmune()
 			|| battleChara.IsColossusRubricatusImmune()
@@ -1819,6 +1820,87 @@ public static class ObjectHelper
 			|| battleChara.IsOmegaImmune()
 			|| battleChara.IsLimitlessBlue()
 			|| battleChara.IsHanselorGretelShielded();
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsEnuoGauntletImmune(this IBattleChara battleChara)
+	{
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (Service.Config.TheUnmakingShadow && DataCenter.IsTheUnmaking)
+		{
+			var Looming = battleChara.NameId == 14752;
+			var Protective = battleChara.NameId == 14755;
+			var Aggressive = battleChara.NameId == 14756;
+			var Soothing = battleChara.NameId == 14757;
+
+			// GauntletTaken (on target) vs GauntletThrown (on player) pairs
+			StatusID GauntletTaken1 = StatusID.GauntletTaken;
+			StatusID GauntletThrown1 = StatusID.GauntletThrown;
+
+			StatusID GauntletTaken2 = StatusID.GauntletTaken_5358;
+			StatusID GauntletThrown2 = StatusID.GauntletThrown_5366;
+
+			StatusID GauntletTaken3 = StatusID.GauntletTaken_5359;
+			StatusID GauntletThrown3 = StatusID.GauntletThrown_5367;
+
+			StatusID GauntletTaken4 = StatusID.GauntletTaken_5360;
+			StatusID GauntletThrown4 = StatusID.GauntletThrown_5368;
+
+			StatusID GauntletTaken5 = StatusID.GauntletTaken_5361;
+			StatusID GauntletThrown5 = StatusID.GauntletThrown_5369;
+
+			StatusID GauntletTaken6 = StatusID.GauntletTaken_5362;
+			StatusID GauntletThrown6 = StatusID.GauntletThrown_5370;
+
+			StatusID GauntletTaken7 = StatusID.GauntletTaken_5363;
+			StatusID GauntletThrown7 = StatusID.GauntletThrown_5371;
+
+			StatusID GauntletTaken8 = StatusID.GauntletTaken_5364;
+			StatusID GauntletThrown8 = StatusID.GauntletThrown_5372;
+
+			if (Looming || Protective || Aggressive || Soothing)
+			{
+				// Iterate all GauntletTaken/GauntletThrown pairs; immune if target has GauntletTaken and player does NOT have corresponding GauntletThrown
+				foreach (var (taken, thrown) in new (StatusID taken, StatusID thrown)[]
+				{
+					(GauntletTaken1, GauntletThrown1),
+					(GauntletTaken2, GauntletThrown2),
+					(GauntletTaken3, GauntletThrown3),
+					(GauntletTaken4, GauntletThrown4),
+					(GauntletTaken5, GauntletThrown5),
+					(GauntletTaken6, GauntletThrown6),
+					(GauntletTaken7, GauntletThrown7),
+					(GauntletTaken8, GauntletThrown8),
+				})
+				{
+					if (battleChara.HasStatus(false, taken) && !StatusHelper.PlayerHasStatus(false, thrown))
+					{
+						if (Service.Config.InDebug)
+						{
+							PluginLog.Information("IsEnuoGauntletImmune: Shadow immune due to GauntletTaken/GauntletThrown mismatch");
+						}
+						return true;
+					}
+
+					if (StatusHelper.PlayerHasStatus(false, thrown) && !battleChara.HasStatus(false, taken))
+					{
+						if (Service.Config.InDebug)
+						{
+							PluginLog.Information("IsEnuoGauntletImmune: Shadow immune due to GauntletTaken/GauntletThrown mismatch");
+						}
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/// <summary>
