@@ -135,6 +135,11 @@ internal partial class Configs : IPluginConfiguration
 	Filter = DutySpecifcExtreme)]
 	private static readonly bool _cinderDriftPallTargeting = true;
 
+	[ConditionBool, UI("The Unmaking Extreme - Shadow logic.",
+	Description = "Treat Shadow as immune if you don't have the corresponding status",
+	Filter = DutySpecifcExtreme)]
+	private static readonly bool _theUnmakingShadow = true;
+
 	[ConditionBool, UI("The Epic of Alexander (Ultimate) - Jagd Doll logic.",
 	Description = "Treat Jagd Doll ads as immune when HP is less than 25%.",
 	Filter = DutySpecifcUltimate)]
