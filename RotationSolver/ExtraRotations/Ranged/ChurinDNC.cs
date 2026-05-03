@@ -133,6 +133,7 @@ public sealed class ChurinDNC : DancerRotation
     /// Checks if the player is in a low-level burst scenario,
     /// </summary>
     private bool IsLowLevelBurst => !HasEnoughLevelForBurst && HasStandardFinish;
+    private static bool HasTechFromOtherDancer => StatusHelper.PlayerHasStatus(false, StatusID.TechnicalFinish);
     private static bool HasTillana => HasActiveStatus(StatusID.FlourishingFinish);
     private static bool IsMedicated => HasActiveStatus(StatusID.Medicated);
 
@@ -729,37 +730,44 @@ public sealed class ChurinDNC : DancerRotation
     /// <param name="strategy">
     /// The HoldStrategy to evaluate, which defines the conditions under which to hold Step and/or Finish actions when no targets are in range.
     /// </param>
-    /// <param name="isTechnical">
-    /// A boolean value indicating whether the dance step being evaluated is a Technical Step (true) or a Standard Step (false), which may affect the conditions for holding actions based on the strategy.
-    /// </param>
     /// <returns>
     /// True if the conditions for holding Step and/or Finish actions are met based on the specified strategy and the presence of targets in range; otherwise, false.
     /// </returns>
-    private bool CanUseStepHoldCheck(HoldStrategy strategy, bool isTechnical) => strategy switch
+    private bool CanUseStepHoldCheck(HoldStrategy strategy) => strategy switch
     {
         HoldStrategy.DontHoldStepAndFinish => true,
         HoldStrategy.HoldStepAndFinish => AreDanceTargetsInRange,
-        HoldStrategy.HoldStepOnly => CanHoldStepOnly(isTechnical),
-        HoldStrategy.HoldFinishOnly => CanHoldFinishOnly(isTechnical),
+        HoldStrategy.HoldStepOnly => CanHoldStepOnly(strategy),
+        HoldStrategy.HoldFinishOnly => CanHoldFinishOnly(strategy),
         _ => true
     };
-    private bool CanHoldStepOnly(bool isTechnical)
+    private bool CanHoldStepOnly(HoldStrategy strategy)
     {
-        var shouldHoldTechStep = isTechnical && ShouldUseTechStep && !HasTechnicalStep && !HasTillana;
-        var shouldHoldStandardStep = !isTechnical && ActiveStandard.IsEnabled
-                                                  && (!CanFinishingMove || !HasFinishingMove) && !HasStandardStep;
+        var shouldHoldTechStep = strategy == TechHoldStrategy
+                                 && ShouldUseTechStep
+                                 && !HasTechnicalStep
+                                 && !HasTillana;
 
-        if (!shouldHoldTechStep && !shouldHoldStandardStep) return false;
-        return (shouldHoldTechStep || shouldHoldStandardStep) && AreDanceTargetsInRange;
+        var shouldHoldStandardStep =  strategy == StandardHoldStrategy
+                                      && ActiveStandard.IsEnabled
+                                      && (!CanFinishingMove || !HasFinishingMove)
+                                      && !HasStandardStep;
+
+        if (!shouldHoldTechStep && !shouldHoldStandardStep) return true;
+        return AreDanceTargetsInRange;
     }
-    private bool CanHoldFinishOnly(bool isTechnical)
+    private bool CanHoldFinishOnly(HoldStrategy strategy)
     {
-        var shouldHoldTechFinish = isTechnical && (HasTillana || HasTechnicalStep);
-        var shouldHoldStandardFinish = !isTechnical && ActiveStandard.IsEnabled && (CanFinishingMove || HasStandardStep);
+        var shouldHoldTechFinish = strategy == TechHoldStrategy
+            && (HasTillana || HasTechnicalStep);
 
-        if (!shouldHoldTechFinish && !shouldHoldStandardFinish) return false;
+        var shouldHoldStandardFinish =  strategy == StandardHoldStrategy
+                                        && ActiveStandard.IsEnabled
+                                        && (CanFinishingMove || HasStandardStep);
 
-        return (shouldHoldTechFinish|| shouldHoldStandardFinish) && AreDanceTargetsInRange;
+        if (!shouldHoldTechFinish && !shouldHoldStandardFinish) return true;
+
+        return AreDanceTargetsInRange;
     }
     private bool CanUseTechStep
     {
@@ -775,7 +783,7 @@ public sealed class ChurinDNC : DancerRotation
             }
 
             return IsTimingOk(TechnicalRecastRemain, TechnicalStepPvE)
-                   && CanUseStepHoldCheck(TechHoldStrategy, true);
+                   && CanUseStepHoldCheck(TechHoldStrategy);
         }
     }
 
@@ -791,7 +799,7 @@ public sealed class ChurinDNC : DancerRotation
             if (ShouldUseTechStep && TechnicalStepPvE.CanUse(out _) && !HasTillana) return false;
 
             return IsTimingOk(ActiveStandardRecastRemain, ActiveStandard)
-                   && CanUseStepHoldCheck(StandardHoldStrategy, false);
+                   && CanUseStepHoldCheck(StandardHoldStrategy);
         }
     }
 
@@ -894,7 +902,7 @@ public sealed class ChurinDNC : DancerRotation
                 return true;
             }
 
-            if (CanTechnicalFinish && CanUseStepHoldCheck(TechHoldStrategy, true))
+            if (CanTechnicalFinish && CanUseStepHoldCheck(TechHoldStrategy))
             {
                 return QuadrupleTechnicalFinishPvE.CanUse(out act);
             }
@@ -915,7 +923,7 @@ public sealed class ChurinDNC : DancerRotation
             return true;
         }
 
-        if (CanStandardFinish && CanUseStepHoldCheck(StandardHoldStrategy, false))
+        if (CanStandardFinish && CanUseStepHoldCheck(StandardHoldStrategy))
         {
             return DoubleStandardFinishPvE.CanUse(out act);
         }
@@ -979,7 +987,7 @@ public sealed class ChurinDNC : DancerRotation
             blockTillana = true;
         }
 
-        return !blockTillana && TillanaPvE.CanUse(out act) && CanUseStepHoldCheck(TechHoldStrategy, true);
+        return !blockTillana && TillanaPvE.CanUse(out act) && CanUseStepHoldCheck(TechHoldStrategy);
     }
 
     private bool TryUseLastDance(out IAction? act)
@@ -1291,7 +1299,7 @@ public sealed class ChurinDNC : DancerRotation
         if (ImGui.CollapsingHeader("Step Logic"))
         {
             ValueRow("Tech Hold Strategy", TechHoldStrategy);
-            BoolRow("Tech Hold Check", CanUseStepHoldCheck(TechHoldStrategy, true));
+            BoolRow("Tech Hold Check", CanUseStepHoldCheck(TechHoldStrategy));
 
             if (ImGui.TreeNode("Technical Step Blocking Reasons"))
             {
@@ -1309,7 +1317,7 @@ public sealed class ChurinDNC : DancerRotation
             ImGui.Separator();
 
             ValueRow("Standard Hold Strategy", StandardHoldStrategy);
-            BoolRow("Standard Hold Check", CanUseStepHoldCheck(StandardHoldStrategy, false));
+            BoolRow("Standard Hold Check", CanUseStepHoldCheck(StandardHoldStrategy));
             ValueRow("Esprit Threshold", EspritThreshold);
             ValueRow("Current Esprit", Esprit);
             if (ImGui.TreeNode("Standard Step Blocking Reasons"))
