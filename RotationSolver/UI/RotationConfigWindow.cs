@@ -3890,7 +3890,9 @@ public partial class RotationConfigWindow : Window
 		{
 			string? tracePath = ActionTracer.CurrentFilePath;
 			bool hasFile = !string.IsNullOrEmpty(tracePath) && File.Exists(tracePath);
-			bool hasAnyData = hasFile || !string.IsNullOrEmpty(ActionTracer.LastFrameSummary);
+			bool hasAnyData = hasFile
+				|| !string.IsNullOrEmpty(ActionTracer.LastFrameSummary)
+				|| ActionTracer.HasAnyTraceFiles();
 
 			if (!hasFile)
 			{
@@ -3934,7 +3936,7 @@ public partial class RotationConfigWindow : Window
 			}
 			if (ImGui.IsItemHovered())
 			{
-				ImGui.SetTooltip("Delete the current trace file and clear the buffered last-frame data.");
+				ImGui.SetTooltip("Delete every actiontrace_*.log file in the Traces folder and clear the buffered last-frame data.");
 			}
 		}
 

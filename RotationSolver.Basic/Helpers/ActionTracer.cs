@@ -12,6 +12,10 @@ namespace RotationSolver.Basic.Helpers;
 /// </summary>
 internal static class ActionTracer
 {
+    private const long MaxFileSizeBytes = 5 * 1024 * 1024; // 5 MB
+
+    private const int MaxRetainedFiles = 10;
+
     private static StreamWriter? _writer;
     private static readonly object _lock = new();
     private static long _frameCounter;
@@ -65,10 +69,10 @@ internal static class ActionTracer
 
     internal static void ClearTrace()
     {
-        string? pathToDelete;
+        string? dir;
         lock (_lock)
         {
-            pathToDelete = _currentFilePath;
+            dir = _traceDirectory;
             try
             {
                 _writer?.Flush();
@@ -88,19 +92,35 @@ internal static class ActionTracer
             }
         }
 
-        if (!string.IsNullOrEmpty(pathToDelete))
+        if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir)) return;
+
+        foreach (string path in Directory.EnumerateFiles(dir, "actiontrace_*.log"))
         {
             try
             {
-                if (File.Exists(pathToDelete))
-                {
-                    File.Delete(pathToDelete);
-                }
+                File.Delete(path);
             }
             catch (Exception ex)
             {
-                PluginLog.Warning($"[ActionTracer] ClearTrace delete failed for '{pathToDelete}': {ex.Message}");
+                PluginLog.Warning($"[ActionTracer] ClearTrace delete failed for '{path}': {ex.Message}");
             }
+        }
+    }
+
+    internal static bool HasAnyTraceFiles()
+    {
+        if (string.IsNullOrEmpty(_traceDirectory) || !Directory.Exists(_traceDirectory)) return false;
+        try
+        {
+            foreach (string _ in Directory.EnumerateFiles(_traceDirectory, "actiontrace_*.log"))
+            {
+                return true;
+            }
+            return false;
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -151,6 +171,11 @@ internal static class ActionTracer
             {
                 EnsureWriter();
                 _writer?.WriteLine(line);
+
+                if (_writer != null && _writer.BaseStream.Length >= MaxFileSizeBytes)
+                {
+                    RolloverWriter();
+                }
             }
             catch (Exception ex)
             {
@@ -164,14 +189,65 @@ internal static class ActionTracer
         }
     }
 
+    private static void RolloverWriter()
+    {
+        try
+        {
+            _writer?.WriteLine($"# rollover: file reached {MaxFileSizeBytes / (1024 * 1024)} MB, continuing in next file");
+            _writer?.Flush();
+            _writer?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            PluginLog.Warning($"[ActionTracer] rollover dispose error: {ex.Message}");
+        }
+        finally
+        {
+            _writer = null;
+            _currentFilePath = null;
+        }
+    }
+
     private static void EnsureWriter()
     {
         if (_writer != null || _traceDirectory == null) return;
 
         Directory.CreateDirectory(_traceDirectory);
-        string path = Path.Combine(_traceDirectory, $"actiontrace_{DateTime.Now:yyyyMMdd_HHmmss}.log");
+        // Millisecond precision in the filename avoids collisions when rollover happens twice in one second.
+        string path = Path.Combine(_traceDirectory, $"actiontrace_{DateTime.Now:yyyyMMdd_HHmmss_fff}.log");
         _writer = new StreamWriter(path, append: false) { AutoFlush = true };
-        _writer.WriteLine($"# RotationSolverReborn action trace started {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        _writer.WriteLine($"# RotationSolverReborn action trace started {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} (max size {MaxFileSizeBytes / (1024 * 1024)} MB before rollover)");
         _currentFilePath = path;
+
+        PruneOldFiles();
+    }
+
+    private static void PruneOldFiles()
+    {
+        if (string.IsNullOrEmpty(_traceDirectory)) return;
+        try
+        {
+            FileInfo[] files = new DirectoryInfo(_traceDirectory).GetFiles("actiontrace_*.log");
+            int excess = files.Length - MaxRetainedFiles;
+            if (excess <= 0) return;
+
+            Array.Sort(files, static (a, b) => a.CreationTimeUtc.CompareTo(b.CreationTimeUtc));
+
+            for (int i = 0; i < excess; i++)
+            {
+                try
+                {
+                    files[i].Delete();
+                }
+                catch (Exception ex)
+                {
+                    PluginLog.Warning($"[ActionTracer] prune failed for '{files[i].FullName}': {ex.Message}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            PluginLog.Warning($"[ActionTracer] prune enumeration failed: {ex.Message}");
+        }
     }
 }
