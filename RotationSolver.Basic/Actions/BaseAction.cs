@@ -183,6 +183,8 @@ public class BaseAction : IBaseAction
 	{
 		act = this;
 
+		ActionTracer.Try(this);
+
 		if (IBaseAction.ActionPreview)
 		{
 			skipCastingCheck = true;
@@ -199,17 +201,17 @@ public class BaseAction : IBaseAction
 
 		if (!Info.BasicCheck(skipStatusProvideCheck, skipStatusNeed, skipComboCheck, skipCastingCheck, checkActionManagerDirectly, targetOverride))
 		{
-			return false;
+			return ActionTracer.Reject(this, "BasicCheck");
 		}
 
 		if (!Cooldown.CooldownCheck(usedUp, gcdCountForAbility))
 		{
-			return false;
+			return ActionTracer.Reject(this, "Cooldown");
 		}
 
 		if (Setting.SpecialType == SpecialActionType.MeleeRangedAttack && IActionHelper.IsLastAction(IActionHelper.MovingActions))
 		{
-			return false; // No range actions after moving.
+			return ActionTracer.Reject(this, "MeleeRangedAfterMove");
 		}
 
 		if (!skipTTKCheck)
@@ -218,14 +220,14 @@ public class BaseAction : IBaseAction
 			{
 				if (!IsTimeToKillValid())
 				{
-					return false;
+					return ActionTracer.Reject(this, "TTKBelowThreshold");
 				}
 			}
 		}
 		PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipStatusProvideCheck, skipTargetStatusNeedCheck, targetOverride);
 		if (PreviewTarget == null)
 		{
-			return false;
+			return ActionTracer.Reject(this, "NoTarget");
 		}
 
 		if (!IBaseAction.ActionPreview)
@@ -233,6 +235,7 @@ public class BaseAction : IBaseAction
 			Target = PreviewTarget.Value;
 		}
 
+		ActionTracer.Accept(this);
 		return true;
 	}
 

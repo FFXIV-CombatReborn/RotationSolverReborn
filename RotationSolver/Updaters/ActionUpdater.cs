@@ -57,9 +57,13 @@ internal static class ActionUpdater
 
 	internal static void UpdateNextAction()
 	{
+		ActionTracer.Enabled = Service.Config.EnableActionTracer;
+		ActionTracer.MirrorToPluginLog = Service.Config.TraceMirrorToPluginLog;
+
 		IPlayerCharacter? localPlayer = Player.Object;
 		ICustomRotation? customRotation = DataCenter.CurrentRotation;
 
+		ActionTracer.BeginFrame();
 		try
 		{
 			if (localPlayer != null && customRotation != null
@@ -69,13 +73,18 @@ internal static class ActionUpdater
 				NextGCDAction = gcdAction as IBaseAction;
 				return;
 			}
+
+			NextAction = NextGCDAction = null;
 		}
 		catch (Exception ex)
 		{
 			LogError("Failed to update the next action in the rotation", ex);
+			NextAction = NextGCDAction = null;
 		}
-
-		NextAction = NextGCDAction = null;
+		finally
+		{
+			ActionTracer.EndFrame(NextAction);
+		}
 	}
 
 	internal static void UpdateCombatInfo()
