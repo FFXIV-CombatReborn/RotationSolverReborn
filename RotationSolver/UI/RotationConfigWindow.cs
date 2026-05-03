@@ -15,6 +15,7 @@ using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
@@ -4059,13 +4060,34 @@ public partial class RotationConfigWindow : Window
 
 		ImGui.Spacing();
 		ImGui.Text($"Statuses:");
-		foreach (Dalamud.Game.ClientState.Statuses.IStatus status in Player.Object.StatusList)
+		using var statusTable = ImRaii.Table("TargetStatusTable", 5,
+			ImGuiTableFlags.BordersInner | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.ScrollY,
+			new Vector2(0, 200 * Scale));
+		if (statusTable)
 		{
-			string source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
-			byte stacks = Player.Object.StatusStack(true, (StatusID)status.StatusId);
-			string stackDisplay = stacks == byte.MaxValue ? "N/A" : stacks.ToString(); // Convert 255 to "N/A"
-			string timeDisplay = status.RemainingTime <= 0f ? "Perm" : $"{status.RemainingTime:F1}s";
-			ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source} Stacks: {stackDisplay} Time: {timeDisplay}");
+			ImGui.TableSetupScrollFreeze(0, 1);
+			ImGui.TableSetupColumn("Name");
+			ImGui.TableSetupColumn("ID");
+			ImGui.TableSetupColumn("Source");
+			ImGui.TableSetupColumn("Stacks");
+			ImGui.TableSetupColumn("Time");
+			ImGui.TableHeadersRow();
+
+			foreach (Dalamud.Game.ClientState.Statuses.IStatus status in Player.Object.StatusList)
+			{
+				if (Player.Object == null) continue;
+				string source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
+				byte stacks = Player.Object.StatusStack(true, (StatusID)status.StatusId);
+				string stackDisplay = stacks == byte.MaxValue ? "N/A" : stacks.ToString();
+				string timeDisplay = status.RemainingTime <= 0f ? "Perm" : $"{status.RemainingTime:F1}s";
+
+				ImGui.TableNextRow();
+				_ = ImGui.TableNextColumn(); ImGui.TextUnformatted(status.GameData.Value.Name.ToString());
+				_ = ImGui.TableNextColumn(); ImGui.TextUnformatted(status.StatusId.ToString());
+				_ = ImGui.TableNextColumn(); ImGui.TextUnformatted(source);
+				_ = ImGui.TableNextColumn(); ImGui.TextUnformatted(stackDisplay);
+				_ = ImGui.TableNextColumn(); ImGui.TextUnformatted(timeDisplay);
+			}
 		}
 	}
 
@@ -4175,7 +4197,7 @@ public partial class RotationConfigWindow : Window
 		ImGui.Text($"IsTyrantCastingSpecialIndicator2: {DataCenter.IsTyrantCastingSpecialIndicator2()}");
 	}
 
-	private static unsafe void DrawParty()
+	private static void DrawParty()
 	{
 		ImGui.Text($"Number of Party Members: {DataCenter.PartyMembers.Count}");
 		ImGui.Text($"Number of Alliance Members: {DataCenter.AllianceMembers.Count}");
@@ -4282,6 +4304,7 @@ public partial class RotationConfigWindow : Window
 			ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
 			ImGui.Text($"HealthRatio: {battleChara.GetHealthRatio()}");
 			ImGui.Text($"HitboxRadius: {battleChara.HitboxRadius}");
+			ImGui.Text($"Distance To Player: {battleChara.DistanceToPlayer()}");
 			ImGui.Spacing();
 			ImGui.Text($"NamePlate Icon ID: {battleChara.GetNamePlateIcon()}");
 			ImGui.Text($"Event Type: {battleChara.GetEventType()}");
@@ -4301,20 +4324,24 @@ public partial class RotationConfigWindow : Window
 			ImGui.Spacing();
 			ImGui.Text($"FateID: {battleChara.FateId().ToString() ?? string.Empty}");
 			ImGui.Text($"EventType: {battleChara.GetEventType().ToString() ?? string.Empty}");
-			ImGui.Text($"IsBozjanCEFateMob: {battleChara.IsBozjanCEMob()}");
+			if (DataCenter.IsInBozja)
+			{
+				ImGui.Text($"IsBozjanCEFateMob: {battleChara.IsBozjanCEMob()}");
+			}
 			ImGui.Spacing();
-			ImGui.Text($"IsOccultCEMob: {battleChara.IsOccultCEMob()}");
-			ImGui.Text($"IsOccultFateMob: {battleChara.IsOccultFateMob()}");
-			ImGui.Text($"IsOCUndeadTarget: {battleChara.IsOCUndeadTarget()}");
-			ImGui.Text($"IsOCSlowgaImmuneTarget: {battleChara.IsOCSlowgaImmuneTarget()}");
-			ImGui.Text($"IsOCDoomImmuneTarget: {battleChara.IsOCDoomImmuneTarget()}");
-			ImGui.Text($"IsOCStunImmuneTarget: {battleChara.IsOCStunImmuneTarget()}");
-			ImGui.Text($"IsOCFreezeImmuneTarget: {battleChara.IsOCFreezeImmuneTarget()}");
-			ImGui.Text($"IsOCBlindImmuneTarget: {battleChara.IsOCBlindImmuneTarget()}");
-			ImGui.Text($"IsOCParalysisImmuneTarget: {battleChara.IsOCParalysisImmuneTarget()}");
-			ImGui.Spacing();
-			ImGui.Text($"IsM9SavageImmune: {battleChara.IsM9SavageImmune()}");
-			ImGui.Spacing();
+			if (DataCenter.IsInOccultCrescentOp)
+			{
+				ImGui.Text($"IsOccultCEMob: {battleChara.IsOccultCEMob()}");
+				ImGui.Text($"IsOccultFateMob: {battleChara.IsOccultFateMob()}");
+				ImGui.Text($"IsOCUndeadTarget: {battleChara.IsOCUndeadTarget()}");
+				ImGui.Text($"IsOCSlowgaImmuneTarget: {battleChara.IsOCSlowgaImmuneTarget()}");
+				ImGui.Text($"IsOCDoomImmuneTarget: {battleChara.IsOCDoomImmuneTarget()}");
+				ImGui.Text($"IsOCStunImmuneTarget: {battleChara.IsOCStunImmuneTarget()}");
+				ImGui.Text($"IsOCFreezeImmuneTarget: {battleChara.IsOCFreezeImmuneTarget()}");
+				ImGui.Text($"IsOCBlindImmuneTarget: {battleChara.IsOCBlindImmuneTarget()}");
+				ImGui.Text($"IsOCParalysisImmuneTarget: {battleChara.IsOCParalysisImmuneTarget()}");
+				ImGui.Spacing();
+			}
 			ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
 			ImGui.Text($"TTK: {battleChara.GetTTK()}");
 			ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
@@ -4331,7 +4358,6 @@ public partial class RotationConfigWindow : Window
 			ImGui.Text($"Is DPS: {battleChara.IsJobCategory(JobRole.AllDPS)}");
 			ImGui.Text($"Is Tank: {battleChara.IsJobCategory(JobRole.Tank)}");
 			ImGui.Text($"Is Alliance: {battleChara.IsAllianceMember()}");
-			ImGui.Text($"Distance To Player: {battleChara.DistanceToPlayer()}");
 			ImGui.Text($"CanProvoke: {battleChara.CanProvoke()}");
 			ImGui.Text($"StatusFlags: {battleChara.StatusFlags}");
 			ImGui.Text($"InView: {Svc.GameGui.WorldToScreen(battleChara.Position, out _)}");
@@ -4340,7 +4366,6 @@ public partial class RotationConfigWindow : Window
 			ImGui.Text($"BattleNPCSubKind: {battleChara.GetBattleNPCSubKind()}");
 			ImGui.Text($"Is Top Priority Hostile: {battleChara.IsTopPriorityHostile()}");
 			ImGui.Text($"Targetable: {battleChara.Struct()->Character.GameObject.TargetableStatus}");
-
 			if (DataCenter.IsInMaskedCarnivale)
 			{
 				ImGui.Spacing();
@@ -4367,12 +4392,33 @@ public partial class RotationConfigWindow : Window
 			}
 			ImGui.Spacing();
 			ImGui.Text($"Statuses:");
-			foreach (Dalamud.Game.ClientState.Statuses.IStatus status in battleChara.StatusList)
+			using var statusTable = ImRaii.Table("TargetStatusTable", 5,
+				ImGuiTableFlags.BordersInner | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp | ImGuiTableFlags.ScrollY,
+				new Vector2(0, 200 * Scale));
+			if (statusTable)
 			{
-				if (Player.Object != null)
+				ImGui.TableSetupScrollFreeze(0, 1);
+				ImGui.TableSetupColumn("Name");
+				ImGui.TableSetupColumn("ID");
+				ImGui.TableSetupColumn("Source");
+				ImGui.TableSetupColumn("Stacks");
+				ImGui.TableSetupColumn("Time");
+				ImGui.TableHeadersRow();
+
+				foreach (Dalamud.Game.ClientState.Statuses.IStatus status in battleChara.StatusList)
 				{
+					if (Player.Object == null) continue;
 					string source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
-					ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source}");
+					byte stacks = battleChara.StatusStack(true, (StatusID)status.StatusId);
+					string stackDisplay = stacks == byte.MaxValue ? "N/A" : stacks.ToString();
+					string timeDisplay = status.RemainingTime <= 0f ? "Perm" : $"{status.RemainingTime:F1}s";
+
+					ImGui.TableNextRow();
+					_ = ImGui.TableNextColumn(); ImGui.TextUnformatted(status.GameData.Value.Name.ToString());
+					_ = ImGui.TableNextColumn(); ImGui.TextUnformatted(status.StatusId.ToString());
+					_ = ImGui.TableNextColumn(); ImGui.TextUnformatted(source);
+					_ = ImGui.TableNextColumn(); ImGui.TextUnformatted(stackDisplay);
+					_ = ImGui.TableNextColumn(); ImGui.TextUnformatted(timeDisplay);
 				}
 			}
 		}
