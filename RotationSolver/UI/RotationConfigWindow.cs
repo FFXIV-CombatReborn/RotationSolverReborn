@@ -488,6 +488,14 @@ public partial class RotationConfigWindow : Window
 			_ = diagInfo.AppendLine($"MoveModeSetting: {moveModeText}");
 		}
 
+		string? lastFrame = ActionTracer.LastFrameSummary;
+		if (!string.IsNullOrEmpty(lastFrame))
+		{
+			_ = diagInfo.AppendLine();
+			_ = diagInfo.AppendLine("Last Action Tracer Frame:");
+			_ = diagInfo.Append(lastFrame);
+		}
+
 		// Ensure that IncompatiblePlugins is not null
 		IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? [];
 
@@ -3878,6 +3886,59 @@ public partial class RotationConfigWindow : Window
 	private static void DrawDebug()
 	{
 		_allSearchable.DrawItems(Configs.Debug);
+
+		{
+			string? tracePath = ActionTracer.CurrentFilePath;
+			bool hasFile = !string.IsNullOrEmpty(tracePath) && File.Exists(tracePath);
+			bool hasAnyData = hasFile
+				|| !string.IsNullOrEmpty(ActionTracer.LastFrameSummary)
+				|| ActionTracer.HasAnyTraceFiles();
+
+			if (!hasFile)
+			{
+				ImGui.BeginDisabled();
+			}
+			if (ImGui.Button("Open Action Trace File"))
+			{
+				try
+				{
+					_ = Process.Start("explorer.exe", $"\"{tracePath}\"");
+				}
+				catch (Exception ex)
+				{
+					PluginLog.Warning($"Failed to open trace file: {ex.Message}");
+				}
+			}
+			if (!hasFile)
+			{
+				ImGui.EndDisabled();
+			}
+			if (ImGui.IsItemHovered())
+			{
+				ImGui.SetTooltip(hasFile
+					? tracePath
+					: "No trace file yet — enable the tracer and enter combat to create one.");
+			}
+
+			ImGui.SameLine();
+
+			if (!hasAnyData)
+			{
+				ImGui.BeginDisabled();
+			}
+			if (ImGui.Button("Clear Trace"))
+			{
+				ActionTracer.ClearTrace();
+			}
+			if (!hasAnyData)
+			{
+				ImGui.EndDisabled();
+			}
+			if (ImGui.IsItemHovered())
+			{
+				ImGui.SetTooltip("Delete every actiontrace_*.log file in the Traces folder and clear the buffered last-frame data.");
+			}
+		}
 
 		if (!Player.Available || !Service.Config.InDebug)
 		{

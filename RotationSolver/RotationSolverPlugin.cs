@@ -55,6 +55,8 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 		_dis.Add(new Service());
 
+		ActionTracer.Init();
+
 		IPCProvider = new();
 
 		_rotationConfigWindow = new();
@@ -360,6 +362,8 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 	public async ValueTask DisposeAsync()
 	{
+		ActionTracer.Shutdown();
+
 		Service.Config.Save();
 		await OtherConfiguration.Save();
 
