@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.Command;
 using ECommons.DalamudServices;
+using ECommons.GameHelpers;
 using RotationSolver.Data;
 
 namespace RotationSolver.Commands
@@ -8,6 +9,12 @@ namespace RotationSolver.Commands
 	{
 		internal static void Enable()
 		{
+			DataCenter.OnSpecialTypeChanged = specialType =>
+			{
+				JobRole role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
+				_specialString = specialType.ToSpecialString(role);
+			};
+
 			_ = Svc.Commands.AddHandler(Service.COMMAND, new CommandInfo(OnCommand)
 			{
 				HelpMessage = UiString.Commands_Rotation.GetDescription(),

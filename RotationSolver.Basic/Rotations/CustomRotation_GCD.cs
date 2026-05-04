@@ -24,6 +24,11 @@ public partial class CustomRotation
 
 		IBaseAction.ForceEnable = false;
 
+		if (DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting))
+		{
+			return null;
+		}
+
 		if (DataCenter.Orbonne && IsLastAction(ActionID.HeavenlyShieldPvE) && DataCenter.IsAgriasCastingSpecialIndicator())
 		{
 			return null;

@@ -269,7 +269,7 @@ internal static class DataCenter
 				Service.Config.TargetingTypes.Add(TargetingType.LowHP);
 				Service.Config.TargetingTypes.Add(TargetingType.HighHP);
 				Service.Config.TargetingTypes.Add(TargetingType.Small);
-			 Service.Config.TargetingTypes.Add(TargetingType.Big);
+				Service.Config.TargetingTypes.Add(TargetingType.Big);
 				Service.Config.Save();
 			}
 
@@ -297,7 +297,13 @@ internal static class DataCenter
 
 	private static DateTime _specialStateStartTime = DateTime.MinValue;
 	private static double SpecialTimeElapsed => (DateTime.Now - _specialStateStartTime).TotalSeconds;
-	public static double SpecialTimeLeft => Service.Config.SpecialDuration - SpecialTimeElapsed;
+	internal static double? SpecialDurationOverride { get; private set; } = null;
+	public static double SpecialTimeLeft => (SpecialDurationOverride ?? Service.Config.SpecialDuration) - SpecialTimeElapsed;
+
+	/// <summary>
+	/// Raised whenever <see cref="SpecialType"/> changes so that UI layers (e.g. RSCommands) can keep their display strings in sync.
+	/// </summary>
+	internal static Action<SpecialCommandType>? OnSpecialTypeChanged { get; set; }
 
 	private static SpecialCommandType _specialType = SpecialCommandType.EndSpecial;
 
@@ -307,8 +313,34 @@ internal static class DataCenter
 		set
 		{
 			_specialType = value;
-			_specialStateStartTime = value == SpecialCommandType.EndSpecial ? DateTime.MinValue : DateTime.Now;
+			if (value == SpecialCommandType.EndSpecial)
+			{
+				SpecialDurationOverride = null;
+				_specialStateStartTime = DateTime.MinValue;
+			}
+			else
+			{
+				SpecialDurationOverride = null;
+				_specialStateStartTime = DateTime.Now;
+			}
+			OnSpecialTypeChanged?.Invoke(value);
 		}
+	}
+
+	internal static void SetSpecialTypeWithDuration(SpecialCommandType value, double duration)
+	{
+		_specialType = value;
+		if (value == SpecialCommandType.EndSpecial)
+		{
+			SpecialDurationOverride = null;
+			_specialStateStartTime = DateTime.MinValue;
+		}
+		else
+		{
+			SpecialDurationOverride = duration;
+			_specialStateStartTime = DateTime.Now;
+		}
+		OnSpecialTypeChanged?.Invoke(value);
 	}
 
 	public static bool State { get; set; } = false;

@@ -632,13 +632,6 @@ public struct ActionTargetInfo(IBaseAction action)
 			affectedTargets = [];
 		}
 
-		if (Service.Config.InDebug)
-		{
-			if (target == null)
-				PluginLog.Debug($"[FindTarget] No target found for action {action.Info.ID}.");
-			else
-				PluginLog.Debug($"[FindTarget] Selected target {target.Name} for action {action.Info.ID} with {affectedTargets.Length} affected.");
-		}
 		return target == null ? null : new TargetResult(target, affectedTargets, target.Position);
 	}
 

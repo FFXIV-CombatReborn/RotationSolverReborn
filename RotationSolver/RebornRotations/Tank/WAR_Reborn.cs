@@ -22,6 +22,9 @@ public sealed class WAR_Reborn : WarriorRotation
 	[RotationConfig(CombatType.PvE, Name = "Use a stack of Onslaught when its about to overcap while standing still")]
 	public bool YEETCooldown { get; set; } = false;
 
+	[RotationConfig(CombatType.PvE, Name = "Use Inner Release while moving")]
+	public bool InnerReleaseMoving { get; set; } = true;
+
 	[RotationConfig(CombatType.PvE, Name = "Use Primal Rend while moving (Dangerous)")]
 	public bool YEET { get; set; } = false;
 
@@ -78,11 +81,11 @@ public sealed class WAR_Reborn : WarriorRotation
 		if (!StatusHelper.PlayerWillStatusEndGCD(2, 0, true, StatusID.SurgingTempest)
 			|| !StormsEyePvE.EnoughLevel)
 		{
-			if (InnerReleasePvE.CanUse(out act))
+			if ((InnerReleaseMoving || !IsMoving) && InnerReleasePvE.CanUse(out act))
 			{
 				return true;
 			}
-			if (!InnerReleasePvE.Info.EnoughLevelAndQuest() && BerserkPvE.CanUse(out act))
+			if ((InnerReleaseMoving || !IsMoving) && !InnerReleasePvE.Info.EnoughLevelAndQuest() && BerserkPvE.CanUse(out act))
 			{
 				return true;
 			}

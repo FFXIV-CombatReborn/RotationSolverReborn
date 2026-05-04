@@ -1,6 +1,4 @@
-using System;
 using System.ComponentModel;
-using System.Numerics;
 
 namespace RotationSolver.ExtraRotations.Melee;
 
@@ -31,8 +29,8 @@ public sealed class BeirutaNIN : NinjaRotation
 	public bool RotationNotes { get; set; } = true;
 
 	[Range(3f, 5f, ConfigUnitType.Seconds, 0.1f)]
-    [RotationConfig(CombatType.PvE, Name = "Countdown Suiton queue time (change this to 5 if you can trust your teamm. Or it should be 4 or 3 to prevent 5s countdown bait)")]
-    public float CountdownSuitonQueueTime { get; set; } = 4f;
+	[RotationConfig(CombatType.PvE, Name = "Countdown Suiton queue time (change this to 5 if you can trust your teamm. Or it should be 4 or 3 to prevent 5s countdown bait)")]
+	public float CountdownSuitonQueueTime { get; set; } = 4f;
 
 	[RotationConfig(CombatType.PvE, Name = "Use Raiton/Katon for uptime while disengaged (Moving one raiton/katon from 60s for uptime)")]
 	public bool UseRaitonDisengageFallback { get; set; } = true;
@@ -231,12 +229,12 @@ public sealed class BeirutaNIN : NinjaRotation
 		 JinPvE.Info.IsQuestUnlocked());
 
 	private new static bool EnoughWeaveTime =>
-    WeaponRemain > DataCenter.CalculatedActionAhead && WeaponRemain < WeaponTotal;
+	WeaponRemain > DataCenter.CalculatedActionAhead && WeaponRemain < WeaponTotal;
 
-    private new static float LateWeaveWindow => WeaponTotal * 0.4f;
+	private new static float LateWeaveWindow => WeaponTotal * 0.4f;
 
-    private new static bool CanLateWeave =>
-    WeaponRemain <= LateWeaveWindow && EnoughWeaveTime;
+	private new static bool CanLateWeave =>
+	WeaponRemain <= LateWeaveWindow && EnoughWeaveTime;
 
 	#endregion
 
@@ -654,9 +652,9 @@ public sealed class BeirutaNIN : NinjaRotation
 		}
 
 		if (remainTime < CountdownSuitonQueueTime)
-        {
-             SetNinjutsu(SuitonPvE);
-        }
+		{
+			SetNinjutsu(SuitonPvE);
+		}
 		else if (remainTime < 6)
 		{
 			if (_ninActionAim == null &&

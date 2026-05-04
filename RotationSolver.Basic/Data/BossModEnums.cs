@@ -6,31 +6,31 @@ namespace RotationSolver.Basic.Data;
 /// </summary>
 public enum SpecialMode
 {
-    /// <summary>
-    /// No special restrictions are active. The player may move and act freely.
-    /// </summary>
-    Normal = 0,
+	/// <summary>
+	/// No special restrictions are active. The player may move and act freely.
+	/// </summary>
+	Normal = 0,
 
-    /// <summary>
-    /// Pyretic or acceleration-bomb type effect is active. At activation time,
-    /// no movement, no actions, and no casting are allowed.
-    /// </summary>
-    Pyretic = 1,
+	/// <summary>
+	/// Pyretic or acceleration-bomb type effect is active. At activation time,
+	/// no movement, no actions, and no casting are allowed.
+	/// </summary>
+	Pyretic = 1,
 
-    /// <summary>
-    /// A no-movement effect is active. The player must remain stationary.
-    /// </summary>
-    NoMovement = 2,
+	/// <summary>
+	/// A no-movement effect is active. The player must remain stationary.
+	/// </summary>
+	NoMovement = 2,
 
-    /// <summary>
-    /// A freezing effect is active. The player is expected to be moving at activation time.
-    /// </summary>
-    Freezing = 4,
+	/// <summary>
+	/// A freezing effect is active. The player is expected to be moving at activation time.
+	/// </summary>
+	Freezing = 4,
 
-    /// <summary>
-    /// A temporary misdirection effect is active, altering the player's movement direction.
-    /// </summary>
-    Misdirection = 5,
+	/// <summary>
+	/// A temporary misdirection effect is active, altering the player's movement direction.
+	/// </summary>
+	Misdirection = 5,
 }
 
 /// <summary>
@@ -39,24 +39,24 @@ public enum SpecialMode
 /// </summary>
 public enum PredictedDamageType
 {
-    /// <summary>
-    /// No incoming damage is predicted.
-    /// </summary>
-    None,
+	/// <summary>
+	/// No incoming damage is predicted.
+	/// </summary>
+	None,
 
-    /// <summary>
-    /// A tankbuster attack is incoming, targeting one or more tanks.
-    /// </summary>
-    Tankbuster,
+	/// <summary>
+	/// A tankbuster attack is incoming, targeting one or more tanks.
+	/// </summary>
+	Tankbuster,
 
-    /// <summary>
-    /// A raidwide attack is incoming, hitting all party members.
-    /// </summary>
-    Raidwide,
+	/// <summary>
+	/// A raidwide attack is incoming, hitting all party members.
+	/// </summary>
+	Raidwide,
 
-    /// <summary>
-    /// A shared damage attack is incoming, requiring multiple players to stack
-    /// in order to split the damage.
-    /// </summary>
-    Shared
+	/// <summary>
+	/// A shared damage attack is incoming, requiring multiple players to stack
+	/// in order to split the damage.
+	/// </summary>
+	Shared
 }
