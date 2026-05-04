@@ -152,8 +152,25 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void TriggerSpecialState(SpecialCommandType specialCommand)
 		{
-			DataCenter.SpecialType = specialCommand;
+			RSCommands.DoSpecialCommandType(specialCommand, false);
 			PluginLog.Debug($"IPC TriggerSpecialState was called. SpecialCommand:{specialCommand}");
+		}
+
+		/// <summary>
+		/// Triggers a special state in the plugin via IPC with a specific duration, overriding the configured default.
+		/// </summary>
+		/// <param name="specialCommand">
+		/// The <see cref="SpecialCommandType"/> value representing the special state to activate (e.g., HealArea, DefenseSingle, Burst).
+		/// </param>
+		/// <param name="duration">
+		/// The duration in seconds (as a float) for which the special state window remains open.
+		/// </param>
+		[EzIPC]
+		public void TriggerSpecialStateWithDuration(SpecialCommandType specialCommand, float duration)
+		{
+			RSCommands.DoSpecialCommandType(specialCommand, false);
+			DataCenter.SetSpecialTypeWithDuration(specialCommand, duration);
+			PluginLog.Debug($"IPC TriggerSpecialStateWithDuration was called. SpecialCommand:{specialCommand}, Duration:{duration}");
 		}
 
 		/// <summary>

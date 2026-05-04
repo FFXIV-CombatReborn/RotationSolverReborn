@@ -108,7 +108,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		await Svc.Framework.Run(() =>
 		{
 			_ = ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
-		});
+		}, cancellationToken);
 
 		// Load main config asynchronously (off main thread)
 		try
@@ -148,6 +148,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 			//HotbarHighlightDrawerManager.Init();
 
 			MajorUpdater.Enable();
+			AutoAttackUpdater.Enable();
 			Watcher.Enable();
 			ActionQueueManager.Enable();
 			ActionContextMenu.Init();
@@ -176,7 +177,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 					Svc.Chat.Print("Warning has been hidden.");
 				}
 			});
-		});
+		}, cancellationToken);
 	}
 
 	private static void DutyState_DutyCompleted(IDutyStateEventArgs e)
@@ -367,6 +368,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		Service.Config.Save();
 		await OtherConfiguration.Save();
 
+		AutoAttackUpdater.Disable();
 		RSCommands.Disable();
 		Watcher.Disable();
 		ActionQueueManager.Disable();

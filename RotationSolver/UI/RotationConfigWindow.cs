@@ -15,7 +15,6 @@ using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
@@ -2269,12 +2268,12 @@ public partial class RotationConfigWindow : Window
 	}
 
 	/// <summary>
-/// Checks if a rotation config should be visible based on parent-child relationships.
-/// A config is visible only if all ancestors in its parent chain are visible and its direct parent condition matches.
-/// </summary>
-/// <param name="config">The configuration to check.</param>
-/// <param name="configSet">The set of all configurations.</param>
-/// <returns>True if the config should be shown, false otherwise.</returns>
+	/// Checks if a rotation config should be visible based on parent-child relationships.
+	/// A config is visible only if all ancestors in its parent chain are visible and its direct parent condition matches.
+	/// </summary>
+	/// <param name="config">The configuration to check.</param>
+	/// <param name="configSet">The set of all configurations.</param>
+	/// <returns>True if the config should be shown, false otherwise.</returns>
 	private static bool ShouldShowRotationConfig(IRotationConfig config, IRotationConfigSet configSet)
 	{
 		return ShouldShowRotationConfigInternal(config, configSet, new HashSet<string>(StringComparer.Ordinal));
@@ -2324,8 +2323,8 @@ public partial class RotationConfigWindow : Window
 					}
 
 					if (parentConfig.Value == null ||
-					    !string.Equals(parentConfig.Value.Trim(), parentValueStr?.Trim(),
-						    StringComparison.OrdinalIgnoreCase))
+						!string.Equals(parentConfig.Value.Trim(), parentValueStr?.Trim(),
+							StringComparison.OrdinalIgnoreCase))
 					{
 						visiting.Remove(config.Name);
 						return false;

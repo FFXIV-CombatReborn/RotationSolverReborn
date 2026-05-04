@@ -199,11 +199,11 @@ internal static class MajorUpdater
 
 		try
 		{
-			ActionQueueManager.Update();
+			AutoAttackUpdater.Update();
 		}
 		catch (Exception ex)
 		{
-			LogOnce("(RSRActivatedCore): ActionQueueManager.Update Exception", ex);
+			LogOnce("(RSRActivatedCore): AutoAttackUpdater.Update Exception", ex);
 		}
 
 		try
@@ -574,5 +574,6 @@ internal static class MajorUpdater
 
 		MiscUpdater.Dispose();
 		ActionUpdater.ClearNextAction();
+		AutoAttackUpdater.Disable();
 	}
 }

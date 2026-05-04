@@ -19,6 +19,11 @@ public partial class CustomRotation
 			return false;
 		}
 
+		if (DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting))
+		{
+			return false;
+		}
+
 		if (WeaponRemain <= 0.5f && WeaponRemain > 0f)
 		{
 			return false;

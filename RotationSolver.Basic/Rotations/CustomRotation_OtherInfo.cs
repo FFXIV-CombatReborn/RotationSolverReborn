@@ -899,8 +899,8 @@ public partial class CustomRotation
 		{
 			act = null;
 
-            if (!Enabled || StatusHelper.PlayerHasStatus(true, StatusID.Medicated))
-                return false;
+			if (!Enabled || StatusHelper.PlayerHasStatus(true, StatusID.Medicated))
+				return false;
 
 			// Check if conditions are met for potion usage
 			if (!IsConditionMet()) return false;
@@ -1126,37 +1126,37 @@ public partial class CustomRotation
 	/// </summary>
 	public static bool BMRTankbusterWithin(float seconds)
 		=> BMRActive && BMRTankbusterIn is > 0f and < float.MaxValue && BMRTankbusterIn <= seconds;
-    #endregion
+	#endregion
 
-    /// <summary>
-    /// The threshold (in seconds) that defines the start of a late weave window.
-    /// </summary>
-    public static float LateWeaveWindow => WeaponTotal * 0.45f;
+	/// <summary>
+	/// The threshold (in seconds) that defines the start of a late weave window.
+	/// </summary>
+	public static float LateWeaveWindow => WeaponTotal * 0.45f;
 
-    /// <summary>
-    /// Checks if there is enough remaining time in the current GCD to execute an off-global action without clipping.
-    /// </summary>
-    public static bool EnoughWeaveTime => WeaponRemain > DataCenter.CalculatedActionAhead + Math.Max(AnimationLock, 0.6f) && WeaponRemain < WeaponTotal;
+	/// <summary>
+	/// Checks if there is enough remaining time in the current GCD to execute an off-global action without clipping.
+	/// </summary>
+	public static bool EnoughWeaveTime => WeaponRemain > DataCenter.CalculatedActionAhead + Math.Max(AnimationLock, 0.6f) && WeaponRemain < WeaponTotal;
 
-    /// <summary>
-    /// Indicates whether the player can currently execute a late weave.
-    /// </summary>
-    public static bool CanLateWeave => WeaponRemain <= LateWeaveWindow && CanWeave;
+	/// <summary>
+	/// Indicates whether the player can currently execute a late weave.
+	/// </summary>
+	public static bool CanLateWeave => WeaponRemain <= LateWeaveWindow && CanWeave;
 
-    /// <summary>
-    /// Indicates whether the player can currently execute an early weave.
-    /// </summary>
-    public static bool CanEarlyWeave => (!HasWeaved() || WeaponRemain > LateWeaveWindow) && CanWeave;
+	/// <summary>
+	/// Indicates whether the player can currently execute an early weave.
+	/// </summary>
+	public static bool CanEarlyWeave => (!HasWeaved() || WeaponRemain > LateWeaveWindow) && CanWeave;
 
-    /// <summary>
-    /// Safely verifies that the player is in the middle of a GCD and has enough time to weave an oGCD.
-    /// </summary>
-    public static bool CanWeave => EnoughWeaveTime && DataCenter.DefaultGCDElapsed > 0;
+	/// <summary>
+	/// Safely verifies that the player is in the middle of a GCD and has enough time to weave an oGCD.
+	/// </summary>
+	public static bool CanWeave => EnoughWeaveTime && DataCenter.DefaultGCDElapsed > 0;
 
-    /// <summary>
-    /// Counts how many party members (alive and not full HP) are within range of the pet.
-    /// </summary>
-    public static int InRangeOfPet(float range)
+	/// <summary>
+	/// Counts how many party members (alive and not full HP) are within range of the pet.
+	/// </summary>
+	public static int InRangeOfPet(float range)
 	{
 		if (!DataCenter.HasPet())
 		{
