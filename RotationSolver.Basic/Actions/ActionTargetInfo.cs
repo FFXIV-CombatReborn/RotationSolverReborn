@@ -1922,14 +1922,25 @@ public struct ActionTargetInfo(IBaseAction action)
 				}
 				break;
 
-			// Fixed-distance self-move: no target needed; always use self so the action fires.
+			// Fixed-distance self-move: self-targeting only fires the action when it is genuinely
+			// self-cast (IsFriendly). Hostile-targeted variants must fall through to the standard
+			// targeting path so a real enemy is selected.
 			case SpecialActionType.FixedDistanceMoveForward:
-				return Player.Object;
+				if (isFriendly)
+				{
+					return Player.Object;
+				}
+				break;
 
-			// Backward movement: character moves away from its current position/target.
-			// Self-targeting is sufficient to fire the action; destination safety is validated separately.
+			// Backward movement: self-targeting fires friendly variants (e.g. DRG Elusive Jump,
+			// RPR Hells Egress). Hostile-targeted variants (e.g. BRD Repelling Shot) deliver damage
+			// to an enemy and knock the user back; they need a hostile target, so fall through.
 			case SpecialActionType.FixedDistanceMoveBackward:
-				return Player.Object;
+				if (isFriendly)
+				{
+					return Player.Object;
+				}
+				break;
 		}
 
 		if (targetOverride == default)
