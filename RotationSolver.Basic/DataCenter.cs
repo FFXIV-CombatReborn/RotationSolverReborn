@@ -255,6 +255,12 @@ internal static class DataCenter
 
 	public static TargetingType? TargetingTypeOverride { get; set; }
 
+	/// <summary>
+	/// Object ID of the target the PvP Smart mode picked on the previous frame.
+	/// Used by <see cref="Actions.PvPTargetSelection.Factors.HysteresisBonus"/> to avoid GCD-to-GCD oscillation.
+	/// </summary>
+	public static ulong? LastPvPSmartTargetId { get; set; }
+
 	public static TargetingType TargetingType
 	{
 		get
@@ -262,6 +268,18 @@ internal static class DataCenter
 			if (TargetingTypeOverride.HasValue)
 			{
 				return TargetingTypeOverride.Value;
+			}
+
+			if (IsPvP)
+			{
+				if (Service.Config.TargetingTypesPvP.Count == 0)
+				{
+					Service.Config.TargetingTypesPvP.Add(TargetingType.PvPSmart);
+					Service.Config.TargetingTypesPvP.Add(TargetingType.LowHPPercent);
+					Service.Config.Save();
+				}
+				return Service.Config.TargetingTypesPvP[
+					Service.Config.TargetingIndexPvP % Service.Config.TargetingTypesPvP.Count];
 			}
 
 			if (Service.Config.TargetingTypes.Count == 0)

@@ -6,6 +6,7 @@ using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using RotationSolver.Basic.Actions.PvPTargetSelection;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
@@ -3758,70 +3759,56 @@ public struct ActionTargetInfo(IBaseAction action)
 					filtered.Sort((a, b) => b.DistanceToPlayer().CompareTo(a.DistanceToPlayer()));
 					break;
 				case TargetingType.PvPHealers:
-					{
-						// Filter for healers
-						List<IBattleChara> healers = [];
-						foreach (var p in objects)
-						{
-							if (p.IsJobs(JobRole.Healer.ToJobs()))
-							{
-								healers.Add(p);
-							}
-						}
-						if (healers.Count > 0)
-						{
-							healers.Sort((a, b) => a.DistanceToPlayer().CompareTo(b.DistanceToPlayer()));
-							filtered = healers;
-						}
-						else
-						{
-							filtered = [.. objects];
-							filtered.Sort((a, b) => a.DistanceToPlayer().CompareTo(b.DistanceToPlayer()));
-						}
-						break;
-					}
+					filtered = FilterAndRankPvPRole(objects, JobRole.Healer);
+					break;
 				case TargetingType.PvPTanks:
-					{
-						List<IBattleChara> tanks = [];
-						foreach (var p in objects)
-						{
-							if (p.IsJobs(JobRole.Tank.ToJobs()))
-							{
-								tanks.Add(p);
-							}
-						}
-						if (tanks.Count > 0)
-						{
-							tanks.Sort((a, b) => a.DistanceToPlayer().CompareTo(b.DistanceToPlayer()));
-							filtered = tanks;
-						}
-						else
-						{
-							filtered = [.. objects];
-							filtered.Sort((a, b) => a.DistanceToPlayer().CompareTo(b.DistanceToPlayer()));
-						}
-						break;
-					}
+					filtered = FilterAndRankPvPRole(objects, JobRole.Tank);
+					break;
 				case TargetingType.PvPDPS:
+					filtered = FilterAndRankPvPRole(objects, JobRole.AllDPS);
+					break;
+				case TargetingType.PvPSmart:
 					{
-						List<IBattleChara> dps = [];
-						foreach (var p in objects)
+						if (objects.Count == 0)
 						{
-							if (p.IsJobs(JobRole.AllDPS.ToJobs()))
+							filtered = [];
+							break;
+						}
+
+						var mitigationDb = MitigationDatabase.WithEmbeddedDefaults();
+						var preset = Service.Config.PvPScoringPreset;
+						var weights = preset == ScoringPreset.Custom
+							? Service.Config.PvPScoringWeights
+							: ScoringWeights.ForPreset(preset);
+
+						var context = new ScoringContext(
+							Weights: weights,
+							MitigationDatabase: mitigationDb,
+							PreviousTargetId: DataCenter.LastPvPSmartTargetId,
+							EffectiveRangeYalms: 25f);
+
+						IBattleChara? best = null;
+						var bestScore = double.NegativeInfinity;
+						foreach (var candidate in objects)
+						{
+							var score = PvPTargetScorer.Score(candidate, context);
+							if (score > bestScore)
 							{
-								dps.Add(p);
+								bestScore = score;
+								best = candidate;
 							}
 						}
-						if (dps.Count > 0)
+
+						if (best == null || double.IsNegativeInfinity(bestScore))
 						{
-							dps.Sort((a, b) => a.DistanceToPlayer().CompareTo(b.DistanceToPlayer()));
-							filtered = dps;
+							// All candidates are Invuln or list is effectively empty.
+							DataCenter.LastPvPSmartTargetId = null;
+							filtered = [];
+							break;
 						}
-						else
-						{
-							filtered = [.. objects];
-							filtered.Sort((a, b) => a.DistanceToPlayer().CompareTo(b.DistanceToPlayer()));
-						}
+
+						DataCenter.LastPvPSmartTargetId = best.GameObjectId;
+						filtered = [best];
 						break;
 					}
 				default:
@@ -4216,6 +4203,41 @@ public struct ActionTargetInfo(IBaseAction action)
 	}
 
 	#endregion
+
+	/// <summary>
+	/// Filters candidates by PvP role, skips Guarded targets, and ranks by HP% ascending
+	/// with distance ascending as a tiebreak. Falls back to nearest-overall if no candidate
+	/// of the requested role survives the Guard filter.
+	/// </summary>
+	private static List<IBattleChara> FilterAndRankPvPRole(IReadOnlyList<IBattleChara> objects, JobRole role)
+	{
+		var jobs = role.ToJobs();
+
+		// Pass 1: candidates of the requested role that are NOT Guarded.
+		var inRole = new List<IBattleChara>();
+		foreach (var candidate in objects)
+		{
+			if (!candidate.IsJobs(jobs)) continue;
+			if (candidate.HasStatus(false, StatusID.Guard)) continue;
+			inRole.Add(candidate);
+		}
+
+		if (inRole.Count > 0)
+		{
+			inRole.Sort(static (a, b) =>
+			{
+				var hpCompare = a.GetHealthRatio().CompareTo(b.GetHealthRatio());
+				if (hpCompare != 0) return hpCompare;
+				return a.DistanceToPlayer().CompareTo(b.DistanceToPlayer());
+			});
+			return inRole;
+		}
+
+		// Fall back: same behavior as before, nearest overall.
+		var fallback = new List<IBattleChara>(objects);
+		fallback.Sort(static (a, b) => a.DistanceToPlayer().CompareTo(b.DistanceToPlayer()));
+		return fallback;
+	}
 }
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
