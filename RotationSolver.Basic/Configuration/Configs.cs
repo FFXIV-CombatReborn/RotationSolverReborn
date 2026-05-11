@@ -51,6 +51,16 @@ internal partial class Configs : IPluginConfiguration
 
 	public string[] RotationLibs { get; set; } = [];
 	public List<TargetingType> TargetingTypes { get; set; } = [];
+	public List<TargetingType> TargetingTypesPvP { get; set; } = [];
+	public int TargetingIndexPvP { get; set; } = 0;
+
+	[UI("PvP scoring preset for the PvPSmart targeting mode.\nCasual: forgiving role-weighted tuning. Ranked: mitigation-heavy, more reactive. Custom: read from PvPScoringWeights below.")]
+	public RotationSolver.Basic.Actions.PvPTargetSelection.ScoringPreset PvPScoringPreset { get; set; }
+		= RotationSolver.Basic.Actions.PvPTargetSelection.ScoringPreset.Casual;
+
+	public RotationSolver.Basic.Actions.PvPTargetSelection.ScoringWeights PvPScoringWeights { get; set; }
+		= RotationSolver.Basic.Actions.PvPTargetSelection.ScoringWeights.ForPreset(
+			RotationSolver.Basic.Actions.PvPTargetSelection.ScoringPreset.Casual);
 
 	public MacroInfo DutyStart { get; set; } = new MacroInfo();
 	public MacroInfo DutyEnd { get; set; } = new MacroInfo();
