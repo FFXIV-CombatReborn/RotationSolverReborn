@@ -421,6 +421,9 @@ namespace RotationSolver.Data
 		[Description("Enemy targeting logic used in PvP zones. Cycles independently from the PvE list.\nUse /rotation Settings TargetingTypesPvP add <option> to add,\n/rotation Settings TargetingTypesPvP remove <option> to remove,\nand /rotation Settings TargetingTypesPvP removeall to remove all options.")]
 		ConfigWindow_Param_HostileDescPvP,
 
+		[Description("PvP scoring preset")]
+		ConfigWindow_Param_PvPScoringPreset,
+
 		[Description("Move Up")]
 		ConfigWindow_Actions_MoveUp,
 

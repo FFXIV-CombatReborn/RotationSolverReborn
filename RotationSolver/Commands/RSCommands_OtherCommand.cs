@@ -119,6 +119,12 @@ public static partial class RSCommands
 			return;
 		}
 
+		if (settingName.Equals("TargetingTypesPvP", StringComparison.OrdinalIgnoreCase))
+		{
+			HandleTargetingTypesPvPCommand(command);
+			return;
+		}
+
 		UpdateSetting(settingName, command);
 	}
 
@@ -466,5 +472,86 @@ public static partial class RSCommands
 
 		// Only log if all commands failed
 		//PluginLog.Debug(UiString.CommandsInsertActionFailure.GetDescription());
+	}
+
+	private static void HandleTargetingTypesPvPCommand(string? command)
+	{
+		if (string.IsNullOrEmpty(command))
+		{
+			Svc.Chat.PrintError("Invalid command for TargetingTypesPvP.");
+			return;
+		}
+
+		var commandParts = command.Split(' ', 2);
+		if (commandParts.Length < 1)
+		{
+			Svc.Chat.PrintError("Invalid command format for TargetingTypesPvP.");
+			return;
+		}
+
+		var action = commandParts[0];
+		var value = commandParts.Length > 1 ? commandParts[1] : null;
+
+		switch (action.ToLower())
+		{
+			case "add":
+				AddTargetingTypePvP(value);
+				break;
+
+			case "remove":
+				RemoveTargetingTypePvP(value);
+				break;
+
+			case "removeall":
+				Service.Config.TargetingTypesPvP.Clear();
+				Svc.Chat.Print("Removed all TargetingTypesPvP.");
+				break;
+
+			default:
+				Svc.Chat.PrintError("Invalid action for TargetingTypesPvP.");
+				break;
+		}
+
+		Service.Config.Save();
+	}
+
+	private static void AddTargetingTypePvP(string? value)
+	{
+		if (string.IsNullOrEmpty(value) || !Enum.TryParse(typeof(TargetingType), value, true, out var parsedEnumAdd))
+		{
+			Svc.Chat.PrintError("Invalid TargetingType value.");
+			return;
+		}
+
+		var targetingTypeAdd = (TargetingType)parsedEnumAdd;
+		if (!Service.Config.TargetingTypesPvP.Contains(targetingTypeAdd))
+		{
+			Service.Config.TargetingTypesPvP.Add(targetingTypeAdd);
+			Svc.Chat.Print($"Added {targetingTypeAdd} to TargetingTypesPvP.");
+		}
+		else
+		{
+			Svc.Chat.Print($"{targetingTypeAdd} is already in TargetingTypesPvP.");
+		}
+	}
+
+	private static void RemoveTargetingTypePvP(string? value)
+	{
+		if (string.IsNullOrEmpty(value) || !Enum.TryParse(typeof(TargetingType), value, true, out var parsedEnumRemove))
+		{
+			Svc.Chat.PrintError("Invalid TargetingType value.");
+			return;
+		}
+
+		var targetingTypeRemove = (TargetingType)parsedEnumRemove;
+		if (Service.Config.TargetingTypesPvP.Contains(targetingTypeRemove))
+		{
+			_ = Service.Config.TargetingTypesPvP.Remove(targetingTypeRemove);
+			Svc.Chat.Print($"Removed {targetingTypeRemove} from TargetingTypesPvP.");
+		}
+		else
+		{
+			Svc.Chat.Print($"{targetingTypeRemove} is not in TargetingTypesPvP.");
+		}
 	}
 }
