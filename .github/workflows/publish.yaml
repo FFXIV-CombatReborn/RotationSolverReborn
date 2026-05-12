@@ -66,8 +66,9 @@ jobs:
             DownloadLinkTesting     = $downloadUrl
             DownloadLinkUpdate      = $downloadUrl
             DownloadCount           = 0
+            LastUpdate              = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
           }
-          @($entry) | ConvertTo-Json -Depth 10 | Set-Content pluginmaster.json -NoNewline
+          ConvertTo-Json -InputObject @($entry) -Depth 10 | Set-Content pluginmaster.json -NoNewline
 
       - name: Publish Plugin
         uses: softprops/action-gh-release@v3
