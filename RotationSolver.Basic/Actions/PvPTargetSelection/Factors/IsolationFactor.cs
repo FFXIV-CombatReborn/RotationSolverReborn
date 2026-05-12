@@ -49,7 +49,7 @@ public static class IsolationFactor
     /// </summary>
     public static double Compute(IBattleChara candidate, IReadOnlyList<IBattleChara> hostiles)
     {
-        if (hostiles == null || hostiles.Count == 0) return 0.0;
+        if (hostiles.Count == 0) return 0.0;
 
         var candidatePos = candidate.Position;
         var candidateId = candidate.GameObjectId;

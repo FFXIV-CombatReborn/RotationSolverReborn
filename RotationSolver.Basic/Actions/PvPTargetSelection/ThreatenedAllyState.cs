@@ -51,6 +51,8 @@ public static class ThreatenedAllyState
                 continue;
             }
 
+            // Filter corpses: GetHealthRatio returns 0 for dead allies; the > 0 clause
+            // skips them so we don't flag a dead healer as "low HP" peel-worthy.
             var ratio = member.GetHealthRatio();
             if (ratio > 0f && ratio < ThreatLowHpRatio)
             {

@@ -23,7 +23,7 @@ public static class ThreatFactor
     /// </summary>
     public static double Compute(IBattleChara candidate, IReadOnlySet<ulong> threatenedAllyIds)
     {
-        if (threatenedAllyIds == null || threatenedAllyIds.Count == 0) return 0.0;
+        if (threatenedAllyIds.Count == 0) return 0.0;
 
         var targetId = candidate.TargetObjectId;
         if (targetId == 0) return 0.0;
