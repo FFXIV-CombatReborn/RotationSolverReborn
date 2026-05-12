@@ -1,67 +1,79 @@
 
 # [![](https://raw.githubusercontent.com/FFXIV-CombatReborn/RebornAssets/main/IconAssets/RSR_Icon.png)](https://github.com/FFXIV-CombatReborn/RotationSolverReborn)
 
-**RotationSolverReborn**
+**RotationSolverReborn — jkleinne fork**
 
-![Github Latest Releases](https://img.shields.io/github/downloads/FFXIV-CombatReborn/RotationSolverReborn/latest/total.svg?style=for-the-badge)
 ![Github License](https://img.shields.io/github/license/FFXIV-CombatReborn/RotationSolverReborn.svg?label=License&style=for-the-badge)
-[![](https://dcbadge.limes.pink/api/server/p54TZMPnC9)](https://discord.gg/p54TZMPnC9)
 
-This tool is designed to enhance your gameplay experience by performing your rotation as optimally as possible, including heals, interrupts, mitigations, and MP management.
+This is a personal fork of [FFXIV-CombatReborn/RotationSolverReborn](https://github.com/FFXIV-CombatReborn/RotationSolverReborn). It tracks upstream and layers one experimental feature on top: a scoring-based PvP hostile target selector (`PvPSmart`). PvE behavior is identical to upstream.
 
-## Features
+If you don't specifically want the `PvPSmart` targeting mode, install upstream RSR instead. This fork does not publish its own Dalamud plugin repository; it exists primarily as a development branch for the PvP targeting work.
 
-- **Dynamic Rotation Guidance aka Training Mode**: Offers real-time suggestions for skill rotations, tailored to your current in-game situation.
-- **Customizable Settings**: Allows users to adjust the rotations based on personal preference, encounter type, and specific boss mechanics.
-- **Comprehensive Database**: Includes an extensive database of class abilities to ensure accurate and effective rotation.
-- **User-Friendly Interface**: Features a clean and intuitive interface, making it easy for players of all levels to navigate and use the plugin effectively.
-- **Regular Updates**: The plugin is regularly updated to reflect the latest game patches, class changes, and user feedback, ensuring it remains relevant and useful.
+## What this fork adds
+
+A new `TargetingType.PvPSmart` mode that replaces the role-blind `Auto(LowHP)` cycle in PvP with a scoring-based selector. For each candidate hostile, the scorer composes a weighted scalar over pure factors and picks the argmax:
+
+- **Invuln short-circuit** — Guard, Hallowed Ground, Living Dead, Holmgang, Superbolide are skipped outright
+- **Role value** — Healer / Ranged DPS weighted above Melee / Tank
+- **Effective HP & finish** — current HP scaled by active mitigation statuses, with a finish-kill bias when a candidate is within burst range
+- **Mitigation penalty** — heavy DR cooldowns deprioritize a target during the window they're active
+- **Distance penalty** — soft falloff as targets approach the effective range edge
+- **Hysteresis** — small sticky bonus for the previous target to prevent GCD-to-GCD oscillation between near-equal candidates
+- **Crystal carrier awareness** *(Crystalline Conflict)* — the hostile holding the crystal gains a bonus
+- **LB cast awareness** — hostiles mid-cast on a Limit Break gain a bonus (interrupt priority)
+- **Isolation factor** — sigmoid bonus the further a hostile is from its nearest ally (catches stragglers)
+- **Threat factor** — bonus when a hostile is targeting a low-HP ally or a party healer (peel priority)
+
+Two preset weight profiles (Casual, Ranked) are bundled, plus a Custom preset for hand-tuned weights. A toggleable debug overlay renders the full per-target score breakdown in real time for tuning.
+
+The existing `PvPHealers` / `PvPDPS` / `PvPTanks` modes remain as explicit role overrides.
+
+### Status & caveats
+
+- Starting weights are conservative seeds. Empirical tuning across Ranked CC matches is pending.
+- Crystal-carrier `StatusID` and the `PvPLBs.json` database are stubs awaiting in-game observation; the carrier and LB factors evaluate to zero until those are populated.
+
+## Upstream features
+
+Everything below is inherited unchanged from upstream RSR:
+
+- **Dynamic Rotation Guidance (Training Mode)** — real-time rotation suggestions tailored to the in-game situation
+- **Customizable Settings** — adjust rotations per preference, encounter, and boss mechanics
+- **Comprehensive Database** — extensive class ability coverage for accurate rotation
+- **User-Friendly Interface** — clean ImGui surface
+- **Regular Updates** — upstream tracks game patches and class changes; this fork periodically pulls from it
 
 ## Installing
-- Enter `/xlsettings` in the chat window and go to the Experimental tab in the opening window.
-- **Skip below the DevPlugins section to the Custom Plugin Repositories section.**
-- Copy and paste the repo.json link into the first free text input field.
+
+This fork is not published to a Dalamud plugin repository. To run it you need to build from source against a Windows + Dalamud dev environment. If you want the official binary distribution, use upstream's instructions:
+
+- Enter `/xlsettings` in chat and open the Experimental tab
+- Scroll past DevPlugins to the Custom Plugin Repositories section
+- Paste the upstream repo URL into a free text input:
+
 ```
 https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
 ```
-- Click on the + button and make sure the checkmark beside the new field is set afterwards.
-- **Click on the Save-icon in the bottom right.**
 
-Following these steps, you should be able to see all contained plugins in the Available Plugins tab in the Dalamud Plugin Installer.
-No Plugins will be installed, you have just made them available. You can now select which of these plugins you actually want to install.
+- Click `+`, tick the new entry's checkbox, and save
 
-- CN users
+CN and KR plugin master files for upstream:
+
 ```
 https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/refs/heads/main/pluginmasterCN.json
-```
-- KR users
-```
 https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/refs/heads/main/pluginmasterKR.json
 ```
 
-## Want to contribute?
+## Contributing
 
-- Create a fork
-- Make your changes
-- Test the changes (Combat rotation changes should be tested vs [Stone, Sky, Sea tests](https://ffxiv.consolegameswiki.com/wiki/Stone,_Sky,_Sea) in game in each expansion)
-- Create a PR and point it to main
+PvP targeting work goes here. Anything else should be contributed upstream:
+
+- For PvP scoring changes (factors, weights, debug overlay): fork this repo, branch from `main`, open a PR against `jkleinne/RotationSolverReborn:main`
+- For everything else (rotations, PvE behavior, core engine): contribute to [upstream RSR](https://github.com/FFXIV-CombatReborn/RotationSolverReborn) instead — changes there flow into this fork on the next sync
+
+Combat rotation changes should be validated against [Stone, Sky, Sea](https://ffxiv.consolegameswiki.com/wiki/Stone,_Sky,_Sea) per expansion before submission.
 
 ## Links
 
-The rotations definitions are [here](https://github.com/FFXIV-CombatReborn/RotationSolverReborn/tree/main/RotationSolver/RebornRotations).
-
-## Latest version of RSR for each FFXIV version
-7.21
-https://github.com/FFXIV-CombatReborn/RotationSolverReborn/releases/tag/7.2.1.65
-
-7.25
-https://github.com/FFXIV-CombatReborn/RotationSolverReborn/releases/tag/7.2.5.122
-
-7.30
-https://github.com/FFXIV-CombatReborn/RotationSolverReborn/releases/tag/7.3.0.59
-
-7.31
-https://github.com/FFXIV-CombatReborn/RotationSolverReborn/releases/tag/7.3.1.28
-
-7.35
-https://github.com/FFXIV-CombatReborn/RotationSolverReborn/releases/tag/7.3.5.27
+- Upstream rotation definitions: [`RotationSolver/RebornRotations`](https://github.com/FFXIV-CombatReborn/RotationSolverReborn/tree/main/RotationSolver/RebornRotations)
+- Upstream Discord: [https://discord.gg/p54TZMPnC9](https://discord.gg/p54TZMPnC9)
