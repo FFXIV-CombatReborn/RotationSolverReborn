@@ -474,6 +474,22 @@ internal static class DataCenter
 	public static bool IsPvP => Territory?.IsPvP ?? false;
 
 	/// <summary>
+	/// True iff the current territory is a Crystalline Conflict instance.
+	/// Used by <see cref="Actions.PvPTargetSelection.CrystalCarrierState"/> to gate
+	/// per-frame carrier scans to the only PvP mode that has a crystal.
+	/// </summary>
+	/// <remarks>
+	/// Locale caveat: <see cref="Data.TerritoryInfo.ContentFinderName"/> is the localized
+	/// PlaceName text. The literal "Crystalline Conflict" matches the English client; on
+	/// JP/DE/FR clients the string differs and detection silently returns <c>false</c>,
+	/// degrading the Phase 2 carrier scoring term to zero contribution (no incorrect
+	/// behavior, just inert). Replace with a locale-invariant signal (ContentFinderIcon
+	/// or a TerritoryID set) if non-English-client support becomes required.
+	/// </remarks>
+	public static bool IsInCrystallineConflict =>
+		string.Equals(Territory?.ContentFinderName, "Crystalline Conflict", StringComparison.Ordinal);
+
+	/// <summary>
 	/// When set to <c>true</c> by an external plugin via IPC, the TargetFreely behaviour is
 	/// activated for the current session without modifying the user's <c>TargetFreely</c>
 	/// config value.  Reset to <c>false</c> by calling the corresponding IPC method.
