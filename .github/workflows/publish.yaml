@@ -36,10 +36,45 @@ jobs:
       - name: Build Plugin
         run: dotnet build --no-restore -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=${{ env.tag }} -p:FileVersion=${{ env.tag }} -p:PackageVersion=${{ env.tag }} -p:InformationalVersion=${{ env.tag }} --output .\build
 
+      - name: Generate pluginmaster.json
+        shell: pwsh
+        run: |
+          $manifest = Get-Content RotationSolver/ascended-rotationsolverreborn.json -Raw | ConvertFrom-Json
+          $downloadUrl = "https://github.com/jkleinne/ascended-rotationsolverreborn/releases/download/${{ env.tag }}/latest.zip"
+          $entry = [ordered]@{
+            Author                  = $manifest.Author
+            Name                    = $manifest.Name
+            InternalName            = $manifest.InternalName
+            Description             = $manifest.Description
+            Punchline               = $manifest.Punchline
+            RepoUrl                 = $manifest.RepoUrl
+            ApplicableVersion       = $manifest.ApplicableVersion
+            DalamudApiLevel         = $manifest.DalamudApiLevel
+            TestingDalamudApiLevel  = $manifest.TestingDalamudApiLevel
+            Tags                    = $manifest.Tags
+            CategoryTags            = $manifest.CategoryTags
+            LoadRequiredState       = $manifest.LoadRequiredState
+            LoadSync                = $manifest.LoadSync
+            CanUnloadAsync          = $manifest.CanUnloadAsync
+            LoadPriority            = $manifest.LoadPriority
+            IsTestingExclusive      = $manifest.IsTestingExclusive
+            IconUrl                 = $manifest.IconUrl
+            AcceptsFeedback         = $manifest.AcceptsFeedback
+            AssemblyVersion         = "${{ env.tag }}"
+            TestingAssemblyVersion  = "${{ env.tag }}"
+            DownloadLinkInstall     = $downloadUrl
+            DownloadLinkTesting     = $downloadUrl
+            DownloadLinkUpdate      = $downloadUrl
+            DownloadCount           = 0
+          }
+          @($entry) | ConvertTo-Json -Depth 10 | Set-Content pluginmaster.json -NoNewline
+
       - name: Publish Plugin
         uses: softprops/action-gh-release@v3
         with:
-          files: ./build/ascended-rotationsolverreborn/latest.zip
+          files: |
+            ./build/ascended-rotationsolverreborn/latest.zip
+            ./pluginmaster.json
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Doc Gen Tool

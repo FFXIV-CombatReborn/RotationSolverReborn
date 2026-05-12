@@ -45,23 +45,25 @@ Everything below is inherited unchanged from upstream RSR:
 
 ## Installing
 
-This fork is not published to a Dalamud plugin repository. To run it you need to build from source against a Windows + Dalamud dev environment. If you want the official binary distribution, use upstream's instructions:
+Once a release tag has been published, the plugin is installable via Dalamud's Custom Plugin Repositories:
 
-- Enter `/xlsettings` in chat and open the Experimental tab
+- Open `/xlsettings` in chat and switch to the Experimental tab
 - Scroll past DevPlugins to the Custom Plugin Repositories section
-- Paste the upstream repo URL into a free text input:
+- Paste this URL into a free text input:
 
 ```
-https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
+https://github.com/jkleinne/ascended-rotationsolverreborn/releases/latest/download/pluginmaster.json
 ```
 
 - Click `+`, tick the new entry's checkbox, and save
+- Reopen Dalamud's plugin installer; "Ascended Rotation Solver Reborn" appears under Available Plugins
 
-CN and KR plugin master files for upstream:
+**Coexistence with upstream RSR:** this fork uses a distinct `InternalName`, so Dalamud loads it as a separate plugin. It does, however, register the same `/rotation` and `/rsr` chat commands as upstream, so the two cannot run simultaneously without command-registration conflicts. Uninstall upstream RSR before installing this fork.
+
+If you'd rather use the official upstream binary distribution:
 
 ```
-https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/refs/heads/main/pluginmasterCN.json
-https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/refs/heads/main/pluginmasterKR.json
+https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
 ```
 
 ## Contributing
