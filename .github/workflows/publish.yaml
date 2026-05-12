@@ -76,3 +76,37 @@ jobs:
             ./build/ascended-rotationsolverreborn/latest.zip
             ./pluginmaster.json
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout Hub Repo
+        uses: actions/checkout@v6
+        with:
+          repository: jkleinne/ascended-plugins
+          token: ${{ secrets.PLUGIN_HUB_TOKEN }}
+          path: hub
+
+      - name: Sync Entry to Hub
+        shell: pwsh
+        run: |
+          $newEntry = @(Get-Content pluginmaster.json -Raw | ConvertFrom-Json)[0]
+          $hub = @(Get-Content hub/pluginmaster.json -Raw | ConvertFrom-Json)
+          $existing = $hub | Where-Object { $_.InternalName -eq $newEntry.InternalName }
+          if ($null -ne $existing) {
+            $merged = $hub | ForEach-Object {
+              if ($_.InternalName -eq $newEntry.InternalName) { $newEntry } else { $_ }
+            }
+          } else {
+            $merged = @($hub) + @($newEntry)
+          }
+          ConvertTo-Json -InputObject @($merged) -Depth 10 | Set-Content hub/pluginmaster.json -NoNewline
+
+          Set-Location hub
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pluginmaster.json
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "No changes to hub pluginmaster.json; skipping push."
+          } else {
+            git commit -m "Sync ascended-rotationsolverreborn ${{ env.tag }}"
+            git push
+          }

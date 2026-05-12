@@ -45,14 +45,14 @@ Everything below is inherited unchanged from upstream RSR:
 
 ## Installing
 
-Once a release tag has been published, the plugin is installable via Dalamud's Custom Plugin Repositories:
+This plugin is distributed through the [ascended-plugins](https://github.com/jkleinne/ascended-plugins) Dalamud repository, which aggregates all `ascended-*` plugin forks under a single URL. Add it to Dalamud once and any future plugin in that namespace becomes available without extra repository entries.
 
 - Open `/xlsettings` in chat and switch to the Experimental tab
 - Scroll past DevPlugins to the Custom Plugin Repositories section
 - Paste this URL into a free text input:
 
 ```
-https://github.com/jkleinne/ascended-rotationsolverreborn/releases/latest/download/pluginmaster.json
+https://raw.githubusercontent.com/jkleinne/ascended-plugins/main/pluginmaster.json
 ```
 
 - Click `+`, tick the new entry's checkbox, and save
