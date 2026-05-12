@@ -1,8 +1,8 @@
 namespace RotationSolver.Basic.Actions.PvPTargetSelection;
 
 /// <summary>
-/// Tunable weights for <see cref="PvPTargetScorer"/>. Phase 3 fields are present and default to 0
-/// so factor wiring is forward-compatible without touching the struct shape later.
+/// Tunable weights for <see cref="PvPTargetScorer"/>. All factor weights are present;
+/// the Casual and Ranked presets carry empirically-seeded starting values.
 /// </summary>
 public readonly record struct ScoringWeights(
     // Phase 1
@@ -14,7 +14,7 @@ public readonly record struct ScoringWeights(
     // Phase 2
     double CarrierWeight,
     double LBWeight,
-    // Phase 3 (zero until wired)
+    // Phase 3
     double IsolationWeight,
     double ThreatWeight)
 {
@@ -32,8 +32,8 @@ public readonly record struct ScoringWeights(
             StickyBonus: 0.03,
             CarrierWeight: 2.00,
             LBWeight: 1.50,
-            IsolationWeight: 0.0,
-            ThreatWeight: 0.0),
+            IsolationWeight: 0.40,
+            ThreatWeight: 0.70),
 
         // Casual is also the seed for Custom: user config overlays this if preset is Custom.
         _ => new ScoringWeights(
@@ -44,7 +44,7 @@ public readonly record struct ScoringWeights(
             StickyBonus: 0.05,
             CarrierWeight: 0.50,
             LBWeight: 1.00,
-            IsolationWeight: 0.0,
-            ThreatWeight: 0.0),
+            IsolationWeight: 0.25,
+            ThreatWeight: 0.40),
     };
 }

@@ -4,11 +4,12 @@ using RotationSolver.Basic.Helpers;
 namespace RotationSolver.Basic.Actions.PvPTargetSelection;
 
 /// <summary>
-/// Composes Phase 1 and Phase 2 factors into a single scalar score for a candidate target.
-/// Pure: reads properties off the passed-in <see cref="IBattleChara"/> but makes no Dalamud calls.
-/// Uses <see cref="ScoringContext"/> for everything beyond the target itself.
-/// Invuln statuses on the target force <see cref="double.NegativeInfinity"/>, which overrides
-/// every other contribution including hysteresis.
+/// Composes Phase 1, Phase 2, and Phase 3 factors into a single scalar score for a
+/// candidate target. Pure: reads properties off the passed-in <see cref="IBattleChara"/>
+/// but makes no Dalamud function calls. Uses <see cref="ScoringContext"/> for everything
+/// beyond the target itself. Invuln statuses on the target force
+/// <see cref="double.NegativeInfinity"/>, which overrides every other contribution
+/// including hysteresis.
 /// </summary>
 public static class PvPTargetScorer
 {
@@ -17,6 +18,7 @@ public static class PvPTargetScorer
     ///
     /// <para>Phase 1 terms: role baseline, finish-kill sigmoid, mitigation penalty, distance penalty, sticky bonus.</para>
     /// <para>Phase 2 terms: crystal-carrier promotion, PvP-LB-cast promotion.</para>
+    /// <para>Phase 3 terms: spatial isolation, threat-to-our-ally promotion.</para>
     /// </summary>
     public static double Score(IBattleChara target, ScoringContext context)
     {
@@ -32,15 +34,17 @@ public static class PvPTargetScorer
         var midpoint = target.MaxHp > 0 ? (double)target.MaxHp * 0.5 : 1.0;
 
         var role = ResolveRole(target);
-        var roleTerm     = context.Weights.RoleWeight                * RoleValueFactor.Compute(role);
-        var finishTerm   = context.Weights.FinishWeight              * FinishFactor.Compute(ehp, midpoint);
-        var mitigTerm    = context.Weights.MitigationPenaltyWeight   * MitigationPenalty.Compute(target, context.MitigationDatabase);
-        var distanceTerm = context.Weights.DistancePenaltyWeight     * DistancePenalty.Compute(target.DistanceToPlayer(), context.EffectiveRangeYalms);
-        var stickyTerm   = context.Weights.StickyBonus               * HysteresisBonus.Compute(target.GameObjectId, context.PreviousTargetId);
-        var carrierTerm  = context.Weights.CarrierWeight             * CrystalCarrierFactor.Compute(target.GameObjectId, context.CrystalCarrierObjectId);
-        var lbTerm       = context.Weights.LBWeight                  * LBCastFactor.Compute(target, context.LBDatabase);
+        var roleTerm      = context.Weights.RoleWeight                * RoleValueFactor.Compute(role);
+        var finishTerm    = context.Weights.FinishWeight              * FinishFactor.Compute(ehp, midpoint);
+        var mitigTerm     = context.Weights.MitigationPenaltyWeight   * MitigationPenalty.Compute(target, context.MitigationDatabase);
+        var distanceTerm  = context.Weights.DistancePenaltyWeight     * DistancePenalty.Compute(target.DistanceToPlayer(), context.EffectiveRangeYalms);
+        var stickyTerm    = context.Weights.StickyBonus               * HysteresisBonus.Compute(target.GameObjectId, context.PreviousTargetId);
+        var carrierTerm   = context.Weights.CarrierWeight             * CrystalCarrierFactor.Compute(target.GameObjectId, context.CrystalCarrierObjectId);
+        var lbTerm        = context.Weights.LBWeight                  * LBCastFactor.Compute(target, context.LBDatabase);
+        var isolationTerm = context.Weights.IsolationWeight           * IsolationFactor.Compute(target, context.Hostiles);
+        var threatTerm    = context.Weights.ThreatWeight              * ThreatFactor.Compute(target, context.ThreatenedAllyIds);
 
-        return roleTerm + finishTerm - mitigTerm - distanceTerm + stickyTerm + carrierTerm + lbTerm;
+        return roleTerm + finishTerm - mitigTerm - distanceTerm + stickyTerm + carrierTerm + lbTerm + isolationTerm + threatTerm;
     }
 
     private static bool HasInvulnStatus(IBattleChara target, IMitigationDatabase database)

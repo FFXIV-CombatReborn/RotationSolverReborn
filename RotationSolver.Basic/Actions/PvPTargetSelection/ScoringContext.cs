@@ -10,4 +10,6 @@ public sealed record ScoringContext(
     ILBDatabase LBDatabase,
     ulong? PreviousTargetId,
     ulong? CrystalCarrierObjectId,
+    IReadOnlyList<IBattleChara> Hostiles,
+    IReadOnlySet<ulong> ThreatenedAllyIds,
     float EffectiveRangeYalms);

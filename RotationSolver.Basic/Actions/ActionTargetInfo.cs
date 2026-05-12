@@ -3786,6 +3786,8 @@ public struct ActionTargetInfo(IBaseAction action)
 							LBDatabase: PvPLBDatabaseProvider.Current,
 							PreviousTargetId: DataCenter.LastPvPSmartTargetId,
 							CrystalCarrierObjectId: CrystalCarrierState.GetCurrentCarrierId(),
+							Hostiles: objects,
+							ThreatenedAllyIds: ThreatenedAllyState.BuildThreatenedAllyIds(),
 							EffectiveRangeYalms: 25f);
 
 						IBattleChara? best = null;
