@@ -7,5 +7,7 @@ namespace RotationSolver.Basic.Actions.PvPTargetSelection;
 public sealed record ScoringContext(
     ScoringWeights Weights,
     IMitigationDatabase MitigationDatabase,
+    ILBDatabase LBDatabase,
     ulong? PreviousTargetId,
+    ulong? CrystalCarrierObjectId,
     float EffectiveRangeYalms);

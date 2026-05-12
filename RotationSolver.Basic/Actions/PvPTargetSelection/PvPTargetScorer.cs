@@ -4,7 +4,7 @@ using RotationSolver.Basic.Helpers;
 namespace RotationSolver.Basic.Actions.PvPTargetSelection;
 
 /// <summary>
-/// Composes Phase 1 factors into a single scalar score for a candidate target.
+/// Composes Phase 1 and Phase 2 factors into a single scalar score for a candidate target.
 /// Pure: reads properties off the passed-in <see cref="IBattleChara"/> but makes no Dalamud calls.
 /// Uses <see cref="ScoringContext"/> for everything beyond the target itself.
 /// Invuln statuses on the target force <see cref="double.NegativeInfinity"/>, which overrides
@@ -14,6 +14,9 @@ public static class PvPTargetScorer
 {
     /// <summary>
     /// Score a candidate. Higher is better. <see cref="double.NegativeInfinity"/> means "do not select".
+    ///
+    /// <para>Phase 1 terms: role baseline, finish-kill sigmoid, mitigation penalty, distance penalty, sticky bonus.</para>
+    /// <para>Phase 2 terms: crystal-carrier promotion, PvP-LB-cast promotion.</para>
     /// </summary>
     public static double Score(IBattleChara target, ScoringContext context)
     {
@@ -34,8 +37,10 @@ public static class PvPTargetScorer
         var mitigTerm    = context.Weights.MitigationPenaltyWeight   * MitigationPenalty.Compute(target, context.MitigationDatabase);
         var distanceTerm = context.Weights.DistancePenaltyWeight     * DistancePenalty.Compute(target.DistanceToPlayer(), context.EffectiveRangeYalms);
         var stickyTerm   = context.Weights.StickyBonus               * HysteresisBonus.Compute(target.GameObjectId, context.PreviousTargetId);
+        var carrierTerm  = context.Weights.CarrierWeight             * CrystalCarrierFactor.Compute(target.GameObjectId, context.CrystalCarrierObjectId);
+        var lbTerm       = context.Weights.LBWeight                  * LBCastFactor.Compute(target, context.LBDatabase);
 
-        return roleTerm + finishTerm - mitigTerm - distanceTerm + stickyTerm;
+        return roleTerm + finishTerm - mitigTerm - distanceTerm + stickyTerm + carrierTerm + lbTerm;
     }
 
     private static bool HasInvulnStatus(IBattleChara target, IMitigationDatabase database)
