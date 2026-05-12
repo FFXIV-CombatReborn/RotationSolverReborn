@@ -141,6 +141,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 		// Phase 2: load PvP target-selection databases (embedded JSON, one-time)
 		PvPMitigationDatabaseProvider.Initialize();
+		PvPLBDatabaseProvider.Initialize();
 
 		// The following must run on the main/framework thread
 		await Svc.Framework.Run(() =>
