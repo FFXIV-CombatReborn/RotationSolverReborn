@@ -216,7 +216,7 @@ namespace RotationSolver.IPC
 			}
 
 			// Use Dalamud plugin info for internal and display names where available.
-			var internalName = Svc.PluginInterface.InternalName ?? "RotationSolver";
+			var internalName = Svc.PluginInterface.InternalName ?? "ascended-rotationsolverreborn";
 			var displayName = Svc.PluginInterface.Manifest?.Name ?? "Rotation Solver";
 			var callbackName = $"{typeof(Wrath_IPCSubscriber).FullName}.LeaseCancelled";
 

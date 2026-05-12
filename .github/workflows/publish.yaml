@@ -39,7 +39,7 @@ jobs:
       - name: Publish Plugin
         uses: softprops/action-gh-release@v3
         with:
-          files: ./build/RotationSolver/latest.zip
+          files: ./build/ascended-rotationsolverreborn/latest.zip
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Doc Gen Tool

@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Dalamud.NET.Sdk/15.0.0">
 	<PropertyGroup>
 		<Description>Based on the pve combat information in one frame, find the best action.</Description>
+		<AssemblyName>ascended-rotationsolverreborn</AssemblyName>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<Platforms>x64</Platforms>
 		<TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
@@ -68,9 +69,9 @@
 	<Target Name="PruneOutputDlls" AfterTargets="ResolveReferences">
 		<ItemGroup>
 			<!-- Keep only these DLLs in the copy-local list -->
-			<_KeepDlls Include="@(ReferenceCopyLocalPaths)" Condition="&#xD;&#xA;					'%(Filename)' == 'RotationSolver' or&#xD;&#xA;					'%(Filename)' == 'RotationSolver.Basic' or&#xD;&#xA;					'%(Filename)' == 'ECommons'&#xD;&#xA;				" />
+			<_KeepDlls Include="@(ReferenceCopyLocalPaths)" Condition="&#xD;&#xA;					'%(Filename)' == 'ascended-rotationsolverreborn' or&#xD;&#xA;					'%(Filename)' == 'RotationSolver.Basic' or&#xD;&#xA;					'%(Filename)' == 'ECommons'&#xD;&#xA;				" />
 			<!-- Remove everything else -->
-			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="!('%(Filename)' == 'RotationSolver' or '%(Filename)' == 'RotationSolver.Basic' or '%(Filename)' == 'ECommons')" />
+			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="!('%(Filename)' == 'ascended-rotationsolverreborn' or '%(Filename)' == 'RotationSolver.Basic' or '%(Filename)' == 'ECommons')" />
 			<!-- Re-add only the kept set -->
 			<ReferenceCopyLocalPaths Include="@(_KeepDlls)" />
 		</ItemGroup>

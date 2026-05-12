@@ -13,7 +13,7 @@ internal class OtherConfiguration
 		var c = new HttpClient();
 		try
 		{
-			c.DefaultRequestHeaders.UserAgent.ParseAdd("RotationSolver");
+			c.DefaultRequestHeaders.UserAgent.ParseAdd("ascended-rotationsolverreborn");
 			c.DefaultRequestHeaders.Accept.ParseAdd("application/json");
 		}
 		catch { /* best-effort headers */ }

@@ -1,7 +1,7 @@
 
 # [![](https://raw.githubusercontent.com/FFXIV-CombatReborn/RebornAssets/main/IconAssets/RSR_Icon.png)](https://github.com/FFXIV-CombatReborn/RotationSolverReborn)
 
-**RotationSolverReborn — jkleinne fork**
+**Ascended Rotation Solver Reborn — personal fork of RSR**
 
 ![Github License](https://img.shields.io/github/license/FFXIV-CombatReborn/RotationSolverReborn.svg?label=License&style=for-the-badge)
 
@@ -68,7 +68,7 @@ https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/refs/h
 
 PvP targeting work goes here. Anything else should be contributed upstream:
 
-- For PvP scoring changes (factors, weights, debug overlay): fork this repo, branch from `main`, open a PR against `jkleinne/RotationSolverReborn:main`
+- For PvP scoring changes (factors, weights, debug overlay): fork this repo, branch from `main`, open a PR against `jkleinne/ascended-rotationsolverreborn:main`
 - For everything else (rotations, PvE behavior, core engine): contribute to [upstream RSR](https://github.com/FFXIV-CombatReborn/RotationSolverReborn) instead — changes there flow into this fork on the next sync
 
 Combat rotation changes should be validated against [Stone, Sky, Sea](https://ffxiv.consolegameswiki.com/wiki/Stone,_Sky,_Sea) per expansion before submission.
