@@ -3775,7 +3775,6 @@ public struct ActionTargetInfo(IBaseAction action)
 							break;
 						}
 
-						var mitigationDb = PvPMitigationDatabaseProvider.Current;
 						var preset = Service.Config.PvPScoringPreset;
 						var weights = preset == ScoringPreset.Custom
 							? Service.Config.PvPScoringWeights
@@ -3783,8 +3782,10 @@ public struct ActionTargetInfo(IBaseAction action)
 
 						var context = new ScoringContext(
 							Weights: weights,
-							MitigationDatabase: mitigationDb,
+							MitigationDatabase: PvPMitigationDatabaseProvider.Current,
+							LBDatabase: PvPLBDatabaseProvider.Current,
 							PreviousTargetId: DataCenter.LastPvPSmartTargetId,
+							CrystalCarrierObjectId: CrystalCarrierState.GetCurrentCarrierId(),
 							EffectiveRangeYalms: 25f);
 
 						IBattleChara? best = null;

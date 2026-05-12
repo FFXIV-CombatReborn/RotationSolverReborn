@@ -30,8 +30,8 @@ public readonly record struct ScoringWeights(
             MitigationPenaltyWeight: 2.00,
             DistancePenaltyWeight: 0.10,
             StickyBonus: 0.03,
-            CarrierWeight: 0.0,
-            LBWeight: 0.0,
+            CarrierWeight: 2.00,
+            LBWeight: 1.50,
             IsolationWeight: 0.0,
             ThreatWeight: 0.0),
 
@@ -42,8 +42,8 @@ public readonly record struct ScoringWeights(
             MitigationPenaltyWeight: 1.00,
             DistancePenaltyWeight: 0.10,
             StickyBonus: 0.05,
-            CarrierWeight: 0.0,
-            LBWeight: 0.0,
+            CarrierWeight: 0.50,
+            LBWeight: 1.00,
             IsolationWeight: 0.0,
             ThreatWeight: 0.0),
     };
