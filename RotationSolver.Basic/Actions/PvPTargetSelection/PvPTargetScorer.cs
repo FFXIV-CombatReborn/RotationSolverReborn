@@ -20,12 +20,23 @@ public static class PvPTargetScorer
     /// <para>Phase 2 terms: crystal-carrier promotion, PvP-LB-cast promotion.</para>
     /// <para>Phase 3 terms: spatial isolation, threat-to-our-ally promotion.</para>
     /// </summary>
-    public static double Score(IBattleChara target, ScoringContext context)
+    public static double Score(IBattleChara target, ScoringContext context) => Compose(target, context).Total;
+
+    /// <summary>
+    /// Return the per-term breakdown for tuning and the debug overlay. Numerically the
+    /// same computation as <see cref="Score"/>; one more struct copy in the return path.
+    /// </summary>
+    public static ScoreBreakdown Explain(IBattleChara target, ScoringContext context) => Compose(target, context);
+
+    private static ScoreBreakdown Compose(IBattleChara target, ScoringContext context)
     {
         // Invuln short-circuit first: saves work and guarantees the override.
         if (HasInvulnStatus(target, context.MitigationDatabase))
         {
-            return double.NegativeInfinity;
+            return new ScoreBreakdown(
+                Role: 0.0, Finish: 0.0, Mitigation: 0.0, Distance: 0.0, Sticky: 0.0,
+                Carrier: 0.0, LB: 0.0, Isolation: 0.0, Threat: 0.0,
+                Invuln: true, Total: double.NegativeInfinity);
         }
 
         var ehp = EffectiveHpCalculator.Compute(target, context.MitigationDatabase);
@@ -44,7 +55,20 @@ public static class PvPTargetScorer
         var isolationTerm = context.Weights.IsolationWeight           * IsolationFactor.Compute(target, context.Hostiles);
         var threatTerm    = context.Weights.ThreatWeight              * ThreatFactor.Compute(target, context.ThreatenedAllyIds);
 
-        return roleTerm + finishTerm - mitigTerm - distanceTerm + stickyTerm + carrierTerm + lbTerm + isolationTerm + threatTerm;
+        var total = roleTerm + finishTerm - mitigTerm - distanceTerm + stickyTerm + carrierTerm + lbTerm + isolationTerm + threatTerm;
+
+        return new ScoreBreakdown(
+            Role: roleTerm,
+            Finish: finishTerm,
+            Mitigation: mitigTerm,
+            Distance: distanceTerm,
+            Sticky: stickyTerm,
+            Carrier: carrierTerm,
+            LB: lbTerm,
+            Isolation: isolationTerm,
+            Threat: threatTerm,
+            Invuln: false,
+            Total: total);
     }
 
     private static bool HasInvulnStatus(IBattleChara target, IMitigationDatabase database)
