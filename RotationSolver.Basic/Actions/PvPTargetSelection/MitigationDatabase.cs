@@ -1,6 +1,7 @@
 using ECommons.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using System.IO;
 
 namespace RotationSolver.Basic.Actions.PvPTargetSelection;
 
@@ -22,12 +23,9 @@ public sealed class MitigationDatabase : IMitigationDatabase
     public bool TryGet(StatusID id, out MitigationEntry entry) => _entries.TryGetValue(id, out entry);
 
     /// <summary>
-    /// The seed list of major PvP defensives. Single source of truth — <see cref="LoadFromJson"/>
-    /// falls back to this set if user JSON fails to parse.
+    /// The seed list of major PvP defensives. Serves as the parse-failure fallback when
+    /// <see cref="WithEmbeddedJson"/> cannot read or parse the shipped JSON resource.
     /// </summary>
-    // TODO(phase-2): replace this array with a single-source-of-truth load from the embedded
-    // PvPMitigations.json resource. Until then, the JSON file ships as a documentation artifact
-    // and the array below is the authoritative runtime data.
     public static IReadOnlyList<MitigationEntry> EmbeddedDefaults { get; } = new[]
     {
         new MitigationEntry(StatusID.Guard,           MitigationKind.Invuln,  0.00, "PvP Guard: universal heavy DR, treated as effective invuln."),
@@ -44,6 +42,35 @@ public sealed class MitigationDatabase : IMitigationDatabase
     /// Build a database from the embedded seed list.
     /// </summary>
     public static MitigationDatabase WithEmbeddedDefaults() => new(BuildDictionary(EmbeddedDefaults));
+
+    /// <summary>
+    /// Read the shipped <c>Data/PvPMitigations.json</c> embedded resource and parse it as the
+    /// authoritative seed list. Returns the embedded defaults if the resource is missing or
+    /// fails to parse, with a warning logged via <see cref="PluginLog"/>.
+    /// </summary>
+    public static MitigationDatabase WithEmbeddedJson()
+    {
+        try
+        {
+            var assembly = typeof(MitigationDatabase).Assembly;
+            using var stream = assembly.GetManifestResourceStream(EmbeddedResourceName);
+            if (stream == null)
+            {
+                TryWarn($"Embedded resource '{EmbeddedResourceName}' not found; falling back to in-code defaults.");
+                return WithEmbeddedDefaults();
+            }
+            using var reader = new StreamReader(stream);
+            var json = reader.ReadToEnd();
+            return LoadFromJson(json);
+        }
+        catch (Exception ex)
+        {
+            TryWarn($"Failed to read embedded mitigation JSON ({ex.Message}); falling back to in-code defaults.");
+            return WithEmbeddedDefaults();
+        }
+    }
+
+    private const string EmbeddedResourceName = "RotationSolver.Basic.Data.PvPMitigations.json";
 
     /// <summary>
     /// Parse a JSON array of <see cref="MitigationEntry"/>-shaped objects. Returns a DB containing

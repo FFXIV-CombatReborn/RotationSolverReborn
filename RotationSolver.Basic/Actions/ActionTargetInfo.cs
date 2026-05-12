@@ -3775,7 +3775,7 @@ public struct ActionTargetInfo(IBaseAction action)
 							break;
 						}
 
-						var mitigationDb = MitigationDatabase.WithEmbeddedDefaults();
+						var mitigationDb = PvPMitigationDatabaseProvider.Current;
 						var preset = Service.Config.PvPScoringPreset;
 						var weights = preset == ScoringPreset.Custom
 							? Service.Config.PvPScoringWeights

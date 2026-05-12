@@ -9,6 +9,7 @@ using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using Lumina.Excel.Sheets;
 using RotationSolver.ActionTimeline;
+using RotationSolver.Basic.Actions.PvPTargetSelection;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
 using RotationSolver.Data;
@@ -137,6 +138,9 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 		// Load OtherConfiguration files
 		await OtherConfiguration.InitAsync(cancellationToken);
+
+		// Phase 2: load PvP target-selection databases (embedded JSON, one-time)
+		PvPMitigationDatabaseProvider.Initialize();
 
 		// The following must run on the main/framework thread
 		await Svc.Framework.Run(() =>
