@@ -42,21 +42,28 @@ public static class ThreatenedAllyState
 
         foreach (var member in DataCenter.PartyMembers)
         {
-            if (member == null) continue;
-
-            var classJob = member.ClassJob;
-            if (classJob.RowId != 0 && classJob.Value.GetJobRole() == JobRole.Healer)
+            try
             {
-                ids.Add(member.GameObjectId);
-                continue;
+                if (member == null) continue;
+
+                var classJob = member.ClassJob;
+                if (classJob.RowId != 0 && classJob.Value.GetJobRole() == JobRole.Healer)
+                {
+                    ids.Add(member.GameObjectId);
+                    continue;
+                }
+
+                // Filter corpses: GetHealthRatio returns 0 for dead allies; the > 0 clause
+                // skips them so we don't flag a dead healer as "low HP" peel-worthy.
+                var ratio = member.GetHealthRatio();
+                if (ratio > 0f && ratio < ThreatLowHpRatio)
+                {
+                    ids.Add(member.GameObjectId);
+                }
             }
-
-            // Filter corpses: GetHealthRatio returns 0 for dead allies; the > 0 clause
-            // skips them so we don't flag a dead healer as "low HP" peel-worthy.
-            var ratio = member.GetHealthRatio();
-            if (ratio > 0f && ratio < ThreatLowHpRatio)
+            catch (AccessViolationException ex)
             {
-                ids.Add(member.GameObjectId);
+                ECommons.Logging.PluginLog.Error($"AccessViolationException in ThreatenedAllyState: {ex.Message}");
             }
         }
 
