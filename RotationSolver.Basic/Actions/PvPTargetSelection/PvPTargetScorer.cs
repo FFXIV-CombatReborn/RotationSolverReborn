@@ -23,8 +23,10 @@ public static class PvPTargetScorer
     public static double Score(IBattleChara target, ScoringContext context) => Compose(target, context).Total;
 
     /// <summary>
-    /// Return the per-term breakdown for tuning and the debug overlay. Numerically the
-    /// same computation as <see cref="Score"/>; one more struct copy in the return path.
+    /// Return the per-term breakdown of a target's score. Use this when per-factor attribution
+    /// is needed — the debug overlay (Task 4), empirical weight tuning, or future diagnostics.
+    /// For the hot target-selection path, use <see cref="Score"/> instead; it returns only the
+    /// composed scalar and discards the breakdown.
     /// </summary>
     public static ScoreBreakdown Explain(IBattleChara target, ScoringContext context) => Compose(target, context);
 
