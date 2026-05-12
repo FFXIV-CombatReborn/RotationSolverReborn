@@ -1,0 +1,10 @@
+[
+  { "Id": "Guard",          "Kind": "Invuln",  "DamageReductionPercent": 0.0,  "Description": "PvP Guard: universal heavy DR, treated as effective invuln." },
+  { "Id": "HallowedGround", "Kind": "Invuln",  "DamageReductionPercent": 0.0,  "Description": "PLD Hallowed Ground: true invulnerability." },
+  { "Id": "LivingDead",     "Kind": "Invuln",  "DamageReductionPercent": 0.0,  "Description": "DRK Living Dead: invulnerability state until expiration." },
+  { "Id": "Holmgang_409",   "Kind": "Invuln",  "DamageReductionPercent": 0.0,  "Description": "WAR Holmgang: true invulnerability." },
+  { "Id": "Superbolide",    "Kind": "Invuln",  "DamageReductionPercent": 0.0,  "Description": "GNB Superbolide: drops to 1 HP with self-recovery; conservative skip." },
+  { "Id": "Bloodwhetting",  "Kind": "HeavyDR", "DamageReductionPercent": 0.50, "Description": "WAR Bloodwhetting: heavy DR plus self-heal." },
+  { "Id": "SacredSoil",     "Kind": "Shield",  "DamageReductionPercent": 0.20, "Description": "SCH Sacred Soil: damage shield, modeled as DR equivalent." },
+  { "Id": "Macrocosmos",    "Kind": "Shield",  "DamageReductionPercent": 0.20, "Description": "AST Macrocosmos: damage shield plus delayed heal." }
+]

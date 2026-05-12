@@ -92,6 +92,9 @@
         <PackageReference Include="System.Drawing.Common" Version="10.0.7" />
         <ProjectReference Include="..\RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj" OutputItemType="Analyzer" ExcludeAssets="All" />
 
+        <EmbeddedResource Include="Data\PvPMitigations.json" />
+        <EmbeddedResource Include="Data\PvPLBs.json" />
+
         <None Include="..\COPYING.LESSER">
             <Pack>True</Pack>
             <PackagePath>\</PackagePath>

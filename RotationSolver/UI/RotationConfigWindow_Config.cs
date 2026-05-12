@@ -189,6 +189,75 @@ public partial class RotationConfigWindow
 				(Up, new[] { VirtualKey.UP }),
 				(Down, new[] { VirtualKey.DOWN }));
 		}
+
+		ImGui.Separator();
+
+		if (ImGuiEx.IconButton(FontAwesomeIcon.Plus, "Add PvP Hostile"))
+		{
+			Service.Config.TargetingTypesPvP.Add(TargetingType.PvPSmart);
+		}
+		ImGui.SameLine();
+		ImGui.TextWrapped(UiString.ConfigWindow_Param_HostileDescPvP.GetDescription());
+
+		for (var i = 0; i < Service.Config.TargetingTypesPvP.Count; i++)
+		{
+			var pvpTargetType = Service.Config.TargetingTypesPvP[i];
+			var pvpKey = $"TargetingTypesPvPPopup_{i}";
+
+			void DeletePvP()
+			{
+				Service.Config.TargetingTypesPvP.RemoveAt(i);
+			}
+
+			void UpPvP()
+			{
+				Service.Config.TargetingTypesPvP.RemoveAt(i);
+				Service.Config.TargetingTypesPvP.Insert(Math.Max(0, i - 1), pvpTargetType);
+			}
+
+			void DownPvP()
+			{
+				Service.Config.TargetingTypesPvP.RemoveAt(i);
+				Service.Config.TargetingTypesPvP.Insert(Math.Min(Service.Config.TargetingTypesPvP.Count - 1, i + 1), pvpTargetType);
+			}
+
+			ImGuiHelper.DrawHotKeysPopup(pvpKey, string.Empty,
+				(UiString.ConfigWindow_List_Remove.GetDescription(), DeletePvP, pairsArray2),
+				(UiString.ConfigWindow_Actions_MoveUp.GetDescription(), UpPvP, pairsArray0),
+				(UiString.ConfigWindow_Actions_MoveDown.GetDescription(), DownPvP, pairsArray1));
+
+			var pvpNames = Enum.GetNames<TargetingType>();
+			var pvpTargetingType = (int)Service.Config.TargetingTypesPvP[i];
+			var pvpText = UiString.ConfigWindow_Param_HostileCondition.GetDescription();
+			ImGui.SetNextItemWidth(ImGui.CalcTextSize(pvpText).X + (30 * Scale));
+			if (ImGui.Combo(pvpText + "##PvPHostileCondition" + i, ref pvpTargetingType, pvpNames, pvpNames.Length))
+			{
+				Service.Config.TargetingTypesPvP[i] = (TargetingType)pvpTargetingType;
+			}
+
+			ImGuiHelper.ExecuteHotKeysPopup(pvpKey, string.Empty, string.Empty, true,
+				(DeletePvP, new[] { VirtualKey.DELETE }),
+				(UpPvP, new[] { VirtualKey.UP }),
+				(DownPvP, new[] { VirtualKey.DOWN }));
+		}
+
+		ImGui.Separator();
+		ImGui.TextUnformatted(UiString.ConfigWindow_Param_PvPScoringPreset.GetDescription());
+		var pvpNames2 = Enum.GetNames<RotationSolver.Basic.Actions.PvPTargetSelection.ScoringPreset>();
+		var presetIndex = (int)Service.Config.PvPScoringPreset;
+		ImGui.SetNextItemWidth(200 * Scale);
+		if (ImGui.Combo("##PvPScoringPreset", ref presetIndex, pvpNames2, pvpNames2.Length))
+		{
+			Service.Config.PvPScoringPreset =
+				(RotationSolver.Basic.Actions.PvPTargetSelection.ScoringPreset)presetIndex;
+		}
+
+		ImGui.Spacing();
+		var showOverlay = Service.Config.PvPSmartShowDebugOverlay;
+		if (ImGui.Checkbox(UiString.ConfigWindow_Param_PvPSmartShowDebugOverlay.GetDescription(), ref showOverlay))
+		{
+			Service.Config.PvPSmartShowDebugOverlay = showOverlay;
+		}
 	}
 	#endregion
 

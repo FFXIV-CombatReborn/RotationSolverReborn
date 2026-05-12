@@ -81,5 +81,13 @@ public enum TargetingType
 	/// PVP: Find the nearest DPS.
 	/// </summary>
 	[Description("Focus DPS in PvP")]
-	PvPDPS
+	PvPDPS,
+
+	/// <summary>
+	/// Smart PvP targeting: scoring-based selector that biases toward
+	/// high-value vulnerable targets, skips effectively-invulnerable ones,
+	/// and uses hysteresis to avoid GCD-to-GCD target oscillation.
+	/// </summary>
+	[Description("PvP Smart")]
+	PvPSmart,
 }

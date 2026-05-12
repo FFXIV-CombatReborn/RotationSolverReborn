@@ -255,6 +255,12 @@ internal static class DataCenter
 
 	public static TargetingType? TargetingTypeOverride { get; set; }
 
+	/// <summary>
+	/// Object ID of the target the PvP Smart mode picked on the previous frame.
+	/// Used by <see cref="Actions.PvPTargetSelection.Factors.HysteresisBonus"/> to avoid GCD-to-GCD oscillation.
+	/// </summary>
+	public static ulong? LastPvPSmartTargetId { get; set; }
+
 	public static TargetingType TargetingType
 	{
 		get
@@ -262,6 +268,18 @@ internal static class DataCenter
 			if (TargetingTypeOverride.HasValue)
 			{
 				return TargetingTypeOverride.Value;
+			}
+
+			if (IsPvP)
+			{
+				if (Service.Config.TargetingTypesPvP.Count == 0)
+				{
+					Service.Config.TargetingTypesPvP.Add(TargetingType.PvPSmart);
+					Service.Config.TargetingTypesPvP.Add(TargetingType.LowHPPercent);
+					Service.Config.Save();
+				}
+				return Service.Config.TargetingTypesPvP[
+					Service.Config.TargetingIndexPvP % Service.Config.TargetingTypesPvP.Count];
 			}
 
 			if (Service.Config.TargetingTypes.Count == 0)
@@ -454,6 +472,22 @@ internal static class DataCenter
 	public static uint TerritoryID => (ushort)Svc.ClientState.TerritoryType;
 
 	public static bool IsPvP => Territory?.IsPvP ?? false;
+
+	/// <summary>
+	/// True iff the current territory is a Crystalline Conflict instance.
+	/// Used by <see cref="Actions.PvPTargetSelection.CrystalCarrierState"/> to gate
+	/// per-frame carrier scans to the only PvP mode that has a crystal.
+	/// </summary>
+	/// <remarks>
+	/// Locale caveat: <see cref="Data.TerritoryInfo.ContentFinderName"/> is the localized
+	/// PlaceName text. The literal "Crystalline Conflict" matches the English client; on
+	/// JP/DE/FR clients the string differs and detection silently returns <c>false</c>,
+	/// degrading the Phase 2 carrier scoring term to zero contribution (no incorrect
+	/// behavior, just inert). Replace with a locale-invariant signal (ContentFinderIcon
+	/// or a TerritoryID set) if non-English-client support becomes required.
+	/// </remarks>
+	public static bool IsInCrystallineConflict =>
+		string.Equals(Territory?.ContentFinderName, "Crystalline Conflict", StringComparison.Ordinal);
 
 	/// <summary>
 	/// When set to <c>true</c> by an external plugin via IPC, the TargetFreely behaviour is
