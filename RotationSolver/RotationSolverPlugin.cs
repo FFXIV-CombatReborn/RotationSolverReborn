@@ -198,6 +198,8 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		}, delay);
 	}
 
+	private static bool? _previousTerritoryIsPvP;
+
 	private static void ClientState_TerritoryChanged(uint id)
 	{
 		DataCenter.ResetAllRecords();
@@ -209,7 +211,10 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		}
 
 		var territory = Service.GetSheet<TerritoryType>().GetRow(id);
-		DataCenter.Territory = new TerritoryInfo(territory);
+		var newTerritory = new TerritoryInfo(territory);
+		var previousIsPvP = _previousTerritoryIsPvP;
+		DataCenter.Territory = newTerritory;
+		_previousTerritoryIsPvP = newTerritory.IsPvP;
 
 		try
 		{
@@ -219,6 +224,54 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		{
 			PluginLog.Warning($"Failed on Territory changed: {ex.Message}");
 		}
+
+		if (previousIsPvP.HasValue)
+		{
+			HandlePvPTerritoryTransition(previousIsPvP.Value, newTerritory.IsPvP);
+		}
+	}
+
+	private const int PvPAutoOnPollIntervalTicks = 30;
+	private const int PvPAutoOnMaxPollAttempts = 20;
+
+	private static void HandlePvPTerritoryTransition(bool wasPvP, bool isPvP)
+	{
+		// Entering a PvP zone: poll until Player is ready, then arm AutoOn. The TerritoryChanged
+		// event fires before the player has fully loaded in, so a fixed delay would be wrong.
+		if (!wasPvP && isPvP && Service.Config.AutoOnPvPMatchStart)
+		{
+			SchedulePvPAutoOnAttempt(attempt: 0);
+			return;
+		}
+
+		// Leaving a PvP zone: this is the actual "PvP match end" signal, regardless of `PvPDisplayActive`.
+		if (wasPvP && !isPvP && Service.Config.AutoOffPvPMatchEnd && DataCenter.State)
+		{
+			RSCommands.CancelState();
+		}
+	}
+
+	private static void SchedulePvPAutoOnAttempt(int attempt)
+	{
+		_ = Svc.Framework.RunOnTick(() =>
+		{
+			// Bail if the user already left the PvP territory or turned the rotation on themselves.
+			if (!(DataCenter.Territory?.IsPvP ?? false) || DataCenter.State)
+			{
+				return;
+			}
+
+			if (Player.Available)
+			{
+				RSCommands.DoStateCommandType(StateCommandType.Auto);
+				return;
+			}
+
+			if (attempt + 1 < PvPAutoOnMaxPollAttempts)
+			{
+				SchedulePvPAutoOnAttempt(attempt + 1);
+			}
+		}, delayTicks: PvPAutoOnPollIntervalTicks);
 	}
 
 	private static void DutyState_DutyStarted(IDutyStateEventArgs e)

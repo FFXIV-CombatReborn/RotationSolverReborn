@@ -389,7 +389,6 @@ namespace RotationSolver.Commands
 				if (Svc.Condition[ConditionFlag.LoggingOut] ||
 					(Service.Config.AutoOffWhenDead && DataCenter.Territory != null && !DataCenter.Territory.IsPvP && Player.Object != null && Player.Object.CurrentHp == 0) ||
 					(Service.Config.AutoOffWhenDeadPvP && DataCenter.Territory != null && DataCenter.Territory.IsPvP && Player.Object != null && Player.Object.CurrentHp == 0) ||
-					(Service.Config.AutoOffPvPMatchEnd && Svc.Condition[ConditionFlag.PvPDisplayActive]) ||
 					(Service.Config.AutoOffCutScene && !DataCenter.IsAutoDuty && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]) ||
 					(Service.Config.AutoOffSwitchClass && Player.Job != _previousJob) ||
 					(Service.Config.AutoOffBetweenArea && !DataCenter.IsAutoDuty && (Svc.Condition[ConditionFlag.BetweenAreas] || Svc.Condition[ConditionFlag.BetweenAreas51])) ||
@@ -403,16 +402,6 @@ namespace RotationSolver.Commands
 					}
 
 					ActionUpdater.AutoCancelTime = DateTime.MinValue;
-					return;
-				}
-
-				if (Service.Config.AutoOnPvPMatchStart &&
-					Svc.Condition[ConditionFlag.BetweenAreas] &&
-					Svc.Condition[ConditionFlag.BoundByDuty] &&
-					!DataCenter.State &&
-					(DataCenter.Territory?.IsPvP ?? false))
-				{
-					DoStateCommandType(StateCommandType.Auto);
 					return;
 				}
 
