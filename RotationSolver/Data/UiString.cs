@@ -424,6 +424,9 @@ namespace RotationSolver.Data
 		[Description("PvP scoring preset")]
 		ConfigWindow_Param_PvPScoringPreset,
 
+		[Description("Show debug overlay (per-target score breakdown)")]
+		ConfigWindow_Param_PvPSmartShowDebugOverlay,
+
 		[Description("Move Up")]
 		ConfigWindow_Actions_MoveUp,
 

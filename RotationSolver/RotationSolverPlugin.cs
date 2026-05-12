@@ -37,6 +37,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 	//private static NativeControlWindow? _nativeControlWindow;
 	private static EasterEggWindow? _easterEggWindow;
 	private static FirstStartTutorialWindow? _firstStartTutorialWindow;
+	private static PvPSmartDebugOverlay? _pvpSmartDebugOverlay;
 
 	private static readonly List<IDisposable> _dis = [];
 	public static string Name => "Rotation Solver Reborn";
@@ -69,6 +70,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		//_nativeControlWindow = new();
 		_easterEggWindow = new();
 		_firstStartTutorialWindow = new();
+		_pvpSmartDebugOverlay = new();
 
 		// Start cactbot bridge if enabled
 		//try
@@ -94,6 +96,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		windowSystem.AddWindow(_overlayWindow);
 		windowSystem.AddWindow(_easterEggWindow);
 		windowSystem.AddWindow(_firstStartTutorialWindow);
+		windowSystem.AddWindow(_pvpSmartDebugOverlay);
 
 		//Notify.Success("Overlay Window was added!");
 

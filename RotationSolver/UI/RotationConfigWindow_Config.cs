@@ -251,6 +251,13 @@ public partial class RotationConfigWindow
 			Service.Config.PvPScoringPreset =
 				(RotationSolver.Basic.Actions.PvPTargetSelection.ScoringPreset)presetIndex;
 		}
+
+		ImGui.Spacing();
+		var showOverlay = Service.Config.PvPSmartShowDebugOverlay;
+		if (ImGui.Checkbox(UiString.ConfigWindow_Param_PvPSmartShowDebugOverlay.GetDescription(), ref showOverlay))
+		{
+			Service.Config.PvPSmartShowDebugOverlay = showOverlay;
+		}
 	}
 	#endregion
 

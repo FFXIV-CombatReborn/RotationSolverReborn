@@ -62,6 +62,9 @@ internal partial class Configs : IPluginConfiguration
 		= RotationSolver.Basic.Actions.PvPTargetSelection.ScoringWeights.ForPreset(
 			RotationSolver.Basic.Actions.PvPTargetSelection.ScoringPreset.Casual);
 
+	[UI("Show a debug overlay with per-target PvPSmart score breakdowns while in PvP.\nThe overlay refreshes each frame and is intended for tuning the scoring weights. Has no effect outside PvP zones.")]
+	public bool PvPSmartShowDebugOverlay { get; set; } = false;
+
 	public MacroInfo DutyStart { get; set; } = new MacroInfo();
 	public MacroInfo DutyEnd { get; set; } = new MacroInfo();
 
