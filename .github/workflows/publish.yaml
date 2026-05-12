@@ -17,8 +17,14 @@ jobs:
       - name: Get Environment Variables
         run: |
           $tag = "${{ github.ref }}" -replace 'refs/tags/', ''
+          # .NET pads AssemblyVersion to 4 components; the in-zip Dalamud manifest reflects
+          # the padded value. Pad the workflow's exposed version to match so pluginmaster.json
+          # and the in-zip manifest agree, which Dalamud's installer requires.
+          $parts = $tag.Split('.')
+          if ($parts.Length -eq 3) { $assemblyVersion = "$tag.0" } else { $assemblyVersion = $tag }
 
           "tag=$tag" | Out-File -Append -FilePath $Env:GITHUB_ENV
+          "assembly_version=$assemblyVersion" | Out-File -Append -FilePath $Env:GITHUB_ENV
           
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
@@ -34,7 +40,7 @@ jobs:
         run: dotnet restore RotationSolver/RotationSolver.csproj
 
       - name: Build Plugin
-        run: dotnet build --no-restore -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=${{ env.tag }} -p:FileVersion=${{ env.tag }} -p:PackageVersion=${{ env.tag }} -p:InformationalVersion=${{ env.tag }} --output .\build
+        run: dotnet build --no-restore -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=${{ env.assembly_version }} -p:FileVersion=${{ env.assembly_version }} -p:PackageVersion=${{ env.tag }} -p:InformationalVersion=${{ env.tag }} --output .\build
 
       - name: Generate pluginmaster.json
         shell: pwsh
@@ -60,8 +66,8 @@ jobs:
             IsTestingExclusive      = $manifest.IsTestingExclusive
             IconUrl                 = $manifest.IconUrl
             AcceptsFeedback         = $manifest.AcceptsFeedback
-            AssemblyVersion         = "${{ env.tag }}"
-            TestingAssemblyVersion  = "${{ env.tag }}"
+            AssemblyVersion         = "${{ env.assembly_version }}"
+            TestingAssemblyVersion  = "${{ env.assembly_version }}"
             DownloadLinkInstall     = $downloadUrl
             DownloadLinkTesting     = $downloadUrl
             DownloadLinkUpdate      = $downloadUrl
