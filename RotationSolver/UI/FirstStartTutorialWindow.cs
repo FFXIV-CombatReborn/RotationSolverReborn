@@ -20,7 +20,7 @@ internal sealed class FirstStartTutorialWindow : Window
 	[
 		new(
 			"Welcome!",
-			"This walkthrough explains how to set up Rotation Solver Reborn and what each section controls and includes recommended macros.",
+			"This walkthrough explains how to set up Ascended Rotation Solver Reborn and what each section controls and includes recommended macros.",
 			Bullets:
 			[
 				"Open the config with /rotation or the plugin UI button.",

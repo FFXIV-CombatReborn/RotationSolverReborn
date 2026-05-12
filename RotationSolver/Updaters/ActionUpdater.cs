@@ -14,7 +14,7 @@ internal static class ActionUpdater
 
 	static ActionUpdater()
 	{
-		_ = EzIPC.Init(typeof(ActionUpdater), "RotationSolverReborn.ActionUpdater");
+		_ = EzIPC.Init(typeof(ActionUpdater), "ascended-rotationsolverreborn.ActionUpdater");
 	}
 
 	[EzIPCEvent] public static Action<uint> NextGCDActionChanged = delegate { };

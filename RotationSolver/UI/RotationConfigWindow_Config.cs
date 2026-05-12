@@ -17,7 +17,7 @@ public partial class RotationConfigWindow
 
 	private void SearchingBox()
 	{
-		if (ImGui.InputTextWithHint("##Rotation Solver Reborn Search Box", UiString.ConfigWindow_Searching.GetDescription(), ref _searchText, 128, ImGuiInputTextFlags.AutoSelectAll))
+		if (ImGui.InputTextWithHint("##Ascended Rotation Solver Reborn Search Box", UiString.ConfigWindow_Searching.GetDescription(), ref _searchText, 128, ImGuiInputTextFlags.AutoSelectAll))
 		{
 			_searchResults = _allSearchable.SearchItems(_searchText);
 		}

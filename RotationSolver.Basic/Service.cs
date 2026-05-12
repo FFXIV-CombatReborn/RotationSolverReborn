@@ -23,6 +23,9 @@ internal class Service : IDisposable
 	public const string ALTCOMMAND = "/rsr";
 	public const string AUTOCOMMAND = "/rotation Auto";
 	public const string OFFCOMMAND = "/rotation Off";
+	// USERNAME and REPO intentionally point at upstream RotationSolverReborn so this
+	// fork inherits upstream's auto-updating data files in /Resources (status lists,
+	// dance partner priority, incompatible-plugins list, etc.) without manual sync.
 	public const string USERNAME = "FFXIV-CombatReborn";
 	public const string REPO = "RotationSolverReborn";
 

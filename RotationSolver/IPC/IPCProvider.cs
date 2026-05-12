@@ -15,7 +15,7 @@ namespace RotationSolver.IPC
 		/// </summary>
 		internal IPCProvider()
 		{
-			_ = EzIPC.Init(this, prefix: "RotationSolverReborn");
+			_ = EzIPC.Init(this, prefix: "ascended-rotationsolverreborn");
 		}
 
 		/// <summary>

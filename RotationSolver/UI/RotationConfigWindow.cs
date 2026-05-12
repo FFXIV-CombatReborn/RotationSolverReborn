@@ -468,7 +468,7 @@ public partial class RotationConfigWindow : Window
 
 		if (_cachedDiagInfo == null)
 		{
-			_ = diagInfo.AppendLine($"Rotation Solver Reborn v{typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?"}");
+			_ = diagInfo.AppendLine($"Ascended Rotation Solver Reborn v{typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?"}");
 			_ = diagInfo.AppendLine("Failed to get Dalamud start info.");
 		}
 		else
@@ -476,7 +476,7 @@ public partial class RotationConfigWindow : Window
 			_ = diagInfo.AppendLine($"OS Type: {_cachedDiagInfo.Platform}");
 			_ = diagInfo.AppendLine($"FFXIV Version: {_cachedDiagInfo.GameVersion}");
 			_ = diagInfo.AppendLine($"Dalamud Version: {Svc.PluginInterface.GetDalamudVersion().Version.ToString()}");
-			_ = diagInfo.AppendLine($"Rotation Solver Reborn v{_cachedDiagInfo.RSRVersion}");
+			_ = diagInfo.AppendLine($"Ascended Rotation Solver Reborn v{_cachedDiagInfo.RSRVersion}");
 			_ = diagInfo.AppendLine($"Dalamud Staging: {DataCenter.DalamudStagingEnabled}");
 			_ = diagInfo.AppendLine($"Game Language: {_cachedDiagInfo.Language}");
 			_ = diagInfo.AppendLine($"Update Frequency: {Service.Config.MinUpdatingTime}");
@@ -1001,7 +1001,7 @@ public partial class RotationConfigWindow : Window
 		{
 			return _baseUsageHints[index];
 		}
-		return "Thank you for using Rotation Solver Reborn!";
+		return "Thank you for using Ascended Rotation Solver Reborn!";
 	}
 
 	// Hint bar at the top of the body
@@ -3678,7 +3678,7 @@ public partial class RotationConfigWindow : Window
 
 			ImGui.Spacing();
 
-			using var child = ImRaii.Child("Rotation Solver Reborn Add Status", new Vector2(-1, ChildHeight * Scale));
+			using var child = ImRaii.Child("Ascended Rotation Solver Reborn Add Status", new Vector2(-1, ChildHeight * Scale));
 			if (child)
 			{
 				var count = Math.Max(1, (int)MathF.Floor(ImGui.GetWindowWidth() / ((size * 3 / 4 * Scale) + ImGui.GetStyle().ItemSpacing.X)));
@@ -3819,7 +3819,7 @@ public partial class RotationConfigWindow : Window
 		}
 		ImGui.PushID(name);
 		uint removeId = 0;
-		var popupId = $"Rotation Solver Reborn Action Popup{name}";
+		var popupId = $"Ascended Rotation Solver Reborn Action Popup{name}";
 
 		if (ImGui.Button($"{UiString.ConfigWindow_List_AddAction.GetDescription()}##{name}"))
 		{
@@ -4121,14 +4121,14 @@ public partial class RotationConfigWindow : Window
 			for (var i = 0; i < libs.Length; i++)
 			{
 				ImGui.SetNextItemWidth(width);
-				if (ImGui.InputTextWithHint($"##Rotation Solver Reborn Territory Provoke Name {i}",
+				if (ImGui.InputTextWithHint($"##Ascended Rotation Solver Reborn Territory Provoke Name {i}",
 					UiString.ConfigWindow_List_NoProvokeName.GetDescription(), ref libs[i], 1024))
 				{
 					OtherConfiguration.NoProvokeNames[territoryId] = libs;
 					_ = OtherConfiguration.SaveNoProvokeNames();
 				}
 				ImGui.SameLine();
-				if (ImGuiEx.IconButton(FontAwesomeIcon.Ban, $"##Rotation Solver Reborn Remove Territory Provoke Name {i}"))
+				if (ImGuiEx.IconButton(FontAwesomeIcon.Ban, $"##Ascended Rotation Solver Reborn Remove Territory Provoke Name {i}"))
 				{
 					removeIndex = i;
 				}

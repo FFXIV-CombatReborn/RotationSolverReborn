@@ -246,7 +246,7 @@ internal static class ActionTracer
 		// Millisecond precision in the filename avoids collisions when rollover happens twice in one second.
 		var path = Path.Combine(_traceDirectory, $"actiontrace_{DateTime.Now:yyyyMMdd_HHmmss_fff}.log");
 		_writer = new StreamWriter(path, append: false) { AutoFlush = true };
-		_writer.WriteLine($"# RotationSolverReborn action trace started {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} (max size {MaxFileSizeBytes / (1024 * 1024)} MB before rollover)");
+		_writer.WriteLine($"# ascended-rotationsolverreborn action trace started {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} (max size {MaxFileSizeBytes / (1024 * 1024)} MB before rollover)");
 		_currentFilePath = path;
 
 		PruneOldFiles();

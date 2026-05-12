@@ -2,10 +2,10 @@
     <PropertyGroup>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <PackageIcon>Logo.png</PackageIcon>
-        <Description>A basic library for rotation development in FFXIV in RotationSolver.</Description>
-        <PackageId>RotationSolverReborn.Basic</PackageId>
-        <Title>RotationSolver.Basic</Title>
-        <RepositoryUrl>https://github.com/FFXIV-CombatReborn/RotationSolverReborn/tree/main/RotationSolver.Basic</RepositoryUrl>
+        <Description>A basic library for rotation development in FFXIV for Ascended Rotation Solver Reborn.</Description>
+        <PackageId>ascended-rotationsolverreborn.Basic</PackageId>
+        <Title>ascended-rotationsolverreborn.Basic</Title>
+        <RepositoryUrl>https://github.com/jkleinne/ascended-rotationsolverreborn/tree/main/RotationSolver.Basic</RepositoryUrl>
         <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
         <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
         <PackageTags>FFXIV, FF14, Dalamud, Rotation</PackageTags>

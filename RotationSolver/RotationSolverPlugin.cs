@@ -40,7 +40,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 	private static PvPSmartDebugOverlay? _pvpSmartDebugOverlay;
 
 	private static readonly List<IDisposable> _dis = [];
-	public static string Name => "Rotation Solver Reborn";
+	public static string Name => "Ascended Rotation Solver Reborn";
 	internal static readonly List<DrawingHighlightHotbarBase> _drawingElements = [];
 
 	public static DalamudLinkPayload OpenLinkPayload { get; private set; } = null!;

@@ -117,7 +117,7 @@ internal class ControlWindow : CtrlWindow
 		ImGui.SameLine();
 
 		var value = Service.Config.IsControlWindowLock ? 0 : 1;
-		if (ImGuiHelper.SelectableCombo("Rotation Solver Reborn Lock the Control Window",
+		if (ImGuiHelper.SelectableCombo("Ascended Rotation Solver Reborn Lock the Control Window",
 		[
 			UiString.InfoWindowNoMove.GetDescription(),
 			UiString.InfoWindowMove.GetDescription(),
