@@ -56,7 +56,8 @@ public sealed class MitigationDatabase : IMitigationDatabase
             using var stream = assembly.GetManifestResourceStream(EmbeddedResourceName);
             if (stream == null)
             {
-                TryWarn($"Embedded resource '{EmbeddedResourceName}' not found; falling back to in-code defaults.");
+                var available = string.Join(", ", assembly.GetManifestResourceNames());
+                TryWarn($"Embedded resource '{EmbeddedResourceName}' not found; falling back to in-code defaults. Available resources: [{available}]");
                 return WithEmbeddedDefaults();
             }
             using var reader = new StreamReader(stream);
