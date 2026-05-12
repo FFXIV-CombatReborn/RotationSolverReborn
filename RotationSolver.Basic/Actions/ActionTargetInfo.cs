@@ -3775,20 +3775,7 @@ public struct ActionTargetInfo(IBaseAction action)
 							break;
 						}
 
-						var preset = Service.Config.PvPScoringPreset;
-						var weights = preset == ScoringPreset.Custom
-							? Service.Config.PvPScoringWeights
-							: ScoringWeights.ForPreset(preset);
-
-						var context = new ScoringContext(
-							Weights: weights,
-							MitigationDatabase: PvPMitigationDatabaseProvider.Current,
-							LBDatabase: PvPLBDatabaseProvider.Current,
-							PreviousTargetId: DataCenter.LastPvPSmartTargetId,
-							CrystalCarrierObjectId: CrystalCarrierState.GetCurrentCarrierId(),
-							Hostiles: objects,
-							ThreatenedAllyIds: ThreatenedAllyState.BuildThreatenedAllyIds(),
-							EffectiveRangeYalms: 25f);
+						var context = PvPScoringContextBuilder.BuildCurrent(objects);
 
 						IBattleChara? best = null;
 						var bestScore = double.NegativeInfinity;

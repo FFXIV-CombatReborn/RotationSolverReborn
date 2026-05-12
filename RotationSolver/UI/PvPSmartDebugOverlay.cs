@@ -19,6 +19,8 @@ internal class PvPSmartDebugOverlay : Window
 {
     private const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoCollapse;
 
+    private static bool _explainErrorLogged;
+
     public PvPSmartDebugOverlay() : base("PvPSmart Score Breakdown", BaseFlags)
     {
         Size = new Vector2(820, 260);
@@ -50,22 +52,12 @@ internal class PvPSmartDebugOverlay : Window
             return;
         }
 
-        var preset = Service.Config.PvPScoringPreset;
-        var weights = preset == ScoringPreset.Custom
-            ? Service.Config.PvPScoringWeights
-            : ScoringWeights.ForPreset(preset);
+        var context = PvPScoringContextBuilder.BuildCurrent(hostiles);
 
-        var context = new ScoringContext(
-            Weights: weights,
-            MitigationDatabase: PvPMitigationDatabaseProvider.Current,
-            LBDatabase: PvPLBDatabaseProvider.Current,
-            PreviousTargetId: DataCenter.LastPvPSmartTargetId,
-            CrystalCarrierObjectId: CrystalCarrierState.GetCurrentCarrierId(),
-            Hostiles: hostiles,
-            ThreatenedAllyIds: ThreatenedAllyState.BuildThreatenedAllyIds(),
-            EffectiveRangeYalms: 25f);
-
-        ImGui.TextUnformatted($"Preset: {preset} | Hostiles: {hostiles.Count} | Selected: 0x{DataCenter.LastPvPSmartTargetId ?? 0:X}");
+        var headerSelected = DataCenter.LastPvPSmartTargetId is ulong selId
+            ? $"0x{selId:X}"
+            : "none";
+        ImGui.TextUnformatted($"Preset: {Service.Config.PvPScoringPreset} | Hostiles: {hostiles.Count} | Selected: {headerSelected}");
         ImGui.Separator();
 
         const ImGuiTableFlags TableFlags =
@@ -101,8 +93,13 @@ internal class PvPSmartDebugOverlay : Window
             {
                 b = PvPTargetScorer.Explain(hostile, context);
             }
-            catch
+            catch (Exception ex)
             {
+                if (!_explainErrorLogged)
+                {
+                    ECommons.Logging.PluginLog.Warning($"PvPSmartDebugOverlay: PvPTargetScorer.Explain threw; suppressing further warnings this session. First error: {ex.Message}");
+                    _explainErrorLogged = true;
+                }
                 continue;
             }
 
