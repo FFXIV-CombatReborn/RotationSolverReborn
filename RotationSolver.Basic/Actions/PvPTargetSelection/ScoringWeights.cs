@@ -1,7 +1,7 @@
 namespace RotationSolver.Basic.Actions.PvPTargetSelection;
 
 /// <summary>
-/// Tunable weights for <see cref="PvPTargetScorer"/>. Phase 2/3 fields are present and default to 0
+/// Tunable weights for <see cref="PvPTargetScorer"/>. Phase 3 fields are present and default to 0
 /// so factor wiring is forward-compatible without touching the struct shape later.
 /// </summary>
 public readonly record struct ScoringWeights(
@@ -11,7 +11,7 @@ public readonly record struct ScoringWeights(
     double MitigationPenaltyWeight,
     double DistancePenaltyWeight,
     double StickyBonus,
-    // Phase 2 (zero until wired)
+    // Phase 2
     double CarrierWeight,
     double LBWeight,
     // Phase 3 (zero until wired)
