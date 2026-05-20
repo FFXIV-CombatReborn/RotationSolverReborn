@@ -1046,7 +1046,7 @@ internal partial class Configs : IPluginConfiguration
 	/// This setting controls how many oGCDs RSR will try to fit in a single GCD window.
 	/// Lower numbers mean more oGCDs, but potentially more GCD clipping.
 	/// </markdown>
-	[JobConfig, Range(0.05f, 0.25f, ConfigUnitType.Percent)]
+	[JobConfig, Range(0.05f, 0.4f, ConfigUnitType.Percent)]
 	[UI("Action Ahead (Percent of your GCD time remaining on a GCD cycle before RSR will try to queue the next GCD)", Filter = BasicTimer,
 	Description = "This setting controls how many oGCDs RSR will try to fit in a single GCD window\nLower numbers mean more oGCDs, but potentially more GCD clipping")]
 	private readonly float _action6head = 0.25f;
