@@ -358,19 +358,6 @@ public sealed class NIN_Reborn : NinjaRotation
 		}
 		else if (TenPvE.CanUse(out _, usedUp: ShadowWalkerNeeded || InTrickAttack || TenPvE.Cooldown.WillHaveXChargesGCD(2, 2, 0) || BurnMudraStacks) && _ninActionAim == null)
 		{
-			//Vulnerable
-			if (ShadowWalkerNeeded && (!MeisuiPvE.Cooldown.IsCoolingDown || !TrickAttackPvE.Cooldown.IsCoolingDown || KunaisBanePvE.Cooldown.IsCoolingDown) && !IsShadowWalking && !HasTenChiJin && SuitonPvE.EnoughLevel)
-			{
-				if (DeathBlossomPvE.CanUse(out _) && JinPvE.CanUse(out _) && JinPvE.Info.IsQuestUnlocked() && HutonPvE.IsEnabled)
-				{
-					SetNinjutsu(HutonPvE);
-				}
-				else if (JinPvE.CanUse(out _) && JinPvE.Info.IsQuestUnlocked() && SuitonPvE.IsEnabled && ((TrickAttackPvE.IsEnabled && !KunaisBanePvE.EnoughLevel) || (KunaisBanePvE.IsEnabled && KunaisBanePvE.EnoughLevel)))
-				{
-					SetNinjutsu(SuitonPvE);
-				}
-			}
-
 			//Aoe
 			if (DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _))
 			{
@@ -385,6 +372,19 @@ public sealed class NIN_Reborn : NinjaRotation
 				else if (KatonPvE.EnoughLevel && KatonPvE.IsEnabled && ChiPvE.Info.IsQuestUnlocked())
 				{
 					SetNinjutsu(KatonPvE);
+				}
+			}
+
+			//Vulnerable
+			if (ShadowWalkerNeeded && (!MeisuiPvE.Cooldown.IsCoolingDown || !TrickAttackPvE.Cooldown.IsCoolingDown || KunaisBanePvE.Cooldown.IsCoolingDown) && !IsShadowWalking && !HasTenChiJin && SuitonPvE.EnoughLevel)
+			{
+				if (DeathBlossomPvE.CanUse(out _) && JinPvE.CanUse(out _) && JinPvE.Info.IsQuestUnlocked() && HutonPvE.IsEnabled)
+				{
+					SetNinjutsu(HutonPvE);
+				}
+				else if (JinPvE.CanUse(out _) && JinPvE.Info.IsQuestUnlocked() && SuitonPvE.IsEnabled && ((TrickAttackPvE.IsEnabled && !KunaisBanePvE.EnoughLevel) || (KunaisBanePvE.IsEnabled && KunaisBanePvE.EnoughLevel)))
+				{
+					SetNinjutsu(SuitonPvE);
 				}
 			}
 

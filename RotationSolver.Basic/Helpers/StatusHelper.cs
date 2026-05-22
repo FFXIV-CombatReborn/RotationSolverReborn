@@ -103,9 +103,11 @@ public static class StatusHelper
 	[
 		StatusID.Holmgang_409,
 		StatusID.LivingDead,
-        //StatusID.WalkingDead,
-        StatusID.Superbolide,
+		//StatusID.WalkingDead,
+		StatusID.Superbolide,
 		StatusID.Invulnerability,
+		StatusID.HpRecoveryDown,
+		StatusID.Mounted,
 	];
 
 	/// <summary>

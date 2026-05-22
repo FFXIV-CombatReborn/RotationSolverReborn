@@ -8,6 +8,7 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
@@ -3209,7 +3210,7 @@ public static class ObjectHelper
 			return 0;
 		}
 
-		var effectiveHp = character.CurrentHp + ObjectHelper.GetObjectShield(battleChara);
+		var effectiveHp = character.CurrentHp + GetObjectShield(battleChara);
 		return (int)Math.Floor((float)effectiveHp / character.MaxHp * 100f);
 	}
 
@@ -3713,10 +3714,18 @@ public static class ObjectHelper
 			return float.MaxValue;
 		}
 
-		// Use XZ-plane (horizontal) distance only — the game engine measures action range
-		// purely on the horizontal plane, ignoring Y-axis differences.
 		var playerPos = Player.Object.Position;
 		var targetPos = battleChara.Position;
+
+		// Check vertical distance first - if too far vertically, the target is unreachable
+		var dy = MathF.Abs(targetPos.Y - playerPos.Y);
+		if (dy > 30f)
+		{
+			return dy;
+		}
+
+		// Use XZ-plane (horizontal) distance only — the game engine measures action range
+		// purely on the horizontal plane, ignoring Y-axis differences (when within vertical threshold).
 		var dx = targetPos.X - playerPos.X;
 		var dz = targetPos.Z - playerPos.Z;
 		var distance = MathF.Sqrt(dx * dx + dz * dz) - (Player.Object.HitboxRadius + battleChara.HitboxRadius);
