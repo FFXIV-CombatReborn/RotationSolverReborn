@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace RotationSolver.RebornRotations.Tank;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.5")]
@@ -6,10 +8,35 @@ namespace RotationSolver.RebornRotations.Tank;
 public sealed class GNB_Reborn : GunbreakerRotation
 {
 	#region Config Options
-	[RotationConfig(CombatType.PvE, Name = "Restrict automatic use of Aurora to only being used on self")]
-	public bool AuroraSelf { get; set; } = false;
-	[RotationConfig(CombatType.PvE, Name = "Restrict automatic use of Heart of Stone/Heart of Corundum to only being used on self")]
-	public bool HeartOfStoneSelf { get; set; } = false;
+	[RotationConfig(CombatType.PvE, Name = "How to use Aurora")]
+	public AuroraUsageStrategy AuroraUsage { get; set; } = AuroraUsageStrategy.TankbusterTarget;
+
+	[RotationConfig(CombatType.PvE, Name = "How to use Heart Of Stone/Heart Of Corundum")]
+	public HeartOfStoneStrategy HeartOfStoneUsage { get; set; } = HeartOfStoneStrategy.TankbusterTarget;
+
+	public enum HeartOfStoneStrategy : byte
+	{
+		[Description("Full target usage")]
+		Fullusage,
+
+		[Description("Only use on tankbuster targets prioritizing self")]
+		TankbusterTarget,
+
+		[Description("Only use on self")]
+		SelfOnly,
+	}
+
+	public enum AuroraUsageStrategy : byte
+	{
+		[Description("Full target usage")]
+		Fullusage,
+
+		[Description("Only use on tankbuster targets prioritizing self")]
+		TankbusterTarget,
+
+		[Description("Only use on self")]
+		SelfOnly,
+	}
 
 	#endregion
 
@@ -99,24 +126,41 @@ public sealed class GNB_Reborn : GunbreakerRotation
 
 		if (HeartOfStonePvE.EnoughLevel)
 		{
-			if (!HeartOfStoneSelf && HeartOfCorundumPvE.EnoughLevel && HeartOfCorundumPvE.CanUse(out act, targetOverride: TargetType.Tankbuster))
+			switch (HeartOfStoneUsage)
 			{
-				return true;
-			}
+				case HeartOfStoneStrategy.SelfOnly:
+					if (HeartOfCorundumPvE.EnoughLevel && HeartOfCorundumPvE.CanUse(out act))
+					{
+						return true;
+					}
+					if (!HeartOfCorundumPvE.EnoughLevel && HeartOfStonePvE.CanUse(out act))
+					{
+						return true;
+					}
+					break;
 
-			if (HeartOfStoneSelf && HeartOfCorundumPvE.EnoughLevel && HeartOfCorundumPvE.CanUse(out act))
-			{
-				return true;
-			}
+				case HeartOfStoneStrategy.TankbusterTarget:
+					if (HeartOfCorundumPvE.EnoughLevel && HeartOfCorundumPvE.CanUse(out act, targetOverride: TargetType.Tankbuster))
+					{
+						return true;
+					}
+					if (!HeartOfCorundumPvE.EnoughLevel && HeartOfStonePvE.CanUse(out act, targetOverride: TargetType.Tankbuster))
+					{
+						return true;
+					}
+					break;
 
-			if (!HeartOfStoneSelf && !HeartOfCorundumPvE.EnoughLevel && HeartOfStonePvE.CanUse(out act, targetOverride: TargetType.Tankbuster))
-			{
-				return true;
-			}
-
-			if (HeartOfStoneSelf && !HeartOfCorundumPvE.EnoughLevel && HeartOfStonePvE.CanUse(out act))
-			{
-				return true;
+				case HeartOfStoneStrategy.Fullusage:
+				default:
+					if (HeartOfCorundumPvE.EnoughLevel && HeartOfCorundumPvE.CanUse(out act, targetOverride: TargetType.LowHP))
+					{
+						return true;
+					}
+					if (!HeartOfCorundumPvE.EnoughLevel && HeartOfStonePvE.CanUse(out act, targetOverride: TargetType.LowHP))
+					{
+						return true;
+					}
+					break;
 			}
 		}
 
@@ -174,14 +218,29 @@ public sealed class GNB_Reborn : GunbreakerRotation
 
 		if (!IsLastAbility(ActionID.AuroraPvE))
 		{
-			if (!AuroraSelf && AuroraPvE.CanUse(out act, targetOverride: TargetType.LowHP))
+			switch (AuroraUsage)
 			{
-				return true;
-			}
+				case AuroraUsageStrategy.SelfOnly:
+					if (AuroraPvE.CanUse(out act))
+					{
+						return true;
+					}
+					break;
 
-			if (AuroraSelf && AuroraPvE.CanUse(out act))
-			{
-				return true;
+				case AuroraUsageStrategy.TankbusterTarget:
+					if (AuroraPvE.CanUse(out act, targetOverride: TargetType.Tankbuster))
+					{
+						return true;
+					}
+					break;
+
+				case AuroraUsageStrategy.Fullusage:
+				default:
+					if (AuroraPvE.CanUse(out act, targetOverride: TargetType.LowHP))
+					{
+						return true;
+					}
+					break;
 			}
 		}
 

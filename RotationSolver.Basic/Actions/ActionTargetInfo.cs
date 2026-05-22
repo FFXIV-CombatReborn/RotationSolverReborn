@@ -4059,7 +4059,7 @@ public struct ActionTargetInfo(IBaseAction action)
 				return null;
 			}
 
-			// Prefer self first
+			// Prefer self first if player is the target of the boss
 			foreach (var t in DataCenter.TankbusterTargets)
 			{
 				if (ObjectHelper.IsAlive(t) && !t.IsConditionCannotTarget() && t.GameObjectId == Player.Object.GameObjectId)

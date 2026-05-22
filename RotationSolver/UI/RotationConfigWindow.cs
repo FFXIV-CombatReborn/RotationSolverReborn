@@ -4605,6 +4605,8 @@ public partial class RotationConfigWindow : Window
 			ImGui.Text($"Fate ID: {DataCenter.PlayerFateId}");
 		}
 		ImGui.Spacing();
+		ImGui.Text($"IsInWindurst: {DataCenter.IsInWindurst}");
+		ImGui.Spacing();
 		ImGui.Text($"In Field Operations: {DataCenter.IsInFieldOperations}");
 		ImGui.Text($"In Field Raid: {DataCenter.IsInFieldRaid}");
 		ImGui.Spacing();
@@ -4637,17 +4639,15 @@ public partial class RotationConfigWindow : Window
 		ImGui.Text($"MountRokkon: {DataCenter.MountRokkon}");
 		ImGui.Text($"SildihnSubterrane: {DataCenter.SildihnSubterrane}");
 		ImGui.Spacing();
-		ImGui.Text($"IsCastingMultiHit: {DataCenter.IsCastingMultiHit()}");
-		ImGui.Text($"IsCastingTankVfx: {DataCenter.IsCastingTankVfx()}");
-		ImGui.Text($"IsCastingAreaVfx: {DataCenter.IsCastingAreaVfx()}");
 		ImGui.Text($"AreHostilesCastingKnockback: {DataCenter.AreHostilesCastingKnockback}");
 		ImGui.Text($"IsHostileCastingAOE: {DataCenter.IsHostileCastingAOE}");
 		ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
 		ImGui.Text($"IsHostileCastingStop: {DataCenter.IsHostileCastingStop}");
 		ImGui.Spacing();
-		var HellInACell = (StatusID)4734;
-		var HasHellInACell = StatusHelper.PlayerHasStatus(false, HellInACell);
-		ImGui.Text($"HasHellInACell: {HasHellInACell}");
+		ImGui.Text($"IsCastingMultiHit: {DataCenter.IsCastingMultiHit()}");
+		ImGui.Text($"IsCastingAreaVfx: {DataCenter.IsCastingAreaVfx()}");
+		ImGui.Text($"IsCastingTankVfx: {DataCenter.IsCastingTankVfx()}");
+		ImGui.Text($"TankbusterTargets: {DataCenter.TankbusterTargets.Count}");
 		ImGui.Spacing();
 		ImGui.Text($"IsInM11S: {DataCenter.IsInM11S}");
 		ImGui.Text($"IsTyrantCastingSpecialIndicator2: {DataCenter.IsTyrantCastingSpecialIndicator2()}");
