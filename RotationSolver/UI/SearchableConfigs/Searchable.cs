@@ -247,7 +247,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 
 	public virtual bool ShowInChild => true;
 
-	public unsafe void Draw()
+	public virtual unsafe void Draw()
 	{
 		// Determine the appropriate filter based on the context (PvP or PvE)
 		var filter = DataCenter.IsPvP ? PvPFilter : PvEFilter;

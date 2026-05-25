@@ -58,29 +58,25 @@ public partial class RotationConfigWindow : Window
 	private bool _rsrIconTriggered = false;
 	private const double RsrIconHoldSeconds = 1.2;
 
-	public bool CNLanguageClient => _cachedDiagInfo?.Language.ToString() == "Chinese";
+	public bool CNLanguageClient => _cachedDiagInfo?.Language.ToString() is "Chinese" or "ChineseSimplified";
 
 	private static readonly string[] _supporters =
 	[
 	"????",
 	"ABA",
 	"Akurosuki",
-	"Anguish",
 	"Aniane",
 	"Bang Pow Nyoom",
-	"Biscuit",
 	"catfourteen",
 	"Chaos_co",
 	"Chris",
 	"Cyxey",
-	"Darkaim",
 	"DeadCode",
 	"Drama",
 	"Eddar",
 	"Elena",
 	"Endings",
 	"Enyo",
-	"Falling_Leaves",
 	"Goku",
 	"Hawa",
 	"Headrushed",
