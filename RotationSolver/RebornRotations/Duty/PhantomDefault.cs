@@ -235,7 +235,7 @@ public sealed class PhantomDefault : PhantomRotation
 			}
 		}
 
-		if (OccultEtherPvE.CanUse(out act) && InCombat)
+		if (OccultEtherPvE.CanUse(out _) && InCombat)
 		{
 			if (!OccultEtherSelf)
 			{
@@ -246,7 +246,7 @@ public sealed class PhantomDefault : PhantomRotation
 			}
 			else
 			{
-				if (OccultEtherPvE.Target.Target == Player && (Player?.CurrentMp < OccultEtherThreshold))
+				if (OccultEtherPvE.CanUse(out act, targetOverride: TargetType.Self) && (Player?.CurrentMp < OccultEtherThreshold))
 				{
 					return true;
 				}
@@ -445,7 +445,7 @@ public sealed class PhantomDefault : PhantomRotation
 			return true;
 		}
 
-		if (OccultPotionPvE.CanUse(out act) && InCombat)
+		if (OccultPotionPvE.CanUse(out _) && InCombat)
 		{
 			if (!OccultPotionSelf)
 			{
@@ -456,7 +456,7 @@ public sealed class PhantomDefault : PhantomRotation
 			}
 			else
 			{
-				if (OccultPotionPvE.Target.Target == Player && Player?.GetHealthRatio() < OccultPotionThreshold)
+				if (OccultPotionPvE.CanUse(out act, targetOverride: TargetType.Self) && Player?.GetHealthRatio() < OccultPotionThreshold)
 				{
 					return true;
 				}
@@ -890,7 +890,7 @@ public sealed class PhantomDefault : PhantomRotation
 		// Check starfall-invuln combo
 		if (StarfallUseage && StarfallPvE.CanUse(out act))
 		{
-			if (ShouldHoldBurst() && !StatusHelper.PlayerWillStatusEnd(3, true, StatusID.PredictionOfStarfall) && !StatusHelper.PlayerWillStatusEnd(3, false, StatusID.PredictionOfStarfall)) // If we're holding burst, we don't want to use starfall yet, but only to a point
+			if (ShouldHoldBurst() && !StatusHelper.PlayerWillStatusEnd(3, false, StatusID.PredictionOfStarfall)) // If we're holding burst, we don't want to use starfall yet, but only to a point
 			{
 				return false;
 			}
@@ -899,6 +899,7 @@ public sealed class PhantomDefault : PhantomRotation
 			{
 				return true;
 			}
+
 			if (Player?.GetEffectiveHpPercent() > 90 && (!HasTankStance || Player?.GetEffectiveHpPercent() > 120) && (!SaveInvulnForStarfall || OracleLevel < 6)// Not the tank or won't kill ourselves (directly) and either can't or won't be invuln'ing self for this
 				&& !MergedStatus.HasFlag(AutoStatus.DefenseArea)) // And not getting hit with a raidwide
 			{
@@ -907,10 +908,10 @@ public sealed class PhantomDefault : PhantomRotation
 		}
 
 		// Do the invuln part of the combo
-		if (StarfallUseage && InCombat && HasStarfall && SaveInvulnForStarfall && InvulnerabilityPvE.CanUse(out act))
+		if (StarfallUseage && InCombat && HasStarfall && SaveInvulnForStarfall && InvulnerabilityPvE.CanUse(out _))
 		{
 			// If we have starfall and can use Invulnerability and we've opted to save invuln for this we're going to make sure we use it on ourselves
-			if (InvulnerabilityPvE.Target.Target == Player)
+			if (InvulnerabilityPvE.CanUse(out act, targetOverride: TargetType.Self))
 			{
 				return true;
 			}
