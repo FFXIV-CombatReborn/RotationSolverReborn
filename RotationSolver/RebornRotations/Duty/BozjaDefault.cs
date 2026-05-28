@@ -1,9 +1,9 @@
 ﻿using RotationSolver.Basic.Rotations.Duties;
 
-namespace DefaultRotations.Duty;
+namespace RotationSolver.RebornRotations.Duty;
 
-[Rotation("Bozja Default",  CombatType.PvE)]
-internal class BozjaDefault : BozjaRotation
+[Rotation("Bozja Reborn",  CombatType.PvE)]
+internal class BozjaReborn : BozjaRotation
 {
 	#region Configs
 	[RotationConfig(CombatType.PvE, Name = "Skip Magical Aversion check for Lost Burst and use it as AOE spam")]
@@ -12,6 +12,44 @@ internal class BozjaDefault : BozjaRotation
 	[RotationConfig(CombatType.PvE, Name = "Skip Physical Aversion check for Lost Rampage and use it as AOE spam")]
 	public bool RampageAversion { get; set; } = true;
 	#endregion
+
+	public override bool GeneralAbility(IAction nextGCD, out IAction? act)
+	{
+		if (InCombat)
+		{
+			if (BannerOfHonedAcuityPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (BannerOfHonoredSacrificePvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (LostFontOfPowerPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (LostFontOfMagicPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (LostFocusPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (LostChainspellPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		return base.GeneralAbility(nextGCD, out act);
+	}
 
 	public override bool HealSingleAbility(IAction nextGCD, out IAction? act)
 	{
@@ -122,7 +160,7 @@ internal class BozjaDefault : BozjaRotation
 				return true;
 			}
 
-			if (LostBurstPvE.CanUse(out act, skipTargetStatusNeedCheck: BurstAversion, skipStatusProvideCheck: BurstAversion, skipAoeCheck: !RampageAversion))
+			if (LostBurstPvE.CanUse(out act, skipTargetStatusNeedCheck: BurstAversion, skipStatusProvideCheck: BurstAversion, skipAoeCheck: !BurstAversion))
 			{
 				return true;
 			}
