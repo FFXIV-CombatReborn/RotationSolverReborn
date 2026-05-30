@@ -17,8 +17,20 @@ public sealed class DNC_Reborn : DancerRotation
 
 	[RotationConfig(CombatType.PvE, Name = "Prevent the use of defense abilties during burst")]
 	private bool BurstDefense { get; set; } = true;
+
+	[Range(0, 5, ConfigUnitType.Seconds, 0.1f)]
+	[RotationConfig(CombatType.PvE, Name = "Max random delay before starting the opener dance during countdown (0 = no delay)")]
+	public float MaxDanceStartDelay { get; set; } = 2.5f;
 	#endregion
 	private bool shouldUseLastDance = true;
+
+	// Random delay (in seconds) rolled once per countdown so the opener dance
+	// isn't started at the exact same time on every pull. The delay is applied
+	// from the moment the dance first becomes eligible (countdown start, capped
+	// at 15s remaining), so a delay is added regardless of countdown length.
+	private static readonly Random DanceStartRandom = new();
+	private float _danceStartThreshold = -1f;
+	private float _lastCountdownRemain = float.MaxValue;
 
 	private static bool InBurstStatus => StatusHelper.PlayerHasStatus(true, StatusID.Devilment);
 
@@ -38,8 +50,24 @@ public sealed class DNC_Reborn : DancerRotation
 	// Override the method for actions to be taken during countdown phase of combat
 	protected override IAction? CountDownAction(float remainTime)
 	{
-		// If there are 15 or fewer seconds remaining in the countdown 
-		if (remainTime <= 15)
+		// At the start of each countdown, roll a fresh random delay and anchor the
+		// dance-start threshold to when the dance first becomes eligible. That point
+		// is the countdown start, capped at 15s remaining (the dance is never wanted
+		// earlier than 15s out). Detecting a new/restarted countdown: first call, or
+		// remainTime jumped back up.
+		if (_danceStartThreshold < 0f || remainTime > _lastCountdownRemain)
+		{
+			var max = Math.Max(0f, MaxDanceStartDelay);
+			var delay = (float)(DanceStartRandom.NextDouble() * max);
+			var eligibleAt = Math.Min(remainTime, 15f);
+			// Clamp to >= 0 so the threshold can't go negative (which would re-roll
+			// every frame) when the delay exceeds a very short countdown.
+			_danceStartThreshold = Math.Max(0f, eligibleAt - delay);
+		}
+		_lastCountdownRemain = remainTime;
+
+		// Begin the opener dance once we're past the (eligibility - random delay) point
+		if (remainTime <= _danceStartThreshold)
 		{
 			// Attempt to use Standard Step if applicable
 			if (StandardStepPvE.CanUse(out var act, skipAoeCheck: true))
