@@ -1,3 +1,5 @@
+using Windows.UI.Input;
+
 namespace RotationSolver.RebornRotations.Tank;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.5")]
@@ -6,6 +8,9 @@ namespace RotationSolver.RebornRotations.Tank;
 public sealed class DRK_Reborn : DarkKnightRotation
 {
 	#region Config Options
+	[RotationConfig(CombatType.PvE, Name = "Use provoke in opening if tank stance is on")]
+	public bool UseProvokeInOpening { get; set; } = true;
+
 	[RotationConfig(CombatType.PvE, Name = "Keep at least 3000 MP")]
 	public bool TheBlackestNight { get; set; } = true;
 
@@ -33,7 +38,7 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	protected override IAction? CountDownAction(float remainTime)
 	{
 		//Provoke when has Shield.
-		if (remainTime <= CountDownAhead)
+		if (UseProvokeInOpening && remainTime <= CountDownAhead)
 		{
 			if (HasTankStance)
 			{
@@ -43,17 +48,18 @@ public sealed class DRK_Reborn : DarkKnightRotation
 				}
 			}
 		}
-		if (remainTime <= 2 && UseBurstMedicine(out var act))
+
+		if (remainTime < 1f && UseBurstMedicine(out var act))
 		{
 			return act;
 		}
 
-		if (remainTime <= 3 && TheBlackestNightPvE.CanUse(out act))
+		if (remainTime <= 3f && TheBlackestNightPvE.CanUse(out act))
 		{
 			return act;
 		}
 
-		if (remainTime <= 4 && BloodWeaponPvE.CanUse(out act))
+		if (remainTime <= 1f && UnmendPvE.CanUse(out act))
 		{
 			return act;
 		}
@@ -66,6 +72,13 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	// Decision-making for emergency abilities, focusing on Blood Weapon usage.
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
 	{
+		if (CombatElapsedLessGCD(3) && (IsLastAction(false, UnmendPvE) || IsLastAction(false, HardSlashPvE)))
+		{
+			if (EdgeOfShadowPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
 
 		return base.EmergencyAbility(nextGCD, out act);
 	}
@@ -193,6 +206,37 @@ public sealed class DRK_Reborn : DarkKnightRotation
 
 	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
 	{
+		if (IsBurst)
+		{
+			if (InCombat && (IsLastGCD(false, SouleaterPvE) || !CombatElapsedLessGCD(4)))
+			{
+				if (DeliriumPvE.CanUse(out act))
+				{
+					return true;
+				}
+			}
+
+			if (!DeliriumPvE.EnoughLevel)
+			{
+				if (BloodWeaponPvE.CanUse(out act))
+				{
+					return true;
+				}
+			}
+			if (InCombat && (IsLastGCD(false, HardSlashPvE) || !CombatElapsedLessGCD(3)))
+			{
+				if (LivingShadowPvE.CanUse(out act, skipAoeCheck: true))
+				{
+					return true;
+				}
+			}
+		}
+
+		if (CombatElapsedLessGCD(4))
+		{
+			return base.AttackAbility(nextGCD, out act);
+		}
+
 		if (CheckDarkSide)
 		{
 			if (FloodOfDarknessPvE.CanUse(out act))
@@ -204,38 +248,6 @@ public sealed class DRK_Reborn : DarkKnightRotation
 			{
 				return true;
 			}
-		}
-
-		if (IsBurst)
-		{
-			if (InCombat && DeliriumPvE.CanUse(out act))
-			{
-				return true;
-			}
-
-			if (DeliriumPvE.EnoughLevel && DeliriumPvE.Cooldown.ElapsedAfterGCD(1) && !DeliriumPvE.Cooldown.ElapsedAfterGCD(3)
-				&& BloodWeaponPvE.CanUse(out act))
-			{
-				return true;
-			}
-
-			if (!DeliriumPvE.EnoughLevel)
-			{
-				if (BloodWeaponPvE.CanUse(out act))
-				{
-					return true;
-				}
-			}
-			if (InCombat && LivingShadowPvE.CanUse(out act, skipAoeCheck: true))
-			{
-				return true;
-			}
-		}
-
-		if (CombatElapsedLess(3))
-		{
-			act = null;
-			return false;
 		}
 
 		if (!IsMoving && SaltedEarthPvE.CanUse(out act, skipAoeCheck: true))
@@ -278,6 +290,24 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	#region GCD Logic
 	protected override bool GeneralGCD(out IAction? act)
 	{
+		if (CombatElapsedLessGCD(4) && !IsLastGCD(false, SouleaterPvE))
+		{
+			if (!HasDelirium && SouleaterPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (!HasDelirium && SyphonStrikePvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (!HasDelirium && HardSlashPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
 		if (DisesteemPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
 		{
 			return true;
@@ -390,11 +420,6 @@ public sealed class DRK_Reborn : DarkKnightRotation
 			if (DarkSideEndAfterGCD(3))
 			{
 				return true;
-			}
-
-			if (CombatElapsedLess(3))
-			{
-				return false;
 			}
 
 			if ((InTwoMIsBurst && HasDarkArts) || (HasDarkArts && StatusHelper.PlayerHasStatus(true, StatusID.BlackestNight)) || (HasDarkArts && DarkSideEndAfterGCD(3)))
