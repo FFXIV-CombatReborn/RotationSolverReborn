@@ -39,14 +39,16 @@ public partial class WhiteMageRotation
 	public static byte BloodLily => JobGauge.BloodLily;
 
 	/// <summary>
-	/// Gets the raw Lily timer value in seconds.
+	/// Gets the raw Lily timer value in seconds remaining until the next lily.
+	/// Lily timer counts up from 0 to 20000ms, so we subtract from 20 to get remaining time.
 	/// </summary>
-	private static float LilyTimeRaw => JobGauge.LilyTimer / 1000f;
+	private static float LilyTimeRaw => (20000f - JobGauge.LilyTimer) / 1000f;
 
 	/// <summary>
 	/// Gets the Lily timer value adjusted by the default GCD remain.
+	/// Returns the time remaining until the next lily is generated.
 	/// </summary>
-	public static float LilyTime => LilyTimeRaw + DataCenter.DefaultGCDRemain;
+	public static float LilyTime => LilyTimeRaw - DataCenter.DefaultGCDRemain;
 
 	/// <summary>
 	/// Determines if the Lily timer will expire after the specified time.
