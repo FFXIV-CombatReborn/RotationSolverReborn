@@ -388,7 +388,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 
 		//if (NotInCombatDelay && RegenDefense.CanUse(out act)) return true;
 
-		var liliesNearlyFull = Lily == 2 && LilyTime < LilyOvercapTime;
+		var liliesNearlyFull = Lily == 2 && LilyAfterGCD((uint)LilyOvercapTime);
 		var liliesFullNoBlood = Lily == 3;
 
 		if (!IsInHighEndDuty || !UseOpenerHighEnd || (IsInHighEndDuty && UseOpenerHighEnd && (HasBuffs || HasPresenceOfMind || ((liliesNearlyFull || liliesFullNoBlood) && !CombatElapsedLessGCD(3)))))
