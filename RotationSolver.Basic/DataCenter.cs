@@ -15,6 +15,7 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
+using System.Drawing;
 using Action = Lumina.Excel.Sheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
@@ -501,6 +502,10 @@ internal static class DataCenter
 	public static bool IsInDSR => TerritoryID == 968;
 	public static bool IsInTOP => TerritoryID == 1122;
 	public static bool IsInFRU => TerritoryID == 1238;
+	public static bool IsInUMAD => TerritoryID == 1363;
+	#endregion
+
+	#region Chaotic
 	public static bool IsInCOD => TerritoryID == 1241;
 	#endregion
 
