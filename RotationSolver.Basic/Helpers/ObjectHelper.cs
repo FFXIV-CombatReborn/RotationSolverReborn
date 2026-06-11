@@ -2100,7 +2100,8 @@ public static class ObjectHelper
 	/// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
 	public static bool IsSpecialImmune(this IBattleChara battleChara)
 	{
-		return battleChara.IsEnuoGauntletImmune()
+		return battleChara.IsDMUBossImmune()
+			|| battleChara.IsEnuoGauntletImmune()
 			|| battleChara.IsWindurstAlexanderImmune()
 			|| battleChara.IsOrbonneImmune()
 			|| battleChara.IsM9SavageImmune()
@@ -2122,6 +2123,54 @@ public static class ObjectHelper
 			|| battleChara.IsOmegaImmune()
 			|| battleChara.IsLimitlessBlue()
 			|| battleChara.IsHanselorGretelShielded();
+	}
+
+	/// <summary>
+	/// Is target Jeuno Boss immune.
+	/// </summary>
+	/// <param name="battleChara">the object.</param>
+	/// <returns></returns>
+	public static bool IsDMUBossImmune(this IBattleChara battleChara)
+	{
+		if (Service.Config.DmuBossImmune && DataCenter.IsInDMU)
+		{
+			var FatedVillain = battleChara.HasStatus(false, StatusID.FatedVillain);
+			var VauntedVillain = battleChara.HasStatus(false, StatusID.VauntedVillain);
+			var EpicVillain = battleChara.HasStatus(false, StatusID.EpicVillain);
+
+			var VauntedHero = StatusHelper.PlayerHasStatus(false, StatusID.VauntedHero);
+			var FatedHero = StatusHelper.PlayerHasStatus(false, StatusID.FatedHero);
+			var EpicHero = StatusHelper.PlayerHasStatus(false, StatusID.EpicHero);
+
+			if (EpicVillain && (VauntedHero || FatedHero))
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsDMUBossImmune: EpicVillain status found");
+				}
+				return true;
+			}
+
+			if (VauntedVillain && (EpicHero || FatedHero))
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsDMUBossImmune: VauntedVillain status found");
+				}
+				return true;
+			}
+
+			if (FatedVillain && (EpicHero || VauntedHero))
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsDMUBossImmune: FatedVillain status found");
+				}
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/// <summary>

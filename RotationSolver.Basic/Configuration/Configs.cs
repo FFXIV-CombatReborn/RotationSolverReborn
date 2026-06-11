@@ -161,6 +161,11 @@ internal partial class Configs : IPluginConfiguration
 	Filter = DutySpecificUltimate)]
 	private static readonly bool _fruCrystalOfDarkness = true;
 
+	[ConditionBool, UI("Dancing Mad (Ultimate) - Hero/Villain logic.",
+	Description = "Treat bosses as immune if you don't have the corresponding status for it.",
+	Filter = DutySpecificUltimate)]
+	private static readonly bool _dmuBossImmune = true;
+
 	[ConditionBool, UI("The Ghimlyt Dark - Colossus Rubricatus ad.",
 	Description = "Treat Colossus Rubricatus as immune while its casting scripted action which leads to its death.",
 	Filter = DutySpecificDungeon)]
