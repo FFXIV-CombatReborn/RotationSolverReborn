@@ -1512,10 +1512,10 @@ public partial class CustomRotation
 	public static bool IsInFRU => DataCenter.IsInFRU;
 
 	///<summary>
-	/// Is player in UMAD duty.
+	/// Is player in DMU duty.
 	///</summary>
-	[Description("Is in UMAD duty")]
-	public static bool IsInUMAD => DataCenter.IsInUMAD;
+	[Description("Is in DMU duty")]
+	public static bool IsInDMU => DataCenter.IsInDMU;
 
 	///<summary>
 	/// Is player in COD duty.

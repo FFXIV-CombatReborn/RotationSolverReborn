@@ -16,9 +16,9 @@
       },
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.2.1.6, )",
-        "resolved": "3.2.1.6",
-        "contentHash": "vr3lF7VyCEFaSB4nPbunH35WzIqfd40dMH4fmNkWO9dnOVDGuPD3eIc98APYUWduNU/LjAGnnQdrxHj5s+C1gg=="
+        "requested": "[3.2.1.12, )",
+        "resolved": "3.2.1.12",
+        "contentHash": "/qOzG6H6Xh17raC2zH0wBbh7Dpj1KjsiXku7CZfg+w908pHsdz4MMJxjILBT+I7T1mTmGasiLLhkW40sInJpeA=="
       },
       "Microsoft.CodeAnalysis.BannedApiAnalyzers": {
         "type": "Direct",
@@ -56,8 +56,8 @@
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "10.0.8",
-        "contentHash": "J9+VT0lkrA7wW38CGxO2sZd+iH9C0qzioMi/2ztpT32WOVr+04uNqFIrxisTRf+mvtXLtdqcio1AoS0vfAVLLQ=="
+        "resolved": "10.0.9",
+        "contentHash": "dk5HKolAR9bBxlL4dl6Koaf0s/Q47QApog+/o341LSuvWGW6ig4q5fTsgYG0MrK//l2Slv6mygncMK/8lgXVDg=="
       },
       "Svg": {
         "type": "Transitive",
@@ -70,10 +70,10 @@
       },
       "System.Drawing.Common": {
         "type": "Transitive",
-        "resolved": "10.0.8",
-        "contentHash": "LCISd6JAF80vsy9L6wuetZeOMR3FH+SwKovw5Zl0Nov9pB9ZOiCSqvOfMzooypPItQLv0mGfEePjJ1nCCQztNw==",
+        "resolved": "10.0.9",
+        "contentHash": "ShkEj8jOhklJgrN3SoaVbCcopvqyIgVXHso2/eibQBL7IZxzJjND77UYVlViHqpwPxyQeA67IOut4b41clBkQw==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "10.0.8"
+          "Microsoft.Win32.SystemEvents": "10.0.9"
         }
       },
       "rotationsolver.sourcegenerators": {
@@ -85,11 +85,11 @@
       "RotationSolverReborn.Basic": {
         "type": "Project",
         "dependencies": {
-          "ECommons": "[3.2.1.6, )",
+          "ECommons": "[3.2.1.12, )",
           "Microsoft.CodeAnalysis.CSharp": "[5.3.0, )",
           "RotationSolver.SourceGenerators": "[1.0.0, )",
           "Svg": "[3.4.7, )",
-          "System.Drawing.Common": "[10.0.8, )"
+          "System.Drawing.Common": "[10.0.9, )"
         }
       }
     }
