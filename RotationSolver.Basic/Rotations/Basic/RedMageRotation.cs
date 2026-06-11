@@ -355,7 +355,7 @@ public partial class RedMageRotation
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool CanInstantCast => HasSwift || HasAccelerate;
+	public static bool CanInstantCast => HasSwift;
 	#endregion
 
 	#region Status Display

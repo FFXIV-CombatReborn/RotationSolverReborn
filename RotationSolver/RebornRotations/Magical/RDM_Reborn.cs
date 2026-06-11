@@ -364,27 +364,74 @@ public sealed class RDM_Reborn : RedMageRotation
 			}
 		}
 
-		if (CanInstantCast && !CanVerEither)
+		if ((CanInstantCast || HasAccelerate) && !CanVerEither)
 		{
-			if (ImpactPvE.EnoughLevel && ImpactPvE.CanUse(out act, skipAoeCheck: !GrandImpactPvE.EnoughLevel && HasAccelerate && ImpactPvE.Target.AffectedTargets.Length >= 2))
+			if (!ImpactPvE.EnoughLevel)
 			{
-				return true;
-			}
-
-			if (!ImpactPvE.EnoughLevel && ScatterPvE.CanUse(out act))
-			{
-				return true;
-			}
-
-			if (WhiteMana < BlackMana)
-			{
-				if (VeraeroPvE.CanUse(out act) && BlackMana - WhiteMana != 6)
+				if (ScatterPvE.CanUse(out act))
 				{
 					return true;
 				}
 			}
 
-			if (VerthunderPvE.CanUse(out act))
+			if (!GrandImpactPvE.EnoughLevel && ImpactPvE.EnoughLevel)
+			{
+				if (ImpactPvE.CanUse(out act))
+				{
+					return true;
+				}
+			}
+
+			if (EnhancedAccelerationIiTrait.EnoughLevel)
+			{
+				if (GrandImpactPvE.CanUse(out act, skipStatusProvideCheck: CanGrandImpact, skipCastingCheck: true))
+				{
+					return true;
+				}
+			}
+
+			if (WhiteMana < BlackMana)
+			{
+				if (VeraeroIiiPvE.EnoughLevel && VeraeroIiiPvE.CanUse(out act, skipCastingCheck: HasAccelerate, usedUp: true) && BlackMana - WhiteMana != 6)
+				{
+					return true;
+				}
+
+				if (!VeraeroIiiPvE.EnoughLevel && VeraeroPvE.CanUse(out act, skipCastingCheck: HasAccelerate, usedUp: true) && BlackMana - WhiteMana != 6)
+				{
+					return true;
+				}
+			}
+
+			if (BlackMana < WhiteMana)
+			{
+				if (VerthunderIiiPvE.EnoughLevel && VerthunderIiiPvE.CanUse(out act, skipCastingCheck: HasAccelerate, usedUp: true) && WhiteMana - BlackMana != 6)
+				{
+					return true;
+				}
+
+				if (!VerthunderIiiPvE.EnoughLevel && VerthunderPvE.CanUse(out act, skipCastingCheck: HasAccelerate, usedUp: true) && WhiteMana - BlackMana != 6)
+				{
+					return true;
+				}
+			}
+
+			if (VerthunderIiiPvE.EnoughLevel && VerthunderIiiPvE.CanUse(out act, skipCastingCheck: HasAccelerate, usedUp: true))
+			{
+				return true;
+			}
+
+			if (!VerthunderIiiPvE.EnoughLevel && VerthunderPvE.CanUse(out act, skipCastingCheck: HasAccelerate, usedUp: true))
+			{
+				return true;
+			}
+
+			if (VeraeroIiiPvE.EnoughLevel && VeraeroIiiPvE.CanUse(out act, skipCastingCheck: HasAccelerate, usedUp: true))
+			{
+				return true;
+			}
+
+			if (!VeraeroIiiPvE.EnoughLevel && VeraeroPvE.CanUse(out act, skipCastingCheck: HasAccelerate, usedUp: true))
 			{
 				return true;
 			}
@@ -452,9 +499,12 @@ public sealed class RDM_Reborn : RedMageRotation
 			}
 		}
 		//Grand impact usage if not interrupting melee combo
-		if (GrandImpactPvE.CanUse(out act, skipStatusProvideCheck: CanGrandImpact, skipCastingCheck: true))
+		if (EnhancedAccelerationIiTrait.EnoughLevel)
 		{
-			return true;
+			if (GrandImpactPvE.CanUse(out act, skipStatusProvideCheck: CanGrandImpact, skipCastingCheck: true))
+			{
+				return true;
+			}
 		}
 
 		if (ManaStacks == 3)
