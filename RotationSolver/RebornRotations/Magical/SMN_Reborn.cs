@@ -161,7 +161,7 @@ public sealed class SMN_Reborn : SummonerRotation
 		{
 			if (RadiantOnCooldown && (RadiantAegisPvE.Cooldown.CurrentCharges == 2 || (RadiantAegisPvE.Cooldown.CurrentCharges == 1 && RadiantAegisPvE.Cooldown.WillHaveXChargesGCD(2, 1, 0))))
 			{
-				if (RadiantAegisPvE.CanUse(out act))
+				if (RadiantAegisPvE.CanUse(out act, usedUp: true))
 				{
 					return true;
 				}
@@ -169,7 +169,7 @@ public sealed class SMN_Reborn : SummonerRotation
 
 			if (RadiantOnCooldownSpam)
 			{
-				if (RadiantAegisPvE.CanUse(out act))
+				if (RadiantAegisPvE.CanUse(out act, usedUp: true))
 				{
 					return true;
 				}
