@@ -271,6 +271,21 @@ public partial class RedMageRotation
 				return true;
 			}
 
+			if (IsLastComboAction(ActionID.RedoublementPvE, ActionID.EnchantedRedoublementPvE, ActionID.EnchantedRedoublementPvE_45962) && (VerholyPvE.EnoughLevel || VerflarePvE.EnoughLevel))
+			{
+				return true;
+			}
+
+			if (IsLastComboAction(ActionID.VerholyPvE, ActionID.VerflarePvE) && ScorchPvE.EnoughLevel)
+			{
+				return true;
+			}
+
+			if (IsLastComboAction(ActionID.ScorchPvE) && ResolutionPvE.EnoughLevel)
+			{
+				return true;
+			}
+
 			return false;
 		}
 	}

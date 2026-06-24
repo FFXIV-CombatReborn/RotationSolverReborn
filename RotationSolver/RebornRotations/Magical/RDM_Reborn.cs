@@ -110,11 +110,14 @@ public sealed class RDM_Reborn : RedMageRotation
 	{
 		var AnyoneInMeleeRange = NumberOfHostilesInRangeOf(3) > 0;
 
-		if (HasEmbolden || EmboldenPvE.Cooldown.HasOneCharge || EmboldenPvE.Cooldown.WillHaveOneCharge(5f) && !IsInMeleeCombo)
+		if ((HasEmbolden || EmboldenPvE.Cooldown.HasOneCharge || EmboldenPvE.Cooldown.WillHaveOneCharge(5f)) && !IsInMeleeCombo)
 		{
 			if (InCombat && HasHostilesInMaxRange && ManaficationPvE.CanUse(out act))
 			{
-				return true;
+				if (InCombat && HasHostilesInMaxRange && ManaficationPvE.CanUse(out act))
+				{
+					return true;
+				}
 			}
 		}
 
@@ -321,12 +324,12 @@ public sealed class RDM_Reborn : RedMageRotation
 			else
 			{
 				// Slight imbalance: proc-aware preference to avoid overwriting existing procs
-				if (CanVerFire && VerholyPvE.CanUse(out act))
+				if (CanVerFire && !CanVerStone && VerholyPvE.CanUse(out act))
 				{
 					return true;
 				}
 
-				if (CanVerStone && VerflarePvE.CanUse(out act))
+				if (CanVerStone && !CanVerFire && VerflarePvE.CanUse(out act))
 				{
 					return true;
 				}
@@ -343,16 +346,6 @@ public sealed class RDM_Reborn : RedMageRotation
 				return true;
 			}
 
-			if (CanVerFire && !CanVerStone && VerholyPvE.CanUse(out act))
-			{
-				return true;
-			}
-
-			if (CanVerStone && !CanVerFire && VerflarePvE.CanUse(out act))
-			{
-				return true;
-			}
-
 			if (VerholyPvE.CanUse(out act))
 			{
 				return true;
@@ -364,7 +357,7 @@ public sealed class RDM_Reborn : RedMageRotation
 			}
 		}
 
-		if ((CanInstantCast || HasAccelerate) && !CanVerEither)
+		if (CanInstantCast || HasAccelerate)
 		{
 			if (!ImpactPvE.EnoughLevel)
 			{
@@ -534,7 +527,7 @@ public sealed class RDM_Reborn : RedMageRotation
 		// Single Target
 		if (VerstonePvE.EnoughLevel)
 		{
-			if (CanVerBoth)
+			if (CanVerBoth && !CanInstantCast)
 			{
 				switch (VerEndsFirst)
 				{
@@ -613,6 +606,43 @@ public sealed class RDM_Reborn : RedMageRotation
 		if (UseVercure && !InCombat && !HasDualcast && VercurePvE.CanUse(out act))
 		{
 			return true;
+		}
+
+		if (CanInstantCast && CanVerBoth)
+		{
+			switch (VerEndsFirst)
+			{
+				case "VerFire":
+					if (VerfirePvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					break;
+				case "VerStone":
+					if (VerstonePvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					break;
+				case "Equal":
+					if (WhiteMana < BlackMana)
+					{
+						if (VerstonePvE.CanUse(out act))
+						{
+							return true;
+						}
+					}
+					if (WhiteMana >= BlackMana)
+					{
+						if (VerfirePvE.CanUse(out act))
+						{
+							return true;
+						}
+					}
+					break;
+			}
 		}
 
 		return base.GeneralGCD(out act);
