@@ -25,12 +25,7 @@ public partial class GunbreakerRotation
 	{
 		if (HasBloodfest)
 		{
-			if (CartridgeChargeIiTrait.EnoughLevel)
-			{
-				return 6;
-			}
-
-			return 4;
+			return 6;
 		}
 		if (CartridgeChargeIiTrait.EnoughLevel)
 		{
@@ -268,7 +263,7 @@ public partial class GunbreakerRotation
 	{
 		setting.CreateConfig = () => new ActionConfig()
 		{
-			AoeCount = 2,
+			AoeCount = 3,
 		};
 	}
 
@@ -315,7 +310,7 @@ public partial class GunbreakerRotation
 	{
 		setting.CreateConfig = () => new ActionConfig()
 		{
-			AoeCount = 2,
+			AoeCount = 3,
 		};
 	}
 

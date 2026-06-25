@@ -943,11 +943,11 @@ public sealed class ChurinBRD : BardRotation
 	{
 		act = null;
 		if (IsInSandbagMode || Song != Song.WanderersMinuet) return false;
-		if (!InBurst && !RagingStrikesPvE.Cooldown.IsCoolingDown) return false;
 
 		if (!PitchPerfectPvE.CanUse(out act)) return false;
 
 		if (Repertoire == 3) return true;
+		if (!InBurst && !RagingStrikesPvE.Cooldown.IsCoolingDown) return false;
 		if (Repertoire == 2 && EmpyrealArrowPvE.Cooldown.WillHaveOneChargeGCD(1)) return true;
 
 		return SongEndAfter(WandRemainTime - DataCenter.CalculatedActionAhead + AnimationLock) && WeaponRemain > LateWeaveWindow;
