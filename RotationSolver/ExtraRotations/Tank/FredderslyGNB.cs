@@ -31,11 +31,6 @@ public sealed class FredderslyGNB : GunbreakerRotation
 			return false;
 		}
 
-		if (GnashingFangPvE.Cooldown.CurrentCharges >= 2)
-		{
-			return true;
-		}
-
 		if (!Use250GnashingOptimization)
 		{
 			return true;
