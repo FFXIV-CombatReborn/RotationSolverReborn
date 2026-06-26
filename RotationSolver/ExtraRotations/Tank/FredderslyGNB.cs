@@ -64,16 +64,15 @@ public sealed class FredderslyGNB : GunbreakerRotation
 
 	private bool ShouldUseLevel100NoMercy(IAction nextGCD)
 	{
+		// NM after Brutal Shell; delayed opener fires NM before Bloodfest so don't gate on it
+		if (CombatElapsedLessGCD(3) && IsLastComboAction(ActionID.BrutalShellPvE))
+		{
+			return OpenerVariant == OpenerStrategy.DelayedBloodfest || HasBloodfest;
+		}
+
 		if (!HasBloodfest)
 		{
 			return false;
-		}
-
-		// The 2.50 opener delays No Mercy until after Brutal Shell so the
-		// window begins on Gnashing Fang instead of the first combo GCD.
-		if (CombatElapsedLessGCD(3) && IsLastComboAction(ActionID.BrutalShellPvE))
-		{
-			return true;
 		}
 
 		// Top logs often ramp with Gnashing Fang first, then weave No Mercy
@@ -92,6 +91,18 @@ public sealed class FredderslyGNB : GunbreakerRotation
 	#region Config Options
 	[RotationConfig(CombatType.PvE, Name = "Use 2.50 Gnashing Fang Optimization")]
 	public bool Use250GnashingOptimization { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Opener variant (Bloodfest timing)")]
+	public OpenerStrategy OpenerVariant { get; set; } = OpenerStrategy.EarlyBloodfest;
+
+	public enum OpenerStrategy : byte
+	{
+		[Description("Early Bloodfest")]
+		EarlyBloodfest,
+
+		[Description("Delayed Bloodfest")]
+		DelayedBloodfest,
+	}
 
 	[RotationConfig(CombatType.PvE, Name = "How to use Aurora")]
 	public AuroraUsageStrategy AuroraUsage { get; set; } = AuroraUsageStrategy.TankbusterTarget;
@@ -388,11 +399,17 @@ public sealed class FredderslyGNB : GunbreakerRotation
 
 		if (BloodfestPvE.CanUse(out act))
 		{
-			if (HasNoMercy
-				|| !NoMercyPvE.EnoughLevel
-				|| NoMercyPvE.Cooldown.WillHaveOneCharge(FillerGnashingHoldWindow)
-				|| InGnashingFang
-				|| HasReadyToGouge)
+			// delayed opener: hold Bloodfest until NM is up
+			bool holdForDelayedOpener = OpenerVariant == OpenerStrategy.DelayedBloodfest
+				&& CombatElapsedLessGCD(3)
+				&& !HasNoMercy;
+
+			if (!holdForDelayedOpener
+				&& (HasNoMercy
+					|| !NoMercyPvE.EnoughLevel
+					|| NoMercyPvE.Cooldown.WillHaveOneCharge(FillerGnashingHoldWindow)
+					|| InGnashingFang
+					|| HasReadyToGouge))
 			{
 				return true;
 			}
