@@ -308,6 +308,7 @@ public partial class SummonerRotation
 		ImGui.Text("ReturnSummon: " + ReturnSummon.ToString());
 		ImGui.Text("SummonTime: " + SummonTime.ToString());
 		ImGui.Text("HasSummon: " + HasSummon.ToString());
+		ImGui.Text("HasPet: " + DataCenter.HasPet().ToString());
 		ImGui.Spacing();
 		ImGui.Text("HasAetherflowStacks: " + HasAetherflowStacks.ToString());
 		ImGui.Text("AetherflowStacks: " + AetherflowStacks.ToString());
@@ -359,7 +360,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyRadiantAegisPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => HasSummon;
+		setting.ActionCheck = () => DataCenter.HasPet();
 		setting.StatusProvide = [StatusID.RadiantAegis];
 		setting.IsFriendly = true;
 	}
