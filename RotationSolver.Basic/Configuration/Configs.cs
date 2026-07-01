@@ -483,6 +483,10 @@ internal partial class Configs : IPluginConfiguration
 	Filter = AutoActionUsage)]
 	private static readonly bool _usePhoenixDown = false;
 
+	[ConditionBool, UI("Use Phoenix Down only if no Raiser alive in party",
+	Parent = nameof(UsePhoenixDown))]
+	private static readonly bool _usePhoenixDownHealerLogic = true;
+
 	[UI("Use damaging gap closer abilites if the distance to your target is less than this.",
 		Filter = AutoActionUsage)]
 	[Range(0, 30, ConfigUnitType.Yalms, 1f)]
