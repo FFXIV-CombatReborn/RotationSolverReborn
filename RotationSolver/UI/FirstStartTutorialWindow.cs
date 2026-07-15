@@ -9,12 +9,10 @@ internal sealed class FirstStartTutorialWindow : Window
 	private const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoResize;
 	private int _stepIndex;
 
-	private static readonly string[] StarterMacros =
-	[
-		"/rotation Settings AoEType Full\r\n/rotation Auto",
-		"/rotation Settings AoEType Cleave\r\n/rotation Manual",
-		"/rotation Off",
-	];
+	// This fork is locked to highlight-only training mode (see TrainingModeGate): the starter
+	// macros toggling Auto/Manual and the "Macros"/"Target"/"Duty" tutorial steps that referenced
+	// them or the now-hidden Target/Duty tabs were removed below rather than left describing
+	// features that no longer do anything.
 
 	private static readonly TutorialStep[] Steps =
 	[
@@ -52,7 +50,6 @@ internal sealed class FirstStartTutorialWindow : Window
 			RotationConfigWindowTab.Actions,
 			[
 				"Click an action icon in a category to see settings to enable/disable it or change its usage rules.",
-				"Use intercept if you want RSR to fire actions you queue manually.",
 				"Toggle cooldown window inclusion so overlays show only what you want."
 			]),
 		new(
@@ -83,15 +80,6 @@ internal sealed class FirstStartTutorialWindow : Window
 				"If you want windows to only show in duty/with enemies, toggle that option here."
 			]),
 		new(
-			"Target",
-			"Target controls what enemies or allies RSR considers valid.",
-			RotationConfigWindowTab.Target,
-			[
-				"Tune vision cone and engage behavior to avoid unwanted pulls.",
-				"Configure target priority rules (FATE, quest mobs, markers).",
-				"If targeting feels wrong, adjust filters before changing rotations."
-			]),
-		new(
 			"List",
 			"List manages curated status lists: dispels, priority targets, knockbacks, and more.",
 			RotationConfigWindowTab.List,
@@ -101,14 +89,6 @@ internal sealed class FirstStartTutorialWindow : Window
 				"These lists drive smart reactions across all jobs."
 			]),
 		new(
-			"Duty",
-			"Duty holds encounter‑specific toggles for special behavior.",
-			RotationConfigWindowTab.Duty,
-			[
-				"Most of these at the moment can be left enabled but there will be more granular controls in the future.",
-				"These settings override general targeting/rotation behavior in specific fights."
-			]),
-		new(
 			"Extra",
 			"Extra is for advanced or experimental tweaks.",
 			RotationConfigWindowTab.Extra,
@@ -116,16 +96,6 @@ internal sealed class FirstStartTutorialWindow : Window
 				"Animation lock and cooldown delay tweaks for those not using BMR.",
 				"Only change these if you understand the side effects.",
 			]),
-		new(
-			"Macros",
-			"Starter macros let you control RSR quickly without opening the UI.",
-			RotationConfigWindowTab.Main,
-			[
-				"Use the macros below to toggle Auto/Manual/Off instantly.",
-				"Right-click any setting or action to copy its macro command.",
-				"Build a small macro bar for fast in combat control."
-			],
-			StarterMacros),
 	];
 
 	public FirstStartTutorialWindow()
