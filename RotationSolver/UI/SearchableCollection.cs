@@ -11,13 +11,19 @@ internal class SearchableCollection
 	private static readonly char[] _splitChar = [' ', ',', '、', '.', '。'];
 	private const int MaxResultLength = 20;
 
-	// Individual properties that are targeting-recommendation-only (children of a kept-visible
-	// parent checkbox, so the section-level filter below can't hide them) — excluded entirely so
-	// they never render and can never be found via search while TrainingModeGate.ExecutionLocked.
+	// Individual properties excluded entirely (never rendered, never found via search) while
+	// TrainingModeGate.ExecutionLocked — either children of a kept-visible parent checkbox that
+	// the section-level filter below can't reach, or settings whose only consumer is dead code
+	// under the gate (e.g. the fake-click/keyboard-noise simulation that only ran inside
+	// DoAction(), which never runs in training mode).
 	private static readonly HashSet<string> _hiddenPropertyNames =
 	[
 		nameof(Configs.TeachingModeAutoTarget),
 		nameof(Configs.TeachingModeShowTargetHint),
+		nameof(Configs.ClickingDelay),
+		nameof(Configs.KeyboardNoise),
+		nameof(Configs.KeyboardNoisePresses),
+		nameof(Configs.EnableClickingCount),
 	];
 
 	public SearchableCollection()
