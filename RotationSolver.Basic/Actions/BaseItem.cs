@@ -234,6 +234,11 @@ public class BaseItem : IBaseItem
 	/// <returns></returns>
 	public unsafe bool Use()
 	{
+		if (TrainingModeGate.ExecutionLocked)
+		{
+			return false;
+		}
+
 		if (Player.Object == null)
 		{
 			return false;

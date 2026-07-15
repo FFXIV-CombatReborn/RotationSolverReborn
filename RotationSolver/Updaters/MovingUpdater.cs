@@ -10,6 +10,16 @@ internal static class MovingUpdater
 {
 	internal static unsafe void UpdateCanMove(bool doNextAction)
 	{
+		// Training mode never forcibly restricts the player's movement — the native
+		// ForceDisableMovement patch (Service.CanMove) has no dependency of its own on whether
+		// DataCenter.State can become true, so this is gated directly rather than relying on that
+		// indirectly holding forever.
+		if (TrainingModeGate.ExecutionLocked)
+		{
+			Service.CanMove = true;
+			return;
+		}
+
 		if (Player.Object == null)
 		{
 			return;

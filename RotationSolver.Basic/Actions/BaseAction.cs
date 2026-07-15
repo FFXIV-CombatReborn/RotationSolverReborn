@@ -252,6 +252,11 @@ public class BaseAction : IBaseAction
 	/// <inheritdoc/>
 	public unsafe bool Use()
 	{
+		if (TrainingModeGate.ExecutionLocked)
+		{
+			return false;
+		}
+
 		if (Player.Object == null)
 		{
 			return false;

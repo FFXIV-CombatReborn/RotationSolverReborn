@@ -26,6 +26,14 @@ internal class SearchableCollection
 		nameof(Configs.EnableClickingCount),
 		nameof(Configs.ToggleManual),
 		nameof(Configs.ToggleAuto),
+		nameof(Configs.SetBluActions2),
+		nameof(Configs.RemoveAnimationLockDelay),
+		nameof(Configs.AnimationLockDelayMax2),
+		nameof(Configs.AnimLockDelaySmoothing),
+		nameof(Configs.RemoveCooldownDelay),
+		nameof(Configs.CooldownAdjustMaxMs),
+		nameof(Configs.EnableCactbotTimeline),
+		nameof(Configs.ShowCactbotToasts),
 	];
 
 	public SearchableCollection()
