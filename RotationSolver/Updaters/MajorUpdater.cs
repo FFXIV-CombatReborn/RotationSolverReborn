@@ -281,6 +281,22 @@ internal static class MajorUpdater
 			}
 		}
 
+		// Training mode: DoAction() (which normally keeps DataCenter.HostileTarget in sync as a
+		// side effect of pressing actions) never runs, so refresh it here every active frame
+		// instead. This is pure bookkeeping for buff/debuff-aware decision logic — the actual
+		// target-switch inside UpdateTargetFromNextAction() stays blocked independently.
+		if (TrainingModeGate.ExecutionLocked)
+		{
+			try
+			{
+				RSCommands.UpdateTargetFromNextAction();
+			}
+			catch (Exception ex)
+			{
+				LogOnce("(RSRActivatedCore): RSCommands.UpdateTargetFromNextAction (TrainingMode) Exception", ex);
+			}
+		}
+
 		// Training mode never takes over from another plugin's auto-rotation, since it never acts itself.
 		if (!TrainingModeGate.ExecutionLocked)
 		{

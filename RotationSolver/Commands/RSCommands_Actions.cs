@@ -337,11 +337,6 @@ namespace RotationSolver.Commands
 
 		public static void UpdateTargetFromNextAction()
 		{
-			if (TrainingModeGate.ExecutionLocked)
-			{
-				return;
-			}
-
 			if (Player.Object == null)
 			{
 				return;
@@ -352,8 +347,11 @@ namespace RotationSolver.Commands
 			{
 				if (baseAct.Target.Target != null && baseAct.Target.Target is IBattleChara target && target != Player.Object && (Service.Config.SwitchTargetFriendly2 || target.IsEnemy()))
 				{
+					// Recording the implied target is pure internal bookkeeping (buff/debuff-aware
+					// decision logic reads DataCenter.HostileTarget) — keep it live even while
+					// training mode blocks the actual game write below.
 					DataCenter.HostileTarget = target;
-					if (!DataCenter.IsManual &&
+					if (!TrainingModeGate.ExecutionLocked && !DataCenter.IsManual &&
 						(Service.Config.SwitchTargetFriendly2 || ((Svc.Targets.Target?.IsEnemy() ?? true)
 						|| Svc.Targets.Target?.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
 					{
