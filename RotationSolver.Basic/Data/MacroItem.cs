@@ -33,6 +33,11 @@ public unsafe class MacroItem(IGameObject? target, RaptureMacroModule.Macro* mac
 	/// <returns>True if the macro started successfully; otherwise, false.</returns>
 	public bool StartUseMacro()
 	{
+		if (TrainingModeGate.ExecutionLocked)
+		{
+			return false;
+		}
+
 		if (RaptureShellModule.Instance()->MacroCurrentLine > -1)
 		{
 			return false;
@@ -52,6 +57,11 @@ public unsafe class MacroItem(IGameObject? target, RaptureMacroModule.Macro* mac
 	/// <returns>True if the macro ended successfully; otherwise, false.</returns>
 	public bool EndUseMacro()
 	{
+		if (TrainingModeGate.ExecutionLocked)
+		{
+			return false;
+		}
+
 		if (RaptureShellModule.Instance()->MacroCurrentLine > -1)
 		{
 			return false;

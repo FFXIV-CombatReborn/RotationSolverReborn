@@ -23,6 +23,11 @@ namespace RotationSolver.Commands
 
 		public static void IncrementState()
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				return;
+			}
+
 			if (!DataCenter.State)
 			{ DoStateCommandType(StateCommandType.Auto); return; }
 			if (DataCenter.State && !DataCenter.IsManual && DataCenter.TargetingType == TargetingType.Big)
@@ -286,6 +291,11 @@ namespace RotationSolver.Commands
 
 		internal static void SetTargetWithDelay(IGameObject? candidate)
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				return;
+			}
+
 			if (candidate == null)
 			{
 				return;
