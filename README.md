@@ -1,42 +1,48 @@
 
 # [![](https://raw.githubusercontent.com/FFXIV-CombatReborn/RebornAssets/main/IconAssets/RSR_Icon.png)](https://github.com/FFXIV-CombatReborn/RotationSolverReborn)
 
-**RotationSolverReborn**
+**RotationSolverReborn — Training Mode fork**
 
-![Github Latest Releases](https://img.shields.io/github/downloads/FFXIV-CombatReborn/RotationSolverReborn/latest/total.svg?style=for-the-badge)
 ![Github License](https://img.shields.io/github/license/FFXIV-CombatReborn/RotationSolverReborn.svg?label=License&style=for-the-badge)
 [![](https://dcbadge.limes.pink/api/server/p54TZMPnC9)](https://discord.gg/p54TZMPnC9)
 
-This tool is designed to enhance your gameplay experience by performing your rotation as optimally as possible, including heals, interrupts, mitigations, and MP management.
+This is a personal fork of [RotationSolverReborn](https://github.com/FFXIV-CombatReborn/RotationSolverReborn), locked down to **highlight-only training mode**. It computes and visually highlights the recommended next action on your hotbar — it never presses actions, switches targets, runs macros, cancels casts, restricts movement, or lets an external plugin drive any of that on your behalf. You press your own buttons; this just tells you which one.
 
-## Features
+## What's different from upstream
 
-- **Full Autorotation**: Able to fully execute combat rotation, including specialized logic for healing, mitigations, duty actions, and mechanic specific behaviour.
-- **Dynamic Rotation Guidance aka Training Mode**: Offers real-time suggestions for skill rotations, tailored to your current in-game situation.
-- **Customizable Settings**: Allows users to adjust the rotations based on personal preference, encounter type, and specific boss mechanics.
-- **Comprehensive Database**: Includes an extensive database of class abilities to ensure accurate and effective rotation.
-- **Regular Updates**: The plugin is regularly updated to reflect the latest game patches, class changes, and user feedback, ensuring it remains relevant and useful.
+Everything about auto-execution and auto-behavior is gated behind a single flag, `TrainingModeGate.ExecutionLocked` (`RotationSolver\TrainingModeGate.cs` and its mirror `RotationSolver.Basic\TrainingModeGate.cs`), hardcoded `true` in this fork. Gated rather than deleted, so the diff against upstream stays small and localized — job rotation decision logic, per-job tuning, and most settings are untouched. Concretely, this fork never:
 
-## Installing
-- Enter `/xlsettings` in the chat window and go to the Experimental tab in the opening window.
-- **Skip below the DevPlugins section to the Custom Plugin Repositories section.**
-- Copy and paste the repo.json link into the first free text input field.
+- Presses an action or item on your behalf (`BaseAction.Use()`/`BaseItem.Use()`, the actual execution primitives, refuse to fire)
+- Auto-selects or auto-switches your target, including the "target freely" nearest-enemy behavior
+- Runs in-game macros automatically (duty-start/end or action-use triggers)
+- Cancels your casts or forcibly locks your movement
+- Lets external plugins (via IPC) or chat commands flip it into an auto-executing state — chat only accepts `/rotation off`
+
+What's kept, because it only ever affects *what gets recommended*, never what happens in-game: per-job rotation tuning, the internal target-resolution logic each job's recommendations use (e.g. "heal the lowest-HP party member"), and the manual Special-Command bias buttons (Heal/Defense/Burst/Move/etc. — your own clicks, not automatic).
+
+The Auto/Manual/AutoDuty/Henched/PvP mode machinery, the Debug/AutoDuty/Duty/Target settings tabs, and the targeting-priority UI are hidden — there's just a single "Training Mode: On/Off" toggle now.
+
+## Updating from upstream
+
+`main` is kept as a pure, untouched mirror of upstream `FFXIV-CombatReborn/RotationSolverReborn`'s `main` branch. All of this fork's changes live on the `training-mode` branch (the one to actually build/run).
+
+To pick up a game-patch update from upstream:
 ```
-https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json
+git fetch upstream
+git checkout main && git merge --ff-only upstream/main && git push origin main
+git checkout training-mode && git merge main
 ```
-- Click on the + button and make sure the checkmark beside the new field is set afterwards.
-- **Click on the Save-icon in the bottom right.**
+Since this fork's edits are small, additive gate-checks scattered across a couple dozen files rather than large rewrites, conflicts should be rare and localized even when upstream touches the same files.
 
-Following these steps, you should be able to see all contained plugins in the Available Plugins tab in the Dalamud Plugin Installer.
-No Plugins will be installed, you have just made them available. You can now select which of these plugins you actually want to install.
+## Building / running
+
+This fork isn't published to a plugin repository — build it locally and dev-load it via Dalamud (`/xlsettings` → Experimental → Dev Plugin Locations, pointing at this repo's build output), rather than installing RotationSolverReborn from the Combat Reborn repo, which would get you the unmodified upstream plugin instead of this one.
+
+```
+dotnet build RotationSolver.sln -c Debug
+```
 
 ## Links
 
-The rotations definitions are [here](https://github.com/FFXIV-CombatReborn/RotationSolverReborn/tree/main/RotationSolver/RebornRotations).
-
-## Latest version of RSR for each FFXIV version
-7.41
-https://github.com/FFXIV-CombatReborn/RotationSolverReborn/releases/tag/7.4.1.10
-
-7.45
-https://github.com/FFXIV-CombatReborn/RotationSolverReborn/releases/tag/7.4.5.35
+- Upstream project: https://github.com/FFXIV-CombatReborn/RotationSolverReborn
+- Job rotation definitions: [`RotationSolver/RebornRotations`](RotationSolver/RebornRotations)
