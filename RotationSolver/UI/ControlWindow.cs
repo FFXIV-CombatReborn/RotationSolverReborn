@@ -83,8 +83,14 @@ internal class ControlWindow : CtrlWindow
 		ImGui.Spacing();
 		columnWidth = Math.Max(columnWidth, ImGui.GetCursorPosX());
 
-		var autoMode = DataCenter.TargetingType;
-		ImGui.Text(" Targeting: " + autoMode.ToString());
+		// Targeting priority is not a training-mode feature (see TrainingModeGate) — the display
+		// of the current TargetingType heuristic is hidden, though the underlying per-job target
+		// resolution that uses it for computing recommendations is untouched.
+		if (!TrainingModeGate.ExecutionLocked)
+		{
+			var autoMode = DataCenter.TargetingType;
+			ImGui.Text(" Targeting: " + autoMode.ToString());
+		}
 
 		var aoeType = Service.Config.AoEType;
 		if (ImGuiHelper.SelectableButton("AoE: " + aoeType.ToString()))

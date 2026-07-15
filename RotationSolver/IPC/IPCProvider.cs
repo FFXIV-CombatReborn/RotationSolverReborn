@@ -35,6 +35,12 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void AddPriorityNameID(uint nameId)
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				PluginLog.Debug($"IPC AddPriorityNameID ignored (targeting is not a training-mode feature). NameID:{nameId}");
+				return;
+			}
+
 			if (DataCenter.PrioritizedNameIds != null)
 			{
 				DataCenter.PrioritizedNameIds.Add(nameId);
@@ -53,6 +59,12 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void RemovePriorityNameID(uint nameId)
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				PluginLog.Debug($"IPC RemovePriorityNameID ignored (targeting is not a training-mode feature). NameID:{nameId}");
+				return;
+			}
+
 			if (DataCenter.PrioritizedNameIds != null)
 			{
 				if (DataCenter.PrioritizedNameIds.Contains(nameId))
@@ -78,6 +90,12 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void AddBlacklistNameID(uint nameId)
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				PluginLog.Debug($"IPC AddBlacklistNameID ignored (targeting is not a training-mode feature). NameID:{nameId}");
+				return;
+			}
+
 			if (DataCenter.BlacklistedNameIds != null)
 			{
 				DataCenter.BlacklistedNameIds.Add(nameId);
@@ -96,6 +114,12 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void RemoveBlacklistNameID(uint nameId)
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				PluginLog.Debug($"IPC RemoveBlacklistNameID ignored (targeting is not a training-mode feature). NameID:{nameId}");
+				return;
+			}
+
 			if (DataCenter.BlacklistedNameIds != null)
 			{
 				if (DataCenter.BlacklistedNameIds.Contains(nameId))

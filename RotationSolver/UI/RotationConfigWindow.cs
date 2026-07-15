@@ -240,10 +240,12 @@ public partial class RotationConfigWindow : Window
 				}
 
 				// These tabs are entirely about auto-execution / external botting-plugin integration
-				// (AutoDuty) or duty-specific auto-execution safety toggles (Duty) — nothing to show
-				// while TrainingModeGate.ExecutionLocked, since nothing ever auto-executes.
+				// (AutoDuty), duty-specific auto-execution safety toggles (Duty), or targeting
+				// priority/recommendation (Target) — nothing to show while
+				// TrainingModeGate.ExecutionLocked, since nothing ever auto-executes and targeting
+				// is no longer a user-facing feature.
 				if (TrainingModeGate.ExecutionLocked &&
-					(tab is RotationConfigWindowTab.AutoDuty or RotationConfigWindowTab.Duty))
+					(tab is RotationConfigWindowTab.AutoDuty or RotationConfigWindowTab.Duty or RotationConfigWindowTab.Target))
 				{
 					shouldSkip = true;
 				}

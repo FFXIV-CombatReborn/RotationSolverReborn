@@ -11,6 +11,15 @@ internal class SearchableCollection
 	private static readonly char[] _splitChar = [' ', ',', '、', '.', '。'];
 	private const int MaxResultLength = 20;
 
+	// Individual properties that are targeting-recommendation-only (children of a kept-visible
+	// parent checkbox, so the section-level filter below can't hide them) — excluded entirely so
+	// they never render and can never be found via search while TrainingModeGate.ExecutionLocked.
+	private static readonly HashSet<string> _hiddenPropertyNames =
+	[
+		nameof(Configs.TeachingModeAutoTarget),
+		nameof(Configs.TeachingModeShowTargetHint),
+	];
+
 	public SearchableCollection()
 	{
 		var properties = typeof(Configs).GetRuntimeProperties();
@@ -27,6 +36,11 @@ internal class SearchableCollection
 		{
 			var ui = property.GetCustomAttribute<UIAttribute>();
 			if (ui == null)
+			{
+				continue;
+			}
+
+			if (TrainingModeGate.ExecutionLocked && _hiddenPropertyNames.Contains(property.Name))
 			{
 				continue;
 			}
@@ -64,9 +78,11 @@ internal class SearchableCollection
 		}
 	}
 
-	// Sections that only control auto-execution behavior (or safety toggles that only matter while
-	// auto-executing), hidden while TrainingModeGate.ExecutionLocked since nothing ever executes.
-	private static readonly HashSet<string> _executionOnlyFilters =
+	// Sections hidden while TrainingModeGate.ExecutionLocked: either auto-execution behavior (or
+	// safety toggles that only matter while auto-executing), or targeting-priority/recommendation
+	// settings — the per-job internal target resolution used to compute action recommendations
+	// stays untouched, but the user-facing "which enemy to prefer" feature is fully hidden.
+	private static readonly HashSet<string> _hiddenFilters =
 	[
 		Configs.AutoActionUsage,
 		Configs.BasicAutoSwitch,
@@ -84,11 +100,12 @@ internal class SearchableCollection
 		Configs.DutySpecificUltimate,
 		Configs.DutySpecificExtreme,
 		Configs.DutySpecificSavage,
+		Configs.TargetConfig,
 	];
 
 	public void DrawItems(string filter)
 	{
-		if (TrainingModeGate.ExecutionLocked && _executionOnlyFilters.Contains(filter))
+		if (TrainingModeGate.ExecutionLocked && _hiddenFilters.Contains(filter))
 		{
 			return;
 		}
@@ -152,6 +169,11 @@ internal class SearchableCollection
 
 		foreach (var pair in _items)
 		{
+			if (TrainingModeGate.ExecutionLocked && _hiddenFilters.Contains(pair.Attribute.Filter))
+			{
+				continue;
+			}
+
 			foreach (var searchable in GetChildren(pair.Searchable))
 			{
 				var parent = GetParent(searchable);

@@ -81,8 +81,11 @@ internal class NextActionWindow : Window
 
 		_ = ControlWindow.DrawIAction(ActionUpdater.NextAction, width, percent);
 
-		// Teaching Mode: show a target hint if the rotation wants a different target
-		if (Service.Config.TeachingMode && Service.Config.TeachingModeShowTargetHint)
+		// Teaching Mode: show a target hint if the rotation wants a different target.
+		// Targeting is not a training-mode feature — this whole hint (including the click-to-target
+		// behavior below) is disabled while TrainingModeGate.ExecutionLocked, regardless of a saved
+		// config value from before this fork existed.
+		if (!TrainingModeGate.ExecutionLocked && Service.Config.TeachingMode && Service.Config.TeachingModeShowTargetHint)
 		{
 			DrawTeachingModeTargetHint(width);
 		}
