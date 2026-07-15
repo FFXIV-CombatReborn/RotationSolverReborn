@@ -24,6 +24,8 @@ internal class SearchableCollection
 		nameof(Configs.KeyboardNoise),
 		nameof(Configs.KeyboardNoisePresses),
 		nameof(Configs.EnableClickingCount),
+		nameof(Configs.ToggleManual),
+		nameof(Configs.ToggleAuto),
 	];
 
 	public SearchableCollection()
@@ -107,6 +109,7 @@ internal class SearchableCollection
 		Configs.DutySpecificExtreme,
 		Configs.DutySpecificSavage,
 		Configs.TargetConfig,
+		Configs.Debug,
 	];
 
 	public void DrawItems(string filter)

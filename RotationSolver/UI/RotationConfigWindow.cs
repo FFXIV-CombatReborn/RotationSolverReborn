@@ -1920,8 +1920,12 @@ public partial class RotationConfigWindow : Window
 
 	private static void DrawAboutCompatibility()
 	{
-		// Display the compatibility description
-		ImGui.TextWrapped(UiString.ConfigWindow_About_Compatibility_Description.GetDescription());
+		// The stock description ("helps you choose targets and click actions") describes the
+		// auto-targeting/auto-execution behavior this fork locks out — show a description that
+		// matches what training mode actually does instead.
+		ImGui.TextWrapped(TrainingModeGate.ExecutionLocked
+			? "This fork only highlights the recommended action and never chooses targets or presses actions for you. Other plugins that change your target or hotbar state can still affect what gets recommended, though. Here is a list of plugins that have historically (but not always) caused compatibility issues:"
+			: UiString.ConfigWindow_About_Compatibility_Description.GetDescription());
 
 		ImGui.Spacing();
 

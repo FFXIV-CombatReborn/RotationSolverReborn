@@ -225,6 +225,14 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 	{
 		get
 		{
+			// OtherCommandType.Settings is blocked under TrainingModeGate.ExecutionLocked
+			// (RSCommands_OtherCommand.cs) — an empty command hides the now-dead Execute/Copy
+			// right-click rows entirely instead of offering a macro that silently does nothing.
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				return string.Empty;
+			}
+
 			var result = Service.COMMAND + " " + OtherCommandType.Settings.ToString() + " " + _property.Name;
 			var extra = _property.GetValue(Service.ConfigDefault)?.ToString();
 			if (!string.IsNullOrEmpty(extra))

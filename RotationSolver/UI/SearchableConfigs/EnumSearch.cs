@@ -102,13 +102,18 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 					}
 					isFirst = false;
 
-					var enumName = enumValue.ToString();
-					var command = $"{Service.COMMAND} {OtherCommandType.Settings} {_property.Name} {enumName}";
+					// OtherCommandType.Settings is blocked under TrainingModeGate.ExecutionLocked
+					// (RSCommands_OtherCommand.cs) — skip offering a macro that silently does nothing.
+					if (!TrainingModeGate.ExecutionLocked)
+					{
+						var enumName = enumValue.ToString();
+						var command = $"{Service.COMMAND} {OtherCommandType.Settings} {_property.Name} {enumName}";
 
-					// Add Execute option
-					DrawHotKeys($"Execute \"{command}\"", () => ExecuteEnumCommand(command), ["Alt"]);
-					// Add Copy option
-					DrawHotKeys($"Copy \"{command}\"", () => CopyCommand(command), ["Ctrl"]);
+						// Add Execute option
+						DrawHotKeys($"Execute \"{command}\"", () => ExecuteEnumCommand(command), ["Alt"]);
+						// Add Copy option
+						DrawHotKeys($"Copy \"{command}\"", () => CopyCommand(command), ["Ctrl"]);
+					}
 				}
 
 				ImGui.EndTable();
