@@ -144,6 +144,11 @@ internal class ControlWindow : CtrlWindow
 		ImGui.Columns(1);
 	}
 
+	// Deliberately NOT gated by TrainingModeGate: these buttons only bias what gets recommended
+	// (e.g. "assume I'm in a burst window") via DataCenter.SpecialType — never a game write, and
+	// always a manual click by the person using the tool. Same carve-out as per-job internal
+	// targeting logic. The IPC equivalent (IPCProvider.TriggerSpecialState*) IS gated, since an
+	// external plugin driving this bias remotely is a different concern than the user's own click.
 	private static void DrawSpecials()
 	{
 		var rotation = DataCenter.CurrentRotation;

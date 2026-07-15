@@ -188,6 +188,12 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void TriggerSpecialState(SpecialCommandType specialCommand)
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				PluginLog.Debug($"IPC TriggerSpecialState ignored (external plugins cannot drive this tool's recommendation bias). SpecialCommand:{specialCommand}");
+				return;
+			}
+
 			RSCommands.DoSpecialCommandType(specialCommand, false);
 			PluginLog.Debug($"IPC TriggerSpecialState was called. SpecialCommand:{specialCommand}");
 		}
@@ -204,6 +210,12 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void TriggerSpecialStateWithDuration(SpecialCommandType specialCommand, float duration)
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				PluginLog.Debug($"IPC TriggerSpecialStateWithDuration ignored (external plugins cannot drive this tool's recommendation bias). SpecialCommand:{specialCommand}, Duration:{duration}");
+				return;
+			}
+
 			RSCommands.DoSpecialCommandType(specialCommand, false);
 			DataCenter.SetSpecialTypeWithDuration(specialCommand, duration);
 			PluginLog.Debug($"IPC TriggerSpecialStateWithDuration was called. SpecialCommand:{specialCommand}, Duration:{duration}");
