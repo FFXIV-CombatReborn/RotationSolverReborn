@@ -10,6 +10,16 @@ public static partial class RSCommands
 {
 	public static void DoOtherCommand(OtherCommandType otherType, string str)
 	{
+		// Shared by chat commands and IPC — Cycle/DoActions toggle state or queue an action,
+		// and Settings is an unrestricted reflection-based setter over every Configs property.
+		// None of those are "which action to recommend" tuning, so all three are locked out here
+		// regardless of entry point.
+		if (TrainingModeGate.ExecutionLocked &&
+			(otherType is OtherCommandType.Cycle or OtherCommandType.DoActions or OtherCommandType.Settings))
+		{
+			return;
+		}
+
 		switch (otherType)
 		{
 			case OtherCommandType.Cycle:

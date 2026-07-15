@@ -50,25 +50,31 @@ internal static class MiscUpdater
 					new TextPayload(showStr)
 				);
 
-				if (Service.Config.DTRType == DTRType.DTRNormal)
+				// Training mode never wires the server-info-bar icon to a state-cycling click
+				// handler — that's a native FFXIV UI button that would otherwise bypass the fact
+				// that ControlWindow no longer exposes Auto/Manual/Off buttons.
+				if (!TrainingModeGate.ExecutionLocked)
 				{
-					_dtrEntry.OnClick = _ => RSCommands.CycleStateWithOneTargetTypes();
-				}
-				else if (Service.Config.DTRType == DTRType.DTRAllAuto)
-				{
-					_dtrEntry.OnClick = _ => RSCommands.CycleStateWithAllTargetTypes();
-				}
-				else if (Service.Config.DTRType == DTRType.DTRAuto)
-				{
-					_dtrEntry.OnClick = _ => RSCommands.CycleStateAuto();
-				}
-				else if (Service.Config.DTRType == DTRType.DTRManual)
-				{
-					_dtrEntry.OnClick = _ => RSCommands.CycleStateManual();
-				}
-				else if (Service.Config.DTRType == DTRType.DTRManualAuto)
-				{
-					_dtrEntry.OnClick = _ => RSCommands.CycleStateManualAuto();
+					if (Service.Config.DTRType == DTRType.DTRNormal)
+					{
+						_dtrEntry.OnClick = _ => RSCommands.CycleStateWithOneTargetTypes();
+					}
+					else if (Service.Config.DTRType == DTRType.DTRAllAuto)
+					{
+						_dtrEntry.OnClick = _ => RSCommands.CycleStateWithAllTargetTypes();
+					}
+					else if (Service.Config.DTRType == DTRType.DTRAuto)
+					{
+						_dtrEntry.OnClick = _ => RSCommands.CycleStateAuto();
+					}
+					else if (Service.Config.DTRType == DTRType.DTRManual)
+					{
+						_dtrEntry.OnClick = _ => RSCommands.CycleStateManual();
+					}
+					else if (Service.Config.DTRType == DTRType.DTRManualAuto)
+					{
+						_dtrEntry.OnClick = _ => RSCommands.CycleStateManualAuto();
+					}
 				}
 			}
 		}

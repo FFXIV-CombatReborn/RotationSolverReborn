@@ -174,14 +174,18 @@ internal static class MajorUpdater
 			return;
 		}
 
-		// Target updater always needs to be first to update
-		try
+		// Training mode never runs in-game macros automatically — MacroUpdater drives
+		// RaptureShellModule.ExecuteMacro(), a real game action, not a recommendation.
+		if (!TrainingModeGate.ExecutionLocked)
 		{
-			MacroUpdater.UpdateMacro();
-		}
-		catch (Exception ex)
-		{
-			LogOnce("(RSRActivatedCore): MacroUpdater.UpdateMacro Exception", ex);
+			try
+			{
+				MacroUpdater.UpdateMacro();
+			}
+			catch (Exception ex)
+			{
+				LogOnce("(RSRActivatedCore): MacroUpdater.UpdateMacro Exception", ex);
+			}
 		}
 
 		if (DataCenter.BMREndabled)

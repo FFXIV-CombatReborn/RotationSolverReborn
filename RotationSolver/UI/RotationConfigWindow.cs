@@ -240,12 +240,12 @@ public partial class RotationConfigWindow : Window
 				}
 
 				// These tabs are entirely about auto-execution / external botting-plugin integration
-				// (AutoDuty), duty-specific auto-execution safety toggles (Duty), or targeting
-				// priority/recommendation (Target) — nothing to show while
-				// TrainingModeGate.ExecutionLocked, since nothing ever auto-executes and targeting
-				// is no longer a user-facing feature.
+				// (AutoDuty), duty-specific auto-execution safety toggles (Duty), targeting
+				// priority/recommendation (Target), or dev-only tools that exercise the IPC gaps
+				// this fork closes (Debug) — nothing appropriate to show in an end-user
+				// highlight-only build while TrainingModeGate.ExecutionLocked.
 				if (TrainingModeGate.ExecutionLocked &&
-					(tab is RotationConfigWindowTab.AutoDuty or RotationConfigWindowTab.Duty or RotationConfigWindowTab.Target))
+					(tab is RotationConfigWindowTab.AutoDuty or RotationConfigWindowTab.Duty or RotationConfigWindowTab.Target or RotationConfigWindowTab.Debug))
 				{
 					shouldSkip = true;
 				}
@@ -1862,18 +1862,24 @@ public partial class RotationConfigWindow : Window
 		// Adjust item spacing for better layout
 		using var style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
 
-		// Display command help for different state commands
-		DisplayCommandHelp(StateCommandType.Auto);
-		DisplayCommandHelp(StateCommandType.Manual);
-		DisplayCommandHelp(StateCommandType.Off);
-		DisplayCommandHelp(OtherCommandType.Cycle);
-		DisplayCommandHelp(StateCommandType.TargetOnly);
-		ImGui.NewLine();
+		// This fork is locked to highlight-only training mode: state-toggle commands
+		// (Auto/Manual/TargetOnly/Cycle/NextAction) are disabled, so their help text is omitted
+		// to avoid advertising a chat surface that no longer does anything.
+		if (!TrainingModeGate.ExecutionLocked)
+		{
+			// Display command help for different state commands
+			DisplayCommandHelp(StateCommandType.Auto);
+			DisplayCommandHelp(StateCommandType.Manual);
+			DisplayCommandHelp(StateCommandType.Off);
+			DisplayCommandHelp(OtherCommandType.Cycle);
+			DisplayCommandHelp(StateCommandType.TargetOnly);
+			ImGui.NewLine();
 
-		// Display command help for other commands
-		DisplayCommandHelp(OtherCommandType.NextAction);
+			// Display command help for other commands
+			DisplayCommandHelp(OtherCommandType.NextAction);
 
-		ImGui.NewLine();
+			ImGui.NewLine();
+		}
 
 		// Display command help for special commands
 		DisplayCommandHelp(SpecialCommandType.EndSpecial);
@@ -1896,6 +1902,11 @@ public partial class RotationConfigWindow : Window
 		// Adjust item spacing for better layout
 		using var style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
 		ImGui.NewLine();
+		if (TrainingModeGate.ExecutionLocked)
+		{
+			ImGui.TextWrapped("This fork is locked to highlight-only training mode: state-toggle and settings chat commands (\"/rotation settings ...\") are disabled. Use the settings tabs above instead.");
+			return;
+		}
 		ImGui.TextWrapped("These commands can be used to open or change plugin settings directly from chat or macros.");
 		ImGui.NewLine();
 		ImGui.TextWrapped("Simply right clicking any action, setting, or toggle will pop up the macro associated with it.");

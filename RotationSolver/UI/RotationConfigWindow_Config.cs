@@ -229,6 +229,12 @@ public partial class RotationConfigWindow
 
 	private static void DrawEventTab()
 	{
+		if (TrainingModeGate.ExecutionLocked)
+		{
+			ImGui.TextWrapped("Duty-start/duty-end and action-use macro triggers are disabled in training mode — this fork never runs in-game macros automatically.");
+			return;
+		}
+
 		if (ImGui.Button(UiString.ConfigWindow_Events_AddEvent.GetDescription()))
 		{
 			Service.Config.Events.Add(new ActionEventInfo());

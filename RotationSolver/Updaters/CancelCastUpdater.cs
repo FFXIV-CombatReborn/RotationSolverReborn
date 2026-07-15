@@ -12,6 +12,11 @@ internal static class CancelCastUpdater
 
 	internal static unsafe void UpdateCancelCast()
 	{
+		if (TrainingModeGate.ExecutionLocked)
+		{
+			return;
+		}
+
 		if (Player.Object == null || !Player.Object.IsCasting)
 		{
 			return;

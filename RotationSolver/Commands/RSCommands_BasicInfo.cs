@@ -68,6 +68,14 @@ namespace RotationSolver.Commands
 
 			if (TryGetOneEnum<StateCommandType>(command, out var stateType))
 			{
+				// Training mode never toggles into an executing state from chat/macro/keybind —
+				// only Off (always safe) still works.
+				if (TrainingModeGate.ExecutionLocked && stateType != StateCommandType.Off)
+				{
+					Svc.Chat.PrintError("This fork is locked to highlight-only training mode; only \"/rotation off\" is available.");
+					return;
+				}
+
 				// Split command into parts
 				var parts = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 				var index = -1;
