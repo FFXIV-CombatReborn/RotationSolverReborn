@@ -17,6 +17,13 @@ namespace RotationSolver.Updaters
 
 		public static void Enable()
 		{
+			// Training mode never intercepts/substitutes the player's own keypresses, so the hook
+			// is never installed in the first place.
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				return;
+			}
+
 			// Initialize hooks
 			InitializeActionHooks();
 		}

@@ -64,8 +64,35 @@ internal class SearchableCollection
 		}
 	}
 
+	// Sections that only control auto-execution behavior (or safety toggles that only matter while
+	// auto-executing), hidden while TrainingModeGate.ExecutionLocked since nothing ever executes.
+	private static readonly HashSet<string> _executionOnlyFilters =
+	[
+		Configs.AutoActionUsage,
+		Configs.BasicAutoSwitch,
+		Configs.PvPSpecificControls,
+		Configs.DutySpecificCrucibleOfTheUnbroken,
+		Configs.DutySpecificTheMaskedCarnivale,
+		Configs.DutySpecificPvP,
+		Configs.DutySpecificFieldOps,
+		Configs.DutySpecificAlliance,
+		Configs.DutySpecificDeepDungeon,
+		Configs.DutySpecificVariantDungeon,
+		Configs.DutySpecificTreasureDungeon,
+		Configs.DutySpecificChaoticAlliance,
+		Configs.DutySpecificDungeon,
+		Configs.DutySpecificUltimate,
+		Configs.DutySpecificExtreme,
+		Configs.DutySpecificSavage,
+	];
+
 	public void DrawItems(string filter)
 	{
+		if (TrainingModeGate.ExecutionLocked && _executionOnlyFilters.Contains(filter))
+		{
+			return;
+		}
+
 		var isFirst = true;
 		Dictionary<byte, List<SearchPair>> filteredItems = [];
 

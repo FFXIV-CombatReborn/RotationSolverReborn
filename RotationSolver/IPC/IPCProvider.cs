@@ -123,6 +123,12 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void ChangeOperatingMode(StateCommandType stateCommand)
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				PluginLog.Debug($"IPC ChangeOperatingMode ignored (training mode is locked to highlight-only). StateCommand:{stateCommand}");
+				return;
+			}
+
 			RSCommands.UpdateState(stateCommand, (JobRole)DataCenter.Job);
 			PluginLog.Debug($"IPC ChangeOperatingMode was called. StateCommand:{stateCommand}");
 		}
@@ -139,6 +145,12 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void AutodutyChangeOperatingMode(StateCommandType stateCommand, TargetingType targetingType)
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				PluginLog.Debug($"IPC AutodutyChangeOperatingMode ignored (training mode is locked to highlight-only). StateCommand:{stateCommand} TargetingType:{targetingType}");
+				return;
+			}
+
 			RSCommands.AutodutyUpdateState(stateCommand, (JobRole)DataCenter.Job, targetingType);
 			PluginLog.Debug($"IPC AutodutyChangeOperatingMode was called. StateCommand:{stateCommand} TargetingType:{targetingType}");
 		}
@@ -185,6 +197,13 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void OtherCommand(OtherCommandType otherType, string str)
 		{
+			if (TrainingModeGate.ExecutionLocked &&
+				(otherType is OtherCommandType.NextAction or OtherCommandType.DoActions or OtherCommandType.Cycle))
+			{
+				PluginLog.Debug($"IPC OtherCommand ignored (training mode is locked to highlight-only). OtherCommandType:{otherType}, String:{str}");
+				return;
+			}
+
 			RSCommands.DoOtherCommand(otherType, str);
 			PluginLog.Debug($"IPC DoOtherCommand was called. OtherCommandType:{otherType}, String:{str},");
 		}
@@ -201,6 +220,12 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void ActionCommand(string action, float time)
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				PluginLog.Debug($"IPC ActionCommand ignored (training mode is locked to highlight-only). Action Name:{action}, Time:{time}");
+				return;
+			}
+
 			var combinedString = $"{action}-{time}";
 
 			RSCommands.DoActionCommand($"{combinedString}");
@@ -214,6 +239,12 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void EnableTargetFreelyOverride()
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				PluginLog.Debug("IPC EnableTargetFreelyOverride ignored (training mode is locked to highlight-only).");
+				return;
+			}
+
 			DataCenter.TargetFreelyOverride = true;
 			PluginLog.Debug("IPC EnableTargetFreelyOverride was called.");
 		}

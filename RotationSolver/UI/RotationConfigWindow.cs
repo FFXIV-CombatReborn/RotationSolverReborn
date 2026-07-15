@@ -239,6 +239,15 @@ public partial class RotationConfigWindow : Window
 					shouldSkip = true;
 				}
 
+				// These tabs are entirely about auto-execution / external botting-plugin integration
+				// (AutoDuty) or duty-specific auto-execution safety toggles (Duty) — nothing to show
+				// while TrainingModeGate.ExecutionLocked, since nothing ever auto-executes.
+				if (TrainingModeGate.ExecutionLocked &&
+					(tab is RotationConfigWindowTab.AutoDuty or RotationConfigWindowTab.Duty))
+				{
+					shouldSkip = true;
+				}
+
 				_configWindowTabProperties[tab] = (shouldSkip, tab.GetAttribute<TabIconAttribute>()?.Icon ?? 0);
 			}
 		}
@@ -4927,16 +4936,19 @@ public partial class RotationConfigWindow : Window
 			ipcProvider.Test(_ipcTestText);
 		}
 
-		if (ImGui.Button("Test ChangeOperatingMode to Manual IPC"))
+		if (!TrainingModeGate.ExecutionLocked)
 		{
-			IPCProvider ipcProvider = new();
-			ipcProvider.ChangeOperatingMode(StateCommandType.Manual);
-		}
+			if (ImGui.Button("Test ChangeOperatingMode to Manual IPC"))
+			{
+				IPCProvider ipcProvider = new();
+				ipcProvider.ChangeOperatingMode(StateCommandType.Manual);
+			}
 
-		if (ImGui.Button("Test ChangeOperatingMode to Off IPC"))
-		{
-			IPCProvider ipcProvider = new();
-			ipcProvider.ChangeOperatingMode(StateCommandType.Off);
+			if (ImGui.Button("Test ChangeOperatingMode to Off IPC"))
+			{
+				IPCProvider ipcProvider = new();
+				ipcProvider.ChangeOperatingMode(StateCommandType.Off);
+			}
 		}
 
 		if (ImGui.Button("Test TriggerSpecialState DefenseArea IPC"))
@@ -4957,7 +4969,7 @@ public partial class RotationConfigWindow : Window
 			ipcProvider.OtherCommand(OtherCommandType.Settings, "HostileType AllTargetsCanAttack");
 		}
 
-		if (ImGui.Button("Test OtherCommand DoAction IPC (Magick Barrier on RDM)"))
+		if (!TrainingModeGate.ExecutionLocked && ImGui.Button("Test OtherCommand DoAction IPC (Magick Barrier on RDM)"))
 		{
 			IPCProvider ipcProvider = new();
 			ipcProvider.OtherCommand(OtherCommandType.DoActions, "Magick Barrier-5");
@@ -4969,20 +4981,23 @@ public partial class RotationConfigWindow : Window
 			ipcProvider.OtherCommand(OtherCommandType.ToggleActions, "Magick Barrier");
 		}
 
-		if (ImGui.Button("Test ActionCommand IPC (Magick Barrier on RDM)"))
+		if (!TrainingModeGate.ExecutionLocked)
 		{
-			IPCProvider ipcProvider = new();
-			ipcProvider.ActionCommand("Magick Barrier", 7);
-		}
-		if (ImGui.Button("Test AutodutyChangeOperatingMode IPC (AutoDuty, HighHPPercent)"))
-		{
-			IPCProvider ipcProvider = new();
-			ipcProvider.AutodutyChangeOperatingMode(StateCommandType.AutoDuty, TargetingType.HighHPPercent);
-		}
-		if (ImGui.Button("Test Henchman IPC support"))
-		{
-			IPCProvider ipcProvider = new();
-			ipcProvider.ChangeOperatingMode(StateCommandType.Henched);
+			if (ImGui.Button("Test ActionCommand IPC (Magick Barrier on RDM)"))
+			{
+				IPCProvider ipcProvider = new();
+				ipcProvider.ActionCommand("Magick Barrier", 7);
+			}
+			if (ImGui.Button("Test AutodutyChangeOperatingMode IPC (AutoDuty, HighHPPercent)"))
+			{
+				IPCProvider ipcProvider = new();
+				ipcProvider.AutodutyChangeOperatingMode(StateCommandType.AutoDuty, TargetingType.HighHPPercent);
+			}
+			if (ImGui.Button("Test Henchman IPC support"))
+			{
+				IPCProvider ipcProvider = new();
+				ipcProvider.ChangeOperatingMode(StateCommandType.Henched);
+			}
 		}
 	}
 

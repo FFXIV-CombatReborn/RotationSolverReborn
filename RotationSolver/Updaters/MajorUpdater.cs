@@ -281,13 +281,17 @@ internal static class MajorUpdater
 			}
 		}
 
-		try
+		// Training mode never takes over from another plugin's auto-rotation, since it never acts itself.
+		if (!TrainingModeGate.ExecutionLocked)
 		{
-			Wrath_IPCSubscriber.DisableAutoRotation();
-		}
-		catch (Exception ex)
-		{
-			LogOnce("(RSRActivatedCore): Wrath_IPCSubscriber.DisableAutoRotation Exception", ex);
+			try
+			{
+				Wrath_IPCSubscriber.DisableAutoRotation();
+			}
+			catch (Exception ex)
+			{
+				LogOnce("(RSRActivatedCore): Wrath_IPCSubscriber.DisableAutoRotation Exception", ex);
+			}
 		}
 	}
 
@@ -489,7 +493,7 @@ internal static class MajorUpdater
 		{
 			MiscUpdater.UpdateMisc();
 
-			if ((Service.Config.TargetFreely || DataCenter.TargetFreelyOverride) && !DataCenter.IsPvP && DataCenter.State && DataCenter.InCombat)
+			if (!TrainingModeGate.ExecutionLocked && (Service.Config.TargetFreely || DataCenter.TargetFreelyOverride) && !DataCenter.IsPvP && DataCenter.State && DataCenter.InCombat)
 			{
 				var nextAction2 = ActionUpdater.NextAction;
 				if (nextAction2 == null)

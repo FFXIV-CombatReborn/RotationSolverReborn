@@ -68,6 +68,11 @@ namespace RotationSolver.Commands
 
 		public static void DoAction()
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				return;
+			}
+
 			if (Player.Object != null && Player.Object.StatusList == null)
 			{
 				return;
@@ -332,6 +337,11 @@ namespace RotationSolver.Commands
 
 		public static void UpdateTargetFromNextAction()
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				return;
+			}
+
 			if (Player.Object == null)
 			{
 				return;
@@ -403,6 +413,12 @@ namespace RotationSolver.Commands
 					}
 
 					ActionUpdater.AutoCancelTime = DateTime.MinValue;
+					return;
+				}
+
+				// Training mode never auto-enables a state; only the auto-off/safety logic above stays active.
+				if (TrainingModeGate.ExecutionLocked)
+				{
 					return;
 				}
 

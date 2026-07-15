@@ -71,13 +71,15 @@ internal class ControlWindow : CtrlWindow
 		var columnWidth = ImGui.GetCursorPosX();
 		ImGui.NewLine();
 
+		// This fork is locked to highlight-only training mode (see TrainingModeGate): the
+		// Auto/Manual/Off execution-mode buttons are replaced with a single toggle that just
+		// turns recommendation highlighting on/off.
 		ImGui.Spacing();
-		DrawCommandAction(61822, StateCommandType.Auto, ImGuiColors.DPSRed);
-		ImGui.SameLine();
-		DrawCommandAction(61751, StateCommandType.Manual, ImGuiColors.DPSRed);
-		columnWidth = Math.Max(columnWidth, ImGui.GetCursorPosX());
-		ImGui.SameLine();
-		DrawCommandAction(61764, StateCommandType.Off, ImGuiColors.DalamudWhite2);
+		bool teachingMode = Service.Config.TeachingMode;
+		if (ImGuiHelper.SelectableButton(teachingMode ? "Training Mode: On" : "Training Mode: Off"))
+		{
+			Service.Config.TeachingMode.Value = !teachingMode;
+		}
 		ImGui.Spacing();
 		columnWidth = Math.Max(columnWidth, ImGui.GetCursorPosX());
 
@@ -433,7 +435,10 @@ internal class ControlWindow : CtrlWindow
 		var cursor = ImGui.GetCursorPos();
 
 		var desc = action?.Name ?? string.Empty;
-		if (texture?.Handle != null && ImGuiHelper.NoPaddingNoColorImageButton(texture, Vector2.One * width, desc))
+		// Training mode: the recommended-action icon is a pure visual highlight. The button is still
+		// rendered (for hover/tooltip), but a click never fires or queues the action.
+		var clicked = texture?.Handle != null && ImGuiHelper.NoPaddingNoColorImageButton(texture, Vector2.One * width, desc);
+		if (clicked && !TrainingModeGate.ExecutionLocked)
 		{
 			if (!DataCenter.State)
 			{

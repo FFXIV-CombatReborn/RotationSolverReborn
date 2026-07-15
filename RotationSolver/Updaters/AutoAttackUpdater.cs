@@ -16,6 +16,12 @@ namespace RotationSolver.Updaters
 
 		public static unsafe void Enable()
 		{
+			// Training mode never toggles auto-attack, so the hook is never installed.
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				return;
+			}
+
 			try
 			{
 				var setAutoAttackStateAddress = AutoAttackState.Addresses.SetImpl.Value;
@@ -52,6 +58,11 @@ namespace RotationSolver.Updaters
 		/// </summary>
 		public static unsafe void Update()
 		{
+			if (TrainingModeGate.ExecutionLocked)
+			{
+				return;
+			}
+
 			if (!Player.Available)
 			{
 				return;
