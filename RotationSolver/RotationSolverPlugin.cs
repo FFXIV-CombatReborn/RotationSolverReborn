@@ -368,6 +368,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		RSCommands.Disable();
 		Watcher.Disable();
 		ActionQueueManager.Disable();
+		ActionContextMenu.Dispose();
 		Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
 		Svc.PluginInterface.UiBuilder.Draw -= OnDraw;
 
