@@ -26,9 +26,9 @@
       },
       "Svg": {
         "type": "Direct",
-        "requested": "[3.4.7, )",
-        "resolved": "3.4.7",
-        "contentHash": "Omez7ly5BGhg3OzdV+LHZ5sI0+JQ6hF7WVKUeyHw4jRvcEWNCPCf1MWMBaf+R0DRBSZHx5EUHwBTEF+2oYtsAw==",
+        "requested": "[3.4.8, )",
+        "resolved": "3.4.8",
+        "contentHash": "KBI/SYpZ0d7YHCoMsviqirp/F9GAWj6VL8gqHwkp9d8TlPECoT9uqvAWP6Dh7V0IGdegfvHPXhZQKNkGpMxhXg==",
         "dependencies": {
           "ExCSS": "4.2.3",
           "System.Drawing.Common": "5.0.3"
