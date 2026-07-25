@@ -8,6 +8,7 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Lumina.Excel.Sheets;
@@ -186,7 +187,9 @@ internal static class DataCenter
 									  || Svc.KeyState[Service.Config.PoslockModifier.ToVirtual()]
 									  //Gamepad cancel.
 									  || Svc.GamepadState.Raw(Dalamud.Game.ClientState.GamePad.GamepadButtons.R1) >=
-									  0.5f;
+									  0.5f
+									  //Mouse cancel: holding left and right mouse buttons at the same time.
+									  || (Service.Config.PosLockMouse && InputManager.IsLeftMouseDown() && InputManager.IsRightMouseDown());
 
 	internal static DateTime EffectTime { private get; set; } = DateTime.Now;
 	internal static DateTime EffectEndTime { private get; set; } = DateTime.Now;
@@ -280,7 +283,30 @@ internal static class DataCenter
 
 	public static TinctureUseType CurrentTinctureUseType => Service.Config.TinctureType;
 
-	public static unsafe ActionID LastComboAction => (ActionID)ActionManager.Instance()->Combo.Action;
+	// Combo.Timer <= 0 means the game itself considers the combo expired/inactive.
+	// In that state Combo.Action can hold a stale/unreliable value (e.g. left over from
+	// unrelated action usage such as mounting), so it must not be reported as the last combo action.
+	// Additionally, only Weaponskill/Spell actions can actually be part of a combo chain; other
+	// categories (e.g. general/system actions like Sprint/Return, action ID 4) can end up in
+	// Combo.Action without representing a real combo step, so they must be filtered out as well.
+	public static unsafe ActionID LastComboAction
+	{
+		get
+		{
+			var manager = ActionManager.Instance();
+			if (manager->Combo.Timer <= 0)
+			{
+				return ActionID.None;
+			}
+
+			var id = manager->Combo.Action;
+			var action = Svc.Data.GetExcelSheet<Action>()?.GetRowOrDefault(id);
+			var cate = action?.GetActionCate() ?? ActionCate.None;
+			return cate is ActionCate.Weaponskill or ActionCate.Spell
+				? (ActionID)id
+				: ActionID.None;
+		}
+	}
 
 	public static unsafe float ComboTime => ActionManager.Instance()->Combo.Timer;
 

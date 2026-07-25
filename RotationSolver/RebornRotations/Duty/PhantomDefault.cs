@@ -36,6 +36,9 @@ public sealed class PhantomDefault : PhantomRotation
 	[RotationConfig(CombatType.PvE, Name = "Use Starfall", PhantomJob = PhantomJob.Oracle)]
 	public bool StarfallUseage { get; set; } = true;
 
+	[RotationConfig(CombatType.PvE, Name = "Keep Defend on cooldown if you are at full stacks of Finishing Fervor", PhantomJob = PhantomJob.Gladiator)]
+	public bool KeepDefendOnCooldown { get; set; } = false;
+
 	[RotationConfig(CombatType.PvE, Name = "Use Invulnerability for Starfall", PhantomJob = PhantomJob.Oracle)]
 	public bool SaveInvulnForStarfall { get; set; } = true;
 
@@ -184,6 +187,11 @@ public sealed class PhantomDefault : PhantomRotation
 		}
 
 		if (InCombat && MagicShellPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (InCombat && KeepDefendOnCooldown && StatusHelper.PlayerHasStatus(true, StatusID.FinishingFervor) && StatusHelper.PlayerStatusStack(true, StatusID.FinishingFervor) == 4 && DefendPvE.CanUse(out act))
 		{
 			return true;
 		}

@@ -314,6 +314,7 @@ namespace RotationSolver.Commands
 					Wrath_IPCSubscriber.Release();
 					ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
 					DataCenter.TargetingTypeOverride = null;
+					Service.CanMove = true;
 					if (Service.Config.ShowToggledSettingInChat)
 					{ Svc.Chat.Print($"Targeting : Off"); }
 					break;
@@ -416,6 +417,7 @@ namespace RotationSolver.Commands
 					Wrath_IPCSubscriber.Release();
 					ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
 					DataCenter.TargetingTypeOverride = null;
+					Service.CanMove = true;
 					if (Service.Config.ShowToggledSettingInChat)
 					{ Svc.Chat.Print($"Targeting : Off"); }
 					break;

@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Value" xml:space="preserve">
+    <value>/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+DutyRoulette = 1,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+Dungeons = 2,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+Guildhests = 3,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+Trials = 4,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+Raids = 5,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+PvP = 6,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+QuestBattles = 7,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+FatEs = 8,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+TreasureHunt = 9,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+Levequests = 10,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+GrandCompany = 11,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+Companions = 12,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+SocietyQuests = 13,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+OverallCompletion = 14,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+PlayerCommendation = 15,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+DisciplesOfTheLand = 16,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+DisciplesOfTheHand = 17,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+RetainerVentures = 18,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+GoldSaucer = 19,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+DeepDungeons = 21,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+WondrousTails = 24,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+CustomDeliveries = 25,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+Eureka = 26,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+TheMaskedCarnivale = 27,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+UltimateRaids = 28,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+SaveTheQueen = 29,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+VcDungeonFinder = 30,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+OceanFishing = 31,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+TripleTriad = 32,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+TheHunt = 33,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+Fishing = 34,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+Gate = 35,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+IslandSanctuary = 36,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+ChaoticAllianceRaid = 37,
+/// &lt;summary&gt;
+/// 
+/// &lt;/summary&gt;
+OccultCrescent = 38,</value>
+  </data>
+</root>

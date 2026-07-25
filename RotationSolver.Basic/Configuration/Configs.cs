@@ -434,6 +434,9 @@ internal partial class Configs : IPluginConfiguration
 	[UI("", Action = ActionID.ImprovisationPvE, Parent = nameof(PoslockCasting))]
 	public bool PosImprovisation { get; set; } = false;
 
+	[UI("Unlock movement when pressing both left and right mouse buttons.", Parent = nameof(PoslockCasting))]
+	public bool PosLockMouse { get; set; } = false;
+
 	[ConditionBool, UI("Lock actions when casting Passage Of Arms during AOE mitigations.",
 	Filter = Extra)]
 	private static readonly bool _pldlockCasting = false;
@@ -482,6 +485,10 @@ internal partial class Configs : IPluginConfiguration
 	Description = "Enable to allow the plugin to use Phoenix Down item. (Experimental feature)",
 	Filter = AutoActionUsage)]
 	private static readonly bool _usePhoenixDown = false;
+
+	[ConditionBool, UI("Use Phoenix Down only if no Raiser alive in party",
+	Parent = nameof(UsePhoenixDown))]
+	private static readonly bool _usePhoenixDownHealerLogic = true;
 
 	[UI("Use damaging gap closer abilites if the distance to your target is less than this.",
 		Filter = AutoActionUsage)]
@@ -1252,7 +1259,7 @@ internal partial class Configs : IPluginConfiguration
 
 	public int ActionSequencerIndex { get; set; }
 
-	[UI("The modifier key to unlock the movement temporarily", Description = "RB is for gamepad player", Parent = nameof(PoslockCasting))]
+	[UI("The modifier key to unlock the movement temporarily", Description = "RB is for gamepad player.", Parent = nameof(PoslockCasting))]
 	public ConsoleModifiers PoslockModifier { get; set; }
 
 	[Range(0, 5, ConfigUnitType.None, 1)]

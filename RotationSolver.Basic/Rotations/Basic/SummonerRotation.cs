@@ -375,7 +375,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyAetherchargePvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InCombat && HasSummon;
+		setting.ActionCheck = () => InCombat && DataCenter.HasPet();
 	}
 
 	static partial void ModifySummonRubyPvE(ref ActionSetting setting)
@@ -469,7 +469,7 @@ public partial class SummonerRotation
 
 	static partial void ModifyDreadwyrmTrancePvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InCombat && SummonTime <= WeaponRemain;
+		setting.ActionCheck = () => InCombat && DataCenter.HasPet() && SummonTime <= WeaponRemain;
 		setting.UnlockedByQuestID = 67640;
 	}
 
@@ -501,7 +501,7 @@ public partial class SummonerRotation
 
 	static partial void ModifySummonBahamutPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InCombat && SummonTime <= WeaponRemain;
+		setting.ActionCheck = () => InCombat && DataCenter.HasPet() && SummonTime <= WeaponRemain;
 		setting.UnlockedByQuestID = 68165;
 	}
 

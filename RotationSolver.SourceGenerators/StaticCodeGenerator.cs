@@ -60,20 +60,20 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	private static void GenerateOpCode(SourceProductionContext context)
 	{
 		var code = $$"""
-            namespace RotationSolver.Basic.Data;
+			namespace RotationSolver.Basic.Data;
 
-            /// <summary>
-            /// The opcode
-            /// </summary>
-            public enum OpCode : ushort
-            {
-                /// <summary>
-                /// 
-                /// </summary>
-                None = 0,
-            {{Properties.Resources.OpCode.Table()}}
-            }
-            """;
+			/// <summary>
+			/// The opcode
+			/// </summary>
+			public enum OpCode : ushort
+			{
+				/// <summary>
+				/// 
+				/// </summary>
+				None = 0,
+			{{Properties.OpCode.Value.Table()}}
+			}
+			""";
 
 		context.AddSource("OpCode.g.cs", code);
 	}
@@ -85,20 +85,20 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	private static void GenerateStatus(SourceProductionContext context)
 	{
 		var code = $$"""
-            namespace RotationSolver.Basic.Data;
-
-            /// <summary>
-            /// The id of the status.
-            /// </summary>
-            public enum StatusID : ushort
-            {
-                /// <summary>
-                /// 
-                /// </summary>
-                None = 0,
-            {{Properties.Resources.StatusId.Table()}}
-            }
-            """;
+			namespace RotationSolver.Basic.Data;
+			
+			/// <summary>
+			/// The id of the status.
+			/// </summary>
+			public enum StatusID : ushort
+			{
+				/// <summary>
+				/// 
+				/// </summary>
+				None = 0,
+			{{Properties.Status.Value.Table()}}
+			}
+			""";
 
 		context.AddSource("StatusID.g.cs", code);
 	}
@@ -110,20 +110,20 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	private static void GenerateContentType(SourceProductionContext context)
 	{
 		var code = $$"""
-            namespace RotationSolver.Basic.Data;
+			namespace RotationSolver.Basic.Data;
 
-            /// <summary>
-            /// 
-            /// </summary>
-            public enum TerritoryContentType : byte
-            {
-                /// <summary>
-                /// 
-                /// </summary>
-                None = 0,
-            {{Properties.Resources.ContentType.Table()}}
-            }
-            """;
+			/// <summary>
+			/// 
+			/// </summary>
+			public enum TerritoryContentType : byte
+			{
+				/// <summary>
+				/// 
+				/// </summary>
+				None = 0,
+			{{Properties.ContentType.Value.Table()}}
+			}
+			""";
 
 		context.AddSource("TerritoryContentType.g.cs", code);
 	}
@@ -146,7 +146,7 @@ public class StaticCodeGenerator : IIncrementalGenerator
 				/// 
 				/// </summary>
 				None = 0,
-			{{Properties.Resources.ActionCategory.Table()}}
+			{{Properties.ActionCategory.Value.Table()}}
 			}
 			""";
 
@@ -171,7 +171,7 @@ public class StaticCodeGenerator : IIncrementalGenerator
 				/// 
 				/// </summary>
 				None = 0,
-			{{Properties.Resources.BNpcNameId.Table()}}
+			{{Properties.BNpcName.Value.Table()}}
 			}
 			""";
 
@@ -185,20 +185,20 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	private static void GenerateActionID(SourceProductionContext context)
 	{
 		var code = $$"""
-            namespace RotationSolver.Basic.Data;
+			namespace RotationSolver.Basic.Data;
 
-            /// <summary>
-            /// The id of the status.
-            /// </summary>
-            public enum ActionID : uint
-            {
-                /// <summary>
-                /// 
-                /// </summary>
-                None = 0,
-            {{Properties.Resources.ActionId.Table()}}
-            }
-            """;
+			/// <summary>
+			/// The id of the status.
+			/// </summary>
+			public enum ActionID : uint
+			{
+				/// <summary>
+				/// 
+				/// </summary>
+				None = 0,
+			{{Properties.ActionId.Value.Table()}}
+			}
+			""";
 
 		context.AddSource("ActionID.g.cs", code);
 	}
@@ -209,8 +209,8 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	/// <param="context">The source production context.</param>
 	private static void GenerateBaseRotation(SourceProductionContext context)
 	{
-		context.AddSource("CustomRotation.g.cs", Properties.Resources.Action);
-		context.AddSource("DutyRotation.g.cs", Properties.Resources.DutyAction);
+		context.AddSource("CustomRotation.g.cs", Properties.Action.Value);
+		context.AddSource("DutyRotation.g.cs", Properties.DutyAction.Value);
 	}
 
 	/// <summary>
@@ -219,6 +219,6 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	/// <param="context">The source production context.</param>
 	private static void GenerateRotations(SourceProductionContext context)
 	{
-		context.AddSource("BaseRotations.g.cs", Properties.Resources.Rotation);
+		context.AddSource("BaseRotations.g.cs", Properties.Rotation.Value);
 	}
 }

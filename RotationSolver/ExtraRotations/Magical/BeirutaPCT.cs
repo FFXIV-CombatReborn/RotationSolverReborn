@@ -25,6 +25,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 		"• This rotation is designed to align Madeen within burst windows.\n" +
 		"• Hyperphantasia is prioritised early in burst to allow earlier movement flexibility.\n" +
 		"• Intercept Rainbow Drip automatically uses Swiftcast when Rainbow Drip is queued (May fail if pressed too late or casting sub inks/motifs).\n" +
+		"• Spam Starry Muse during first motif in opener if frequently seen fire in red being used in opener\n" +
 		"• Manual Swiftcast input will be spent on Motif (creature -> weapon -> landscape)."
 	)]
 	public bool Info_DoNotChange { get; set; } = true;
@@ -509,10 +510,6 @@ public sealed class BeirutaPCT : PictomancerRotation
 
 	protected override bool GeneralGCD(out IAction? act)
 	{
-		if (HasStarryMuse && HammerStampPvE.CanUse(out act, skipComboCheck: true))
-		{
-			return true;
-		}
 
 		if (!InCombat)
 			_holyUsedInOpenerAtMs = 0;
@@ -571,6 +568,18 @@ public sealed class BeirutaPCT : PictomancerRotation
 			_prepStrikingUsedAtMs = 0;
 		}
 
+		if (StarPrismPvE.CanUse(out act) && HasStarstruck)
+		{
+			_starPrismUsedAtMs = Environment.TickCount64;
+			return true;
+		}
+
+		if (!HasSubtractivePalette && HasStarryMuse && HammerStampPvE.CanUse(out act, skipComboCheck: true))
+		{
+			return true;
+		}
+
+
 		if (HasStarryMuse && HasInspiration && !reserveHyperForPrism)
 		{
 			if (CometInBlackPvE.CanUse(out act, skipCastingCheck: true))
@@ -585,12 +594,6 @@ public sealed class BeirutaPCT : PictomancerRotation
 			if (ThunderInMagentaPvE.CanUse(out act)) return true;
 			if (StoneInYellowPvE.CanUse(out act)) return true;
 			if (BlizzardInCyanPvE.CanUse(out act)) return true;
-		}
-
-		if (StarPrismPvE.CanUse(out act) && HasStarstruck)
-		{
-			_starPrismUsedAtMs = Environment.TickCount64;
-			return true;
 		}
 
 		bool canCommitGcdNow = NextAbilityToNextGCD < 0.6f;

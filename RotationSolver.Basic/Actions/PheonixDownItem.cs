@@ -10,7 +10,7 @@ internal class PhoenixDownItem : BaseItem
 		ItemCheck = () =>
 		{
 			var t = DataCenter.DeathTarget;
-			return t != null && RotationSolver.Basic.Helpers.ObjectHelper.CanBeRaised(t);
+			return t != null && ObjectHelper.CanBeRaised(t);
 		};
 	}
 
@@ -41,5 +41,5 @@ internal class PhoenixDownItem : BaseItem
 		return false;
 	}
 
-	protected override bool CanUseThis => Service.Config.UsePhoenixDown && !AnyLivingRaiserInParty() && DataCenter.DeathTarget != null;
+	protected override bool CanUseThis => Service.Config.UsePhoenixDown && ((Service.Config.UsePhoenixDownHealerLogic && !AnyLivingRaiserInParty()) || !Service.Config.UsePhoenixDownHealerLogic) && DataCenter.DeathTarget != null;
 }

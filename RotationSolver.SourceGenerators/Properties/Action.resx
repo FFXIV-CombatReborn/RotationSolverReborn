@@ -1,0 +1,1807 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Value" xml:space="preserve">
+    <value>using RotationSolver.Basic.Actions;
+
+namespace RotationSolver.Basic.Rotations;
+
+/// &lt;summary&gt;
+/// The Custom Rotation.
+/// &lt;br&gt;Number of Actions: 65&lt;/br&gt;
+/// &lt;/summary&gt;
+public abstract partial class CustomRotation
+{
+#region Actions
+    private readonly Lazy&lt;IBaseAction&gt; _SprintPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)3, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySprintPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/3"&gt;&lt;strong&gt;Sprint&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [3] [System]
+    /// &lt;/summary&gt;
+    static partial void ModifySprintPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/3"&gt;&lt;strong&gt;Sprint&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [3] [System]
+    /// &lt;para&gt;Increases movement speed. Duration: 10s (20s when not in combat Additional Effect: Grants Jog when the effect expires Jog Effect: Movement speed is increased Effect ends when enmity is generated. Has no effect in battle. ※Unavailable in PvP.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SprintPvE =&gt; _SprintPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _TeleportPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)5, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyTeleportPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/5"&gt;&lt;strong&gt;Teleport&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [5] [System]
+    /// &lt;/summary&gt;
+    static partial void ModifyTeleportPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/5"&gt;&lt;strong&gt;Teleport&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [5] [System]
+    /// &lt;para&gt;&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction TeleportPvE =&gt; _TeleportPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ReturnPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)6, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyReturnPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/6"&gt;&lt;strong&gt;Return&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [6] [System]
+    /// &lt;/summary&gt;
+    static partial void ModifyReturnPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/6"&gt;&lt;strong&gt;Return&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [6] [System]
+    /// &lt;para&gt;Instantly return to your current home point.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ReturnPvE =&gt; _ReturnPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _DecipherPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)1694, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyDecipherPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/1694"&gt;&lt;strong&gt;Decipher&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [1694] [System]
+    /// &lt;/summary&gt;
+    static partial void ModifyDecipherPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/1694"&gt;&lt;strong&gt;Decipher&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [1694] [System]
+    /// &lt;para&gt;&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction DecipherPvE =&gt; _DecipherPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _DigPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)1695, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyDigPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/1695"&gt;&lt;strong&gt;Dig&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [1695] [System]
+    /// &lt;/summary&gt;
+    static partial void ModifyDigPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/1695"&gt;&lt;strong&gt;Dig&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [1695] [System]
+    /// &lt;para&gt;&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction DigPvE =&gt; _DigPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _RampartPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7531, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyRampartPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7531"&gt;&lt;strong&gt;Rampart&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7531] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyRampartPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7531"&gt;&lt;strong&gt;Rampart&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7531] [Ability]
+    /// &lt;para&gt;Reduces damage taken by 20%. Duration: 20s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction RampartPvE =&gt; _RampartPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ProvokePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7533, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyProvokePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7533"&gt;&lt;strong&gt;Provoke&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7533] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyProvokePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7533"&gt;&lt;strong&gt;Provoke&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7533] [Ability]
+    /// &lt;para&gt;Gesture threateningly placing yourself at the top of a target's enmity list while gaining additional enmity.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ProvokePvE =&gt; _ProvokePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ReprisalPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7535, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyReprisalPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7535"&gt;&lt;strong&gt;Reprisal&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7535] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyReprisalPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7535"&gt;&lt;strong&gt;Reprisal&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7535] [Ability]
+    /// &lt;para&gt;Reduces damage dealt by nearby enemies by 10%. Duration: s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ReprisalPvE =&gt; _ReprisalPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ShirkPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7537, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyShirkPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7537"&gt;&lt;strong&gt;Shirk&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7537] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyShirkPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7537"&gt;&lt;strong&gt;Shirk&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7537] [Ability]
+    /// &lt;para&gt;Diverts 25% of enmity to target party member.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ShirkPvE =&gt; _ShirkPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _InterjectPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7538, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyInterjectPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7538"&gt;&lt;strong&gt;Interject&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7538] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyInterjectPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7538"&gt;&lt;strong&gt;Interject&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7538] [Ability]
+    /// &lt;para&gt;Interrupts the use of a target's action.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction InterjectPvE =&gt; _InterjectPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _LowBlowPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7540, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyLowBlowPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7540"&gt;&lt;strong&gt;Low Blow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7540] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyLowBlowPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7540"&gt;&lt;strong&gt;Low Blow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7540] [Ability]
+    /// &lt;para&gt;Stuns target. Duration: 5s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction LowBlowPvE =&gt; _LowBlowPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SecondWindPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7541, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySecondWindPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7541"&gt;&lt;strong&gt;Second Wind&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (PGL LNC ARC ROG MNK DRG BRD NIN MCH SAM DNC RPR VPR) [7541] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifySecondWindPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7541"&gt;&lt;strong&gt;Second Wind&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (PGL LNC ARC ROG MNK DRG BRD NIN MCH SAM DNC RPR VPR) [7541] [Ability]
+    /// &lt;para&gt;Instantly restores own HP. Cure Potency:&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SecondWindPvE =&gt; _SecondWindPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BloodbathPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7542, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBloodbathPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7542"&gt;&lt;strong&gt;Bloodbath&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (PGL LNC ROG MNK DRG NIN SAM RPR VPR) [7542] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBloodbathPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7542"&gt;&lt;strong&gt;Bloodbath&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (PGL LNC ROG MNK DRG NIN SAM RPR VPR) [7542] [Ability]
+    /// &lt;para&gt;Converts a portion of physical damage dealt into HP. Duration: 20s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BloodbathPvE =&gt; _BloodbathPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _TrueNorthPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7546, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyTrueNorthPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7546"&gt;&lt;strong&gt;True North&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (PGL LNC ROG MNK DRG NIN SAM RPR VPR) [7546] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyTrueNorthPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7546"&gt;&lt;strong&gt;True North&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (PGL LNC ROG MNK DRG NIN SAM RPR VPR) [7546] [Ability]
+    /// &lt;para&gt;Nullifies all action direction requirements. Duration: 10s Maximum Charges: 2&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction TrueNorthPvE =&gt; _TrueNorthPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ArmsLengthPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7548, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyArmsLengthPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7548"&gt;&lt;strong&gt;Arm's Length&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA PGL MRD LNC ARC PLD MNK WAR DRG BRD ROG NIN MCH DRK SAM GNB DNC RPR VPR) [7548] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyArmsLengthPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7548"&gt;&lt;strong&gt;Arm's Length&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA PGL MRD LNC ARC PLD MNK WAR DRG BRD ROG NIN MCH DRK SAM GNB DNC RPR VPR) [7548] [Ability]
+    /// &lt;para&gt;Nullifies most knockback and draw-in effects. Duration: 6s Additional Effect: When you are struck by a physical attack the striker will be afflicted with Slow +20% Duration: 15s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ArmsLengthPvE =&gt; _ArmsLengthPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _FeintPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7549, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyFeintPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7549"&gt;&lt;strong&gt;Feint&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (PGL LNC ROG MNK DRG NIN SAM RPR VPR) [7549] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyFeintPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7549"&gt;&lt;strong&gt;Feint&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (PGL LNC ROG MNK DRG NIN SAM RPR VPR) [7549] [Ability]
+    /// &lt;para&gt;Lowers target's physical damage dealt by 10% and magic damage dealt by 5%. Duration: s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction FeintPvE =&gt; _FeintPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _HeadGrazePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7551, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyHeadGrazePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7551"&gt;&lt;strong&gt;Head Graze&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (ARC BRD MCH DNC) [7551] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyHeadGrazePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7551"&gt;&lt;strong&gt;Head Graze&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (ARC BRD MCH DNC) [7551] [Ability]
+    /// &lt;para&gt;Interrupts the use of a target's action.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction HeadGrazePvE =&gt; _HeadGrazePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _FootGrazePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7553, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyFootGrazePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7553"&gt;&lt;strong&gt;Foot Graze&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (ARC BRD MCH DNC) [7553] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyFootGrazePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7553"&gt;&lt;strong&gt;Foot Graze&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (ARC BRD MCH DNC) [7553] [Ability]
+    /// &lt;para&gt;Binds target. Duration: 10s Cancels auto-attack upon execution. Target unbound if damage taken.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction FootGrazePvE =&gt; _FootGrazePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _LegGrazePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7554, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyLegGrazePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7554"&gt;&lt;strong&gt;Leg Graze&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (ARC BRD MCH DNC) [7554] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyLegGrazePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7554"&gt;&lt;strong&gt;Leg Graze&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (ARC BRD MCH DNC) [7554] [Ability]
+    /// &lt;para&gt;Afflicts target with Heavy +40%. Duration: 10s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction LegGrazePvE =&gt; _LegGrazePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _PelotonPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7557, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyPelotonPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7557"&gt;&lt;strong&gt;Peloton&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (ARC BRD MCH DNC) [7557] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyPelotonPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7557"&gt;&lt;strong&gt;Peloton&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (ARC BRD MCH DNC) [7557] [Ability]
+    /// &lt;para&gt;Increases movement speed of self and nearby party members. Duration: 30s Effect ends when enmity is generated. Has no effect in battle.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction PelotonPvE =&gt; _PelotonPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SurecastPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7559, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySurecastPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7559"&gt;&lt;strong&gt;Surecast&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ THM ACN WHM BLM SMN SCH AST RDM BLU SGE PCT) [7559] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifySurecastPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7559"&gt;&lt;strong&gt;Surecast&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ THM ACN WHM BLM SMN SCH AST RDM BLU SGE PCT) [7559] [Ability]
+    /// &lt;para&gt;Spells can be cast without interruption. Additional Effect: Nullifies most knockback and draw-in effects Duration: 6s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SurecastPvE =&gt; _SurecastPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _AddlePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7560, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyAddlePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7560"&gt;&lt;strong&gt;Addle&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (THM ACN BLM SMN RDM BLU PCT) [7560] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyAddlePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7560"&gt;&lt;strong&gt;Addle&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (THM ACN BLM SMN RDM BLU PCT) [7560] [Ability]
+    /// &lt;para&gt;Lowers target's physical damage dealt by 5% and magic damage dealt by 10%. Duration: s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction AddlePvE =&gt; _AddlePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SwiftcastPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7561, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySwiftcastPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7561"&gt;&lt;strong&gt;Swiftcast&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ THM ACN WHM BLM SMN SCH AST RDM BLU SGE PCT) [7561] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifySwiftcastPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7561"&gt;&lt;strong&gt;Swiftcast&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ THM ACN WHM BLM SMN SCH AST RDM BLU SGE PCT) [7561] [Ability]
+    /// &lt;para&gt;Next spell is cast immediately. Duration: 10s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SwiftcastPvE =&gt; _SwiftcastPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _LucidDreamingPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7562, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyLucidDreamingPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7562"&gt;&lt;strong&gt;Lucid Dreaming&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ THM ACN WHM BLM SMN SCH AST RDM BLU SGE PCT) [7562] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyLucidDreamingPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7562"&gt;&lt;strong&gt;Lucid Dreaming&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ THM ACN WHM BLM SMN SCH AST RDM BLU SGE PCT) [7562] [Ability]
+    /// &lt;para&gt;Gradually restores own MP. Potency: 55 Duration: 21s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction LucidDreamingPvE =&gt; _LucidDreamingPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _EsunaPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7568, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyEsunaPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7568"&gt;&lt;strong&gt;Esuna&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ WHM SCH AST SGE) [7568] [Spell]
+    /// &lt;/summary&gt;
+    static partial void ModifyEsunaPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7568"&gt;&lt;strong&gt;Esuna&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ WHM SCH AST SGE) [7568] [Spell]
+    /// &lt;para&gt;Removes a single detrimental effect from target.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction EsunaPvE =&gt; _EsunaPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _RescuePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7571, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyRescuePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7571"&gt;&lt;strong&gt;Rescue&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ WHM SCH AST SGE) [7571] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyRescuePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7571"&gt;&lt;strong&gt;Rescue&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ WHM SCH AST SGE) [7571] [Ability]
+    /// &lt;para&gt;Instantly draws target party member to your side. Cannot be used outside of combat or when target is suffering from certain enfeeblements.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction RescuePvE =&gt; _RescuePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _LegSweepPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)7863, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyLegSweepPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/7863"&gt;&lt;strong&gt;Leg Sweep&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (PGL LNC ROG MNK DRG NIN SAM RPR VPR) [7863] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyLegSweepPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/7863"&gt;&lt;strong&gt;Leg Sweep&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (PGL LNC ROG MNK DRG NIN SAM RPR VPR) [7863] [Ability]
+    /// &lt;para&gt;Stuns target. Duration: 3s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction LegSweepPvE =&gt; _LegSweepPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OpticalSightPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)9971, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOpticalSightPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/9971"&gt;&lt;strong&gt;Optical Sight&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9971] [Special]
+    /// &lt;/summary&gt;
+    static partial void ModifyOpticalSightPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/9971"&gt;&lt;strong&gt;Optical Sight&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9971] [Special]
+    /// &lt;para&gt;Deals damage with a potency of 30,000 to all opposing players and warmachina near point of impact. 3,000 when attacking a mammet or object.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction OpticalSightPvP =&gt; _OpticalSightPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SpinCrusherPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)9973, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySpinCrusherPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/9973"&gt;&lt;strong&gt;Spin Crusher&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9973] [Special]
+    /// &lt;/summary&gt;
+    static partial void ModifySpinCrusherPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/9973"&gt;&lt;strong&gt;Spin Crusher&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9973] [Special]
+    /// &lt;para&gt;Delivers an attack with a potency of 50,000 to all opposing warmachina in a cone before you. 5,000 when attacking a player mammet or object.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SpinCrusherPvP =&gt; _SpinCrusherPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _LaserXSwordPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)9974, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyLaserXSwordPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/9974"&gt;&lt;strong&gt;Laser X Sword&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9974] [Special]
+    /// &lt;/summary&gt;
+    static partial void ModifyLaserXSwordPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/9974"&gt;&lt;strong&gt;Laser X Sword&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9974] [Special]
+    /// &lt;para&gt;Delivers an attack with a potency of 50,000 to all opposing players and warmachina in a cone before you. 5,000 when attacking a mammet or object.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction LaserXSwordPvP =&gt; _LaserXSwordPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; __3000TonzeMissilePvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)9975, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        Modify_3000TonzeMissilePvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/9975"&gt;&lt;strong&gt;3000-tonze Missile&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9975] [Special]
+    /// &lt;/summary&gt;
+    static partial void Modify_3000TonzeMissilePvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/9975"&gt;&lt;strong&gt;3000-tonze Missile&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9975] [Special]
+    /// &lt;para&gt;Deals damage with a potency of 1,000,000 to all objects near point of impact. 20,000 to opposing players warmachina or mammets. Potency decreases the greater the target's distance from point of impact to a maximum of 30 yalms.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction _3000TonzeMissilePvP =&gt; __3000TonzeMissilePvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SteamReleasePvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)9977, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySteamReleasePvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/9977"&gt;&lt;strong&gt;Steam Release&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9977] [Special]
+    /// &lt;/summary&gt;
+    static partial void ModifySteamReleasePvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/9977"&gt;&lt;strong&gt;Steam Release&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9977] [Special]
+    /// &lt;para&gt;Deals damage to all opposing players and warmachina nearby with a potency of 10,000. 1,000 when attacking a mammet or object. Additional Effect: 15-yalm knockback&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SteamReleasePvP =&gt; _SteamReleasePvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _FlarethrowerPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)9978, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyFlarethrowerPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/9978"&gt;&lt;strong&gt;Flarethrower&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9978] [Special]
+    /// &lt;/summary&gt;
+    static partial void ModifyFlarethrowerPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/9978"&gt;&lt;strong&gt;Flarethrower&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9978] [Special]
+    /// &lt;para&gt;Deals damage with a potency of 40,000 to all opposing players and warmachina in a cone before you. 4,000 when attacking a mammet or object. Additional Effect: Inflicts Burns on opposing players and warmachina Potency: 10,000 Duration: 12s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction FlarethrowerPvP =&gt; _FlarethrowerPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _DoubleRocketPunchPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)9979, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyDoubleRocketPunchPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/9979"&gt;&lt;strong&gt;Double Rocket Punch&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9979] [Special]
+    /// &lt;/summary&gt;
+    static partial void ModifyDoubleRocketPunchPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/9979"&gt;&lt;strong&gt;Double Rocket Punch&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9979] [Special]
+    /// &lt;para&gt;Deals damage with a potency of 600,000 to all objects near point of impact. 30,000 when attacking opposing players warmachina or mammets. Additional Effect: Stun Duration: 3s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction DoubleRocketPunchPvP =&gt; _DoubleRocketPunchPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _MegaBeamPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)9980, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyMegaBeamPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/9980"&gt;&lt;strong&gt;Mega Beam&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9980] [Special]
+    /// &lt;/summary&gt;
+    static partial void ModifyMegaBeamPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/9980"&gt;&lt;strong&gt;Mega Beam&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9980] [Special]
+    /// &lt;para&gt;Delivers damage with a potency of 80,000 to all opposing players and warmachina in a straight line before you. 8,000 when attacking a mammet or object. Additional Effect: 30-yalm knockback&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction MegaBeamPvP =&gt; _MegaBeamPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _CeruleumRefillPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)9981, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyCeruleumRefillPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/9981"&gt;&lt;strong&gt;Ceruleum Refill&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9981] [Special]
+    /// &lt;/summary&gt;
+    static partial void ModifyCeruleumRefillPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/9981"&gt;&lt;strong&gt;Ceruleum Refill&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9981] [Special]
+    /// &lt;para&gt;Uses 25 units of ceruleum fuel (CE to restore 5000 EP to currently mounted warmachina.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction CeruleumRefillPvP =&gt; _CeruleumRefillPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _DismountPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)10057, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyDismountPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/10057"&gt;&lt;strong&gt;Dismount&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [10057] [Special]
+    /// &lt;/summary&gt;
+    static partial void ModifyDismountPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/10057"&gt;&lt;strong&gt;Dismount&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [10057] [Special]
+    /// &lt;para&gt;Exit the warmachina.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction DismountPvP =&gt; _DismountPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ReturnPvE_10061Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)10061, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyReturnPvE_10061(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/10061"&gt;&lt;strong&gt;Return&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [10061] [System]
+    /// &lt;/summary&gt;
+    static partial void ModifyReturnPvE_10061(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/10061"&gt;&lt;strong&gt;Return&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [10061] [System]
+    /// &lt;para&gt;Returns your team to the starting area. Can be used while engaged in battle.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ReturnPvE_10061 =&gt; _ReturnPvE_10061Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ReposePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)16560, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyReposePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/16560"&gt;&lt;strong&gt;Repose&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ WHM SCH AST SGE) [16560] [Spell]
+    /// &lt;/summary&gt;
+    static partial void ModifyReposePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/16560"&gt;&lt;strong&gt;Repose&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (CNJ WHM SCH AST SGE) [16560] [Spell]
+    /// &lt;para&gt;Afflicts target with Sleep. Duration: 30s Cancels auto-attack upon execution.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ReposePvE =&gt; _ReposePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SleepPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)25880, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySleepPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/25880"&gt;&lt;strong&gt;Sleep&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (THM ACN BLM SMN RDM BLU PCT) [25880] [Spell]
+    /// &lt;/summary&gt;
+    static partial void ModifySleepPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/25880"&gt;&lt;strong&gt;Sleep&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (THM ACN BLM SMN RDM BLU PCT) [25880] [Spell]
+    /// &lt;para&gt;Puts target and all nearby enemies to sleep. Duration: 30s Cancels auto-attack upon execution.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SleepPvE =&gt; _SleepPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _GuardPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)29054, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyGuardPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/29054"&gt;&lt;strong&gt;Guard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29054] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyGuardPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/29054"&gt;&lt;strong&gt;Guard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29054] [Ability]
+    /// &lt;para&gt;Reduces damage taken by 99% and grants immunity to Stun Heavy Bind Silence Deep Freeze and knockback and draw-in effects. Duration: 4s Movement speed is reduced by 33% for the duration of this effect. Effect ends upon reuse using another action or when the effect duration expires.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction GuardPvP =&gt; _GuardPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _StandardissueElixirPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)29055, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyStandardissueElixirPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/29055"&gt;&lt;strong&gt;Standard-issue Elixir&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29055] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyStandardissueElixirPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/29055"&gt;&lt;strong&gt;Standard-issue Elixir&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29055] [Ability]
+    /// &lt;para&gt;Restores your HP and MP to maximum. Casting will be interrupted when damage is taken.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction StandardissueElixirPvP =&gt; _StandardissueElixirPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _PurifyPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)29056, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyPurifyPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/29056"&gt;&lt;strong&gt;Purify&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29056] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyPurifyPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/29056"&gt;&lt;strong&gt;Purify&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29056] [Ability]
+    /// &lt;para&gt;Removes Stun Heavy Bind Silence Deep Freeze and Miracle of Nature. Additional Effect: Grants Resilience Resilience Effect: Nullifies status afflictions that can be removed by Purify as well as knockback and draw-in effects Duration: 2s Can be used even when under the effect of certain status afflictions.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction PurifyPvP =&gt; _PurifyPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SprintPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)29057, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySprintPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/29057"&gt;&lt;strong&gt;Sprint&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29057] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifySprintPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/29057"&gt;&lt;strong&gt;Sprint&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29057] [Ability]
+    /// &lt;para&gt;Increases movement speed by 50%. Effect ends upon reuse or execution of another action.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SprintPvP =&gt; _SprintPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _IsleReturnPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)29573, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyIsleReturnPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/29573"&gt;&lt;strong&gt;Isle Return&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [29573] [System]
+    /// &lt;/summary&gt;
+    static partial void ModifyIsleReturnPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/29573"&gt;&lt;strong&gt;Isle Return&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [29573] [System]
+    /// &lt;para&gt;Instantly return to this sanctuary's cozy cabin.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction IsleReturnPvE =&gt; _IsleReturnPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _RecuperatePvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)29711, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyRecuperatePvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/29711"&gt;&lt;strong&gt;Recuperate&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29711] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyRecuperatePvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/29711"&gt;&lt;strong&gt;Recuperate&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29711] [Ability]
+    /// &lt;para&gt;Restores own HP. Cure Potency: 16,000&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction RecuperatePvP =&gt; _RecuperatePvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _GuardPvP_29735Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)29735, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyGuardPvP_29735(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/29735"&gt;&lt;strong&gt;Guard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29735] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyGuardPvP_29735(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/29735"&gt;&lt;strong&gt;Guard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29735] [Ability]
+    /// &lt;para&gt;Reduces damage taken by 99% and grants immunity to Stun Heavy Bind Silence Deep Freeze and knockback and draw-in effects. Duration: 4s Movement speed is reduced by 33% for the duration of this effect. Effect ends upon reuse using another action or when the effect duration expires.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction GuardPvP_29735 =&gt; _GuardPvP_29735Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _IsleSprintPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)31314, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyIsleSprintPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/31314"&gt;&lt;strong&gt;Isle Sprint&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [31314] [System]
+    /// &lt;/summary&gt;
+    static partial void ModifyIsleSprintPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/31314"&gt;&lt;strong&gt;Isle Sprint&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [31314] [System]
+    /// &lt;para&gt;Movement speed is increased. Duration: 20s Additional Effect: Grants Jog when the effect expires Jog Effect: Movement speed is increased&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction IsleSprintPvE =&gt; _IsleSprintPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultReturnPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)41343, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultReturnPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/41343"&gt;&lt;strong&gt;Occult Return&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [41343] [System]
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultReturnPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/41343"&gt;&lt;strong&gt;Occult Return&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [41343] [System]
+    /// &lt;para&gt;Instantly return to base camp.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction OccultReturnPvE =&gt; _OccultReturnPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _StellarReturnPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)42149, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyStellarReturnPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/42149"&gt;&lt;strong&gt;Stellar Return&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [42149] [System]
+    /// &lt;/summary&gt;
+    static partial void ModifyStellarReturnPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/42149"&gt;&lt;strong&gt;Stellar Return&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [42149] [System]
+    /// &lt;para&gt;Instantly return to the current cosmic exploration area's rainbow crystal.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction StellarReturnPvE =&gt; _StellarReturnPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _RampagePvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43243, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyRampagePvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43243"&gt;&lt;strong&gt;Rampage&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (PLD WAR DRK GNB) [43243] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyRampagePvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43243"&gt;&lt;strong&gt;Rampage&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (PLD WAR DRK GNB) [43243] [Ability]
+    /// &lt;para&gt;Delivers an attack with a potency of 8,000 to all nearby enemies. Additional Effect: Increases target's damage taken by 25% Duration: 10s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction RampagePvP =&gt; _RampagePvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _RampartPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43244, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyRampartPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43244"&gt;&lt;strong&gt;Rampart&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (PLD WAR DRK GNB) [43244] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyRampartPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43244"&gt;&lt;strong&gt;Rampart&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (PLD WAR DRK GNB) [43244] [Ability]
+    /// &lt;para&gt;Reduces damage taken by 50% while increasing HP recovered by healing actions by 25%. Duration: 15s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction RampartPvP =&gt; _RampartPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _FullSwingPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43245, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyFullSwingPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43245"&gt;&lt;strong&gt;Full Swing&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (PLD WAR DRK GNB) [43245] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyFullSwingPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43245"&gt;&lt;strong&gt;Full Swing&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (PLD WAR DRK GNB) [43245] [Ability]
+    /// &lt;para&gt;Delivers an attack with a potency of 8,000. Additional Effect: 30-yalm knockback Removes Guard from enemies under its effect.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction FullSwingPvP =&gt; _FullSwingPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BloodbathPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43246, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBloodbathPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43246"&gt;&lt;strong&gt;Bloodbath&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MNK DRG NIN SAM RPR VPR) [43246] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBloodbathPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43246"&gt;&lt;strong&gt;Bloodbath&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MNK DRG NIN SAM RPR VPR) [43246] [Ability]
+    /// &lt;para&gt;Increases damage dealt by 25% and converts 100% of damage dealt into HP. Duration: 10s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BloodbathPvP =&gt; _BloodbathPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SwiftPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43247, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySwiftPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43247"&gt;&lt;strong&gt;Swift&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MNK DRG NIN SAM RPR VPR) [43247] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifySwiftPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43247"&gt;&lt;strong&gt;Swift&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MNK DRG NIN SAM RPR VPR) [43247] [Ability]
+    /// &lt;para&gt;Increases movement speed by 100% and grants immunity to Stun Heavy Bind Silence Deep Freeze and knockback and draw-in effects. Duration: 4s Effect ends when riding a mount.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SwiftPvP =&gt; _SwiftPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SmitePvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43248, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySmitePvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43248"&gt;&lt;strong&gt;Smite&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MNK DRG NIN SAM RPR VPR) [43248] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifySmitePvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43248"&gt;&lt;strong&gt;Smite&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MNK DRG NIN SAM RPR VPR) [43248] [Ability]
+    /// &lt;para&gt;Delivers an attack with a potency of 6,000. Potency increases up to 18,000 as the target's HP decreases reaching its maximum value when the target has 25% HP or less. Ignores the effects of Guard when dealing damage. Recast time resets upon earning a kill or an assist.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SmitePvP =&gt; _SmitePvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _DervishPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43249, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyDervishPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43249"&gt;&lt;strong&gt;Dervish&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BRD MCH DNC) [43249] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyDervishPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43249"&gt;&lt;strong&gt;Dervish&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BRD MCH DNC) [43249] [Ability]
+    /// &lt;para&gt;Reduces cast time and recast time of spells and weaponskills by 10% and increases movement speed by 33% for self and nearby party members. This action's effects extend through obstructions. Duration: 12s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction DervishPvP =&gt; _DervishPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BraveryPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43250, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBraveryPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43250"&gt;&lt;strong&gt;Bravery&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BRD MCH DNC) [43250] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBraveryPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43250"&gt;&lt;strong&gt;Bravery&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BRD MCH DNC) [43250] [Ability]
+    /// &lt;para&gt;Increases damage dealt by a party member or self by 25% and reduces damage taken by 25%. Duration: 15s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BraveryPvP =&gt; _BraveryPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _EagleEyeShotPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43251, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyEagleEyeShotPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43251"&gt;&lt;strong&gt;Eagle Eye Shot&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BRD MCH DNC) [43251] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyEagleEyeShotPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43251"&gt;&lt;strong&gt;Eagle Eye Shot&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BRD MCH DNC) [43251] [Ability]
+    /// &lt;para&gt;Delivers an attack with a potency of 12,000. Ignores the effects of Guard when dealing damage.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction EagleEyeShotPvP =&gt; _EagleEyeShotPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _CometPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43252, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyCometPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43252"&gt;&lt;strong&gt;Comet&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BLM SMN RDM PCT) [43252] [Spell]
+    /// &lt;/summary&gt;
+    static partial void ModifyCometPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43252"&gt;&lt;strong&gt;Comet&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BLM SMN RDM PCT) [43252] [Spell]
+    /// &lt;para&gt;Deals magic damage to enemies at the designated area with a potency of 20,000. This action's effects extend through obstructions. You cannot move while casting nor can you cancel the spell once cast.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction CometPvP =&gt; _CometPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _RustPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43254, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyRustPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43254"&gt;&lt;strong&gt;Rust&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BLM SMN RDM PCT) [43254] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyRustPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43254"&gt;&lt;strong&gt;Rust&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BLM SMN RDM PCT) [43254] [Ability]
+    /// &lt;para&gt;Reduces damage dealt and healing potency of target and all enemies nearby it by 33%. Duration: 10s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction RustPvP =&gt; _RustPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _HaelanPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43255, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyHaelanPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43255"&gt;&lt;strong&gt;Haelan&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (WHM SCH AST SGE) [43255] [Spell]
+    /// &lt;/summary&gt;
+    static partial void ModifyHaelanPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43255"&gt;&lt;strong&gt;Haelan&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (WHM SCH AST SGE) [43255] [Spell]
+    /// &lt;para&gt;Restores target's HP. Cure Potency: 16,000 Potency reduced to 8,000 when targeting self.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction HaelanPvP =&gt; _HaelanPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _StoneskinIiPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43256, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyStoneskinIiPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43256"&gt;&lt;strong&gt;Stoneskin II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (WHM SCH AST SGE) [43256] [Spell]
+    /// &lt;/summary&gt;
+    static partial void ModifyStoneskinIiPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43256"&gt;&lt;strong&gt;Stoneskin II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (WHM SCH AST SGE) [43256] [Spell]
+    /// &lt;para&gt;Creates a barrier around self and all nearby party members that absorbs damage equivalent to a heal of 12,000 potency. This action's effects extend through obstructions. Duration: 10s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction StoneskinIiPvP =&gt; _StoneskinIiPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _DiabrosisPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43257, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyDiabrosisPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43257"&gt;&lt;strong&gt;Diabrosis&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (WHM SCH AST SGE) [43257] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyDiabrosisPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43257"&gt;&lt;strong&gt;Diabrosis&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (WHM SCH AST SGE) [43257] [Ability]
+    /// &lt;para&gt;Deals unaspected damage with a potency of 9,000 to target and all enemies nearby it. Additional Effect: Reduces target's HP recovered by healing actions by 33% Duration: 10s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction DiabrosisPvP =&gt; _DiabrosisPvPCreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _PhantomDartPvPCreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)43291, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyPhantomDartPvP(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/43291"&gt;&lt;strong&gt;Phantom Dart&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BLM SMN RDM PCT) [43291] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyPhantomDartPvP(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/43291"&gt;&lt;strong&gt;Phantom Dart&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BLM SMN RDM PCT) [43291] [Ability]
+    /// &lt;para&gt;Deals unaspected damage with a potency of 4,000. Additional Effect: Increases target's damage taken by 25% Duration: 5s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction PhantomDartPvP =&gt; _PhantomDartPvPCreator.Value;
+
+    private IBaseAction[] _AllBaseActions = null;
+    
+    /// &lt;inheritdoc/&gt;
+    public virtual IBaseAction[] AllBaseActions =&gt; _AllBaseActions ??= [
+    	SprintPvE, TeleportPvE, ReturnPvE, DecipherPvE, DigPvE, RampartPvE, ProvokePvE, ReprisalPvE, ShirkPvE, InterjectPvE, LowBlowPvE, SecondWindPvE, BloodbathPvE, TrueNorthPvE, ArmsLengthPvE, FeintPvE, HeadGrazePvE, FootGrazePvE, LegGrazePvE, PelotonPvE, SurecastPvE, AddlePvE, SwiftcastPvE, LucidDreamingPvE, EsunaPvE, RescuePvE, LegSweepPvE, OpticalSightPvP, SpinCrusherPvP, LaserXSwordPvP, _3000TonzeMissilePvP, SteamReleasePvP, FlarethrowerPvP, DoubleRocketPunchPvP, MegaBeamPvP, CeruleumRefillPvP, DismountPvP, ReposePvE, SleepPvE, GuardPvP, StandardissueElixirPvP, PurifyPvP, SprintPvP, IsleReturnPvE, RecuperatePvP, IsleSprintPvE, OccultReturnPvE, StellarReturnPvE, RampagePvP, RampartPvP, FullSwingPvP, BloodbathPvP, SwiftPvP, SmitePvP, DervishPvP, BraveryPvP, EagleEyeShotPvP, CometPvP, RustPvP, HaelanPvP, StoneskinIiPvP, DiabrosisPvP, PhantomDartPvP,
+    	
+    ];
+#endregion
+
+#region Items
+    private readonly Lazy&lt;IBaseItem&gt; _BottleOfElixirCreator = new(() =&gt; new BaseItem(4559));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4559"&gt;&lt;strong&gt;Elixir&lt;/strong&gt;&lt;/see&gt; [4559]
+    /// &lt;para&gt;This special blend of herbal extracts and aetheric essence rejuvenates body and mind instantly restoring HP and MP.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem BottleOfElixir =&gt; _BottleOfElixirCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _BottleOfHielixirCreator = new(() =&gt; new BaseItem(4560));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4560"&gt;&lt;strong&gt;Hi-Elixir&lt;/strong&gt;&lt;/see&gt; [4560]
+    /// &lt;para&gt;This special blend of herbal extracts and aetheric essence rejuvenates body and mind instantly restoring HP and MP.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem BottleOfHielixir =&gt; _BottleOfHielixirCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _BottleOfAntidoteCreator = new(() =&gt; new BaseItem(4564));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4564"&gt;&lt;strong&gt;Antidote&lt;/strong&gt;&lt;/see&gt; [4564]
+    /// &lt;para&gt;This alchemically crafted restorative instantly cures most instances of poison.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem BottleOfAntidote =&gt; _BottleOfAntidoteCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _BottleOfEyeDropsCreator = new(() =&gt; new BaseItem(4565));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4565"&gt;&lt;strong&gt;Eye Drops&lt;/strong&gt;&lt;/see&gt; [4565]
+    /// &lt;para&gt;This alchemically crafted restorative instantly cures most instances of blindness.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem BottleOfEyeDrops =&gt; _BottleOfEyeDropsCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _BottleOfEchoDropsCreator = new(() =&gt; new BaseItem(4566));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4566"&gt;&lt;strong&gt;Echo Drops&lt;/strong&gt;&lt;/see&gt; [4566]
+    /// &lt;para&gt;This alchemically crafted restorative instantly cures most instances of silence.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem BottleOfEchoDrops =&gt; _BottleOfEchoDropsCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _BottleOfSmellingSaltsCreator = new(() =&gt; new BaseItem(4567));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4567"&gt;&lt;strong&gt;Smelling Salts&lt;/strong&gt;&lt;/see&gt; [4567]
+    /// &lt;para&gt;This alchemically crafted restorative instantly rouses most sleeping targets.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem BottleOfSmellingSalts =&gt; _BottleOfSmellingSaltsCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _BottleOfSpineDropsCreator = new(() =&gt; new BaseItem(4568));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4568"&gt;&lt;strong&gt;Spine Drops&lt;/strong&gt;&lt;/see&gt; [4568]
+    /// &lt;para&gt;This alchemically crafted restorative instantly cures most instances of paralysis.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem BottleOfSpineDrops =&gt; _BottleOfSpineDropsCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _GoldNeedleCreator = new(() =&gt; new BaseItem(4569));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4569"&gt;&lt;strong&gt;Gold Needle&lt;/strong&gt;&lt;/see&gt; [4569]
+    /// &lt;para&gt;The properties of this solid-gold needle include curing petrification and pricking fingers.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem GoldNeedle =&gt; _GoldNeedleCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _TuftOfPhoenixDownCreator = new(() =&gt; new BaseItem(4570));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4570"&gt;&lt;strong&gt;Phoenix Down&lt;/strong&gt;&lt;/see&gt; [4570]
+    /// &lt;para&gt;The billowy plumage of the fledgling Phoenix─a legendary bird that upon each fiery death is said to rise from its own ashes in a literal “blaze of glory.” When placed within fifteen yalms of one who is incapacitated it will instantly revive the person. While some cultures insist that the tailfeather's restorative properties trump those of down these claims have yet to be proven in any sort of scientific capacity. ※Cannot be used during certain duties.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem TuftOfPhoenixDown =&gt; _TuftOfPhoenixDownCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _FireWardPotionCreator = new(() =&gt; new BaseItem(4614));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4614"&gt;&lt;strong&gt;Fire Ward Potion&lt;/strong&gt;&lt;/see&gt; [4614]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to fire-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem FireWardPotion =&gt; _FireWardPotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _IceWardPotionCreator = new(() =&gt; new BaseItem(4615));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4615"&gt;&lt;strong&gt;Ice Ward Potion&lt;/strong&gt;&lt;/see&gt; [4615]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to ice-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem IceWardPotion =&gt; _IceWardPotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _WindWardPotionCreator = new(() =&gt; new BaseItem(4616));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4616"&gt;&lt;strong&gt;Wind Ward Potion&lt;/strong&gt;&lt;/see&gt; [4616]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to wind-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem WindWardPotion =&gt; _WindWardPotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _EarthWardPotionCreator = new(() =&gt; new BaseItem(4617));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4617"&gt;&lt;strong&gt;Earth Ward Potion&lt;/strong&gt;&lt;/see&gt; [4617]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to earth-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem EarthWardPotion =&gt; _EarthWardPotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _LightningWardPotionCreator = new(() =&gt; new BaseItem(4618));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4618"&gt;&lt;strong&gt;Lightning Ward Potion&lt;/strong&gt;&lt;/see&gt; [4618]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to lightning-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem LightningWardPotion =&gt; _LightningWardPotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _WaterWardPotionCreator = new(() =&gt; new BaseItem(4619));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4619"&gt;&lt;strong&gt;Water Ward Potion&lt;/strong&gt;&lt;/see&gt; [4619]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to water-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem WaterWardPotion =&gt; _WaterWardPotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _FireWardHipotionCreator = new(() =&gt; new BaseItem(4620));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4620"&gt;&lt;strong&gt;Fire Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4620]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to fire-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem FireWardHipotion =&gt; _FireWardHipotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _IceWardHipotionCreator = new(() =&gt; new BaseItem(4621));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4621"&gt;&lt;strong&gt;Ice Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4621]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to ice-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem IceWardHipotion =&gt; _IceWardHipotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _WindWardHipotionCreator = new(() =&gt; new BaseItem(4622));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4622"&gt;&lt;strong&gt;Wind Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4622]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to wind-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem WindWardHipotion =&gt; _WindWardHipotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _EarthWardHipotionCreator = new(() =&gt; new BaseItem(4623));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4623"&gt;&lt;strong&gt;Earth Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4623]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to earth-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem EarthWardHipotion =&gt; _EarthWardHipotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _LightningWardHipotionCreator = new(() =&gt; new BaseItem(4624));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4624"&gt;&lt;strong&gt;Lightning Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4624]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to lightning-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem LightningWardHipotion =&gt; _LightningWardHipotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _WaterWardHipotionCreator = new(() =&gt; new BaseItem(4625));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4625"&gt;&lt;strong&gt;Water Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4625]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to water-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem WaterWardHipotion =&gt; _WaterWardHipotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _FireWardMegapotionCreator = new(() =&gt; new BaseItem(4626));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4626"&gt;&lt;strong&gt;Fire Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4626]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to fire-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem FireWardMegapotion =&gt; _FireWardMegapotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _IceWardMegapotionCreator = new(() =&gt; new BaseItem(4627));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4627"&gt;&lt;strong&gt;Ice Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4627]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to ice-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem IceWardMegapotion =&gt; _IceWardMegapotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _WindWardMegapotionCreator = new(() =&gt; new BaseItem(4628));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4628"&gt;&lt;strong&gt;Wind Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4628]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to wind-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem WindWardMegapotion =&gt; _WindWardMegapotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _EarthWardMegapotionCreator = new(() =&gt; new BaseItem(4629));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4629"&gt;&lt;strong&gt;Earth Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4629]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to earth-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem EarthWardMegapotion =&gt; _EarthWardMegapotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _LightningWardMegapotionCreator = new(() =&gt; new BaseItem(4630));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4630"&gt;&lt;strong&gt;Lightning Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4630]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to lightning-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem LightningWardMegapotion =&gt; _LightningWardMegapotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _WaterWardMegapotionCreator = new(() =&gt; new BaseItem(4631));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/4631"&gt;&lt;strong&gt;Water Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4631]
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to water-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem WaterWardMegapotion =&gt; _WaterWardMegapotionCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _VialOfCordialCreator = new(() =&gt; new BaseItem(6141));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/6141"&gt;&lt;strong&gt;Cordial&lt;/strong&gt;&lt;/see&gt; [6141]
+    /// &lt;para&gt;A sweet fermented concoction that instantly restores 300 GP (350 if the cordial is of high quality).&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem VialOfCordial =&gt; _VialOfCordialCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _PhialOfRetainerFantasiaCreator = new(() =&gt; new BaseItem(8841));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/8841"&gt;&lt;strong&gt;Retainer Fantasia&lt;/strong&gt;&lt;/see&gt; [8841]
+    /// &lt;para&gt;Legend states that any who drink this mysterious liquid before lying down for the evening will awaken a new man (or woman). Grants you a single opportunity to edit your retainer's appearance when speaking to a retainer vocate.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem PhialOfRetainerFantasia =&gt; _PhialOfRetainerFantasiaCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _VialOfWateredCordialCreator = new(() =&gt; new BaseItem(16911));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/16911"&gt;&lt;strong&gt;Watered Cordial&lt;/strong&gt;&lt;/see&gt; [16911]
+    /// &lt;para&gt;A sweet fermented concoction that instantly restores 150 GP (200 if the cordial is of high quality).&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem VialOfWateredCordial =&gt; _VialOfWateredCordialCreator.Value;
+    private readonly Lazy&lt;IBaseItem&gt; _OccultPotionCreator = new(() =&gt; new BaseItem(47741));
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#item/47741"&gt;&lt;strong&gt;Occult Potion&lt;/strong&gt;&lt;/see&gt; [47741]
+    /// &lt;para&gt;This special blend of herbal extracts and aetheric essence rejuvenates body and mind instantly restoring HP or MP. Consumed upon use of Occult Potion or Occult Ether. ※Only available for use on the Occult Crescent.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public IBaseItem OccultPotion =&gt; _OccultPotionCreator.Value;
+
+    private IBaseItem[] _AllItems = null;
+    
+    /// &lt;inheritdoc/&gt;
+    public  IBaseItem[] AllItems =&gt; _AllItems ??= [
+    	BottleOfElixir, BottleOfHielixir, BottleOfAntidote, BottleOfEyeDrops, BottleOfEchoDrops, BottleOfSmellingSalts, BottleOfSpineDrops, GoldNeedle, TuftOfPhoenixDown, FireWardPotion, IceWardPotion, WindWardPotion, EarthWardPotion, LightningWardPotion, WaterWardPotion, FireWardHipotion, IceWardHipotion, WindWardHipotion, EarthWardHipotion, LightningWardHipotion, WaterWardHipotion, FireWardMegapotion, IceWardMegapotion, WindWardMegapotion, EarthWardMegapotion, LightningWardMegapotion, WaterWardMegapotion, VialOfCordial, PhialOfRetainerFantasia, VialOfWateredCordial, OccultPotion,
+    	
+    ];
+#endregion
+}</value>
+  </data>
+</root>

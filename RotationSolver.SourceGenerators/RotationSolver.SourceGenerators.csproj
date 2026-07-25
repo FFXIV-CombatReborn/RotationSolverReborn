@@ -10,21 +10,93 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.6.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Properties\Resources.Designer.cs">
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>Resources.resx</DependentUpon>
+	  <Compile Update="Properties\Status.Designer.cs">
+		<DesignTime>True</DesignTime>
+		<AutoGen>True</AutoGen>
+		<DependentUpon>Status.resx</DependentUpon>
+	  </Compile>
+	  <Compile Update="Properties\ContentType.Designer.cs">
+		<DesignTime>True</DesignTime>
+		<AutoGen>True</AutoGen>
+		<DependentUpon>ContentType.resx</DependentUpon>
+	  </Compile>
+	  <Compile Update="Properties\ActionId.Designer.cs">
+		<DesignTime>True</DesignTime>
+		<AutoGen>True</AutoGen>
+		<DependentUpon>ActionId.resx</DependentUpon>
+	  </Compile>
+	  <Compile Update="Properties\ActionCategory.Designer.cs">
+		<DesignTime>True</DesignTime>
+		<AutoGen>True</AutoGen>
+		<DependentUpon>ActionCategory.resx</DependentUpon>
+	  </Compile>
+	  <Compile Update="Properties\BNpcName.Designer.cs">
+		<DesignTime>True</DesignTime>
+		<AutoGen>True</AutoGen>
+		<DependentUpon>BNpcName.resx</DependentUpon>
+	  </Compile>
+	  <Compile Update="Properties\Action.Designer.cs">
+		<DesignTime>True</DesignTime>
+		<AutoGen>True</AutoGen>
+		<DependentUpon>Action.resx</DependentUpon>
+	  </Compile>
+	  <Compile Update="Properties\DutyAction.Designer.cs">
+		<DesignTime>True</DesignTime>
+		<AutoGen>True</AutoGen>
+		<DependentUpon>DutyAction.resx</DependentUpon>
+	  </Compile>
+	  <Compile Update="Properties\Rotation.Designer.cs">
+		<DesignTime>True</DesignTime>
+		<AutoGen>True</AutoGen>
+		<DependentUpon>Rotation.resx</DependentUpon>
+	  </Compile>
+	  <Compile Update="Properties\OpCode.Designer.cs">
+		<DesignTime>True</DesignTime>
+		<AutoGen>True</AutoGen>
+		<DependentUpon>OpCode.resx</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Update="Properties\Resources.resx">
-	    <Generator>ResXFileCodeGenerator</Generator>
-	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+	  <EmbeddedResource Update="Properties\Status.resx">
+		<Generator>ResXFileCodeGenerator</Generator>
+		<LastGenOutput>Status.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Properties\ContentType.resx">
+		<Generator>ResXFileCodeGenerator</Generator>
+		<LastGenOutput>ContentType.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Properties\ActionId.resx">
+		<Generator>ResXFileCodeGenerator</Generator>
+		<LastGenOutput>ActionId.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Properties\ActionCategory.resx">
+		<Generator>ResXFileCodeGenerator</Generator>
+		<LastGenOutput>ActionCategory.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Properties\BNpcName.resx">
+		<Generator>ResXFileCodeGenerator</Generator>
+		<LastGenOutput>BNpcName.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Properties\Action.resx">
+		<Generator>ResXFileCodeGenerator</Generator>
+		<LastGenOutput>Action.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Properties\DutyAction.resx">
+		<Generator>ResXFileCodeGenerator</Generator>
+		<LastGenOutput>DutyAction.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Properties\Rotation.resx">
+		<Generator>ResXFileCodeGenerator</Generator>
+		<LastGenOutput>Rotation.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Properties\OpCode.resx">
+		<Generator>ResXFileCodeGenerator</Generator>
+		<LastGenOutput>OpCode.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>
 	</ItemGroup>
 </Project>

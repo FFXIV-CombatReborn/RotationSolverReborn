@@ -36,22 +36,22 @@ public partial class CustomRotation
 			return null;
 		}
 
-		if (Service.Config.PldlockCasting && DataCenter.Job == ECommons.ExcelServices.Job.PLD && IsLastAction(ActionID.PassageOfArmsPvE) && StatusHelper.PlayerHasStatus(true, StatusID.PassageOfArms))
+		if (Service.Config.PldlockCasting && DataCenter.Job == Job.PLD && IsLastAction(ActionID.PassageOfArmsPvE) && StatusHelper.PlayerHasStatus(true, StatusID.PassageOfArms))
 		{
 			return null;
 		}
 
-		if (Service.Config.AstlockCasting && DataCenter.Job == ECommons.ExcelServices.Job.AST && IsLastAction(ActionID.CollectiveUnconsciousPvE) && StatusHelper.PlayerHasStatus(true, StatusID.CollectiveUnconscious_848))
+		if (Service.Config.AstlockCasting && DataCenter.Job == Job.AST && IsLastAction(ActionID.CollectiveUnconsciousPvE) && StatusHelper.PlayerHasStatus(true, StatusID.CollectiveUnconscious_848))
 		{
 			return null;
 		}
 
-		if (Service.Config.BlulockCasting && DataCenter.Job == ECommons.ExcelServices.Job.BLU && IsLastAction(ActionID.PhantomFlurryPvE) && StatusHelper.PlayerHasStatus(true, StatusID.PhantomFlurry))
+		if (Service.Config.BlulockCasting && DataCenter.Job == Job.BLU && IsLastAction(ActionID.PhantomFlurryPvE) && StatusHelper.PlayerHasStatus(true, StatusID.PhantomFlurry))
 		{
 			return null;
 		}
 
-		if (DataCenter.Job == ECommons.ExcelServices.Job.NIN && StatusHelper.PlayerHasStatus(true, StatusID.Mudra) && DataCenter.DefaultGCDRemain >= 0.625f)
+		if (DataCenter.Job == Job.NIN && StatusHelper.PlayerHasStatus(true, StatusID.Mudra) && DataCenter.DefaultGCDRemain > 0.6f)
 		{
 			return null;
 		}

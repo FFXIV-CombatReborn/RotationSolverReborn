@@ -20,6 +20,12 @@ internal static class ActionUpdater
 	[EzIPCEvent] public static Action<uint> NextGCDActionChanged = delegate { };
 	[EzIPCEvent] public static Action<uint> NextActionChanged = delegate { };
 
+	/// <summary>
+	/// Fired whenever the enemy positional that RSR is about to move into (or use an action from) changes.
+	/// The value is the underlying byte of <see cref="EnemyPositional"/>.
+	/// </summary>
+	[EzIPCEvent] public static Action<byte> DesiredPositionalChanged = delegate { };
+
 	private static IAction? _nextAction;
 	internal static IAction? NextAction
 	{
@@ -44,14 +50,53 @@ internal static class ActionUpdater
 			{
 				_nextGCDAction = value;
 				NextGCDActionChanged?.Invoke(_nextGCDAction?.AdjustedID ?? 0);
+				DesiredPositional = CalculateDesiredPositional();
 			}
 		}
+	}
+
+	private static EnemyPositional _desiredPositional = EnemyPositional.None;
+
+	/// <summary>
+	/// The enemy positional RSR intends to use for the next GCD action, e.g. <see cref="EnemyPositional.Rear"/>
+	/// for a rear positional combo action. <see cref="EnemyPositional.None"/> if no positional is required.
+	/// </summary>
+	internal static EnemyPositional DesiredPositional
+	{
+		get => _desiredPositional;
+		private set
+		{
+			if (_desiredPositional != value)
+			{
+				_desiredPositional = value;
+				DesiredPositionalChanged?.Invoke((byte)_desiredPositional);
+			}
+		}
+	}
+
+	private static EnemyPositional CalculateDesiredPositional()
+	{
+		var action = NextGCDAction;
+		if (action == null)
+		{
+			return EnemyPositional.None;
+		}
+
+		if (action.Setting.EnemyPositional != EnemyPositional.None)
+		{
+			return action.Setting.EnemyPositional;
+		}
+
+		return ConfigurationHelper.ActionPositional.TryGetValue((ActionID)action.ID, out var positional)
+			? positional
+			: EnemyPositional.None;
 	}
 
 	internal static void ClearNextAction()
 	{
 		SetAction(0);
 		NextAction = NextGCDAction = null;
+		DesiredPositional = EnemyPositional.None;
 	}
 
 	internal static void UpdateNextAction()

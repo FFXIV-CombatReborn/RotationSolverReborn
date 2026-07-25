@@ -564,19 +564,23 @@ public sealed class BeirutaRDM : RedMageRotation
 	private bool ShouldUseFallbackAoeSpells() =>
 		IsSpellAoeDesired();
 	private bool IsUnsafeForManafication()
-	{
-		return
-			IsLastGCD(
-				ActionID.EnchantedRipostePvE, ActionID.EnchantedRipostePvE_45960,
-				ActionID.EnchantedZwerchhauPvE, ActionID.EnchantedZwerchhauPvE_45961,
-				ActionID.EnchantedMoulinetPvE,
-				ActionID.EnchantedMoulinetDeuxPvE,
-				ActionID.VerholyPvE,
-				ActionID.VerflarePvE,
-				ActionID.ScorchPvE) ||
-			ScorchPvE.CanUse(out _) ||
-			ResolutionPvE.CanUse(out _);
-	}
+{
+	return
+		IsLastGCD(
+			ActionID.EnchantedRipostePvE, ActionID.EnchantedRipostePvE_45960,
+			ActionID.EnchantedZwerchhauPvE, ActionID.EnchantedZwerchhauPvE_45961,
+			ActionID.RedoublementPvE,
+			ActionID.EnchantedRedoublementPvE,
+			ActionID.EnchantedRedoublementPvE_45962,
+			ActionID.EnchantedMoulinetPvE,
+			ActionID.EnchantedMoulinetDeuxPvE,
+			ActionID.EnchantedMoulinetTroisPvE,
+			ActionID.VerholyPvE,
+			ActionID.VerflarePvE,
+			ActionID.ScorchPvE) ||
+		ScorchPvE.CanUse(out _) ||
+		ResolutionPvE.CanUse(out _);
+}
 	private bool CanUseManaficationNow(bool gateMelee)
 	{
 		if (gateMelee)

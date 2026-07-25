@@ -368,8 +368,18 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		RSCommands.Disable();
 		Watcher.Disable();
 		ActionQueueManager.Disable();
+		ActionContextMenu.Dispose();
 		Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
 		Svc.PluginInterface.UiBuilder.Draw -= OnDraw;
+
+		Svc.DutyState.DutyStarted -= DutyState_DutyStarted;
+		Svc.DutyState.DutyWiped -= DutyState_DutyWiped;
+		Svc.DutyState.DutyCompleted -= DutyState_DutyCompleted;
+		Svc.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
+
+		Svc.Chat.RemoveChatLinkHandler();
+		OpenLinkPayload = null!;
+		HideWarningLinkPayload = null;
 
 		foreach (var item in _dis)
 		{
