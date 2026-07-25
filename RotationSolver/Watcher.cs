@@ -177,11 +177,10 @@ public static class Watcher
 			// Only process real actions/items. Mounts and other non-action types (e.g. ActionType.Mount)
 			// reuse the Action sheet's row IDs, which can collide with unrelated GCDs/abilities and
 			// corrupt LastAction/LastComboAction tracking if not filtered out here.
-			if (set.Header.ActionType is not ActionType.Action and not ActionType.Item)
-			{
-				//PluginLog.Debug($"ActionFromSelf: ActionType is {set.Header.ActionType}, not Action or Item. Exiting.");
-				return;
-			}
+			//if (set.Header.ActionType is not ActionType.Action and not ActionType.Item)
+			//{
+			//	return;
+			//}
 
 			if (set.Action == null)
 			{
