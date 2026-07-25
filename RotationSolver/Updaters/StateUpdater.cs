@@ -583,6 +583,14 @@ internal static class StateUpdater
 			return true;
 		}
 
+		if (Service.Config.AutoSprintWithTank && DataCenter.IsMoving
+			&& DataCenter.Role != JobRole.Tank
+			&& !StatusHelper.PlayerHasStatus(false, StatusID.Sprint)
+			&& AnyPartyTankSprinting())
+		{
+			return true;
+		}
+
 		return false;
 	}
 
@@ -766,6 +774,18 @@ internal static class StateUpdater
 		foreach (var member in DataCenter.AllianceMembers)
 		{
 			if (member.IsJobCategory(JobRole.Tank) && member.CurrentHp != 0 && member.HasStatus(false, StatusHelper.TankStanceStatus))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static bool AnyPartyTankSprinting()
+	{
+		foreach (var member in DataCenter.PartyMembers)
+		{
+			if (member.IsJobCategory(JobRole.Tank) && member.HasStatus(false, StatusID.Sprint))
 			{
 				return true;
 			}
