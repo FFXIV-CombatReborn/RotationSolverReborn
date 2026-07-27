@@ -2393,7 +2393,7 @@ internal static class DataCenter
 
 	#region BossModReborn Timeline Integration
 
-	public static bool BMREndabled
+	public static bool BMREnabled
 	{
 		get
 		{
@@ -2454,6 +2454,33 @@ internal static class DataCenter
 	/// When null, BossModReborn is not available and all fixed dashes are considered safe.
 	/// </summary>
 	public static Func<Vector3, Vector3, bool>? BMRIsFixedDashSafe { get; set; }
+
+	/// <summary>
+	/// The most recently polled set of upcoming planned actions from BossMod's Cooldown Planner,
+	/// wired up by BMRPlanUpdater. Empty when no plan is active or BossModReborn is unavailable.
+	/// </summary>
+	public static List<BMRPlannedAction> BMRPlannedActions { get; set; } = [];
+
+	/// <summary>
+	/// Returns the currently active planned action (if any) matching the given adjusted action id,
+	/// i.e. one whose activation window has started (ActivationIn &lt;= 0) and not yet ended
+	/// (WindowEndIn &gt; 0). Only entries resolved to a concrete game action (ActionType == 1) are considered.
+	/// </summary>
+	public static BMRPlannedAction? GetActivePlannedAction(uint actionId)
+	{
+		var actions = BMRPlannedActions;
+		for (var i = 0; i < actions.Count; i++)
+		{
+			var action = actions[i];
+			if (action.ActionId == actionId && action.ActivationIn <= 0f && action.WindowEndIn > 0f)
+			{
+				PluginLog.Information($"GetActivePlannedAction: Found active planned action {action.ActionId} with ActivationIn {action.ActivationIn} and WindowEndIn {action.WindowEndIn}");
+				return action;
+			}
+		}
+
+		return null;
+	}
 
 	/// <summary>
 	/// Returns true if the destination is safe to move to, or if BossModReborn IPC is unavailable.
@@ -2531,6 +2558,14 @@ internal static class DataCenter
 		BMRIsPositionSafe = null;
 		BMRIsDashSafe = null;
 		BMRIsFixedDashSafe = null;
+	}
+
+	/// <summary>
+	/// Clears any cached Cooldown Planner data (called when the feature is disabled or BMR becomes unavailable).
+	/// </summary>
+	public static void ResetBmrPlanData()
+	{
+		BMRPlannedActions = [];
 	}
 	#endregion
 }

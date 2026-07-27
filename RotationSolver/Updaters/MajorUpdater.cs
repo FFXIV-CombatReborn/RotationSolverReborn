@@ -184,7 +184,7 @@ internal static class MajorUpdater
 			LogOnce("(RSRActivatedCore): MacroUpdater.UpdateMacro Exception", ex);
 		}
 
-		if (DataCenter.BMREndabled)
+		if (DataCenter.BMREnabled)
 		{
 			try
 			{
@@ -193,6 +193,15 @@ internal static class MajorUpdater
 			catch (Exception ex)
 			{
 				LogOnce("(RSRActivatedCore): BossModUpdater.Update Exception", ex);
+			}
+
+			try
+			{
+				BMRPlanUpdater.Update();
+			}
+			catch (Exception ex)
+			{
+				LogOnce("(RSRActivatedCore): BMRPlanUpdater.Update Exception", ex);
 			}
 		}
 

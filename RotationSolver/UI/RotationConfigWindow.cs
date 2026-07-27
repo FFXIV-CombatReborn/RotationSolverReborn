@@ -67,13 +67,11 @@ public partial class RotationConfigWindow : Window
 	"Akurosuki",
 	"Alkeid",
 	"catfourteen",
-	"Chaewon",
 	"Chaos_co",
 	"Chris",
 	"DeadCode",
 	"Drama",
 	"Eddar",
-	"Elena",
 	"Endings",
 	"Enyo",
 	"ExiledxSnake",
@@ -86,17 +84,13 @@ public partial class RotationConfigWindow : Window
 	"kuromiromi",
 	"Lemon",
 	"LouBird",
-	"memoryloops",
 	"Miracle Ace",
 	"Mirai",
 	"Miri",
 	"No",
-	"Papaya",
 	"Plogons",
 	"Preset",
 	"prismagreen",
-	"Reek",
-	"Robsie",
 	"smf26",
 	"Utterly Hopeless!",
 	"Vaex_Darastrix",
@@ -4336,6 +4330,8 @@ public partial class RotationConfigWindow : Window
 		{() => "Next Action", DrawNextAction },
 		{() => "Last Action", DrawLastAction },
 		{() => "IPC Testing", DrawIPC },
+		{() => "BMR Data", DrawBMRData }, 
+
 		{() => "Effect", () =>
 			{
 				ImGui.Text(Watcher.ShowStrSelf);
@@ -4984,6 +4980,12 @@ public partial class RotationConfigWindow : Window
 			IPCProvider ipcProvider = new();
 			ipcProvider.ChangeOperatingMode(StateCommandType.Henched);
 		}
+	}
+
+	private static void DrawBMRData()
+	{
+		ImGui.Text($"Cooldown Planner IPC Enabled: {BMRPlan_IPCSubscriber.IsEnabled}");
+		ImGui.Text($"BMRPlannedActionsCount: {DataCenter.BMRPlannedActions.Count}");
 	}
 
 	private static void DrawAction(ActionID id, string type)
