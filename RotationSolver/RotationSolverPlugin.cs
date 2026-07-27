@@ -147,6 +147,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 			AutoAttackUpdater.Enable();
 			Watcher.Enable();
 			ActionQueueManager.Enable();
+			BMRPlanUpdater.Enable();
 			ActionContextMenu.Init();
 			HotbarHighlightManager.Init();
 
@@ -368,6 +369,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		RSCommands.Disable();
 		Watcher.Disable();
 		ActionQueueManager.Disable();
+		BMRPlanUpdater.Disable();
 		ActionContextMenu.Dispose();
 		Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
 		Svc.PluginInterface.UiBuilder.Draw -= OnDraw;

@@ -359,6 +359,16 @@ internal partial class Configs : IPluginConfiguration
 	[Range(1, 10, ConfigUnitType.Seconds)]
 	public float InterceptActionTime { get; set; } = 5;
 
+	[ConditionBool, UI("Use BossModReborn's Cooldown Planner actions with the interception system (Experimental)",
+		Description = "When enabled and BossModReborn is loaded, RSR will allow actions planned in BMR's Cooldown Planner to pass through the intercept system when their window is active.",
+		Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction3))]
+	private static readonly bool _useBMRPlan = false;
+
+	[UI("How far ahead (in seconds) to look up upcoming Cooldown Planner actions", Parent = nameof(UseBmrPlan),
+		Filter = AutoActionUsage, Section = 5)]
+	[Range(1, 60, ConfigUnitType.Seconds, 1f)]
+	public float BMRPlanLookAheadSeconds { get; set; } = 5f;
+
 	/// <markdown file="Auto" name="What kind of AoE moves to use" section="Action Usage and Control">
 	/// - Full: Use all available AoE actions.
 	/// - Cleave: Use only single-target AoE actions.
