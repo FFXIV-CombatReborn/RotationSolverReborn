@@ -65,7 +65,7 @@ namespace RotationSolver.Basic.Rotations.Duties;
 
 /// &lt;summary&gt;
 /// The Custom Rotation.
-/// &lt;br&gt;Number of Actions: 506&lt;/br&gt;
+/// &lt;br&gt;Number of Actions: 559&lt;/br&gt;
 /// &lt;/summary&gt;
 public abstract partial class DutyRotation
 {
@@ -9702,7 +9702,7 @@ public abstract partial class DutyRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/41604"&gt;&lt;strong&gt;Shirahadori&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [41604] [Ability] Duty Action
-    /// &lt;para&gt;Renders you impervious to physical damage for one attack. Duration: 4s&lt;/para&gt;
+    /// &lt;para&gt;Renders you impervious to most physical damage for one attack. Duration: 4s&lt;/para&gt;
     /// &lt;/summary&gt;
     [ID(41604)]
     public IBaseAction ShirahadoriPvE =&gt; _ShirahadoriPvECreator.Value;
@@ -10093,7 +10093,7 @@ public abstract partial class DutyRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/41621"&gt;&lt;strong&gt;Occult Slowga&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [41621] [Spell] Duty Action
-    /// &lt;para&gt;Afflict target and all enemies nearby it with Slow +80%. Duration: 30s&lt;/para&gt;
+    /// &lt;para&gt;Afflicts target and all enemies nearby it with Slow +80%. Duration: 30s&lt;/para&gt;
     /// &lt;/summary&gt;
     [ID(41621)]
     public IBaseAction OccultSlowgaPvE =&gt; _OccultSlowgaPvECreator.Value;
@@ -11040,6 +11040,190 @@ public abstract partial class DutyRotation
     /// &lt;/summary&gt;
     [ID(45127)]
     public IBaseAction PruningPirouettePvE =&gt; _PruningPirouettePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ShootHardPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)46406, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyShootHardPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/46406"&gt;&lt;strong&gt;Shoot Hard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46406] [Weaponskill] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyShootHardPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/46406"&gt;&lt;strong&gt;Shoot Hard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46406] [Weaponskill] Duty Action
+    /// &lt;para&gt;Delivers a hard-hitting attack.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(46406)]
+    public IBaseAction ShootHardPvE =&gt; _ShootHardPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ShootHarderPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)46407, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyShootHarderPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/46407"&gt;&lt;strong&gt;Shoot Harder&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46407] [Weaponskill] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyShootHarderPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/46407"&gt;&lt;strong&gt;Shoot Harder&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46407] [Weaponskill] Duty Action
+    /// &lt;para&gt;Delivers an even harder-hitting attack.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(46407)]
+    public IBaseAction ShootHarderPvE =&gt; _ShootHarderPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SmokingGunPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)46408, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySmokingGunPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/46408"&gt;&lt;strong&gt;Smoking Gun&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46408] [Weaponskill] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifySmokingGunPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/46408"&gt;&lt;strong&gt;Smoking Gun&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46408] [Weaponskill] Duty Action
+    /// &lt;para&gt;Delivers an attack with hard-boiled style.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(46408)]
+    public IBaseAction SmokingGunPvE =&gt; _SmokingGunPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _PulpFissionPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)46409, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyPulpFissionPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/46409"&gt;&lt;strong&gt;Pulp Fission&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46409] [Weaponskill] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyPulpFissionPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/46409"&gt;&lt;strong&gt;Pulp Fission&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46409] [Weaponskill] Duty Action
+    /// &lt;para&gt;Delivers an electrifying magical attack with a potency of 1,800 to target and all enemies nearby it. Can only be executed while under the effect of Fission Chamber.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(46409)]
+    public IBaseAction PulpFissionPvE =&gt; _PulpFissionPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _MoltingPythonPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)46410, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyMoltingPythonPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/46410"&gt;&lt;strong&gt;Molting Python&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46410] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyMoltingPythonPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/46410"&gt;&lt;strong&gt;Molting Python&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46410] [Ability] Duty Action
+    /// &lt;para&gt;Delivers an attack with a potency of 300 while dodging to the left smooth as a snake shedding its skin.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(46410)]
+    public IBaseAction MoltingPythonPvE =&gt; _MoltingPythonPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _NightStallionPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)46411, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyNightStallionPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/46411"&gt;&lt;strong&gt;Night Stallion&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46411] [Weaponskill] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyNightStallionPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/46411"&gt;&lt;strong&gt;Night Stallion&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46411] [Weaponskill] Duty Action
+    /// &lt;para&gt;Delivers a sliding attack with a potency of 600 to all enemies in a straight line before you.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(46411)]
+    public IBaseAction NightStallionPvE =&gt; _NightStallionPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ThickSkinPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)46412, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyThickSkinPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/46412"&gt;&lt;strong&gt;Thick Skin&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46412] [Weaponskill] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyThickSkinPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/46412"&gt;&lt;strong&gt;Thick Skin&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46412] [Weaponskill] Duty Action
+    /// &lt;para&gt;Hard-boiled goodness replenishes HP and reduces damage taken by 60%. Duration: 4s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(46412)]
+    public IBaseAction ThickSkinPvE =&gt; _ThickSkinPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _TheShortGoodbyePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)46413, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyTheShortGoodbyePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/46413"&gt;&lt;strong&gt;The Short Good-bye&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46413] [Weaponskill] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyTheShortGoodbyePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/46413"&gt;&lt;strong&gt;The Short Good-bye&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46413] [Weaponskill] Duty Action
+    /// &lt;para&gt;Say farewell to your target with the hardest of hard-boiled limit breaks.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(46413)]
+    public IBaseAction TheShortGoodbyePvE =&gt; _TheShortGoodbyePvECreator.Value;
     private readonly Lazy&lt;IBaseAction&gt; _MagicShellPvECreator = new(() =&gt; 
     {
         IBaseAction action = new BaseAction((ActionID)46590, true);
@@ -11059,7 +11243,7 @@ public abstract partial class DutyRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/46590"&gt;&lt;strong&gt;Magic Shell&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [46590] [Ability] Duty Action
-    /// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to 20% of the caster's maximum HP. Duration: 60s When the barrier is completely absorbed grants Honed Spellblade to the caster.&lt;/para&gt;
+    /// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to 20% of the caster's maximum HP. Duration: 60s When the barrier is completely absorbed or expires grants Honed Spellblade to the caster.&lt;/para&gt;
     /// &lt;/summary&gt;
     [ID(46590)]
     public IBaseAction MagicShellPvE =&gt; _MagicShellPvECreator.Value;
@@ -11151,7 +11335,7 @@ public abstract partial class DutyRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/46594"&gt;&lt;strong&gt;Finisher&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [46594] [Weaponskill] Duty Action
-    /// &lt;para&gt;Delivers an attack to target. 60% chance for an attack with a potency of 600. 20% chance for an attack with a potency of 1,000 potency. 20% chance for your attack to miss. Potency scales with item level. Additional Effect: 25% chance to kill target instantly with some exceptions.&lt;/para&gt;
+    /// &lt;para&gt;Delivers an attack to target. 20% chance for an attack with a potency of 1,000. Additional Effect: 25% chance to kill target instantly with some exceptions 60% chance for an attack with a potency of 600. 20% chance for your attack to miss. Potency scales with item level.&lt;/para&gt;
     /// &lt;/summary&gt;
     [ID(46594)]
     public IBaseAction FinisherPvE =&gt; _FinisherPvECreator.Value;
@@ -11427,7 +11611,7 @@ public abstract partial class DutyRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/46606"&gt;&lt;strong&gt;Inquiring Mind&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [46606] [Ability] Duty Action
-    /// &lt;para&gt;When executed near a knowledge crystal grants an effect to self and nearby party members based on your phantom job and its level. Phantom Knight Effect (Level 2 or Higher): Grants Enduring Fortitude Enduring Fortitude Effect: Reduces damage taken by 10% Duration: 30m Phantom Monk Effect (Level 3 or Higher): Grants Fleetfooted Fleetfooted Effect: Increases movement speed Duration: 30m Phantom Bard Effect (Level 2 or Higher): Grants Romeo's Ballad Romeo's Ballad Effect: Increases Phantom EXP earned through battle by 10% Duration: 30m Phantom Dancer Effect (Level 2 or Higher): Grants Quicker Step Swiftstrike Effect: Increases damage dealt by 2% Duration: 30m&lt;/para&gt;
+    /// &lt;para&gt;When executed near a knowledge crystal grants an effect to self and nearby party members based on your phantom job and its level. Phantom Knight Effect (Level 2 or Higher): Grants Enduring Fortitude Enduring Fortitude Effect: Reduces damage taken by 10% Duration: 30m Phantom Monk Effect (Level 3 or Higher): Grants Fleetfooted Fleetfooted Effect: Increases movement speed Duration: 30m Phantom Bard Effect (Level 2 or Higher): Grants Romeo's Ballad Romeo's Ballad Effect: Increases Phantom EXP earned through battle by 10% Duration: 30m Phantom Dancer Effect (Level 2 or Higher): Grants Quicker Step Quicker Step Effect: Increases damage dealt by 2% Duration: 30m&lt;/para&gt;
     /// &lt;/summary&gt;
     [ID(46606)]
     public IBaseAction InquiringMindPvE =&gt; _InquiringMindPvECreator.Value;
@@ -11707,6 +11891,1041 @@ public abstract partial class DutyRotation
     /// &lt;/summary&gt;
     [ID(46942)]
     public IBaseAction VariantEagleEyeShotPvE =&gt; _VariantEagleEyeShotPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _FumaShurikenPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49062, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyFumaShurikenPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49062"&gt;&lt;strong&gt;Fuma Shuriken&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49062] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyFumaShurikenPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49062"&gt;&lt;strong&gt;Fuma Shuriken&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49062] [Ability] Duty Action
+    /// &lt;para&gt;Delivers an attack with a potency of 230. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49062)]
+    public IBaseAction FumaShurikenPvE =&gt; _FumaShurikenPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SmokePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49063, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySmokePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49063"&gt;&lt;strong&gt;Smoke&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49063] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifySmokePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49063"&gt;&lt;strong&gt;Smoke&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49063] [Ability] Duty Action
+    /// &lt;para&gt;Increases evasion by 20%. Duration: 90s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49063)]
+    public IBaseAction SmokePvE =&gt; _SmokePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _LightningScrollPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49064, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyLightningScrollPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49064"&gt;&lt;strong&gt;Lightning Scroll&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49064] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyLightningScrollPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49064"&gt;&lt;strong&gt;Lightning Scroll&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49064] [Ability] Duty Action
+    /// &lt;para&gt;Deals lightning damage with a potency of 150 to target and all enemies nearby it. Potency increases to 195 when used against targets weak to lightning. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49064)]
+    public IBaseAction LightningScrollPvE =&gt; _LightningScrollPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _FlameScrollPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49065, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyFlameScrollPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49065"&gt;&lt;strong&gt;Flame Scroll&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49065] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyFlameScrollPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49065"&gt;&lt;strong&gt;Flame Scroll&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49065] [Ability] Duty Action
+    /// &lt;para&gt;Deals fire damage with a potency of 150 to target and all enemies nearby it. Potency increases to 195 when used against targets weak to fire. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49065)]
+    public IBaseAction FlameScrollPvE =&gt; _FlameScrollPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ImagePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49066, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyImagePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49066"&gt;&lt;strong&gt;Image&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49066] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyImagePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49066"&gt;&lt;strong&gt;Image&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49066] [Ability] Duty Action
+    /// &lt;para&gt;Grants three stacks of Image. Image Effect: Nullifies most physical attacks Duration: 30s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49066)]
+    public IBaseAction ImagePvE =&gt; _ImagePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultCureIiPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49067, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultCureIiPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49067"&gt;&lt;strong&gt;Occult Cure II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49067] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultCureIiPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49067"&gt;&lt;strong&gt;Occult Cure II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49067] [Spell] Duty Action
+    /// &lt;para&gt;Restores target's HP. Cure Potency: 40,000&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49067)]
+    public IBaseAction OccultCureIiPvE =&gt; _OccultCureIiPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultCureIiiPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49068, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultCureIiiPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49068"&gt;&lt;strong&gt;Occult Cure III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49068] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultCureIiiPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49068"&gt;&lt;strong&gt;Occult Cure III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49068] [Spell] Duty Action
+    /// &lt;para&gt;Restores own or target party member's HP and all party members nearby target. Cure Potency: 30,000&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49068)]
+    public IBaseAction OccultCureIiiPvE =&gt; _OccultCureIiiPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultBlinkPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49069, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultBlinkPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49069"&gt;&lt;strong&gt;Occult Blink&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49069] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultBlinkPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49069"&gt;&lt;strong&gt;Occult Blink&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49069] [Ability] Duty Action
+    /// &lt;para&gt;Renders target impervious to most magic damage for one attack. Duration: 30s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49069)]
+    public IBaseAction OccultBlinkPvE =&gt; _OccultBlinkPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultRaisePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49070, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultRaisePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49070"&gt;&lt;strong&gt;Occult Raise&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49070] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultRaisePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49070"&gt;&lt;strong&gt;Occult Raise&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49070] [Spell] Duty Action
+    /// &lt;para&gt;Resurrects target to a weakened state. Can also be cast on targets with Resurrection Restricted.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49070)]
+    public IBaseAction OccultRaisePvE =&gt; _OccultRaisePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultHolyPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49071, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultHolyPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49071"&gt;&lt;strong&gt;Occult Holy&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49071] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultHolyPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49071"&gt;&lt;strong&gt;Occult Holy&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49071] [Spell] Duty Action
+    /// &lt;para&gt;Deals unaspected damage with a potency of 500 to target and all enemies nearby it. Potency increases to 750 when used against undead enemies. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49071)]
+    public IBaseAction OccultHolyPvE =&gt; _OccultHolyPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultFireIiiPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49072, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultFireIiiPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49072"&gt;&lt;strong&gt;Occult Fire III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49072] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultFireIiiPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49072"&gt;&lt;strong&gt;Occult Fire III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49072] [Spell] Duty Action
+    /// &lt;para&gt;Deals fire damage with a potency of 400 to target and all enemies nearby it. Potency increases to 520 when used against targets weak to fire. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49072)]
+    public IBaseAction OccultFireIiiPvE =&gt; _OccultFireIiiPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultBlizzardIiiPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49073, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultBlizzardIiiPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49073"&gt;&lt;strong&gt;Occult Blizzard III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49073] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultBlizzardIiiPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49073"&gt;&lt;strong&gt;Occult Blizzard III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49073] [Spell] Duty Action
+    /// &lt;para&gt;Deals ice damage with a potency of 400 to target and all enemies nearby it. Potency increases to 520 when used against targets weak to ice. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49073)]
+    public IBaseAction OccultBlizzardIiiPvE =&gt; _OccultBlizzardIiiPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultThunderIiiPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49074, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultThunderIiiPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49074"&gt;&lt;strong&gt;Occult Thunder III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49074] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultThunderIiiPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49074"&gt;&lt;strong&gt;Occult Thunder III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49074] [Spell] Duty Action
+    /// &lt;para&gt;Deals lightning damage with a potency of 400 to target and all enemies nearby it. Potency increases to 520 when used against targets weak to lightning. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49074)]
+    public IBaseAction OccultThunderIiiPvE =&gt; _OccultThunderIiiPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultToadPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49075, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultToadPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49075"&gt;&lt;strong&gt;Occult Toad&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49075] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultToadPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49075"&gt;&lt;strong&gt;Occult Toad&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49075] [Spell] Duty Action
+    /// &lt;para&gt;Afflicts target with Occult Toad. Occult Toad Effect: Reduces target's damage dealt by 99% and prevents the execution of actions save for auto-attack Duration: 20s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49075)]
+    public IBaseAction OccultToadPvE =&gt; _OccultToadPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultFlarePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49076, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultFlarePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49076"&gt;&lt;strong&gt;Occult Flare&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49076] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultFlarePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49076"&gt;&lt;strong&gt;Occult Flare&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49076] [Spell] Duty Action
+    /// &lt;para&gt;Deals unaspected damage with a potency of 500 to target and all enemies nearby it. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49076)]
+    public IBaseAction OccultFlarePvE =&gt; _OccultFlarePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultJumpPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49077, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultJumpPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49077"&gt;&lt;strong&gt;Occult Jump&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49077] [Weaponskill] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultJumpPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49077"&gt;&lt;strong&gt;Occult Jump&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49077] [Weaponskill] Duty Action
+    /// &lt;para&gt;Delivers an attack with a potency of . Potency scales with item level. Additional Effect: Reduces damage taken by Duration: 2s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49077)]
+    public IBaseAction OccultJumpPvE =&gt; _OccultJumpPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _StepForthPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49078, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyStepForthPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49078"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49078] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyStepForthPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49078"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49078] [Ability] Duty Action
+    /// &lt;para&gt;Quickly move 10 yalms in the selected direction.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49078)]
+    public IBaseAction StepForthPvE =&gt; _StepForthPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _LancePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49079, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyLancePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49079"&gt;&lt;strong&gt;Lance&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49079] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyLancePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49079"&gt;&lt;strong&gt;Lance&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49079] [Ability] Duty Action
+    /// &lt;para&gt;Delivers an attack with a potency of 300. Potency scales with item level. Additional Effect: Absorbs a portion of damage dealt as HP Additional Effect: Absorbed HP that exceeds maximum HP will be applied as a barrier Duration: 60s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49079)]
+    public IBaseAction LancePvE =&gt; _LancePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _HellfirePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49080, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyHellfirePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49080"&gt;&lt;strong&gt;Hellfire&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49080] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyHellfirePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49080"&gt;&lt;strong&gt;Hellfire&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49080] [Spell] Duty Action
+    /// &lt;para&gt;Deals fire damage with a potency of 600 to target and all enemies nearby it. Potency increases to 780 when used against targets weak to fire. Potency scales with item level. Cast and recast timer cannot be affected by status effects or gear attributes.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49080)]
+    public IBaseAction HellfirePvE =&gt; _HellfirePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _JudgmentBoltPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49081, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyJudgmentBoltPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49081"&gt;&lt;strong&gt;Judgment Bolt&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49081] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyJudgmentBoltPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49081"&gt;&lt;strong&gt;Judgment Bolt&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49081] [Spell] Duty Action
+    /// &lt;para&gt;Deals lightning damage with a potency of 600 to target and all enemies nearby it. Potency increases to 780 when used against targets weak to lightning. Potency scales with item level. Cast and recast timer cannot be affected by status effects or gear attributes. Shares a recast timer with Hellfire.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49081)]
+    public IBaseAction JudgmentBoltPvE =&gt; _JudgmentBoltPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _EarthenWallPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49082, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyEarthenWallPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49082"&gt;&lt;strong&gt;Earthen Wall&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49082] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyEarthenWallPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49082"&gt;&lt;strong&gt;Earthen Wall&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49082] [Spell] Duty Action
+    /// &lt;para&gt;Creates a barrier around self and all nearby party members that absorbs damage equivalent to a heal of 40,000 potency. Duration: 10s Cast and recast timer cannot be affected by status effects or gear attributes.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49082)]
+    public IBaseAction EarthenWallPvE =&gt; _EarthenWallPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ThunderstormPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49083, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyThunderstormPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49083"&gt;&lt;strong&gt;Thunderstorm&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49083] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyThunderstormPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49083"&gt;&lt;strong&gt;Thunderstorm&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49083] [Spell] Duty Action
+    /// &lt;para&gt;Deals wind damage with a potency of 600 to all enemies in a cone before you. Potency increases to 780 when used against targets weak to wind. Potency scales with item level. Cast and recast timer cannot be affected by status effects or gear attributes. Shares a recast timer with Hellfire and Judgment Bolt.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49083)]
+    public IBaseAction ThunderstormPvE =&gt; _ThunderstormPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _MegaflarePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49084, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyMegaflarePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49084"&gt;&lt;strong&gt;Megaflare&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49084] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyMegaflarePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49084"&gt;&lt;strong&gt;Megaflare&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49084] [Spell] Duty Action
+    /// &lt;para&gt;Deals unaspected damage with a potency of 1,000 to target and all enemies nearby it. Potency scales with item level. Cast and recast timer cannot be affected by status effects or gear attributes.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49084)]
+    public IBaseAction MegaflarePvE =&gt; _MegaflarePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultAeroPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49085, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultAeroPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49085"&gt;&lt;strong&gt;Occult Aero&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49085] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultAeroPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49085"&gt;&lt;strong&gt;Occult Aero&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49085] [Spell] Duty Action
+    /// &lt;para&gt;Deals wind damage with a potency of 150. Potency increases to 195 when used against targets weak to wind. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49085)]
+    public IBaseAction OccultAeroPvE =&gt; _OccultAeroPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultMissilePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49086, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultMissilePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49086"&gt;&lt;strong&gt;Occult Missile&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49086] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultMissilePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49086"&gt;&lt;strong&gt;Occult Missile&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49086] [Spell] Duty Action
+    /// &lt;para&gt;Delivers an attack with a 35% chance to deal damage equal to 75% of target's current HP with some exceptions.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49086)]
+    public IBaseAction OccultMissilePvE =&gt; _OccultMissilePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultAquaBreathPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49087, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultAquaBreathPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49087"&gt;&lt;strong&gt;Occult Aqua Breath&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49087] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultAquaBreathPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49087"&gt;&lt;strong&gt;Occult Aqua Breath&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49087] [Spell] Duty Action
+    /// &lt;para&gt;Deals unaspected damage with a potency of 300 to target and all enemies nearby it. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49087)]
+    public IBaseAction OccultAquaBreathPvE =&gt; _OccultAquaBreathPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultMightyGuardPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49088, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultMightyGuardPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49088"&gt;&lt;strong&gt;Occult Mighty Guard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49088] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultMightyGuardPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49088"&gt;&lt;strong&gt;Occult Mighty Guard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49088] [Spell] Duty Action
+    /// &lt;para&gt;Reduces damage taken by self and nearby party members by 20%. Duration: 15s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49088)]
+    public IBaseAction OccultMightyGuardPvE =&gt; _OccultMightyGuardPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultAeroIiPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49089, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultAeroIiPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49089"&gt;&lt;strong&gt;Occult Aero II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49089] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultAeroIiPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49089"&gt;&lt;strong&gt;Occult Aero II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49089] [Spell] Duty Action
+    /// &lt;para&gt;Deals wind damage with a potency of 200. Potency increases to 260 when used against targets weak to wind. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49089)]
+    public IBaseAction OccultAeroIiPvE =&gt; _OccultAeroIiPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultWhiteWindPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49090, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultWhiteWindPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49090"&gt;&lt;strong&gt;Occult White Wind&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49090] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultWhiteWindPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49090"&gt;&lt;strong&gt;Occult White Wind&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49090] [Spell] Duty Action
+    /// &lt;para&gt;Restores own HP and the HP of all nearby party members by an amount equal to your current HP.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49090)]
+    public IBaseAction OccultWhiteWindPvE =&gt; _OccultWhiteWindPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultAeroIiiPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49091, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultAeroIiiPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49091"&gt;&lt;strong&gt;Occult Aero III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49091] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultAeroIiiPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49091"&gt;&lt;strong&gt;Occult Aero III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49091] [Spell] Duty Action
+    /// &lt;para&gt;Deals wind damage with a potency of 250 to target and all enemies nearby it. Potency increases to 325 when used against targets weak to wind. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49091)]
+    public IBaseAction OccultAeroIiiPvE =&gt; _OccultAeroIiiPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultFireIiPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49092, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultFireIiPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49092"&gt;&lt;strong&gt;Occult Fire II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49092] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultFireIiPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49092"&gt;&lt;strong&gt;Occult Fire II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49092] [Spell] Duty Action
+    /// &lt;para&gt;Deals fire damage with a potency of 300 to target and all enemies nearby it. Potency increases to 390 when used against targets weak to fire. Potency scales with item level.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49092)]
+    public IBaseAction OccultFireIiPvE =&gt; _OccultFireIiPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultCureIiPvE_49093Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49093, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultCureIiPvE_49093(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49093"&gt;&lt;strong&gt;Occult Cure II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49093] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultCureIiPvE_49093(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49093"&gt;&lt;strong&gt;Occult Cure II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49093] [Spell] Duty Action
+    /// &lt;para&gt;Restores target's HP. Cure Potency: 40,000&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49093)]
+    public IBaseAction OccultCureIiPvE_49093 =&gt; _OccultCureIiPvE_49093Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultLibraPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49094, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultLibraPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49094"&gt;&lt;strong&gt;Occult Libra&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49094] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultLibraPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49094"&gt;&lt;strong&gt;Occult Libra&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49094] [Ability] Duty Action
+    /// &lt;para&gt;Discern the elemental affinity of enemies increasing the potency of elemental attacks that exploit their weaknesses. Duration: 120s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49094)]
+    public IBaseAction OccultLibraPvE =&gt; _OccultLibraPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultBlizzardIiPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49095, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultBlizzardIiPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49095"&gt;&lt;strong&gt;Occult Blizzard II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49095] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultBlizzardIiPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49095"&gt;&lt;strong&gt;Occult Blizzard II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49095] [Spell] Duty Action
+    /// &lt;para&gt;Deals ice damage with a potency of 300 to target and all enemies nearby it. Potency increases to 390 when used against targets weak to ice. Potency scales with item level. Shares a recast timer with Occult Fire II.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49095)]
+    public IBaseAction OccultBlizzardIiPvE =&gt; _OccultBlizzardIiPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _OccultThunderIiPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49096, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyOccultThunderIiPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49096"&gt;&lt;strong&gt;Occult Thunder II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49096] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyOccultThunderIiPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49096"&gt;&lt;strong&gt;Occult Thunder II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49096] [Spell] Duty Action
+    /// &lt;para&gt;Deals lightning damage with a potency of 300 to target and all enemies nearby it. Potency increases to 390 when used against targets weak to lightning. Potency scales with item level. Shares a recast timer with Occult Fire II and Occult Blizzard II.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49096)]
+    public IBaseAction OccultThunderIiPvE =&gt; _OccultThunderIiPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _DrainTouchPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49097, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyDrainTouchPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49097"&gt;&lt;strong&gt;Drain Touch&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49097] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyDrainTouchPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49097"&gt;&lt;strong&gt;Drain Touch&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49097] [Ability] Duty Action
+    /// &lt;para&gt;Deals unaspected damage with a potency of 150. Potency scales with item level. Additional Effect: Absorbs a portion of damage dealt as HP Additional Effect: Grants Drain Touch Drain Touch Effect: Most attacks cannot reduce your HP to less than 1 Duration: 6s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49097)]
+    public IBaseAction DrainTouchPvE =&gt; _DrainTouchPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _DeepFreezePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49098, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyDeepFreezePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49098"&gt;&lt;strong&gt;Deep Freeze&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49098] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyDeepFreezePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49098"&gt;&lt;strong&gt;Deep Freeze&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49098] [Spell] Duty Action
+    /// &lt;para&gt;Deals ice damage with a potency of 300 to all enemies in a straight line. Potency increases to 390 when used against targets weak to ice. Drain Touch Potency: 400 Potency increases to 520 when used against targets weak to ice. Potency scales with item level. Consumes 10% of maximum HP when executed. Additional Effect: Freezes time for target when under the effect of Drain Touch Duration: 4s Additional Effect: Afflicts yourself with Doom Duration: 10s Effect is dispelled when HP is restored to full.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49098)]
+    public IBaseAction DeepFreezePvE =&gt; _DeepFreezePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _HellWindPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49099, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyHellWindPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49099"&gt;&lt;strong&gt;Hell Wind&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49099] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyHellWindPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49099"&gt;&lt;strong&gt;Hell Wind&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49099] [Spell] Duty Action
+    /// &lt;para&gt;Deals wind damage with a potency of 300 to all enemies in a straight line. Potency increases to 390 when used against targets weak to wind. Drain Touch Potency: 400 Potency increases to 520 when used against targets weak to wind. Potency scales with item level. Consumes 10% of maximum HP when executed. Additional Effect: 10% chance to Petrify target when under the effect of Drain Touch Petrify Effect: Incapacitated upon taking damage Duration: 10s Additional Effect: Afflicts yourself with Doom Duration: 10s Effect is dispelled when HP is restored to full. Shares a recast timer with Deep Freeze.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49099)]
+    public IBaseAction HellWindPvE =&gt; _HellWindPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ChaosDrivePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49100, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyChaosDrivePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49100"&gt;&lt;strong&gt;Chaos Drive&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49100] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyChaosDrivePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49100"&gt;&lt;strong&gt;Chaos Drive&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49100] [Spell] Duty Action
+    /// &lt;para&gt;Deals lightning damage with a potency of 300 to all enemies in a straight line. Potency increases to 390 when used against targets weak to lightning. Drain Touch Potency: 400 Potency increases to 520 when used against targets weak to lightning. Potency scales with item level. Consumes 10% of maximum HP when executed. Additional Effect: Afflicts target with Paralysis when under the effect of Drain Touch Duration: 18s Additional Effect: Afflicts yourself with Doom Duration: 10s Effect is dispelled when HP is restored to full. Shares a recast timer with Deep Freeze and Hell Wind.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49100)]
+    public IBaseAction ChaosDrivePvE =&gt; _ChaosDrivePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _DoomsdayPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49101, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyDoomsdayPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49101"&gt;&lt;strong&gt;Doomsday&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49101] [Spell] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyDoomsdayPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49101"&gt;&lt;strong&gt;Doomsday&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49101] [Spell] Duty Action
+    /// &lt;para&gt;Deals unaspected damage with a potency of 350 to all enemies in a straight line. Drain Touch Potency: 500 Potency scales with item level. Consumes 10% of maximum HP when executed. Additional Effect: Removes one beneficial status from target with some exceptions when under the effect of Drain Touch Additional Effect: Afflicts yourself with Doom Duration: 10s Effect is dispelled when HP is restored to full.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49101)]
+    public IBaseAction DoomsdayPvE =&gt; _DoomsdayPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _WisdomOnTheWindsPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)49102, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyWisdomOnTheWindsPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/49102"&gt;&lt;strong&gt;Wisdom on the Winds&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49102] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyWisdomOnTheWindsPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/49102"&gt;&lt;strong&gt;Wisdom on the Winds&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49102] [Ability] Duty Action
+    /// &lt;para&gt;Resets the recast timer of most class and job actions.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(49102)]
+    public IBaseAction WisdomOnTheWindsPvE =&gt; _WisdomOnTheWindsPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _StepForthPvE_50473Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)50473, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyStepForthPvE_50473(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/50473"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50473] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyStepForthPvE_50473(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50473"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50473] [Ability] Duty Action
+    /// &lt;para&gt;&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(50473)]
+    public IBaseAction StepForthPvE_50473 =&gt; _StepForthPvE_50473Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _StepForthPvE_50474Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)50474, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyStepForthPvE_50474(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/50474"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50474] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyStepForthPvE_50474(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50474"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50474] [Ability] Duty Action
+    /// &lt;para&gt;&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(50474)]
+    public IBaseAction StepForthPvE_50474 =&gt; _StepForthPvE_50474Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _StepForthPvE_50475Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)50475, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyStepForthPvE_50475(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/50475"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50475] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyStepForthPvE_50475(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50475"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50475] [Ability] Duty Action
+    /// &lt;para&gt;&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(50475)]
+    public IBaseAction StepForthPvE_50475 =&gt; _StepForthPvE_50475Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _StepForthPvE_50476Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)50476, true);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyStepForthPvE_50476(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/50476"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50476] [Ability] Duty Action
+    /// &lt;/summary&gt;
+    static partial void ModifyStepForthPvE_50476(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50476"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50476] [Ability] Duty Action
+    /// &lt;para&gt;&lt;/para&gt;
+    /// &lt;/summary&gt;
+    [ID(50476)]
+    public IBaseAction StepForthPvE_50476 =&gt; _StepForthPvE_50476Creator.Value;
 }</value>
   </data>
 </root>
