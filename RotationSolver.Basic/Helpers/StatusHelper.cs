@@ -747,7 +747,7 @@ public static class StatusHelper
 
 		try
 		{
-			Chat.SendMessage($"/statusoff {GetStatusName(status)}");
+			Chat.SendMessage($"/statusoff \"{GetStatusName(status)}\"");
 			PluginLog.Information($"Status {GetStatusName(status)} removed successfully.");
 		}
 		catch (Exception ex)
