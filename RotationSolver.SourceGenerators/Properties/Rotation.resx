@@ -1453,13 +1453,13 @@ static partial void ModifyPhalanxPvP(ref ActionSetting setting);
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/29069"&gt;&lt;strong&gt;Phalanx&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (PLD) [29069] [Limit Break]
-/// &lt;para&gt;Grants the effect of Hallowed Ground to self and Phalanx to nearby party members. Hallowed Ground Effect: Renders you impervious to most attacks Duration: 10s Phalanx Effect: Reduces damage taken by 33% Duration: 10s Additional Effect: Grants Blade of Faith Ready Duration: 15s Can only be executed when the limit gauge is full. Gauge Charge Time: 120s This action's effects extend through obstructions. ※Action changes to Blade of Faith upon execution.&lt;/para&gt;
+/// &lt;para&gt;Grants the effect of Hallowed Ground to self and Phalanx to nearby party members. Hallowed Ground Effect: Renders you impervious to most attacks Duration: 10s Phalanx Effect: Reduces damage taken by 33% Duration: 10s Additional Effect: Grants Blade of Faith Ready Duration: 15s Can only be executed when the limit gauge is full. Gauge Charge Time: 135s This action's effects extend through obstructions. ※Action changes to Blade of Faith upon execution.&lt;/para&gt;
 /// &lt;/summary&gt;
 
 private IBaseAction PhalanxPvP =&gt; _PhalanxPvPCreator.Value;
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/29069"&gt;&lt;strong&gt;Phalanx&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (PLD) [29069] [Limit Break]
-/// &lt;para&gt;Grants the effect of Hallowed Ground to self and Phalanx to nearby party members. Hallowed Ground Effect: Renders you impervious to most attacks Duration: 10s Phalanx Effect: Reduces damage taken by 33% Duration: 10s Additional Effect: Grants Blade of Faith Ready Duration: 15s Can only be executed when the limit gauge is full. Gauge Charge Time: 120s This action's effects extend through obstructions. ※Action changes to Blade of Faith upon execution.&lt;/para&gt;
+/// &lt;para&gt;Grants the effect of Hallowed Ground to self and Phalanx to nearby party members. Hallowed Ground Effect: Renders you impervious to most attacks Duration: 10s Phalanx Effect: Reduces damage taken by 33% Duration: 10s Additional Effect: Grants Blade of Faith Ready Duration: 15s Can only be executed when the limit gauge is full. Gauge Charge Time: 135s This action's effects extend through obstructions. ※Action changes to Blade of Faith upon execution.&lt;/para&gt;
 /// &lt;/summary&gt;
 private sealed protected override IBaseAction LimitBreakPvP =&gt; PhalanxPvP;
 
@@ -5525,13 +5525,13 @@ static partial void ModifySkyHighPvP(ref ActionSetting setting);
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/29497"&gt;&lt;strong&gt;Sky High&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (DRG) [29497] [Limit Break]
-/// &lt;para&gt;Jump high into the air preventing enemies from targeting you. Movement is still possible before landing and speed is increased by 50%. Duration: 5s Additional Effect: Removes Heavy and Bind Executes Sky Shatter automatically when effect duration expires. Can only be executed when the limit gauge is full. Gauge Charge Time: 90s ※Action changes to Sky Shatter upon execution.&lt;/para&gt;
+/// &lt;para&gt;Jump high into the air preventing enemies from targeting you. Movement is still possible before landing and speed is increased by 50%. Duration: 4s Additional Effect: Removes Heavy and Bind Executes Sky Shatter automatically when effect duration expires. Can only be executed when the limit gauge is full. Gauge Charge Time: 90s ※Action changes to Sky Shatter upon execution.&lt;/para&gt;
 /// &lt;/summary&gt;
 
 private IBaseAction SkyHighPvP =&gt; _SkyHighPvPCreator.Value;
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/29497"&gt;&lt;strong&gt;Sky High&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (DRG) [29497] [Limit Break]
-/// &lt;para&gt;Jump high into the air preventing enemies from targeting you. Movement is still possible before landing and speed is increased by 50%. Duration: 5s Additional Effect: Removes Heavy and Bind Executes Sky Shatter automatically when effect duration expires. Can only be executed when the limit gauge is full. Gauge Charge Time: 90s ※Action changes to Sky Shatter upon execution.&lt;/para&gt;
+/// &lt;para&gt;Jump high into the air preventing enemies from targeting you. Movement is still possible before landing and speed is increased by 50%. Duration: 4s Additional Effect: Removes Heavy and Bind Executes Sky Shatter automatically when effect duration expires. Can only be executed when the limit gauge is full. Gauge Charge Time: 90s ※Action changes to Sky Shatter upon execution.&lt;/para&gt;
 /// &lt;/summary&gt;
 private sealed protected override IBaseAction LimitBreakPvP =&gt; SkyHighPvP;
 
@@ -7792,7 +7792,7 @@ public abstract partial class WhiteMageRotation : CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/29227"&gt;&lt;strong&gt;Aquaveil&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (WHM) [29227] [Ability]
-    /// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to a heal of 8,000 potency. Duration: 10s Additional Effect: Nullifies one status affliction that can be removed by Purify Barrier potency is doubled when successfully nullifying a status affliction.&lt;/para&gt;
+    /// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to a heal of 10,000 potency. Duration: 10s Additional Effect: Nullifies one status affliction that can be removed by Purify Barrier potency is doubled when successfully nullifying a status affliction.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction AquaveilPvP =&gt; _AquaveilPvPCreator.Value;
@@ -14975,7 +14975,7 @@ public abstract partial class NinjaRotation : CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/29511"&gt;&lt;strong&gt;Bunshin&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (NIN) [29511] [Ability]
-    /// &lt;para&gt;Grants 5 stacks of Bunshin each stack allowing your shadow to attack enemies each time you execute a weaponskill. Bunshin Potency: 4,000 Potency is halved when executing Fuma Shuriken or Zesho Meppo. Duration: 20s Additional Effect: Grants Shade Shift creating a shadow that absorbs damage equivalent to a heal of 8,000 potency Duration: 10s ※Action changes to Huton while under the effect of Three Mudra.&lt;/para&gt;
+    /// &lt;para&gt;Grants 5 stacks of Bunshin each stack allowing your shadow to attack enemies each time you execute a weaponskill. Bunshin Potency: 5,000 Potency is halved when executing Fuma Shuriken or Zesho Meppo. Duration: 20s Additional Effect: Grants Shade Shift creating a shadow that absorbs damage equivalent to a heal of 8,000 potency Duration: 10s ※Action changes to Huton while under the effect of Three Mudra.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction BunshinPvP =&gt; _BunshinPvPCreator.Value;
@@ -15251,7 +15251,7 @@ public abstract partial class NinjaRotation : CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/41452"&gt;&lt;strong&gt;Zesho Meppo&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (NIN) [41452] [Weaponskill]
-    /// &lt;para&gt;Delivers a fourfold attack each hit with a potency of 2,000. Can only be executed while under the effect of Zesho Meppo Ready. ※This action cannot be assigned to a hotbar.&lt;/para&gt;
+    /// &lt;para&gt;Delivers a fourfold attack each hit with a potency of 2,500. Can only be executed while under the effect of Zesho Meppo Ready. ※This action cannot be assigned to a hotbar.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction ZeshoMeppoPvP =&gt; _ZeshoMeppoPvPCreator.Value;
@@ -15507,7 +15507,7 @@ public abstract partial class MachinistRotation : CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/2864"&gt;&lt;strong&gt;Rook Autoturret&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (MCH) [2864] [Ability]
-    /// &lt;para&gt;Deploys a single-target battle turret which attacks using Volley Fire dealing damage with a potency of 35. Potency increases as Battery Gauge exceeds required cost at time of deployment up to a maximum of 75. Battery Gauge Cost: 50 Duration: 9s Consumes Battery Gauge upon execution. Shuts down when time expires or upon execution of Rook Overdrive. Shares a recast timer with Rook Overdrive.&lt;/para&gt;
+    /// &lt;para&gt;Deploys a single-target battle turret which attacks using Volley Fire dealing damage with a potency of 35. Potency increases as Battery Gauge exceeds required cost at time of deployment up to a maximum of 70. Battery Gauge Cost: 50 Duration: 9s Consumes Battery Gauge upon execution. Shuts down when time expires or upon execution of Rook Overdrive. Shares a recast timer with Rook Overdrive.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction RookAutoturretPvE =&gt; _RookAutoturretPvECreator.Value;
@@ -16312,7 +16312,7 @@ public abstract partial class MachinistRotation : CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/29404"&gt;&lt;strong&gt;Scattergun&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MCH) [29404] [Weaponskill]
-    /// &lt;para&gt;Delivers an attack with a potency of 8,000 to all enemies in a cone before you. Strikes twice when hitting only a single target. Additional Effect: 10-yalm knockback This weaponskill does not share a recast timer with any other actions.&lt;/para&gt;
+    /// &lt;para&gt;Delivers an attack with a potency of 10,000 to all enemies in a cone before you. Strikes twice when hitting only a single target. Additional Effect: 10-yalm knockback This weaponskill does not share a recast timer with any other actions.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction ScattergunPvP =&gt; _ScattergunPvPCreator.Value;
@@ -16450,7 +16450,7 @@ public abstract partial class MachinistRotation : CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/29412"&gt;&lt;strong&gt;Bishop Autoturret&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MCH) [29412] [Ability]
-    /// &lt;para&gt;Deploys an area of effect battle turret which will deliver auto-attacks to enemies within range with a potency of 7,500. Duration: 10s Additional Effect: Creates a barrier that absorbs damage equivalent to a heal of 7,500 potency Duration: 6s&lt;/para&gt;
+    /// &lt;para&gt;Deploys an area of effect battle turret which will deliver auto-attacks to enemies within range with a potency of 8,000. Duration: 10s Additional Effect: Creates a barrier that absorbs damage equivalent to a heal of 8,000 potency Duration: 6s&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction BishopAutoturretPvP =&gt; _BishopAutoturretPvPCreator.Value;
@@ -16473,7 +16473,7 @@ public abstract partial class MachinistRotation : CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/29413"&gt;&lt;strong&gt;Aether Mortar&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MCH) [29413] [Ability]
-    /// &lt;para&gt;Deals unaspected damage with a potency of 7,500 to all nearby enemies. Additional Effect: Creates a barrier that absorbs damage equivalent to a heal of 7,500 potency Duration: 6s ※This action cannot be assigned to a hotbar.&lt;/para&gt;
+    /// &lt;para&gt;Deals unaspected damage with a potency of 8,000 to all nearby enemies. Additional Effect: Creates a barrier that absorbs damage equivalent to a heal of 8,000 potency Duration: 6s ※This action cannot be assigned to a hotbar.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction AetherMortarPvP =&gt; _AetherMortarPvPCreator.Value;
@@ -17692,7 +17692,7 @@ public abstract partial class DarkKnightRotation : CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/29093"&gt;&lt;strong&gt;the Blackest Night&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (DRK) [29093] [Ability]
-    /// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to a heal of 8,000 potency. Duration: 8s Grants Dark Arts when barrier is completely absorbed. Duration: 15s Dark Arts Effect: Consume Dark Arts instead of HP to execute Shadowbringer Maximum Charges: 2&lt;/para&gt;
+    /// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to a heal of 10,000 potency. Duration: 8s Grants Dark Arts when barrier is completely absorbed. Duration: 15s Dark Arts Effect: Consume Dark Arts instead of HP to execute Shadowbringer Maximum Charges: 2&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction TheBlackestNightPvP =&gt; _TheBlackestNightPvPCreator.Value;
@@ -35506,7 +35506,7 @@ public abstract partial class PictomancerRotation : CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/39216"&gt;&lt;strong&gt;Star Prism&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (PCT) [39216] [Spell]
-    /// &lt;para&gt;Deals unaspected damage with a potency of 16,000 to target and all enemies nearby it. Additional Effect: Restores HP of all party members within 30 yalms of target Cure Potency: 16,000 Additional Effect: Increases damage dealt by all party members within 30 yalms of target by 15% Duration: 15s This action's effects extend through obstructions. ※This action cannot be assigned to a hotbar.&lt;/para&gt;
+    /// &lt;para&gt;Deals unaspected damage with a potency of 16,000 to target and all enemies nearby it. Additional Effect: Restores HP of all party members within 30 yalms of target Cure Potency: 16,000 Additional Effect: Increases damage dealt by all party members within 30 yalms of target by 10% Duration: 15s This action's effects extend through obstructions. ※This action cannot be assigned to a hotbar.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction StarPrismPvP =&gt; _StarPrismPvPCreator.Value;

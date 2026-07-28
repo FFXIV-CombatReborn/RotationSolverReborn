@@ -70501,6 +70501,11 @@ Comet_14306 = 14306,
 Maelstrom_14307 = 14307,
 
 /// &lt;summary&gt;
+/// 14308
+/// &lt;/summary&gt;
+Hardiboiled = 14308,
+
+/// &lt;summary&gt;
 /// 14309
 /// &lt;/summary&gt;
 MistwakeCrawler = 14309,
@@ -71026,6 +71031,11 @@ GallantShepherd = 14462,
 WindupYuffie = 14463,
 
 /// &lt;summary&gt;
+/// 14464
+/// &lt;/summary&gt;
+WindupVincent = 14464,
+
+/// &lt;summary&gt;
 /// 14465
 /// &lt;/summary&gt;
 WindupRedXiii = 14465,
@@ -71091,6 +71101,31 @@ AiryBubble_14476 = 14476,
 DefectiveSentryR9 = 14477,
 
 /// &lt;summary&gt;
+/// 14478
+/// &lt;/summary&gt;
+Carnelian = 14478,
+
+/// &lt;summary&gt;
+/// 14479
+/// &lt;/summary&gt;
+RottenWalker = 14479,
+
+/// &lt;summary&gt;
+/// 14480
+/// &lt;/summary&gt;
+IllicitAerostat = 14480,
+
+/// &lt;summary&gt;
+/// 14481
+/// &lt;/summary&gt;
+IllicitTurret = 14481,
+
+/// &lt;summary&gt;
+/// 14482
+/// &lt;/summary&gt;
+Hildibrand_14482 = 14482,
+
+/// &lt;summary&gt;
 /// 14483
 /// &lt;/summary&gt;
 SoothingSeabeast = 14483,
@@ -71121,6 +71156,51 @@ FallingRock = 14487,
 Thief_14488 = 14488,
 
 /// &lt;summary&gt;
+/// 14489
+/// &lt;/summary&gt;
+TwoheadedAevis = 14489,
+
+/// &lt;summary&gt;
+/// 14490
+/// &lt;/summary&gt;
+GreenHead = 14490,
+
+/// &lt;summary&gt;
+/// 14491
+/// &lt;/summary&gt;
+BlueHead = 14491,
+
+/// &lt;summary&gt;
+/// 14492
+/// &lt;/summary&gt;
+BallLightning_14492 = 14492,
+
+/// &lt;summary&gt;
+/// 14493
+/// &lt;/summary&gt;
+SwirlingOrb_14493 = 14493,
+
+/// &lt;summary&gt;
+/// 14494
+/// &lt;/summary&gt;
+CharmedLightning = 14494,
+
+/// &lt;summary&gt;
+/// 14495
+/// &lt;/summary&gt;
+CharmedIce = 14495,
+
+/// &lt;summary&gt;
+/// 14497
+/// &lt;/summary&gt;
+ArcaneFont_14497 = 14497,
+
+/// &lt;summary&gt;
+/// 14498
+/// &lt;/summary&gt;
+ArcaneFont_14498 = 14498,
+
+/// &lt;summary&gt;
 /// 14499
 /// &lt;/summary&gt;
 Coffinmaker_14499 = 14499,
@@ -71141,9 +71221,134 @@ VampetteFatale = 14501,
 Thunderhead_14502 = 14502,
 
 /// &lt;summary&gt;
+/// 14503
+/// &lt;/summary&gt;
+Necrophobia = 14503,
+
+/// &lt;summary&gt;
+/// 14504
+/// &lt;/summary&gt;
+SeveringHead = 14504,
+
+/// &lt;summary&gt;
+/// 14505
+/// &lt;/summary&gt;
+Abductor = 14505,
+
+/// &lt;summary&gt;
+/// 14506
+/// &lt;/summary&gt;
+BitingWind_14506 = 14506,
+
+/// &lt;summary&gt;
+/// 14507
+/// &lt;/summary&gt;
+AbductorsPlume = 14507,
+
+/// &lt;summary&gt;
+/// 14508
+/// &lt;/summary&gt;
+ElmGigas = 14508,
+
+/// &lt;summary&gt;
+/// 14509
+/// &lt;/summary&gt;
+AlabasterBlade = 14509,
+
+/// &lt;summary&gt;
+/// 14510
+/// &lt;/summary&gt;
+AlabasterGolem = 14510,
+
+/// &lt;summary&gt;
+/// 14511
+/// &lt;/summary&gt;
+LightAether = 14511,
+
+/// &lt;summary&gt;
+/// 14512
+/// &lt;/summary&gt;
+PhantomNecromancer = 14512,
+
+/// &lt;summary&gt;
+/// 14513
+/// &lt;/summary&gt;
+LongdeadSeafarer = 14513,
+
+/// &lt;summary&gt;
+/// 14514
+/// &lt;/summary&gt;
+LongdeadPirate = 14514,
+
+/// &lt;summary&gt;
+/// 14515
+/// &lt;/summary&gt;
+LongdeadExplorer = 14515,
+
+/// &lt;summary&gt;
 /// 14516
 /// &lt;/summary&gt;
 SeabornSpeaker = 14516,
+
+/// &lt;summary&gt;
+/// 14517
+/// &lt;/summary&gt;
+ConjuredCalofisteri = 14517,
+
+/// &lt;summary&gt;
+/// 14518
+/// &lt;/summary&gt;
+Entanglement_14518 = 14518,
+
+/// &lt;summary&gt;
+/// 14519
+/// &lt;/summary&gt;
+LitheLock = 14519,
+
+/// &lt;summary&gt;
+/// 14520
+/// &lt;/summary&gt;
+Arbatel = 14520,
+
+/// &lt;summary&gt;
+/// 14521
+/// &lt;/summary&gt;
+Page16 = 14521,
+
+/// &lt;summary&gt;
+/// 14522
+/// &lt;/summary&gt;
+Page8 = 14522,
+
+/// &lt;summary&gt;
+/// 14523
+/// &lt;/summary&gt;
+PhantomHydra = 14523,
+
+/// &lt;summary&gt;
+/// 14524
+/// &lt;/summary&gt;
+HolySphere_14524 = 14524,
+
+/// &lt;summary&gt;
+/// 14525
+/// &lt;/summary&gt;
+BallOfFire_14525 = 14525,
+
+/// &lt;summary&gt;
+/// 14526
+/// &lt;/summary&gt;
+SwirlingOrb_14526 = 14526,
+
+/// &lt;summary&gt;
+/// 14527
+/// &lt;/summary&gt;
+BallOfLevin_14527 = 14527,
+
+/// &lt;summary&gt;
+/// 14528
+/// &lt;/summary&gt;
+Page512 = 14528,
 
 /// &lt;summary&gt;
 /// 14529
@@ -71226,9 +71431,79 @@ VisitantTroubadour = 14712,
 VisitantSuccubus = 14713,
 
 /// &lt;summary&gt;
+/// 14714
+/// &lt;/summary&gt;
+Pallmagia = 14714,
+
+/// &lt;summary&gt;
+/// 14715
+/// &lt;/summary&gt;
+Pallkeeper = 14715,
+
+/// &lt;summary&gt;
 /// 14716
 /// &lt;/summary&gt;
 EyeOfTheScorpion = 14716,
+
+/// &lt;summary&gt;
+/// 14717
+/// &lt;/summary&gt;
+Index = 14717,
+
+/// &lt;summary&gt;
+/// 14718
+/// &lt;/summary&gt;
+TranscribedIndex = 14718,
+
+/// &lt;summary&gt;
+/// 14719
+/// &lt;/summary&gt;
+SummonedBomb = 14719,
+
+/// &lt;summary&gt;
+/// 14720
+/// &lt;/summary&gt;
+SummonedBird = 14720,
+
+/// &lt;summary&gt;
+/// 14721
+/// &lt;/summary&gt;
+HolyLance = 14721,
+
+/// &lt;summary&gt;
+/// 14722
+/// &lt;/summary&gt;
+ForetoldPhenomenon = 14722,
+
+/// &lt;summary&gt;
+/// 14723
+/// &lt;/summary&gt;
+SwirlingOrb_14723 = 14723,
+
+/// &lt;summary&gt;
+/// 14724
+/// &lt;/summary&gt;
+BallOfFire_14724 = 14724,
+
+/// &lt;summary&gt;
+/// 14725
+/// &lt;/summary&gt;
+BallOfLevin_14725 = 14725,
+
+/// &lt;summary&gt;
+/// 14726
+/// &lt;/summary&gt;
+Evilseer = 14726,
+
+/// &lt;summary&gt;
+/// 14727
+/// &lt;/summary&gt;
+AccursedOrb = 14727,
+
+/// &lt;summary&gt;
+/// 14728
+/// &lt;/summary&gt;
+ArchKelpie = 14728,
 
 /// &lt;summary&gt;
 /// 14729
@@ -71259,6 +71534,36 @@ Prishe = 14733,
 /// 14734
 /// &lt;/summary&gt;
 Chort = 14734,
+
+/// &lt;summary&gt;
+/// 14735
+/// &lt;/summary&gt;
+Machetaur = 14735,
+
+/// &lt;summary&gt;
+/// 14736
+/// &lt;/summary&gt;
+DemiMedusa = 14736,
+
+/// &lt;summary&gt;
+/// 14737
+/// &lt;/summary&gt;
+DefectiveLamia = 14737,
+
+/// &lt;summary&gt;
+/// 14738
+/// &lt;/summary&gt;
+SensualSandy = 14738,
+
+/// &lt;summary&gt;
+/// 14739
+/// &lt;/summary&gt;
+PoisonCloud_14739 = 14739,
+
+/// &lt;summary&gt;
+/// 14747
+/// &lt;/summary&gt;
+Pelekys = 14747,
 
 /// &lt;summary&gt;
 /// 14749
@@ -71326,6 +71631,86 @@ ScrapByblos_14760 = 14760,
 ScrapHeap = 14761,
 
 /// &lt;summary&gt;
+/// 14762
+/// &lt;/summary&gt;
+RuinHound = 14762,
+
+/// &lt;summary&gt;
+/// 14763
+/// &lt;/summary&gt;
+IcePillar_14763 = 14763,
+
+/// &lt;summary&gt;
+/// 14764
+/// &lt;/summary&gt;
+PatientKuribu = 14764,
+
+/// &lt;summary&gt;
+/// 14765
+/// &lt;/summary&gt;
+Iambe = 14765,
+
+/// &lt;summary&gt;
+/// 14766
+/// &lt;/summary&gt;
+WinsomeSeed = 14766,
+
+/// &lt;summary&gt;
+/// 14767
+/// &lt;/summary&gt;
+RegnantChimera = 14767,
+
+/// &lt;summary&gt;
+/// 14768
+/// &lt;/summary&gt;
+FulmipotentOrb = 14768,
+
+/// &lt;summary&gt;
+/// 14769
+/// &lt;/summary&gt;
+GlacipotentOrb = 14769,
+
+/// &lt;summary&gt;
+/// 14770
+/// &lt;/summary&gt;
+PersistentPot_14770 = 14770,
+
+/// &lt;summary&gt;
+/// 14771
+/// &lt;/summary&gt;
+CrescentGremlin = 14771,
+
+/// &lt;summary&gt;
+/// 14772
+/// &lt;/summary&gt;
+CrimsonGremlin = 14772,
+
+/// &lt;summary&gt;
+/// 14773
+/// &lt;/summary&gt;
+PersistentPot_14773 = 14773,
+
+/// &lt;summary&gt;
+/// 14774
+/// &lt;/summary&gt;
+CrescentFan_14774 = 14774,
+
+/// &lt;summary&gt;
+/// 14775
+/// &lt;/summary&gt;
+GreaterFan = 14775,
+
+/// &lt;summary&gt;
+/// 14776
+/// &lt;/summary&gt;
+Stormcaller = 14776,
+
+/// &lt;summary&gt;
+/// 14777
+/// &lt;/summary&gt;
+BitingWind_14777 = 14777,
+
+/// &lt;summary&gt;
 /// 14778
 /// &lt;/summary&gt;
 ShantottoTheDemon = 14778,
@@ -71359,6 +71744,201 @@ EmptyWeeper = 14783,
 /// 14784
 /// &lt;/summary&gt;
 EmptyThinker = 14784,
+
+/// &lt;summary&gt;
+/// 14785
+/// &lt;/summary&gt;
+Cresceregina = 14785,
+
+/// &lt;summary&gt;
+/// 14786
+/// &lt;/summary&gt;
+BallOfLevin_14786 = 14786,
+
+/// &lt;summary&gt;
+/// 14787
+/// &lt;/summary&gt;
+ClaretDragon = 14787,
+
+/// &lt;summary&gt;
+/// 14788
+/// &lt;/summary&gt;
+Necrohaze = 14788,
+
+/// &lt;summary&gt;
+/// 14789
+/// &lt;/summary&gt;
+AetherialWard_14789 = 14789,
+
+/// &lt;summary&gt;
+/// 14790
+/// &lt;/summary&gt;
+Algol = 14790,
+
+/// &lt;summary&gt;
+/// 14791
+/// &lt;/summary&gt;
+AtlasCarbuncle = 14791,
+
+/// &lt;summary&gt;
+/// 14792
+/// &lt;/summary&gt;
+TopazStone = 14792,
+
+/// &lt;summary&gt;
+/// 14795
+/// &lt;/summary&gt;
+TinyMage = 14795,
+
+/// &lt;summary&gt;
+/// 14796
+/// &lt;/summary&gt;
+TinyApprentice = 14796,
+
+/// &lt;summary&gt;
+/// 14797
+/// &lt;/summary&gt;
+FlareSphere = 14797,
+
+/// &lt;summary&gt;
+/// 14798
+/// &lt;/summary&gt;
+HolySphere_14798 = 14798,
+
+/// &lt;summary&gt;
+/// 14799
+/// &lt;/summary&gt;
+ArcaneSphere_14799 = 14799,
+
+/// &lt;summary&gt;
+/// 14800
+/// &lt;/summary&gt;
+ArcaneSphere_14800 = 14800,
+
+/// &lt;summary&gt;
+/// 14801
+/// &lt;/summary&gt;
+Metamorph = 14801,
+
+/// &lt;summary&gt;
+/// 14802
+/// &lt;/summary&gt;
+TowerArmor = 14802,
+
+/// &lt;summary&gt;
+/// 14803
+/// &lt;/summary&gt;
+TowerCrusader = 14803,
+
+/// &lt;summary&gt;
+/// 14804
+/// &lt;/summary&gt;
+TowerBarmuu = 14804,
+
+/// &lt;summary&gt;
+/// 14805
+/// &lt;/summary&gt;
+TowerMantis = 14805,
+
+/// &lt;summary&gt;
+/// 14806
+/// &lt;/summary&gt;
+TowerIdol_14806 = 14806,
+
+/// &lt;summary&gt;
+/// 14807
+/// &lt;/summary&gt;
+TowerYarzon = 14807,
+
+/// &lt;summary&gt;
+/// 14808
+/// &lt;/summary&gt;
+TowerOchu = 14808,
+
+/// &lt;summary&gt;
+/// 14809
+/// &lt;/summary&gt;
+TowerPot = 14809,
+
+/// &lt;summary&gt;
+/// 14810
+/// &lt;/summary&gt;
+TowerPurbol = 14810,
+
+/// &lt;summary&gt;
+/// 14811
+/// &lt;/summary&gt;
+TowerPurbolHip = 14811,
+
+/// &lt;summary&gt;
+/// 14812
+/// &lt;/summary&gt;
+TowerPlasma = 14812,
+
+/// &lt;summary&gt;
+/// 14813
+/// &lt;/summary&gt;
+TowerWoodGolem = 14813,
+
+/// &lt;summary&gt;
+/// 14814
+/// &lt;/summary&gt;
+StormGenerator = 14814,
+
+/// &lt;summary&gt;
+/// 14815
+/// &lt;/summary&gt;
+Scalesmasher = 14815,
+
+/// &lt;summary&gt;
+/// 14816
+/// &lt;/summary&gt;
+TowerSlime = 14816,
+
+/// &lt;summary&gt;
+/// 14817
+/// &lt;/summary&gt;
+TowerCurseclock = 14817,
+
+/// &lt;summary&gt;
+/// 14818
+/// &lt;/summary&gt;
+CrescentTomato = 14818,
+
+/// &lt;summary&gt;
+/// 14819
+/// &lt;/summary&gt;
+CrescentOnion = 14819,
+
+/// &lt;summary&gt;
+/// 14820
+/// &lt;/summary&gt;
+SwordDancer = 14820,
+
+/// &lt;summary&gt;
+/// 14821
+/// &lt;/summary&gt;
+DancingSword = 14821,
+
+/// &lt;summary&gt;
+/// 14822
+/// &lt;/summary&gt;
+DancingSword_14822 = 14822,
+
+/// &lt;summary&gt;
+/// 14823
+/// &lt;/summary&gt;
+DancingSword_14823 = 14823,
+
+/// &lt;summary&gt;
+/// 14824
+/// &lt;/summary&gt;
+DancingSword_14824 = 14824,
+
+/// &lt;summary&gt;
+/// 14825
+/// &lt;/summary&gt;
+DancingSword_14825 = 14825,
 
 /// &lt;summary&gt;
 /// 14826
@@ -71431,6 +72011,16 @@ Awaern = 14838,
 Awzdei = 14839,
 
 /// &lt;summary&gt;
+/// 14840
+/// &lt;/summary&gt;
+CrescentArachne = 14840,
+
+/// &lt;summary&gt;
+/// 14841
+/// &lt;/summary&gt;
+ArachneDaughter = 14841,
+
+/// &lt;summary&gt;
 /// 14842
 /// &lt;/summary&gt;
 VisitantJester = 14842,
@@ -71461,6 +72051,21 @@ Liteloader = 14846,
 Caprino = 14847,
 
 /// &lt;summary&gt;
+/// 14848
+/// &lt;/summary&gt;
+TinyOmniscient = 14848,
+
+/// &lt;summary&gt;
+/// 14849
+/// &lt;/summary&gt;
+PunyMage = 14849,
+
+/// &lt;summary&gt;
+/// 14850
+/// &lt;/summary&gt;
+WindupWukLamat = 14850,
+
+/// &lt;summary&gt;
 /// 14852
 /// &lt;/summary&gt;
 WindupPrishe = 14852,
@@ -71469,6 +72074,351 @@ WindupPrishe = 14852,
 /// 14854
 /// &lt;/summary&gt;
 Budvi = 14854,
+
+/// &lt;summary&gt;
+/// 14855
+/// &lt;/summary&gt;
+WindupBarret = 14855,
+
+/// &lt;summary&gt;
+/// 14856
+/// &lt;/summary&gt;
+NymianUolosapa = 14856,
+
+/// &lt;summary&gt;
+/// 14857
+/// &lt;/summary&gt;
+CrescentCliffkite = 14857,
+
+/// &lt;summary&gt;
+/// 14858
+/// &lt;/summary&gt;
+CrescentUrolith = 14858,
+
+/// &lt;summary&gt;
+/// 14859
+/// &lt;/summary&gt;
+CrescentDhara = 14859,
+
+/// &lt;summary&gt;
+/// 14860
+/// &lt;/summary&gt;
+CrescentBibliotaph = 14860,
+
+/// &lt;summary&gt;
+/// 14861
+/// &lt;/summary&gt;
+CrescentWeapon = 14861,
+
+/// &lt;summary&gt;
+/// 14862
+/// &lt;/summary&gt;
+CrescentCingulata = 14862,
+
+/// &lt;summary&gt;
+/// 14863
+/// &lt;/summary&gt;
+CrescentWorm = 14863,
+
+/// &lt;summary&gt;
+/// 14864
+/// &lt;/summary&gt;
+CrescentZu = 14864,
+
+/// &lt;summary&gt;
+/// 14865
+/// &lt;/summary&gt;
+CrescentTomato_14865 = 14865,
+
+/// &lt;summary&gt;
+/// 14866
+/// &lt;/summary&gt;
+CrescentOnion_14866 = 14866,
+
+/// &lt;summary&gt;
+/// 14867
+/// &lt;/summary&gt;
+CrescentVinegaroon = 14867,
+
+/// &lt;summary&gt;
+/// 14868
+/// &lt;/summary&gt;
+CrescentOpken = 14868,
+
+/// &lt;summary&gt;
+/// 14869
+/// &lt;/summary&gt;
+CrescentBelladonna = 14869,
+
+/// &lt;summary&gt;
+/// 14870
+/// &lt;/summary&gt;
+CrescentSapria = 14870,
+
+/// &lt;summary&gt;
+/// 14871
+/// &lt;/summary&gt;
+CrescentMelia = 14871,
+
+/// &lt;summary&gt;
+/// 14872
+/// &lt;/summary&gt;
+CrescentLorelei = 14872,
+
+/// &lt;summary&gt;
+/// 14873
+/// &lt;/summary&gt;
+CrescentWraith = 14873,
+
+/// &lt;summary&gt;
+/// 14874
+/// &lt;/summary&gt;
+CrescentSaltSwallow = 14874,
+
+/// &lt;summary&gt;
+/// 14875
+/// &lt;/summary&gt;
+CrescentSoblyn = 14875,
+
+/// &lt;summary&gt;
+/// 14876
+/// &lt;/summary&gt;
+CrescentHuwasi = 14876,
+
+/// &lt;summary&gt;
+/// 14877
+/// &lt;/summary&gt;
+CrescentBile = 14877,
+
+/// &lt;summary&gt;
+/// 14878
+/// &lt;/summary&gt;
+CrescentMedusa = 14878,
+
+/// &lt;summary&gt;
+/// 14879
+/// &lt;/summary&gt;
+CrescentElftoad = 14879,
+
+/// &lt;summary&gt;
+/// 14880
+/// &lt;/summary&gt;
+CrescentKargas = 14880,
+
+/// &lt;summary&gt;
+/// 14881
+/// &lt;/summary&gt;
+CrescentSandSerpent = 14881,
+
+/// &lt;summary&gt;
+/// 14882
+/// &lt;/summary&gt;
+CrescentCoeurl = 14882,
+
+/// &lt;summary&gt;
+/// 14883
+/// &lt;/summary&gt;
+CrescentGazellehawk = 14883,
+
+/// &lt;summary&gt;
+/// 14884
+/// &lt;/summary&gt;
+CrescentHarpeia = 14884,
+
+/// &lt;summary&gt;
+/// 14885
+/// &lt;/summary&gt;
+CrescentKaluk = 14885,
+
+/// &lt;summary&gt;
+/// 14886
+/// &lt;/summary&gt;
+CrescentWoolback = 14886,
+
+/// &lt;summary&gt;
+/// 14887
+/// &lt;/summary&gt;
+CrescentBigHorn = 14887,
+
+/// &lt;summary&gt;
+/// 14888
+/// &lt;/summary&gt;
+CrescentRatel = 14888,
+
+/// &lt;summary&gt;
+/// 14889
+/// &lt;/summary&gt;
+CrescentAdamantoise = 14889,
+
+/// &lt;summary&gt;
+/// 14890
+/// &lt;/summary&gt;
+CrescentRegolith = 14890,
+
+/// &lt;summary&gt;
+/// 14891
+/// &lt;/summary&gt;
+CrescentRock = 14891,
+
+/// &lt;summary&gt;
+/// 14892
+/// &lt;/summary&gt;
+CrescentGremlin_14892 = 14892,
+
+/// &lt;summary&gt;
+/// 14893
+/// &lt;/summary&gt;
+CrescentRoteyes = 14893,
+
+/// &lt;summary&gt;
+/// 14894
+/// &lt;/summary&gt;
+CrescentMossFungus = 14894,
+
+/// &lt;summary&gt;
+/// 14895
+/// &lt;/summary&gt;
+CrescentBanemite = 14895,
+
+/// &lt;summary&gt;
+/// 14896
+/// &lt;/summary&gt;
+CrescentBlackguard_14896 = 14896,
+
+/// &lt;summary&gt;
+/// 14897
+/// &lt;/summary&gt;
+CrescentHellhound = 14897,
+
+/// &lt;summary&gt;
+/// 14898
+/// &lt;/summary&gt;
+CrescentParthenope = 14898,
+
+/// &lt;summary&gt;
+/// 14899
+/// &lt;/summary&gt;
+CrescentGargoyle = 14899,
+
+/// &lt;summary&gt;
+/// 14900
+/// &lt;/summary&gt;
+CrescentCraklaw = 14900,
+
+/// &lt;summary&gt;
+/// 14901
+/// &lt;/summary&gt;
+CrescentHaunt = 14901,
+
+/// &lt;summary&gt;
+/// 14902
+/// &lt;/summary&gt;
+CrescentNanka = 14902,
+
+/// &lt;summary&gt;
+/// 14903
+/// &lt;/summary&gt;
+CrescentAccursed = 14903,
+
+/// &lt;summary&gt;
+/// 14904
+/// &lt;/summary&gt;
+BirdOfTheCrescent = 14904,
+
+/// &lt;summary&gt;
+/// 14905
+/// &lt;/summary&gt;
+CrescentAnila = 14905,
+
+/// &lt;summary&gt;
+/// 14906
+/// &lt;/summary&gt;
+CrescentZirnitra_14906 = 14906,
+
+/// &lt;summary&gt;
+/// 14907
+/// &lt;/summary&gt;
+CrescentArioch = 14907,
+
+/// &lt;summary&gt;
+/// 14908
+/// &lt;/summary&gt;
+CrescentWamoura = 14908,
+
+/// &lt;summary&gt;
+/// 14909
+/// &lt;/summary&gt;
+CrescentCarrier = 14909,
+
+/// &lt;summary&gt;
+/// 14910
+/// &lt;/summary&gt;
+CrescentOiseauRare = 14910,
+
+/// &lt;summary&gt;
+/// 14911
+/// &lt;/summary&gt;
+CrescentJester = 14911,
+
+/// &lt;summary&gt;
+/// 14912
+/// &lt;/summary&gt;
+CrescentSuccubus = 14912,
+
+/// &lt;summary&gt;
+/// 14913
+/// &lt;/summary&gt;
+CrescentGusion = 14913,
+
+/// &lt;summary&gt;
+/// 14914
+/// &lt;/summary&gt;
+CrescentBombadeel = 14914,
+
+/// &lt;summary&gt;
+/// 14915
+/// &lt;/summary&gt;
+CrescentRothound = 14915,
+
+/// &lt;summary&gt;
+/// 14916
+/// &lt;/summary&gt;
+CrescentSkatene = 14916,
+
+/// &lt;summary&gt;
+/// 14917
+/// &lt;/summary&gt;
+CrescentGeshunpest_14917 = 14917,
+
+/// &lt;summary&gt;
+/// 14918
+/// &lt;/summary&gt;
+CrescentNecrodium = 14918,
+
+/// &lt;summary&gt;
+/// 14919
+/// &lt;/summary&gt;
+CrescentBicephalus = 14919,
+
+/// &lt;summary&gt;
+/// 14920
+/// &lt;/summary&gt;
+CrescentAnkou = 14920,
+
+/// &lt;summary&gt;
+/// 14921
+/// &lt;/summary&gt;
+CrescentGlutton = 14921,
+
+/// &lt;summary&gt;
+/// 14922
+/// &lt;/summary&gt;
+CrescentStoneshell = 14922,
+
+/// &lt;summary&gt;
+/// 14923
+/// &lt;/summary&gt;
+CrescentFlame_14923 = 14923,
 
 /// &lt;summary&gt;
 /// 14924
@@ -71486,6 +72436,31 @@ VisitantEvilEye = 14925,
 VisitantImp = 14926,
 
 /// &lt;summary&gt;
+/// 14929
+/// &lt;/summary&gt;
+TowerCatoblepas = 14929,
+
+/// &lt;summary&gt;
+/// 14930
+/// &lt;/summary&gt;
+Towerhander = 14930,
+
+/// &lt;summary&gt;
+/// 14931
+/// &lt;/summary&gt;
+TowerSkatene_14931 = 14931,
+
+/// &lt;summary&gt;
+/// 14932
+/// &lt;/summary&gt;
+TowerHumbaba = 14932,
+
+/// &lt;summary&gt;
+/// 14933
+/// &lt;/summary&gt;
+Airbuster = 14933,
+
+/// &lt;summary&gt;
 /// 14934
 /// &lt;/summary&gt;
 AhtUrhganGuard = 14934,
@@ -71496,6 +72471,11 @@ AhtUrhganGuard = 14934,
 SareelJa = 14935,
 
 /// &lt;summary&gt;
+/// 14938
+/// &lt;/summary&gt;
+HermeticRecluse = 14938,
+
+/// &lt;summary&gt;
 /// 14939
 /// &lt;/summary&gt;
 MusicalPaca = 14939,
@@ -71503,7 +72483,7 @@ MusicalPaca = 14939,
 /// &lt;summary&gt;
 /// 14940
 /// &lt;/summary&gt;
-Sweetkit = 14940,
+LollyCat = 14940,
 
 /// &lt;summary&gt;
 /// 14941
