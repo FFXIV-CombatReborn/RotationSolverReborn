@@ -736,7 +736,7 @@ FestalCantPvE = 2360,
 ToadBreathPvE = 2443,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/2864"&gt;&lt;strong&gt;Rook Autoturret&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (MCH) [2864] [Ability]
-/// &lt;para&gt;Deploys a single-target battle turret which attacks using Volley Fire dealing damage with a potency of 35. Potency increases as Battery Gauge exceeds required cost at time of deployment up to a maximum of 75. Battery Gauge Cost: 50 Duration: 9s Consumes Battery Gauge upon execution. Shuts down when time expires or upon execution of Rook Overdrive. Shares a recast timer with Rook Overdrive.&lt;/para&gt;
+/// &lt;para&gt;Deploys a single-target battle turret which attacks using Volley Fire dealing damage with a potency of 35. Potency increases as Battery Gauge exceeds required cost at time of deployment up to a maximum of 70. Battery Gauge Cost: 50 Duration: 9s Consumes Battery Gauge upon execution. Shuts down when time expires or upon execution of Rook Overdrive. Shares a recast timer with Rook Overdrive.&lt;/para&gt;
 /// &lt;/summary&gt;
 RookAutoturretPvE = 2864,
 /// &lt;summary&gt;
@@ -6101,7 +6101,7 @@ ShadowbringerPvP = 29091,
 PlungePvP = 29092,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/29093"&gt;&lt;strong&gt;the Blackest Night&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (DRK) [29093] [Ability]
-/// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to a heal of 8,000 potency. Duration: 8s Grants Dark Arts when barrier is completely absorbed. Duration: 15s Dark Arts Effect: Consume Dark Arts instead of HP to execute Shadowbringer Maximum Charges: 2&lt;/para&gt;
+/// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to a heal of 10,000 potency. Duration: 8s Grants Dark Arts when barrier is completely absorbed. Duration: 15s Dark Arts Effect: Consume Dark Arts instead of HP to execute Shadowbringer Maximum Charges: 2&lt;/para&gt;
 /// &lt;/summary&gt;
 TheBlackestNightPvP = 29093,
 /// &lt;summary&gt;
@@ -6211,7 +6211,7 @@ CureIiiPvP = 29225,
 AfflatusMiseryPvP = 29226,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/29227"&gt;&lt;strong&gt;Aquaveil&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (WHM) [29227] [Ability]
-/// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to a heal of 8,000 potency. Duration: 10s Additional Effect: Nullifies one status affliction that can be removed by Purify Barrier potency is doubled when successfully nullifying a status affliction.&lt;/para&gt;
+/// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to a heal of 10,000 potency. Duration: 10s Additional Effect: Nullifies one status affliction that can be removed by Purify Barrier potency is doubled when successfully nullifying a status affliction.&lt;/para&gt;
 /// &lt;/summary&gt;
 AquaveilPvP = 29227,
 /// &lt;summary&gt;
@@ -6391,7 +6391,7 @@ TheWardensPaeanPvP = 29400,
 BlastChargePvP = 29402,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/29404"&gt;&lt;strong&gt;Scattergun&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MCH) [29404] [Weaponskill]
-/// &lt;para&gt;Delivers an attack with a potency of 8,000 to all enemies in a cone before you. Strikes twice when hitting only a single target. Additional Effect: 10-yalm knockback This weaponskill does not share a recast timer with any other actions.&lt;/para&gt;
+/// &lt;para&gt;Delivers an attack with a potency of 10,000 to all enemies in a cone before you. Strikes twice when hitting only a single target. Additional Effect: 10-yalm knockback This weaponskill does not share a recast timer with any other actions.&lt;/para&gt;
 /// &lt;/summary&gt;
 ScattergunPvP = 29404,
 /// &lt;summary&gt;
@@ -6421,12 +6421,12 @@ ChainSawPvP = 29408,
 WildfirePvP = 29409,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/29412"&gt;&lt;strong&gt;Bishop Autoturret&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MCH) [29412] [Ability]
-/// &lt;para&gt;Deploys an area of effect battle turret which will deliver auto-attacks to enemies within range with a potency of 7,500. Duration: 10s Additional Effect: Creates a barrier that absorbs damage equivalent to a heal of 7,500 potency Duration: 6s&lt;/para&gt;
+/// &lt;para&gt;Deploys an area of effect battle turret which will deliver auto-attacks to enemies within range with a potency of 8,000. Duration: 10s Additional Effect: Creates a barrier that absorbs damage equivalent to a heal of 8,000 potency Duration: 6s&lt;/para&gt;
 /// &lt;/summary&gt;
 BishopAutoturretPvP = 29412,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/29413"&gt;&lt;strong&gt;Aether Mortar&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MCH) [29413] [Ability]
-/// &lt;para&gt;Deals unaspected damage with a potency of 7,500 to all nearby enemies. Additional Effect: Creates a barrier that absorbs damage equivalent to a heal of 7,500 potency Duration: 6s ※This action cannot be assigned to a hotbar.&lt;/para&gt;
+/// &lt;para&gt;Deals unaspected damage with a potency of 8,000 to all nearby enemies. Additional Effect: Creates a barrier that absorbs damage equivalent to a heal of 8,000 potency Duration: 6s ※This action cannot be assigned to a hotbar.&lt;/para&gt;
 /// &lt;/summary&gt;
 AetherMortarPvP = 29413,
 /// &lt;summary&gt;
@@ -6666,7 +6666,7 @@ MeisuiPvP = 29508,
 ForkedRaijuPvP = 29510,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/29511"&gt;&lt;strong&gt;Bunshin&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (NIN) [29511] [Ability]
-/// &lt;para&gt;Grants 5 stacks of Bunshin each stack allowing your shadow to attack enemies each time you execute a weaponskill. Bunshin Potency: 4,000 Potency is halved when executing Fuma Shuriken or Zesho Meppo. Duration: 20s Additional Effect: Grants Shade Shift creating a shadow that absorbs damage equivalent to a heal of 8,000 potency Duration: 10s ※Action changes to Huton while under the effect of Three Mudra.&lt;/para&gt;
+/// &lt;para&gt;Grants 5 stacks of Bunshin each stack allowing your shadow to attack enemies each time you execute a weaponskill. Bunshin Potency: 5,000 Potency is halved when executing Fuma Shuriken or Zesho Meppo. Duration: 20s Additional Effect: Grants Shade Shift creating a shadow that absorbs damage equivalent to a heal of 8,000 potency Duration: 10s ※Action changes to Huton while under the effect of Three Mudra.&lt;/para&gt;
 /// &lt;/summary&gt;
 BunshinPvP = 29511,
 /// &lt;summary&gt;
@@ -8621,7 +8621,7 @@ SubtractivePalettePvP = 39213,
 ReleaseSubtractivePalettePvP = 39214,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/39216"&gt;&lt;strong&gt;Star Prism&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (PCT) [39216] [Spell]
-/// &lt;para&gt;Deals unaspected damage with a potency of 16,000 to target and all enemies nearby it. Additional Effect: Restores HP of all party members within 30 yalms of target Cure Potency: 16,000 Additional Effect: Increases damage dealt by all party members within 30 yalms of target by 15% Duration: 15s This action's effects extend through obstructions. ※This action cannot be assigned to a hotbar.&lt;/para&gt;
+/// &lt;para&gt;Deals unaspected damage with a potency of 16,000 to target and all enemies nearby it. Additional Effect: Restores HP of all party members within 30 yalms of target Cure Potency: 16,000 Additional Effect: Increases damage dealt by all party members within 30 yalms of target by 10% Duration: 15s This action's effects extend through obstructions. ※This action cannot be assigned to a hotbar.&lt;/para&gt;
 /// &lt;/summary&gt;
 StarPrismPvP = 39216,
 /// &lt;summary&gt;
@@ -8741,7 +8741,7 @@ StarcrossPvP = 41450,
 DokumoriPvP = 41451,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/41452"&gt;&lt;strong&gt;Zesho Meppo&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (NIN) [41452] [Weaponskill]
-/// &lt;para&gt;Delivers a fourfold attack each hit with a potency of 2,000. Can only be executed while under the effect of Zesho Meppo Ready. ※This action cannot be assigned to a hotbar.&lt;/para&gt;
+/// &lt;para&gt;Delivers a fourfold attack each hit with a potency of 2,500. Can only be executed while under the effect of Zesho Meppo Ready. ※This action cannot be assigned to a hotbar.&lt;/para&gt;
 /// &lt;/summary&gt;
 ZeshoMeppoPvP = 41452,
 /// &lt;summary&gt;
@@ -9061,7 +9061,7 @@ OccultUnicornPvE = 41602,
 MineuchiPvE = 41603,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/41604"&gt;&lt;strong&gt;Shirahadori&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [41604] [Ability]
-/// &lt;para&gt;Renders you impervious to physical damage for one attack. Duration: 4s&lt;/para&gt;
+/// &lt;para&gt;Renders you impervious to most physical damage for one attack. Duration: 4s&lt;/para&gt;
 /// &lt;/summary&gt;
 ShirahadoriPvE = 41604,
 /// &lt;summary&gt;
@@ -9146,7 +9146,7 @@ RingingRespitePvE = 41619,
 SuspendPvE = 41620,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/41621"&gt;&lt;strong&gt;Occult Slowga&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [41621] [Spell]
-/// &lt;para&gt;Afflict target and all enemies nearby it with Slow +80%. Duration: 30s&lt;/para&gt;
+/// &lt;para&gt;Afflicts target and all enemies nearby it with Slow +80%. Duration: 30s&lt;/para&gt;
 /// &lt;/summary&gt;
 OccultSlowgaPvE = 41621,
 /// &lt;summary&gt;
@@ -9465,8 +9465,48 @@ EnchantedZwerchhauPvE_45961 = 45961,
 /// &lt;/summary&gt;
 EnchantedRedoublementPvE_45962 = 45962,
 /// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/46406"&gt;&lt;strong&gt;Shoot Hard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46406] [Weaponskill]
+/// &lt;para&gt;Delivers a hard-hitting attack.&lt;/para&gt;
+/// &lt;/summary&gt;
+ShootHardPvE = 46406,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/46407"&gt;&lt;strong&gt;Shoot Harder&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46407] [Weaponskill]
+/// &lt;para&gt;Delivers an even harder-hitting attack.&lt;/para&gt;
+/// &lt;/summary&gt;
+ShootHarderPvE = 46407,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/46408"&gt;&lt;strong&gt;Smoking Gun&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46408] [Weaponskill]
+/// &lt;para&gt;Delivers an attack with hard-boiled style.&lt;/para&gt;
+/// &lt;/summary&gt;
+SmokingGunPvE = 46408,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/46409"&gt;&lt;strong&gt;Pulp Fission&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46409] [Weaponskill]
+/// &lt;para&gt;Delivers an electrifying magical attack with a potency of 1,800 to target and all enemies nearby it. Can only be executed while under the effect of Fission Chamber.&lt;/para&gt;
+/// &lt;/summary&gt;
+PulpFissionPvE = 46409,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/46410"&gt;&lt;strong&gt;Molting Python&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46410] [Ability]
+/// &lt;para&gt;Delivers an attack with a potency of 300 while dodging to the left smooth as a snake shedding its skin.&lt;/para&gt;
+/// &lt;/summary&gt;
+MoltingPythonPvE = 46410,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/46411"&gt;&lt;strong&gt;Night Stallion&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46411] [Weaponskill]
+/// &lt;para&gt;Delivers a sliding attack with a potency of 600 to all enemies in a straight line before you.&lt;/para&gt;
+/// &lt;/summary&gt;
+NightStallionPvE = 46411,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/46412"&gt;&lt;strong&gt;Thick Skin&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46412] [Weaponskill]
+/// &lt;para&gt;Hard-boiled goodness replenishes HP and reduces damage taken by 60%. Duration: 4s&lt;/para&gt;
+/// &lt;/summary&gt;
+ThickSkinPvE = 46412,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/46413"&gt;&lt;strong&gt;The Short Good-bye&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [46413] [Weaponskill]
+/// &lt;para&gt;Say farewell to your target with the hardest of hard-boiled limit breaks.&lt;/para&gt;
+/// &lt;/summary&gt;
+TheShortGoodbyePvE = 46413,
+/// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/46590"&gt;&lt;strong&gt;Magic Shell&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [46590] [Ability]
-/// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to 20% of the caster's maximum HP. Duration: 60s When the barrier is completely absorbed grants Honed Spellblade to the caster.&lt;/para&gt;
+/// &lt;para&gt;Creates a barrier around self or target party member that absorbs damage equivalent to 20% of the caster's maximum HP. Duration: 60s When the barrier is completely absorbed or expires grants Honed Spellblade to the caster.&lt;/para&gt;
 /// &lt;/summary&gt;
 MagicShellPvE = 46590,
 /// &lt;summary&gt;
@@ -9486,7 +9526,7 @@ HolySpellbladePvE = 46592,
 BlazingSpellbladePvE = 46593,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/46594"&gt;&lt;strong&gt;Finisher&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [46594] [Weaponskill]
-/// &lt;para&gt;Delivers an attack to target. 60% chance for an attack with a potency of 600. 20% chance for an attack with a potency of 1,000 potency. 20% chance for your attack to miss. Potency scales with item level. Additional Effect: 25% chance to kill target instantly with some exceptions.&lt;/para&gt;
+/// &lt;para&gt;Delivers an attack to target. 20% chance for an attack with a potency of 1,000. Additional Effect: 25% chance to kill target instantly with some exceptions 60% chance for an attack with a potency of 600. 20% chance for your attack to miss. Potency scales with item level.&lt;/para&gt;
 /// &lt;/summary&gt;
 FinisherPvE = 46594,
 /// &lt;summary&gt;
@@ -9546,7 +9586,7 @@ SteadfastStancePvE = 46604,
 MesmerizePvE = 46605,
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#action/46606"&gt;&lt;strong&gt;Inquiring Mind&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [46606] [Ability]
-/// &lt;para&gt;When executed near a knowledge crystal grants an effect to self and nearby party members based on your phantom job and its level. Phantom Knight Effect (Level 2 or Higher): Grants Enduring Fortitude Enduring Fortitude Effect: Reduces damage taken by 10% Duration: 30m Phantom Monk Effect (Level 3 or Higher): Grants Fleetfooted Fleetfooted Effect: Increases movement speed Duration: 30m Phantom Bard Effect (Level 2 or Higher): Grants Romeo's Ballad Romeo's Ballad Effect: Increases Phantom EXP earned through battle by 10% Duration: 30m Phantom Dancer Effect (Level 2 or Higher): Grants Quicker Step Swiftstrike Effect: Increases damage dealt by 2% Duration: 30m&lt;/para&gt;
+/// &lt;para&gt;When executed near a knowledge crystal grants an effect to self and nearby party members based on your phantom job and its level. Phantom Knight Effect (Level 2 or Higher): Grants Enduring Fortitude Enduring Fortitude Effect: Reduces damage taken by 10% Duration: 30m Phantom Monk Effect (Level 3 or Higher): Grants Fleetfooted Fleetfooted Effect: Increases movement speed Duration: 30m Phantom Bard Effect (Level 2 or Higher): Grants Romeo's Ballad Romeo's Ballad Effect: Increases Phantom EXP earned through battle by 10% Duration: 30m Phantom Dancer Effect (Level 2 or Higher): Grants Quicker Step Quicker Step Effect: Increases damage dealt by 2% Duration: 30m&lt;/para&gt;
 /// &lt;/summary&gt;
 InquiringMindPvE = 46606,
 /// &lt;summary&gt;
@@ -9608,6 +9648,231 @@ VariantRampartPvE_46941 = 46941,
 /// &lt;see href="https://garlandtools.org/db/#action/46942"&gt;&lt;strong&gt;Variant Eagle Eye Shot&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [46942] [Ability]
 /// &lt;para&gt;Delivers a ranged attack with a potency of 150. Potency scales with item level.&lt;/para&gt;
 /// &lt;/summary&gt;
-VariantEagleEyeShotPvE = 46942,</value>
+VariantEagleEyeShotPvE = 46942,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49062"&gt;&lt;strong&gt;Fuma Shuriken&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49062] [Ability]
+/// &lt;para&gt;Delivers an attack with a potency of 230. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+FumaShurikenPvE_49062 = 49062,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49063"&gt;&lt;strong&gt;Smoke&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49063] [Ability]
+/// &lt;para&gt;Increases evasion by 20%. Duration: 90s&lt;/para&gt;
+/// &lt;/summary&gt;
+SmokePvE = 49063,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49064"&gt;&lt;strong&gt;Lightning Scroll&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49064] [Ability]
+/// &lt;para&gt;Deals lightning damage with a potency of 150 to target and all enemies nearby it. Potency increases to 195 when used against targets weak to lightning. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+LightningScrollPvE = 49064,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49065"&gt;&lt;strong&gt;Flame Scroll&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49065] [Ability]
+/// &lt;para&gt;Deals fire damage with a potency of 150 to target and all enemies nearby it. Potency increases to 195 when used against targets weak to fire. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+FlameScrollPvE = 49065,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49066"&gt;&lt;strong&gt;Image&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49066] [Ability]
+/// &lt;para&gt;Grants three stacks of Image. Image Effect: Nullifies most physical attacks Duration: 30s&lt;/para&gt;
+/// &lt;/summary&gt;
+ImagePvE = 49066,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49067"&gt;&lt;strong&gt;Occult Cure II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49067] [Spell]
+/// &lt;para&gt;Restores target's HP. Cure Potency: 40,000&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultCureIiPvE = 49067,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49068"&gt;&lt;strong&gt;Occult Cure III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49068] [Spell]
+/// &lt;para&gt;Restores own or target party member's HP and all party members nearby target. Cure Potency: 30,000&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultCureIiiPvE = 49068,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49069"&gt;&lt;strong&gt;Occult Blink&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49069] [Ability]
+/// &lt;para&gt;Renders target impervious to most magic damage for one attack. Duration: 30s&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultBlinkPvE = 49069,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49070"&gt;&lt;strong&gt;Occult Raise&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49070] [Spell]
+/// &lt;para&gt;Resurrects target to a weakened state. Can also be cast on targets with Resurrection Restricted.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultRaisePvE = 49070,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49071"&gt;&lt;strong&gt;Occult Holy&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49071] [Spell]
+/// &lt;para&gt;Deals unaspected damage with a potency of 500 to target and all enemies nearby it. Potency increases to 750 when used against undead enemies. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultHolyPvE = 49071,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49072"&gt;&lt;strong&gt;Occult Fire III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49072] [Spell]
+/// &lt;para&gt;Deals fire damage with a potency of 400 to target and all enemies nearby it. Potency increases to 520 when used against targets weak to fire. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultFireIiiPvE = 49072,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49073"&gt;&lt;strong&gt;Occult Blizzard III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49073] [Spell]
+/// &lt;para&gt;Deals ice damage with a potency of 400 to target and all enemies nearby it. Potency increases to 520 when used against targets weak to ice. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultBlizzardIiiPvE = 49073,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49074"&gt;&lt;strong&gt;Occult Thunder III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49074] [Spell]
+/// &lt;para&gt;Deals lightning damage with a potency of 400 to target and all enemies nearby it. Potency increases to 520 when used against targets weak to lightning. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultThunderIiiPvE = 49074,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49075"&gt;&lt;strong&gt;Occult Toad&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49075] [Spell]
+/// &lt;para&gt;Afflicts target with Occult Toad. Occult Toad Effect: Reduces target's damage dealt by 99% and prevents the execution of actions save for auto-attack Duration: 20s&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultToadPvE = 49075,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49076"&gt;&lt;strong&gt;Occult Flare&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49076] [Spell]
+/// &lt;para&gt;Deals unaspected damage with a potency of 500 to target and all enemies nearby it. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultFlarePvE = 49076,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49077"&gt;&lt;strong&gt;Occult Jump&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49077] [Weaponskill]
+/// &lt;para&gt;Delivers an attack with a potency of . Potency scales with item level. Additional Effect: Reduces damage taken by Duration: 2s&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultJumpPvE = 49077,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49078"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49078] [Ability]
+/// &lt;para&gt;Quickly move 10 yalms in the selected direction.&lt;/para&gt;
+/// &lt;/summary&gt;
+StepForthPvE = 49078,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49079"&gt;&lt;strong&gt;Lance&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49079] [Ability]
+/// &lt;para&gt;Delivers an attack with a potency of 300. Potency scales with item level. Additional Effect: Absorbs a portion of damage dealt as HP Additional Effect: Absorbed HP that exceeds maximum HP will be applied as a barrier Duration: 60s&lt;/para&gt;
+/// &lt;/summary&gt;
+LancePvE = 49079,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49080"&gt;&lt;strong&gt;Hellfire&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49080] [Spell]
+/// &lt;para&gt;Deals fire damage with a potency of 600 to target and all enemies nearby it. Potency increases to 780 when used against targets weak to fire. Potency scales with item level. Cast and recast timer cannot be affected by status effects or gear attributes.&lt;/para&gt;
+/// &lt;/summary&gt;
+HellfirePvE = 49080,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49081"&gt;&lt;strong&gt;Judgment Bolt&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49081] [Spell]
+/// &lt;para&gt;Deals lightning damage with a potency of 600 to target and all enemies nearby it. Potency increases to 780 when used against targets weak to lightning. Potency scales with item level. Cast and recast timer cannot be affected by status effects or gear attributes. Shares a recast timer with Hellfire.&lt;/para&gt;
+/// &lt;/summary&gt;
+JudgmentBoltPvE = 49081,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49082"&gt;&lt;strong&gt;Earthen Wall&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49082] [Spell]
+/// &lt;para&gt;Creates a barrier around self and all nearby party members that absorbs damage equivalent to a heal of 40,000 potency. Duration: 10s Cast and recast timer cannot be affected by status effects or gear attributes.&lt;/para&gt;
+/// &lt;/summary&gt;
+EarthenWallPvE = 49082,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49083"&gt;&lt;strong&gt;Thunderstorm&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49083] [Spell]
+/// &lt;para&gt;Deals wind damage with a potency of 600 to all enemies in a cone before you. Potency increases to 780 when used against targets weak to wind. Potency scales with item level. Cast and recast timer cannot be affected by status effects or gear attributes. Shares a recast timer with Hellfire and Judgment Bolt.&lt;/para&gt;
+/// &lt;/summary&gt;
+ThunderstormPvE = 49083,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49084"&gt;&lt;strong&gt;Megaflare&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49084] [Spell]
+/// &lt;para&gt;Deals unaspected damage with a potency of 1,000 to target and all enemies nearby it. Potency scales with item level. Cast and recast timer cannot be affected by status effects or gear attributes.&lt;/para&gt;
+/// &lt;/summary&gt;
+MegaflarePvE = 49084,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49085"&gt;&lt;strong&gt;Occult Aero&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49085] [Spell]
+/// &lt;para&gt;Deals wind damage with a potency of 150. Potency increases to 195 when used against targets weak to wind. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultAeroPvE = 49085,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49086"&gt;&lt;strong&gt;Occult Missile&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49086] [Spell]
+/// &lt;para&gt;Delivers an attack with a 35% chance to deal damage equal to 75% of target's current HP with some exceptions.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultMissilePvE = 49086,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49087"&gt;&lt;strong&gt;Occult Aqua Breath&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49087] [Spell]
+/// &lt;para&gt;Deals unaspected damage with a potency of 300 to target and all enemies nearby it. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultAquaBreathPvE = 49087,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49088"&gt;&lt;strong&gt;Occult Mighty Guard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49088] [Spell]
+/// &lt;para&gt;Reduces damage taken by self and nearby party members by 20%. Duration: 15s&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultMightyGuardPvE = 49088,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49089"&gt;&lt;strong&gt;Occult Aero II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49089] [Spell]
+/// &lt;para&gt;Deals wind damage with a potency of 200. Potency increases to 260 when used against targets weak to wind. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultAeroIiPvE = 49089,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49090"&gt;&lt;strong&gt;Occult White Wind&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49090] [Spell]
+/// &lt;para&gt;Restores own HP and the HP of all nearby party members by an amount equal to your current HP.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultWhiteWindPvE = 49090,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49091"&gt;&lt;strong&gt;Occult Aero III&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49091] [Spell]
+/// &lt;para&gt;Deals wind damage with a potency of 250 to target and all enemies nearby it. Potency increases to 325 when used against targets weak to wind. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultAeroIiiPvE = 49091,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49092"&gt;&lt;strong&gt;Occult Fire II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49092] [Spell]
+/// &lt;para&gt;Deals fire damage with a potency of 300 to target and all enemies nearby it. Potency increases to 390 when used against targets weak to fire. Potency scales with item level.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultFireIiPvE = 49092,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49093"&gt;&lt;strong&gt;Occult Cure II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49093] [Spell]
+/// &lt;para&gt;Restores target's HP. Cure Potency: 40,000&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultCureIiPvE_49093 = 49093,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49094"&gt;&lt;strong&gt;Occult Libra&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49094] [Ability]
+/// &lt;para&gt;Discern the elemental affinity of enemies increasing the potency of elemental attacks that exploit their weaknesses. Duration: 120s&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultLibraPvE = 49094,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49095"&gt;&lt;strong&gt;Occult Blizzard II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49095] [Spell]
+/// &lt;para&gt;Deals ice damage with a potency of 300 to target and all enemies nearby it. Potency increases to 390 when used against targets weak to ice. Potency scales with item level. Shares a recast timer with Occult Fire II.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultBlizzardIiPvE = 49095,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49096"&gt;&lt;strong&gt;Occult Thunder II&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49096] [Spell]
+/// &lt;para&gt;Deals lightning damage with a potency of 300 to target and all enemies nearby it. Potency increases to 390 when used against targets weak to lightning. Potency scales with item level. Shares a recast timer with Occult Fire II and Occult Blizzard II.&lt;/para&gt;
+/// &lt;/summary&gt;
+OccultThunderIiPvE = 49096,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49097"&gt;&lt;strong&gt;Drain Touch&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49097] [Ability]
+/// &lt;para&gt;Deals unaspected damage with a potency of 150. Potency scales with item level. Additional Effect: Absorbs a portion of damage dealt as HP Additional Effect: Grants Drain Touch Drain Touch Effect: Most attacks cannot reduce your HP to less than 1 Duration: 6s&lt;/para&gt;
+/// &lt;/summary&gt;
+DrainTouchPvE = 49097,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49098"&gt;&lt;strong&gt;Deep Freeze&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49098] [Spell]
+/// &lt;para&gt;Deals ice damage with a potency of 300 to all enemies in a straight line. Potency increases to 390 when used against targets weak to ice. Drain Touch Potency: 400 Potency increases to 520 when used against targets weak to ice. Potency scales with item level. Consumes 10% of maximum HP when executed. Additional Effect: Freezes time for target when under the effect of Drain Touch Duration: 4s Additional Effect: Afflicts yourself with Doom Duration: 10s Effect is dispelled when HP is restored to full.&lt;/para&gt;
+/// &lt;/summary&gt;
+DeepFreezePvE = 49098,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49099"&gt;&lt;strong&gt;Hell Wind&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49099] [Spell]
+/// &lt;para&gt;Deals wind damage with a potency of 300 to all enemies in a straight line. Potency increases to 390 when used against targets weak to wind. Drain Touch Potency: 400 Potency increases to 520 when used against targets weak to wind. Potency scales with item level. Consumes 10% of maximum HP when executed. Additional Effect: 10% chance to Petrify target when under the effect of Drain Touch Petrify Effect: Incapacitated upon taking damage Duration: 10s Additional Effect: Afflicts yourself with Doom Duration: 10s Effect is dispelled when HP is restored to full. Shares a recast timer with Deep Freeze.&lt;/para&gt;
+/// &lt;/summary&gt;
+HellWindPvE = 49099,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49100"&gt;&lt;strong&gt;Chaos Drive&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49100] [Spell]
+/// &lt;para&gt;Deals lightning damage with a potency of 300 to all enemies in a straight line. Potency increases to 390 when used against targets weak to lightning. Drain Touch Potency: 400 Potency increases to 520 when used against targets weak to lightning. Potency scales with item level. Consumes 10% of maximum HP when executed. Additional Effect: Afflicts target with Paralysis when under the effect of Drain Touch Duration: 18s Additional Effect: Afflicts yourself with Doom Duration: 10s Effect is dispelled when HP is restored to full. Shares a recast timer with Deep Freeze and Hell Wind.&lt;/para&gt;
+/// &lt;/summary&gt;
+ChaosDrivePvE = 49100,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49101"&gt;&lt;strong&gt;Doomsday&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49101] [Spell]
+/// &lt;para&gt;Deals unaspected damage with a potency of 350 to all enemies in a straight line. Drain Touch Potency: 500 Potency scales with item level. Consumes 10% of maximum HP when executed. Additional Effect: Removes one beneficial status from target with some exceptions when under the effect of Drain Touch Additional Effect: Afflicts yourself with Doom Duration: 10s Effect is dispelled when HP is restored to full.&lt;/para&gt;
+/// &lt;/summary&gt;
+DoomsdayPvE = 49101,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/49102"&gt;&lt;strong&gt;Wisdom on the Winds&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [49102] [Ability]
+/// &lt;para&gt;Resets the recast timer of most class and job actions.&lt;/para&gt;
+/// &lt;/summary&gt;
+WisdomOnTheWindsPvE = 49102,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/50473"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50473] [Ability]
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+StepForthPvE_50473 = 50473,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/50474"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50474] [Ability]
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+StepForthPvE_50474 = 50474,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/50475"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50475] [Ability]
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+StepForthPvE_50475 = 50475,
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#action/50476"&gt;&lt;strong&gt;Step Forth&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (Any Disciple of War or Magic (excluding limited jobs)) [50476] [Ability]
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+StepForthPvE_50476 = 50476,</value>
   </data>
 </root>

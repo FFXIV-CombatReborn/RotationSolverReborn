@@ -249,7 +249,7 @@ public partial class DutyRotation
 	{
 		setting.StatusFromSelf = false;
 		setting.IsFriendly = true;
-		setting.TargetStatusProvide = [StatusID.LostReflect];
+		setting.TargetStatusProvide = [StatusID.Reflect_2337];
 	}
 
 	static partial void ModifyLostStoneskinPvE(ref ActionSetting setting)

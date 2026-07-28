@@ -13832,10 +13832,10 @@ LostSwift = 2335,
 LostStealth = 2336,
 
 /// &lt;summary&gt;
-/// &lt;see href="https://garlandtools.org/db/#status/2337"&gt;&lt;strong&gt;Lost Reflect&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;see href="https://garlandtools.org/db/#status/2337"&gt;&lt;strong&gt;Reflect&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
 /// &lt;para&gt;Reflecting magic back on its caster.&lt;/para&gt;
 /// &lt;/summary&gt;
-LostReflect = 2337,
+Reflect_2337 = 2337,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/2338"&gt;&lt;strong&gt;Lost Spellforge&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
@@ -27927,19 +27927,22 @@ Outsider = 4831,
 SkysTheLimit = 4832,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4833"&gt;&lt;strong&gt;Fission Chamber&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Wielding a fully charged Molt Python Maximum. Able to execute Pulp Fission.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4833 = 4833,
+FissionChamber = 4833,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4834"&gt;&lt;strong&gt;Electrified Gentleman&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Releasing an ordinarily fatal accumulation of lightning-aspected aether.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4834 = 4834,
+ElectrifiedGentleman = 4834,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4835"&gt;&lt;strong&gt;Hard-boiled&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Temporarily fortified by the consumption of a hard-boiled egg. Damage taken is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4835 = 4835,
+Hardboiled = 4835,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4836"&gt;&lt;strong&gt;Butterfly Motif&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
@@ -28125,9 +28128,10 @@ UnnamedStatus_4871 = 4871,
 UnnamedStatus_4872 = 4872,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4873"&gt;&lt;strong&gt;Image&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Impervious to most physical attacks for one strike.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4873 = 4873,
+Image = 4873,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -28135,9 +28139,10 @@ UnnamedStatus_4873 = 4873,
 UnnamedStatus_4874 = 4874,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4875"&gt;&lt;strong&gt;Invincibility&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Invulnerable to all damage.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4875 = 4875,
+Invincibility_4875 = 4875,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4876"&gt;&lt;strong&gt;Tele-portent&lt;/strong&gt;&lt;/see&gt; ↓
@@ -28842,29 +28847,34 @@ UnnamedStatus_5012 = 5012,
 UnnamedStatus_5013 = 5013,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5014"&gt;&lt;strong&gt;+1 Correction&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Knowledge level has been increased by one via a scrawled revision.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5014 = 5014,
+Status_1Correction = 5014,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5015"&gt;&lt;strong&gt;+2 Correction&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Knowledge level has been increased by two via a scrawled revision.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5015 = 5015,
+Status_2Correction = 5015,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5016"&gt;&lt;strong&gt;+3 Correction&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Knowledge level has been increased by three via a scrawled revision.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5016 = 5016,
+Status_3Correction = 5016,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5017"&gt;&lt;strong&gt;+4 Correction&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Knowledge level has been increased by four via a scrawled revision.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5017 = 5017,
+Status_4Correction = 5017,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5018"&gt;&lt;strong&gt;+5 Correction&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Knowledge level has been increased by five via a scrawled revision.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5018 = 5018,
+Status_5Correction = 5018,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -29017,9 +29027,10 @@ DarkResistanceDownIi_5046 = 5046,
 BubbleGaol_5047 = 5047,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5048"&gt;&lt;strong&gt;Guilty as Charged&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Able to execute unrestricted Pulp Fission attacks against deserving mooks thanks to a steady supply of Hildi-brand lightning energy.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5048 = 5048,
+GuiltyAsCharged = 5048,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -29038,34 +29049,28 @@ UnnamedStatus_5050 = 5050,
 Bloodfest = 5051,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5052"&gt;&lt;strong&gt;Green Noise: Easterly&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Attacks from foe's green head will resound with the body's frequency resulting in a surge of wind from the east.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5052 = 5052,
+GreenNoiseEasterly = 5052,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5053"&gt;&lt;strong&gt;Green Noise: Westerly&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Attacks from foe's green head will resound with the body's frequency resulting in a surge of wind from the west.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5053 = 5053,
+GreenNoiseWesterly = 5053,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5054"&gt;&lt;strong&gt;Blue Noise: Easterly&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Attacks from foe's blue head will resound with the body's frequency resulting in a surge of wind from the east.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5054 = 5054,
+BlueNoiseEasterly = 5054,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5055"&gt;&lt;strong&gt;Blue Noise: Westerly&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Attacks from foe's blue head will resound with the body's frequency resulting in a surge of wind from the west.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5055 = 5055,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5056 = 5056,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5057 = 5057,
+BlueNoiseWesterly = 5055,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5058"&gt;&lt;strong&gt;Stone Curse&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -29074,9 +29079,10 @@ UnnamedStatus_5057 = 5057,
 StoneCurse_5058 = 5058,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5059"&gt;&lt;strong&gt;Gradual Zombification&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Slowly transforming into a brain-craving zombie. A stack of 2 will result in zombification.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5059 = 5059,
+GradualZombification_5059 = 5059,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -29460,24 +29466,28 @@ UnnamedStatus_5133 = 5133,
 UnnamedStatus_5134 = 5134,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5135"&gt;&lt;strong&gt;Dig Three Graves&lt;/strong&gt;&lt;/see&gt; ↑
+/// &lt;para&gt;Performing a specific action thrice.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5135 = 5135,
+DigThreeGraves = 5135,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5136"&gt;&lt;strong&gt;Growing Dread&lt;/strong&gt;&lt;/see&gt; ↓
+/// &lt;para&gt;Riddled with dread roots. Will take high damage if hit by Sowing Dread again.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5136 = 5136,
+GrowingDread = 5136,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5137"&gt;&lt;strong&gt;Growing Panic&lt;/strong&gt;&lt;/see&gt; ↓
+/// &lt;para&gt;Riddled with panic-inducing roots. Will take high damage if hit by Sowing Panic again.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5137 = 5137,
+GrowingPanic = 5137,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5138"&gt;&lt;strong&gt;Zombie-proof&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Temporarily immune to Gradual Zombification.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5138 = 5138,
+Zombieproof = 5138,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -29495,14 +29505,16 @@ UnnamedStatus_5140 = 5140,
 UnnamedStatus_5141 = 5141,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5142"&gt;&lt;strong&gt;Forward March&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Have received the order to advance. Order will be executed when status fades.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5142 = 5142,
+ForwardMarch_5142 = 5142,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5143"&gt;&lt;strong&gt;About Face&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Have received the order to retreat. Order will be executed when status fades.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5143 = 5143,
+AboutFace_5143 = 5143,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5144"&gt;&lt;strong&gt;_rsv_5144_-1_1_0_0_S74CFC3B0_E74CFC3B0&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -29552,9 +29564,10 @@ UnnamedStatus_5151 = 5151,
 Loadbearing_5152 = 5152,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5153"&gt;&lt;strong&gt;Elementary Deficiency&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Biological composition is missing stabilizing elements resulting in high damage taken from Elementary Chemistry. Taking damage of the applicable elemental aspect will reduce stacks dispelling this effect when stack count reaches 0.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5153 = 5153,
+ElementaryDeficiency = 5153,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -29731,19 +29744,22 @@ UnnamedStatus_5186 = 5186,
 Doom_5187 = 5187,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5188"&gt;&lt;strong&gt;Pacification&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Unable to use weaponskills.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5188 = 5188,
+Pacification_5188 = 5188,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5189"&gt;&lt;strong&gt;Astral Realignment&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Existentially aligned to the astral realm.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5189 = 5189,
+AstralRealignment_5189 = 5189,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5190"&gt;&lt;strong&gt;Astral Eye&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Magicks are facilitating the perception of extradimensional beings.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5190 = 5190,
+AstralEye = 5190,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5191"&gt;&lt;strong&gt;Motion Tracker&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -30366,114 +30382,136 @@ UnnamedStatus_5312 = 5312,
 UnnamedStatus_5313 = 5313,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5314"&gt;&lt;strong&gt;Lighting Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Charging up the Molt Python Maximum with lightning-aspected aether. Will grant the effect Fission Chamber when 2 stacks are accumulated.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5314 = 5314,
+LightingUp = 5314,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5315"&gt;&lt;strong&gt;First Strike&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Weaponskill cast time and recast time spell cast time and recast time and auto-attack delay are reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5315 = 5315,
+FirstStrike = 5315,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5316"&gt;&lt;strong&gt;Occult Blink&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Impervious to most magic attacks for one strike.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5316 = 5316,
+OccultBlink = 5316,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5317"&gt;&lt;strong&gt;Occult Toad&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Transformed into a toad most magical but nevertheless unable to execute actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5317 = 5317,
+OccultToad = 5317,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5318"&gt;&lt;strong&gt;Vulnerability Down&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Damage taken is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5318 = 5318,
+VulnerabilityDown_5318 = 5318,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5319"&gt;&lt;strong&gt;Lance&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;A highly effective weapons maneuver is nullifying damage.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5319 = 5319,
+Lance = 5319,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5320"&gt;&lt;strong&gt;Earthen Wall&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Lithified flesh is absorbing damage.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5320 = 5320,
+EarthenWall = 5320,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5321"&gt;&lt;strong&gt;Occult Mighty Guard&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Damage taken is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5321 = 5321,
+OccultMightyGuard = 5321,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5322"&gt;&lt;strong&gt;Fire Weakness&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Elemental weakness has been made apparent. Damage from fire-aspected phantom actions is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5322 = 5322,
+FireWeakness = 5322,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5323"&gt;&lt;strong&gt;Ice Weakness&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Elemental weakness has been made apparent. Damage from ice-aspected phantom actions is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5323 = 5323,
+IceWeakness = 5323,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5324"&gt;&lt;strong&gt;Lightning Weakness&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Elemental weakness has been made apparent. Damage from lightning-aspected phantom actions is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5324 = 5324,
+LightningWeakness = 5324,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5325"&gt;&lt;strong&gt;Wind Weakness&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Elemental weakness has been made apparent. Damage from wind-aspected phantom actions is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5325 = 5325,
+WindWeakness = 5325,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5326"&gt;&lt;strong&gt;Drain Touch&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Most attacks cannot reduce own HP to less than 1.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5326 = 5326,
+DrainTouch = 5326,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5327"&gt;&lt;strong&gt;Smoke&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Evasion is enhanced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5327 = 5327,
+Smoke = 5327,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5328"&gt;&lt;strong&gt;Phantom Ninja&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Ruminating on the knowledge of a ninja of eld. Ready to use select phantom actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5328 = 5328,
+PhantomNinja = 5328,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5329"&gt;&lt;strong&gt;Phantom White Mage&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Ruminating on the knowledge of a white mage of eld. Ready to use select phantom actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5329 = 5329,
+PhantomWhiteMage = 5329,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5330"&gt;&lt;strong&gt;Phantom Black Mage&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Ruminating on the knowledge of a black mage of eld. Ready to use select phantom actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5330 = 5330,
+PhantomBlackMage = 5330,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5331"&gt;&lt;strong&gt;Phantom Dragoon&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Ruminating on the knowledge of a dragoon of eld. Ready to use select phantom actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5331 = 5331,
+PhantomDragoon = 5331,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5332"&gt;&lt;strong&gt;Phantom Summoner&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Ruminating on the knowledge of a summoner of eld. Ready to use select phantom actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5332 = 5332,
+PhantomSummoner = 5332,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5333"&gt;&lt;strong&gt;Phantom Blue Mage&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Ruminating on the knowledge of a blue mage of eld. Ready to use select phantom actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5333 = 5333,
+PhantomBlueMage = 5333,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5334"&gt;&lt;strong&gt;Phantom Red Mage&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Ruminating on the knowledge of a red mage of eld. Ready to use select phantom actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5334 = 5334,
+PhantomRedMage = 5334,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5335"&gt;&lt;strong&gt;Phantom Necromancer&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Ruminating on the knowledge of a necromancer of eld. Ready to use select phantom actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5335 = 5335,
+PhantomNecromancer = 5335,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -30506,11 +30544,6 @@ UnnamedStatus_5340 = 5340,
 UnnamedStatus_5341 = 5341,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5342 = 5342,
-
-/// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5343"&gt;&lt;strong&gt;Light Vision&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
 /// &lt;para&gt;Guided by a luminous beacon increasing movement speed. Invulnerable to Unbecoming.&lt;/para&gt;
 /// &lt;/summary&gt;
@@ -30532,19 +30565,10 @@ UnnamedStatus_5345 = 5345,
 UnnamedStatus_5346 = 5346,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5349"&gt;&lt;strong&gt;Fetters&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Unable to execute actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5347 = 5347,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5348 = 5348,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5349 = 5349,
+Fetters_5349 = 5349,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5350"&gt;&lt;strong&gt;_rsv_5350_-1_1_0_0_S74CFC3B0_E74CFC3B0&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -30688,14 +30712,16 @@ GauntletThrown_5372 = 5372,
 UnnamedStatus_5373 = 5373,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5374"&gt;&lt;strong&gt;Ensorcelled: Aero III&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Wind magicks are at the ready.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5374 = 5374,
+EnsorcelledAeroIii = 5374,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5375"&gt;&lt;strong&gt;Ensorcelled: Stone III&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Earth magicks are at the ready.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5375 = 5375,
+EnsorcelledStoneIii = 5375,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5376"&gt;&lt;strong&gt;Perfect Defense&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
@@ -30822,14 +30848,16 @@ EasterlyWinds = 5398,
 WesterlyWinds = 5399,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5400"&gt;&lt;strong&gt;Epic Villain&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Dueling in a decisive battle. Damage from those who have not been dubbed Epic Hero is nullified.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5400 = 5400,
+EpicVillain_5400 = 5400,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5401"&gt;&lt;strong&gt;Fated Villain&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Dueling in a decisive battle. Damage from those who have not been dubbed Fated Hero is nullified.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5401 = 5401,
+FatedVillain_5401 = 5401,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -30837,14 +30865,16 @@ UnnamedStatus_5401 = 5401,
 UnnamedStatus_5402 = 5402,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5403"&gt;&lt;strong&gt;Easterly Reprise&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Will be hit by a surge of wind from the east when this effect expires.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5403 = 5403,
+EasterlyReprise = 5403,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5404"&gt;&lt;strong&gt;Westerly Reprise&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Will be hit by a surge of wind from the east when this effect expires.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5404 = 5404,
+WesterlyReprise = 5404,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -30863,9 +30893,10 @@ UnnamedStatus_5406 = 5406,
 StrungUp = 5407,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5408"&gt;&lt;strong&gt;Incapacitated&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Unable to perform any actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5408 = 5408,
+Incapacitated_5408 = 5408,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -30878,9 +30909,10 @@ UnnamedStatus_5409 = 5409,
 UnnamedStatus_5410 = 5410,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5411"&gt;&lt;strong&gt;Stun&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Unable to execute actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5411 = 5411,
+Stun_5411 = 5411,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5412"&gt;&lt;strong&gt;Supplementary Formula&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
@@ -30950,9 +30982,10 @@ UnnamedStatus_5423 = 5423,
 UnnamedStatus_5424 = 5424,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5425"&gt;&lt;strong&gt;Poison&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Toxins are causing damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5425 = 5425,
+Poison_5425 = 5425,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31015,9 +31048,10 @@ UnnamedStatus_5436 = 5436,
 UnnamedStatus_5437 = 5437,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5438"&gt;&lt;strong&gt;Dualcast&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;The next spell will be cast immediately.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5438 = 5438,
+Dualcast_5438 = 5438,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31160,14 +31194,10 @@ UnnamedStatus_5466 = 5466,
 VulnerabilityDown_5467 = 5467,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5469"&gt;&lt;strong&gt;Poison&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Toxins are causing damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5468 = 5468,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5469 = 5469,
+Poison_5469 = 5469,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31178,11 +31208,6 @@ UnnamedStatus_5470 = 5470,
 /// &lt;para&gt;&lt;/para&gt;
 /// &lt;/summary&gt;
 UnnamedStatus_5471 = 5471,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5472 = 5472,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5473"&gt;&lt;strong&gt;Doom&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -31482,24 +31507,28 @@ UnnamedStatus_5530 = 5530,
 MountainBuster = 5531,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5532"&gt;&lt;strong&gt;Seal of the Bell&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Wielding a bell from among the stock of sealed implements.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5532 = 5532,
+SealOfTheBell = 5532,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5533"&gt;&lt;strong&gt;Seal of the Blade&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Wielding a blade from among the stock of sealed implements.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5533 = 5533,
+SealOfTheBlade = 5533,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5534"&gt;&lt;strong&gt;Seal of the Bow&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Wielding a bow from among the stock of sealed implements.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5534 = 5534,
+SealOfTheBow = 5534,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5535"&gt;&lt;strong&gt;Seal of the Harp&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Wielding a harp from among the stock of sealed implements.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5535 = 5535,
+SealOfTheHarp = 5535,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
