@@ -3,6 +3,7 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using RotationSolver.Basic.Rotations.Duties;
 
 namespace RotationSolver.Basic.Actions;
 
@@ -328,6 +329,14 @@ public readonly struct ActionBasicInfo
 				return false;
 			}
 
+			// Quest Battle actions (e.g. Hardboiled) are an entirely separate system from standard
+			// duty actions: they replace the player's normal hotbars rather than occupying the
+			// dedicated duty action slots, so they must never fall through to the duty action check below.
+			if (_action.Setting.IsQuestBattleAction)
+			{
+				return DataCenter.IsInQuestBattle;
+			}
+
 			if (IsDutyAction)
 			{
 				foreach (var actionId in DataCenter.DutyActions)
@@ -472,12 +481,22 @@ public readonly struct ActionBasicInfo
 			return false;
 		}
 
-		if (!IsActionEnabled() || !IsOnSlot)
+		if (!IsActionEnabled())
 		{
 			return false;
 		}
 
-		if (IsActionDisabled() || !HasEnoughMP())
+		if (IsActionDisabled())
+		{
+			return false;
+		}
+
+		if (!IsOnSlot)
+		{
+			return false;
+		}
+
+		if (!HasEnoughMP())
 		{
 			return false;
 		}

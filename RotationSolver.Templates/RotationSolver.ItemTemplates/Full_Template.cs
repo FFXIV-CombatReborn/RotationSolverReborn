@@ -41,9 +41,9 @@ internal class Full_Template : AST_Base
     //For some gcds very important, even more than healing, defense, interrupt, etc.
     [RotationDesc("Optional description for Emergency GCD")]
     [RotationDesc(ActionID.None)]
-    protected override bool EmergencyGCD(out IAction act)
+    protected override bool EmergencyGCD(IAction? nextGCD, out IAction act)
     {
-        return base.EmergencyGCD(out act);
+        return base.EmergencyGCD(nextGCD, out act);
     }
 
     //For some gcds that moving forward.

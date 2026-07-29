@@ -918,7 +918,7 @@ public sealed class NIN_Reborn : NinjaRotation
 	#endregion
 
 	#region GCD Logic
-	protected override bool EmergencyGCD(out IAction? act)
+	protected override bool EmergencyGCD(IAction? nextGCD, out IAction? act)
 	{
 		if (!InCombat && !CombatMudra)
 		{
@@ -1006,7 +1006,7 @@ public sealed class NIN_Reborn : NinjaRotation
 			}
 		}
 
-		return base.EmergencyGCD(out act);
+		return base.EmergencyGCD(nextGCD, out act);
 	}
 
 	protected override bool GeneralGCD(out IAction? act)

@@ -186,6 +186,11 @@ internal partial class Configs : IPluginConfiguration
 	Filter = DutySpecificFieldOps)]
 	private static readonly bool _forkedtowerDeadStar = true;
 
+	[ConditionBool, UI("North Horn CE - Tiny Mage targetting logic.",
+	Description = "Treat Tiny Mage CE mobs as immune if you're more than 5 yalms away and they are not the farthest along their cast.",
+	Filter = DutySpecificFieldOps)]
+	private static readonly bool _northHornTinyMage = true;
+
 	[ConditionBool, UI("Pilgrim's Traverse - Eminent Grief logic.",
 	Description = "Treat Eminent Grief as immune if you don't have Light Vengeance buff, and treat Devoured Eater as immune if you don't have Dark Vengeance buff.",
 	Filter = DutySpecificDeepDungeon)]

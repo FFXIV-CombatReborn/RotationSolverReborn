@@ -15,6 +15,7 @@ using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
@@ -3128,6 +3129,7 @@ public partial class RotationConfigWindow : Window
 					var target = action.Target.Target;
 					ImGui.Text("Can Use: " + action.CanUse(out _));
 					ImGui.Spacing();
+					ImGui.Spacing();
 					ImGui.Text("ID: " + action.Info.ID);
 					ImGui.Text("Cast Type: " + action.Info.CastType);
 					ImGui.Text("GCDSingleHeal: " + action.Config.GCDSingleHeal);
@@ -4591,28 +4593,42 @@ public partial class RotationConfigWindow : Window
 		ImGui.Text($"In Field Operations: {DataCenter.IsInFieldOperations}");
 		ImGui.Text($"In Field Raid: {DataCenter.IsInFieldRaid}");
 		ImGui.Spacing();
-		ImGui.Text($"IsInBozjanFieldOp: {DataCenter.IsInBozjanFieldOp}");
-		ImGui.Text($"IsInBozjanFieldOpCE: {DataCenter.IsInBozjanFieldOpCE}");
-		ImGui.Text($"IsInDelubrumNormal: {DataCenter.IsInDelubrumNormal}");
-		ImGui.Text($"IsInDelubrumSavage: {DataCenter.IsInDelubrumSavage}");
-		ImGui.Text($"IsInBozja: {DataCenter.IsInBozja}");
-		ImGui.Spacing();
-		ImGui.Text($"In Occult Crescent: {DataCenter.IsInOccultCrescentOp}");
-		ImGui.Text($"Is In ForkedTower: {DataCenter.IsInForkedTower}");
-		ImGui.Text($"FreelancerLevel: {DutyRotation.FreelancerLevel}");
-		ImGui.Text($"KnightLevel: {DutyRotation.KnightLevel}");
-		ImGui.Text($"MonkLevel: {DutyRotation.MonkLevel}");
-		ImGui.Text($"BardLevel: {DutyRotation.BardLevel}");
-		ImGui.Text($"ChemistLevel: {DutyRotation.ChemistLevel}");
-		ImGui.Text($"TimeMageLevel: {DutyRotation.TimeMageLevel}");
-		ImGui.Text($"CannoneerLevel: {DutyRotation.CannoneerLevel}");
-		ImGui.Text($"OracleLevel: {DutyRotation.OracleLevel}");
-		ImGui.Text($"BerserkerLevel: {DutyRotation.BerserkerLevel}");
-		ImGui.Text($"RangerLevel: {DutyRotation.RangerLevel}");
-		ImGui.Text($"ThiefLevel: {DutyRotation.ThiefLevel}");
-		ImGui.Text($"SamuraiLevel: {DutyRotation.SamuraiLevel}");
-		ImGui.Text($"GeomancerLevel: {DutyRotation.GeomancerLevel}");
-		ImGui.Spacing();
+		if (DataCenter.IsInBozjanFieldOp)
+		{
+			ImGui.Text($"IsInBozjanFieldOp: {DataCenter.IsInBozjanFieldOp}");
+			ImGui.Text($"IsInBozjanFieldOpCE: {DataCenter.IsInBozjanFieldOpCE}");
+			ImGui.Text($"IsInDelubrumNormal: {DataCenter.IsInDelubrumNormal}");
+			ImGui.Text($"IsInDelubrumSavage: {DataCenter.IsInDelubrumSavage}");
+			ImGui.Text($"IsInBozja: {DataCenter.IsInBozja}");
+		}
+		if (DataCenter.IsInOccultCrescentOp)
+		{
+			ImGui.Text($"In Occult Crescent: {DataCenter.IsInOccultCrescentOp}");
+			ImGui.Text($"Is In ForkedTower: {DataCenter.IsInForkedTower}");
+			ImGui.Text($"FreelancerLevel: {DutyRotation.FreelancerLevel}");
+			ImGui.Text($"KnightLevel: {DutyRotation.KnightLevel}");
+			ImGui.Text($"MonkLevel: {DutyRotation.MonkLevel}");
+			ImGui.Text($"BardLevel: {DutyRotation.BardLevel}");
+			ImGui.Text($"ChemistLevel: {DutyRotation.ChemistLevel}");
+			ImGui.Text($"TimeMageLevel: {DutyRotation.TimeMageLevel}");
+			ImGui.Text($"CannoneerLevel: {DutyRotation.CannoneerLevel}");
+			ImGui.Text($"OracleLevel: {DutyRotation.OracleLevel}");
+			ImGui.Text($"BerserkerLevel: {DutyRotation.BerserkerLevel}");
+			ImGui.Text($"RangerLevel: {DutyRotation.RangerLevel}");
+			ImGui.Text($"ThiefLevel: {DutyRotation.ThiefLevel}");
+			ImGui.Text($"SamuraiLevel: {DutyRotation.SamuraiLevel}");
+			ImGui.Text($"GeomancerLevel: {DutyRotation.GeomancerLevel}");
+			ImGui.Text($"MysticKnightLevel: {DutyRotation.MysticKnightLevel}");
+			ImGui.Text($"DancerLevel: {DutyRotation.DancerLevel}");
+			ImGui.Text($"NinjaLevel: {DutyRotation.NinjaLevel}");
+			ImGui.Text($"WhiteMageLevel: {DutyRotation.WhiteMageLevel}");
+			ImGui.Text($"BlackMageLevel: {DutyRotation.BlackMageLevel}");
+			ImGui.Text($"DragoonLevel: {DutyRotation.DragoonLevel}");
+			ImGui.Text($"SummonerLevel: {DutyRotation.SummonerLevel}");
+			ImGui.Text($"BlueMageLevel: {DutyRotation.BlueMageLevel}");
+			ImGui.Text($"RedMageLevel: {DutyRotation.RedMageLevel}");
+			ImGui.Text($"NecromancerLevel: {DutyRotation.NecromancerLevel}");
+		}
 		ImGui.Text($"InVariantDungeon: {DataCenter.InVariantDungeon}");
 		ImGui.Text($"The Merchant's Tale Advanced: {DataCenter.TheMerchantsTaleAdvanced}");
 		ImGui.Text($"The Merchant's Tale: {DataCenter.TheMerchantsTale}");
@@ -4632,6 +4648,7 @@ public partial class RotationConfigWindow : Window
 		ImGui.Spacing();
 		ImGui.Text($"IsInM11S: {DataCenter.IsInM11S}");
 		ImGui.Text($"IsTyrantCastingSpecialIndicator2: {DataCenter.IsTyrantCastingSpecialIndicator2()}");
+		ImGui.Text($"IsLichCastingSpecialIndicator: {DataCenter.IsLichCastingSpecialIndicator()}");
 	}
 
 	private static void DrawParty()
@@ -4738,6 +4755,8 @@ public partial class RotationConfigWindow : Window
 
 		if (target is IBattleChara battleChara)
 		{
+			ImGui.Text($"IsCasting: {battleChara.IsCasting}");
+			ImGui.Text($"CastID: {battleChara.CastInfo.ActionId}");
 			ImGui.Text($"Is Status Capped: {StatusHelper.IsStatusCapped(battleChara)}");
 			ImGui.Text($"CanSee: {battleChara.CanSee()}");
 			ImGui.Text($"CanBeRaised: {battleChara.CanBeRaised()}");

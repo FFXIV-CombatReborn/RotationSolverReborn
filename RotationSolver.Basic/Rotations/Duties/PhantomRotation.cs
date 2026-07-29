@@ -75,6 +75,28 @@ public partial class DutyRotation
 			IsEnabled = false,
 		};
 	}
+
+	/// <summary>
+	///
+	/// </summary>
+	static partial void ModifyInquiringMindPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => FreelancerLevel >= 15;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			IsEnabled = false,
+		};
+	}
+
+	/// <summary>
+	///
+	/// </summary>
+	static partial void ModifyWisdomOnTheWindsPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => FreelancerLevel >= 20;
+		setting.TargetType = TargetType.Self;
+		setting.IsFriendly = true;
+	}
 	#endregion
 
 	#region Knight
@@ -986,6 +1008,498 @@ public partial class DutyRotation
 	{
 		setting.ActionCheck = () => GladiatorLevel >= 4;
 		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+	#endregion
+
+	#region Ninja
+	static partial void ModifyFumaShurikenPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => NinjaLevel >= 1;
+		setting.IsFriendly = false;
+	}
+
+	static partial void ModifySmokePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => NinjaLevel >= 2;
+		setting.IsFriendly = true;
+		setting.StatusProvide = [StatusID.Smoke];
+		setting.TargetType = TargetType.Self;
+	}
+
+	static partial void ModifyLightningScrollPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => NinjaLevel >= 3;
+		setting.IsFriendly = false;
+		setting.TargetStatusNeed = [StatusID.LightningWeakness];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyFlameScrollPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => NinjaLevel >= 4;
+		setting.IsFriendly = false;
+		setting.TargetStatusNeed = [StatusID.FireWeakness];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyImagePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => NinjaLevel >= 6;
+		setting.IsFriendly = true;
+		setting.StatusProvide = [StatusID.Image];
+		setting.TargetType = TargetType.Self;
+	}
+	#endregion
+
+	#region White Mage
+
+	static partial void ModifyOccultCureIiPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => WhiteMageLevel >= 1;
+		setting.IsFriendly = true;
+	}
+
+	static partial void ModifyOccultCureIiiPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => WhiteMageLevel >= 2;
+		setting.IsFriendly = true;
+	}
+
+	static partial void ModifyOccultBlinkPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => WhiteMageLevel >= 3;
+		setting.IsFriendly = true;
+		setting.StatusProvide = [StatusID.OccultBlink];
+	}
+
+	static partial void ModifyOccultRaisePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => WhiteMageLevel >= 4;
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Death;
+	}
+
+	static partial void ModifyOccultHolyPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => WhiteMageLevel >= 5;
+		setting.IsFriendly = false;
+	}
+	#endregion
+
+	#region Black Mage
+
+	static partial void ModifyOccultFireIiiPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlackMageLevel >= 1;
+		setting.IsFriendly = false;
+		setting.TargetStatusNeed = [StatusID.FireWeakness];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultBlizzardIiiPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlackMageLevel >= 2;
+		setting.IsFriendly = false;
+		setting.TargetStatusNeed = [StatusID.IceWeakness];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultThunderIiiPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlackMageLevel >= 3;
+		setting.IsFriendly = false;
+		setting.TargetStatusNeed = [StatusID.LightningWeakness];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultToadPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlackMageLevel >= 4;
+		setting.IsFriendly = false;
+		setting.TargetStatusProvide = [StatusID.OccultToad];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultFlarePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlackMageLevel >= 5;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+	#endregion
+
+	#region Dragoon
+
+	static partial void ModifyOccultJumpPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DragoonLevel >= 1;
+		setting.IsFriendly = false;
+		setting.StatusProvide = [StatusID.VulnerabilityDown_5318];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyStepForthPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DragoonLevel >= 2;
+		setting.IsFriendly = true;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyStepForthPvE_50473(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DragoonLevel >= 2;
+		setting.IsFriendly = true;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyStepForthPvE_50474(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DragoonLevel >= 2;
+		setting.IsFriendly = true;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyStepForthPvE_50475(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DragoonLevel >= 2;
+		setting.IsFriendly = true;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyStepForthPvE_50476(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DragoonLevel >= 2;
+		setting.IsFriendly = true;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyLancePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => DragoonLevel >= 3;
+		setting.IsFriendly = false;
+		setting.StatusProvide = [StatusID.Lance];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+	#endregion
+
+	#region Summoner
+	static partial void ModifyHellfirePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => SummonerLevel >= 1;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Fire;
+		setting.StatusNeed = [StatusID.FireWeakness];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyJudgmentBoltPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlackMageLevel >= 2;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Lightning;
+		setting.StatusNeed = [StatusID.LightningWeakness];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyEarthenWallPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlackMageLevel >= 3;
+		setting.IsFriendly = true;
+		setting.StatusProvide = [StatusID.EarthenWall];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyThunderstormPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlackMageLevel >= 4;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Lightning;
+		setting.StatusNeed = [StatusID.LightningWeakness];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyMegaflarePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlackMageLevel >= 5;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+	#endregion
+
+	#region Blue Mage
+
+	//public static bool AeroIiUnlocked => Service.GetAdjustedActionId(ActionID.OccultAeroPvE) == ActionID.OccultAeroIiPvE;
+
+	//public static bool AeroIiiUnlocked => Service.GetAdjustedActionId(ActionID.OccultAeroPvE) == ActionID.OccultAeroIiiPvE;
+
+	/// <summary>
+	///
+	/// </summary>
+	public static bool WhiteWindUnlocked => false;
+
+	static partial void ModifyOccultAeroPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlueMageLevel >= 1;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Wind;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultMissilePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlueMageLevel >= 1;
+		setting.IsFriendly = false;
+		setting.CanTarget = tar => !tar.IsOccultCEMob() && !tar.IsOccultFateMob();
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultAquaBreathPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlueMageLevel >= 1;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultMightyGuardPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlueMageLevel >= 2;
+		setting.IsFriendly = true;
+		setting.StatusProvide = [StatusID.OccultMightyGuard];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultAeroIiPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlueMageLevel >= 2;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Wind;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultWhiteWindPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlueMageLevel >= 3;
+		setting.IsFriendly = true;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultAeroIiiPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => BlueMageLevel >= 3;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Wind;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+	#endregion
+
+	#region Red Mage
+	static partial void ModifyOccultFireIiPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => RedMageLevel >= 1;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Fire;
+		setting.TargetStatusNeed = [StatusID.FireWeakness];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultCureIiPvE_49093(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => RedMageLevel >= 2;
+		setting.IsFriendly = true;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultLibraPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => RedMageLevel >= 3;
+		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultBlizzardIiPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => RedMageLevel >= 4;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Ice;
+		setting.TargetStatusNeed = [StatusID.IceWeakness];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyOccultThunderIiPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => RedMageLevel >= 5;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Lightning;
+		setting.TargetStatusNeed = [StatusID.LightningWeakness];
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+	#endregion
+
+	#region Necromancer
+
+	/// <summary>
+	///
+	/// </summary>
+	public static bool HasDrainTouch => StatusHelper.PlayerHasStatus(true, StatusID.DrainTouch);
+
+
+	static partial void ModifyDrainTouchPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => NecromancerLevel >= 1;
+		setting.IsFriendly = false;
+		setting.StatusProvide = [StatusID.DrainTouch];
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyDeepFreezePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => NecromancerLevel >= 2;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Ice;
+		setting.TargetStatusNeed = [StatusID.IceWeakness];
+		setting.StatusFromSelf = false;
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyHellWindPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => NecromancerLevel >= 3;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Wind;
+		setting.TargetStatusNeed = [StatusID.WindWeakness];
+		setting.StatusFromSelf = false;
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyChaosDrivePvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => NecromancerLevel >= 4;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Lightning;
+		setting.TargetStatusNeed = [StatusID.LightningWeakness];
+		setting.StatusFromSelf = false;
+		setting.MPOverride = () => 0;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
+	}
+
+	static partial void ModifyDoomsdayPvE(ref ActionSetting setting)
+	{
+		setting.ActionCheck = () => NecromancerLevel >= 5;
+		setting.IsFriendly = false;
+		setting.AspectOverride = Aspect.Unaspected;
+		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,

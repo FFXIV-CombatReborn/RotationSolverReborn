@@ -111,7 +111,7 @@ public sealed class BRD_DefaultPvP : BardRotation
 	#endregion
 
 	#region GCDs
-	protected override bool EmergencyGCD(out IAction? action)
+	protected override bool EmergencyGCD(IAction? nextGCD, out IAction? action)
 	{
 		if (BRDEsuna2 && TheWardensPaeanPvP.CanUse(out action))
 		{
