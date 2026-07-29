@@ -148,24 +148,24 @@ public sealed class ChurinSMN : SummonerRotation
 		if (_m4SOrderMap.Count > 0)
 		{
 			var sortedKeys = new int[_m4SOrderMap.Count];
-			int ski = 0;
+			var ski = 0;
 			foreach (var k in _m4SOrderMap.Keys) sortedKeys[ski++] = k;
-			System.Array.Sort(sortedKeys);
+			Array.Sort(sortedKeys);
 			foreach (var key in sortedKeys)
 			{
-				var kv = new System.Collections.Generic.KeyValuePair<int, SummonOrderType>(key, _m4SOrderMap[key]);
+				var kv = new KeyValuePair<int, SummonOrderType>(key, _m4SOrderMap[key]);
 				if (kv.Key < InBigSummonCount) continue;
 				ImGui.SameLine();
 				ImGui.Text($"#{kv.Key}:");
 				ImGui.SameLine();
 				var primals = GetPrimalsFromOrder(kv.Value);
-				const float IconSize = 22f;
+				const float iconSize = 22f;
 				for (var i = 0; i < primals.Length; i++)
 				{
 					var act = primals[i];
 					if (act.GetTexture(out var tex) && tex.Handle != IntPtr.Zero)
 					{
-						ImGui.Image(tex.Handle, new Vector2(IconSize, IconSize));
+						ImGui.Image(tex.Handle, new Vector2(iconSize, iconSize));
 						if (ImGui.IsItemHovered()) ImGui.SetTooltip(act?.Name ?? kv.Value.ToString());
 					}
 					else
@@ -1041,9 +1041,9 @@ public sealed class ChurinSMN : SummonerRotation
 				return AddSwiftcastOnLowAOE && !RubyRitePvE.EnoughLevel;
 			}
 
-			if (nextGCD.IsTheSameTo(false, RubyRitePvE))
+			if (nextGCD.IsTheSameTo(false, RubyRitePvE) && !ElementalMasteryTrait.EnoughLevel)
 			{
-				return AddSwiftcastOnRuby && ElementalMasteryTrait.EnoughLevel && !RubyAttunement;
+				return AddSwiftcastOnRuby;
 			}
 
 			if (nextGCD.IsTheSameTo(false, SlipstreamPvE))

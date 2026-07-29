@@ -116,7 +116,7 @@ public sealed class ChurinBRD : BardRotation
 
 	private bool BurstEndGCD(uint gcdCount) => StatusHelper.PlayerHasStatus(true, BurstStatus)
 	                                           && StatusHelper.PlayerWillStatusEndGCD(gcdCount, DataCenter.CalculatedActionAhead, true, BurstStatus);
-	private static bool CanUseEnhancedFiller => HasBarrage || HasHawksEye;
+	private static bool CanUseEnhancedFiller => (HasBarrage || HasHawksEye) && !IsLastGCD(ActionID.RefulgentArrowPvE, ActionID.StraightShotPvE);
 	private static bool IsMedicated => StatusHelper.PlayerHasStatus(true, StatusID.Medicated) &&
 	                                   !StatusHelper.PlayerWillStatusEnd(0f, true, StatusID.Medicated);
 	private static bool InOddMinuteWindow => InMages && SongTime > 15f;
