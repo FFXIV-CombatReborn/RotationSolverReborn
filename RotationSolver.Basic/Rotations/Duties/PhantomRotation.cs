@@ -1401,6 +1401,8 @@ public partial class DutyRotation
 	{
 		setting.ActionCheck = () => RedMageLevel >= 3;
 		setting.IsFriendly = false;
+		setting.StatusFromSelf = false;
+		setting.TargetStatusProvide = [StatusID.FireWeakness, StatusID.IceWeakness, StatusID.WindWeakness];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
