@@ -377,7 +377,9 @@ internal static class ActionUpdater
 			|| Svc.Condition[ConditionFlag.BetweenAreas51]
 			|| Svc.Condition[ConditionFlag.Mounted]
 			|| Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
-			|| Svc.Condition[ConditionFlag.RolePlaying]
+			// RolePlaying is set for the entire duration of Quest Battles (e.g. Hardboiled), where the
+			// player's NPC form is actively fighting, so it shouldn't be treated as an occupied state there.
+			|| (Svc.Condition[ConditionFlag.RolePlaying] && !DataCenter.IsInQuestBattle)
 			|| Svc.Condition[ConditionFlag.InFlight]
 			|| Svc.Condition[ConditionFlag.Diving]
 			|| Svc.Condition[ConditionFlag.Swimming]

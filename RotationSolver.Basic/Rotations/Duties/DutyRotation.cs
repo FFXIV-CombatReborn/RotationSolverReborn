@@ -10,7 +10,7 @@ namespace RotationSolver.Basic.Rotations.Duties;
 public partial class DutyRotation : IDisposable
 {
 	#region GCD
-	public virtual bool EmergencyGCD(out IAction? act)
+	public virtual bool EmergencyGCD(IAction? nextGCD, out IAction? act)
 	{
 		act = null;
 		return false;
@@ -392,6 +392,14 @@ public partial class DutyRotation : IDisposable
 		MysticKnight,
 		Gladiator,
 		Dancer,
+		Ninja,
+		WhiteMage,
+		BlackMage,
+		Dragoon,
+		Summoner,
+		BlueMage,
+		RedMage,
+		Necromancer,
 		None
 	}
 
@@ -477,6 +485,46 @@ public partial class DutyRotation : IDisposable
 			return PhantomJob.MysticKnight;
 		}
 
+		if (NinjaLevel > 0)
+		{
+			return PhantomJob.Ninja;
+		}
+
+		if (BlackMageLevel > 0)
+		{
+			return PhantomJob.BlackMage;
+		}
+
+		if (WhiteMageLevel > 0)
+		{
+			return PhantomJob.WhiteMage;
+		}
+
+		if (DragoonLevel > 0)
+		{
+			return PhantomJob.Dragoon;
+		}
+
+		if (SummonerLevel > 0)
+		{
+			return PhantomJob.Summoner;
+		}
+
+		if (NecromancerLevel > 0)
+		{
+			return PhantomJob.Necromancer;
+		}
+
+		if (BlueMageLevel > 0)
+		{
+			return PhantomJob.BlueMage;
+		}
+
+		if (RedMageLevel > 0)
+		{
+			return PhantomJob.RedMage;
+		}
+
 		return PhantomJob.None;
 	}
 
@@ -530,6 +578,17 @@ public partial class DutyRotation : IDisposable
 	/// The CMD status, which is checked from the player.
 	/// </summary>
 	public static AutoStatus CommandStatus => DataCenter.CommandStatus;
+
+	/// <summary>
+	/// Returns the number of hostile targets within the specified range from the player.
+	/// </summary>
+	/// <param name="range">The range to check (in yalms).</param>
+	/// <returns>The number of hostile targets within the given range.</returns>
+	[Description("The number of hostiles in specified range")]
+	public static int NumberOfHostilesInRangeOf(float range)
+	{
+		return DataCenter.NumberOfHostilesInRangeOf(range);
+	}
 
 	/// <summary>
 	/// Is there any hostile target in range? 25 for ranged jobs and healer, 3 for melee and tank.
@@ -718,7 +777,88 @@ public partial class DutyRotation : IDisposable
 		}
 	}
 
+	public static byte NinjaLevel
+	{
+		get
+		{
+			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomNinja);
+			return stacks == byte.MaxValue ? (byte)0 : stacks;
+		}
+	}
+
+	public static byte BlackMageLevel
+	{
+		get
+		{
+			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomBlackMage);
+			return stacks == byte.MaxValue ? (byte)0 : stacks;
+		}
+	}
+
+	public static byte WhiteMageLevel
+	{
+		get
+		{
+			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomWhiteMage);
+			return stacks == byte.MaxValue ? (byte)0 : stacks;
+		}
+	}
+
+	public static byte DragoonLevel
+	{
+		get
+		{
+			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomDragoon);
+			return stacks == byte.MaxValue ? (byte)0 : stacks;
+		}
+	}
+
+	public static byte SummonerLevel
+	{
+		get
+		{
+			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomSummoner);
+			return stacks == byte.MaxValue ? (byte)0 : stacks;
+		}
+	}
+
+	public static byte NecromancerLevel
+	{
+		get
+		{
+			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomNecromancer);
+			return stacks == byte.MaxValue ? (byte)0 : stacks;
+		}
+	}
+
+	public static byte BlueMageLevel
+	{
+		get
+		{
+			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomBlueMage);
+			return stacks == byte.MaxValue ? (byte)0 : stacks;
+		}
+	}
+
+	public static byte RedMageLevel
+	{
+		get
+		{
+			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomRedMage);
+			return stacks == byte.MaxValue ? (byte)0 : stacks;
+		}
+	}
+
 	#endregion
+
+	/// <summary>
+	/// The specific duty action IDs that belong to this duty rotation. Overridden by duty rotation
+	/// base classes (e.g. <see cref="HardboiledRotation"/>) whose actions replace the player's normal
+	/// hotbars instead of occupying the dedicated duty action slots (Quest Battles), since those
+	/// duties can't be identified by matching against <see cref="DataCenter.DutyActions"/>.
+	/// </summary>
+	protected virtual uint[] QuestBattleActionIds => [];
+
 	/// <summary>
 	/// Gets all actions available in the duty rotation.
 	/// </summary>
@@ -728,6 +868,7 @@ public partial class DutyRotation : IDisposable
 		{
 			var runtimeProperties = GetType().GetRuntimeProperties();
 			var propertiesList = new List<PropertyInfo>();
+			var questBattleActionIds = DataCenter.IsInQuestBattle ? QuestBattleActionIds : [];
 
 			foreach (var p in runtimeProperties)
 			{
@@ -741,6 +882,18 @@ public partial class DutyRotation : IDisposable
 					{
 						hasdutyAction = true;
 						break;
+					}
+				}
+
+				if (!hasdutyAction)
+				{
+					foreach (var dutyaction in questBattleActionIds)
+					{
+						if (dutyaction == id)
+						{
+							hasdutyAction = true;
+							break;
+						}
 					}
 				}
 

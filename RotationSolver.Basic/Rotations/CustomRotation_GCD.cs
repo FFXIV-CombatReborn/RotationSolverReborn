@@ -69,11 +69,11 @@ public partial class CustomRotation
 		try
 		{
 			IBaseAction.ShouldEndSpecial = false;
-			if (DataCenter.CurrentDutyRotation?.EmergencyGCD(out act) == true)
+			if (DataCenter.CurrentDutyRotation?.EmergencyGCD(act, out act) == true)
 			{
 				return act;
 			}
-			if (EmergencyGCD(out act))
+			if (EmergencyGCD(act, out act))
 			{
 				return act;
 			}
@@ -660,9 +660,10 @@ public partial class CustomRotation
 	/// <summary>
 	/// Attempts to use the Emergency GCD action.
 	/// </summary>
+	/// <param name="nextGCD">The next GCD action.</param>
 	/// <param name="act">The action to be performed.</param>
 	/// <returns>True if the action can be used; otherwise, false.</returns>
-	protected virtual bool EmergencyGCD(out IAction? act)
+	protected virtual bool EmergencyGCD(IAction? nextGCD, out IAction? act)
 	{
 		act = null;
 		if (DataCenter.IsPvP)

@@ -84,6 +84,17 @@ public class ActionSetting
 	public uint RequiredBluSlotActionId { get; set; } = 0;
 
 	/// <summary>
+	/// Marks this action as belonging to a Quest Battle's replacement action set (e.g. Hardboiled),
+	/// where the player's normal character/hotbars are replaced by an NPC with its own actions.
+	/// This is intentionally separate from <see cref="ActionBasicInfo.IsDutyAction"/> (the standard
+	/// duty-action-bar system used by content like Bozja/Eureka/Occult Crescent) so that Quest Battle
+	/// handling never interferes with normal duty action slot detection.
+	/// When set, <see cref="ActionBasicInfo.IsOnSlot"/> is <c>true</c> whenever <see cref="DataCenter.IsInQuestBattle"/>
+	/// is <c>true</c>, regardless of the standard duty action hotbar slots.
+	/// </summary>
+	public bool IsQuestBattleAction { get; set; } = false;
+
+	/// <summary>
 	/// The override of the <see cref="ActionBasicInfo.MPNeed"/>.
 	/// </summary>
 	public Func<uint?>? MPOverride { get; set; } = null;

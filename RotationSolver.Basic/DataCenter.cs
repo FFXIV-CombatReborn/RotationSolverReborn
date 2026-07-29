@@ -493,6 +493,14 @@ internal static class DataCenter
 
 	public static bool IsInDuty => Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56];
 
+	/// <summary>
+	/// True when playing a Quest Battle, where the player's normal character/actions are replaced
+	/// by an NPC with its own action set (e.g. Hardboiled). These duties set <see cref="ConditionFlag.RolePlaying"/>
+	/// instead of <see cref="ConditionFlag.BoundByDuty"/>, and their duty actions replace the normal
+	/// hotbars rather than occupying the dedicated duty action slots.
+	/// </summary>
+	public static bool IsInQuestBattle => Territory?.ContentType == TerritoryContentType.QuestBattles;
+
 	public static bool IsInAllianceRaid
 	{
 		get
@@ -1785,6 +1793,65 @@ internal static class DataCenter
 						PluginLog.Debug($"Agrias cast detected on obj {hostile.GameObjectId} - remaining: {remaining:F3}s, GCD remain: {DefaultGCDRemain:F3}s");
 					}
 					return true;
+				}
+			}
+			catch (AccessViolationException ex)
+			{
+				PluginLog.Warning($"AccessViolation in IsHostileCastingSpecialIndicator for obj {hostile?.GameObjectId}: {ex.Message}");
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsLichCastingSpecialIndicator()
+	{
+		if (!IsInQuestBattle)
+		{
+			return false;
+		}
+
+		var hostileEnum = AllHostileTargets;
+		if (hostileEnum == null)
+		{
+			return false;
+		}
+
+		for (int i = 0, n = hostileEnum.Count; i < n; i++)
+		{
+			var hostile = hostileEnum[i];
+			if (hostile == null)
+			{
+				continue;
+			}
+
+			try
+			{
+				// Ensure the hostile is actually casting
+				if (!hostile.IsCasting)
+				{
+					continue;
+				}
+
+				// Alexandrian Quake - 46419
+				var castId = hostile.CastActionId;
+
+				// Remaining cast time is exposed as CurrentCastTime (units consistent with other checks)
+				var remaining = hostile.TotalCastTime - hostile.CurrentCastTime;
+
+				if (castId == 46419 || castId == 46427)
+				{
+					if (remaining <= 3f)
+					{
+						if (Service.Config.InDebug)
+						{
+							PluginLog.Debug($"Lich Cast Detected");
+						}
+						return true;
+					}
 				}
 			}
 			catch (AccessViolationException ex)

@@ -118,6 +118,7 @@ public static class StatusHelper
 		StatusID.Swiftcast,
 		StatusID.Triplecast,
 		StatusID.Dualcast,
+		StatusID.Dualcast_5438,
 		StatusID.OccultQuick,
 		StatusID.LostChainspell
 	];

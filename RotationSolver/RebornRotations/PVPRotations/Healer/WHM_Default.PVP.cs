@@ -74,7 +74,7 @@ public class WHM_DefaultPVP : WhiteMageRotation
 	#endregion
 
 	#region GCDs
-	protected override bool EmergencyGCD(out IAction? action)
+	protected override bool EmergencyGCD(IAction? nextGCD, out IAction? action)
 	{
 		if (AquaveilEsuna && AquaveilPvP.CanUse(out action))
 		{

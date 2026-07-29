@@ -962,9 +962,12 @@ public static class ObjectHelper
 			return true;
 		}
 
-		if (battleChara.IsOccultCEMob())
+		if (DataCenter.IsInOccultCrescentOp)
 		{
-			return true;
+			if (battleChara.IsOccultCEMob())
+			{
+				return true;
+			}
 		}
 
 		// MCH prio targeting for Wildfire
@@ -2100,7 +2103,8 @@ public static class ObjectHelper
 	/// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
 	public static bool IsSpecialImmune(this IBattleChara battleChara)
 	{
-		return battleChara.IsDMUBossImmune()
+		return battleChara.TreatTinyMageImmune()
+			|| battleChara.IsDMUBossImmune()
 			|| battleChara.IsEnuoGauntletImmune()
 			|| battleChara.IsWindurstAlexanderImmune()
 			|| battleChara.IsOrbonneImmune()
@@ -2126,7 +2130,57 @@ public static class ObjectHelper
 	}
 
 	/// <summary>
-	/// Is target Jeuno Boss immune.
+	/// 
+	/// </summary>
+	/// <param name="battleChara">the object.</param>
+	/// <returns></returns>
+	public static bool TreatTinyMageImmune(this IBattleChara battleChara)
+	{
+		if (Service.Config.NorthHornTinyMage && DataCenter.IsInOccultCrescentOp)
+		{
+			const uint MeteorCastID = 48327;
+
+			if (battleChara.CastActionId == MeteorCastID)
+			{
+				var hostileTargets = DataCenter.AllHostileTargets;
+				if (hostileTargets != null)
+				{
+					IBattleChara? lowestRemainingCastTimeTarget = null;
+					var lowestRemainingCastTime = float.MaxValue;
+
+					foreach (var hostile in hostileTargets)
+					{
+						if (hostile == null || hostile.CastActionId != MeteorCastID)
+						{
+							continue;
+						}
+
+						if (hostile.RemainingCastTime < lowestRemainingCastTime)
+						{
+							lowestRemainingCastTime = hostile.RemainingCastTime;
+							lowestRemainingCastTimeTarget = hostile;
+						}
+					}
+
+					if (lowestRemainingCastTimeTarget != null
+						&& !battleChara.Equals(lowestRemainingCastTimeTarget)
+						&& battleChara.DistanceToPlayer() > 5)
+					{
+						if (Service.Config.InDebug)
+						{
+							PluginLog.Information("TreatTinyMageImmune: Not the lowest remaining cast time Meteor caster and more than 5 yalms away, treating as immune.");
+						}
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	///
 	/// </summary>
 	/// <param name="battleChara">the object.</param>
 	/// <returns></returns>
