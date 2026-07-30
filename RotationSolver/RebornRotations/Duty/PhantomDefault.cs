@@ -861,7 +861,7 @@ public sealed class PhantomDefault : PhantomRotation
 		{
 			if ((DrainTouchStatusStrategyUsage == DrainTouchStatusStrategy.EitherDrainTouch) || (DrainTouchStatusStrategyUsage == DrainTouchStatusStrategy.DrainTouchOnly && HasDrainTouch) || (DrainTouchStatusStrategyUsage == DrainTouchStatusStrategy.NoDrainTouch && !HasDrainTouch))
 			{
-				if (DeepFreezePvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+				if (ChaosDrivePvE.CanUse(out act, skipTargetStatusNeedCheck: false))
 				{
 					return true;
 				}
@@ -871,7 +871,7 @@ public sealed class PhantomDefault : PhantomRotation
 					return true;
 				}
 
-				if (ChaosDrivePvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+				if (DeepFreezePvE.CanUse(out act, skipTargetStatusNeedCheck: false))
 				{
 					return true;
 				}
@@ -899,22 +899,30 @@ public sealed class PhantomDefault : PhantomRotation
 						}
 					}
 				}
+
+				if (DeepFreezePvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+				{
+					if (StatusHelper.HasStatus(DeepFreezePvE.Target.Target, false, StatusID.FireWeakness))
+					{
+						return true;
+					}
+				}
 			}
 		}
 
 		if (RedMageLevel > 0)
 		{
-			if (OccultFireIiPvE.CanUse(out act))
-			{
-				return true;
-			}
-
 			if (OccultBlizzardIiPvE.CanUse(out act))
 			{
 				return true;
 			}
 
 			if (OccultThunderIiPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (OccultFireIiPvE.CanUse(out act))
 			{
 				return true;
 			}
@@ -946,6 +954,14 @@ public sealed class PhantomDefault : PhantomRotation
 					{
 						return true;
 					}
+				}
+			}
+
+			if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				if (StatusHelper.HasStatus(OccultFireIiPvE.Target.Target, false, StatusID.WindWeakness))
+				{
+					return true;
 				}
 			}
 		}
@@ -985,22 +1001,22 @@ public sealed class PhantomDefault : PhantomRotation
 				return true;
 			}
 
-			if (HellfirePvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+			if (ThunderstormPvE.CanUse(out act))
 			{
 				return true;
 			}
 
-			if (JudgmentBoltPvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+			if (JudgmentBoltPvE.CanUse(out act))
 			{
 				return true;
 			}
 
-			if (ThunderstormPvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+			if (HellfirePvE.CanUse(out act))
 			{
 				return true;
 			}
 
-			if (HellfirePvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			if (ThunderstormPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
 			{
 				return true;
 			}
@@ -1010,7 +1026,7 @@ public sealed class PhantomDefault : PhantomRotation
 				return true;
 			}
 
-			if (ThunderstormPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			if (HellfirePvE.CanUse(out act, skipTargetStatusNeedCheck: true))
 			{
 				return true;
 			}
