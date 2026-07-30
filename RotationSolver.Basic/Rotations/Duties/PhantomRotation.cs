@@ -1235,6 +1235,7 @@ public partial class DutyRotation
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Fire;
 		setting.StatusNeed = [StatusID.FireWeakness];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1247,6 +1248,7 @@ public partial class DutyRotation
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Lightning;
 		setting.StatusNeed = [StatusID.LightningWeakness];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1270,6 +1272,7 @@ public partial class DutyRotation
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Lightning;
 		setting.StatusNeed = [StatusID.LightningWeakness];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1380,7 +1383,8 @@ public partial class DutyRotation
 		setting.ActionCheck = () => RedMageLevel >= 1;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Fire;
-		setting.TargetStatusNeed = [StatusID.FireWeakness, StatusID.WindWeakness];
+		setting.StatusFromSelf = false;
+		setting.TargetStatusNeed = [StatusID.FireWeakness];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1415,7 +1419,8 @@ public partial class DutyRotation
 		setting.ActionCheck = () => RedMageLevel >= 4;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Ice;
-		setting.TargetStatusNeed = [StatusID.IceWeakness, StatusID.WindWeakness];
+		setting.StatusFromSelf = false;
+		setting.TargetStatusNeed = [StatusID.IceWeakness];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1427,7 +1432,8 @@ public partial class DutyRotation
 		setting.ActionCheck = () => RedMageLevel >= 5;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Lightning;
-		setting.TargetStatusNeed = [StatusID.LightningWeakness, StatusID.WindWeakness];
+		setting.StatusFromSelf = false;
+		setting.TargetStatusNeed = [StatusID.LightningWeakness];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1460,7 +1466,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => NecromancerLevel >= 2;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Ice;
-		setting.TargetStatusNeed = [StatusID.IceWeakness, StatusID.FireWeakness];
+		setting.TargetStatusNeed = [StatusID.IceWeakness];
 		setting.StatusFromSelf = false;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
@@ -1474,7 +1480,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => NecromancerLevel >= 3;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Wind;
-		setting.TargetStatusNeed = [StatusID.WindWeakness, StatusID.FireWeakness];
+		setting.TargetStatusNeed = [StatusID.WindWeakness];
 		setting.StatusFromSelf = false;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
@@ -1488,7 +1494,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => NecromancerLevel >= 4;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Lightning;
-		setting.TargetStatusNeed = [StatusID.LightningWeakness, StatusID.FireWeakness];
+		setting.TargetStatusNeed = [StatusID.LightningWeakness];
 		setting.StatusFromSelf = false;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
