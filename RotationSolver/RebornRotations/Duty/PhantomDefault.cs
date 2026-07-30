@@ -881,43 +881,72 @@ public sealed class PhantomDefault : PhantomRotation
 					return true;
 				}
 
-				if (DeepFreezePvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+				if (NecromancerLevel < 3)
 				{
-					return true;
+					if (DeepFreezePvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+					{
+						return true;
+					}
 				}
 
-				if (HellWindPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+				if (NecromancerLevel < 4)
 				{
-					return true;
-				}
-
-				if (ChaosDrivePvE.CanUse(out act, skipTargetStatusNeedCheck: true))
-				{
-					return true;
+					if (DeepFreezePvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+					{
+						if (StatusHelper.HasStatus(DeepFreezePvE.Target.Target, false, StatusID.LightningWeakness))
+						{
+							return true;
+						}
+					}
 				}
 			}
 		}
 
 		if (RedMageLevel > 0)
 		{
-			if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+			if (OccultFireIiPvE.CanUse(out act))
 			{
 				return true;
 			}
 
-			if (OccultBlizzardIiPvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+			if (OccultBlizzardIiPvE.CanUse(out act))
 			{
 				return true;
 			}
 
-			if (OccultThunderIiPvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+			if (OccultThunderIiPvE.CanUse(out act))
 			{
 				return true;
 			}
 
-			if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: RedMageLevel < 3))
+			if (RedMageLevel < 3)
 			{
-				return true;
+				if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+				{
+					return true;
+				}
+			}
+
+			if (RedMageLevel < 4)
+			{
+				if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+				{
+					if (StatusHelper.HasStatus(OccultFireIiPvE.Target.Target, false, StatusID.IceWeakness))
+					{
+						return true;
+					}
+				}
+			}
+
+			if (RedMageLevel < 5)
+			{
+				if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+				{
+					if (StatusHelper.HasStatus(OccultFireIiPvE.Target.Target, false, StatusID.LightningWeakness))
+					{
+						return true;
+					}
+				}
 			}
 		}
 

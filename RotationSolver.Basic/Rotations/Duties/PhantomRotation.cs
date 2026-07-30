@@ -1460,7 +1460,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => NecromancerLevel >= 2;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Ice;
-		setting.TargetStatusNeed = [StatusID.IceWeakness];
+		setting.TargetStatusNeed = [StatusID.IceWeakness, StatusID.FireWeakness];
 		setting.StatusFromSelf = false;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
@@ -1474,7 +1474,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => NecromancerLevel >= 3;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Wind;
-		setting.TargetStatusNeed = [StatusID.WindWeakness];
+		setting.TargetStatusNeed = [StatusID.WindWeakness, StatusID.FireWeakness];
 		setting.StatusFromSelf = false;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
@@ -1488,7 +1488,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => NecromancerLevel >= 4;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Lightning;
-		setting.TargetStatusNeed = [StatusID.LightningWeakness];
+		setting.TargetStatusNeed = [StatusID.LightningWeakness, StatusID.FireWeakness];
 		setting.StatusFromSelf = false;
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
