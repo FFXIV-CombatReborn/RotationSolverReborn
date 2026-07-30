@@ -919,7 +919,7 @@ public sealed class PhantomDefault : PhantomRotation
 				return true;
 			}
 
-			if (RedMageLevel < 3)
+			if (RedMageLevel <= 3)
 			{
 				if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
 				{
