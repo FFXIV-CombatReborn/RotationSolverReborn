@@ -387,7 +387,7 @@ public sealed class VPR_Reborn : ViperRotation
 			{
 				if (WillSwiftEnd)
 				{
-					if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+					if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, checkActionManager: true))
 					{
 						return true;
 					}
@@ -395,7 +395,7 @@ public sealed class VPR_Reborn : ViperRotation
 
 				if (WillHunterEnd)
 				{
-					if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+					if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, checkActionManager: true))
 					{
 						return true;
 					}
@@ -404,14 +404,14 @@ public sealed class VPR_Reborn : ViperRotation
 				switch (HunterOrSwiftEndsFirst)
 				{
 					case "Hunter":
-						if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+						if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, checkActionManager: true))
 						{
 							return true;
 						}
 
 						break;
 					case "Swift":
-						if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+						if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, checkActionManager: true))
 						{
 							return true;
 						}
@@ -420,12 +420,12 @@ public sealed class VPR_Reborn : ViperRotation
 					case "Equal":
 					case null:
 					default:
-						if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+						if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, checkActionManager: true))
 						{
 							return true;
 						}
 
-						if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+						if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, checkActionManager: true))
 						{
 							return true;
 						}
@@ -437,7 +437,7 @@ public sealed class VPR_Reborn : ViperRotation
 			{
 				if (!IsSwift)
 				{
-					if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+					if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, checkActionManager: true))
 					{
 						return true;
 					}
@@ -445,7 +445,7 @@ public sealed class VPR_Reborn : ViperRotation
 
 				if (!IsHunter)
 				{
-					if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+					if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, checkActionManager: true))
 					{
 						return true;
 					}
@@ -455,12 +455,12 @@ public sealed class VPR_Reborn : ViperRotation
 
 		if (!PitActive)
 		{
-			if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+			if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, checkActionManager: true))
 			{
 				return true;
 			}
 
-			if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+			if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, checkActionManager: true))
 			{
 				return true;
 			}
@@ -625,7 +625,7 @@ public sealed class VPR_Reborn : ViperRotation
 			{
 				if (WillSwiftEnd)
 				{
-					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 					{
 						return true;
 					}
@@ -633,18 +633,18 @@ public sealed class VPR_Reborn : ViperRotation
 
 				if (WillHunterEnd)
 				{
-					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 					{
 						return true;
 					}
 				}
 
-				if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
+				if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
 				{
 					return true;
 				}
 
-				if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
+				if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
 				{
 					return true;
 				}
@@ -652,14 +652,14 @@ public sealed class VPR_Reborn : ViperRotation
 				switch (HunterOrSwiftEndsFirst)
 				{
 					case "Hunter":
-						if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+						if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 						{
 							return true;
 						}
 
 						break;
 					case "Swift":
-						if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+						if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 						{
 							return true;
 						}
@@ -668,12 +668,12 @@ public sealed class VPR_Reborn : ViperRotation
 					case "Equal":
 					case null:
 					default:
-						if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+						if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 						{
 							return true;
 						}
 
-						if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+						if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 						{
 							return true;
 						}
@@ -686,22 +686,22 @@ public sealed class VPR_Reborn : ViperRotation
 			{
 				if (!IsHunter && !IsSwift)
 				{
-					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
+					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
 					{
 						return true;
 					}
 
-					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
+					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
 					{
 						return true;
 					}
 
-					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 					{
 						return true;
 					}
 
-					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 					{
 						return true;
 					}
@@ -709,7 +709,7 @@ public sealed class VPR_Reborn : ViperRotation
 
 				if (!IsSwift)
 				{
-					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 					{
 						return true;
 					}
@@ -717,7 +717,7 @@ public sealed class VPR_Reborn : ViperRotation
 
 				if (!IsHunter)
 				{
-					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 					{
 						return true;
 					}
@@ -727,12 +727,12 @@ public sealed class VPR_Reborn : ViperRotation
 
 		if (!DreadActive)
 		{
-			if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+			if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 			{
 				return true;
 			}
 
-			if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+			if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, checkActionManager: true))
 			{
 				return true;
 			}

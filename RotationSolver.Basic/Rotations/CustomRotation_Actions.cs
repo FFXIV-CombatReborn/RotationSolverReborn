@@ -47,7 +47,7 @@ public partial class CustomRotation
 
 	static partial void ModifySecondWindPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => Player?.GetHealthRatio() < Service.Config.HealthSingleAbility && InCombat;
+		setting.ActionCheck = () => ((Player?.GetHealthRatio() < Service.Config.HealthSingleAbility) || StatusHelper.PlayerHasStatus(false, StatusHelper.DoomHealStatus)) && InCombat;
 	}
 
 	static partial void ModifyRampartPvE(ref ActionSetting setting)

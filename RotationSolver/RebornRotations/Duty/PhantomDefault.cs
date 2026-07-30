@@ -915,17 +915,7 @@ public sealed class PhantomDefault : PhantomRotation
 				return true;
 			}
 
-			if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
-			{
-				return true;
-			}
-
-			if (OccultBlizzardIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
-			{
-				return true;
-			}
-
-			if (OccultThunderIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: RedMageLevel < 3))
 			{
 				return true;
 			}

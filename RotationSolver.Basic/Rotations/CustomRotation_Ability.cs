@@ -557,7 +557,7 @@ public partial class CustomRotation
 
 			case JobRole.Healer:
 			case JobRole.RangedMagical:
-				if (Job == ECommons.ExcelServices.Job.BLM)
+				if (Job == Job.BLM)
 				{
 					break;
 				}
@@ -671,7 +671,23 @@ public partial class CustomRotation
 			}
 		}
 
-		act = null;
+		if (Role is JobRole.Melee && StatusHelper.PlayerHasStatus(false, StatusHelper.DoomHealStatus))
+		{
+			if (SecondWindPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		if (Role is JobRole.RangedPhysical && StatusHelper.PlayerHasStatus(false, StatusHelper.DoomHealStatus))
+		{
+			if (SecondWindPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+			act = null;
 		return false;
 	}
 
