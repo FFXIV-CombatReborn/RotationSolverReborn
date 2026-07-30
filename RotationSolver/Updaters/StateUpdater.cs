@@ -705,7 +705,7 @@ internal static class StateUpdater
 		var ratio = target.DoomNeedHealing() ? 0f : GetHealingOfTimeRatio(target, hotStatus);
 
 		// Determine the target's health ratio. If they have a "Doom" status, treat their health as critically low (0.2).
-		var h = target.DoomNeedHealing() ? 0.2f : target.GetHealthRatio();
+		var h = target.DoomNeedHealing() ? 0.1f : target.GetHealthRatio();
 
 		// If the target's health is zero or they are invulnerable to healing, return false.
 		if (h == 0 || !target.NoNeedHealingInvuln())
