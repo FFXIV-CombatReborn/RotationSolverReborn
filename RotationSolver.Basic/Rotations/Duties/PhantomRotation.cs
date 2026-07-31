@@ -1234,7 +1234,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => SummonerLevel >= 1;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Fire;
-		setting.StatusNeed = [StatusID.FireWeakness];
+		setting.TargetStatusNeed = [StatusID.FireWeakness];
 		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -1247,7 +1247,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => BlackMageLevel >= 2;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Lightning;
-		setting.StatusNeed = [StatusID.LightningWeakness];
+		setting.TargetStatusNeed = [StatusID.LightningWeakness];
 		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -1271,7 +1271,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => BlackMageLevel >= 4;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Lightning;
-		setting.StatusNeed = [StatusID.LightningWeakness];
+		setting.TargetStatusNeed = [StatusID.LightningWeakness];
 		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
