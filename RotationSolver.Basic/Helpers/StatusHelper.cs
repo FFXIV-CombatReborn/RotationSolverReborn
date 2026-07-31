@@ -319,7 +319,17 @@ public static class StatusHelper
 	/// <returns></returns>
 	public static bool DoomNeedHealing(this IBattleChara Doomp)
 	{
-		return Doomp.HasStatus(false, DoomHealStatus);
+		if (Doomp.StatusList == null)
+		{
+			return false;
+		}
+
+		if (HasStatus(Doomp, false, DoomHealStatus))
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	/// <summary>
@@ -618,6 +628,11 @@ public static class StatusHelper
 		}
 
 		if (Player.Object.StatusList == null)
+		{
+			return false;
+		}
+
+		if (battleChara == null || !battleChara.IsValid())
 		{
 			return false;
 		}
