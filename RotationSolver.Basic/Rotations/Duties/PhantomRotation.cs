@@ -1249,7 +1249,7 @@ public partial class DutyRotation
 
 	static partial void ModifyJudgmentBoltPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => BlackMageLevel >= 2;
+		setting.ActionCheck = () => SummonerLevel >= 2;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Lightning;
 		setting.TargetStatusNeed = [StatusID.LightningWeakness];
@@ -1262,7 +1262,7 @@ public partial class DutyRotation
 
 	static partial void ModifyEarthenWallPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => BlackMageLevel >= 3;
+		setting.ActionCheck = () => SummonerLevel >= 3;
 		setting.IsFriendly = true;
 		setting.StatusProvide = [StatusID.EarthenWall];
 		setting.CreateConfig = () => new ActionConfig()
@@ -1273,7 +1273,7 @@ public partial class DutyRotation
 
 	static partial void ModifyThunderstormPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => BlackMageLevel >= 4;
+		setting.ActionCheck = () => SummonerLevel >= 4;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Lightning;
 		setting.TargetStatusNeed = [StatusID.LightningWeakness];
@@ -1286,7 +1286,7 @@ public partial class DutyRotation
 
 	static partial void ModifyMegaflarePvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => BlackMageLevel >= 5;
+		setting.ActionCheck = () => SummonerLevel >= 5;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
