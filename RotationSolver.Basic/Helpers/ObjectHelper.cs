@@ -2104,6 +2104,7 @@ public static class ObjectHelper
 	public static bool IsSpecialImmune(this IBattleChara battleChara)
 	{
 		return battleChara.TreatTinyMageImmune()
+			|| battleChara.MathCEMobImmune()
 			|| battleChara.IsDMUBossImmune()
 			|| battleChara.IsEnuoGauntletImmune()
 			|| battleChara.IsWindurstAlexanderImmune()
@@ -2127,6 +2128,29 @@ public static class ObjectHelper
 			|| battleChara.IsOmegaImmune()
 			|| battleChara.IsLimitlessBlue()
 			|| battleChara.IsHanselorGretelShielded();
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="battleChara">the object.</param>
+	/// <returns></returns>
+	public static bool MathCEMobImmune(this IBattleChara battleChara)
+	{
+		if (DataCenter.IsInOccultCrescentOp)
+		{
+			var Page64 = battleChara.NameId == 3915;
+			var Page16 = battleChara.NameId == 14521;
+			var Page8 = battleChara.NameId == 14522;
+			var Page512 = battleChara.NameId == 14528;
+
+			if (Page64 || Page16 || Page8 || Page512)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/// <summary>
@@ -3712,6 +3736,11 @@ public static class ObjectHelper
 		if (battleChara == null)
 		{
 			return 0; // This may need to be changed to 100
+		}
+
+		if (battleChara.DoomNeedHealing())
+		{
+			return 0.01f;
 		}
 
 		if (DataCenter.RefinedHP.TryGetValue(battleChara.GameObjectId, out var hp))

@@ -704,8 +704,8 @@ internal static class StateUpdater
 		// Calculate the ratio of remaining healing-over-time effects on the target. If they have a "Doom" status, treat dot healing as non-existent.
 		var ratio = target.DoomNeedHealing() ? 0f : GetHealingOfTimeRatio(target, hotStatus);
 
-		// Determine the target's health ratio. If they have a "Doom" status, treat their health as critically low (0.2).
-		var h = target.DoomNeedHealing() ? 0.1f : target.GetHealthRatio();
+		// Determine the target's health ratio. GetHealthRatio already treats "Doom" status targets as critically low (1%).
+		var h = target.GetHealthRatio();
 
 		// If the target's health is zero or they are invulnerable to healing, return false.
 		if (h == 0 || !target.NoNeedHealingInvuln())

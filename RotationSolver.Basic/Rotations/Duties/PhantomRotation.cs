@@ -1103,6 +1103,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => BlackMageLevel >= 1;
 		setting.IsFriendly = false;
 		setting.TargetStatusNeed = [StatusID.FireWeakness];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1114,6 +1115,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => BlackMageLevel >= 2;
 		setting.IsFriendly = false;
 		setting.TargetStatusNeed = [StatusID.IceWeakness];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1125,6 +1127,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => BlackMageLevel >= 3;
 		setting.IsFriendly = false;
 		setting.TargetStatusNeed = [StatusID.LightningWeakness];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
