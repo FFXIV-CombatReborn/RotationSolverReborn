@@ -1032,34 +1032,9 @@ public sealed class PhantomDefault : PhantomRotation
 			}
 		}
 
-		if (OccultJumpPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (OccultFlarePvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (OccultHolyPvE.CanUse(out act))
-		{
-			return true;
-		}
-
 		if (BlackMageLevel > 0)
 		{
-			if (OccultFireIiiPvE.CanUse(out act, skipTargetStatusNeedCheck: false))
-			{
-				return true;
-			}
-
-			if (OccultBlizzardIiiPvE.CanUse(out act, skipTargetStatusNeedCheck: false))
-			{
-				return true;
-			}
-
-			if (OccultThunderIiiPvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+			if (OccultFlarePvE.CanUse(out act))
 			{
 				return true;
 			}
@@ -1078,6 +1053,31 @@ public sealed class PhantomDefault : PhantomRotation
 			{
 				return true;
 			}
+
+			if (OccultThunderIiiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+
+			if (OccultBlizzardIiiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+
+			if (OccultFireIiiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+		}
+
+		if (OccultJumpPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (OccultHolyPvE.CanUse(out act))
+		{
+			return true;
 		}
 
 		if (DeadlyBlowPvE.CanUse(out act, skipComboCheck: true)) // Ideally we want to use this in burst windows, but 30 second cooldown means we can use it outside of burst windows too
