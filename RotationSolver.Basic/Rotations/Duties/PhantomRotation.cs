@@ -1035,6 +1035,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => NinjaLevel >= 3;
 		setting.IsFriendly = false;
 		setting.TargetStatusNeed = [StatusID.LightningWeakness];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -1046,6 +1047,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => NinjaLevel >= 4;
 		setting.IsFriendly = false;
 		setting.TargetStatusNeed = [StatusID.FireWeakness];
+		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,

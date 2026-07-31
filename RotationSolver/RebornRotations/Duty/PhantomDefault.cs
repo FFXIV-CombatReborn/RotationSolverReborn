@@ -391,22 +391,12 @@ public sealed class PhantomDefault : PhantomRotation
 				return true;
 			}
 
-			if (LightningScrollPvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+			if (LightningScrollPvE.CanUse(out act))
 			{
 				return true;
 			}
 
-			if (LightningScrollPvE.CanUse(out act, skipTargetStatusNeedCheck: false))
-			{
-				return true;
-			}
-
-			if (FumaShurikenPvE.CanUse(out act))
-			{
-				return true;
-			}
-
-			if (LightningScrollPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			if (FlameScrollPvE.CanUse(out act))
 			{
 				return true;
 			}
@@ -416,6 +406,10 @@ public sealed class PhantomDefault : PhantomRotation
 				return true;
 			}
 
+			if (LightningScrollPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
 		}
 
 		if (PhantomKickPvE.CanUse(out act))
