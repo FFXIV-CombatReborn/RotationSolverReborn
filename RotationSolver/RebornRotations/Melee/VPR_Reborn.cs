@@ -296,7 +296,7 @@ public sealed class VPR_Reborn : ViperRotation
 		if (AbilityPrio2 &&
 			!NoAbilityReady)
 		{
-			if ((UFGhosting || (!UFGhosting && NoAbilityReady)) && !HasHostilesInRange && UncoiledFuryPvE.CanUse(out act, usedUp: true))
+			if ((UFGhosting || (!UFGhosting && NoAbilityReady)) && !HasHostilesInRange && HasHunterAndSwift && UncoiledFuryPvE.CanUse(out act, usedUp: true))
 			{
 				return true;
 			}
@@ -353,7 +353,7 @@ public sealed class VPR_Reborn : ViperRotation
 			var isTargetDying = CurrentTarget?.IsDying() ?? false;
 			if ((MaxRattling == RattlingCoilStacks || RattlingCoilStacks >= MaxUncoiledStacksUser || (isTargetBoss && isTargetDying && RattlingCoilStacks > 0)) && !HasReadyToReawaken && NoAbilityReady)
 			{
-				if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+				if (HasHunterAndSwift && UncoiledFuryPvE.CanUse(out act, usedUp: true))
 				{
 					return true;
 				}
@@ -361,7 +361,7 @@ public sealed class VPR_Reborn : ViperRotation
 
 			if (MedicineUncoiledFury && StatusHelper.PlayerHasStatus(true, StatusID.Medicated) && !HasReadyToReawaken && NoAbilityReady)
 			{
-				if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+				if (HasHunterAndSwift && UncoiledFuryPvE.CanUse(out act, usedUp: true))
 				{
 					return true;
 				}
@@ -373,7 +373,7 @@ public sealed class VPR_Reborn : ViperRotation
 				&& !HasReadyToReawaken
 				&& NoAbilityReady)
 			{
-				if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+				if (HasHunterAndSwift && UncoiledFuryPvE.CanUse(out act, usedUp: true))
 				{
 					return true;
 				}
@@ -956,7 +956,7 @@ public sealed class VPR_Reborn : ViperRotation
 		}
 
 		//Ranged
-		if ((UFGhosting || (!UFGhosting && NoAbilityReady)) && UncoiledFuryPvE.CanUse(out act, usedUp: true))
+		if ((UFGhosting || (!UFGhosting && NoAbilityReady)) && HasHunterAndSwift && UncoiledFuryPvE.CanUse(out act, usedUp: true))
 		{
 			return true;
 		}
