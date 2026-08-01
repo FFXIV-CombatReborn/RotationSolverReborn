@@ -181,10 +181,15 @@ internal partial class Configs : IPluginConfiguration
 	Filter = DutySpecificDungeon)]
 	private static readonly bool _jailerImmune = true;
 
-	[ConditionBool, UI("Forked Tower - Dead Star logic.",
+	[ConditionBool, UI("Forked Tower Blood - Dead Star logic.",
 	Description = "Treat Triton/Nereid/Phobos as immune if you don't have the corresponding status for it.",
 	Filter = DutySpecificFieldOps)]
 	private static readonly bool _forkedtowerDeadStar = true;
+
+	[ConditionBool, UI("Forked Tower Magic - First Boss Villian/Hero.",
+	Description = "Treat the first boss of Forked Tower as immune if you don't have the corresponding status for it.",
+	Filter = DutySpecificFieldOps)]
+	private static readonly bool _forkedtowerFirstBossVillianHero = true;
 
 	[ConditionBool, UI("North Horn CE - Tiny Mage targetting logic.",
 	Description = "Treat Tiny Mage CE mobs as immune if you're more than 5 yalms away and they are not the farthest along their cast.",

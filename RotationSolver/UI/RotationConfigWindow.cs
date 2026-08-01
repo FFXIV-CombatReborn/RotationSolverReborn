@@ -4728,8 +4728,9 @@ public partial class RotationConfigWindow : Window
 		}
 		if (DataCenter.IsInOccultCrescentOp)
 		{
-			ImGui.Text($"In Occult Crescent: {DataCenter.IsInOccultCrescentOp}");
-			ImGui.Text($"Is In ForkedTower: {DataCenter.IsInForkedTower}");
+			ImGui.Text($"In North Horn: {DataCenter.IsInNorthHorn}");
+			ImGui.Text($"In South Horn: {DataCenter.IsInSouthHorn}");
+			ImGui.Text($"Is In Forked Tower Blood: {DataCenter.IsInForkedTowerBlood}");
 			ImGui.Text($"FreelancerLevel: {DutyRotation.FreelancerLevel}");
 			ImGui.Text($"KnightLevel: {DutyRotation.KnightLevel}");
 			ImGui.Text($"MonkLevel: {DutyRotation.MonkLevel}");

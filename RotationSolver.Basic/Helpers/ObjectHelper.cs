@@ -1371,6 +1371,14 @@ public static class ObjectHelper
 			}
 		}
 
+		if (DataCenter.IsInNorthHorn)
+		{
+			if (battleChara.NameId == 14719)
+			{
+				return true;
+			}
+		}
+
 		return false;
 	}
 
@@ -2104,6 +2112,7 @@ public static class ObjectHelper
 	public static bool IsSpecialImmune(this IBattleChara battleChara)
 	{
 		return battleChara.TreatTinyMageImmune()
+			|| battleChara.ForkedNormalHeadsImmune()
 			|| battleChara.MathCEMobImmune()
 			|| battleChara.IsDMUBossImmune()
 			|| battleChara.IsEnuoGauntletImmune()
@@ -2135,9 +2144,49 @@ public static class ObjectHelper
 	/// </summary>
 	/// <param name="battleChara">the object.</param>
 	/// <returns></returns>
+	public static bool ForkedNormalHeadsImmune(this IBattleChara battleChara)
+	{
+		if (DataCenter.IsInNorthHorn && Service.Config.ForkedtowerFirstBossVillianHero)
+		{
+			var Greenhead = battleChara.NameId == 14490;
+			var Bluehead = battleChara.NameId == 14491;
+
+			var FatedVillain = battleChara.HasStatus(false, StatusID.FatedVillain_5401);
+			var EpicVillain = battleChara.HasStatus(false, StatusID.EpicVillain_5400);
+
+			var FatedHero = StatusHelper.PlayerHasStatus(false, StatusID.FatedHero);
+			var EpicHero = StatusHelper.PlayerHasStatus(false, StatusID.EpicHero);
+
+			if ((Greenhead || Bluehead) && EpicVillain && FatedHero)
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("ForkedNormalHeadsImmune: EpicVillain status found");
+				}
+				return true;
+			}
+
+			if ((Greenhead || Bluehead) && FatedVillain && EpicHero)
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("ForkedNormalHeadsImmune: FatedVillain status found");
+				}
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="battleChara">the object.</param>
+	/// <returns></returns>
 	public static bool MathCEMobImmune(this IBattleChara battleChara)
 	{
-		if (DataCenter.IsInOccultCrescentOp)
+		if (DataCenter.IsInNorthHorn)
 		{
 			var Page64 = battleChara.NameId == 3915;
 			var Page16 = battleChara.NameId == 14521;
@@ -2160,7 +2209,7 @@ public static class ObjectHelper
 	/// <returns></returns>
 	public static bool TreatTinyMageImmune(this IBattleChara battleChara)
 	{
-		if (Service.Config.NorthHornTinyMage && DataCenter.IsInOccultCrescentOp)
+		if (Service.Config.NorthHornTinyMage && DataCenter.IsInNorthHorn)
 		{
 			const uint MeteorCastID = 48327;
 
@@ -2976,7 +3025,7 @@ public static class ObjectHelper
 	/// <returns></returns>
 	public static bool IsDeadStarImmune(this IBattleChara battleChara)
 	{
-		if (Service.Config.ForkedtowerDeadStar && DataCenter.IsInForkedTower)
+		if (Service.Config.ForkedtowerDeadStar && DataCenter.IsInForkedTowerBlood)
 		{
 			var PhobosicGravity = StatusHelper.PlayerHasStatus(false, StatusID.PhobosicGravity);
 			var TritonicGravity = StatusHelper.PlayerHasStatus(false, StatusID.TritonicGravity);

@@ -374,12 +374,7 @@ public sealed class PhantomDefault : PhantomRotation
 			return true;
 		}
 
-		if (LancePvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (LancePvE.CanUse(out act))
+		if (LancePvE.CanUse(out act, skipStatusProvideCheck: true))
 		{
 			return true;
 		}

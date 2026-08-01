@@ -643,7 +643,7 @@ public partial class DutyRotation
 	/// <param name="setting">The action setting to modify.</param>
 	static partial void ModifyTrapDetectionPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => ThiefLevel >= 4 && DataCenter.IsInForkedTower;
+		setting.ActionCheck = () => ThiefLevel >= 4 && DataCenter.IsInForkedTowerBlood;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,

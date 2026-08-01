@@ -28,6 +28,7 @@ public static class StatusHelper
 		{ 14505, [StatusID.LightningWeakness] },
 		{ 14508, [StatusID.LightningWeakness] },
 		{ 14509, [StatusID.LightningWeakness] },
+		{ 14512, [StatusID.WindWeakness] },
 		{ 14520, [StatusID.FireWeakness] },
 		{ 14523, [StatusID.IceWeakness] },
 		{ 14714, [StatusID.FireWeakness] },
