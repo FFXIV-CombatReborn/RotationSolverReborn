@@ -319,14 +319,26 @@ public static class StatusHelper
 	/// <returns></returns>
 	public static bool DoomNeedHealing(this IBattleChara Doomp)
 	{
-		if (Doomp.StatusList == null)
+		if (Doomp == null || !Doomp.IsValid())
 		{
 			return false;
 		}
 
-		if (HasStatus(Doomp, false, DoomHealStatus))
+		try
 		{
-			return true;
+			if (Doomp.StatusList == null)
+			{
+				return false;
+			}
+
+			if (HasStatus(Doomp, false, DoomHealStatus))
+			{
+				return true;
+			}
+		}
+		catch (Exception)
+		{
+			return false;
 		}
 
 		return false;
