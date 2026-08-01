@@ -697,9 +697,19 @@ internal static class DataCenter
 	public static bool IsInOccultCrescentOp => Territory?.ContentType == TerritoryContentType.OccultCrescent;
 
 	/// <summary>
+	///
+	/// </summary>
+	public static bool IsInNorthHorn => IsInOccultCrescentOp && TerritoryID == 1346;
+
+	/// <summary>
+	///
+	/// </summary>
+	public static bool IsInSouthHorn => IsInOccultCrescentOp && TerritoryID == 1252;
+
+	/// <summary>
 	/// Determines if the current content is Forked Tower.
 	/// </summary>
-	public static bool IsInForkedTower => IsInOccultCrescentOp && StatusHelper.PlayerHasStatus(false, StatusID.DutiesAsAssigned_4228);
+	public static bool IsInForkedTowerBlood => IsInOccultCrescentOp && StatusHelper.PlayerHasStatus(false, StatusID.DutiesAsAssigned_4228);
 	#endregion
 
 	#region Variant Dungeon
