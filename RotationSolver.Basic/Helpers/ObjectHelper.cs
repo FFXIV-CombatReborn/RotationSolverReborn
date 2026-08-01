@@ -964,9 +964,17 @@ public static class ObjectHelper
 
 		if (DataCenter.IsInOccultCrescentOp)
 		{
-			if (battleChara.IsOccultCEMob())
+			if (battleChara.IsOccultCEMob() && battleChara.NameId != 14717)
 			{
 				return true;
+			}
+
+			if (DataCenter.IsInNorthHorn)
+			{
+				if (battleChara.NameId == 14719)
+				{
+					return true;
+				}
 			}
 		}
 
@@ -1366,14 +1374,6 @@ public static class ObjectHelper
 		if (DataCenter.TerritoryID == 1284)
 		{
 			if (battleChara.NameId == 13978)
-			{
-				return true;
-			}
-		}
-
-		if (DataCenter.IsInNorthHorn)
-		{
-			if (battleChara.NameId == 14719)
 			{
 				return true;
 			}
