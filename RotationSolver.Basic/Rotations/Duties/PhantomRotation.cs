@@ -1276,7 +1276,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => SummonerLevel >= 4;
 		setting.IsFriendly = false;
 		setting.AspectOverride = Aspect.Lightning;
-		setting.TargetStatusNeed = [StatusID.LightningWeakness];
+		setting.TargetStatusNeed = [StatusID.WindWeakness];
 		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{

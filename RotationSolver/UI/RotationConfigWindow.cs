@@ -15,7 +15,6 @@ using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
@@ -4333,6 +4332,7 @@ public partial class RotationConfigWindow : Window
 		{() => "Last Action", DrawLastAction },
 		{() => "IPC Testing", DrawIPC },
 		{() => "BMR Data", DrawBMRData }, 
+		{() => "Occult Crescent Weaknesses", DrawOccultWeaknesses },
 
 		{() => "Effect", () =>
 			{
@@ -4345,6 +4345,131 @@ public partial class RotationConfigWindow : Window
 	private static void DrawDebugRotationStatus()
 	{
 		DataCenter.CurrentRotation?.DisplayRotationStatus();
+	}
+
+	private static void DrawOccultWeaknesses()
+	{
+		ImGui.TextWrapped("Records the elemental weaknesses (Lightning, Fire, Ice, Wind) observed on hostiles " +
+			"encountered in Occult Crescent, keyed by their NameId. This is populated automatically while in " +
+			"Occult Crescent.");
+
+		if (ImGui.Button("Open Weakness Data File"))
+		{
+			try
+			{
+				var path = Svc.PluginInterface.ConfigDirectory.FullName + "\\OccultWeaknessRecords.json";
+				_ = Process.Start("explorer.exe", $"\"{path}\"");
+			}
+			catch (Exception ex)
+			{
+				PluginLog.Warning($"Failed to open weakness data file: {ex.Message}");
+			}
+		}
+		ImGui.SameLine();
+		if (ImGui.Button("Clear Weakness Data"))
+		{
+			OtherConfiguration.ResetOccultWeaknessRecords();
+		}
+		ImGui.SameLine();
+		if (ImGui.Button("Copy as Curated List Entries"))
+		{
+			var sb = new StringBuilder();
+			foreach (var kvp in OtherConfiguration.OccultWeaknessRecords)
+			{
+				var statusesSb = new StringBuilder();
+				for (var i = 0; i < kvp.Value.Count; i++)
+				{
+					if (i > 0)
+					{
+						_ = statusesSb.Append(", ");
+					}
+					_ = statusesSb.Append("StatusID.").Append(kvp.Value[i]);
+				}
+				_ = sb.AppendLine($"\t\t{{ {kvp.Key}, [{statusesSb}] }},");
+			}
+			ImGui.SetClipboardText(sb.ToString());
+		}
+		if (ImGui.IsItemHovered())
+		{
+			ImGui.SetTooltip("Copies each recorded NameId/weakness.");
+		}
+
+		using var table = ImRaii.Table("OccultWeaknessTable", 3,
+			ImGuiTableFlags.BordersInner | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp,
+			new Vector2(0, 200 * Scale));
+		if (table)
+		{
+			ImGui.TableSetupScrollFreeze(0, 1);
+			ImGui.TableSetupColumn("NameId");
+			ImGui.TableSetupColumn("Name");
+			ImGui.TableSetupColumn("Weaknesses");
+			ImGui.TableHeadersRow();
+
+			foreach (var kvp in OtherConfiguration.OccultWeaknessRecords)
+			{
+				ImGui.TableNextRow();
+				_ = ImGui.TableNextColumn();
+				ImGui.TextUnformatted(kvp.Key.ToString());
+				_ = ImGui.TableNextColumn();
+				var npcName = string.Empty;
+				try
+				{
+					npcName = Service.GetSheet<Lumina.Excel.Sheets.BNpcName>().GetRow(kvp.Key).Singular.ToString();
+				}
+				catch { /* best-effort name lookup */ }
+				ImGui.TextUnformatted(npcName);
+				_ = ImGui.TableNextColumn();
+				ImGui.TextUnformatted(string.Join(", ", kvp.Value));
+			}
+		}
+
+		ImGui.Spacing();
+		ImGui.Separator();
+		ImGui.TextWrapped("Hostiles in Range Without Weakness Data");
+
+		var unknownNames = new List<string>();
+		var seenNameIds = new HashSet<uint>();
+		var hostiles = DataCenter.AllHostileTargets;
+		if (hostiles != null)
+		{
+			for (var i = 0; i < hostiles.Count; i++)
+			{
+				var hostile = hostiles[i];
+				if (hostile == null || hostile.NameId == 0)
+				{
+					continue;
+				}
+
+				if (!seenNameIds.Add(hostile.NameId))
+				{
+					continue;
+				}
+
+				if (StatusHelper.HasKnownOccultWeakness(hostile.NameId) ||
+					OtherConfiguration.OccultWeaknessRecords.ContainsKey(hostile.NameId))
+				{
+					continue;
+				}
+
+				var npcName = string.Empty;
+				try
+				{
+					npcName = Service.GetSheet<Lumina.Excel.Sheets.BNpcName>().GetRow(hostile.NameId).Singular.ToString();
+				}
+				catch { /* best-effort name lookup */ }
+
+				unknownNames.Add(string.IsNullOrEmpty(npcName) ? $"NameId {hostile.NameId}" : npcName);
+			}
+		}
+
+		if (unknownNames.Count == 0)
+		{
+			ImGui.TextUnformatted("None.");
+		}
+		else
+		{
+			ImGui.TextUnformatted(string.Join(", ", unknownNames));
+		}
 	}
 
 	private static void DrawDebugBaseStatus()

@@ -15,6 +15,160 @@ public static class StatusHelper
 	/// <summary>
 	/// 
 	/// </summary>
+	public static readonly Dictionary<uint, StatusID[]> OccultWeaknessByNameId = new()
+	{
+		{ 13876, [StatusID.LightningWeakness] },
+		{ 13939, [StatusID.IceWeakness] },
+		{ 13940, [StatusID.WindWeakness] },
+		{ 13941, [StatusID.FireWeakness] },
+		{ 13942, [StatusID.LightningWeakness] },
+		{ 14490, [StatusID.WindWeakness] },
+		{ 14491, [StatusID.FireWeakness] },
+		{ 14503, [StatusID.IceWeakness] },
+		{ 14505, [StatusID.LightningWeakness] },
+		{ 14508, [StatusID.LightningWeakness] },
+		{ 14509, [StatusID.LightningWeakness] },
+		{ 14520, [StatusID.FireWeakness] },
+		{ 14523, [StatusID.IceWeakness] },
+		{ 14714, [StatusID.FireWeakness] },
+		{ 14717, [StatusID.FireWeakness, StatusID.WindWeakness] },
+		{ 14720, [StatusID.IceWeakness] },
+		{ 14726, [StatusID.FireWeakness] },
+		{ 14728, [StatusID.LightningWeakness] },
+		{ 14735, [StatusID.FireWeakness] },
+		{ 14736, [StatusID.IceWeakness] },
+		{ 14738, [StatusID.FireWeakness] },
+		{ 14762, [StatusID.FireWeakness] },
+		{ 14764, [StatusID.LightningWeakness, StatusID.WindWeakness] },
+		{ 14765, [StatusID.FireWeakness] },
+		{ 14767, [StatusID.WindWeakness] },
+		{ 14771, [StatusID.FireWeakness] },
+		{ 14772, [StatusID.IceWeakness] },
+		{ 14775, [StatusID.LightningWeakness] },
+		{ 14776, [StatusID.FireWeakness] },
+		{ 14785, [StatusID.FireWeakness] },
+		{ 14790, [StatusID.FireWeakness] },
+		{ 14791, [StatusID.IceWeakness] },
+		{ 14801, [StatusID.WindWeakness] },
+		{ 14802, [StatusID.LightningWeakness] },
+		{ 14804, [StatusID.LightningWeakness] },
+		{ 14805, [StatusID.IceWeakness] },
+		{ 14806, [StatusID.LightningWeakness] },
+		{ 14809, [StatusID.LightningWeakness] },
+		{ 14817, [StatusID.LightningWeakness] },
+		{ 14820, [StatusID.LightningWeakness] },
+		{ 14840, [StatusID.IceWeakness] },
+		{ 14841, [StatusID.IceWeakness] },
+		{ 14857, [StatusID.LightningWeakness] },
+		{ 14858, [StatusID.LightningWeakness] },
+		{ 14859, [StatusID.LightningWeakness] },
+		{ 14860, [StatusID.FireWeakness] },
+		{ 14861, [StatusID.FireWeakness] },
+		{ 14862, [StatusID.FireWeakness] },
+		{ 14863, [StatusID.IceWeakness] },
+		{ 14864, [StatusID.WindWeakness] },
+		{ 14865, [StatusID.FireWeakness] },
+		{ 14866, [StatusID.FireWeakness] },
+		{ 14867, [StatusID.IceWeakness] },
+		{ 14868, [StatusID.LightningWeakness] },
+		{ 14869, [StatusID.FireWeakness, StatusID.IceWeakness] },
+		{ 14870, [StatusID.FireWeakness] },
+		{ 14871, [StatusID.FireWeakness] },
+		{ 14872, [StatusID.WindWeakness] },
+		{ 14873, [StatusID.WindWeakness] },
+		{ 14874, [StatusID.LightningWeakness] },
+		{ 14875, [StatusID.LightningWeakness, StatusID.IceWeakness] },
+		{ 14876, [StatusID.LightningWeakness] },
+		{ 14877, [StatusID.LightningWeakness] },
+		{ 14878, [StatusID.FireWeakness, StatusID.WindWeakness] },
+		{ 14879, [StatusID.IceWeakness] },
+		{ 14880, [StatusID.FireWeakness] },
+		{ 14881, [StatusID.IceWeakness] },
+		{ 14882, [StatusID.FireWeakness] },
+		{ 14883, [StatusID.IceWeakness, StatusID.WindWeakness] },
+		{ 14884, [StatusID.WindWeakness] },
+		{ 14885, [StatusID.FireWeakness] },
+		{ 14886, [StatusID.FireWeakness] },
+		{ 14887, [StatusID.FireWeakness] },
+		{ 14888, [StatusID.FireWeakness] },
+		{ 14889, [StatusID.IceWeakness] },
+		{ 14890, [StatusID.LightningWeakness] },
+		{ 14891, [StatusID.LightningWeakness] },
+		{ 14892, [StatusID.FireWeakness] },
+		{ 14893, [StatusID.FireWeakness] },
+		{ 14894, [StatusID.FireWeakness] },
+		{ 14895, [StatusID.IceWeakness] },
+		{ 14896, [StatusID.WindWeakness] },
+		{ 14897, [StatusID.IceWeakness] },
+		{ 14898, [StatusID.IceWeakness] },
+		{ 14899, [StatusID.WindWeakness] },
+		{ 14900, [StatusID.LightningWeakness] },
+		{ 14901, [StatusID.LightningWeakness] },
+		{ 14902, [StatusID.IceWeakness] },
+		{ 14903, [StatusID.WindWeakness] },
+		{ 14904, [StatusID.WindWeakness] },
+		{ 14905, [StatusID.LightningWeakness] },
+		{ 14906, [StatusID.IceWeakness] },
+		{ 14907, [StatusID.WindWeakness] },
+		{ 14908, [StatusID.IceWeakness, StatusID.WindWeakness] },
+		{ 14909, [StatusID.FireWeakness] },
+		{ 14910, [StatusID.WindWeakness] },
+		{ 14911, [StatusID.WindWeakness] },
+		{ 14912, [StatusID.WindWeakness] },
+		{ 14913, [StatusID.FireWeakness] },
+		{ 14914, [StatusID.IceWeakness] },
+		{ 14915, [StatusID.FireWeakness] },
+		{ 14917, [StatusID.WindWeakness] },
+		{ 14918, [StatusID.WindWeakness] },
+		{ 14919, [StatusID.FireWeakness] },
+		{ 14920, [StatusID.IceWeakness] },
+		{ 14921, [StatusID.WindWeakness] },
+		{ 14922, [StatusID.LightningWeakness] },
+		{ 14923, [StatusID.WindWeakness] },
+		{ 14929, [StatusID.FireWeakness] },
+		{ 14930, [StatusID.WindWeakness] },
+		{ 14931, [StatusID.FireWeakness] },
+		{ 14932, [StatusID.IceWeakness] },
+	};
+
+	/// <summary>
+	/// The elemental weakness statuses used in Occult Crescent
+	/// </summary>
+	public static StatusID[] OccultWeaknessStatuses { get; } =
+	[
+		StatusID.LightningWeakness,
+		StatusID.FireWeakness,
+		StatusID.IceWeakness,
+		StatusID.WindWeakness,
+	];
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsOccultWeaknessStatus(StatusID status)
+	{
+		return Array.IndexOf(OccultWeaknessStatuses, status) >= 0;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool HasKnownOccultWeakness(uint nameId)
+	{
+		return nameId != 0 && OccultWeaknessByNameId.ContainsKey(nameId);
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool HasKnownOccultWeakness(uint nameId, StatusID status)
+	{
+		return nameId != 0 && OccultWeaknessByNameId.TryGetValue(nameId, out var known) && known != null && Array.IndexOf(known, status) >= 0;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
 	public static StatusID[] RangePhysicalDefense { get; } =
 	[
 		StatusID.Troubadour,

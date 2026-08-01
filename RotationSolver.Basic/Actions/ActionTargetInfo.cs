@@ -334,6 +334,17 @@ public struct ActionTargetInfo(IBaseAction action)
 
 		if (action.Setting.TargetStatusNeed != null && !skipTargetStatusNeedCheck)
 		{
+			if (DataCenter.IsInOccultCrescentOp && battleChara.NameId != 0)
+			{
+				foreach (var id in action.Setting.TargetStatusNeed)
+				{
+					if (StatusHelper.IsOccultWeaknessStatus(id) && StatusHelper.HasKnownOccultWeakness(battleChara.NameId, id))
+					{
+						return true;
+					}
+				}
+			}
+
 			if (battleChara.WillStatusEndGCD(action.Config.StatusGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusNeed))
 			{
 				return false;
