@@ -191,6 +191,11 @@ internal partial class Configs : IPluginConfiguration
 	Filter = DutySpecificFieldOps)]
 	private static readonly bool _northHornTinyMage = true;
 
+	[ConditionBool, UI("Elemental Weakness Tracking.",
+	Description = "Enable tracking of elemental weaknesses for debug. This enables you to track weaknesses to report to dev. See Debug > Occult Crescent Weaknesses.",
+	Filter = DutySpecificFieldOps)]
+	private static readonly bool _elementalWeaknessTracking = false;
+
 	[ConditionBool, UI("Pilgrim's Traverse - Eminent Grief logic.",
 	Description = "Treat Eminent Grief as immune if you don't have Light Vengeance buff, and treat Devoured Eater as immune if you don't have Dark Vengeance buff.",
 	Filter = DutySpecificDeepDungeon)]

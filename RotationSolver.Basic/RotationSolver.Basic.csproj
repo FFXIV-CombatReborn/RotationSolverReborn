@@ -79,7 +79,7 @@
         <Using Include="Dalamud.Bindings.ImGui" />
         <Using Include="Newtonsoft.Json" />
 
-        <PackageReference Include="ECommons" Version="3.2.1.16" />
+        <PackageReference Include="ECommons" Version="3.2.1.17" />
 
         <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0">
           <PrivateAssets>all</PrivateAssets>

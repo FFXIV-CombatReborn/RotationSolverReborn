@@ -3,6 +3,7 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
+using RotationSolver.Basic.Configuration;
 
 namespace RotationSolver.Updaters;
 
@@ -43,6 +44,11 @@ internal static partial class TargetUpdater
 			? GetFirstHostileTarget(ObjectHelper.CanProvoke)
 			: null; // Calculating this per frame rather than on-demand is actually a fair amount worse
 		DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt); // Tanks, Melee, RDM, and various phantom and duty actions can interrupt so just deal with it
+
+		if (DataCenter.IsInOccultCrescentOp && Service.Config.ElementalWeaknessTracking)
+		{
+			UpdateOccultWeaknesses();
+		}
 
 		UpdateTimeToKill();
 	}
@@ -708,5 +714,47 @@ internal static partial class TargetUpdater
 		}
 
 		DataCenter.RecordedHP.Enqueue((now, currentHPs));
+	}
+
+	private static void UpdateOccultWeaknesses()
+	{
+		var hostiles = DataCenter.AllHostileTargets;
+		if (hostiles == null || hostiles.Count == 0)
+		{
+			return;
+		}
+
+		var foundNew = false;
+
+		for (var i = 0; i < hostiles.Count; i++)
+		{
+			var hostile = hostiles[i];
+			if (hostile == null || hostile.NameId == 0)
+			{
+				continue;
+			}
+
+			// Skip mobs whose weakness is already manually curated in StatusHelper.
+			if (StatusHelper.HasKnownOccultWeakness(hostile.NameId))
+			{
+				continue;
+			}
+
+			foreach (var weakness in StatusHelper.OccultWeaknessStatuses)
+			{
+				if (hostile.HasStatus(false, weakness))
+				{
+					if (OtherConfiguration.RecordOccultWeakness(hostile.NameId, weakness))
+					{
+						foundNew = true;
+					}
+				}
+			}
+		}
+
+		if (foundNew)
+		{
+			_ = OtherConfiguration.SaveOccultWeaknessRecords();
+		}
 	}
 }

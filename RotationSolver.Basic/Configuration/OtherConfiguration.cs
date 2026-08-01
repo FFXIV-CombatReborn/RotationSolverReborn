@@ -57,6 +57,11 @@ internal class OtherConfiguration
 	public static Dictionary<uint, string[]> NoHostileNames = [];
 	public static Dictionary<uint, string[]> NoProvokeNames = [];
 
+	/// <summary>
+	///
+	/// </summary>
+	public static Dictionary<uint, List<string>> OccultWeaknessRecords = [];
+
 	/// <markdown file="List" name="Beneficial Positions" section="Map-Specific Settings">
 	/// Adds a preferred location used for ground **healing** AoE abilities (example: Earthly Star).
 	///
@@ -123,6 +128,7 @@ internal class OtherConfiguration
 		_ = Task.Run(() => InitOne(ref NoCastingStatus, nameof(NoCastingStatus)));
 		_ = Task.Run(() => InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback)));
 		_ = Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)));
+		_ = Task.Run(() => InitOne(ref OccultWeaknessRecords, nameof(OccultWeaknessRecords), false));
 	}
 
 	public static async Task InitAsync(CancellationToken cancellationToken = default)
@@ -148,7 +154,8 @@ internal class OtherConfiguration
 			Task.Run(() => InitOne(ref RotationSolverRecord, nameof(RotationSolverRecord), false), cancellationToken),
 			Task.Run(() => InitOne(ref NoCastingStatus, nameof(NoCastingStatus)), cancellationToken),
 			Task.Run(() => InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback)), cancellationToken),
-			Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)), cancellationToken)
+			Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)), cancellationToken),
+			Task.Run(() => InitOne(ref OccultWeaknessRecords, nameof(OccultWeaknessRecords), false), cancellationToken)
 		);
 	}
 
@@ -172,6 +179,7 @@ internal class OtherConfiguration
 			await SaveNoCastingStatus();
 			await SaveHostileCastingKnockback();
 			await SaveHostileCastingStop();
+			await SaveOccultWeaknessRecords();
 		});
 	}
 	#region Action Tab
@@ -330,6 +338,55 @@ internal class OtherConfiguration
 	{
 		return Task.Run(() => Save(NoHostileNames, nameof(NoHostileNames)));
 	}
+
+	#region Occult Crescent Weakness Tracking
+
+	public static Task SaveOccultWeaknessRecords()
+	{
+		return Task.Run(() => Save(OccultWeaknessRecords, nameof(OccultWeaknessRecords)));
+	}
+
+	public static void ResetOccultWeaknessRecords()
+	{
+		OccultWeaknessRecords.Clear();
+		SaveOccultWeaknessRecords().Wait();
+	}
+
+	/// <summary>
+	///
+	/// </summary>
+	public static bool RecordOccultWeakness(uint nameId, StatusID weakness)
+	{
+		if (nameId == 0)
+		{
+			return false;
+		}
+
+		// Skip checking/recording entirely if this NameId is already manually curated.
+		if (StatusHelper.HasKnownOccultWeakness(nameId))
+		{
+			return false;
+		}
+
+		if (!OccultWeaknessRecords.TryGetValue(nameId, out var list))
+		{
+			list = [];
+			OccultWeaknessRecords[nameId] = list;
+		}
+
+		var weaknessName = weakness.ToString();
+		if (list.Contains(weaknessName))
+		{
+			return false;
+		}
+
+		list.Add(weaknessName);
+
+		return true;
+	}
+
+	#endregion
+
 
 	private static string GetFilePath(string name)
 	{

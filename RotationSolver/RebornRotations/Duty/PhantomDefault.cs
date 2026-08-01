@@ -855,17 +855,17 @@ public sealed class PhantomDefault : PhantomRotation
 		{
 			if ((DrainTouchStatusStrategyUsage == DrainTouchStatusStrategy.EitherDrainTouch) || (DrainTouchStatusStrategyUsage == DrainTouchStatusStrategy.DrainTouchOnly && HasDrainTouch) || (DrainTouchStatusStrategyUsage == DrainTouchStatusStrategy.NoDrainTouch && !HasDrainTouch))
 			{
-				if (ChaosDrivePvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+				if (ChaosDrivePvE.CanUse(out act))
 				{
 					return true;
 				}
 
-				if (HellWindPvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+				if (HellWindPvE.CanUse(out act))
 				{
 					return true;
 				}
 
-				if (DeepFreezePvE.CanUse(out act, skipTargetStatusNeedCheck: false))
+				if (DeepFreezePvE.CanUse(out act))
 				{
 					return true;
 				}
