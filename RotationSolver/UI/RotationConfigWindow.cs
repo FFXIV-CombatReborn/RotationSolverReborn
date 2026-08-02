@@ -4353,16 +4353,16 @@ public partial class RotationConfigWindow : Window
 			"encountered in Occult Crescent, keyed by their NameId. This is populated automatically while in " +
 			"Occult Crescent.");
 
-		if (ImGui.Button("Open Weakness Data File"))
+		if (ImGui.Button("Open Weakness Data Folder"))
 		{
 			try
 			{
-				var path = Svc.PluginInterface.ConfigDirectory.FullName + "\\OccultWeaknessRecords.json";
+				var path = Svc.PluginInterface.ConfigDirectory.FullName;
 				_ = Process.Start("explorer.exe", $"\"{path}\"");
 			}
 			catch (Exception ex)
 			{
-				PluginLog.Warning($"Failed to open weakness data file: {ex.Message}");
+				PluginLog.Warning($"Failed to open weakness data folder: {ex.Message}");
 			}
 		}
 		ImGui.SameLine();
@@ -4374,19 +4374,26 @@ public partial class RotationConfigWindow : Window
 		if (ImGui.Button("Copy as Curated List Entries"))
 		{
 			var sb = new StringBuilder();
-			foreach (var kvp in OtherConfiguration.OccultWeaknessRecords)
+			void AppendEntries(Dictionary<uint, List<string>> records)
 			{
-				var statusesSb = new StringBuilder();
-				for (var i = 0; i < kvp.Value.Count; i++)
+				foreach (var kvp in records)
 				{
-					if (i > 0)
+					var statusesSb = new StringBuilder();
+					for (var i = 0; i < kvp.Value.Count; i++)
 					{
-						_ = statusesSb.Append(", ");
+						if (i > 0)
+						{
+							_ = statusesSb.Append(", ");
+						}
+						_ = statusesSb.Append("StatusID.").Append(kvp.Value[i]);
 					}
-					_ = statusesSb.Append("StatusID.").Append(kvp.Value[i]);
+					_ = sb.AppendLine($"\t\t{{ {kvp.Key}, [{statusesSb}] }},");
 				}
-				_ = sb.AppendLine($"\t\t{{ {kvp.Key}, [{statusesSb}] }},");
 			}
+			sb.AppendLine("// North Horn");
+			AppendEntries(OtherConfiguration.NorthHornWeaknessRecords);
+			sb.AppendLine("// South Horn");
+			AppendEntries(OtherConfiguration.SouthHornWeaknessRecords);
 			ImGui.SetClipboardText(sb.ToString());
 		}
 		if (ImGui.IsItemHovered())
@@ -4394,33 +4401,42 @@ public partial class RotationConfigWindow : Window
 			ImGui.SetTooltip("Copies each recorded NameId/weakness.");
 		}
 
-		using var table = ImRaii.Table("OccultWeaknessTable", 3,
+		using var table = ImRaii.Table("OccultWeaknessTable", 4,
 			ImGuiTableFlags.BordersInner | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp,
 			new Vector2(0, 200 * Scale));
 		if (table)
 		{
 			ImGui.TableSetupScrollFreeze(0, 1);
+			ImGui.TableSetupColumn("Zone");
 			ImGui.TableSetupColumn("NameId");
 			ImGui.TableSetupColumn("Name");
 			ImGui.TableSetupColumn("Weaknesses");
 			ImGui.TableHeadersRow();
 
-			foreach (var kvp in OtherConfiguration.OccultWeaknessRecords)
+			void DrawRows(string zoneName, Dictionary<uint, List<string>> records)
 			{
-				ImGui.TableNextRow();
-				_ = ImGui.TableNextColumn();
-				ImGui.TextUnformatted(kvp.Key.ToString());
-				_ = ImGui.TableNextColumn();
-				var npcName = string.Empty;
-				try
+				foreach (var kvp in records)
 				{
-					npcName = Service.GetSheet<Lumina.Excel.Sheets.BNpcName>().GetRow(kvp.Key).Singular.ToString();
+					ImGui.TableNextRow();
+					_ = ImGui.TableNextColumn();
+					ImGui.TextUnformatted(zoneName);
+					_ = ImGui.TableNextColumn();
+					ImGui.TextUnformatted(kvp.Key.ToString());
+					_ = ImGui.TableNextColumn();
+					var npcName = string.Empty;
+					try
+					{
+						npcName = Service.GetSheet<Lumina.Excel.Sheets.BNpcName>().GetRow(kvp.Key).Singular.ToString();
+					}
+					catch { /* best-effort name lookup */ }
+					ImGui.TextUnformatted(npcName);
+					_ = ImGui.TableNextColumn();
+					ImGui.TextUnformatted(string.Join(", ", kvp.Value));
 				}
-				catch { /* best-effort name lookup */ }
-				ImGui.TextUnformatted(npcName);
-				_ = ImGui.TableNextColumn();
-				ImGui.TextUnformatted(string.Join(", ", kvp.Value));
 			}
+
+			DrawRows("North Horn", OtherConfiguration.NorthHornWeaknessRecords);
+			DrawRows("South Horn", OtherConfiguration.SouthHornWeaknessRecords);
 		}
 
 		ImGui.Spacing();
@@ -4445,8 +4461,11 @@ public partial class RotationConfigWindow : Window
 					continue;
 				}
 
-				if (StatusHelper.HasKnownOccultWeakness(hostile.NameId) ||
-					OtherConfiguration.OccultWeaknessRecords.ContainsKey(hostile.NameId))
+				var alreadyRecorded = DataCenter.IsInNorthHorn
+					? OtherConfiguration.NorthHornWeaknessRecords.ContainsKey(hostile.NameId)
+					: DataCenter.IsInSouthHorn && OtherConfiguration.SouthHornWeaknessRecords.ContainsKey(hostile.NameId);
+
+				if (StatusHelper.HasKnownOccultWeakness(hostile.NameId) || alreadyRecorded)
 				{
 					continue;
 				}

@@ -15,7 +15,7 @@ public static class StatusHelper
 	/// <summary>
 	/// 
 	/// </summary>
-	public static readonly Dictionary<uint, StatusID[]> OccultWeaknessByNameId = new()
+	public static readonly Dictionary<uint, StatusID[]> NorthHornWeaknessByNameId = new()
 	{
 		{ 13876, [StatusID.LightningWeakness] },
 		{ 13939, [StatusID.IceWeakness] },
@@ -140,6 +140,36 @@ public static class StatusHelper
 	};
 
 	/// <summary>
+	/// 
+	/// </summary>
+	public static readonly Dictionary<uint, StatusID[]> SouthHornWeaknessByNameId = new()
+	{
+		{ 13703, [StatusID.FireWeakness] },
+		{ 13855, [StatusID.WindWeakness] },
+		{ 13877, [StatusID.FireWeakness] },
+		{ 13878, [StatusID.FireWeakness] },
+		{ 13880, [StatusID.IceWeakness] },
+		{ 13883, [StatusID.LightningWeakness] },
+		{ 13884, [StatusID.FireWeakness] },
+		{ 13886, [StatusID.FireWeakness] },
+		{ 13887, [StatusID.FireWeakness] },
+		{ 13895, [StatusID.FireWeakness] },
+		{ 13900, [StatusID.FireWeakness] },
+		{ 13902, [StatusID.IceWeakness] },
+		{ 13909, [StatusID.IceWeakness] },
+		{ 13913, [StatusID.LightningWeakness] },
+		{ 13919, [StatusID.FireWeakness] },
+		{ 13928, [StatusID.LightningWeakness] },
+		{ 13930, [StatusID.IceWeakness] },
+		{ 13931, [StatusID.FireWeakness] },
+		{ 13932, [StatusID.FireWeakness] },
+		{ 13934, [StatusID.LightningWeakness] },
+		{ 13935, [StatusID.WindWeakness] },
+		{ 13936, [StatusID.LightningWeakness] },
+		{ 13937, [StatusID.LightningWeakness] },
+	};
+
+	/// <summary>
 	/// The elemental weakness statuses used in Occult Crescent
 	/// </summary>
 	public static StatusID[] OccultWeaknessStatuses { get; } =
@@ -163,7 +193,23 @@ public static class StatusHelper
 	/// </summary>
 	public static bool HasKnownOccultWeakness(uint nameId)
 	{
-		return nameId != 0 && OccultWeaknessByNameId.ContainsKey(nameId);
+		if (DataCenter.IsInNorthHorn)
+		{
+			if (nameId != 0 && NorthHornWeaknessByNameId.ContainsKey(nameId))
+			{
+				return true;
+			}
+		}
+
+		if (DataCenter.IsInSouthHorn)
+		{
+			if (nameId != 0 && SouthHornWeaknessByNameId.ContainsKey(nameId))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/// <summary>
@@ -171,7 +217,23 @@ public static class StatusHelper
 	/// </summary>
 	public static bool HasKnownOccultWeakness(uint nameId, StatusID status)
 	{
-		return nameId != 0 && OccultWeaknessByNameId.TryGetValue(nameId, out var known) && known != null && Array.IndexOf(known, status) >= 0;
+		if (DataCenter.IsInNorthHorn)
+		{
+			if (nameId != 0 && NorthHornWeaknessByNameId.TryGetValue(nameId, out var known) && known != null && Array.IndexOf(known, status) >= 0)
+			{
+				return true;
+			}
+		}
+
+		if (DataCenter.IsInSouthHorn)
+		{
+			if (nameId != 0 && SouthHornWeaknessByNameId.TryGetValue(nameId, out var known) && known != null && Array.IndexOf(known, status) >= 0)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/// <summary>

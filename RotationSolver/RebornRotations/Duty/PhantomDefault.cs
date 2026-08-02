@@ -175,7 +175,6 @@ public sealed class PhantomDefault : PhantomRotation
 		return base.EmergencyAbility(nextGCD, out act);
 	}
 
-
 	public override bool EmergencyGCD(IAction? nextGCD, out IAction? act)
 	{
 		if (HandleOraclePrediction(nextGCD, out act))
