@@ -10,8 +10,16 @@ public class ObjectListDelay<T> : IEnumerable<T> where T : IGameObject
 {
 	private IEnumerable<T> _list = [];
 	private readonly Func<(float min, float max)> _getRange;
-	private Dictionary<ulong, DateTime> _revealTime = [];
+	private readonly Dictionary<ulong, DateTime> _revealTime = [];
+	private readonly Dictionary<ulong, DateTime> _lastSeen = [];
 	private readonly Random _ran = new();
+
+	/// <summary>
+	/// How long an object's reveal timer is retained after it briefly disappears from
+	/// <see cref="Delay(IEnumerable{T})"/>'s input (e.g. a single-frame filter flicker),
+	/// so it is not mistakenly treated as a brand-new object and re-delayed.
+	/// </summary>
+	private static readonly TimeSpan StaleGracePeriod = TimeSpan.FromSeconds(2);
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ObjectListDelay{T}"/> class.
@@ -42,18 +50,20 @@ public class ObjectListDelay<T> : IEnumerable<T> where T : IGameObject
 	public void Delay(IEnumerable<T> originData)
 	{
 		List<T> outList = [];
-		Dictionary<ulong, DateTime> revealTime = [];
 		var now = DateTime.Now;
 
 		foreach (var item in originData)
 		{
-			if (!_revealTime.TryGetValue(item.GameObjectId, out var time))
+			var id = item.GameObjectId;
+			_lastSeen[id] = now;
+
+			if (!_revealTime.TryGetValue(id, out var time))
 			{
 				(var min, var max) = _getRange();
 				var delaySecond = min + ((float)_ran.NextDouble() * (max - min));
 				time = now + TimeSpan.FromMilliseconds(delaySecond * 1000);
+				_revealTime[id] = time;
 			}
-			revealTime[item.GameObjectId] = time;
 
 			if (now > time)
 			{
@@ -61,8 +71,31 @@ public class ObjectListDelay<T> : IEnumerable<T> where T : IGameObject
 			}
 		}
 
+		// Prune objects that have genuinely been absent for a while so this doesn't grow
+		// unbounded. Anything within the grace period is kept even if it wasn't present in
+		// this particular call, so a single-frame absence doesn't reset its delay timer.
+		if (_lastSeen.Count > 0)
+		{
+			List<ulong>? stale = null;
+			foreach (var kvp in _lastSeen)
+			{
+				if (now - kvp.Value > StaleGracePeriod)
+				{
+					(stale ??= []).Add(kvp.Key);
+				}
+			}
+
+			if (stale != null)
+			{
+				foreach (var id in stale)
+				{
+					_lastSeen.Remove(id);
+					_revealTime.Remove(id);
+				}
+			}
+		}
+
 		_list = outList;
-		_revealTime = revealTime;
 	}
 
 	/// <summary>
