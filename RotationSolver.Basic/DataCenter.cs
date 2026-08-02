@@ -858,6 +858,11 @@ internal static class DataCenter
 			return true;
 		}
 
+		if (DutyRotation.WhiteMageLevel >= 4)
+		{
+			return true;
+		}
+
 		if (StatusHelper.PlayerHasStatus(false, StatusID.VariantRaiseSet))
 		{
 			return true;

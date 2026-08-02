@@ -144,29 +144,79 @@ public static class StatusHelper
 	/// </summary>
 	public static readonly Dictionary<uint, StatusID[]> SouthHornWeaknessByNameId = new()
 	{
+		{ 13638, [StatusID.FireWeakness] },
+		{ 13646, [StatusID.FireWeakness] },
+		{ 13656, [StatusID.IceWeakness] },
+		{ 13666, [StatusID.IceWeakness] },
+		{ 13668, [StatusID.IceWeakness] },
 		{ 13703, [StatusID.FireWeakness] },
+		{ 13717, [StatusID.LightningWeakness] },
+		{ 13718, [StatusID.LightningWeakness] },
+		{ 13726, [StatusID.LightningWeakness] },
+		{ 13728, [StatusID.LightningWeakness] },
+		{ 13729, [StatusID.LightningWeakness] },
+		{ 13740, [StatusID.FireWeakness] },
+		{ 13747, [StatusID.LightningWeakness] },
+		{ 13748, [StatusID.LightningWeakness] },
+		{ 13853, [StatusID.WindWeakness] },
 		{ 13855, [StatusID.WindWeakness] },
+		{ 13871, [StatusID.FireWeakness] },
+		{ 13872, [StatusID.WindWeakness] },
+		{ 13873, [StatusID.IceWeakness] },
+		{ 13874, [StatusID.FireWeakness] },
+		{ 13875, [StatusID.FireWeakness] },
 		{ 13877, [StatusID.FireWeakness] },
 		{ 13878, [StatusID.FireWeakness] },
+		{ 13879, [StatusID.LightningWeakness] },
 		{ 13880, [StatusID.IceWeakness] },
+		{ 13881, [StatusID.LightningWeakness] },
+		{ 13882, [StatusID.IceWeakness] },
 		{ 13883, [StatusID.LightningWeakness] },
 		{ 13884, [StatusID.FireWeakness] },
+		{ 13885, [StatusID.IceWeakness] },
 		{ 13886, [StatusID.FireWeakness] },
 		{ 13887, [StatusID.FireWeakness] },
+		{ 13888, [StatusID.IceWeakness] },
+		{ 13890, [StatusID.FireWeakness] },
+		{ 13891, [StatusID.LightningWeakness] },
+		{ 13892, [StatusID.WindWeakness] },
+		{ 13893, [StatusID.FireWeakness] },
+		{ 13894, [StatusID.FireWeakness] },
 		{ 13895, [StatusID.FireWeakness] },
+		{ 13896, [StatusID.IceWeakness] },
+		{ 13897, [StatusID.IceWeakness] },
+		{ 13898, [StatusID.WindWeakness] },
 		{ 13900, [StatusID.FireWeakness] },
+		{ 13901, [StatusID.WindWeakness] },
 		{ 13902, [StatusID.IceWeakness] },
+		{ 13903, [StatusID.LightningWeakness] },
+		{ 13904, [StatusID.IceWeakness] },
+		{ 13906, [StatusID.FireWeakness] },
+		{ 13907, [StatusID.IceWeakness] },
+		{ 13908, [StatusID.IceWeakness] },
 		{ 13909, [StatusID.IceWeakness] },
+		{ 13911, [StatusID.FireWeakness] },
+		{ 13912, [StatusID.LightningWeakness] },
 		{ 13913, [StatusID.LightningWeakness] },
+		{ 13915, [StatusID.LightningWeakness] },
+		{ 13916, [StatusID.IceWeakness] },
+		{ 13917, [StatusID.LightningWeakness] },
+		{ 13918, [StatusID.IceWeakness] },
 		{ 13919, [StatusID.FireWeakness] },
+		{ 13922, [StatusID.WindWeakness] },
+		{ 13924, [StatusID.LightningWeakness] },
+		{ 13925, [StatusID.FireWeakness] },
+		{ 13926, [StatusID.FireWeakness] },
 		{ 13928, [StatusID.LightningWeakness] },
 		{ 13930, [StatusID.IceWeakness] },
 		{ 13931, [StatusID.FireWeakness] },
 		{ 13932, [StatusID.FireWeakness] },
+		{ 13933, [StatusID.LightningWeakness] },
 		{ 13934, [StatusID.LightningWeakness] },
 		{ 13935, [StatusID.WindWeakness] },
 		{ 13936, [StatusID.LightningWeakness] },
 		{ 13937, [StatusID.LightningWeakness] },
+		{ 13938, [StatusID.IceWeakness] },
 	};
 
 	/// <summary>
@@ -543,7 +593,12 @@ public static class StatusHelper
 	/// <returns></returns>
 	public static bool DoomNeedHealing(this IBattleChara Doomp)
 	{
-		if (Doomp == null || !Doomp.IsValid())
+		if (Doomp == null)
+		{
+			return false;
+		}
+
+		if (!Doomp.IsValid())
 		{
 			return false;
 		}

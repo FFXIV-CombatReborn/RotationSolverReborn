@@ -3787,9 +3787,17 @@ public static class ObjectHelper
 			return 0; // This may need to be changed to 100
 		}
 
-		if (battleChara.DoomNeedHealing())
+		if (!battleChara.IsValid())
 		{
-			return 0.01f;
+			return 0; // This may need to be changed to 100
+		}
+
+		if (battleChara.IsParty())
+		{
+			if (battleChara.DoomNeedHealing())
+			{
+				return 0.01f;
+			}
 		}
 
 		if (DataCenter.RefinedHP.TryGetValue(battleChara.GameObjectId, out var hp))
@@ -3797,12 +3805,19 @@ public static class ObjectHelper
 			return hp;
 		}
 
-		if (battleChara.MaxHp == 0)
+		try
 		{
-			return 0; // Avoid division by zero
-		}
+			if (battleChara.MaxHp == 0)
+			{
+				return 0; // Avoid division by zero
+			}
 
-		return (float)battleChara.CurrentHp / battleChara.MaxHp;
+			return (float)battleChara.CurrentHp / battleChara.MaxHp;
+		}
+		catch (Exception)
+		{
+			return 0;
+		}
 	}
 
 	/// <summary>
