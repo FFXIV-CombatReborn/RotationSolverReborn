@@ -754,7 +754,14 @@ internal static partial class TargetUpdater
 
 		if (foundNew)
 		{
-			_ = OtherConfiguration.SaveOccultWeaknessRecords();
+			if (DataCenter.IsInNorthHorn)
+			{
+				_ = OtherConfiguration.SaveNorthHornWeaknessRecords();
+			}
+			else if (DataCenter.IsInSouthHorn)
+			{
+				_ = OtherConfiguration.SaveSouthHornWeaknessRecords();
+			}
 		}
 	}
 }

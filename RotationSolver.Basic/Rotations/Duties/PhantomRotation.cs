@@ -1088,7 +1088,6 @@ public partial class DutyRotation
 	{
 		setting.ActionCheck = () => WhiteMageLevel >= 4;
 		setting.IsFriendly = true;
-		setting.TargetType = TargetType.Death;
 	}
 
 	static partial void ModifyOccultHolyPvE(ref ActionSetting setting)
