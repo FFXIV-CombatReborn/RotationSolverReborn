@@ -508,9 +508,12 @@ public sealed class AST_Reborn : AstrologianRotation
 			return base.HealSingleGCD(out act);
 		}
 
-		if (AspectedBeneficPvE.CanUse(out act) && (IsMoving || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal))
+		if (AspectedBeneficPvE.CanUse(out act))
 		{
-			return true;
+			if (IsMoving || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal)
+			{
+				return true;
+			}
 		}
 
 		if (BeneficIiPvE.CanUse(out act))
