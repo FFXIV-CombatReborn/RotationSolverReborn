@@ -830,6 +830,11 @@ public sealed class PhantomDefault : PhantomRotation
 			return base.GeneralGCD(out act);
 		}
 
+		if (ShouldHoldBurst())
+		{
+			return base.GeneralGCD(out act);
+		}
+
 		if (InCombat && AetherialGainPvE.CanUse(out act))
 		{
 			return true;
@@ -1083,11 +1088,6 @@ public sealed class PhantomDefault : PhantomRotation
 		if (InCombat && OccultQuickPvE.CanUse(out act) && !StatusHelper.PlayerHasStatus(true, StatusID.Manafication) && !StatusHelper.PlayerHasStatus(true, StatusID.Embolden) && !StatusHelper.PlayerHasStatus(true, StatusID.MagickedSwordplay) && !StatusHelper.PlayerHasStatus(true, StatusID.GrandImpactReady))
 		{
 			return true;
-		}
-
-		if (ShouldHoldBurst())
-		{
-			return base.GeneralGCD(out act);
 		}
 
 		if (BlazingSpellbladePvE.CanUse(out act))

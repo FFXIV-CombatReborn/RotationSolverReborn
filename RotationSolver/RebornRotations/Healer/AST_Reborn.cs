@@ -258,19 +258,28 @@ public sealed class AST_Reborn : AstrologianRotation
 			return true;
 		}
 
-		if (EssentialDignityPvE.Cooldown.CurrentCharges == 3 && EssentialDignityPvE.CanUse(out act, usedUp: true) && EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityThird)
+		if (EssentialDignityPvE.Cooldown.CurrentCharges == 3 && EssentialDignityPvE.CanUse(out act, usedUp: true))
 		{
-			return true;
+			if (EssentialDignityPvE.Target.Target?.GetHealthRatio() < EssentialDignityThird)
+			{
+				return true;
+			}
 		}
 
-		if (EssentialDignityPvE.Cooldown.CurrentCharges == 2 && EssentialDignityPvE.CanUse(out act, usedUp: true) && EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignitySecond)
+		if (EssentialDignityPvE.Cooldown.CurrentCharges == 2 && EssentialDignityPvE.CanUse(out act, usedUp: true))
 		{
-			return true;
+			if (EssentialDignityPvE.Target.Target?.GetHealthRatio() < EssentialDignitySecond)
+			{
+				return true;
+			}
 		}
 
-		if (EssentialDignityPvE.Cooldown.CurrentCharges == 1 && EssentialDignityPvE.CanUse(out act, usedUp: true) && EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityLast)
+		if (EssentialDignityPvE.Cooldown.CurrentCharges == 1 && EssentialDignityPvE.CanUse(out act, usedUp: true))
 		{
-			return true;
+			if (EssentialDignityPvE.Target.Target?.GetHealthRatio() < EssentialDignityLast)
+			{
+				return true;
+			}
 		}
 
 		if (CelestialIntersectionPvE.CanUse(out act, usedUp: true))

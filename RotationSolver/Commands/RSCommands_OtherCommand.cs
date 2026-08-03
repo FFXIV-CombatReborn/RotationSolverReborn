@@ -315,16 +315,29 @@ public static partial class RSCommands
 		HashSet<IAction> seen = [];
 		for (var i = 0; i < rotationActions.Length; i++)
 		{
-			if (seen.Add(rotationActions[i]))
+			var action = rotationActions[i];
+			// Skip PvE/PvP variants that don't match the current content so that
+			// actions sharing the same in-game name (e.g. "Guardian" for GuardianPvE
+			// and GuardianPvP) aren't ambiguous when matching by name.
+			if (action is IBaseAction baseAction && baseAction.Info.IsPvP != DataCenter.IsPvP)
 			{
-				allActionsList.Add(rotationActions[i]);
+				continue;
+			}
+			if (seen.Add(action))
+			{
+				allActionsList.Add(action);
 			}
 		}
 		for (var i = 0; i < dutyActions.Length; i++)
 		{
-			if (seen.Add(dutyActions[i]))
+			var action = dutyActions[i];
+			if (action is IBaseAction baseAction && baseAction.Info.IsPvP != DataCenter.IsPvP)
 			{
-				allActionsList.Add(dutyActions[i]);
+				continue;
+			}
+			if (seen.Add(action))
+			{
+				allActionsList.Add(action);
 			}
 		}
 		IAction[] allActions = [.. allActionsList];
@@ -391,16 +404,26 @@ public static partial class RSCommands
 			HashSet<IAction> seen = [];
 			for (var i = 0; i < rotationActions.Length; i++)
 			{
-				if (seen.Add(rotationActions[i]))
+				var action = rotationActions[i];
+				if (action is IBaseAction baseAction && baseAction.Info.IsPvP != DataCenter.IsPvP)
 				{
-					allActionsList.Add(rotationActions[i]);
+					continue;
+				}
+				if (seen.Add(action))
+				{
+					allActionsList.Add(action);
 				}
 			}
 			for (var i = 0; i < dutyActions.Length; i++)
 			{
-				if (seen.Add(dutyActions[i]))
+				var action = dutyActions[i];
+				if (action is IBaseAction baseAction && baseAction.Info.IsPvP != DataCenter.IsPvP)
 				{
-					allActionsList.Add(dutyActions[i]);
+					continue;
+				}
+				if (seen.Add(action))
+				{
+					allActionsList.Add(action);
 				}
 			}
 			IAction[] allActions = [.. allActionsList];
