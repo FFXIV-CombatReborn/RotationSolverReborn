@@ -1,5 +1,6 @@
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
+using RotationSolver.Basic.Rotations.Duties;
 
 namespace RotationSolver.Basic.Rotations;
 
@@ -648,10 +649,12 @@ public partial class CustomRotation
 
 		if (nextGCD is BaseAction action)
 		{
-			if (Role is JobRole.RangedMagical &&
-				action.Info.CastTime >= 5 && IActionHelper.IsLastActionGCD() && SwiftcastPvE.CanUse(out act))
+			if (Role is JobRole.RangedMagical && action.Info.CastTime >= 5 && IActionHelper.IsLastActionGCD() && SwiftcastPvE.CanUse(out act))
 			{
-				return true;
+				if (!nextGCD.IsTheSameTo(false, ActionID.MegaflarePvE, ActionID.ThunderstormPvE, ActionID.JudgmentBoltPvE, ActionID.HellfirePvE, ActionID.EarthenWallPvE))
+				{
+					return true;
+				}
 			}
 		}
 
