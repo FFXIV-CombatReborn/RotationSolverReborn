@@ -310,7 +310,7 @@ internal static class DataCenter
 
 	public static unsafe float ComboTime => ActionManager.Instance()->Combo.Timer;
 
-	public static bool IsMoving => Player.IsMoving;
+	public static bool IsMoving => Player.IsMoving || BMRIsMoving;
 
 	internal static float StopMovingRaw { get; set; }
 
@@ -2506,6 +2506,21 @@ internal static class DataCenter
 	public static float BMRSpecialModeIn { get; set; } = float.MaxValue;
 	public static SpecialMode BMRSpecialModeType { get; set; } = SpecialMode.Normal;
 
+	/// <summary>
+	/// True if BossMod's boss module AI hints are requesting the current cast be cancelled.
+	/// </summary>
+	public static bool BMRForceCancelCast { get; set; }
+
+	/// <summary>
+	/// True if BossMod's AI controller is requesting the current cast be cancelled.
+	/// </summary>
+	public static bool BMRForceCancelCastAI { get; set; }
+
+	/// <summary>
+	/// True if BossMod is moving.
+	/// </summary>
+	public static bool BMRIsMoving { get; set; }
+
 	// Debug diagnostics
 	public static float BMRDebugTimelineRaidwide { get; set; } = float.MaxValue;
 	public static float BMRDebugTimelineTankbuster { get; set; } = float.MaxValue;
@@ -2626,6 +2641,9 @@ internal static class DataCenter
 		BMRNextDamageType = 0;
 		BMRSpecialModeIn = float.MaxValue;
 		BMRSpecialModeType = 0;
+		BMRForceCancelCast = false;
+		BMRForceCancelCastAI = false;
+		BMRIsMoving = false;
 		BMRDebugTimelineRaidwide = float.MaxValue;
 		BMRDebugTimelineTankbuster = float.MaxValue;
 		BMRDebugHintsRaidwide = float.MaxValue;

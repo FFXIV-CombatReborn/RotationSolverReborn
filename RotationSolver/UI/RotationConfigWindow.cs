@@ -5150,6 +5150,9 @@ public partial class RotationConfigWindow : Window
 	{
 		ImGui.Text($"Cooldown Planner IPC Enabled: {BMRPlan_IPCSubscriber.IsEnabled}");
 		ImGui.Text($"BMRPlannedActionsCount: {DataCenter.BMRPlannedActions.Count}");
+		ImGui.Text($"BMRForceCancelCast: {DataCenter.BMRForceCancelCast}");
+		ImGui.Text($"BMRForceCancelCastAI: {DataCenter.BMRForceCancelCastAI}");
+		ImGui.Text($"BMRIsMoving: {DataCenter.BMRIsMoving}");
 	}
 
 	private static void DrawAction(ActionID id, string type)

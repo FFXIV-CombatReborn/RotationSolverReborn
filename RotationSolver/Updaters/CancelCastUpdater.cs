@@ -62,6 +62,11 @@ internal static class CancelCastUpdater
 
 		var bmrPyretic = DataCenter.BMRSpecialModeType == SpecialMode.Pyretic;
 
+		// Cancel the cast if BossMod's own AI hints (module or AI controller) are requesting a cancel,
+		// e.g. because the boss module determined the cast is no longer safe/useful.
+		var bmrForceCancelCast = Service.Config.UseBmrTimeline
+			&& (DataCenter.BMRForceCancelCast || DataCenter.BMRForceCancelCastAI);
+
 		var shouldStopHealing =
 			Service.Config.StopHealingAfterThresholdExperimental2
 			&& DataCenter.InCombat
@@ -71,7 +76,7 @@ internal static class CancelCastUpdater
 				is IBaseAction { Setting.GCDSingleHeal: true }
 			&& (DataCenter.MergedStatus & (AutoStatus.HealAreaSpell | AutoStatus.HealSingleSpell)) == 0;
 
-		if (_tarStopCastDelay.Delay(tarDead) || hasNoCastingStatus || stopDueStatus || tarHasRaise || tarHasGuard || shouldStopHealing)
+		if (_tarStopCastDelay.Delay(tarDead) || hasNoCastingStatus || stopDueStatus || tarHasRaise || tarHasGuard || shouldStopHealing || bmrForceCancelCast)
 		{
 			var uiState = UIState.Instance();
 			if (uiState != null)

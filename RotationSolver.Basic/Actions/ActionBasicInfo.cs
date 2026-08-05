@@ -603,7 +603,7 @@ public readonly struct ActionBasicInfo
 		// Must be in a state where casting is not possible
 		if (DataCenter.SpecialType == SpecialCommandType.NoCasting ||
 			(DateTime.Now > DataCenter.KnockbackStart && DateTime.Now < DataCenter.KnockbackFinished) ||
-			(DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck))
+			(DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck) || DataCenter.BMRForceCancelCast || DataCenter.BMRIsMoving)
 		{
 			return true;
 		}

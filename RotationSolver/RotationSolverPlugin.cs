@@ -410,6 +410,10 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		HotbarHighlightManager.Dispose();
 		ActionTimelineManager.Instance.Dispose();
 
+		BMRInfo_IPCSubscriber.Dispose();
+		BMRTimeline_IPCSubscriber.Dispose();
+		BMRPlan_IPCSubscriber.Dispose();
+
 		ECommonsMain.Dispose();
 	}
 }
