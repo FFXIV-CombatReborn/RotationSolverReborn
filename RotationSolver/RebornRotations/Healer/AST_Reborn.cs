@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Healer;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.5")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
 [SourceCode(Path = "main/RebornRotations/Healer/AST_Reborn.cs")]
 
 public sealed class AST_Reborn : AstrologianRotation
@@ -260,7 +260,7 @@ public sealed class AST_Reborn : AstrologianRotation
 
 		if (EssentialDignityPvE.Cooldown.CurrentCharges == 3 && EssentialDignityPvE.CanUse(out act, usedUp: true))
 		{
-			if (EssentialDignityPvE.Target.Target?.GetHealthRatio() < EssentialDignityThird)
+			if (EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityThird)
 			{
 				return true;
 			}
@@ -268,7 +268,7 @@ public sealed class AST_Reborn : AstrologianRotation
 
 		if (EssentialDignityPvE.Cooldown.CurrentCharges == 2 && EssentialDignityPvE.CanUse(out act, usedUp: true))
 		{
-			if (EssentialDignityPvE.Target.Target?.GetHealthRatio() < EssentialDignitySecond)
+			if (EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignitySecond)
 			{
 				return true;
 			}
@@ -276,7 +276,7 @@ public sealed class AST_Reborn : AstrologianRotation
 
 		if (EssentialDignityPvE.Cooldown.CurrentCharges == 1 && EssentialDignityPvE.CanUse(out act, usedUp: true))
 		{
-			if (EssentialDignityPvE.Target.Target?.GetHealthRatio() < EssentialDignityLast)
+			if (EssentialDignityPvE.Target.Target.GetHealthRatio() < EssentialDignityLast)
 			{
 				return true;
 			}
@@ -519,7 +519,7 @@ public sealed class AST_Reborn : AstrologianRotation
 
 		if (AspectedBeneficPvE.CanUse(out act))
 		{
-			if (IsMoving || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal)
+			if (IsMoving || AspectedBeneficPvE.Target.Target.GetHealthRatio() < AspectedBeneficHeal)
 			{
 				return true;
 			}

@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Healer;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.5")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
 [SourceCode(Path = "main/RebornRotations/Healer/WHM_Reborn.cs")]
 
 public sealed class WHM_Reborn : WhiteMageRotation
@@ -224,7 +224,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 	protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
 	{
 		if (BenedictionPvE.CanUse(out act) &&
-			BenedictionPvE.Target.Target?.GetHealthRatio() < BenedictionHeal)
+			BenedictionPvE.Target.Target.GetHealthRatio() < BenedictionHeal)
 		{
 			return true;
 		}
@@ -345,7 +345,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			return true;
 		}
 
-		if (RegenPvE.CanUse(out act) && (RegenPvE.Target.Target?.GetHealthRatio() > RegenHeal))
+		if (RegenPvE.CanUse(out act) && (RegenPvE.Target.Target.GetHealthRatio() > RegenHeal))
 		{
 			return true;
 		}

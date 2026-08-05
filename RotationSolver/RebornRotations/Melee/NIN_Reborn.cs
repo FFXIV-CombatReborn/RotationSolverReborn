@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.5")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
 [SourceCode(Path = "main/RebornRotations/Melee/NIN_Reborn.cs")]
 
 public sealed class NIN_Reborn : NinjaRotation

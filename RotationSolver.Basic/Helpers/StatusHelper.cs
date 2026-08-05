@@ -603,8 +603,22 @@ public static class StatusHelper
 			return false;
 		}
 
+		// Extra defensive checks to shrink the window between the IsValid()
+		// check above and the native StatusList access below. Objects can be
+		// invalidated (despawned/removed from the object table) between the
+		// two, and some entity kinds do not expose a usable StatusManager.
+		if (Doomp.Address == nint.Zero || Doomp.EntityId == 0)
+		{
+			return false;
+		}
+
 		try
 		{
+			if (!Doomp.IsValid())
+			{
+				return false;
+			}
+
 			if (Doomp.StatusList == null)
 			{
 				return false;
