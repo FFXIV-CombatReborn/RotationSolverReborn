@@ -9,19 +9,9 @@ internal static class BossModUpdater
 
 	public static void Update()
 	{
-		if (!Service.Config.UseBmrTimeline)
-		{
-			if (DataCenter.BMRHasActiveModule)
-			{
-				DataCenter.ResetBmrData();
-			}
-
-			return;
-		}
-
 		if (!_checkedAvailability)
 		{
-			_isAvailable = BMRTimeline_IPCSubscriber.IsEnabled;
+			_isAvailable = BMRTimeline_IPCSubscriber.IsEnabled || BMRInfo_IPCSubscriber.IsEnabled || BMRPlan_IPCSubscriber.IsEnabled;
 			_checkedAvailability = true;
 		}
 
@@ -35,11 +25,9 @@ internal static class BossModUpdater
 		{
 			DataCenter.BMRHasActiveModule = BMRTimeline_IPCSubscriber.HasActiveModule?.Invoke() ?? false;
 
-			if (!DataCenter.BMRHasActiveModule)
-			{
-				DataCenter.ResetBmrData();
-				return;
-			}
+			DataCenter.BMRForceCancelCast = BMRInfo_IPCSubscriber.ForceCancelCast?.Invoke() ?? false;
+			DataCenter.BMRForceCancelCastAI = BMRInfo_IPCSubscriber.ForceCancelCastAI?.Invoke() ?? false;
+			DataCenter.BMRIsMoving = BMRInfo_IPCSubscriber.IsMoving?.Invoke() ?? false;
 
 			DataCenter.BMRActiveModuleName = BMRTimeline_IPCSubscriber.ActiveModuleName?.Invoke();
 
