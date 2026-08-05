@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Healer;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.5")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
 [SourceCode(Path = "main/RebornRotations/Healer/SGE_Reborn.cs")]
 
 public sealed class SGE_Reborn : SageRotation
@@ -236,7 +236,7 @@ public sealed class SGE_Reborn : SageRotation
 			}
 		}
 
-		if (TaurocholePvE.CanUse(out act) && TaurocholePvE.Target.Target?.GetHealthRatio() < TaurocholeHeal)
+		if (TaurocholePvE.CanUse(out act) && TaurocholePvE.Target.Target.GetHealthRatio() < TaurocholeHeal)
 		{
 			return true;
 		}

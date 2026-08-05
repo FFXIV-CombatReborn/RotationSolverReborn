@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Melee;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.5")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.55")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Melee/DRG_Default.PvP.cs")]
 
 public sealed class DRG_DefaultPvP : DragoonRotation

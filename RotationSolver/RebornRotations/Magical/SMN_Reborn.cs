@@ -2,7 +2,7 @@
 
 namespace RotationSolver.RebornRotations.Magical;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.5")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
 [SourceCode(Path = "main/RebornRotations/Magical/SMN_Reborn.cs")]
 
 public sealed class SMN_Reborn : SummonerRotation
@@ -393,7 +393,7 @@ public sealed class SMN_Reborn : SummonerRotation
 	[RotationDesc(ActionID.ResurrectionPvE)]
 	protected override bool RaiseGCD(out IAction? act)
 	{
-		if ((!InSolarBahamut && SBRaise) || !SBRaise)
+		if ((InSolarBahamut && SBRaise) || !InSolarBahamut)
 		{
 			if (ResurrectionPvE.CanUse(out act))
 			{
