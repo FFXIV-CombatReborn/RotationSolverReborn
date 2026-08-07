@@ -1094,6 +1094,10 @@ public partial class DutyRotation
 	{
 		setting.ActionCheck = () => WhiteMageLevel >= 5;
 		setting.IsFriendly = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			AoeCount = 1,
+		};
 	}
 	#endregion
 

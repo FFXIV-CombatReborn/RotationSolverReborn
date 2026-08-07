@@ -92,6 +92,11 @@ internal static class DataCenter
 		return Player.Available && (State || IsManual || Service.Config.TeachingMode);
 	}
 
+	public static bool IsActivatedIPC()
+	{
+		return Player.Available && (State || IsManual);
+	}
+
 	public static bool PlayerAvailable()
 	{
 		return Player.Available && Player.Object != null;
