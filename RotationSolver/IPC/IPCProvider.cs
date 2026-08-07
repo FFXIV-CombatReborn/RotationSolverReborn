@@ -243,5 +243,19 @@ namespace RotationSolver.IPC
 		{
 			return (byte)ActionUpdater.DesiredPositional;
 		}
+
+		/// <summary>
+		/// IPC method allowing other plugins to subscribe to and query whether RotationSolver's
+		/// autorotation is currently active.
+		/// </summary>
+		/// <returns>
+		/// <see langword="true"/> if <see cref="DataCenter.IsActivated"/> reports the autorotation
+		/// as active; otherwise, <see langword="false"/>.
+		/// </returns>
+		[EzIPC]
+		public bool AutorotationActive()
+		{
+			return DataCenter.IsActivatedIPC();
+		}
 	}
 }

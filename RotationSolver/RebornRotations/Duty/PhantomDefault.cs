@@ -1068,7 +1068,7 @@ public sealed class PhantomDefault : PhantomRotation
 			return true;
 		}
 
-		if (OccultHolyPvE.CanUse(out act))
+		if (OccultHolyPvE.CanUse(out act, skipAoeCheck: true))
 		{
 			return true;
 		}
