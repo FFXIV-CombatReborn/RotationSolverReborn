@@ -165,6 +165,18 @@ public partial class DutyRotation : IDisposable
 
 	#endregion
 
+	/// <summary>
+	/// Last used Combo Action.
+	/// <br>WARNING: Do Not make this method the main of your rotation.</br>
+	/// </summary>
+	/// <param name="ids">True if any of this is matched.</param>
+	/// <returns></returns>
+	public static bool IsLastComboAction(params ActionID[] ids)
+	{
+		CustomRotation.CountingOfLastUsing++;
+		return IActionHelper.IsLastComboAction(ids);
+	}
+
 	public virtual void DisplayDutyStatus()
 	{
 		if (DataCenter.Orbonne)
