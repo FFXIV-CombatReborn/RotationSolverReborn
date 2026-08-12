@@ -3081,12 +3081,12 @@ public partial class RotationConfigWindow : Window
 
 					if (shouldStatus)
 					{
-						int statusGcdCount = config.StatusGcdCount;
+						int StatusRefreshGcdCount = config.StatusRefreshGcdCount;
 						ImGui.SetNextItemWidth(Scale * 150);
 						if (ImGui.DragInt($"{UiString.ConfigWindow_Actions_GcdCount.GetDescription()}##{a}",
-							ref statusGcdCount, 0.05f, 1, 10))
+							ref StatusRefreshGcdCount, 0.05f, 1, 10))
 						{
-							config.StatusGcdCount = (byte)statusGcdCount;
+							config.StatusRefreshGcdCount = (byte)StatusRefreshGcdCount;
 						}
 					}
 				}

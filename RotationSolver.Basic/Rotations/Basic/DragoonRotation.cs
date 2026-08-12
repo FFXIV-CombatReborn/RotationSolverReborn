@@ -144,7 +144,7 @@ public partial class DragoonRotation
 		setting.StatusProvide = [StatusID.PowerSurge_2720];
 		setting.CreateConfig = () => new ActionConfig()
 		{
-			StatusGcdCount = 6,
+			StatusRefreshGcdCount = 6,
 		};
 	}
 
@@ -194,7 +194,7 @@ public partial class DragoonRotation
 		setting.TargetStatusProvide = [StatusID.ChaosThrust, StatusID.ChaoticSpring];
 		setting.CreateConfig = () => new ActionConfig()
 		{
-			StatusGcdCount = 6,
+			StatusRefreshGcdCount = 6,
 		};
 	}
 
@@ -328,7 +328,7 @@ public partial class DragoonRotation
 		setting.TargetStatusProvide = [StatusID.ChaoticSpring];
 		setting.CreateConfig = () => new ActionConfig()
 		{
-			StatusGcdCount = 6,
+			StatusRefreshGcdCount = 6,
 		};
 	}
 
@@ -362,7 +362,7 @@ public partial class DragoonRotation
 		setting.StatusProvide = [StatusID.PowerSurge_2720];
 		setting.CreateConfig = () => new ActionConfig()
 		{
-			StatusGcdCount = 6,
+			StatusRefreshGcdCount = 6,
 		};
 	}
 

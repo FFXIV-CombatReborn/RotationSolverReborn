@@ -150,17 +150,34 @@ public class BaseAction : IBaseAction
 				}
 			}
 
-			// One-time AoE count reset: force AOE Count to rotation default (or global default),
-			// without touching other user-configured fields.
-			if (!value.AoeResetDone)
-			{
-				var defaultAoe = (Setting.CreateConfig?.Invoke()?.AoeCount) ?? new ActionConfig().AoeCount;
-				value.AoeCount = defaultAoe;
-				value.AoeResetDone = true;
+			// Keep user configs in sync with rotation defaults: whenever the default value for
+			// AOE Count or Status Refresh GCD Count changes between plugin updates, reset the
+			// user's stored value to the new default, without touching other user-configured fields.
+			ActionConfig? defaults = null;
+			ActionConfig GetDefaults() => defaults ??= Setting.CreateConfig?.Invoke() ?? new ActionConfig();
 
+			bool changed = false;
+
+			byte defaultAoe = GetDefaults().AoeCount;
+			if (!value.AoeResetDone || value.AppliedDefaultAoeCount != defaultAoe)
+			{
+				value.AoeCount = defaultAoe;
+				value.AppliedDefaultAoeCount = defaultAoe;
+				value.AoeResetDone = true;
+				changed = true;
+			}
+
+			byte defaultStatusRefresh = GetDefaults().StatusRefreshGcdCount;
+			if (value.AppliedDefaultStatusRefreshGcdCount != defaultStatusRefresh)
+			{
+				value.StatusRefreshGcdCount = defaultStatusRefresh;
+				value.AppliedDefaultStatusRefreshGcdCount = defaultStatusRefresh;
+				changed = true;
+			}
+
+			if (changed)
+			{
 				Service.Config.RotationActionConfig[ID] = value;
-				// Optionally persist immediately:
-				// Service.Config.Save();
 			}
 
 			return value;

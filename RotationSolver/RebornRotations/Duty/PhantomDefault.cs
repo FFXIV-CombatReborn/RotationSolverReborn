@@ -1150,15 +1150,9 @@ public sealed class PhantomDefault : PhantomRotation
 			return true;
 		}
 
-		if (SilverCannonPvE.CanUse(out act, skipStatusProvideCheck: true))
+		if (SilverCannonPvE.CanUse(out act))
 		{
-			if (SilverCannonPvE.Target.Target?.WillStatusEnd(15, true, SilverCannonPvE.Setting.TargetStatusProvide ?? []) ?? false)
-			{
-				if (SilverCannonPvE.Target.Target?.WillStatusEnd(15, false, SilverCannonPvE.Setting.TargetStatusProvide ?? []) ?? false)
-				{
-					return true;
-				}
-			}
+			return true;
 		}
 
 		if (HolyCannonPvE.CanUse(out act))

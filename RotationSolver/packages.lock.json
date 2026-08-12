@@ -56,8 +56,8 @@
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "IY0lTfC2uVwTizjtGgQ03ViwyXGQ9lMDblzB889/HyguAZJ2J8pRrjPown8h2eJe8WFc8nh+BUEsEPkshzizYQ=="
+        "resolved": "10.0.11",
+        "contentHash": "WXGazuzGf3eX24z1qgiGwP2df3t2T28QeZvMjlRqdjNuewQyLfbOb6rEXmk6Xs++gOQClmw90pkjPd9j/hNWDw=="
       },
       "Svg": {
         "type": "Transitive",
@@ -70,10 +70,10 @@
       },
       "System.Drawing.Common": {
         "type": "Transitive",
-        "resolved": "10.0.10",
-        "contentHash": "R9q9TI//kGavXWTxvaSS9ERj79s+Vm7V7769zEmRbzdrIOJzAnGw+wWSo/JkaVdQfAAefV2V1bWYKCHF7Zs5oQ==",
+        "resolved": "10.0.11",
+        "contentHash": "Schxw0FzXMAwa+If/oVxqjrmmiyUbw9KUAeqJOPnjsdAzkmUZXSZWNRLHZye2boFYlbMRkeBY6dba5hs8Mu4OQ==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "10.0.10"
+          "Microsoft.Win32.SystemEvents": "10.0.11"
         }
       },
       "rotationsolver.sourcegenerators": {
@@ -89,7 +89,7 @@
           "Microsoft.CodeAnalysis.CSharp": "[5.6.0, )",
           "RotationSolver.SourceGenerators": "[1.0.0, )",
           "Svg": "[3.4.8, )",
-          "System.Drawing.Common": "[10.0.10, )"
+          "System.Drawing.Common": "[10.0.11, )"
         }
       }
     }

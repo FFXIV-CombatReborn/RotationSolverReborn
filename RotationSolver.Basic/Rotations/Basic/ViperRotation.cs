@@ -649,12 +649,12 @@ public partial class ViperRotation
 
 	static partial void ModifyHuntersCoilPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => DreadActive || HuntersCoilOnly;
+		setting.ActionCheck = () => (DreadActive || HuntersCoilOnly) && !IsLastGCD(ActionID.HuntersCoilPvE);
 	}
 
 	static partial void ModifySwiftskinsCoilPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => DreadActive || SwiftskinsCoilOnly;
+		setting.ActionCheck = () => (DreadActive || SwiftskinsCoilOnly) && !IsLastGCD(ActionID.SwiftskinsCoilPvE);
 	}
 
 	static partial void ModifyVicepitPvE(ref ActionSetting setting)
