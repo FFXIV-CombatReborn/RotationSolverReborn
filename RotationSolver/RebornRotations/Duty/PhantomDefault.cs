@@ -1090,9 +1090,15 @@ public sealed class PhantomDefault : PhantomRotation
 			return true;
 		}
 
-		if (BlazingSpellbladePvE.CanUse(out act))
+		if (BlazingSpellbladePvE.CanUse(out act, skipStatusProvideCheck: true))
 		{
-			return true;
+			if (BlazingSpellbladePvE.Target.Target?.WillStatusEnd(30, true, BlazingSpellbladePvE.Setting.TargetStatusProvide ?? []) ?? false)
+			{
+				if (BlazingSpellbladePvE.Target.Target?.WillStatusEnd(30, false, BlazingSpellbladePvE.Setting.TargetStatusProvide ?? []) ?? false)
+				{
+					return true;
+				}
+			}
 		}
 
 		if (HolySpellbladePvE.CanUse(out act))

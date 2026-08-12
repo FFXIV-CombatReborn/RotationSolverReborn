@@ -910,6 +910,7 @@ public partial class DutyRotation
 	static partial void ModifyBlazingSpellbladePvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => MysticKnightLevel >= 4;
+		setting.TargetStatusProvide = [StatusID.BlazingBane];
 		setting.IsFriendly = false;
 	}
 
