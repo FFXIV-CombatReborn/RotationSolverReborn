@@ -345,7 +345,7 @@ public struct ActionTargetInfo(IBaseAction action)
 				}
 			}
 
-			if (battleChara.WillStatusEndGCD(action.Config.StatusGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusNeed))
+			if (battleChara.WillStatusEndGCD(action.Config.StatusRefreshGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusNeed))
 			{
 				return false;
 			}
@@ -353,7 +353,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
 		if (action.Setting.TargetStatusProvide != null && !skipStatusProvideCheck)
 		{
-			if (!battleChara.WillStatusEndGCD(action.Config.StatusGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusProvide) || (Service.Config.Statuscap2 && StatusHelper.IsStatusCapped(battleChara)))
+			if (!battleChara.WillStatusEndGCD(action.Config.StatusRefreshGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusProvide) || (Service.Config.Statuscap2 && StatusHelper.IsStatusCapped(battleChara)))
 			{
 				return false;
 			}

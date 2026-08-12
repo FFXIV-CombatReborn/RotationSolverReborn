@@ -191,7 +191,7 @@ public partial class WarriorRotation
 		setting.StatusProvide = [StatusID.SurgingTempest];
 		setting.CreateConfig = () => new ActionConfig()
 		{
-			StatusGcdCount = 9,
+			StatusRefreshGcdCount = 9,
 		};
 	}
 

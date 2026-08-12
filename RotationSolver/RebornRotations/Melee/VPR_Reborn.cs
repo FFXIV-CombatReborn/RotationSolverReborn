@@ -40,9 +40,14 @@ public sealed class VPR_Reborn : ViperRotation
 	#endregion
 
 	#region Tracking Properties
+	// 0 = none, 1 = Hunter's Coil, 2 = Swiftskin's Coil.
+	// Locks in the position-based Coil choice so the predicted positional doesn't flip while the player repositions.
+	private int _coilChoice = 0;
+
 	public override void DisplayRotationStatus()
 	{
 		ImGui.Text($"No Last Combo Action: {IsNoActionCombo()}");
+		ImGui.Text($"Locked Coil Choice: {(_coilChoice == 1 ? "Hunter's Coil" : _coilChoice == 2 ? "Swiftskin's Coil" : "None")}");
 	}
 	#endregion
 
@@ -619,48 +624,72 @@ public sealed class VPR_Reborn : ViperRotation
 		// Try using Coil thats buff provided will end soon
 		// then try using Coil that you can hit positional on
 		// then try using Coil that will end first
+		bool canHunterCoil = HuntersCoilPvE.CanUse(out IAction? hunterCoilAct, skipStatusProvideCheck: true);
+		bool canSwiftCoil = SwiftskinsCoilPvE.CanUse(out IAction? swiftCoilAct, skipStatusProvideCheck: true);
+
 		if (DreadActive)
 		{
+			// Clear the locked Coil choice once a Coil has actually been cast.
+			if (_coilChoice != 0 && IsLastGCD(true, HuntersCoilPvE, SwiftskinsCoilPvE))
+			{
+				_coilChoice = 0;
+			}
+
 			if (HasHunterAndSwift)
 			{
-				if (WillSwiftEnd)
+				if (WillSwiftEnd && canSwiftCoil)
 				{
-					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-					{
-						return true;
-					}
-				}
-
-				if (WillHunterEnd)
-				{
-					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-					{
-						return true;
-					}
-				}
-
-				if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
-				{
+					act = swiftCoilAct;
 					return true;
 				}
 
-				if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
+				if (WillHunterEnd && canHunterCoil)
 				{
+					act = hunterCoilAct;
+					return true;
+				}
+
+				// Honor a previously locked choice so the predicted positional doesn't change while repositioning.
+				if (_coilChoice == 1 && canHunterCoil)
+				{
+					act = hunterCoilAct;
+					return true;
+				}
+
+				if (_coilChoice == 2 && canSwiftCoil)
+				{
+					act = swiftCoilAct;
+					return true;
+				}
+
+				if (canHunterCoil && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
+				{
+					_coilChoice = 1;
+					act = hunterCoilAct;
+					return true;
+				}
+
+				if (canSwiftCoil && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
+				{
+					_coilChoice = 2;
+					act = swiftCoilAct;
 					return true;
 				}
 
 				switch (HunterOrSwiftEndsFirst)
 				{
 					case "Hunter":
-						if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+						if (canHunterCoil)
 						{
+							act = hunterCoilAct;
 							return true;
 						}
 
 						break;
 					case "Swift":
-						if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+						if (canSwiftCoil)
 						{
+							act = swiftCoilAct;
 							return true;
 						}
 
@@ -668,13 +697,15 @@ public sealed class VPR_Reborn : ViperRotation
 					case "Equal":
 					case null:
 					default:
-						if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+						if (canHunterCoil)
 						{
+							act = hunterCoilAct;
 							return true;
 						}
 
-						if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+						if (canSwiftCoil)
 						{
+							act = swiftCoilAct;
 							return true;
 						}
 
@@ -686,54 +717,73 @@ public sealed class VPR_Reborn : ViperRotation
 			{
 				if (!IsHunter && !IsSwift)
 				{
-					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
+					// Honor a previously locked choice so the predicted positional doesn't change while repositioning.
+					if (_coilChoice == 1 && canHunterCoil)
 					{
+						act = hunterCoilAct;
 						return true;
 					}
 
-					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
+					if (_coilChoice == 2 && canSwiftCoil)
 					{
+						act = swiftCoilAct;
 						return true;
 					}
 
-					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+					if (canHunterCoil && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
 					{
+						_coilChoice = 1;
+						act = hunterCoilAct;
 						return true;
 					}
 
-					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+					if (canSwiftCoil && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
 					{
+						_coilChoice = 2;
+						act = swiftCoilAct;
+						return true;
+					}
+
+					if (canHunterCoil)
+					{
+						act = hunterCoilAct;
+						return true;
+					}
+
+					if (canSwiftCoil)
+					{
+						act = swiftCoilAct;
 						return true;
 					}
 				}
 
-				if (!IsSwift)
+				if (!IsSwift && canSwiftCoil)
 				{
-					if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-					{
-						return true;
-					}
+					act = swiftCoilAct;
+					return true;
 				}
 
-				if (!IsHunter)
+				if (!IsHunter && canHunterCoil)
 				{
-					if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
-					{
-						return true;
-					}
+					act = hunterCoilAct;
+					return true;
 				}
 			}
 		}
 
 		if (!DreadActive)
 		{
-			if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+			_coilChoice = 0;
+
+			if (canHunterCoil)
 			{
+				act = hunterCoilAct;
 				return true;
 			}
 
-			if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+			if (canSwiftCoil)
 			{
+				act = swiftCoilAct;
 				return true;
 			}
 		}

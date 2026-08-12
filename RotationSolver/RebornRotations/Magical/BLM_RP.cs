@@ -97,38 +97,38 @@ public class BLM_RP : BlackMageRotation
 	{
 		//2 target thunder
 		if (HighThunderIiPvE.CanUse(out act)
-			&& (HighThunderIiPvE.Target.Target?.WillStatusEndGCD(HighThunderIiPvE.Config.StatusGcdCount, 0, true, HighThunderIiPvE.Setting.TargetStatusProvide ?? []) ?? false))
+			&& (HighThunderIiPvE.Target.Target?.WillStatusEndGCD(HighThunderIiPvE.Config.StatusRefreshGcdCount, 0, true, HighThunderIiPvE.Setting.TargetStatusProvide ?? []) ?? false))
 		{
 			return true;
 		}
 
 		if (ThunderIvPvE.CanUse(out act)
-			&& (ThunderIvPvE.Target.Target?.WillStatusEndGCD(ThunderIvPvE.Config.StatusGcdCount, 0, true, ThunderIvPvE.Setting.TargetStatusNeed ?? []) ?? false))
+			&& (ThunderIvPvE.Target.Target?.WillStatusEndGCD(ThunderIvPvE.Config.StatusRefreshGcdCount, 0, true, ThunderIvPvE.Setting.TargetStatusNeed ?? []) ?? false))
 		{
 			return true;
 		}
 
 		if (ThunderIiPvE.CanUse(out act)
-			&& (ThunderIiPvE.Target.Target?.WillStatusEndGCD(ThunderIiPvE.Config.StatusGcdCount, 0, true, ThunderIiPvE.Setting.TargetStatusNeed ?? []) ?? false))
+			&& (ThunderIiPvE.Target.Target?.WillStatusEndGCD(ThunderIiPvE.Config.StatusRefreshGcdCount, 0, true, ThunderIiPvE.Setting.TargetStatusNeed ?? []) ?? false))
 		{
 			return true;
 		}
 
 		//1 target thunder
 		if (HighThunderPvE.CanUse(out act)
-			&& (HighThunderPvE.Target.Target?.WillStatusEndGCD(HighThunderPvE.Config.StatusGcdCount, 0, true, HighThunderPvE.Setting.TargetStatusProvide ?? []) ?? false))
+			&& (HighThunderPvE.Target.Target?.WillStatusEndGCD(HighThunderPvE.Config.StatusRefreshGcdCount, 0, true, HighThunderPvE.Setting.TargetStatusProvide ?? []) ?? false))
 		{
 			return true;
 		}
 
 		if (ThunderIiiPvE.CanUse(out act)
-			&& (ThunderIiiPvE.Target.Target?.WillStatusEndGCD(ThunderIiiPvE.Config.StatusGcdCount, 0, true, ThunderIiiPvE.Setting.TargetStatusNeed ?? []) ?? false))
+			&& (ThunderIiiPvE.Target.Target?.WillStatusEndGCD(ThunderIiiPvE.Config.StatusRefreshGcdCount, 0, true, ThunderIiiPvE.Setting.TargetStatusNeed ?? []) ?? false))
 		{
 			return true;
 		}
 
 		if (!ThunderIiiPvE.Info.EnoughLevelAndQuest() && ThunderPvE.CanUse(out act)
-			&& (ThunderPvE.Target.Target?.WillStatusEndGCD(ThunderPvE.Config.StatusGcdCount, 0, true, ThunderPvE.Setting.TargetStatusNeed ?? []) ?? false))
+			&& (ThunderPvE.Target.Target?.WillStatusEndGCD(ThunderPvE.Config.StatusRefreshGcdCount, 0, true, ThunderPvE.Setting.TargetStatusNeed ?? []) ?? false))
 		{
 			return true;
 		}

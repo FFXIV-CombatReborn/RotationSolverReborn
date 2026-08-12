@@ -460,10 +460,12 @@ public partial class DutyRotation
 	{
 		setting.ActionCheck = () => CannoneerLevel >= 6;
 		setting.TargetStatusProvide = [StatusID.SilverSickness];
+		setting.StatusFromSelf = false;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
+			StatusRefreshGcdCount = 6,
 		};
 	}
 	#endregion
@@ -911,6 +913,12 @@ public partial class DutyRotation
 	{
 		setting.ActionCheck = () => MysticKnightLevel >= 4;
 		setting.IsFriendly = false;
+		setting.TargetStatusProvide = [StatusID.BlazingBane];
+		setting.StatusFromSelf = false;
+		setting.CreateConfig = () => new ActionConfig()
+		{
+			StatusRefreshGcdCount = 6,
+		};
 	}
 
 	#endregion
@@ -1335,15 +1343,6 @@ public partial class DutyRotation
 	#endregion
 
 	#region Blue Mage
-
-	//public static bool AeroIiUnlocked => Service.GetAdjustedActionId(ActionID.OccultAeroPvE) == ActionID.OccultAeroIiPvE;
-
-	//public static bool AeroIiiUnlocked => Service.GetAdjustedActionId(ActionID.OccultAeroPvE) == ActionID.OccultAeroIiiPvE;
-
-	/// <summary>
-	///
-	/// </summary>
-	public static bool WhiteWindUnlocked => false;
 
 	static partial void ModifyOccultAeroPvE(ref ActionSetting setting)
 	{
