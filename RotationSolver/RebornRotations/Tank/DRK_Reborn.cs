@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace RotationSolver.RebornRotations.Tank;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
@@ -28,11 +30,23 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	[Range(0, 1, ConfigUnitType.Percent)]
 	[RotationConfig(CombatType.PvE, Name = "Target health threshold needed to use Oblation with above option", Parent = nameof(OblationLantern))]
 	private float OblationLanternRatio { get; set; } = 0.5f;
+
+	[RotationConfig(CombatType.PvE, Name = "Opener action")]
+	public OpenerActionStrategy OpenerActionUsage { get; set; } = OpenerActionStrategy.Unmend;
+
+	public enum OpenerActionStrategy : byte
+	{
+		[Description("Use Unmend")]
+		Unmend,
+
+		[Description("Use Shadowstride")]
+		Shadowstride,
+	}
 	#endregion
 
-	#region Countdown Logic
-	// Countdown logic to prepare for combat.
-	// Includes logic for using Provoke, tank stances, and burst medicines.
+		#region Countdown Logic
+		// Countdown logic to prepare for combat.
+		// Includes logic for using Provoke, tank stances, and burst medicines.
 	protected override IAction? CountDownAction(float remainTime)
 	{
 		//Provoke when has Shield.
@@ -57,9 +71,20 @@ public sealed class DRK_Reborn : DarkKnightRotation
 			return act;
 		}
 
-		if (remainTime <= 1f && UnmendPvE.CanUse(out act))
+		if (OpenerActionUsage == OpenerActionStrategy.Unmend)
 		{
-			return act;
+			if (remainTime <= 1f && UnmendPvE.CanUse(out act))
+			{
+				return act;
+			}
+		}
+
+		if (OpenerActionUsage == OpenerActionStrategy.Shadowstride)
+		{
+			if (remainTime <= 1f && ShadowstridePvE.CanUse(out act))
+			{
+				return act;
+			}
 		}
 
 		return base.CountDownAction(remainTime);
