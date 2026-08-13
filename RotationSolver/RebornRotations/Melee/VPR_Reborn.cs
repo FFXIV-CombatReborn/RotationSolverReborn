@@ -624,8 +624,8 @@ public sealed class VPR_Reborn : ViperRotation
 		// Try using Coil thats buff provided will end soon
 		// then try using Coil that you can hit positional on
 		// then try using Coil that will end first
-		bool canHunterCoil = HuntersCoilPvE.CanUse(out IAction? hunterCoilAct, skipStatusProvideCheck: true);
-		bool canSwiftCoil = SwiftskinsCoilPvE.CanUse(out IAction? swiftCoilAct, skipStatusProvideCheck: true);
+		var canHunterCoil = HuntersCoilPvE.CanUse(out var hunterCoilAct, skipStatusProvideCheck: true);
+		var canSwiftCoil = SwiftskinsCoilPvE.CanUse(out var swiftCoilAct, skipStatusProvideCheck: true);
 
 		if (DreadActive)
 		{

@@ -1,10 +1,8 @@
 ﻿using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
-using ECommons;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
-using RotationSolver.Basic.Data;
 using RotationSolver.Data;
 
 namespace RotationSolver.UI.SearchableConfigs;

@@ -383,7 +383,7 @@ internal class OtherConfiguration
 			return false;
 		}
 
-		Dictionary<uint, List<string>>? records = DataCenter.IsInNorthHorn
+		var records = DataCenter.IsInNorthHorn
 			? NorthHornWeaknessRecords
 			: DataCenter.IsInSouthHorn
 				? SouthHornWeaknessRecords

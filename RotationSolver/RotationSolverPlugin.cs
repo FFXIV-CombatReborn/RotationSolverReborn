@@ -185,11 +185,11 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 				if (guid == 0)
 				{
 					Service.Config.HideWarning.Value = true;
-								Svc.Chat.Print("Warning has been hidden.");
-								}
-							});
-						}, CancellationToken.None);
-					}
+					Svc.Chat.Print("Warning has been hidden.");
+				}
+			});
+		}, CancellationToken.None);
+	}
 
 	private static void DutyState_DutyCompleted(IDutyStateEventArgs e)
 	{

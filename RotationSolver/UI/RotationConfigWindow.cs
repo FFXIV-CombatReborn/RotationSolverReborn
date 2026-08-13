@@ -3391,7 +3391,7 @@ public partial class RotationConfigWindow : Window
 					return new MovementSafetyResult { Status = MovementSafetyStatus.NotSafe, Reason = "Unknown movement type" };
 			}
 		}
-			catch (Exception ex)
+		catch (Exception ex)
 		{
 			return new MovementSafetyResult { Status = MovementSafetyStatus.NotSafe, Reason = $"Error: {ex.Message}" };
 		}
@@ -4331,7 +4331,7 @@ public partial class RotationConfigWindow : Window
 		{() => "Next Action", DrawNextAction },
 		{() => "Last Action", DrawLastAction },
 		{() => "IPC Testing", DrawIPC },
-		{() => "BMR Data", DrawBMRData }, 
+		{() => "BMR Data", DrawBMRData },
 		{() => "Occult Crescent Weaknesses", DrawOccultWeaknesses },
 
 		{() => "Effect", () =>

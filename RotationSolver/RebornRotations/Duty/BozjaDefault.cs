@@ -2,7 +2,7 @@
 
 namespace RotationSolver.RebornRotations.Duty;
 
-[Rotation("Bozja Reborn",  CombatType.PvE)]
+[Rotation("Bozja Reborn", CombatType.PvE)]
 internal class BozjaReborn : BozjaRotation
 {
 	#region Configs
@@ -72,24 +72,24 @@ internal class BozjaReborn : BozjaRotation
 	}
 
 	public override bool DefenseSingleGCD(out IAction? act)
-    {
+	{
 		if (LostStoneskinPvE.CanUse(out act))
 		{
 			return true;
 		}
 
 		return base.DefenseSingleGCD(out act);
-    }
+	}
 
-    public override bool DefenseAreaGCD(out IAction? act)
-    {
+	public override bool DefenseAreaGCD(out IAction? act)
+	{
 		if (LostStoneskinIiPvE.CanUse(out act))
 		{
 			return true;
 		}
 
 		return base.DefenseAreaGCD(out act);
-    }
+	}
 
 	public override bool HealSingleGCD(out IAction? act)
 	{
@@ -137,7 +137,7 @@ internal class BozjaReborn : BozjaRotation
 	}
 
 	public override bool GeneralGCD(out IAction? act)
-    {
+	{
 		if (InCombat)
 		{
 			if (LostSeraphStrikePvE.CanUse(out act))
@@ -212,5 +212,5 @@ internal class BozjaReborn : BozjaRotation
 		}
 
 		return base.GeneralGCD(out act);
-    }
+	}
 }
