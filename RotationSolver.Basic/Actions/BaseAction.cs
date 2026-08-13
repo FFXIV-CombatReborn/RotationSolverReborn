@@ -156,9 +156,9 @@ public class BaseAction : IBaseAction
 			ActionConfig? defaults = null;
 			ActionConfig GetDefaults() => defaults ??= Setting.CreateConfig?.Invoke() ?? new ActionConfig();
 
-			bool changed = false;
+			var changed = false;
 
-			byte defaultAoe = GetDefaults().AoeCount;
+			var defaultAoe = GetDefaults().AoeCount;
 			if (!value.AoeResetDone || value.AppliedDefaultAoeCount != defaultAoe)
 			{
 				value.AoeCount = defaultAoe;
@@ -167,7 +167,7 @@ public class BaseAction : IBaseAction
 				changed = true;
 			}
 
-			byte defaultStatusRefresh = GetDefaults().StatusRefreshGcdCount;
+			var defaultStatusRefresh = GetDefaults().StatusRefreshGcdCount;
 			if (value.AppliedDefaultStatusRefreshGcdCount != defaultStatusRefresh)
 			{
 				value.StatusRefreshGcdCount = defaultStatusRefresh;

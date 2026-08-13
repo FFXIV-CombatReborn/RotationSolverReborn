@@ -16,7 +16,6 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
-using System.Drawing;
 using Action = Lumina.Excel.Sheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;

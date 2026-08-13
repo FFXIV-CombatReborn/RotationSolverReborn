@@ -1,9 +1,7 @@
 ﻿using ECommons.ExcelServices;
 using ECommons.GameHelpers;
-using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using RotationSolver.Basic.Rotations.Duties;
 
 namespace RotationSolver.Basic.Actions;
 

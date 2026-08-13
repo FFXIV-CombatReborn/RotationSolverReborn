@@ -1913,7 +1913,7 @@ public struct ActionTargetInfo(IBaseAction action)
 					}
 				}
 				break;
-				
+
 			// Movement-attack: the character moves as part of dealing damage to a hostile target.
 			// Use the full standard hostile targeting pipeline — all normal filters apply
 			// (stop marks, priority, TTK, resistance, CanTarget predicate).

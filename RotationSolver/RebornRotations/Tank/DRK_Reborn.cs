@@ -1,5 +1,3 @@
-using Windows.UI.Input;
-
 namespace RotationSolver.RebornRotations.Tank;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]

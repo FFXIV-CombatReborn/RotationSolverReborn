@@ -389,7 +389,7 @@ public partial class DutyRotation
 	static partial void ModifyLostRendArmorPvE(ref ActionSetting setting)
 	{
 		setting.IsFriendly = false;
-		setting.TargetStatusProvide	= [StatusID.LostRendArmor];
+		setting.TargetStatusProvide = [StatusID.LostRendArmor];
 		setting.CreateConfig = () => new ActionConfig
 		{
 			AoeCount = 1,
