@@ -416,118 +416,121 @@ namespace RotationSolver.Commands
 					return;
 				}
 
-				if (Service.Config.StartOnPartyIsInCombat2 && !DataCenter.State && DataCenter.PartyMembers.Count > 1)
+				if (Service.Config.AutoOnYes)
 				{
-					for (var i = 0; i < DataCenter.PartyMembers.Count; i++)
+					if (Service.Config.StartOnPartyIsInCombat2 && !DataCenter.State && DataCenter.PartyMembers.Count > 1)
 					{
-						var p = DataCenter.PartyMembers[i];
-						if (p != null && p.InCombat())
+						for (var i = 0; i < DataCenter.PartyMembers.Count; i++)
 						{
-							DoStateCommandType(StateCommandType.Auto);
-							return;
-						}
-
-						if (p != null && hostileTargetObjectIds.Contains(p.GameObjectId))
-						{
-							DoStateCommandType(StateCommandType.Auto);
-							return;
-						}
-					}
-				}
-
-				if ((Service.Config.StartOnAllianceIsInCombat2 && !DataCenter.State && DataCenter.AllianceMembers.Count > 1) && !(DataCenter.IsInBozjanFieldOp || DataCenter.IsInBozjanFieldOpCE || DataCenter.IsInOccultCrescentOp))
-				{
-					for (var i = 0; i < DataCenter.AllianceMembers.Count; i++)
-					{
-						var a = DataCenter.AllianceMembers[i];
-						if (a != null && a.InCombat())
-						{
-							DoStateCommandType(StateCommandType.Auto);
-							return;
-						}
-
-						if (a != null && hostileTargetObjectIds.Contains(a.GameObjectId))
-						{
-							DoStateCommandType(StateCommandType.Auto);
-							return;
-						}
-					}
-				}
-
-				if (Service.Config.StartOnFieldOpInCombat2 && !DataCenter.State && (DataCenter.IsInBozjanFieldOp || DataCenter.IsInBozjanFieldOpCE || DataCenter.IsInOccultCrescentOp) && Player.Object != null)
-				{
-					var targets = TargetHelper.GetTargetsByRange(30f);
-					for (var i = 0; i < targets.Count; i++)
-					{
-						var t = targets[i];
-						if (t != null && DataCenter.AllHostileTargets.Contains(t) && !ObjectHelper.IsDummy(t))
-						{
-							continue;
-						}
-						if (t != null && t.GameObjectId != Player.Object.GameObjectId)
-						{
-							// PluginLog.Debug($"StartOnFieldOpInCombat: {t.Name} InCombat: {t.InCombat()} Distance: {t.DistanceToPlayer()} ");    
-						}
-
-						if (t != null && t.InCombat())
-						{
-							DoStateCommandType(StateCommandType.Auto);
-							return;
-						}
-						if (t != null && hostileTargetObjectIds.Contains(t.GameObjectId))
-						{
-							DoStateCommandType(StateCommandType.Auto);
-							return;
-						}
-					}
-				}
-				IBattleChara? target = null;
-				if (Service.Config.StartOnAttackedBySomeone2 && !DataCenter.State && Player.Object != null)
-				{
-					for (var i = 0; i < DataCenter.AllHostileTargets.Count; i++)
-					{
-						var t = DataCenter.AllHostileTargets[i];
-						if (t != null && t is IBattleChara battleChara)
-						{
-							try
+							var p = DataCenter.PartyMembers[i];
+							if (p != null && p.InCombat())
 							{
-								if (battleChara.TargetObjectId == Player.Object.GameObjectId)
-								{
-									target = battleChara;
-									break;
-								}
+								DoStateCommandType(StateCommandType.Auto);
+								return;
 							}
-							catch (AccessViolationException)
+
+							if (p != null && hostileTargetObjectIds.Contains(p.GameObjectId))
 							{
-								// Object became invalid while reading TargetObjectId.
+								DoStateCommandType(StateCommandType.Auto);
+								return;
+							}
+						}
+					}
+
+					if ((Service.Config.StartOnAllianceIsInCombat2 && !DataCenter.State && DataCenter.AllianceMembers.Count > 1) && !(DataCenter.IsInBozjanFieldOp || DataCenter.IsInBozjanFieldOpCE || DataCenter.IsInOccultCrescentOp))
+					{
+						for (var i = 0; i < DataCenter.AllianceMembers.Count; i++)
+						{
+							var a = DataCenter.AllianceMembers[i];
+							if (a != null && a.InCombat())
+							{
+								DoStateCommandType(StateCommandType.Auto);
+								return;
+							}
+
+							if (a != null && hostileTargetObjectIds.Contains(a.GameObjectId))
+							{
+								DoStateCommandType(StateCommandType.Auto);
+								return;
+							}
+						}
+					}
+
+					if (Service.Config.StartOnFieldOpInCombat2 && !DataCenter.State && (DataCenter.IsInBozjanFieldOp || DataCenter.IsInBozjanFieldOpCE || DataCenter.IsInOccultCrescentOp) && Player.Object != null)
+					{
+						var targets = TargetHelper.GetTargetsByRange(30f);
+						for (var i = 0; i < targets.Count; i++)
+						{
+							var t = targets[i];
+							if (t != null && DataCenter.AllHostileTargets.Contains(t) && !ObjectHelper.IsDummy(t))
+							{
 								continue;
 							}
-						}
-					}
-					if (target != null && !ObjectHelper.IsDummy(target))
-					{
-						DoStateCommandType(StateCommandType.Manual);
-					}
-				}
+							if (t != null && t.GameObjectId != Player.Object.GameObjectId)
+							{
+								// PluginLog.Debug($"StartOnFieldOpInCombat: {t.Name} InCombat: {t.InCombat()} Distance: {t.DistanceToPlayer()} ");    
+							}
 
-				if (Service.Config.StartOnCountdown && !DataCenter.IsInDutyReplay())
-				{
-					if (Service.CountDownTime > 0)
-					{
-						_lastCountdownTime = Service.CountDownTime;
-						if (!DataCenter.State)
-						{
-							DoStateCommandType(Service.Config.CountdownStartsManualMode
-								? StateCommandType.Manual
-								: StateCommandType.Auto);
+							if (t != null && t.InCombat())
+							{
+								DoStateCommandType(StateCommandType.Auto);
+								return;
+							}
+							if (t != null && hostileTargetObjectIds.Contains(t.GameObjectId))
+							{
+								DoStateCommandType(StateCommandType.Auto);
+								return;
+							}
 						}
-						return;
 					}
-					else if (Service.CountDownTime == 0 && _lastCountdownTime > 0.2f)
+					IBattleChara? target = null;
+					if (Service.Config.StartOnAttackedBySomeone2 && !DataCenter.State && Player.Object != null)
 					{
-						_lastCountdownTime = 0;
-						CancelState();
-						return;
+						for (var i = 0; i < DataCenter.AllHostileTargets.Count; i++)
+						{
+							var t = DataCenter.AllHostileTargets[i];
+							if (t != null && t is IBattleChara battleChara)
+							{
+								try
+								{
+									if (battleChara.TargetObjectId == Player.Object.GameObjectId)
+									{
+										target = battleChara;
+										break;
+									}
+								}
+								catch (AccessViolationException)
+								{
+									// Object became invalid while reading TargetObjectId.
+									continue;
+								}
+							}
+						}
+						if (target != null && !ObjectHelper.IsDummy(target))
+						{
+							DoStateCommandType(StateCommandType.Manual);
+						}
+					}
+
+					if (Service.Config.StartOnCountdown && !DataCenter.IsInDutyReplay())
+					{
+						if (Service.CountDownTime > 0)
+						{
+							_lastCountdownTime = Service.CountDownTime;
+							if (!DataCenter.State)
+							{
+								DoStateCommandType(Service.Config.CountdownStartsManualMode
+									? StateCommandType.Manual
+									: StateCommandType.Auto);
+							}
+							return;
+						}
+						else if (Service.CountDownTime == 0 && _lastCountdownTime > 0.2f)
+						{
+							_lastCountdownTime = 0;
+							CancelState();
+							return;
+						}
 					}
 				}
 			}
