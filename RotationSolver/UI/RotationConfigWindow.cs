@@ -4825,6 +4825,13 @@ public partial class RotationConfigWindow : Window
 			ImGui.Spacing();
 		}
 
+		foreach (var p in DataCenter.PartyMembers)
+		{
+			var text = $"Name: {p.Name}, HP: {p.GetEffectiveHpPercent()}%";
+
+			ImGui.Text(text);
+		}
+
 		foreach (var p in Svc.Party)
 		{
 			if (p.GameObject is not IBattleChara b)
