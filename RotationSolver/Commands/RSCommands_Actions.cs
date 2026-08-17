@@ -512,25 +512,26 @@ namespace RotationSolver.Commands
 						}
 					}
 
-					if (Service.Config.StartOnCountdown && !DataCenter.IsInDutyReplay())
+				}
+
+				if (Service.Config.StartOnCountdown && !DataCenter.IsInDutyReplay())
+				{
+					if (Service.CountDownTime > 0)
 					{
-						if (Service.CountDownTime > 0)
+						_lastCountdownTime = Service.CountDownTime;
+						if (!DataCenter.State)
 						{
-							_lastCountdownTime = Service.CountDownTime;
-							if (!DataCenter.State)
-							{
-								DoStateCommandType(Service.Config.CountdownStartsManualMode
-									? StateCommandType.Manual
-									: StateCommandType.Auto);
-							}
-							return;
+							DoStateCommandType(Service.Config.CountdownStartsManualMode
+								? StateCommandType.Manual
+								: StateCommandType.Auto);
 						}
-						else if (Service.CountDownTime == 0 && _lastCountdownTime > 0.2f)
-						{
-							_lastCountdownTime = 0;
-							CancelState();
-							return;
-						}
+						return;
+					}
+					else if (Service.CountDownTime == 0 && _lastCountdownTime > 0.2f)
+					{
+						_lastCountdownTime = 0;
+						CancelState();
+						return;
 					}
 				}
 			}
