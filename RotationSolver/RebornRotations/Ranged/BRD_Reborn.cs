@@ -38,7 +38,13 @@ public sealed class BRD_Reborn : BardRotation
 	public float ARMYTime { get; set; } = 34;
 
 	[RotationConfig(CombatType.PvE, Name = "First Song")]
-	private Song FirstSong { get; set; } = Song.WanderersMinuet;
+	private SongTrack FirstSong { get; set; } = SongTrack.WanderersMinuet;
+
+	[RotationConfig(CombatType.PvE, Name = "Second Song")]
+	private SongTrack SecondSong { get; set; } = SongTrack.MagesBallad;
+
+	[RotationConfig(CombatType.PvE, Name = "Third Song")]
+	private SongTrack ThirdSong { get; set; } = SongTrack.ArmysPaeon;
 
 	[RotationConfig(CombatType.PvE, Name = "Use Warden's Paean on other players")]
 	public bool BRDEsuna { get; set; } = true;
@@ -128,86 +134,140 @@ public sealed class BRD_Reborn : BardRotation
 		return base.DefenseAreaAbility(nextGCD, out act);
 	}
 
+	private SongTrack GetNextSongTrack(SongTrack currentSong)
+	{
+		if (currentSong == FirstSong)
+		{
+			return SecondSong;
+		}
+
+		return currentSong == SecondSong ? ThirdSong : FirstSong;
+	}
+
+	private Song SongTrackToSong(SongTrack track)
+	{
+		return track switch
+		{
+			SongTrack.WanderersMinuet => Song.WanderersMinuet,
+			SongTrack.MagesBallad => Song.MagesBallad,
+			SongTrack.ArmysPaeon => Song.ArmysPaeon,
+			_ => Song.None,
+		};
+	}
+
+	private bool TrySongTrackAction(SongTrack track, out IAction? act)
+	{
+		act = null;
+		return track switch
+		{
+			SongTrack.WanderersMinuet => TheWanderersMinuetPvE.CanUse(out act),
+			SongTrack.MagesBallad => MagesBalladPvE.CanUse(out act),
+			SongTrack.ArmysPaeon => ArmysPaeonPvE.CanUse(out act),
+			_ => false,
+		};
+	}
+
 	protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
 	{
-		if (TheWanderersMinuetPvE.CanUse(out act) && InCombat && !IsLastAbility(ActionID.ArmysPaeonPvE) && !IsLastAbility(ActionID.MagesBalladPvE))
+		if (!InCombat)
 		{
-			if (SongEndAfter(ARMYRemainTime) && (Song != Song.None || StatusHelper.PlayerHasStatus(true, StatusID.ArmysEthos)))
+			return base.GeneralAbility(nextGCD, out act);
+		}
+
+		if (Song != Song.None)
+		{
+			SongTrack currentSongTrack = Song switch
 			{
-				return true;
+				Song.WanderersMinuet => SongTrack.WanderersMinuet,
+				Song.MagesBallad => SongTrack.MagesBallad,
+				Song.ArmysPaeon => SongTrack.ArmysPaeon,
+				_ => SongTrack.WanderersMinuet,
+			};
+
+			SongTrack nextSongTrack = GetNextSongTrack(currentSongTrack);
+			Song nextSong = SongTrackToSong(nextSongTrack);
+
+			float remainTime = currentSongTrack switch
+			{
+				SongTrack.WanderersMinuet => WANDRemainTime,
+				SongTrack.MagesBallad => MAGERemainTime,
+				SongTrack.ArmysPaeon => ARMYRemainTime,
+				_ => 0,
+			};
+
+			if (TrySongTrackAction(nextSongTrack, out act) && SongEndAfter(remainTime))
+			{
+				if (nextSong == Song.WanderersMinuet)
+				{
+					if (Song != Song.None || StatusHelper.PlayerHasStatus(true, StatusID.ArmysEthos))
+					{
+						if (!IsLastAbility(ActionID.ArmysPaeonPvE) && !IsLastAbility(ActionID.MagesBalladPvE))
+						{
+							return true;
+						}
+					}
+				}
+				else if (nextSong == Song.MagesBallad)
+				{
+					if (Song == Song.WanderersMinuet && (Repertoire == 0 || !HasHostilesInMaxRange))
+					{
+						if (!IsLastAbility(ActionID.ArmysPaeonPvE) && !IsLastAbility(ActionID.TheWanderersMinuetPvE))
+						{
+							return true;
+						}
+					}
+					else if (Song == Song.ArmysPaeon && SongEndAfterGCD(2) && TheWanderersMinuetPvE.Cooldown.IsCoolingDown)
+					{
+						if (!IsLastAbility(ActionID.ArmysPaeonPvE) && !IsLastAbility(ActionID.TheWanderersMinuetPvE))
+						{
+							return true;
+						}
+					}
+				}
+				else if (nextSong == Song.ArmysPaeon)
+				{
+					if (TheWanderersMinuetPvE.EnoughLevel)
+					{
+						if (SongEndAfter(remainTime))
+						{
+							if (!IsLastAbility(ActionID.MagesBalladPvE) && !IsLastAbility(ActionID.TheWanderersMinuetPvE))
+							{
+								return true;
+							}
+						}
+
+						if (SongEndAfter(2) && MagesBalladPvE.Cooldown.IsCoolingDown && Song == Song.WanderersMinuet)
+						{
+							if (!IsLastAbility(ActionID.MagesBalladPvE) && !IsLastAbility(ActionID.TheWanderersMinuetPvE))
+							{
+								return true;
+							}
+						}
+					}
+					else if (SongEndAfter(2))
+					{
+						if (!IsLastAbility(ActionID.MagesBalladPvE) && !IsLastAbility(ActionID.TheWanderersMinuetPvE))
+						{
+							return true;
+						}
+					}
+				}
 			}
 		}
 
-		if (MagesBalladPvE.CanUse(out act) && InCombat && !IsLastAbility(ActionID.ArmysPaeonPvE) && !IsLastAbility(ActionID.TheWanderersMinuetPvE))
+		if (Song == Song.None)
 		{
-			if (Song == Song.WanderersMinuet && SongEndAfter(WANDRemainTime) && (Repertoire == 0 || !HasHostilesInMaxRange))
+			if (TrySongTrackAction(FirstSong, out act))
 			{
 				return true;
 			}
 
-			if (Song == Song.ArmysPaeon && SongEndAfterGCD(2) && TheWanderersMinuetPvE.Cooldown.IsCoolingDown)
-			{
-				return true;
-			}
-		}
-
-		if (ArmysPaeonPvE.CanUse(out act) && InCombat && !IsLastAbility(ActionID.MagesBalladPvE) && !IsLastAbility(ActionID.TheWanderersMinuetPvE))
-		{
-			if (TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(MAGERemainTime) && Song == Song.MagesBallad)
+			if (TrySongTrackAction(SecondSong, out act))
 			{
 				return true;
 			}
 
-			if (TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2) && MagesBalladPvE.Cooldown.IsCoolingDown && Song == Song.WanderersMinuet)
-			{
-				return true;
-			}
-
-			if (!TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2))
-			{
-				return true;
-			}
-		}
-
-		if (Song == Song.None && InCombat)
-		{
-			switch (FirstSong)
-			{
-				case Song.WanderersMinuet:
-					if (TheWanderersMinuetPvE.CanUse(out act))
-					{
-						return true;
-					}
-
-					break;
-
-				case Song.ArmysPaeon:
-					if (ArmysPaeonPvE.CanUse(out act))
-					{
-						return true;
-					}
-
-					break;
-
-				case Song.MagesBallad:
-					if (MagesBalladPvE.CanUse(out act))
-					{
-						return true;
-					}
-
-					break;
-			}
-			if (TheWanderersMinuetPvE.CanUse(out act))
-			{
-				return true;
-			}
-
-			if (MagesBalladPvE.CanUse(out act))
-			{
-				return true;
-			}
-
-			if (ArmysPaeonPvE.CanUse(out act))
+			if (TrySongTrackAction(ThirdSong, out act))
 			{
 				return true;
 			}
