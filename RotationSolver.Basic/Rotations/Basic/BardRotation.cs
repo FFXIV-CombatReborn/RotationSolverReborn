@@ -21,6 +21,32 @@ public partial class BardRotation
 	/// <summary>
 	/// 
 	/// </summary>
+	public enum SongTrack : byte
+	{
+		/// <summary>
+		/// 
+		/// </summary>
+		None = 0,
+
+		/// <summary>
+		/// 
+		/// </summary>
+		MagesBallad = 1,
+
+		/// <summary>
+		/// 
+		/// </summary>
+		ArmysPaeon = 2,
+
+		/// <summary>
+		/// 
+		/// </summary>
+		WanderersMinuet = 3,
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
 	public static bool InWanderers => Song == Song.WanderersMinuet;
 
 	/// <summary>
