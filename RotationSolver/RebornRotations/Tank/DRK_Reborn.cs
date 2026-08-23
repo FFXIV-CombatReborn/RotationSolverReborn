@@ -44,7 +44,7 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	}
 	#endregion
 
-		#region Countdown Logic
+	#region Countdown Logic
 		// Countdown logic to prepare for combat.
 		// Includes logic for using Provoke, tank stances, and burst medicines.
 	protected override IAction? CountDownAction(float remainTime)
@@ -313,7 +313,7 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	#region GCD Logic
 	protected override bool GeneralGCD(out IAction? act)
 	{
-		if (CombatElapsedLessGCD(4) && !IsLastGCD(false, SouleaterPvE))
+		if (CombatElapsedLessGCD(4) && !IsLastGCD(false, SouleaterPvE) && NumberOfHostilesInRange < 2)
 		{
 			if (!HasDelirium && SouleaterPvE.CanUse(out act))
 			{
@@ -374,6 +374,11 @@ public sealed class DRK_Reborn : DarkKnightRotation
 			return true;
 		}
 
+		if (UnleashPvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		//Single Target
 		if (!HasDelirium && SouleaterPvE.CanUse(out act))
 		{
@@ -381,11 +386,6 @@ public sealed class DRK_Reborn : DarkKnightRotation
 		}
 
 		if (!HasDelirium && SyphonStrikePvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (UnleashPvE.CanUse(out act))
 		{
 			return true;
 		}
