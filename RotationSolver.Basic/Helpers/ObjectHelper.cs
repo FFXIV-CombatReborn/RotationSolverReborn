@@ -277,7 +277,7 @@ public static class ObjectHelper
 		// Fate
 		if (Service.Config.IgnoreNonFateInFate && DataCenter.Territory?.ContentType != TerritoryContentType.Eureka)
 		{
-			if (battleChara.FateId() != 0 && battleChara.FateId() != DataCenter.PlayerFateId)
+			if (battleChara.FateId() != DataCenter.PlayerFateId)
 			{
 				return false;
 			}
