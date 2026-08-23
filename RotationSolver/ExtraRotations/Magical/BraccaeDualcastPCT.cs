@@ -1,9 +1,13 @@
 namespace RotationSolver.ExtraRotations.Magical;
 
-[Rotation("Beiruta Dualcast PCT", CombatType.PvE, GameVersion = "7.45")]
-[SourceCode(Path = "main/ExtraRotations/Magical/BeirutaDualcastPCT.cs")]
+/// <summary>
+/// Braccae's Dualcast Pictomancer Rotation (designed for Occult Crescent / Level 6 Phantom Red Mage Dualcast).
+/// Based on the foundational rotation architecture and burst alignments of BeirutaPCT by Beiruta.
+/// </summary>
+[Rotation("Braccae Dualcast PCT", CombatType.PvE, GameVersion = "7.45")]
+[SourceCode(Path = "main/ExtraRotations/Magical/BraccaeDualcastPCT.cs")]
 [ExtraRotation]
-public sealed class BeirutaDualcastPCT : PictomancerRotation
+public sealed class BraccaeDualcastPCT : PictomancerRotation
 {
 	#region Config Options
 
@@ -23,11 +27,12 @@ public sealed class BeirutaDualcastPCT : PictomancerRotation
 	}
 
 	[RotationConfig(CombatType.PvE, Name =
-		"Dualcast Pictomancer Rotation:\n" +
-		"• Assumes every cast with a cast time triggers Dualcast (making the next cast instant).\n" +
-		"• Prioritizes dualcasting Motifs (Creature, Weapon, Landscape) immediately whenever available before standard spells.\n" +
-		"• When Dualcast is absent, hardcasts fast 1.5s Aetherhue spells (Fire/Aero/Water) as primers to proc Dualcast.\n" +
-		"• Uses Dualcast on 4.0s Rainbow Drip and 2.3s Subtractive Inks when motifs are already painted.\n" +
+		"Braccae Dualcast Pictomancer Rotation (Based on BeirutaPCT):\n" +
+		"• Built for Phantom Job Dualcast (e.g. Occult Crescent with Level 6 Phantom Red Mage).\n" +
+		"• Automatically dualcasts Motifs (Creature, Weapon, Landscape) when corresponding Muse charges are available.\n" +
+		"• Intelligently gates Motif painting to avoid 0-DPS GCD lockouts when Muses have 0 charges.\n" +
+		"• When Dualcast is absent, hardcasts fast 1.5s Aetherhue spells (Fire/Aero/Water) as primers.\n" +
+		"• Uses Dualcast on 2.3s Subtractive Inks and burst Rainbow Drip when motifs are filled.\n" +
 		"• Full burst alignment with Starry Muse, Retribution of the Madeen, Mog of the Ages, and Hammer Time."
 	)]
 	public bool Info_DoNotChange { get; set; } = true;
@@ -37,6 +42,9 @@ public sealed class BeirutaDualcastPCT : PictomancerRotation
 
 	[RotationConfig(CombatType.PvE, Name = "Use Dualcast on Rainbow Drip when motifs are already drawn")]
 	public bool DualcastRainbowDrip { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Only spend Dualcast on raw Rainbow Drip inside Starry Muse (burst) or downtime")]
+	public bool RawRainbowDripInBurstOnly { get; set; } = true;
 
 	[RotationConfig(CombatType.PvE, Name = "Use HolyInWhite or CometInBlack while moving")]
 	public bool HolyCometMoving { get; set; } = true;
@@ -50,15 +58,6 @@ public sealed class BeirutaDualcastPCT : PictomancerRotation
 	[Range(1, 5, ConfigUnitType.None, 1)]
 	[RotationConfig(CombatType.PvE, Name = "Paint overcap protection limit. How many paint you need to be at for it to use Holy out of burst (Setting is ignored when you have Hyperphantasia)")]
 	public int HolyCometMax { get; set; } = 5;
-
-	[RotationConfig(CombatType.PvE, Name = "Use swiftcast on Intercepted Rainbow Drip before Boss Untargetable")]
-	public bool RainbowDripSwift { get; set; } = true;
-
-	[RotationConfig(CombatType.PvE, Name = "Use swiftcast on Motif")]
-	public bool MotifSwiftCastSwift { get; set; } = false;
-
-	[RotationConfig(CombatType.PvE, Name = "Which Motif to use swiftcast on")]
-	public CanvasFlags MotifSwiftCast { get; set; } = CanvasFlags.Claw;
 
 	[RotationConfig(CombatType.PvE, Name = "Prevent the use of defense abilities during bursts")]
 	private bool BurstDefense { get; set; } = true;
@@ -203,46 +202,10 @@ public sealed class BeirutaDualcastPCT : PictomancerRotation
 			return true;
 		}
 
-		if (RainbowDripSwift
-			&& !HasRainbowBright
-			&& nextGCD.IsTheSameTo(false, RainbowDripPvE)
-			&& SwiftcastPvE.CanUse(out act))
+		// Use Swiftcast as a fallback instant tool if Dualcast is dropped
+		if (InCombat && !HasInstantCast && SwiftcastPvE.CanUse(out act))
 		{
 			return true;
-		}
-
-		bool isMedicated = StatusHelper.PlayerHasStatus(true, StatusID.Medicated);
-
-		// Apply Swiftcast to creature motifs during Medicated when a motif is queued.
-		if (isMedicated)
-		{
-			bool isCreatureMotif =
-				nextGCD.IsTheSameTo(false, PomMotifPvE)
-				|| nextGCD.IsTheSameTo(false, WingMotifPvE)
-				|| nextGCD.IsTheSameTo(false, ClawMotifPvE)
-				|| nextGCD.IsTheSameTo(false, MawMotifPvE);
-
-			if (isCreatureMotif && SwiftcastPvE.CanUse(out act))
-				return true;
-
-			return base.EmergencyAbility(nextGCD, out act);
-		}
-
-		if (MotifSwiftCastSwift)
-		{
-			if ((MotifSwiftCast switch
-			{
-				CanvasFlags.Pom => nextGCD.IsTheSameTo(false, PomMotifPvE),
-				CanvasFlags.Wing => nextGCD.IsTheSameTo(false, WingMotifPvE),
-				CanvasFlags.Claw => nextGCD.IsTheSameTo(false, ClawMotifPvE),
-				CanvasFlags.Maw => nextGCD.IsTheSameTo(false, MawMotifPvE),
-				CanvasFlags.Weapon => nextGCD.IsTheSameTo(false, HammerMotifPvE),
-				CanvasFlags.Landscape => nextGCD.IsTheSameTo(false, StarrySkyMotifPvE),
-				_ => false
-			}) && SwiftcastPvE.CanUse(out act))
-			{
-				return true;
-			}
 		}
 
 		return base.EmergencyAbility(nextGCD, out act);
@@ -453,33 +416,6 @@ public sealed class BeirutaDualcastPCT : PictomancerRotation
 
 	protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
 	{
-		// Prioritize Swiftcast for Rainbow Drip when it is intercepted and queued.
-		if (RainbowDripSwift
-			&& !HasRainbowBright
-			&& nextGCD.IsTheSameTo(false, RainbowDripPvE)
-			&& SwiftcastPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		// Apply Swiftcast only to the configured Motif when enabled.
-		if (MotifSwiftCastSwift)
-		{
-			bool shouldSwiftMotif = MotifSwiftCast switch
-			{
-				CanvasFlags.Pom => nextGCD.IsTheSameTo(false, PomMotifPvE),
-				CanvasFlags.Wing => nextGCD.IsTheSameTo(false, WingMotifPvE),
-				CanvasFlags.Claw => nextGCD.IsTheSameTo(false, ClawMotifPvE),
-				CanvasFlags.Maw => nextGCD.IsTheSameTo(false, MawMotifPvE),
-				CanvasFlags.Weapon => nextGCD.IsTheSameTo(false, HammerMotifPvE),
-				CanvasFlags.Landscape => nextGCD.IsTheSameTo(false, StarrySkyMotifPvE),
-				_ => false
-			};
-
-			if (shouldSwiftMotif && SwiftcastPvE.CanUse(out act))
-				return true;
-		}
-
 		if ((MergedStatus.HasFlag(AutoStatus.DefenseArea)
 			|| StatusHelper.PlayerWillStatusEndGCD(2, 0, true, StatusID.TemperaCoat))
 			&& TemperaGrassaPvE.CanUse(out act))
@@ -696,7 +632,8 @@ public sealed class BeirutaDualcastPCT : PictomancerRotation
 			}
 
 			// Dualcast Rainbow Drip (4.0s cast becomes instant, 1000 potency) if motifs are already drawn
-			if (DualcastRainbowDrip && RainbowDripPvE.CanUse(out act, skipCastingCheck: true))
+			bool allowRawRainbowDrip = DualcastRainbowDrip && (!RawRainbowDripInBurstOnly || HasStarryMuse || !InCombat);
+			if (allowRawRainbowDrip && RainbowDripPvE.CanUse(out act, skipCastingCheck: true))
 			{
 				return true;
 			}
@@ -847,6 +784,17 @@ public sealed class BeirutaDualcastPCT : PictomancerRotation
 		act = null;
 		if (CreatureMotifDrawn) return false;
 
+		// Smart Charge Gating:
+		// Only spend a 4.0s GCD to paint if Living Muse has a charge ready or almost ready (<= 4.0s),
+		// OR we are preparing for upcoming Starry Muse burst (<= 30s) / early opener.
+		bool allowCreaturePaint = !InCombat
+			|| LivingMusePvE.Cooldown.HasOneCharge
+			|| LivingMusePvE.Cooldown.RecastTimeRemainOneCharge <= 4.0f
+			|| StarryMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30f
+			|| CombatTime < 5f;
+
+		if (!allowCreaturePaint) return false;
+
 		if (PomMotifPvE.CanUse(out act, skipCastingCheck: true)) return true;
 		if (WingMotifPvE.CanUse(out act, skipCastingCheck: true)) return true;
 		if (ClawMotifPvE.CanUse(out act, skipCastingCheck: true)) return true;
@@ -860,6 +808,17 @@ public sealed class BeirutaDualcastPCT : PictomancerRotation
 		act = null;
 		if (WeaponMotifDrawn || HasHammerTime || isMedicated) return false;
 
+		// Smart Charge Gating:
+		// Only spend a 4.0s GCD to paint hammer if Steel Muse has a charge ready or almost ready (<= 4.0s),
+		// OR we are preparing for upcoming Starry Muse burst (<= 30s) / early opener.
+		bool allowHammerPaint = !InCombat
+			|| SteelMusePvE.Cooldown.HasOneCharge
+			|| SteelMusePvE.Cooldown.RecastTimeRemainOneCharge <= 4.0f
+			|| StarryMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30f
+			|| CombatTime < 5f;
+
+		if (!allowHammerPaint) return false;
+
 		if (HammerMotifPvE.CanUse(out act, skipCastingCheck: true)) return true;
 
 		return false;
@@ -869,6 +828,15 @@ public sealed class BeirutaDualcastPCT : PictomancerRotation
 	{
 		act = null;
 		if (LandscapeMotifDrawn || HasStarryMuse || HasHyperphantasia) return false;
+
+		// Smart Landscape Gating:
+		// Only paint Starry Sky Motif if Scenic Muse is ready or coming off cooldown within 40s (or out of combat/opener).
+		bool allowLandscapePaint = !InCombat
+			|| ScenicMusePvE.Cooldown.HasOneCharge
+			|| ScenicMusePvE.Cooldown.RecastTimeRemainOneCharge <= 40f
+			|| CombatTime < 5f;
+
+		if (!allowLandscapePaint) return false;
 
 		if (StarrySkyMotifPvE.CanUse(out act, skipCastingCheck: true)) return true;
 
