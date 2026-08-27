@@ -101,38 +101,56 @@ internal class NextActionWindow : Window
 			return;
 		}
 
-		var name = suggestedTarget.Name.TextValue;
-		if (string.IsNullOrEmpty(name))
+		try
 		{
-			return;
+			var name = suggestedTarget.Name.TextValue;
+			if (string.IsNullOrEmpty(name))
+			{
+				return;
+			}
+
+			uint suggestedTargetId;
+			try
+			{
+				suggestedTargetId = (uint)suggestedTarget.GameObjectId;
+			}
+			catch
+			{
+				// Target became invalid or corrupted in memory
+				return;
+			}
+
+			var isCurrentTarget = Svc.Targets.Target?.GameObjectId == suggestedTarget.GameObjectId;
+			var isSelf = suggestedTargetId == (Player.Object?.GameObjectId ?? 0);
+
+			var label = $"Target: {name}";
+			var color = isSelf
+				? ImGuiColors.DalamudWhite
+				: isCurrentTarget
+					? ImGuiColors.HealerGreen
+					: ImGuiColors.DalamudOrange;
+
+			var textWidth = ImGui.CalcTextSize(label).X;
+			var offsetX = (width - textWidth) / 2f;
+			ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, offsetX));
+
+			ImGui.PushStyleColor(ImGuiCol.Text, color);
+			ImGui.Selectable(label, false, ImGuiSelectableFlags.None, new Vector2(textWidth, 0));
+			ImGui.PopStyleColor();
+
+			if (ImGui.IsItemClicked() && !isSelf)
+			{
+				Svc.Targets.Target = suggestedTarget;
+			}
+
+			if (ImGui.IsItemHovered() && !isSelf)
+			{
+				ImGui.SetTooltip("Click to target");
+			}
 		}
-
-		var isCurrentTarget = Svc.Targets.Target?.GameObjectId == suggestedTarget.GameObjectId;
-		var isSelf = suggestedTarget.GameObjectId == (Player.Object?.GameObjectId ?? 0);
-
-		var label = $"Target: {name}";
-		var color = isSelf
-			? ImGuiColors.DalamudWhite
-			: isCurrentTarget
-				? ImGuiColors.HealerGreen
-				: ImGuiColors.DalamudOrange;
-
-		var textWidth = ImGui.CalcTextSize(label).X;
-		var offsetX = (width - textWidth) / 2f;
-		ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, offsetX));
-
-		ImGui.PushStyleColor(ImGuiCol.Text, color);
-		ImGui.Selectable(label, false, ImGuiSelectableFlags.None, new Vector2(textWidth, 0));
-		ImGui.PopStyleColor();
-
-		if (ImGui.IsItemClicked() && !isSelf)
+		catch
 		{
-			Svc.Targets.Target = suggestedTarget;
-		}
-
-		if (ImGui.IsItemHovered() && !isSelf)
-		{
-			ImGui.SetTooltip("Click to target");
+			// Suppress any exceptions from accessing game objects that may have become invalid
 		}
 	}
 
