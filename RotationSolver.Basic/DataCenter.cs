@@ -1115,23 +1115,9 @@ internal static class DataCenter
 		return (float)currentHp / member.MaxHp;
 	}
 
-	private static int _partyHpCacheFrame = -1;
-	private static float _partyMinHp = 0;
-	private static float _partyAvgHp = 0;
-	private static float _partyStdDevHp = 0;
-	private static int _partyHpCount = 0;
-	private static float _lowestPartyAvgHp = 0;
-	private static float _lowestPartyStdDevHp = 0;
-
 	private static readonly float[] _hpBuffer = new float[8];
-	private static void UpdatePartyHpCache()
+	private static void ComputePartyHpStats(out float minHp, out float avgHp, out float stdDevHp, out float lowestAvgHp, out float lowestStdDevHp)
 	{
-		var currentFrame = Environment.TickCount;
-		if (_partyHpCacheFrame == currentFrame)
-		{
-			return;
-		}
-
 		var hpCount = 0;
 		foreach (var member in PartyMembers)
 		{
@@ -1147,26 +1133,25 @@ internal static class DataCenter
 				}
 				catch (AccessViolationException ex)
 				{
-					PluginLog.Error($"AccessViolationException in Party HP cache: {ex.Message}");
+					PluginLog.Error($"AccessViolationException in Party HP computation: {ex.Message}");
 				}
 			}
 		}
 
-		_partyHpCount = hpCount;
 		if (hpCount == 0)
 		{
-			_partyMinHp = 0;
-			_partyAvgHp = 0;
-			_partyStdDevHp = 0;
-			_lowestPartyAvgHp = 0;
-			_lowestPartyStdDevHp = 0;
+			minHp = 0;
+			avgHp = 0;
+			stdDevHp = 0;
+			lowestAvgHp = 0;
+			lowestStdDevHp = 0;
 			return;
 		}
 
 		// If there are more than 4 players, we order the array
 		if (hpCount > 4)
 		{
-			Array.Sort(_hpBuffer);
+			Array.Sort(_hpBuffer, 0, hpCount);
 		}
 
 		float sum = 0;
@@ -1201,50 +1186,62 @@ internal static class DataCenter
 			}
 		}
 
-		_partyMinHp = min;
-		_partyAvgHp = avg;
-		_partyStdDevHp = (float)Math.Sqrt(variance / hpCount);
-		_lowestPartyAvgHp = lowestHpMembersAvg;
-		_lowestPartyStdDevHp = (float)Math.Sqrt(lowestHpMembersVariance / (hpCount > 4 ? 4 : hpCount));
-		_partyHpCacheFrame = currentFrame;
+		minHp = min;
+		avgHp = avg;
+		stdDevHp = (float)Math.Sqrt(variance / hpCount);
+		lowestAvgHp = lowestHpMembersAvg;
+		lowestStdDevHp = (float)Math.Sqrt(lowestHpMembersVariance / (hpCount > 4 ? 4 : hpCount));
 	}
 
 	public static float PartyMembersMinHP
 	{
-		get { UpdatePartyHpCache(); return _partyMinHp; }
+		get 
+		{
+			ComputePartyHpStats(out var minHp, out _, out _, out _, out _);
+			return minHp;
+		}
 	}
 
 	public static float PartyMembersAverHP
 	{
-		get { UpdatePartyHpCache(); return _partyAvgHp; }
+		get 
+		{
+			ComputePartyHpStats(out _, out var avgHp, out _, out _, out _);
+			return avgHp;
+		}
 	}
 
 	public static float PartyMembersDifferHP
 	{
-		get { UpdatePartyHpCache(); return _partyStdDevHp; }
+		get 
+		{
+			ComputePartyHpStats(out _, out _, out var stdDevHp, out _, out _);
+			return stdDevHp;
+		}
 	}
 
 	public static float LowestPartyMembersAverHP
 	{
-		get { UpdatePartyHpCache(); return _lowestPartyAvgHp; }
+		get 
+		{
+			ComputePartyHpStats(out _, out _, out _, out var lowestAvgHp, out _);
+			return lowestAvgHp;
+		}
 	}
 
 	public static float LowestPartyMembersDifferHP
 	{
-		get { UpdatePartyHpCache(); return _lowestPartyStdDevHp; }
+		get 
+		{
+			ComputePartyHpStats(out _, out _, out _, out _, out var lowestStdDevHp);
+			return lowestStdDevHp;
+		}
 	}
 
 	public static IEnumerable<float> PartyMembersHP
 	{
 		get
 		{
-			UpdatePartyHpCache();
-			// Return a snapshot of the current frame's HPs
-			if (_partyHpCount == 0)
-			{
-				yield break;
-			}
-
 			var hpList = new List<float>();
 			foreach (var member in PartyMembers)
 			{
