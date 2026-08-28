@@ -72,7 +72,7 @@ public partial class SageRotation
 
 	static partial void ModifyDosisPvE(ref ActionSetting setting)
 	{
-
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyDiagnosisPvE(ref ActionSetting setting)
@@ -137,6 +137,7 @@ public partial class SageRotation
 		{
 			AoeCount = 1,
 		};
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyEukrasiaPvE(ref ActionSetting setting)
@@ -166,6 +167,7 @@ public partial class SageRotation
 	{
 		setting.StatusProvide = [StatusID.EukrasianPrognosis, StatusID.Galvanize];
 		setting.StatusFromSelf = false;
+		setting.IsFriendly = true;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -185,12 +187,14 @@ public partial class SageRotation
 		{
 			IsRestrictedDOT = true,
 		};
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifySoteriaPvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.Soteria];
 		setting.TargetType = TargetType.Self;
+		setting.IsFriendly = true;
 		setting.ActionCheck = () =>
 		{
 			foreach (var m in DataCenter.PartyMembers)
@@ -212,6 +216,7 @@ public partial class SageRotation
 	static partial void ModifyDruocholePvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Addersgall >= 1;
+		setting.IsFriendly = true;
 	}
 
 	static partial void ModifyDyskrasiaPvE(ref ActionSetting setting)
@@ -220,12 +225,15 @@ public partial class SageRotation
 		{
 			AoeCount = 3,
 		};
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyKeracholePvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Addersgall >= 1;
 		setting.StatusProvide = [StatusID.Kerachole, StatusID.Kerakeia];
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -235,6 +243,8 @@ public partial class SageRotation
 	static partial void ModifyIxocholePvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Addersgall >= 1;
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -244,11 +254,15 @@ public partial class SageRotation
 	static partial void ModifyZoePvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.Zoe];
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 	}
 
 	static partial void ModifyPepsisPvE(ref ActionSetting setting)
 	{
 		setting.StatusNeed = [StatusID.EukrasianPrognosis];
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -258,6 +272,7 @@ public partial class SageRotation
 	static partial void ModifyPhysisIiPvE(ref ActionSetting setting)
 	{
 		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -267,6 +282,7 @@ public partial class SageRotation
 	static partial void ModifyTaurocholePvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Addersgall >= 1;
+		setting.IsFriendly = true;
 		setting.TargetStatusProvide = [StatusID.Taurochole];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -286,11 +302,12 @@ public partial class SageRotation
 	static partial void ModifyHaimaPvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.Haima];
+		setting.IsFriendly = true;
 	}
 
 	static partial void ModifyDosisIiPvE(ref ActionSetting setting)
 	{
-
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyPhlegmaIiPvE(ref ActionSetting setting)
@@ -299,6 +316,7 @@ public partial class SageRotation
 		{
 			AoeCount = 1,
 		};
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyEukrasianDosisIiPvE(ref ActionSetting setting)
@@ -314,16 +332,20 @@ public partial class SageRotation
 		{
 			IsRestrictedDOT = true,
 		};
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyRhizomataPvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => Addersting < 3;
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 	}
 
 	static partial void ModifyHolosPvE(ref ActionSetting setting)
 	{
 		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -335,6 +357,7 @@ public partial class SageRotation
 		setting.StatusProvide = [StatusID.Panhaima, StatusID.Panhaimatinon];
 		setting.UnlockedByQuestID = 69608;
 		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -343,7 +366,7 @@ public partial class SageRotation
 
 	static partial void ModifyDosisIiiPvE(ref ActionSetting setting)
 	{
-
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyPhlegmaIiiPvE(ref ActionSetting setting)
@@ -352,6 +375,7 @@ public partial class SageRotation
 		{
 			AoeCount = 1,
 		};
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyEukrasianDosisIiiPvE(ref ActionSetting setting)
@@ -367,6 +391,7 @@ public partial class SageRotation
 		{
 			IsRestrictedDOT = true,
 		};
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyDyskrasiaIiPvE(ref ActionSetting setting)
@@ -396,11 +421,14 @@ public partial class SageRotation
 		{
 			AoeCount = 1,
 		};
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyKrasisPvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.Krasis];
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 	}
 
 	static partial void ModifyPneumaPvE(ref ActionSetting setting)
@@ -418,12 +446,15 @@ public partial class SageRotation
 		{
 			AoeCount = 1,
 		};
+		setting.IsFriendly = false;
 	}
 
 	static partial void ModifyEukrasianPrognosisIiPvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.EukrasianPrognosis, StatusID.Galvanize];
 		setting.StatusFromSelf = false;
+		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,
@@ -434,6 +465,7 @@ public partial class SageRotation
 	{
 		setting.StatusProvide = [StatusID.Philosophia];
 		setting.TargetStatusProvide = [StatusID.Eudaimonia];
+		setting.IsFriendly = true;
 		setting.TargetType = TargetType.Self;
 		setting.CreateConfig = () => new ActionConfig()
 		{
