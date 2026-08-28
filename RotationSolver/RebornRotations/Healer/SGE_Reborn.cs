@@ -219,7 +219,7 @@ public sealed class SGE_Reborn : SageRotation
 
 		if (HolosPvE.CanUse(out act))
 		{
-			return true;
+			return true;	
 		}
 
 		return base.DefenseAreaAbility(nextGCD, out act);

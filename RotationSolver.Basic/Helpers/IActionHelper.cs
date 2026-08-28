@@ -38,7 +38,6 @@ public static class IActionHelper
 		ActionID.PrognosisPvE,
 		ActionID.PrognosisPvE_27043,
 		ActionID.PneumaPvE,
-		ActionID.PneumaPvE,
             
         // WHM
         ActionID.CurePvE,
