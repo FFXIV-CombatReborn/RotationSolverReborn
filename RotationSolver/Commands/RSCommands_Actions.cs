@@ -279,7 +279,7 @@ namespace RotationSolver.Commands
 			}
 		}
 
-		internal static void SetTargetWithDelay(IGameObject? candidate)
+		internal static void SetTargetWithDelay(IBattleChara? candidate)
 		{
 			if (candidate == null)
 			{
@@ -307,12 +307,12 @@ namespace RotationSolver.Commands
 
 					if (currentId == initialTargetId)
 					{
-						IGameObject? cand = null;
+						IBattleChara? cand = null;
 						foreach (var obj in Svc.Objects)
 						{
 							if (obj != null && obj.GameObjectId == candidateId)
 							{
-								cand = obj;
+								cand = obj as IBattleChara;
 								break;
 							}
 						}

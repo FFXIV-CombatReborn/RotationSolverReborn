@@ -925,31 +925,46 @@ public static class StatusHelper
 	/// <returns></returns>
 	public static bool HasStatus(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
 	{
-		if (!DataCenter.PlayerAvailable())
-		{
-			return false;
-		}
-
-		if (Player.Object == null)
-		{
-			return false;
-		}
-
-		if (Player.Object.StatusList == null)
-		{
-			return false;
-		}
-
-		if (battleChara == null || !battleChara.IsValid())
-		{
-			return false;
-		}
-
 		try
 		{
+			if (!DataCenter.PlayerAvailable())
+			{
+				return false;
+			}
+
+			if (Player.Object == null)
+			{
+				return false;
+			}
+
+			if (Player.Object.StatusList == null)
+			{
+				return false;
+			}
+
+			if (battleChara == null)
+			{
+				return false;
+			}
+
+			if (!battleChara.IsValid())
+			{
+				return false;
+			}
+
 			if (battleChara.StatusList == null)
 			{
 				return false;
+			}
+			
+			if (HasApplyStatus(battleChara, statusIDs))
+			{
+				return true;
+			}
+
+			foreach (var _ in battleChara.GetStatus(isFromSelf, statusIDs))
+			{
+				return true;
 			}
 		}
 		catch
@@ -958,15 +973,6 @@ public static class StatusHelper
 			return false;
 		}
 
-		if (HasApplyStatus(battleChara, statusIDs))
-		{
-			return true;
-		}
-
-		foreach (var _ in battleChara.GetStatus(isFromSelf, statusIDs))
-		{
-			return true;
-		}
 		return false;
 	}
 
@@ -1144,7 +1150,12 @@ public static class StatusHelper
 		for (var i = 0; i < statusList.Length; i++)
 		{
 			var status = statusList[i];
-			if (status == null || status.StatusId == 0)
+			if (status == null)
+			{
+				continue;
+			}
+
+			if (status.StatusId == 0)
 			{
 				continue;
 			}

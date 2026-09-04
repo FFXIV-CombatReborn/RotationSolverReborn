@@ -254,7 +254,7 @@ public static class TargetFilter
 		return false;
 	}
 
-	private static bool IsJobs(this IGameObject battleChara, HashSet<byte> validJobs)
+	private static bool IsJobs(this IBattleChara battleChara, HashSet<byte> validJobs)
 	{
 		if (battleChara is IBattleChara b && validJobs != null)
 		{
