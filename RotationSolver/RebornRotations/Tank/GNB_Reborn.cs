@@ -129,11 +129,11 @@ public sealed class GNB_Reborn : GunbreakerRotation
 			switch (HeartOfStoneUsage)
 			{
 				case HeartOfStoneStrategy.SelfOnly:
-					if (HeartOfCorundumPvE.EnoughLevel && HeartOfCorundumPvE.CanUse(out act))
+					if (HeartOfCorundumPvE.EnoughLevel && HeartOfCorundumPvE.CanUse(out act, targetOverride: TargetType.Self))
 					{
 						return true;
 					}
-					if (!HeartOfCorundumPvE.EnoughLevel && HeartOfStonePvE.CanUse(out act))
+					if (!HeartOfCorundumPvE.EnoughLevel && HeartOfStonePvE.CanUse(out act, targetOverride: TargetType.Self))
 					{
 						return true;
 					}
@@ -221,7 +221,7 @@ public sealed class GNB_Reborn : GunbreakerRotation
 			switch (AuroraUsage)
 			{
 				case AuroraUsageStrategy.SelfOnly:
-					if (AuroraPvE.CanUse(out act))
+					if (AuroraPvE.CanUse(out act, targetOverride: TargetType.Self))
 					{
 						return true;
 					}

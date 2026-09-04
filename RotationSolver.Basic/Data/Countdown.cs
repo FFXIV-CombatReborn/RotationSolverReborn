@@ -1,5 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+﻿using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using System.Runtime.InteropServices;
 
 namespace RotationSolver.Basic.Data;
@@ -11,47 +10,27 @@ namespace RotationSolver.Basic.Data;
 public unsafe struct Countdown
 {
 	/// <summary>
-	/// The timer value.
+	/// 
 	/// </summary>
-	[FieldOffset(0x28)] public float Timer;
-
-	/// <summary>
-	/// Indicates whether the countdown is active.
-	/// </summary>
-	[FieldOffset(0x38)] public byte Active;
-
-	/// <summary>
-	/// The initiator of the countdown.
-	/// </summary>
-	[FieldOffset(0x3C)] public uint Initiator;
-
-	/// <summary>
-	/// Gets the instance of the countdown struct.
-	/// </summary>
-	public static unsafe Countdown* Instance
-	{
-		get
-		{
-			var instance = (Countdown*)Framework.Instance()->GetUIModule()->GetAgentModule()->GetAgentByInternalId(AgentId.CountDownSettingDialog);
-			return instance == null ? throw new InvalidOperationException("Countdown instance is null.") : instance;
-		}
-	}
+	public static bool CountdownActive => AgentCountDownSettingDialog.Instance()->Active;
 
 	/// <summary>
 	/// Gets the remaining time of the countdown.
 	/// </summary>
-	public static float TimeRemaining
-	{
-		get
-		{
-			var inst = Instance;
-			if (inst == null)
-			{
-				return 0;
-			}
+	public static float TimeRemaining => CountdownActive ? MathF.Max(0f, AgentCountDownSettingDialog.Instance()->TimeRemaining) : 0f;
 
-			var remainingTime = inst->Active != 0 ? inst->Timer : 0;
-			return remainingTime;
-		}
-	}
+	//public static float TimeRemaining
+	//{
+	//	get
+	//	{
+	//		var inst = Instance;
+	//		if (inst == null)
+	//		{
+	//			return 0;
+	//		}
+
+	//		var remainingTime = inst->Active != 0 ? inst->Timer : 0;
+	//		return remainingTime;
+	//	}
+	//}
 }
