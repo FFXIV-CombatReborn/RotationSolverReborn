@@ -176,7 +176,7 @@ public sealed class BRD_Reborn : BardRotation
 
 		if (Song != Song.None)
 		{
-			SongTrack currentSongTrack = Song switch
+			var currentSongTrack = Song switch
 			{
 				Song.WanderersMinuet => SongTrack.WanderersMinuet,
 				Song.MagesBallad => SongTrack.MagesBallad,
@@ -184,10 +184,10 @@ public sealed class BRD_Reborn : BardRotation
 				_ => SongTrack.WanderersMinuet,
 			};
 
-			SongTrack nextSongTrack = GetNextSongTrack(currentSongTrack);
-			Song nextSong = SongTrackToSong(nextSongTrack);
+			var nextSongTrack = GetNextSongTrack(currentSongTrack);
+			var nextSong = SongTrackToSong(nextSongTrack);
 
-			float remainTime = currentSongTrack switch
+			var remainTime = currentSongTrack switch
 			{
 				SongTrack.WanderersMinuet => WANDRemainTime,
 				SongTrack.MagesBallad => MAGERemainTime,

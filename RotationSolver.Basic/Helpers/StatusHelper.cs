@@ -956,7 +956,7 @@ public static class StatusHelper
 			{
 				return false;
 			}
-			
+
 			if (HasApplyStatus(battleChara, statusIDs))
 			{
 				return true;
