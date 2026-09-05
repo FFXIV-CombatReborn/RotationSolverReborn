@@ -1,7 +1,9 @@
 namespace RotationSolver.ExtraRotations.Magical;
 
 /// <summary>
-/// Braccae's Dualcast Pictomancer Rotation (designed for Occult Crescent / Level 6 Phantom Red Mage Dualcast).
+/// Braccae's Dualcast Pictomancer Rotation.
+/// Automatically activates Dualcast-optimized motif painting when inside Occult Crescent / The Forked Towers
+/// with Level 6 Phantom Red Mage equipped, and seamlessly falls back to standard BeirutaPCT rotation otherwise.
 /// Based on the foundational rotation architecture and burst alignments of BeirutaPCT by Beiruta.
 /// </summary>
 [Rotation("Braccae Dualcast PCT", CombatType.PvE, GameVersion = "7.45")]
@@ -28,19 +30,20 @@ public sealed class BraccaeDualcastPCT : PictomancerRotation
 
 	[RotationConfig(CombatType.PvE, Name =
 		"Braccae Dualcast Pictomancer Rotation (Based on BeirutaPCT):\n" +
-		"• Built for Phantom Job Dualcast (e.g. Occult Crescent with Level 6 Phantom Red Mage).\n" +
-		"• Automatically dualcasts Motifs (Creature, Weapon, Landscape) when corresponding Muse charges are available.\n" +
-		"• Intelligently gates Motif painting to avoid 0-DPS GCD lockouts when Muses have 0 charges.\n" +
-		"• When Dualcast is absent, hardcasts fast 1.5s Aetherhue spells (Fire/Aero/Water) as primers.\n" +
-		"• Uses Dualcast on 2.3s Subtractive Inks and burst Rainbow Drip when motifs are filled.\n" +
+		"• Automatically enables Dualcast mode when in Occult Crescent / The Forked Towers with Level 6 Phantom Red Mage.\n" +
+		"• Automatically falls back to standard BeirutaPCT rotation in all other zones or jobs.\n" +
+		"• In Dualcast mode: instantly dualcasts Motifs when Muses are ready, using 1.5s Aetherhue primers to proc Dualcast.\n" +
 		"• Full burst alignment with Starry Muse, Retribution of the Madeen, Mog of the Ages, and Hammer Time."
 	)]
 	public bool Info_DoNotChange { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "Dualcast Motif Priority Order")]
+	[RotationConfig(CombatType.PvE, Name = "Auto-enable Dualcast rotation only in Occult Crescent / The Forked Towers with Level 6 Phantom Red Mage (Fall back to Standard PCT otherwise)")]
+	public bool AutoOccultDualcastCondition { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Dualcast Motif Priority Order (Dualcast Mode)")]
 	public MotifPriorityOrder MotifPriority { get; set; } = MotifPriorityOrder.CreatureWeaponLandscape;
 
-	[RotationConfig(CombatType.PvE, Name = "Use Dualcast on Rainbow Drip when motifs are already drawn")]
+	[RotationConfig(CombatType.PvE, Name = "Use Dualcast on Rainbow Drip when motifs are already drawn (Dualcast Mode)")]
 	public bool DualcastRainbowDrip { get; set; } = true;
 
 	[RotationConfig(CombatType.PvE, Name = "Only spend Dualcast on raw Rainbow Drip inside Starry Muse (burst) or downtime")]
@@ -68,6 +71,27 @@ public sealed class BraccaeDualcastPCT : PictomancerRotation
 	#endregion
 
 	#region Helper Properties
+
+	// Phantom Job & Occult Crescent Zone Detection
+	public static byte PhantomRedMageLevel
+	{
+		get
+		{
+			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomRedMage);
+			return stacks == byte.MaxValue ? (byte)0 : stacks;
+		}
+	}
+
+	public static bool IsInOccultOrForkedTower =>
+		DataCenter.IsInOccultCrescentOp
+		|| DataCenter.IsInForkedTowerBlood
+		|| StatusHelper.PlayerHasStatus(false, StatusID.DutiesAsAssigned_4228);
+
+	public static bool HasLevel6PhantomRedMage =>
+		PhantomRedMageLevel >= 6;
+
+	public bool IsDualcastModeActive =>
+		!AutoOccultDualcastCondition || (IsInOccultOrForkedTower && HasLevel6PhantomRedMage);
 
 	// Dualcast and Instant Buff detection
 	private static bool HasDualcast =>
@@ -103,7 +127,8 @@ public sealed class BraccaeDualcastPCT : PictomancerRotation
 	private bool NeedsStrikingMovementRescue(IAction nextGCD) =>
 		InCombat
 		&& !NextIsMovementSafeGcd(nextGCD)
-		&& !HasInstantCast
+		&& !(IsDualcastModeActive && HasInstantCast)
+		&& !HasSwift
 		&& !HasHammerTime
 		&& MovingTime > 1.5f;
 
@@ -145,6 +170,20 @@ public sealed class BraccaeDualcastPCT : PictomancerRotation
 	// Determine whether Inspiration is currently active.
 	private static bool HasInspiration =>
 		StatusHelper.PlayerHasStatus(true, StatusID.Inspiration);
+
+	#endregion
+
+	#region Debug & UI Status
+
+	public override void DisplayBaseStatus()
+	{
+		base.DisplayBaseStatus();
+		ImGui.Separator();
+		ImGui.Text($"Dualcast Mode Active: {IsDualcastModeActive}");
+		ImGui.Text($"In Occult / Forked Tower: {IsInOccultOrForkedTower}");
+		ImGui.Text($"Phantom Red Mage Level: {PhantomRedMageLevel}");
+		ImGui.Text($"Has Level 6 Phantom Red Mage: {HasLevel6PhantomRedMage}");
+	}
 
 	#endregion
 
@@ -618,6 +657,125 @@ public sealed class BraccaeDualcastPCT : PictomancerRotation
 		if (RainbowDripPvE.CanUse(out act) && HasRainbowBright)
 		{
 			return true;
+		}
+		#endregion
+
+		#region STANDARD BEIRUTAPCT GCD LOGIC (When Dualcast Mode is Inactive)
+		if (!IsDualcastModeActive)
+		{
+			// Cast motifs within the Scenic Muse preparation window.
+			if (ScenicMusePvE.Cooldown.RecastTimeRemainOneCharge <= 30 && !HasStarryMuse && !HasHyperphantasia)
+			{
+				if (StarrySkyMotifPvE.CanUse(out act) && !HasHyperphantasia) return true;
+
+				if (!isMedicated && !WeaponMotifDrawn && HammerMotifPvE.CanUse(out act)) return true;
+			}
+
+			// Cast creature motifs when Living Muse is available and not restricted by early combat rules.
+			if (!blockEarlyHolyAndLivingMotif
+				&& (LivingMusePvE.Cooldown.HasOneCharge
+					|| LivingMusePvE.Cooldown.RecastTimeRemainOneCharge <= CreatureMotifPvE.Info.CastTime * 1.7)
+				&& !HasStarryMuse && !HasHyperphantasia)
+			{
+				if (PomMotifPvE.CanUse(out act)) return true;
+				if (WingMotifPvE.CanUse(out act)) return true;
+				if (ClawMotifPvE.CanUse(out act)) return true;
+				if (MawMotifPvE.CanUse(out act)) return true;
+			}
+
+			// Cast weapon motif when Steel Muse is available and not restricted by Hyperphantasia.
+			if ((SteelMusePvE.Cooldown.HasOneCharge || SteelMusePvE.Cooldown.RecastTimeRemainOneCharge <= WeaponMotifPvE.Info.CastTime)
+				&& !HasStarryMuse && !HasHyperphantasia)
+			{
+				if (!isMedicated && HammerMotifPvE.CanUse(out act))
+				{
+					return true;
+				}
+			}
+
+			// Use Holy/Comet while moving only when the GCD commit timing window is available.
+			if (HolyCometMoving && InCombat && MovingTime > 1.5f && canCommitGcdNow && !HasSwift && !HasHammerTime && HolyCometAllowedByPaintReserve)
+			{
+				if (CometInBlackPvE.CanUse(out act)) return true;
+				if (HolyInWhitePvE.CanUse(out act)) return true;
+			}
+
+			// Spend Swiftcast on motif completion if available
+			if (HasSwift && (!LandscapeMotifDrawn || !CreatureMotifDrawn || !WeaponMotifDrawn))
+			{
+				if (PomMotifPvE.CanUse(out act, skipCastingCheck: true)) return true;
+				if (WingMotifPvE.CanUse(out act, skipCastingCheck: true)) return true;
+				if (ClawMotifPvE.CanUse(out act, skipCastingCheck: true)) return true;
+				if (MawMotifPvE.CanUse(out act, skipCastingCheck: true)) return true;
+				if (!isMedicated && HammerMotifPvE.CanUse(out act, skipCastingCheck: true)) return true;
+				if (StarrySkyMotifPvE.CanUse(out act, skipCastingCheck: true) && !HasHyperphantasia) return true;
+			}
+
+			// Use Holy/Comet for Paint overcap protection when configured.
+			if (Paint == HolyCometMax && !HasStarryMuse && (UseCapCometHoly || UseCapCometOnly))
+			{
+				if (CometInBlackPvE.CanUse(out act))
+				{
+					return true;
+				}
+
+				if (HolyInWhitePvE.CanUse(out act) && !UseCapCometOnly)
+				{
+					return true;
+				}
+			}
+
+			// Use AOE Subtractive Inks when not too close to Starry.
+			if (!StarryWithin3)
+			{
+				if (ThunderIiInMagentaPvE.CanUse(out act)) return true;
+				if (StoneIiInYellowPvE.CanUse(out act)) return true;
+				if (BlizzardIiInCyanPvE.CanUse(out act)) return true;
+			}
+
+			if (WaterIiInBluePvE.CanUse(out act)) return true;
+			if (AeroIiInGreenPvE.CanUse(out act)) return true;
+			if (FireIiInRedPvE.CanUse(out act)) return true;
+
+			// Use single-target Subtractive Inks when not too close to Starry.
+			if (!StarryWithin3)
+			{
+				if (ThunderInMagentaPvE.CanUse(out act)) return true;
+				if (StoneInYellowPvE.CanUse(out act)) return true;
+				if (BlizzardInCyanPvE.CanUse(out act)) return true;
+			}
+
+			if (WaterInBluePvE.CanUse(out act)) return true;
+			if (AeroInGreenPvE.CanUse(out act)) return true;
+
+			if (!blockEarlyFire && !fireHardLockout && FireInRedPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			// Force Holy/Comet usage during the final 3 seconds before Starry.
+			if (StarryWithin3 && InCombat && CombatTime > 5f)
+			{
+				if (CometInBlackPvE.CanUse(out act))
+				{
+					return true;
+				}
+
+				if (HolyInWhitePvE.CanUse(out act) && !UseCapCometOnly)
+				{
+					return true;
+				}
+			}
+
+			if (PomMotifPvE.CanUse(out act)) return true;
+			if (WingMotifPvE.CanUse(out act)) return true;
+			if (ClawMotifPvE.CanUse(out act)) return true;
+			if (MawMotifPvE.CanUse(out act)) return true;
+
+			if (!isMedicated && HammerMotifPvE.CanUse(out act)) return true;
+			if (StarrySkyMotifPvE.CanUse(out act)) return true;
+
+			return base.GeneralGCD(out act);
 		}
 		#endregion
 
