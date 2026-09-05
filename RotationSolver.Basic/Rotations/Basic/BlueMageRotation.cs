@@ -829,7 +829,6 @@ public partial class BlueMageRotation
 
 	static partial void ModifyExuviationPvE(ref ActionSetting setting)
 	{
-		setting.TargetType = TargetType.Dispel;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,

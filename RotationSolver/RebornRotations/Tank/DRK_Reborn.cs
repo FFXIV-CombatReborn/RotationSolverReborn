@@ -45,8 +45,8 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	#endregion
 
 	#region Countdown Logic
-		// Countdown logic to prepare for combat.
-		// Includes logic for using Provoke, tank stances, and burst medicines.
+	// Countdown logic to prepare for combat.
+	// Includes logic for using Provoke, tank stances, and burst medicines.
 	protected override IAction? CountDownAction(float remainTime)
 	{
 		//Provoke when has Shield.

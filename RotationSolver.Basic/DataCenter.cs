@@ -1195,7 +1195,7 @@ internal static class DataCenter
 
 	public static float PartyMembersMinHP
 	{
-		get 
+		get
 		{
 			ComputePartyHpStats(out var minHp, out _, out _, out _, out _);
 			return minHp;
@@ -1204,7 +1204,7 @@ internal static class DataCenter
 
 	public static float PartyMembersAverHP
 	{
-		get 
+		get
 		{
 			ComputePartyHpStats(out _, out var avgHp, out _, out _, out _);
 			return avgHp;
@@ -1213,7 +1213,7 @@ internal static class DataCenter
 
 	public static float PartyMembersDifferHP
 	{
-		get 
+		get
 		{
 			ComputePartyHpStats(out _, out _, out var stdDevHp, out _, out _);
 			return stdDevHp;
@@ -1222,7 +1222,7 @@ internal static class DataCenter
 
 	public static float LowestPartyMembersAverHP
 	{
-		get 
+		get
 		{
 			ComputePartyHpStats(out _, out _, out _, out var lowestAvgHp, out _);
 			return lowestAvgHp;
@@ -1231,7 +1231,7 @@ internal static class DataCenter
 
 	public static float LowestPartyMembersDifferHP
 	{
-		get 
+		get
 		{
 			ComputePartyHpStats(out _, out _, out _, out _, out var lowestStdDevHp);
 			return lowestStdDevHp;
