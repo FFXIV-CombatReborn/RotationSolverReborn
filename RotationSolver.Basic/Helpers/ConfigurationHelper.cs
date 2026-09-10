@@ -292,10 +292,10 @@ internal static class ConfigurationHelper
 			return true;
 		}
 
-		//if (job == Job.BST && cat.BST)
-		//{
-		//	return true;
-		//}
+		if (job == Job.BST && cat.Unknown0)
+		{
+			return true;
+		}
 
 		return false;
 	}
