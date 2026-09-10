@@ -36,7 +36,7 @@ internal static class RotationUpdater
 		Dictionary<JobRole, List<CustomRotationGroup>> customRotationsGroupedByJobRole = [];
 		foreach (var customRotationGroup in CustomRotations)
 		{
-			var job = customRotationGroup.Rotations[0].GetType().GetCustomAttribute<JobsAttribute>()?.Jobs[0] ?? Job.ADV;
+			var job = customRotationGroup.Rotations[0].GetType().GetCustomAttribute<JobsAttribute>(inherit: true)?.Jobs[0] ?? Job.ADV;
 			var jobRole = Svc.Data.GetExcelSheet<ClassJob>()!.GetRow((uint)job)!.GetJobRole();
 			if (!customRotationsGroupedByJobRole.TryGetValue(jobRole, out var value))
 			{
@@ -135,9 +135,10 @@ internal static class RotationUpdater
 		Dictionary<Job, List<Type>> rotationGroups = [];
 		foreach (var rotation in rotationList)
 		{
-			var attr = rotation.GetCustomAttribute<JobsAttribute>();
+			var attr = rotation.GetCustomAttribute<JobsAttribute>(inherit: true);
 			if (attr == null)
 			{
+				PluginLog.Information($"Rotation {rotation.FullName} has no Jobs attribute");
 				continue;
 			}
 
@@ -157,7 +158,7 @@ internal static class RotationUpdater
 			var jobId = kvp.Key;
 			Type[] rotations = [.. kvp.Value];
 
-			result.Add(new CustomRotationGroup(jobId, rotations[0].GetCustomAttribute<JobsAttribute>()!.Jobs,
+			result.Add(new CustomRotationGroup(jobId, rotations[0].GetCustomAttribute<JobsAttribute>(inherit: true)!.Jobs,
 				rotations));
 		}
 
@@ -201,6 +202,10 @@ internal static class RotationUpdater
 				{
 					continue;
 				}
+				if (act.Setting.IsFakeAction)
+				{
+					continue;
+				}
 				// Filter out Mount actions
 				else if (act.Info.IsMountAction)
 				{
@@ -221,7 +226,14 @@ internal static class RotationUpdater
 				}
 				else if (act.Action.IsRoleAction)
 				{
-					key = "Role Action";
+					if (DataCenter.Job == Job.BST)
+					{
+						continue;
+					}
+					else
+					{
+						key = "Role Action";
+					}
 				}
 				else if (act.Info.IsPvPLimitBreak && DataCenter.IsPvP)
 				{
@@ -404,6 +416,12 @@ internal static class RotationUpdater
 
 			if (validCustomRotations.TryGetValue(curCombatType, out var validCustomRotationsList))
 			{
+				if (validCustomRotationsList.Count == 0)
+				{
+					PluginLog.Information($"No valid {curCombatType} rotations found for {nowJob}");
+					return;
+				}
+
 				var desiredRotationName = DataCenter.IsPvP ? Service.Config.PvPRotationChoice : Service.Config.RotationChoice;
 
 				// Check if we have a matching rotation for the config, or use the first rotation which should be our default
@@ -425,6 +443,14 @@ internal static class RotationUpdater
 
 				return;
 			}
+			else
+			{
+				PluginLog.Debug($"Combat type {curCombatType} not found in rotations for {nowJob}. Available types: {string.Join(", ", validCustomRotations.Keys)}");
+			}
+		}
+		else
+		{
+			PluginLog.Debug($"No rotations found for job {nowJob} in CustomRotationsLookup");
 		}
 
 		DataCenter.CurrentRotation = null;
@@ -449,11 +475,9 @@ internal static class RotationUpdater
 		{
 			return (ICustomRotation?)Activator.CreateInstance(t);
 		}
-		catch (Exception)
+		catch (Exception ex)
 		{
-#if DEBUG
-			PluginLog.Error($"Failed to create the rotation: {t.Name}");
-#endif
+			PluginLog.Error($"Failed to create the rotation: {t.Name}: {ex.Message}\n{ex.InnerException?.Message}");
 			return null;
 		}
 	}

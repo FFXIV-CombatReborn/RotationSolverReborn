@@ -100,6 +100,12 @@ public class ActionSetting
 	public Func<uint?>? MPOverride { get; set; } = null;
 
 	/// <summary>
+	/// Marks action as a fake action. 
+	/// This is used for actions that can be placed on hotbars but not actually usable, just a placeholder to turn into something else.
+	/// </summary>
+	public bool IsFakeAction { get; set; } = false;
+
+	/// <summary>
 	/// Is this action in the melee range.
 	/// </summary>
 	internal SpecialActionType SpecialType { get; set; }
