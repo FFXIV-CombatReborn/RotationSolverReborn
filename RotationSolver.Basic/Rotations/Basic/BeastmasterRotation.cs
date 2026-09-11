@@ -1277,42 +1277,49 @@ public partial class BeastmasterRotation
 	//Vilekin Borrow
 	static partial void ModifyBorrowPvE_47239(ref ActionSetting setting)
 	{
+		setting.ActionCheck = () => KinshipBattlehorn != ActiveBattlehorn;
 		setting.StatusNeed = [StatusID.OneWithNature];
 	}
 
 	//Cloudkin Borrow
 	static partial void ModifyBorrowPvE_47240(ref ActionSetting setting)
 	{
+		setting.ActionCheck = () => KinshipBattlehorn != ActiveBattlehorn;
 		setting.StatusNeed = [StatusID.OneWithNature];
 	}
 
 	//Seedkin Borrow
 	static partial void ModifyBorrowPvE_47241(ref ActionSetting setting)
 	{
+		setting.ActionCheck = () => KinshipBattlehorn != ActiveBattlehorn;
 		setting.StatusNeed = [StatusID.OneWithNature];
 	}
 
 	//Wavekin Borrow
 	static partial void ModifyBorrowPvE_47242(ref ActionSetting setting)
 	{
+		setting.ActionCheck = () => KinshipBattlehorn != ActiveBattlehorn;
 		setting.StatusNeed = [StatusID.OneWithNature];
 	}
 
 	//Scalekin Borrow
 	static partial void ModifyBorrowPvE_47243(ref ActionSetting setting)
 	{
+		setting.ActionCheck = () => KinshipBattlehorn != ActiveBattlehorn;
 		setting.StatusNeed = [StatusID.OneWithNature];
 	}
 
 	//Soulkin Borrow
 	static partial void ModifyBorrowPvE_47244(ref ActionSetting setting)
 	{
+		setting.ActionCheck = () => KinshipBattlehorn != ActiveBattlehorn;
 		setting.StatusNeed = [StatusID.OneWithNature];
 	}
 
 	//Ashkin Borrow
 	static partial void ModifyBorrowPvE_47245(ref ActionSetting setting)
 	{
+		setting.ActionCheck = () => KinshipBattlehorn != ActiveBattlehorn;
 		setting.StatusNeed = [StatusID.OneWithNature];
 	}
 	#endregion
