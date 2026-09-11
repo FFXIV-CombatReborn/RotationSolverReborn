@@ -143,12 +143,17 @@ internal static class StateUpdater
 				return false;
 			}
 
-			unsafe
+			// Validate liveness before the native reads inside HasPositional()/
+			// FindEnemyPositional() below; a try/catch can't cover an
+			// AccessViolationException from a freed native object.
+			if (!target.IsValid())
 			{
-				if (target.Struct() == null)
-				{
-					return false;
-				}
+				return false;
+			}
+
+			if (target.Address == nint.Zero)
+			{
+				return false;
 			}
 
 			try
