@@ -11671,10 +11671,10 @@ DownForTheCount_1950 = 1950,
 Tactician_1951 = 1951,
 
 /// &lt;summary&gt;
-/// &lt;see href="https://garlandtools.org/db/#status/1952"&gt;&lt;strong&gt;Hide&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;see href="https://garlandtools.org/db/#status/1952"&gt;&lt;strong&gt;Hidden&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
 /// &lt;para&gt;Unable to be detected. Movement speed is severely reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-Hide = 1952,
+Hidden_1952 = 1952,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/1953"&gt;&lt;strong&gt;Down for the Count&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -24045,7 +24045,7 @@ PerpetualConflagration = 4122,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4123"&gt;&lt;strong&gt;Life Siphon&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
-/// &lt;para&gt;Attacks generate HP equal to the amount of damage dealt.&lt;/para&gt;
+/// &lt;para&gt;Attacks generate HP equal to a portion of damage dealt.&lt;/para&gt;
 /// &lt;/summary&gt;
 LifeSiphon = 4123,
 
@@ -26676,79 +26676,94 @@ UnnamedStatus_4593 = 4593,
 Doom_4594 = 4594,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4595"&gt;&lt;strong&gt;Volant Heart&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Feeling Volant. Using instinctual skills with a Rampant affinity will trigger an intentional combo.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4595 = 4595,
+VolantHeart = 4595,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4596"&gt;&lt;strong&gt;Rampant Heart&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Feeling Rampant. Using instinctual skills with a Durant affinity will trigger an intentional combo.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4596 = 4596,
+RampantHeart = 4596,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4597"&gt;&lt;strong&gt;Durant Heart&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Feeling Durant. Using instinctual skills with an Eldritch affinity will trigger an intentional combo.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4597 = 4597,
+DurantHeart = 4597,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4598"&gt;&lt;strong&gt;Eldritch Heart&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Feeling Eldritch. Using instinctual skills with a Volant affinity will trigger an intentional combo.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4598 = 4598,
+EldritchHeart = 4598,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4599"&gt;&lt;strong&gt;Sunstrider&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Striding boldly beneath the sun. Using instinctual skills with a Moonstalker affinity will trigger an infinitive combo.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4599 = 4599,
+Sunstrider = 4599,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4600"&gt;&lt;strong&gt;Moonstalker&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Stealthily stalking the moon. Using instinctual skills with a Sunstrider affinity will trigger an infinitive combo.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4600 = 4600,
+Moonstalker = 4600,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4601"&gt;&lt;strong&gt;One with Nature&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Communing with the wilds. Able to execute Tempered Release.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4601 = 4601,
+OneWithNature = 4601,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4602"&gt;&lt;strong&gt;Beast Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a beastkin familiar. Able to execute Beastskin.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4602 = 4602,
+BeastKinship = 4602,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4603"&gt;&lt;strong&gt;Vile Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a vilekin familiar. Able to execute Vileskin.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4603 = 4603,
+VileKinship = 4603,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4604"&gt;&lt;strong&gt;Cloud Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a cloudkin familiar. Able to execute Cloud Skim.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4604 = 4604,
+CloudKinship = 4604,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4605"&gt;&lt;strong&gt;Seed Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a seedkin familiar. Able to execute Seedsower.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4605 = 4605,
+SeedKinship = 4605,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4606"&gt;&lt;strong&gt;Wave Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a wavekin familiar. Able to execute Quelling Wave.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4606 = 4606,
+WaveKinship = 4606,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4607"&gt;&lt;strong&gt;Scale Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a scalekin familiar. Able to execute Scaleskin.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4607 = 4607,
+ScaleKinship = 4607,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4608"&gt;&lt;strong&gt;Soul Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a soulkin familiar. Able to execute Soul Crush.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4608 = 4608,
+SoulKinship = 4608,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4609"&gt;&lt;strong&gt;Ash Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from an ashkin familiar. Able to execute Scouring Ash.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4609 = 4609,
+AshKinship = 4609,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4610"&gt;&lt;strong&gt;Mighty Strikes&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
@@ -26775,9 +26790,10 @@ PlasmaThrottleCharged = 4612,
 EnergyLoad = 4613,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4614"&gt;&lt;strong&gt;Lingering Vantage&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Next Parting Blow will deal increased damage.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4614 = 4614,
+LingeringVantage = 4614,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4615"&gt;&lt;strong&gt;Curse of Solitude&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -26809,29 +26825,34 @@ StandingFirm_4618 = 4618,
 UnnamedStatus_4619 = 4619,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4620"&gt;&lt;strong&gt;Vileskin&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Immune to most knockback and draw-in effects. Blocking incoming attacks and TP is increased for each successful block.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4620 = 4620,
+Vileskin = 4620,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4621"&gt;&lt;strong&gt;Beastskin&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Physical damage taken is reduced and critical hit rate is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4621 = 4621,
+Beastskin = 4621,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4622"&gt;&lt;strong&gt;Seeds Sown&lt;/strong&gt;&lt;/see&gt; ↓ (BST)
+/// &lt;para&gt;Toxins are causing damage over time and damage dealt is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4622 = 4622,
+SeedsSown = 4622,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4623"&gt;&lt;strong&gt;Scaleskin&lt;/strong&gt;&lt;/see&gt; ↑ (BST)
+/// &lt;para&gt;A scaly barrier is reducing magical damage. When the barrier is fully absorbed TP will increase.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4623 = 4623,
+Scaleskin = 4623,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4624"&gt;&lt;strong&gt;Capturing Interest&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Attempting to prove worthiness as a beastmaster.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4624 = 4624,
+CapturingInterest = 4624,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4625"&gt;&lt;strong&gt;Breaker of Wind&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -26840,9 +26861,10 @@ UnnamedStatus_4624 = 4624,
 BreakerOfWind = 4625,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4626"&gt;&lt;strong&gt;Interest Captured&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Weighing worthiness. Alliance will be determined upon incapacitation.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4626 = 4626,
+InterestCaptured = 4626,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4627"&gt;&lt;strong&gt;Fury&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
@@ -26927,49 +26949,58 @@ UnnamedStatus_4641 = 4641,
 UnnamedStatus_4642 = 4642,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4643"&gt;&lt;strong&gt;Wavering Heart&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Otherwise engaged. Unable to perform combos with your familiar.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4643 = 4643,
+WaveringHeart = 4643,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4644"&gt;&lt;strong&gt;Beast Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a beastkin familiar. Able to execute Beastskin.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4644 = 4644,
+BeastKinship_4644 = 4644,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4645"&gt;&lt;strong&gt;Vile Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a vilekin familiar. Able to execute Vileskin.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4645 = 4645,
+VileKinship_4645 = 4645,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4646"&gt;&lt;strong&gt;Cloud Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a cloudkin familiar. Able to execute Cloud Skim.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4646 = 4646,
+CloudKinship_4646 = 4646,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4647"&gt;&lt;strong&gt;Seed Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a seedkin familiar. Able to execute Seedsower.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4647 = 4647,
+SeedKinship_4647 = 4647,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4648"&gt;&lt;strong&gt;Wave Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a wavekin familiar. Able to execute Quelling Wave.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4648 = 4648,
+WaveKinship_4648 = 4648,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4649"&gt;&lt;strong&gt;Scale Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a scalekin familiar. Able to execute Scaleskin.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4649 = 4649,
+ScaleKinship_4649 = 4649,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4650"&gt;&lt;strong&gt;Soul Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from a soulkin familiar. Able to execute Soul Crush.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4650 = 4650,
+SoulKinship_4650 = 4650,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4651"&gt;&lt;strong&gt;Ash Kinship&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Borrowing aether from an ashkin familiar. Able to execute Scouring Ash.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4651 = 4651,
+AshKinship_4651 = 4651,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4652"&gt;&lt;strong&gt;Toxicosis&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -27993,129 +28024,154 @@ AlexandrianSwiftdodge = 4842,
 AlexandrianSwiftstep = 4843,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4846"&gt;&lt;strong&gt;Reraise&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Chance of automatic revival upon KO.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4846 = 4846,
+Reraise_4846 = 4846,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4847"&gt;&lt;strong&gt;Crucible Item Penalty&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Unable to use any items other than ephemeral items or meals.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4847 = 4847,
+CrucibleItemPenalty = 4847,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4848"&gt;&lt;strong&gt;Keen Edge&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Sustaining damage over time in exchange for dealing increased damage.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4848 = 4848,
+KeenEdge_4848 = 4848,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4849"&gt;&lt;strong&gt;Blink&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Impervious to most physical attacks. Each nullified attack reduces one stack.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4849 = 4849,
+Blink = 4849,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4850"&gt;&lt;strong&gt;Antipoison&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Poison resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4850 = 4850,
+Antipoison = 4850,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4851"&gt;&lt;strong&gt;Antiparalysis&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Paralysis resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4851 = 4851,
+Antiparalysis = 4851,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4852"&gt;&lt;strong&gt;Antiblind&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Blind resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4852 = 4852,
+Antiblind = 4852,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4853"&gt;&lt;strong&gt;Antipetrification&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Petrification resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4853 = 4853,
+Antipetrification = 4853,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4854"&gt;&lt;strong&gt;Antisleep&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Sleep resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4854 = 4854,
+Antisleep = 4854,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4855"&gt;&lt;strong&gt;Winners Keepers&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;The next victorious battle within the Crucible of the Unbroken is likely to yield ample loot.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4855 = 4855,
+WinnersKeepers = 4855,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4856"&gt;&lt;strong&gt;Token Benefits&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;The next victorious battle within the Crucible of the Unbroken is likely to yield ample territory tokens.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4856 = 4856,
+TokenBenefits = 4856,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4857"&gt;&lt;strong&gt;Tough Skin&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Damage taken is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4857 = 4857,
+ToughSkin = 4857,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4858"&gt;&lt;strong&gt;Hasty Spirit&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Weaponskill cast time and recast time spell cast time and recast time and auto-attack delay are reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4858 = 4858,
+HastySpirit = 4858,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4859"&gt;&lt;strong&gt;Liquid Strength&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Physical damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4859 = 4859,
+LiquidStrength = 4859,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4860"&gt;&lt;strong&gt;Liquid Magic&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Magic damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4860 = 4860,
+LiquidMagic = 4860,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4861"&gt;&lt;strong&gt;Liquid Intensity&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Critical hit rate is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4861 = 4861,
+LiquidIntensity = 4861,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4862"&gt;&lt;strong&gt;Liquid Evasion&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Evasion is enhanced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4862 = 4862,
+LiquidEvasion = 4862,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4863"&gt;&lt;strong&gt;Liquid Constitution&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Maximum HP is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4863 = 4863,
+LiquidConstitution = 4863,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4864"&gt;&lt;strong&gt;Through Fire&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Chance that fire damage will be absorbed.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4864 = 4864,
+ThroughFire = 4864,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4865"&gt;&lt;strong&gt;Through Water&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Chance that water damage will be absorbed.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4865 = 4865,
+ThroughWater = 4865,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4866"&gt;&lt;strong&gt;Through Earth&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Chance that earth damage will be absorbed.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4866 = 4866,
+ThroughEarth = 4866,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4867"&gt;&lt;strong&gt;Through Thunder&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Chance that lightning damage will be absorbed.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4867 = 4867,
+ThroughThunder = 4867,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4868"&gt;&lt;strong&gt;Through Wind&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Chance that wind damage will be absorbed.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4868 = 4868,
+ThroughWind = 4868,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4869"&gt;&lt;strong&gt;Through Ice&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Chance that ice damage will be absorbed.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4869 = 4869,
+ThroughIce = 4869,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4870"&gt;&lt;strong&gt;Sandstill&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Protected by sands that will turn back time should you suffer defeat within the Crucible of the Unbroken.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4870 = 4870,
+Sandstill = 4870,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -28134,9 +28190,10 @@ UnnamedStatus_4872 = 4872,
 Image = 4873,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4874"&gt;&lt;strong&gt;Damage Down&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Damage dealt is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4874 = 4874,
+DamageDown_4874 = 4874,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4875"&gt;&lt;strong&gt;Invincibility&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
@@ -28169,9 +28226,10 @@ Teleportent_4878 = 4878,
 Teleportent_4879 = 4879,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4880"&gt;&lt;strong&gt;Windburn&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Sustaining wind damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4880 = 4880,
+Windburn_4880 = 4880,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -28219,9 +28277,10 @@ UnnamedStatus_4889 = 4889,
 UnnamedStatus_4890 = 4890,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4891"&gt;&lt;strong&gt;Petrification&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Stone-like rigidity is preventing the execution of actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4891 = 4891,
+Petrification_4891 = 4891,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4892"&gt;&lt;strong&gt;Variant Eagle Eye Shot Set&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
@@ -28230,9 +28289,10 @@ UnnamedStatus_4891 = 4891,
 VariantEagleEyeShotSet = 4892,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4893"&gt;&lt;strong&gt;Guerrilla Tactics&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Damage dealt is increased and evasion is enhanced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4893 = 4893,
+GuerrillaTactics = 4893,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4894"&gt;&lt;strong&gt;Sleep&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -28552,44 +28612,52 @@ VulnerabilityDown_4955 = 4955,
 UnnamedStatus_4956 = 4956,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4957"&gt;&lt;strong&gt;Sleep Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Sleep resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4957 = 4957,
+SleepResistanceUp = 4957,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4958"&gt;&lt;strong&gt;Paralysis Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Paralysis resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4958 = 4958,
+ParalysisResistanceUp = 4958,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4959"&gt;&lt;strong&gt;Petrification Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Petrification resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4959 = 4959,
+PetrificationResistanceUp = 4959,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4960"&gt;&lt;strong&gt;Blind Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Blind resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4960 = 4960,
+BlindResistanceUp = 4960,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4961"&gt;&lt;strong&gt;Poison Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Poison resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4961 = 4961,
+PoisonResistanceUp_4961 = 4961,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4962"&gt;&lt;strong&gt;Haste&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Weaponskill cast time and recast time spell cast time and recast time and auto-attack delay are reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4962 = 4962,
+Haste_4962 = 4962,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4963"&gt;&lt;strong&gt;Physical Vulnerability Down&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Physical damage taken is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4963 = 4963,
+PhysicalVulnerabilityDown_4963 = 4963,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4964"&gt;&lt;strong&gt;Magic Vulnerability Down&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Magic damage taken is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4964 = 4964,
+MagicVulnerabilityDown_4964 = 4964,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/4965"&gt;&lt;strong&gt;Snow Fort&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
@@ -28762,34 +28830,40 @@ UnnamedStatus_4995 = 4995,
 AttractorBeamCharged = 4996,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4997"&gt;&lt;strong&gt;Fire Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Fire resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4997 = 4997,
+FireResistanceUp_4997 = 4997,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4998"&gt;&lt;strong&gt;Water Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Water resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4998 = 4998,
+WaterResistanceUp_4998 = 4998,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/4999"&gt;&lt;strong&gt;Wind Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Wind resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_4999 = 4999,
+WindResistanceUp_4999 = 4999,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5000"&gt;&lt;strong&gt;Lightning Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Lightning resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5000 = 5000,
+LightningResistanceUp_5000 = 5000,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5001"&gt;&lt;strong&gt;Earth Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Earth resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5001 = 5001,
+EarthResistanceUp_5001 = 5001,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5002"&gt;&lt;strong&gt;Ice Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Ice resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5002 = 5002,
+IceResistanceUp_5002 = 5002,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -28877,44 +28951,52 @@ Status_4Correction = 5017,
 Status_5Correction = 5018,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5019"&gt;&lt;strong&gt;Physical Damage Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Physical damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5019 = 5019,
+PhysicalDamageUp_5019 = 5019,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5020"&gt;&lt;strong&gt;Magic Damage Up&lt;/strong&gt;&lt;/see&gt; ↑ (BST)
+/// &lt;para&gt;Magic damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5020 = 5020,
+MagicDamageUp_5020 = 5020,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5021"&gt;&lt;strong&gt;Water Resistance Down&lt;/strong&gt;&lt;/see&gt; ↓ (BST)
+/// &lt;para&gt;Water resistance is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5021 = 5021,
+WaterResistanceDown_5021 = 5021,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5022"&gt;&lt;strong&gt;Wind Resistance Down&lt;/strong&gt;&lt;/see&gt; ↓ (BST)
+/// &lt;para&gt;Wind resistance is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5022 = 5022,
+WindResistanceDown_5022 = 5022,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5023"&gt;&lt;strong&gt;Fire Resistance Down&lt;/strong&gt;&lt;/see&gt; ↓ (BST)
+/// &lt;para&gt;Fire resistance is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5023 = 5023,
+FireResistanceDown_5023 = 5023,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5024"&gt;&lt;strong&gt;Lightning Resistance Down&lt;/strong&gt;&lt;/see&gt; ↓ (BST)
+/// &lt;para&gt;Lightning resistance is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5024 = 5024,
+LightningResistanceDown_5024 = 5024,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5025"&gt;&lt;strong&gt;Earth Resistance Down&lt;/strong&gt;&lt;/see&gt; ↓ (BST)
+/// &lt;para&gt;Earth resistance is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5025 = 5025,
+EarthResistanceDown = 5025,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5026"&gt;&lt;strong&gt;Ice Resistance Down&lt;/strong&gt;&lt;/see&gt; ↓ (BST)
+/// &lt;para&gt;Ice resistance is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5026 = 5026,
+IceResistanceDown_5026 = 5026,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -29490,19 +29572,16 @@ GrowingPanic = 5137,
 Zombieproof = 5138,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5140"&gt;&lt;strong&gt;Poison&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Toxins are causing damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5139 = 5139,
+Poison_5140 = 5140,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5141"&gt;&lt;strong&gt;Poison&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Toxins are causing damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5140 = 5140,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5141 = 5141,
+Poison_5141 = 5141,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5142"&gt;&lt;strong&gt;Forward March&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -29523,39 +29602,46 @@ AboutFace_5143 = 5143,
 Rsv51441100S74Cfc3B0E74Cfc3B0 = 5144,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5145"&gt;&lt;strong&gt;Needles Out&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Damage taken is reduced while countering physical attacks.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5145 = 5145,
+NeedlesOut = 5145,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5146"&gt;&lt;strong&gt;Wit's End&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Feeling increasingly perplexed. Will become Confused upon reaching 16 stacks.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5146 = 5146,
+WitsEnd = 5146,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5147"&gt;&lt;strong&gt;Damage Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5147 = 5147,
+DamageUp_5147 = 5147,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5148"&gt;&lt;strong&gt;All Evens&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Challenged by a riddle. Will result in punishment for those not standing on an even number when this effect expires.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5148 = 5148,
+AllEvens = 5148,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5149"&gt;&lt;strong&gt;All Odds&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Challenged by a riddle. Will result in punishment for those not standing on an odd number when this effect expires.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5149 = 5149,
+AllOdds = 5149,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5150"&gt;&lt;strong&gt;All Prime&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Challenged by a riddle. Will result in punishment for those not standing on a prime number when this effect expires.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5150 = 5150,
+AllPrime = 5150,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5151"&gt;&lt;strong&gt;All Three&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Challenged by a riddle. Will result in punishment for those not standing on a multiple of three when this effect expires.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5151 = 5151,
+AllThree = 5151,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5152"&gt;&lt;strong&gt;Load-bearing&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -29676,49 +29762,52 @@ UnnamedStatus_5173 = 5173,
 ForcedMarch_5174 = 5174,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5175"&gt;&lt;strong&gt;Heavy&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Movement speed is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5175 = 5175,
+Heavy_5175 = 5175,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5176"&gt;&lt;strong&gt;Briar&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Thick briar is reducing movement speed and causing damage over time. Prevents draw-in and knockback effects.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5176 = 5176,
+Briar_5176 = 5176,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5177"&gt;&lt;strong&gt;Freezing&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Body is slowly turning to ice. Will experience a Deep Freeze upon reaching 8 stacks.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5177 = 5177,
+Freezing_5177 = 5177,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5178"&gt;&lt;strong&gt;Growing Dread&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Slowly succumbing to inner demons. Will suffer Hysteria upon reaching 5 stacks.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5178 = 5178,
+GrowingDread_5178 = 5178,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5180"&gt;&lt;strong&gt;Physical Vulnerability Up&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Physical damage taken is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5179 = 5179,
+PhysicalVulnerabilityUp_5180 = 5180,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5181"&gt;&lt;strong&gt;Magic Vulnerability Up&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Magic damage taken is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5180 = 5180,
+MagicVulnerabilityUp_5181 = 5181,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5182"&gt;&lt;strong&gt;Swelling&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Slowly increasing in volume. Will become Bloated upon reaching 16 stacks.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5181 = 5181,
+Swelling = 5182,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5183"&gt;&lt;strong&gt;Toxicosis&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Toxins are causing damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5182 = 5182,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5183 = 5183,
+Toxicosis_5183 = 5183,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5184"&gt;&lt;strong&gt;Doom&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -29733,9 +29822,10 @@ Doom_5184 = 5184,
 Doom_5185 = 5185,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5186"&gt;&lt;strong&gt;Trailblazing&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Turning up the heat of battle. Maximum HP and damage dealt are increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5186 = 5186,
+Trailblazing = 5186,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5187"&gt;&lt;strong&gt;Doom&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -29802,14 +29892,16 @@ UnnamedStatus_5196 = 5196,
 UnnamedStatus_5197 = 5197,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5198"&gt;&lt;strong&gt;Astral Ascendancy&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Fire wind and lightning resistances are increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5198 = 5198,
+AstralAscendancy = 5198,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5199"&gt;&lt;strong&gt;Umbral Ascendancy&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Water earth and ice resistances are increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5199 = 5199,
+UmbralAscendancy = 5199,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -30514,34 +30606,40 @@ PhantomRedMage = 5334,
 PhantomNecromancer = 5335,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5336"&gt;&lt;strong&gt;Fire Resistance Down&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Fire resistance is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5336 = 5336,
+FireResistanceDown_5336 = 5336,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5337"&gt;&lt;strong&gt;Water Resistance Down&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Water resistance is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5337 = 5337,
+WaterResistanceDown_5337 = 5337,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5338"&gt;&lt;strong&gt;Vulnerability Down&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Damage taken is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5338 = 5338,
+VulnerabilityDown_5338 = 5338,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5339"&gt;&lt;strong&gt;Physical Damage Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Physical damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5339 = 5339,
+PhysicalDamageUp_5339 = 5339,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5340"&gt;&lt;strong&gt;Magic Damage Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Magic damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5340 = 5340,
+MagicDamageUp_5340 = 5340,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5341"&gt;&lt;strong&gt;Unseen Force&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Wounded by an invisible dagger and sustaining damage over time. A shockwave will erupt from where the dagger struck when this effect expires.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5341 = 5341,
+UnseenForce = 5341,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5343"&gt;&lt;strong&gt;Light Vision&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
@@ -30606,9 +30704,10 @@ UnnamedStatus_5354 = 5354,
 HealingGlyph = 5355,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5356"&gt;&lt;strong&gt;Heavy&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Movement speed is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5356 = 5356,
+Heavy_5356 = 5356,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5357"&gt;&lt;strong&gt;Gauntlet Taken&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -30751,24 +30850,28 @@ UnnamedStatus_5379 = 5379,
 UnnamedStatus_5380 = 5380,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5381"&gt;&lt;strong&gt;Blind&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Encroaching darkness is lowering accuracy.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5381 = 5381,
+Blind_5381 = 5381,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5382"&gt;&lt;strong&gt;Paralysis&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Deadened nerves are sometimes preventing the execution of actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5382 = 5382,
+Paralysis_5382 = 5382,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5383"&gt;&lt;strong&gt;Nightmare&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Troubled sleep is preventing the execution of actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5383 = 5383,
+Nightmare_5383 = 5383,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5384"&gt;&lt;strong&gt;Windburn&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Sustaining wind damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5384 = 5384,
+Windburn_5384 = 5384,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -30781,54 +30884,64 @@ UnnamedStatus_5385 = 5385,
 UnnamedStatus_5386 = 5386,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5387"&gt;&lt;strong&gt;Toxicosis&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Toxins are causing damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5387 = 5387,
+Toxicosis_5387 = 5387,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5388"&gt;&lt;strong&gt;Paralysis&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Deadened nerves are sometimes preventing the execution of actions.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5388 = 5388,
+Paralysis_5388 = 5388,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5389"&gt;&lt;strong&gt;Blind&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Encroaching darkness is lowering accuracy.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5389 = 5389,
+Blind_5389 = 5389,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5390"&gt;&lt;strong&gt;Haste+&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Weaponskill cast time and recast time spell cast time and recast time and auto-attack delay are reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5390 = 5390,
+Haste_5390 = 5390,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5391"&gt;&lt;strong&gt;Damage Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5391 = 5391,
+DamageUp_5391 = 5391,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5392"&gt;&lt;strong&gt;Magic Vulnerability Down&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Magic damage taken is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5392 = 5392,
+MagicVulnerabilityDown_5392 = 5392,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5393"&gt;&lt;strong&gt;Physical Vulnerability Down&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Physical damage taken is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5393 = 5393,
+PhysicalVulnerabilityDown_5393 = 5393,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5394"&gt;&lt;strong&gt;Rehabilitation&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Regenerating HP over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5394 = 5394,
+Rehabilitation_5394 = 5394,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5395"&gt;&lt;strong&gt;High Wire&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Heightened excitement is causing actions to become erratic.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5395 = 5395,
+HighWire_5395 = 5395,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5396"&gt;&lt;strong&gt;Slow&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Weaponskill cast time and recast time spell cast time and recast time and auto-attack delay are increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5396 = 5396,
+Slow_5396 = 5396,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -30872,7 +30985,7 @@ EasterlyReprise = 5403,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5404"&gt;&lt;strong&gt;Westerly Reprise&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
-/// &lt;para&gt;Will be hit by a surge of wind from the east when this effect expires.&lt;/para&gt;
+/// &lt;para&gt;Will be hit by a surge of wind from the west when this effect expires.&lt;/para&gt;
 /// &lt;/summary&gt;
 WesterlyReprise = 5404,
 
@@ -30882,9 +30995,10 @@ WesterlyReprise = 5404,
 UnnamedStatus_5405 = 5405,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5406"&gt;&lt;strong&gt;Recharge&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Charged with aether.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5406 = 5406,
+Recharge_5406 = 5406,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5407"&gt;&lt;strong&gt;Strung Up&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -30899,9 +31013,10 @@ StrungUp = 5407,
 Incapacitated_5408 = 5408,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5409"&gt;&lt;strong&gt;Damage Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5409 = 5409,
+DamageUp_5409 = 5409,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -30962,9 +31077,10 @@ UnnamedStatus_5419 = 5419,
 UnnamedStatus_5420 = 5420,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5421"&gt;&lt;strong&gt;Doom&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Certain death when counter reaches zero.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5421 = 5421,
+Doom_5421 = 5421,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -30972,25 +31088,22 @@ UnnamedStatus_5421 = 5421,
 UnnamedStatus_5422 = 5422,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5423"&gt;&lt;strong&gt;Popoto Skin&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Relying upon a beloved companion. All damage taken is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5423 = 5423,
+PopotoSkin = 5423,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5424"&gt;&lt;strong&gt;Wit's End&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Feeling increasingly perplexed. Will become Confused upon reaching 12 stacks.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5424 = 5424,
+WitsEnd_5424 = 5424,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5425"&gt;&lt;strong&gt;Poison&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
 /// &lt;para&gt;Toxins are causing damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
 Poison_5425 = 5425,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5426 = 5426,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31003,9 +31116,10 @@ UnnamedStatus_5427 = 5427,
 UnnamedStatus_5428 = 5428,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5429"&gt;&lt;strong&gt;Bind+&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Unable to move.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5429 = 5429,
+Bind_5429 = 5429,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31013,34 +31127,16 @@ UnnamedStatus_5429 = 5429,
 UnnamedStatus_5430 = 5430,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5433"&gt;&lt;strong&gt;Brood Rage&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;The mother zu is maddened by the death of her brood. Damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5431 = 5431,
+BroodRage_5433 = 5433,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5434"&gt;&lt;strong&gt;Paralyzing Spikes&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Elemental spikes are dealing lightning damage to and paralyzing attackers.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5432 = 5432,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5433 = 5433,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5434 = 5434,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5435 = 5435,
-
-/// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
-/// &lt;/summary&gt;
-UnnamedStatus_5436 = 5436,
+ParalyzingSpikes = 5434,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31059,9 +31155,10 @@ Dualcast_5438 = 5438,
 UnnamedStatus_5439 = 5439,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5442"&gt;&lt;strong&gt;Bleeding&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Sustaining damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5442 = 5442,
+Bleeding_5442 = 5442,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31094,19 +31191,22 @@ UnnamedStatus_5447 = 5447,
 UnnamedStatus_5448 = 5448,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5449"&gt;&lt;strong&gt;Physical Damage Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Physical damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5449 = 5449,
+PhysicalDamageUp_5449 = 5449,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5450"&gt;&lt;strong&gt;Damage Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5450 = 5450,
+DamageUp_5450 = 5450,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5451"&gt;&lt;strong&gt;Damage Down&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Damage dealt is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5451 = 5451,
+DamageDown_5451 = 5451,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5452"&gt;&lt;strong&gt;_rsv_5452_-1_1_0_0_S74CFC3B0_E74CFC3B0&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -31127,9 +31227,10 @@ Rsv54531100S74Cfc3B0E74Cfc3B0 = 5453,
 Rsv54541100S74Cfc3B0E74Cfc3B0 = 5454,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5455"&gt;&lt;strong&gt;Bind&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Unable to move.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5455 = 5455,
+Bind_5455 = 5455,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31167,9 +31268,10 @@ UnnamedStatus_5461 = 5461,
 UnnamedStatus_5462 = 5462,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5463"&gt;&lt;strong&gt;Excellence&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Impervious to most attacks. Damage dealt is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5463 = 5463,
+Excellence_5463 = 5463,
 
 /// &lt;summary&gt;
 /// &lt;see href="https://garlandtools.org/db/#status/5464"&gt;&lt;strong&gt;_rsv_5464_-1_1_0_0_S74CFC3B0_E74CFC3B0&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
@@ -31178,9 +31280,10 @@ UnnamedStatus_5463 = 5463,
 Rsv54641100S74Cfc3B0E74Cfc3B0 = 5464,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5465"&gt;&lt;strong&gt;Blaze Spikes&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Elemental spikes are dealing fire damage to attackers.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5465 = 5465,
+BlazeSpikes_5465 = 5465,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31321,39 +31424,46 @@ UnnamedStatus_5493 = 5493,
 UnnamedStatus_5494 = 5494,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5495"&gt;&lt;strong&gt;Burns&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Sustaining fire damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5495 = 5495,
+Burns_5495 = 5495,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5496"&gt;&lt;strong&gt;Dropsy&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Sustaining water damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5496 = 5496,
+Dropsy_5496 = 5496,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5497"&gt;&lt;strong&gt;Windburn&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Sustaining wind damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5497 = 5497,
+Windburn_5497 = 5497,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5498"&gt;&lt;strong&gt;Electrocution&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Sustaining lightning damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5498 = 5498,
+Electrocution_5498 = 5498,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5499"&gt;&lt;strong&gt;Sludge&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Sustaining earth damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5499 = 5499,
+Sludge_5499 = 5499,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5500"&gt;&lt;strong&gt;Frostbite&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Sustaining ice damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5500 = 5500,
+Frostbite_5500 = 5500,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5501"&gt;&lt;strong&gt;Bleeding&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Sustaining damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5501 = 5501,
+Bleeding_5501 = 5501,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31531,14 +31641,16 @@ SealOfTheBow = 5534,
 SealOfTheHarp = 5535,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5536"&gt;&lt;strong&gt;Brand of the Sullen&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Damage taken by Sullen Gaze is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5536 = 5536,
+BrandOfTheSullen_5536 = 5536,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5537"&gt;&lt;strong&gt;Brand of the Ireful&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Damage taken by Ireful Gaze is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5537 = 5537,
+BrandOfTheIreful_5537 = 5537,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31614,29 +31726,34 @@ UnnamedStatus_5549 = 5549,
 UnnamedStatus_5550 = 5550,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5551"&gt;&lt;strong&gt;Fire Resistance Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Fire resistance is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5551 = 5551,
+FireResistanceUp_5551 = 5551,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5552"&gt;&lt;strong&gt;Lightning Resistance Down&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Lightning resistance is reduced.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5552 = 5552,
+LightningResistanceDown_5552 = 5552,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5553"&gt;&lt;strong&gt;Toxicosis&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Toxins are causing damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5553 = 5553,
+Toxicosis_5553 = 5553,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5554"&gt;&lt;strong&gt;Toxicosis&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Toxins are causing damage over time.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5554 = 5554,
+Toxicosis_5554 = 5554,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5555"&gt;&lt;strong&gt;Bind+&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Unable to move.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5555 = 5555,
+Bind_5555 = 5555,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31669,9 +31786,10 @@ UnnamedStatus_5560 = 5560,
 UnnamedStatus_5561 = 5561,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5562"&gt;&lt;strong&gt;High Wire&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Heightened excitement is causing actions to become erratic.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5562 = 5562,
+HighWire_5562 = 5562,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31789,9 +31907,10 @@ UnnamedStatus_5584 = 5584,
 UnnamedStatus_5585 = 5585,
 
 /// &lt;summary&gt;
-/// &lt;para&gt;&lt;/para&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5586"&gt;&lt;strong&gt;Enmity Up&lt;/strong&gt;&lt;/see&gt; ↑ (All Classes)
+/// &lt;para&gt;Enmity is increased.&lt;/para&gt;
 /// &lt;/summary&gt;
-UnnamedStatus_5586 = 5586,
+EnmityUp_5586 = 5586,
 
 /// &lt;summary&gt;
 /// &lt;para&gt;&lt;/para&gt;
@@ -31862,6 +31981,1259 @@ UnnamedStatus_5599 = 5599,
 /// &lt;para&gt;&lt;/para&gt;
 /// &lt;/summary&gt;
 UnnamedStatus_5600 = 5600,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5601 = 5601,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5602 = 5602,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5603 = 5603,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5604 = 5604,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5605 = 5605,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5606 = 5606,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5607 = 5607,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5608 = 5608,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5609 = 5609,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5610 = 5610,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5611 = 5611,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5612 = 5612,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5613 = 5613,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5614 = 5614,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5615 = 5615,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5616 = 5616,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5617 = 5617,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5618 = 5618,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5619 = 5619,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5620 = 5620,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5621 = 5621,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5622 = 5622,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5623 = 5623,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5624 = 5624,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5625 = 5625,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5626 = 5626,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5627 = 5627,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5628 = 5628,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5629 = 5629,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5630 = 5630,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5631 = 5631,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5632 = 5632,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5633 = 5633,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5634 = 5634,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5635 = 5635,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5636 = 5636,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5637 = 5637,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5638 = 5638,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5639 = 5639,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5640 = 5640,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5641 = 5641,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5642 = 5642,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5643 = 5643,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5644 = 5644,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5645 = 5645,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5646 = 5646,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5647 = 5647,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5648 = 5648,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5649 = 5649,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5650 = 5650,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5651 = 5651,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5652 = 5652,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5653 = 5653,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5654 = 5654,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5655 = 5655,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5656 = 5656,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5657 = 5657,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5658 = 5658,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5659 = 5659,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5660 = 5660,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5661 = 5661,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5662 = 5662,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5663 = 5663,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5664 = 5664,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5665 = 5665,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5666 = 5666,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5667 = 5667,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5668 = 5668,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5669 = 5669,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5670 = 5670,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5671 = 5671,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5672 = 5672,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5673 = 5673,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5674 = 5674,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5675 = 5675,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5676 = 5676,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5677 = 5677,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5678 = 5678,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5679 = 5679,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5680 = 5680,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5681 = 5681,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5682 = 5682,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5683 = 5683,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5684 = 5684,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5685 = 5685,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5686 = 5686,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5687 = 5687,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5688 = 5688,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5689 = 5689,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5690 = 5690,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5691 = 5691,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5692 = 5692,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5693 = 5693,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5694 = 5694,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5695 = 5695,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5696 = 5696,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5697 = 5697,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5698 = 5698,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5699 = 5699,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5700 = 5700,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5701 = 5701,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5702 = 5702,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5703 = 5703,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5704 = 5704,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5705 = 5705,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5706 = 5706,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5707 = 5707,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5708 = 5708,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5709 = 5709,
+
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5710"&gt;&lt;strong&gt;Bind&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Unable to move.&lt;/para&gt;
+/// &lt;/summary&gt;
+Bind_5710 = 5710,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5711 = 5711,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5712 = 5712,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5713 = 5713,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5714 = 5714,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5715 = 5715,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5716 = 5716,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5717 = 5717,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5718 = 5718,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5719 = 5719,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5720 = 5720,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5721 = 5721,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5722 = 5722,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5723 = 5723,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5724 = 5724,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5725 = 5725,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5726 = 5726,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5727 = 5727,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5728 = 5728,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5729 = 5729,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5730 = 5730,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5731 = 5731,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5732 = 5732,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5733 = 5733,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5734 = 5734,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5735 = 5735,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5736 = 5736,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5737 = 5737,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5738 = 5738,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5739 = 5739,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5740 = 5740,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5741 = 5741,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5742 = 5742,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5743 = 5743,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5744 = 5744,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5745 = 5745,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5746 = 5746,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5747 = 5747,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5748 = 5748,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5749 = 5749,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5750 = 5750,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5751 = 5751,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5752 = 5752,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5753 = 5753,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5754 = 5754,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5755 = 5755,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5756 = 5756,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5757 = 5757,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5758 = 5758,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5759 = 5759,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5760 = 5760,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5761 = 5761,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5762 = 5762,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5763 = 5763,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5764 = 5764,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5765 = 5765,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5766 = 5766,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5767 = 5767,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5768 = 5768,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5769 = 5769,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5770 = 5770,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5771 = 5771,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5772 = 5772,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5773 = 5773,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5774 = 5774,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5775 = 5775,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5776 = 5776,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5777 = 5777,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5778 = 5778,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5779 = 5779,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5780 = 5780,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5781 = 5781,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5782 = 5782,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5783 = 5783,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5784 = 5784,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5785 = 5785,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5786 = 5786,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5787 = 5787,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5788 = 5788,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5789 = 5789,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5790 = 5790,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5791 = 5791,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5792 = 5792,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5793 = 5793,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5794 = 5794,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5795 = 5795,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5796 = 5796,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5797 = 5797,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5798 = 5798,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5799 = 5799,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5800 = 5800,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5801 = 5801,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5802 = 5802,
+
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5803"&gt;&lt;strong&gt;Stun&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Unable to execute actions.&lt;/para&gt;
+/// &lt;/summary&gt;
+Stun_5803 = 5803,
+
+/// &lt;summary&gt;
+/// &lt;see href="https://garlandtools.org/db/#status/5804"&gt;&lt;strong&gt;Slow&lt;/strong&gt;&lt;/see&gt; ↓ (All Classes)
+/// &lt;para&gt;Weaponskill cast time and recast time spell cast time and recast time and auto-attack delay are increased.&lt;/para&gt;
+/// &lt;/summary&gt;
+Slow_5804 = 5804,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5805 = 5805,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5806 = 5806,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5807 = 5807,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5808 = 5808,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5809 = 5809,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5810 = 5810,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5811 = 5811,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5812 = 5812,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5813 = 5813,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5814 = 5814,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5815 = 5815,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5816 = 5816,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5817 = 5817,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5818 = 5818,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5819 = 5819,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5820 = 5820,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5821 = 5821,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5822 = 5822,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5823 = 5823,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5824 = 5824,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5825 = 5825,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5826 = 5826,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5827 = 5827,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5828 = 5828,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5829 = 5829,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5830 = 5830,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5831 = 5831,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5832 = 5832,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5833 = 5833,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5834 = 5834,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5835 = 5835,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5836 = 5836,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5837 = 5837,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5838 = 5838,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5839 = 5839,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5840 = 5840,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5841 = 5841,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5842 = 5842,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5843 = 5843,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5844 = 5844,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5845 = 5845,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5846 = 5846,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5847 = 5847,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5848 = 5848,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5849 = 5849,
+
+/// &lt;summary&gt;
+/// &lt;para&gt;&lt;/para&gt;
+/// &lt;/summary&gt;
+UnnamedStatus_5850 = 5850,
 </value>
   </data>
 </root>

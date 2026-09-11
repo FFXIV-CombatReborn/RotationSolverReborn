@@ -70996,6 +70996,256 @@ Seakin = 14405,
 GhostTrain = 14406,
 
 /// &lt;summary&gt;
+/// 14407
+/// &lt;/summary&gt;
+CuSith = 14407,
+
+/// &lt;summary&gt;
+/// 14408
+/// &lt;/summary&gt;
+Squirrel = 14408,
+
+/// &lt;summary&gt;
+/// 14409
+/// &lt;/summary&gt;
+Lamb = 14409,
+
+/// &lt;summary&gt;
+/// 14410
+/// &lt;/summary&gt;
+Pugil_14410 = 14410,
+
+/// &lt;summary&gt;
+/// 14411
+/// &lt;/summary&gt;
+Opoopo_14411 = 14411,
+
+/// &lt;summary&gt;
+/// 14412
+/// &lt;/summary&gt;
+Dodo = 14412,
+
+/// &lt;summary&gt;
+/// 14413
+/// &lt;/summary&gt;
+Coblyn_14413 = 14413,
+
+/// &lt;summary&gt;
+/// 14414
+/// &lt;/summary&gt;
+Diremite_14414 = 14414,
+
+/// &lt;summary&gt;
+/// 14415
+/// &lt;/summary&gt;
+Megalocrab_14415 = 14415,
+
+/// &lt;summary&gt;
+/// 14416
+/// &lt;/summary&gt;
+Wespe_14416 = 14416,
+
+/// &lt;summary&gt;
+/// 14417
+/// &lt;/summary&gt;
+Vulture = 14417,
+
+/// &lt;summary&gt;
+/// 14418
+/// &lt;/summary&gt;
+Mandragora_14418 = 14418,
+
+/// &lt;summary&gt;
+/// 14419
+/// &lt;/summary&gt;
+Geshunpest_14419 = 14419,
+
+/// &lt;summary&gt;
+/// 14420
+/// &lt;/summary&gt;
+Puk_14420 = 14420,
+
+/// &lt;summary&gt;
+/// 14421
+/// &lt;/summary&gt;
+Crab = 14421,
+
+/// &lt;summary&gt;
+/// 14422
+/// &lt;/summary&gt;
+Mantis = 14422,
+
+/// &lt;summary&gt;
+/// 14423
+/// &lt;/summary&gt;
+Slime = 14423,
+
+/// &lt;summary&gt;
+/// 14424
+/// &lt;/summary&gt;
+Dullahan_14424 = 14424,
+
+/// &lt;summary&gt;
+/// 14425
+/// &lt;/summary&gt;
+Bat = 14425,
+
+/// &lt;summary&gt;
+/// 14426
+/// &lt;/summary&gt;
+FlyingTrap = 14426,
+
+/// &lt;summary&gt;
+/// 14427
+/// &lt;/summary&gt;
+Ziz_14427 = 14427,
+
+/// &lt;summary&gt;
+/// 14428
+/// &lt;/summary&gt;
+Sabotender_14428 = 14428,
+
+/// &lt;summary&gt;
+/// 14429
+/// &lt;/summary&gt;
+Golem = 14429,
+
+/// &lt;summary&gt;
+/// 14430
+/// &lt;/summary&gt;
+Apkallu_14430 = 14430,
+
+/// &lt;summary&gt;
+/// 14431
+/// &lt;/summary&gt;
+Adamantoise_14431 = 14431,
+
+/// &lt;summary&gt;
+/// 14432
+/// &lt;/summary&gt;
+Buffalo = 14432,
+
+/// &lt;summary&gt;
+/// 14433
+/// &lt;/summary&gt;
+Uragnite_14433 = 14433,
+
+/// &lt;summary&gt;
+/// 14434
+/// &lt;/summary&gt;
+Worm = 14434,
+
+/// &lt;summary&gt;
+/// 14435
+/// &lt;/summary&gt;
+Spriggan_14435 = 14435,
+
+/// &lt;summary&gt;
+/// 14436
+/// &lt;/summary&gt;
+Goobbue_14436 = 14436,
+
+/// &lt;summary&gt;
+/// 14437
+/// &lt;/summary&gt;
+Gigantoad_14437 = 14437,
+
+/// &lt;summary&gt;
+/// 14438
+/// &lt;/summary&gt;
+Colibri_14438 = 14438,
+
+/// &lt;summary&gt;
+/// 14439
+/// &lt;/summary&gt;
+Coeurl_14439 = 14439,
+
+/// &lt;summary&gt;
+/// 14440
+/// &lt;/summary&gt;
+Raptor = 14440,
+
+/// &lt;summary&gt;
+/// 14441
+/// &lt;/summary&gt;
+Drake = 14441,
+
+/// &lt;summary&gt;
+/// 14442
+/// &lt;/summary&gt;
+Treant_14442 = 14442,
+
+/// &lt;summary&gt;
+/// 14443
+/// &lt;/summary&gt;
+Antling = 14443,
+
+/// &lt;summary&gt;
+/// 14444
+/// &lt;/summary&gt;
+Chimera_14444 = 14444,
+
+/// &lt;summary&gt;
+/// 14445
+/// &lt;/summary&gt;
+Morbol_14445 = 14445,
+
+/// &lt;summary&gt;
+/// 14446
+/// &lt;/summary&gt;
+Ghost_14446 = 14446,
+
+/// &lt;summary&gt;
+/// 14447
+/// &lt;/summary&gt;
+Salamander_14447 = 14447,
+
+/// &lt;summary&gt;
+/// 14448
+/// &lt;/summary&gt;
+Cobra = 14448,
+
+/// &lt;summary&gt;
+/// 14449
+/// &lt;/summary&gt;
+Hydra_14449 = 14449,
+
+/// &lt;summary&gt;
+/// 14450
+/// &lt;/summary&gt;
+Damselfly_14450 = 14450,
+
+/// &lt;summary&gt;
+/// 14451
+/// &lt;/summary&gt;
+RottingGoobbue = 14451,
+
+/// &lt;summary&gt;
+/// 14452
+/// &lt;/summary&gt;
+Zu_14452 = 14452,
+
+/// &lt;summary&gt;
+/// 14453
+/// &lt;/summary&gt;
+IceGolem_14453 = 14453,
+
+/// &lt;summary&gt;
+/// 14454
+/// &lt;/summary&gt;
+Karlabos_14454 = 14454,
+
+/// &lt;summary&gt;
+/// 14455
+/// &lt;/summary&gt;
+Rafflesia_14455 = 14455,
+
+/// &lt;summary&gt;
+/// 14456
+/// &lt;/summary&gt;
+Behemoth_14456 = 14456,
+
+/// &lt;summary&gt;
 /// 14457
 /// &lt;/summary&gt;
 LittleMermaid = 14457,
@@ -71361,6 +71611,851 @@ AlexanderResurrected = 14529,
 GordiusSystem = 14530,
 
 /// &lt;summary&gt;
+/// 14531
+/// &lt;/summary&gt;
+BoneKnight = 14531,
+
+/// &lt;summary&gt;
+/// 14532
+/// &lt;/summary&gt;
+BoneBishop = 14532,
+
+/// &lt;summary&gt;
+/// 14533
+/// &lt;/summary&gt;
+ArchDemonPiece = 14533,
+
+/// &lt;summary&gt;
+/// 14534
+/// &lt;/summary&gt;
+AbyssalLance_14534 = 14534,
+
+/// &lt;summary&gt;
+/// 14535
+/// &lt;/summary&gt;
+PiscodemonPiece = 14535,
+
+/// &lt;summary&gt;
+/// 14536
+/// &lt;/summary&gt;
+BanemitePiece = 14536,
+
+/// &lt;summary&gt;
+/// 14537
+/// &lt;/summary&gt;
+MitelingPiece = 14537,
+
+/// &lt;summary&gt;
+/// 14538
+/// &lt;/summary&gt;
+OgrePiece = 14538,
+
+/// &lt;summary&gt;
+/// 14539
+/// &lt;/summary&gt;
+WispPiece = 14539,
+
+/// &lt;summary&gt;
+/// 14540
+/// &lt;/summary&gt;
+BallOfFire_14540 = 14540,
+
+/// &lt;summary&gt;
+/// 14541
+/// &lt;/summary&gt;
+PasDeSeul = 14541,
+
+/// &lt;summary&gt;
+/// 14542
+/// &lt;/summary&gt;
+SuccubusMage = 14542,
+
+/// &lt;summary&gt;
+/// 14543
+/// &lt;/summary&gt;
+SuccubusKnight = 14543,
+
+/// &lt;summary&gt;
+/// 14544
+/// &lt;/summary&gt;
+Pheromone = 14544,
+
+/// &lt;summary&gt;
+/// 14545
+/// &lt;/summary&gt;
+ManticorePiece = 14545,
+
+/// &lt;summary&gt;
+/// 14546
+/// &lt;/summary&gt;
+TaurusPiece = 14546,
+
+/// &lt;summary&gt;
+/// 14547
+/// &lt;/summary&gt;
+AethericCharge_14547 = 14547,
+
+/// &lt;summary&gt;
+/// 14548
+/// &lt;/summary&gt;
+AhrimanPiece = 14548,
+
+/// &lt;summary&gt;
+/// 14549
+/// &lt;/summary&gt;
+WyvernPiece = 14549,
+
+/// &lt;summary&gt;
+/// 14550
+/// &lt;/summary&gt;
+Whirlwind_14550 = 14550,
+
+/// &lt;summary&gt;
+/// 14551
+/// &lt;/summary&gt;
+WindSprite_14551 = 14551,
+
+/// &lt;summary&gt;
+/// 14552
+/// &lt;/summary&gt;
+VoidmancerPiece = 14552,
+
+/// &lt;summary&gt;
+/// 14553
+/// &lt;/summary&gt;
+ZombiePiece = 14553,
+
+/// &lt;summary&gt;
+/// 14554
+/// &lt;/summary&gt;
+Malady_14554 = 14554,
+
+/// &lt;summary&gt;
+/// 14555
+/// &lt;/summary&gt;
+ElderTablitaurPiece = 14555,
+
+/// &lt;summary&gt;
+/// 14556
+/// &lt;/summary&gt;
+YoungerTablitaurPiece = 14556,
+
+/// &lt;summary&gt;
+/// 14557
+/// &lt;/summary&gt;
+DemonPiece = 14557,
+
+/// &lt;summary&gt;
+/// 14558
+/// &lt;/summary&gt;
+EvilWeaponPiece = 14558,
+
+/// &lt;summary&gt;
+/// 14559
+/// &lt;/summary&gt;
+DeviletPiece = 14559,
+
+/// &lt;summary&gt;
+/// 14560
+/// &lt;/summary&gt;
+AethericCharge_14560 = 14560,
+
+/// &lt;summary&gt;
+/// 14561
+/// &lt;/summary&gt;
+LoosefroxInkyjots = 14561,
+
+/// &lt;summary&gt;
+/// 14562
+/// &lt;/summary&gt;
+ChewchumPopoto = 14562,
+
+/// &lt;summary&gt;
+/// 14563
+/// &lt;/summary&gt;
+GobbieBomb = 14563,
+
+/// &lt;summary&gt;
+/// 14564
+/// &lt;/summary&gt;
+CavalierPiece = 14564,
+
+/// &lt;summary&gt;
+/// 14565
+/// &lt;/summary&gt;
+FeintedCavalierPiece = 14565,
+
+/// &lt;summary&gt;
+/// 14566
+/// &lt;/summary&gt;
+BoneKnight_14566 = 14566,
+
+/// &lt;summary&gt;
+/// 14567
+/// &lt;/summary&gt;
+BoneBishop_14567 = 14567,
+
+/// &lt;summary&gt;
+/// 14568
+/// &lt;/summary&gt;
+BoneFragment = 14568,
+
+/// &lt;summary&gt;
+/// 14569
+/// &lt;/summary&gt;
+YmirPiece = 14569,
+
+/// &lt;summary&gt;
+/// 14570
+/// &lt;/summary&gt;
+YmirShell = 14570,
+
+/// &lt;summary&gt;
+/// 14571
+/// &lt;/summary&gt;
+SahaginPiece = 14571,
+
+/// &lt;summary&gt;
+/// 14572
+/// &lt;/summary&gt;
+ZuPiece = 14572,
+
+/// &lt;summary&gt;
+/// 14573
+/// &lt;/summary&gt;
+CockerelPiece = 14573,
+
+/// &lt;summary&gt;
+/// 14574
+/// &lt;/summary&gt;
+PulletPiece = 14574,
+
+/// &lt;summary&gt;
+/// 14575
+/// &lt;/summary&gt;
+ZuEgg_14575 = 14575,
+
+/// &lt;summary&gt;
+/// 14576
+/// &lt;/summary&gt;
+ZuEgg_14576 = 14576,
+
+/// &lt;summary&gt;
+/// 14577
+/// &lt;/summary&gt;
+CatoblepasPiece = 14577,
+
+/// &lt;summary&gt;
+/// 14578
+/// &lt;/summary&gt;
+DemonicEye_14578 = 14578,
+
+/// &lt;summary&gt;
+/// 14579
+/// &lt;/summary&gt;
+DemonicEye_14579 = 14579,
+
+/// &lt;summary&gt;
+/// 14580
+/// &lt;/summary&gt;
+LakhamuPiece = 14580,
+
+/// &lt;summary&gt;
+/// 14581
+/// &lt;/summary&gt;
+GolemPiece = 14581,
+
+/// &lt;summary&gt;
+/// 14582
+/// &lt;/summary&gt;
+SandSphere_14582 = 14582,
+
+/// &lt;summary&gt;
+/// 14583
+/// &lt;/summary&gt;
+SirenPiece = 14583,
+
+/// &lt;summary&gt;
+/// 14584
+/// &lt;/summary&gt;
+SweetSong_14584 = 14584,
+
+/// &lt;summary&gt;
+/// 14585
+/// &lt;/summary&gt;
+ShamblingPiece = 14585,
+
+/// &lt;summary&gt;
+/// 14586
+/// &lt;/summary&gt;
+CrawlingPiece = 14586,
+
+/// &lt;summary&gt;
+/// 14587
+/// &lt;/summary&gt;
+CampeadorPiece = 14587,
+
+/// &lt;summary&gt;
+/// 14588
+/// &lt;/summary&gt;
+SabotenderPiece = 14588,
+
+/// &lt;summary&gt;
+/// 14589
+/// &lt;/summary&gt;
+FlowertenderPiece = 14589,
+
+/// &lt;summary&gt;
+/// 14590
+/// &lt;/summary&gt;
+SoldadoPiece = 14590,
+
+/// &lt;summary&gt;
+/// 14591
+/// &lt;/summary&gt;
+GuardiaPiece = 14591,
+
+/// &lt;summary&gt;
+/// 14592
+/// &lt;/summary&gt;
+GuttlerTheGutter = 14592,
+
+/// &lt;summary&gt;
+/// 14593
+/// &lt;/summary&gt;
+CombustingBlade = 14593,
+
+/// &lt;summary&gt;
+/// 14594
+/// &lt;/summary&gt;
+MoltenBlade = 14594,
+
+/// &lt;summary&gt;
+/// 14595
+/// &lt;/summary&gt;
+ThanatosPiece = 14595,
+
+/// &lt;summary&gt;
+/// 14596
+/// &lt;/summary&gt;
+StrixPiece = 14596,
+
+/// &lt;summary&gt;
+/// 14597
+/// &lt;/summary&gt;
+TomePiece = 14597,
+
+/// &lt;summary&gt;
+/// 14598
+/// &lt;/summary&gt;
+StrixPlume = 14598,
+
+/// &lt;summary&gt;
+/// 14599
+/// &lt;/summary&gt;
+MorbolPiece = 14599,
+
+/// &lt;summary&gt;
+/// 14600
+/// &lt;/summary&gt;
+SeedlingPiece = 14600,
+
+/// &lt;summary&gt;
+/// 14601
+/// &lt;/summary&gt;
+OchuPiece = 14601,
+
+/// &lt;summary&gt;
+/// 14602
+/// &lt;/summary&gt;
+CarrionBroth_14602 = 14602,
+
+/// &lt;summary&gt;
+/// 14603
+/// &lt;/summary&gt;
+CorpseFlowerPiece = 14603,
+
+/// &lt;summary&gt;
+/// 14604
+/// &lt;/summary&gt;
+SaplingPiece = 14604,
+
+/// &lt;summary&gt;
+/// 14605
+/// &lt;/summary&gt;
+QueenHawkPiece = 14605,
+
+/// &lt;summary&gt;
+/// 14606
+/// &lt;/summary&gt;
+IceDragonPiece = 14606,
+
+/// &lt;summary&gt;
+/// 14607
+/// &lt;/summary&gt;
+IceSprite_14607 = 14607,
+
+/// &lt;summary&gt;
+/// 14608
+/// &lt;/summary&gt;
+GargoylePiece = 14608,
+
+/// &lt;summary&gt;
+/// 14609
+/// &lt;/summary&gt;
+Malady_14609 = 14609,
+
+/// &lt;summary&gt;
+/// 14610
+/// &lt;/summary&gt;
+AdministratorPiece = 14610,
+
+/// &lt;summary&gt;
+/// 14611
+/// &lt;/summary&gt;
+BugPiece = 14611,
+
+/// &lt;summary&gt;
+/// 14612
+/// &lt;/summary&gt;
+FootmanPiece = 14612,
+
+/// &lt;summary&gt;
+/// 14613
+/// &lt;/summary&gt;
+DreadnaughtPiece = 14613,
+
+/// &lt;summary&gt;
+/// 14614
+/// &lt;/summary&gt;
+DronePiece = 14614,
+
+/// &lt;summary&gt;
+/// 14615
+/// &lt;/summary&gt;
+MirrorknightPiece = 14615,
+
+/// &lt;summary&gt;
+/// 14616
+/// &lt;/summary&gt;
+CobraPiece = 14616,
+
+/// &lt;summary&gt;
+/// 14617
+/// &lt;/summary&gt;
+GolemPiece_14617 = 14617,
+
+/// &lt;summary&gt;
+/// 14618
+/// &lt;/summary&gt;
+TreantPiece = 14618,
+
+/// &lt;summary&gt;
+/// 14619
+/// &lt;/summary&gt;
+SlugPiece = 14619,
+
+/// &lt;summary&gt;
+/// 14620
+/// &lt;/summary&gt;
+SaplingPiece_14620 = 14620,
+
+/// &lt;summary&gt;
+/// 14621
+/// &lt;/summary&gt;
+DiremitePiece = 14621,
+
+/// &lt;summary&gt;
+/// 14622
+/// &lt;/summary&gt;
+BilokoPiece = 14622,
+
+/// &lt;summary&gt;
+/// 14623
+/// &lt;/summary&gt;
+ProgenitrixPiece = 14623,
+
+/// &lt;summary&gt;
+/// 14624
+/// &lt;/summary&gt;
+GrenadePiece = 14624,
+
+/// &lt;summary&gt;
+/// 14625
+/// &lt;/summary&gt;
+BombPiece = 14625,
+
+/// &lt;summary&gt;
+/// 14626
+/// &lt;/summary&gt;
+SnollPiece = 14626,
+
+/// &lt;summary&gt;
+/// 14627
+/// &lt;/summary&gt;
+PyrobolusPiece = 14627,
+
+/// &lt;summary&gt;
+/// 14628
+/// &lt;/summary&gt;
+BorgnyTheVenomous = 14628,
+
+/// &lt;summary&gt;
+/// 14629
+/// &lt;/summary&gt;
+ToxicMass = 14629,
+
+/// &lt;summary&gt;
+/// 14630
+/// &lt;/summary&gt;
+PoisonCloud_14630 = 14630,
+
+/// &lt;summary&gt;
+/// 14631
+/// &lt;/summary&gt;
+FlaurosPiece = 14631,
+
+/// &lt;summary&gt;
+/// 14632
+/// &lt;/summary&gt;
+LightningSprite_14632 = 14632,
+
+/// &lt;summary&gt;
+/// 14633
+/// &lt;/summary&gt;
+MindflayerPiece = 14633,
+
+/// &lt;summary&gt;
+/// 14634
+/// &lt;/summary&gt;
+MyconidPiece = 14634,
+
+/// &lt;summary&gt;
+/// 14635
+/// &lt;/summary&gt;
+Shroombed = 14635,
+
+/// &lt;summary&gt;
+/// 14636
+/// &lt;/summary&gt;
+Spore = 14636,
+
+/// &lt;summary&gt;
+/// 14637
+/// &lt;/summary&gt;
+ArcaneSphere_14637 = 14637,
+
+/// &lt;summary&gt;
+/// 14638
+/// &lt;/summary&gt;
+BoogymanPiece = 14638,
+
+/// &lt;summary&gt;
+/// 14639
+/// &lt;/summary&gt;
+DeepeyePiece = 14639,
+
+/// &lt;summary&gt;
+/// 14640
+/// &lt;/summary&gt;
+BombPiece_14640 = 14640,
+
+/// &lt;summary&gt;
+/// 14641
+/// &lt;/summary&gt;
+LightSprite_14641 = 14641,
+
+/// &lt;summary&gt;
+/// 14642
+/// &lt;/summary&gt;
+AtomosPiece = 14642,
+
+/// &lt;summary&gt;
+/// 14643
+/// &lt;/summary&gt;
+RedGremlinPiece = 14643,
+
+/// &lt;summary&gt;
+/// 14644
+/// &lt;/summary&gt;
+GremlinPiece = 14644,
+
+/// &lt;summary&gt;
+/// 14645
+/// &lt;/summary&gt;
+PuddingPiece = 14645,
+
+/// &lt;summary&gt;
+/// 14646
+/// &lt;/summary&gt;
+BavaroisPiece = 14646,
+
+/// &lt;summary&gt;
+/// 14647
+/// &lt;/summary&gt;
+FlanPiece = 14647,
+
+/// &lt;summary&gt;
+/// 14648
+/// &lt;/summary&gt;
+VodorigaPiece = 14648,
+
+/// &lt;summary&gt;
+/// 14649
+/// &lt;/summary&gt;
+MenacingDahakPiece = 14649,
+
+/// &lt;summary&gt;
+/// 14650
+/// &lt;/summary&gt;
+AethericCharge_14650 = 14650,
+
+/// &lt;summary&gt;
+/// 14651
+/// &lt;/summary&gt;
+DrakePiece = 14651,
+
+/// &lt;summary&gt;
+/// 14652
+/// &lt;/summary&gt;
+BallOfFire_14652 = 14652,
+
+/// &lt;summary&gt;
+/// 14653
+/// &lt;/summary&gt;
+BarbmolePiece = 14653,
+
+/// &lt;summary&gt;
+/// 14654
+/// &lt;/summary&gt;
+TwistingBlaze_14654 = 14654,
+
+/// &lt;summary&gt;
+/// 14655
+/// &lt;/summary&gt;
+AbaddonPiece = 14655,
+
+/// &lt;summary&gt;
+/// 14656
+/// &lt;/summary&gt;
+MorphoPiece = 14656,
+
+/// &lt;summary&gt;
+/// 14657
+/// &lt;/summary&gt;
+DurgaPiece = 14657,
+
+/// &lt;summary&gt;
+/// 14658
+/// &lt;/summary&gt;
+Missile_14658 = 14658,
+
+/// &lt;summary&gt;
+/// 14659
+/// &lt;/summary&gt;
+SpinnerrookPiece = 14659,
+
+/// &lt;summary&gt;
+/// 14660
+/// &lt;/summary&gt;
+MedusaPiece = 14660,
+
+/// &lt;summary&gt;
+/// 14661
+/// &lt;/summary&gt;
+LamiaPiece = 14661,
+
+/// &lt;summary&gt;
+/// 14662
+/// &lt;/summary&gt;
+CyclopsPiece = 14662,
+
+/// &lt;summary&gt;
+/// 14663
+/// &lt;/summary&gt;
+ChimeraPiece = 14663,
+
+/// &lt;summary&gt;
+/// 14664
+/// &lt;/summary&gt;
+BallLightning_14664 = 14664,
+
+/// &lt;summary&gt;
+/// 14665
+/// &lt;/summary&gt;
+SphinxPiece = 14665,
+
+/// &lt;summary&gt;
+/// 14666
+/// &lt;/summary&gt;
+DodoPiece = 14666,
+
+/// &lt;summary&gt;
+/// 14667
+/// &lt;/summary&gt;
+PugilPiece = 14667,
+
+/// &lt;summary&gt;
+/// 14668
+/// &lt;/summary&gt;
+OpoopoPiece = 14668,
+
+/// &lt;summary&gt;
+/// 14669
+/// &lt;/summary&gt;
+PukPiece = 14669,
+
+/// &lt;summary&gt;
+/// 14670
+/// &lt;/summary&gt;
+GigantisPiece = 14670,
+
+/// &lt;summary&gt;
+/// 14671
+/// &lt;/summary&gt;
+CyclopsPiece_14671 = 14671,
+
+/// &lt;summary&gt;
+/// 14672
+/// &lt;/summary&gt;
+CongealedLightning = 14672,
+
+/// &lt;summary&gt;
+/// 14673
+/// &lt;/summary&gt;
+CongealedKindling = 14673,
+
+/// &lt;summary&gt;
+/// 14674
+/// &lt;/summary&gt;
+SwordsmogPiece = 14674,
+
+/// &lt;summary&gt;
+/// 14675
+/// &lt;/summary&gt;
+MogbreakerPiece = 14675,
+
+/// &lt;summary&gt;
+/// 14676
+/// &lt;/summary&gt;
+KingedKupocurer = 14676,
+
+/// &lt;summary&gt;
+/// 14677
+/// &lt;/summary&gt;
+KingedKupocaster = 14677,
+
+/// &lt;summary&gt;
+/// 14678
+/// &lt;/summary&gt;
+KupocurerPiece = 14678,
+
+/// &lt;summary&gt;
+/// 14679
+/// &lt;/summary&gt;
+KupocasterPiece = 14679,
+
+/// &lt;summary&gt;
+/// 14680
+/// &lt;/summary&gt;
+KingedSwordsmog = 14680,
+
+/// &lt;summary&gt;
+/// 14681
+/// &lt;/summary&gt;
+MelomogPiece = 14681,
+
+/// &lt;summary&gt;
+/// 14682
+/// &lt;/summary&gt;
+MogsongSphere = 14682,
+
+/// &lt;summary&gt;
+/// 14683
+/// &lt;/summary&gt;
+MogmuggerPiece = 14683,
+
+/// &lt;summary&gt;
+/// 14684
+/// &lt;/summary&gt;
+BehemothPiece = 14684,
+
+/// &lt;summary&gt;
+/// 14685
+/// &lt;/summary&gt;
+GiantPiece = 14685,
+
+/// &lt;summary&gt;
+/// 14686
+/// &lt;/summary&gt;
+LightningSprite_14686 = 14686,
+
+/// &lt;summary&gt;
+/// 14687
+/// &lt;/summary&gt;
+Comet_14687 = 14687,
+
+/// &lt;summary&gt;
+/// 14688
+/// &lt;/summary&gt;
+KingAhrimanPiece = 14688,
+
+/// &lt;summary&gt;
+/// 14689
+/// &lt;/summary&gt;
+FinalHourglass_14689 = 14689,
+
+/// &lt;summary&gt;
+/// 14690
+/// &lt;/summary&gt;
+GrimReaperPiece = 14690,
+
+/// &lt;summary&gt;
+/// 14691
+/// &lt;/summary&gt;
+HapalitPiece = 14691,
+
+/// &lt;summary&gt;
+/// 14692
+/// &lt;/summary&gt;
+DirtyEyePiece = 14692,
+
+/// &lt;summary&gt;
+/// 14693
+/// &lt;/summary&gt;
+LaudaTheSpellcleaver = 14693,
+
+/// &lt;summary&gt;
+/// 14694
+/// &lt;/summary&gt;
+CombustingBlade_14694 = 14694,
+
+/// &lt;summary&gt;
+/// 14695
+/// &lt;/summary&gt;
+MoltenBlade_14695 = 14695,
+
+/// &lt;summary&gt;
+/// 14696
+/// &lt;/summary&gt;
+EphemeralBlade = 14696,
+
+/// &lt;summary&gt;
+/// 14697
+/// &lt;/summary&gt;
+IndefatigableBlade = 14697,
+
+/// &lt;summary&gt;
+/// 14698
+/// &lt;/summary&gt;
+PossessiveBlade = 14698,
+
+/// &lt;summary&gt;
+/// 14699
+/// &lt;/summary&gt;
+ThanatosPiece_14699 = 14699,
+
+/// &lt;summary&gt;
 /// 14700
 /// &lt;/summary&gt;
 VisitantLongfingers = 14700,
@@ -71561,9 +72656,49 @@ SensualSandy = 14738,
 PoisonCloud_14739 = 14739,
 
 /// &lt;summary&gt;
+/// 14740
+/// &lt;/summary&gt;
+YoungSkyfarer = 14740,
+
+/// &lt;summary&gt;
+/// 14741
+/// &lt;/summary&gt;
+Estinien_14741 = 14741,
+
+/// &lt;summary&gt;
+/// 14742
+/// &lt;/summary&gt;
+Alphinaud_14742 = 14742,
+
+/// &lt;summary&gt;
+/// 14743
+/// &lt;/summary&gt;
+ThrallSubjugator = 14743,
+
+/// &lt;summary&gt;
+/// 14744
+/// &lt;/summary&gt;
+ThrallCaptor = 14744,
+
+/// &lt;summary&gt;
+/// 14745
+/// &lt;/summary&gt;
+ThrallImpaler = 14745,
+
+/// &lt;summary&gt;
+/// 14746
+/// &lt;/summary&gt;
+SubjugatorsHeart = 14746,
+
+/// &lt;summary&gt;
 /// 14747
 /// &lt;/summary&gt;
 Pelekys = 14747,
+
+/// &lt;summary&gt;
+/// 14748
+/// &lt;/summary&gt;
+GreatWispPiece = 14748,
 
 /// &lt;summary&gt;
 /// 14749
@@ -71784,6 +72919,11 @@ AtlasCarbuncle = 14791,
 /// 14792
 /// &lt;/summary&gt;
 TopazStone = 14792,
+
+/// &lt;summary&gt;
+/// 14794
+/// &lt;/summary&gt;
+TablitaurBrothers = 14794,
 
 /// &lt;summary&gt;
 /// 14795
@@ -72064,6 +73204,11 @@ PunyMage = 14849,
 /// 14850
 /// &lt;/summary&gt;
 WindupWukLamat = 14850,
+
+/// &lt;summary&gt;
+/// 14851
+/// &lt;/summary&gt;
+Laudouble = 14851,
 
 /// &lt;summary&gt;
 /// 14852
@@ -72436,6 +73581,16 @@ VisitantEvilEye = 14925,
 VisitantImp = 14926,
 
 /// &lt;summary&gt;
+/// 14927
+/// &lt;/summary&gt;
+CaptiveSerpent = 14927,
+
+/// &lt;summary&gt;
+/// 14928
+/// &lt;/summary&gt;
+SpicekickMustard = 14928,
+
+/// &lt;summary&gt;
 /// 14929
 /// &lt;/summary&gt;
 TowerCatoblepas = 14929,
@@ -72469,6 +73624,16 @@ AhtUrhganGuard = 14934,
 /// 14935
 /// &lt;/summary&gt;
 SareelJa = 14935,
+
+/// &lt;summary&gt;
+/// 14936
+/// &lt;/summary&gt;
+GuttlerAndLauda = 14936,
+
+/// &lt;summary&gt;
+/// 14937
+/// &lt;/summary&gt;
+MagickedBlade = 14937,
 
 /// &lt;summary&gt;
 /// 14938

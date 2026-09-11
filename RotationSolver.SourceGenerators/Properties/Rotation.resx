@@ -22700,7 +22700,7 @@ public abstract partial class RedMageRotation : CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/41495"&gt;&lt;strong&gt;Prefulgence&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (RDM) [41495] [Spell]
-    /// &lt;para&gt;Deals unaspected damage with a potency of 10,000 to target and all enemies nearby it. Additional Effect: Restores own HP Cure Potency: 10,000 Additional Effect: Restores HP of party members near target Cure Potency: 10,000 Can only be executed while under the effect of Prefulgence.&lt;/para&gt;
+    /// &lt;para&gt;Deals unaspected damage with a potency of 10,000 to target and all enemies nearby it. Additional Effect: Restores own HP Cure Potency: 10,000 Additional Effect: Restores HP of party members near target Cure Potency: 10,000 Can only be executed while under the effect of Prefulgence Ready. ※This action cannot be assigned to a hotbar.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction PrefulgencePvP =&gt; _PrefulgencePvPCreator.Value;
@@ -35775,8 +35775,8 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; AdventOfChocob
 
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/beastmaster"&gt;&lt;strong&gt;beastmaster&lt;/strong&gt;&lt;/see&gt;
-/// &lt;br&gt;Number of Actions: 0&lt;/br&gt;
-/// &lt;br&gt;Number of Traits: 0&lt;/br&gt;
+/// &lt;br&gt;Number of Actions: 47&lt;/br&gt;
+/// &lt;br&gt;Number of Traits: 14&lt;/br&gt;
 /// &lt;/summary&gt;
 [Jobs(Job.BST)]
 public abstract partial class BeastmasterRotation : CustomRotation
@@ -35784,13 +35784,1093 @@ public abstract partial class BeastmasterRotation : CustomRotation
     
 
 #region Actions
+    private readonly Lazy&lt;IBaseAction&gt; _SmashAxePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44879, false);
+        CustomRotation.LoadActionSetting(ref action);
     
+        var setting = action.Setting;
+        ModifySmashAxePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44879"&gt;&lt;strong&gt;Smash Axe&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44879] [Weaponskill]
+    /// &lt;/summary&gt;
+    static partial void ModifySmashAxePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44879"&gt;&lt;strong&gt;Smash Axe&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44879] [Weaponskill]
+    /// &lt;para&gt;Delivers an attack with a potency of .&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SmashAxePvE =&gt; _SmashAxePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _CapturePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44880, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyCapturePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44880"&gt;&lt;strong&gt;Capture&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44880] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyCapturePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44880"&gt;&lt;strong&gt;Capture&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44880] [Ability]
+    /// &lt;para&gt;Delivers an attack with a potency of 100. Target cannot be incapacitated by this attack. Additional Effect: Marks target with Interest Captured Duration: 120s Interest Captured Effect: Forges a pact with the targeted beast should you succeed in their subdual Success is determined upon defeating targets under the effect of Interest Captured. An entry in the Master's Bestiary will be added upon successful subdual allowing the beast to be summoned as a familiar. Success rate is inversely proportional to the target's HP at the time of execution. Furthermore success rate increases if the target is a lower level than you. Ineffective against targets whose level is higher than your own.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction CapturePvE =&gt; _CapturePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _FirstBattlehornPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44881, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyFirstBattlehornPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44881"&gt;&lt;strong&gt;First Battlehorn&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44881] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyFirstBattlehornPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44881"&gt;&lt;strong&gt;First Battlehorn&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44881] [Ability]
+    /// &lt;para&gt;Summons to fight at your side. During combat recast timer cooldown will begin once your familiar has retreated. Retreat outside of combat will not affect recast timer.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction FirstBattlehornPvE =&gt; _FirstBattlehornPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _GaugePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44882, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyGaugePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44882"&gt;&lt;strong&gt;Gauge&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44882] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyGaugePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44882"&gt;&lt;strong&gt;Gauge&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44882] [Ability]
+    /// &lt;para&gt;Investigates a targeted beast's probability of Capture. Can be executed while mounted but only when grounded.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction GaugePvE =&gt; _GaugePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _AxebladeBitePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44883, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyAxebladeBitePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44883"&gt;&lt;strong&gt;Axeblade Bite&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44883] [Weaponskill]
+    /// &lt;/summary&gt;
+    static partial void ModifyAxebladeBitePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44883"&gt;&lt;strong&gt;Axeblade Bite&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44883] [Weaponskill]
+    /// &lt;para&gt;Delivers an attack with a potency of 260. Combo Action: Smash Axe Combo Potency: 500&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction AxebladeBitePvE =&gt; _AxebladeBitePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _AvalancheAxePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44884, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyAvalancheAxePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44884"&gt;&lt;strong&gt;Avalanche Axe&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44884] [Weaponskill]
+    /// &lt;/summary&gt;
+    static partial void ModifyAvalancheAxePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44884"&gt;&lt;strong&gt;Avalanche Axe&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44884] [Weaponskill]
+    /// &lt;para&gt;Delivers an attack with a potency of 400. Potency increases up to 1,000 as TP nears maximum. All TP will be expended upon execution. Minimum TP Gauge Cost: 100 Instinctual Affinity: Rampant Additional Effect: Grants Rampant Heart Duration: 7s Instinctual skills may be executed sequentially to deal additional damage which is determined by the skill that completes the combo. Executing a Rampant skill while under the effect of Volant Heart will complete a Sunstrider intentional combo dealing greater additional damage. Instinctual skills do not share a recast timer with any other actions.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction AvalancheAxePvE =&gt; _AvalancheAxePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ShieldsplitterPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44885, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyShieldsplitterPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44885"&gt;&lt;strong&gt;Shieldsplitter&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44885] [Weaponskill]
+    /// &lt;/summary&gt;
+    static partial void ModifyShieldsplitterPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44885"&gt;&lt;strong&gt;Shieldsplitter&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44885] [Weaponskill]
+    /// &lt;para&gt;Delivers an attack with a potency of 280. Combo Action: Axeblade Bite Combo Potency: 600 Combo Bonus: Increases TP Gauge by 15&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ShieldsplitterPvE =&gt; _ShieldsplitterPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BeastModePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44886, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBeastModePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44886"&gt;&lt;strong&gt;Beast Mode&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44886] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBeastModePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44886"&gt;&lt;strong&gt;Beast Mode&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44886] [Ability]
+    /// &lt;para&gt;Upon using Borrow changes to an action dependent on Kinship. Beast Kinship Effect: Action reduces physical vulnerability Vile Kinship Effect: Action increases block rate Cloud Kinship Effect: Action bolsters movement Seed Kinship Effect: Action inflicts poison and weakening effects Wave Kinship Effect: Action deals ranged magic damage to a single target Scale Kinship Effect: Action absorbs magic damage Soul Kinship Effect: Action delivers an attack that interrupts a single target Ash Kinship Effect: Action removes a detrimental effect&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BeastModePvE =&gt; _BeastModePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _MistralAxePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44887, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyMistralAxePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44887"&gt;&lt;strong&gt;Mistral Axe&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44887] [Weaponskill]
+    /// &lt;/summary&gt;
+    static partial void ModifyMistralAxePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44887"&gt;&lt;strong&gt;Mistral Axe&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44887] [Weaponskill]
+    /// &lt;para&gt;Delivers an attack with a potency of 400. Potency increases up to 1,000 as TP nears maximum. All TP will be expended upon execution. Minimum TP Gauge Cost: 100 Instinctual Affinity: Durant Additional Effect: Grants Durant Heart Duration: 7s Instinctual skills may be executed sequentially to deal additional damage which is determined by the skill that completes the combo. Executing a Durant skill while under the effect of Rampant Heart will complete a Moonstalker intentional combo dealing greater additional damage. Instinctual skills do not share a recast timer with any other actions.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction MistralAxePvE =&gt; _MistralAxePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SpinningAxePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44888, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySpinningAxePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44888"&gt;&lt;strong&gt;Spinning Axe&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44888] [Weaponskill]
+    /// &lt;/summary&gt;
+    static partial void ModifySpinningAxePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44888"&gt;&lt;strong&gt;Spinning Axe&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44888] [Weaponskill]
+    /// &lt;para&gt;Delivers an attack with a potency of 400. Potency increases up to 1,000 as TP nears maximum. All TP will be expended upon execution. Minimum TP Gauge Cost: 100 Instinctual Affinity: Eldritch Additional Effect: Grants Eldritch Heart Duration: 7s Instinctual skills may be executed sequentially to deal additional damage which is determined by the skill that completes the combo. Executing an Eldritch skill while under the effect of Durant Heart will complete a Sunstrider intentional combo dealing greater additional damage. Instinctual skills do not share a recast timer with any other actions.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SpinningAxePvE =&gt; _SpinningAxePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _GaleAxePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44889, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyGaleAxePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44889"&gt;&lt;strong&gt;Gale Axe&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44889] [Weaponskill]
+    /// &lt;/summary&gt;
+    static partial void ModifyGaleAxePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44889"&gt;&lt;strong&gt;Gale Axe&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44889] [Weaponskill]
+    /// &lt;para&gt;Delivers an attack with a potency of 400. Potency increases up to 1,000 as TP nears maximum. All TP will be expended upon execution. Minimum TP Gauge Cost: 100 Instinctual Affinity: Volant Additional Effect: Grants Volant Heart Duration: 7s Instinctual skills may be executed sequentially to deal additional damage which is determined by the skill that completes the combo. Executing a Volant skill while under the effect of Eldritch Heart will complete a Moonstalker intentional combo dealing greater additional damage. Instinctual skills do not share a recast timer with any other actions.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction GaleAxePvE =&gt; _GaleAxePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _TemperedReleasePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44890, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyTemperedReleasePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44890"&gt;&lt;strong&gt;Tempered Release&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44890] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyTemperedReleasePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44890"&gt;&lt;strong&gt;Tempered Release&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44890] [Ability]
+    /// &lt;para&gt;Orders your familiar to execute a controlled ability. Can only be executed while in combat and under the effect of One with Nature.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction TemperedReleasePvE =&gt; _TemperedReleasePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _PartingBlowPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44891, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyPartingBlowPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44891"&gt;&lt;strong&gt;Parting Blow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44891] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyPartingBlowPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44891"&gt;&lt;strong&gt;Parting Blow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44891] [Ability]
+    /// &lt;para&gt;Orders your familiar to execute Aetheric Burst. Aetheric Burst Effect: Deals unaspected damage to target and all enemies nearby it with a potency of 1,000 Familiar retreats from combat upon execution. Can only be executed while in combat.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction PartingBlowPvE =&gt; _PartingBlowPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SecondBattlehornPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44892, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySecondBattlehornPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44892"&gt;&lt;strong&gt;Second Battlehorn&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44892] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifySecondBattlehornPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44892"&gt;&lt;strong&gt;Second Battlehorn&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44892] [Ability]
+    /// &lt;para&gt;Summons to fight at your side. During combat recast timer cooldown will begin once your familiar has retreated. Retreat outside of combat will not affect recast timer.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SecondBattlehornPvE =&gt; _SecondBattlehornPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ShieldChargePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44893, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyShieldChargePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44893"&gt;&lt;strong&gt;Shield Charge&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44893] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyShieldChargePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44893"&gt;&lt;strong&gt;Shield Charge&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44893] [Ability]
+    /// &lt;para&gt;Rushes forward and delivers an attack to target and all enemies nearby it with a potency of Cannot be executed while bound.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ShieldChargePvE =&gt; _ShieldChargePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ThirdBattlehornPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44894, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyThirdBattlehornPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44894"&gt;&lt;strong&gt;Third Battlehorn&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44894] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyThirdBattlehornPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44894"&gt;&lt;strong&gt;Third Battlehorn&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44894] [Ability]
+    /// &lt;para&gt;Summons to fight at your side. During combat recast timer cooldown will begin once your familiar has retreated. Retreat outside of combat will not affect recast timer.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ThirdBattlehornPvE =&gt; _ThirdBattlehornPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BorrowPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44895, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBorrowPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44895"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44895] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBorrowPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44895"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44895] [Ability]
+    /// &lt;para&gt;Borrows aether from your summoned familiar to gain Kinship according to its classification. Beastkin Familiar Effect: Grants Beast Kinship Vilekin Familiar Effect: Grants Vile Kinship Cloudkin Familiar Effect: Grants Cloud Kinship Seedkin Familiar Effect: Grants Seed Kinship Wavekin Familiar Effect: Grants Wave Kinship Scalekin Familiar Effect: Grants Scale Kinship Soulkin Familiar Effect: Grants Soul Kinship Ashkin Familiar Effect: Grants Ash Kinship Changes Beast Mode into an action according to your familiar's classification. Duration: 90s Expiration timer is halted while your familiar is summoned. Can only be executed while under the effect of One with Nature.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BorrowPvE =&gt; _BorrowPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BeastskinPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44896, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBeastskinPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44896"&gt;&lt;strong&gt;Beastskin&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44896] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBeastskinPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44896"&gt;&lt;strong&gt;Beastskin&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44896] [Ability]
+    /// &lt;para&gt;Reduces physical damage taken by 25% and increases critical hit rate by 5%. Duration: 30s Can only be executed while under the effect of Beast Kinship. ※This action cannot be assigned to a hotbar. ※Beast Mode changes to Beastskin when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BeastskinPvE =&gt; _BeastskinPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _VileskinPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44897, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyVileskinPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44897"&gt;&lt;strong&gt;Vileskin&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44897] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyVileskinPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44897"&gt;&lt;strong&gt;Vileskin&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44897] [Ability]
+    /// &lt;para&gt;Nullifies most knockback and draw-in effects and increases block rate to 100%. Increases TP Gauge by 12 for each block. Duration: 15s Can only be executed while under the effect of Vile Kinship. ※This action cannot be assigned to a hotbar. ※Beast Mode changes to Vileskin when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction VileskinPvE =&gt; _VileskinPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _CloudSkimPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44898, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyCloudSkimPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44898"&gt;&lt;strong&gt;Cloud Skim&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44898] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyCloudSkimPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44898"&gt;&lt;strong&gt;Cloud Skim&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44898] [Ability]
+    /// &lt;para&gt;Move quickly in the selected direction. Increases evasion by 5%. Duration: 60s Can only be executed while under the effect of Cloud Kinship. Cannot be executed while bound. ※This action cannot be assigned to a hotbar. ※Beast Mode changes to Cloud Skim when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction CloudSkimPvE =&gt; _CloudSkimPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SeedsowerPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44899, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySeedsowerPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44899"&gt;&lt;strong&gt;Seedsower&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44899] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifySeedsowerPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44899"&gt;&lt;strong&gt;Seedsower&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44899] [Ability]
+    /// &lt;para&gt;Afflicts nearby enemies with Seeds Sown. Seeds Sown Effect: Reduces damage dealt by 10% and inflicts toxins that cause damage over time Potency: 25 Duration: 60s Can only be executed while under the effect of Seed Kinship. ※This action cannot be assigned to a hotbar. ※Beast Mode changes to Seedsower when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SeedsowerPvE =&gt; _SeedsowerPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _QuellingWavePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44900, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyQuellingWavePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44900"&gt;&lt;strong&gt;Quelling Wave&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44900] [Spell]
+    /// &lt;/summary&gt;
+    static partial void ModifyQuellingWavePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44900"&gt;&lt;strong&gt;Quelling Wave&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44900] [Spell]
+    /// &lt;para&gt;Deals water damage with a potency of 350. Additional Effect: Increases TP Gauge by 10 Additional Effect: Removes one beneficial status from target thereby increasing TP Gauge by 50 Can only be executed while under the effect of Wave Kinship. ※This action cannot be assigned to a hotbar. ※Beast Mode changes to Quelling Wave when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction QuellingWavePvE =&gt; _QuellingWavePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ScaleskinPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44901, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyScaleskinPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44901"&gt;&lt;strong&gt;Scaleskin&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44901] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyScaleskinPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44901"&gt;&lt;strong&gt;Scaleskin&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44901] [Ability]
+    /// &lt;para&gt;Creates a barrier around self that absorbs magic damage totaling 8% of maximum HP. Duration: 15s Increases TP Gauge by 85 when barrier is completely absorbed. Can only be executed while under the effect of Scale Kinship. ※This action cannot be assigned to a hotbar. ※Beast Mode changes to Scaleskin when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ScaleskinPvE =&gt; _ScaleskinPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SoulCrushPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44902, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySoulCrushPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44902"&gt;&lt;strong&gt;Soul Crush&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44902] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifySoulCrushPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44902"&gt;&lt;strong&gt;Soul Crush&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44902] [Ability]
+    /// &lt;para&gt;Delivers a close-quarter attack with a potency of 300. Additional Effect: Interrupts the use of a target's action Potency increases to 1,000 and TP Gauge increases by 100 upon interruption. Can only be executed while under the effect of Soul Kinship. ※This action cannot be assigned to a hotbar. ※Beast Mode changes to Soul Crush when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SoulCrushPvE =&gt; _SoulCrushPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ScouringAshPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44903, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyScouringAshPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44903"&gt;&lt;strong&gt;Scouring Ash&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44903] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyScouringAshPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44903"&gt;&lt;strong&gt;Scouring Ash&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44903] [Ability]
+    /// &lt;para&gt;Removes a single detrimental effect from self or targeted party member. Recovers 10% of maximum HP and increases TP Gauge by 100 upon removal. Can only be executed while under the effect of Ash Kinship. ※This action cannot be assigned to a hotbar. ※Beast Mode changes to Scouring Ash when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ScouringAshPvE =&gt; _ScouringAshPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _RallyingCheerPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44904, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyRallyingCheerPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44904"&gt;&lt;strong&gt;Rallying Cheer&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44904] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyRallyingCheerPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44904"&gt;&lt;strong&gt;Rallying Cheer&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44904] [Ability]
+    /// &lt;para&gt;Spends all stacks of Natural Instinct to increase Familiar TP Gauge. Standard Familiar TP Gauge Increase: 30 Each stack of Natural Instinct increases Familiar TP Gauge by 70. Can only be executed while in combat.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction RallyingCheerPvE =&gt; _RallyingCheerPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _RallyPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44905, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyRallyPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44905"&gt;&lt;strong&gt;Rally&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44905] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyRallyPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44905"&gt;&lt;strong&gt;Rally&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44905] [Ability]
+    /// &lt;para&gt;Spends all stacks of Mastered Instinct to increase TP Gauge. Standard TP Gauge Increase: 40 Each stack of Mastered Instinct increases TP Gauge by 70. Can only be executed while in combat.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction RallyPvE =&gt; _RallyPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BrutalRagePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44930, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBrutalRagePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44930"&gt;&lt;strong&gt;Brutal Rage&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44930] [Weaponskill]
+    /// &lt;/summary&gt;
+    static partial void ModifyBrutalRagePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44930"&gt;&lt;strong&gt;Brutal Rage&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44930] [Weaponskill]
+    /// &lt;para&gt;Rushes forward and delivers an attack with a potency of 1,200 to target and all enemies nearby it. All TP will be expended upon execution. TP Gauge Cost: 250 Instinctual Affinity: Sunstrider Additional Effect: Grants Sunstrider Duration: 7s Instinctual skills may be executed sequentially to deal additional damage which is determined by the skill that completes the combo. Executing a Sunstrider skill while under the effect of Moonstalker will complete the infinitive combo Universality dealing greater additional damage. Cannot be executed while bound. ※This action cannot be assigned to a hotbar. ※Avalanche Axe changes to Brutal Rage when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BrutalRagePvE =&gt; _BrutalRagePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _HawkishTalonsPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44931, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyHawkishTalonsPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44931"&gt;&lt;strong&gt;Hawkish Talons&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44931] [Weaponskill]
+    /// &lt;/summary&gt;
+    static partial void ModifyHawkishTalonsPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44931"&gt;&lt;strong&gt;Hawkish Talons&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44931] [Weaponskill]
+    /// &lt;para&gt;Rushes forward and delivers an attack with a potency of 1,200 to target and all enemies nearby it. All TP will be expended upon execution. TP Gauge Cost: 250 Instinctual Affinity: Moonstalker Additional Effect: Grants Moonstalker Duration: 7s Instinctual skills may be executed sequentially to deal additional damage which is determined by the skill that completes the combo. Executing a Moonstalker skill while under the effect of Sunstrider will complete the infinitive combo Universality dealing greater additional damage. Cannot be executed while bound. ※This action cannot be assigned to a hotbar. ※Mistral Axe changes to Hawkish Talons when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction HawkishTalonsPvE =&gt; _HawkishTalonsPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _RisenFallPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44932, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyRisenFallPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44932"&gt;&lt;strong&gt;Risen Fall&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44932] [Weaponskill]
+    /// &lt;/summary&gt;
+    static partial void ModifyRisenFallPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44932"&gt;&lt;strong&gt;Risen Fall&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44932] [Weaponskill]
+    /// &lt;para&gt;Deals unaspected damage with a potency of 1,200 to target and all enemies nearby it. All TP will be expended upon execution. TP Gauge Cost: 250 Instinctual Affinity: Sunstrider Additional Effect: Grants Sunstrider Duration: 7s Instinctual skills may be executed sequentially to deal additional damage which is determined by the skill that completes the combo. Executing a Sunstrider skill while under the effect of Moonstalker will complete the infinitive combo Universality dealing greater additional damage. ※This action cannot be assigned to a hotbar. ※Spinning Axe changes to Risen Fall when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction RisenFallPvE =&gt; _RisenFallPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _CalamityPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)44933, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyCalamityPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/44933"&gt;&lt;strong&gt;Calamity&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44933] [Weaponskill]
+    /// &lt;/summary&gt;
+    static partial void ModifyCalamityPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/44933"&gt;&lt;strong&gt;Calamity&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [44933] [Weaponskill]
+    /// &lt;para&gt;Deals unaspected damage with a potency of 1,200 to all enemies in a straight line. All TP will be expended upon execution. TP Gauge Cost: 250 Instinctual Affinity: Moonstalker Additional Effect: Grants Moonstalker Duration: 7s Instinctual skills may be executed sequentially to deal additional damage which is determined by the skill that completes the combo. Executing a Moonstalker skill while under the effect of Sunstrider will complete the infinitive combo Universality dealing greater additional damage. ※This action cannot be assigned to a hotbar. ※Gale Axe changes to Calamity when requirements for execution are met.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction CalamityPvE =&gt; _CalamityPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _CloudSkimPvE_45038Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)45038, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyCloudSkimPvE_45038(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/45038"&gt;&lt;strong&gt;Cloud Skim&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [45038] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyCloudSkimPvE_45038(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/45038"&gt;&lt;strong&gt;Cloud Skim&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [45038] [Ability]
+    /// &lt;para&gt;&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction CloudSkimPvE_45038 =&gt; _CloudSkimPvE_45038Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _CloudSkimPvE_45039Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)45039, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyCloudSkimPvE_45039(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/45039"&gt;&lt;strong&gt;Cloud Skim&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [45039] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyCloudSkimPvE_45039(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/45039"&gt;&lt;strong&gt;Cloud Skim&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [45039] [Ability]
+    /// &lt;para&gt;&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction CloudSkimPvE_45039 =&gt; _CloudSkimPvE_45039Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _CloudSkimPvE_45040Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)45040, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyCloudSkimPvE_45040(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/45040"&gt;&lt;strong&gt;Cloud Skim&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [45040] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyCloudSkimPvE_45040(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/45040"&gt;&lt;strong&gt;Cloud Skim&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [45040] [Ability]
+    /// &lt;para&gt;&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction CloudSkimPvE_45040 =&gt; _CloudSkimPvE_45040Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _CloudSkimPvE_45041Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)45041, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyCloudSkimPvE_45041(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/45041"&gt;&lt;strong&gt;Cloud Skim&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [45041] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyCloudSkimPvE_45041(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/45041"&gt;&lt;strong&gt;Cloud Skim&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [45041] [Ability]
+    /// &lt;para&gt;&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction CloudSkimPvE_45041 =&gt; _CloudSkimPvE_45041Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _ChallengePvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)46750, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyChallengePvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/46750"&gt;&lt;strong&gt;Challenge&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [46750] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyChallengePvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/46750"&gt;&lt;strong&gt;Challenge&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [46750] [Ability]
+    /// &lt;para&gt;Gesture threateningly placing yourself at the top of a target's enmity list and increasing enmity generation. Duration: 30s Additional Effect: Nullifies familiar's Cover&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction ChallengePvE =&gt; _ChallengePvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _SnarlPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)46751, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifySnarlPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/46751"&gt;&lt;strong&gt;Snarl&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [46751] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifySnarlPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/46751"&gt;&lt;strong&gt;Snarl&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [46751] [Ability]
+    /// &lt;para&gt;Orders your familiar to use Threaten placing it at the top of a target's enmity list and increasing its enmity generation. Additional Effect: Takes all damage intended for the beastmaster Duration: 45s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction SnarlPvE =&gt; _SnarlPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _TemperedReleasePvE_47092Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)47092, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyTemperedReleasePvE_47092(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/47092"&gt;&lt;strong&gt;Tempered Release&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47092] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyTemperedReleasePvE_47092(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/47092"&gt;&lt;strong&gt;Tempered Release&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47092] [Ability]
+    /// &lt;para&gt;Orders your familiar to execute a controlled technique. Can only be executed while in combat and under the effect of One with Nature.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction TemperedReleasePvE_47092 =&gt; _TemperedReleasePvE_47092Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _TrickPvECreator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)47093, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyTrickPvE(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/47093"&gt;&lt;strong&gt;Trick&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47093] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyTrickPvE(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/47093"&gt;&lt;strong&gt;Trick&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47093] [Ability]
+    /// &lt;para&gt;Orders your familiar to execute an instinctual skill. Minimum TP Gauge Cost: 100 Additional Effect: Grants Volant Heart Rampant Heart Durant Heart or Eldritch Heart Duration: 7s Effects granted by this action may be paired with beastmaster instinctual skills to create combos.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction TrickPvE =&gt; _TrickPvECreator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BorrowPvE_47238Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)47238, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBorrowPvE_47238(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/47238"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47238] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBorrowPvE_47238(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/47238"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47238] [Ability]
+    /// &lt;para&gt;Borrows aether from your familiar to grant Beast Kinship. Beast Kinship Effect: Enables execution of Beastskin Duration: 90s Expiration timer is halted while your familiar is summoned. Can only be executed while under the effect of One with Nature.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BorrowPvE_47238 =&gt; _BorrowPvE_47238Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BorrowPvE_47239Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)47239, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBorrowPvE_47239(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/47239"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47239] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBorrowPvE_47239(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/47239"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47239] [Ability]
+    /// &lt;para&gt;Borrows aether from your familiar to grant Vile Kinship. Vile Kinship Effect: Enables execution of Vileskin Duration: 90s Expiration timer is halted while your familiar is summoned. Can only be executed while under the effect of One with Nature.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BorrowPvE_47239 =&gt; _BorrowPvE_47239Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BorrowPvE_47240Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)47240, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBorrowPvE_47240(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/47240"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47240] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBorrowPvE_47240(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/47240"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47240] [Ability]
+    /// &lt;para&gt;Borrows aether from your familiar to grant Cloud Kinship. Cloud Kinship Effect: Enables execution of Cloud Skim Duration: 90s Expiration timer is halted while your familiar is summoned. Can only be executed while under the effect of One with Nature.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BorrowPvE_47240 =&gt; _BorrowPvE_47240Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BorrowPvE_47241Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)47241, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBorrowPvE_47241(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/47241"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47241] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBorrowPvE_47241(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/47241"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47241] [Ability]
+    /// &lt;para&gt;Borrows aether from your familiar to grant Seed Kinship. Seed Kinship Effect: Enables execution of Seedsower Duration: 90s Expiration timer is halted while your familiar is summoned. Can only be executed while under the effect of One with Nature.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BorrowPvE_47241 =&gt; _BorrowPvE_47241Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BorrowPvE_47242Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)47242, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBorrowPvE_47242(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/47242"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47242] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBorrowPvE_47242(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/47242"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47242] [Ability]
+    /// &lt;para&gt;Borrows aether from your familiar to grant Wave Kinship. Wave Kinship Effect: Enables execution of Quelling Wave Duration: 90s Expiration timer is halted while your familiar is summoned. Can only be executed while under the effect of One with Nature.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BorrowPvE_47242 =&gt; _BorrowPvE_47242Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BorrowPvE_47243Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)47243, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBorrowPvE_47243(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/47243"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47243] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBorrowPvE_47243(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/47243"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47243] [Ability]
+    /// &lt;para&gt;Borrows aether from your familiar to grant Scale Kinship. Scale Kinship Effect: Enables execution of Scaleskin Duration: 90s Expiration timer is halted while your familiar is summoned. Can only be executed while under the effect of One with Nature.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BorrowPvE_47243 =&gt; _BorrowPvE_47243Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BorrowPvE_47244Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)47244, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBorrowPvE_47244(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/47244"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47244] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBorrowPvE_47244(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/47244"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47244] [Ability]
+    /// &lt;para&gt;Borrows aether from your familiar to grant Soul Kinship. Soul Kinship Effect: Enables execution of Soul Crush Duration: 90s Expiration timer is halted while your familiar is summoned. Can only be executed while under the effect of One with Nature.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BorrowPvE_47244 =&gt; _BorrowPvE_47244Creator.Value;
+    private readonly Lazy&lt;IBaseAction&gt; _BorrowPvE_47245Creator = new(() =&gt; 
+    {
+        IBaseAction action = new BaseAction((ActionID)47245, false);
+        CustomRotation.LoadActionSetting(ref action);
+    
+        var setting = action.Setting;
+        ModifyBorrowPvE_47245(ref setting);
+        action.Setting = setting;
+    
+        return action;
+    });
+    
+    /// &lt;summary&gt;
+    /// Modify &lt;see href="https://garlandtools.org/db/#action/47245"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47245] [Ability]
+    /// &lt;/summary&gt;
+    static partial void ModifyBorrowPvE_47245(ref ActionSetting setting);
+    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/47245"&gt;&lt;strong&gt;Borrow&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [47245] [Ability]
+    /// &lt;para&gt;Borrows aether from your familiar to grant Ash Kinship. Ash Kinship Effect: Enables execution of Scouring Ash Duration: 90s Expiration timer is halted while your familiar is summoned. Can only be executed while under the effect of One with Nature.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    
+    public IBaseAction BorrowPvE_47245 =&gt; _BorrowPvE_47245Creator.Value;
 
     private IBaseAction[] _AllBaseActions = null;
     
     /// &lt;inheritdoc/&gt;
     public override IBaseAction[] AllBaseActions =&gt; _AllBaseActions ??= [
-    	
+    	SmashAxePvE, CapturePvE, FirstBattlehornPvE, GaugePvE, AxebladeBitePvE, AvalancheAxePvE, ShieldsplitterPvE, BeastModePvE, MistralAxePvE, SpinningAxePvE, GaleAxePvE, TemperedReleasePvE, PartingBlowPvE, SecondBattlehornPvE, ShieldChargePvE, ThirdBattlehornPvE, BorrowPvE, BeastskinPvE, VileskinPvE, CloudSkimPvE, SeedsowerPvE, QuellingWavePvE, ScaleskinPvE, SoulCrushPvE, ScouringAshPvE, RallyingCheerPvE, RallyPvE, BrutalRagePvE, HawkishTalonsPvE, RisenFallPvE, CalamityPvE, ChallengePvE, SnarlPvE, TrickPvE,
     	..base.AllBaseActions,
     ];
 
@@ -35803,13 +36883,82 @@ public abstract partial class BeastmasterRotation : CustomRotation
 
 #region Traits
 
-    
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50690"&gt;&lt;strong&gt;Wild Heart&lt;/strong&gt;&lt;/see&gt; (BST) [690]
+    /// &lt;para&gt;Allows for TP Gauge accumulation upon landing certain weaponskill combos.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait WildHeartTrait { get; } = new BaseTrait(690);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50691"&gt;&lt;strong&gt;Wild Heart II&lt;/strong&gt;&lt;/see&gt; (BST) [691]
+    /// &lt;para&gt;Allows for Familiar TP Gauge accumulation upon the landing of auto-attacks or Aetheric Burst.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait WildHeartIiTrait { get; } = new BaseTrait(691);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50692"&gt;&lt;strong&gt;Battlehorn Mastery&lt;/strong&gt;&lt;/see&gt; (BST) [692]
+    /// &lt;para&gt;Grants the effect of One with Nature upon summoning a familiar.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait BattlehornMasteryTrait { get; } = new BaseTrait(692);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50693"&gt;&lt;strong&gt;Wild Heart IV&lt;/strong&gt;&lt;/see&gt; (BST) [693]
+    /// &lt;para&gt;Grants 1 stack of Natural Instinct upon completing a combo with a familiar instinctual skill.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait WildHeartIvTrait { get; } = new BaseTrait(693);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50694"&gt;&lt;strong&gt;Wild Heart III&lt;/strong&gt;&lt;/see&gt; (BST) [694]
+    /// &lt;para&gt;Grants 1 stack of Mastered Instinct upon completing a combo with a beastmaster instinctual skill.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait WildHeartIiiTrait { get; } = new BaseTrait(694);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50749"&gt;&lt;strong&gt;Tempered Release Mastery&lt;/strong&gt;&lt;/see&gt; (BST) [749]
+    /// &lt;para&gt;Grants Lingering Vantage upon using Tempered Release. Duration: 60s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait TemperedReleaseMasteryTrait { get; } = new BaseTrait(749);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50750"&gt;&lt;strong&gt;Enhanced Borrow&lt;/strong&gt;&lt;/see&gt; (BST) [750]
+    /// &lt;para&gt;Grants Lingering Vantage upon using Borrow. Duration: 60s&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait EnhancedBorrowTrait { get; } = new BaseTrait(750);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50751"&gt;&lt;strong&gt;Enhanced Shield Charge&lt;/strong&gt;&lt;/see&gt; (BST) [751]
+    /// &lt;para&gt;Allows the accumulation of charges for consecutive uses of Shield Charge. Maximum Charges: 3&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait EnhancedShieldChargeTrait { get; } = new BaseTrait(751);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50752"&gt;&lt;strong&gt;Beastmastery&lt;/strong&gt;&lt;/see&gt; (BST) [752]
+    /// &lt;para&gt;Increases the potency of Smash Axe to 160 and Shield Charge to 300.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait BeastmasteryTrait { get; } = new BaseTrait(752);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50754"&gt;&lt;strong&gt;Battlehorn Mastery II&lt;/strong&gt;&lt;/see&gt; (BST) [754]
+    /// &lt;para&gt;Resets the recast timer for Tempered Release upon summoning a familiar.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait BattlehornMasteryIiTrait { get; } = new BaseTrait(754);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50755"&gt;&lt;strong&gt;Battlehorn Mastery III&lt;/strong&gt;&lt;/see&gt; (BST) [755]
+    /// &lt;para&gt;Resets the recast timer for Borrow upon summoning a familiar.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait BattlehornMasteryIiiTrait { get; } = new BaseTrait(755);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50756"&gt;&lt;strong&gt;Enhanced Rally&lt;/strong&gt;&lt;/see&gt; (BST) [756]
+    /// &lt;para&gt;Reduces Rally recast time to 90 seconds.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait EnhancedRallyTrait { get; } = new BaseTrait(756);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50757"&gt;&lt;strong&gt;Enhanced Rallying Cheer&lt;/strong&gt;&lt;/see&gt; (BST) [757]
+    /// &lt;para&gt;Reduces Rallying Cheer recast time to 90 seconds.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait EnhancedRallyingCheerTrait { get; } = new BaseTrait(757);
+    /// &lt;summary&gt;
+    /// &lt;see href="https://garlandtools.org/db/#action/50758"&gt;&lt;strong&gt;Instinctual Mastery&lt;/strong&gt;&lt;/see&gt; (BST) [758]
+    /// &lt;para&gt;Upgrades Avalanche Axe to Brutal Rage Mistral Axe to Hawkish Talons Spinning Axe to Risen Fall and Gale Axe to Calamity upon accumulating 250 TP.&lt;/para&gt;
+    /// &lt;/summary&gt;
+    public static IBaseTrait InstinctualMasteryTrait { get; } = new BaseTrait(758);
 
     private IBaseTrait[] _AllTraits = null;
     
     /// &lt;inheritdoc/&gt;
     public override IBaseTrait[] AllTraits =&gt; _AllTraits ??= [
-    	
+    	WildHeartTrait, WildHeartIiTrait, BattlehornMasteryTrait, WildHeartIvTrait, WildHeartIiiTrait, TemperedReleaseMasteryTrait, EnhancedBorrowTrait, EnhancedShieldChargeTrait, BeastmasteryTrait, BattlehornMasteryIiTrait, BattlehornMasteryIiiTrait, EnhancedRallyTrait, EnhancedRallyingCheerTrait, InstinctualMasteryTrait,
     	..base.AllTraits,
     ];
 #endregion

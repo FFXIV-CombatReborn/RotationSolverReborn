@@ -35,7 +35,7 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGet
 				tmp.Add(c.Abbreviation.ToString());
 			}
 		}
-		_notCombatJobs = tmp.ToArray();
+		_notCombatJobs = [.. tmp];
 		base.BeforeCreating();
 	}
 
@@ -122,6 +122,45 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGet
 		}
 
 		return true;
+	}
+
+	/// <summary>
+	/// Checks if a job is compatible with a class job category.
+	/// </summary>
+	/// <param name="category">The class job category.</param>
+	/// <param name="jobAbbreviation">The job abbreviation to check.</param>
+	/// <returns>True if compatible; otherwise, false.</returns>
+	protected static bool IsJobCompatible(ClassJobCategory category, string jobAbbreviation)
+	{
+		// Use a reliable method to check job compatibility
+		// This handles special cases like BST (Beastmaster) which maps to Unknown0
+		return jobAbbreviation switch
+		{
+			"PLD" => category.PLD,
+			"WAR" => category.WAR,
+			"DRK" => category.DRK,
+			"GNB" => category.GNB,
+			"WHM" => category.WHM,
+			"SCH" => category.SCH,
+			"AST" => category.AST,
+			"SGE" => category.SGE,
+			"MNK" => category.MNK,
+			"DRG" => category.DRG,
+			"NIN" => category.NIN,
+			"SAM" => category.SAM,
+			"RPR" => category.RPR,
+			"VPR" => category.VPR,
+			"BRD" => category.BRD,
+			"MCH" => category.MCH,
+			"DNC" => category.DNC,
+			"BLM" => category.BLM,
+			"SMN" => category.SMN,
+			"RDM" => category.RDM,
+			"PCT" => category.PCT,
+			"BLU" => category.BLU,
+			"BST" => category.Unknown0,
+			_ => false
+		};
 	}
 
 	/// <summary>

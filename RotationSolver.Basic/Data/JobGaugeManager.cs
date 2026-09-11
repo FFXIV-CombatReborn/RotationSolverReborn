@@ -5,20 +5,15 @@ namespace RotationSolver.Basic.Data
 	/// <summary>
 	/// Manages job gauges and provides thread-safe access to them.
 	/// </summary>
-	public class JobGaugeManager
+	/// <remarks>
+	/// Initializes a new instance of the <see cref="JobGaugeManager"/> class.
+	/// </remarks>
+	/// <param name="jobGauges">The job gauges service.</param>
+	/// <exception cref="ArgumentNullException">Thrown when <paramref name="jobGauges"/> is null.</exception>
+	public class JobGaugeManager(IJobGauges jobGauges)
 	{
-		private readonly IJobGauges jobGauges;
-		private readonly object lockObject = new();
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="JobGaugeManager"/> class.
-		/// </summary>
-		/// <param name="jobGauges">The job gauges service.</param>
-		/// <exception cref="ArgumentNullException">Thrown when <paramref name="jobGauges"/> is null.</exception>
-		public JobGaugeManager(IJobGauges jobGauges)
-		{
-			this.jobGauges = jobGauges ?? throw new ArgumentNullException(nameof(jobGauges));
-		}
+		private readonly IJobGauges jobGauges = jobGauges ?? throw new ArgumentNullException(nameof(jobGauges));
+		private readonly Lock lockObject = new();
 
 		/// <summary>
 		/// Gets the job gauge of the specified type.

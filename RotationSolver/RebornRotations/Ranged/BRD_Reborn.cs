@@ -144,7 +144,7 @@ public sealed class BRD_Reborn : BardRotation
 		return currentSong == SecondSong ? ThirdSong : FirstSong;
 	}
 
-	private Song SongTrackToSong(SongTrack track)
+	private static Song SongTrackToSong(SongTrack track)
 	{
 		return track switch
 		{

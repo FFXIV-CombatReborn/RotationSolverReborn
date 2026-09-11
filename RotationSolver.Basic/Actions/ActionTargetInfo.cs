@@ -24,7 +24,33 @@ public struct ActionTargetInfo(IBaseAction action)
 	/// <summary>
 	/// The range of this action.
 	/// </summary>
-	public readonly float Range => ActionManager.GetActionRange(action.Info.ID);
+	public readonly float Range
+	{
+		get
+		{
+			if ((ActionID)action.Info.ID == ActionID.AvalancheAxePvE)
+			{
+				return 3f;
+			}
+
+			if ((ActionID)action.Info.ID == ActionID.SpinningAxePvE)
+			{
+				return 3f;
+			}
+
+			if ((ActionID)action.Info.ID == ActionID.MistralAxePvE)
+			{
+				return 3f;
+			}
+
+			if ((ActionID)action.Info.ID == ActionID.GaleAxePvE)
+			{
+				return 3f;
+			}
+
+			return ActionManager.GetActionRange(action.Info.ID);
+		}
+	}
 
 	/// <summary>
 	/// The effect range of this action.
@@ -81,6 +107,16 @@ public struct ActionTargetInfo(IBaseAction action)
 			{
 				continue;
 			}
+
+			//// Capture only targets creatures whose associated BST pet we don't already have unlocked.
+			//if (type == TargetType.Capture)
+			//{
+			//	var capturePetId = DataCenter.GetPetIdFromModel(target);
+			//	if (capturePetId == 0 || DataCenter.PetUnlocked(capturePetId))
+			//	{
+			//		continue;
+			//	}
+			//}
 
 			// When this action is flagged as Restricted DoT, skip targets on the restricted list
 			if (action.IsRestrictedDOT && DataCenter.RestrictedDotNameIds != null)
@@ -304,6 +340,10 @@ public struct ActionTargetInfo(IBaseAction action)
 		ActionID.DotonPvE_18880,
 		ActionID.FeatherRainPvE,
 		ActionID.SaltAndDarknessPvP,
+		ActionID.AvalancheAxePvE,
+		ActionID.SpinningAxePvE,
+		ActionID.MistralAxePvE,
+		ActionID.GaleAxePvE,
 	];
 
 	private readonly bool IsSpecialAbility(uint iD)
@@ -2017,6 +2057,7 @@ public struct ActionTargetInfo(IBaseAction action)
 				TargetType.TheBalance => FindTheBalance(),
 				TargetType.Kardia => FindKardia(),
 				TargetType.Deployment => FindDeploymentTacticsTarget(),
+				//TargetType.Capture => FindCaptureTarget(),
 				_ => isFriendly ? FindFriendly() : FindHostile(),
 			};
 		}
@@ -2095,6 +2136,7 @@ public struct ActionTargetInfo(IBaseAction action)
 				TargetType.TheBalance => FindTheBalance(),
 				TargetType.Kardia => FindKardia(),
 				TargetType.Deployment => FindDeploymentTacticsTarget(),
+				//TargetType.Capture => FindCaptureTarget(),
 				_ => isFriendly ? FindFriendly() : FindHostile(),
 			};
 		}
@@ -4092,6 +4134,36 @@ public struct ActionTargetInfo(IBaseAction action)
 			return DataCenter.TankbusterTargets[0];
 		}
 
+		//TODO: Capture
+		//IBattleChara? FindCaptureTarget()
+		//{
+		//	if (battleChara == null || Player.Object == null)
+		//	{
+		//		return null;
+		//	}
+
+		//	IBattleChara? closest = null;
+		//	var closestDistance = float.MaxValue;
+
+		//	foreach (var t in battleChara)
+		//	{
+		//		var petId = DataCenter.GetPetIdFromModel(t);
+		//		if (petId == 0 || DataCenter.PetUnlocked(petId))
+		//		{
+		//			continue;
+		//		}
+
+		//		var distance = Player.DistanceTo(t.Position);
+		//		if (distance < closestDistance)
+		//		{
+		//			closestDistance = distance;
+		//			closest = t;
+		//		}
+		//	}
+
+		//	return closest;
+		//}
+
 		return null;
 	}
 
@@ -4277,7 +4349,8 @@ public enum TargetType : byte
 	PvPDPS,
 	HighHPPercent,
 	LowHPPercent,
-	Tankbuster
+	Tankbuster,
+	Capture
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
