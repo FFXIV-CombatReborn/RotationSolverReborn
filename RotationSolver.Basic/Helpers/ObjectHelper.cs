@@ -125,12 +125,11 @@ public static class ObjectHelper
 			return false;
 		}
 
-		unsafe
+		// Validate liveness before the native BaseId read below; see the note
+		// in IsEnemy() for why the try/catch alone can't cover this.
+		if (!battleChara.IsValid() || battleChara.Address == nint.Zero)
 		{
-			if (battleChara.Struct() == null)
-			{
-				return false;
-			}
+			return false;
 		}
 
 		try
@@ -546,7 +545,20 @@ public static class ObjectHelper
 
 	internal static unsafe bool IsEnemy(this IGameObject obj)
 	{
+		// Validate liveness before any native read/call: a try/catch around
+		// AccessViolationException does not protect us here,
+		// so the object must be confirmed live beforehand.
 		if (obj == null)
+		{
+			return false;
+		}
+
+		if (!obj.IsValid())
+		{
+			return false;
+		}
+
+		if (obj.Address == nint.Zero)
 		{
 			return false;
 		}
@@ -3827,7 +3839,9 @@ public static class ObjectHelper
 	/// </returns>
 	public static EnemyPositional FindEnemyPositional(this IBattleChara enemy)
 	{
-		if (enemy == null || Player.Object == null)
+		// Validate liveness before the native Position/Rotation reads below;
+		// see the note in IsEnemy() for why the try/catch alone can't cover this.
+		if (enemy == null || !enemy.IsValid() || enemy.Address == nint.Zero || Player.Object == null)
 		{
 			return EnemyPositional.None;
 		}
@@ -3867,7 +3881,7 @@ public static class ObjectHelper
 	/// </returns>
 	internal static Vector3 GetFaceVector(this IBattleChara battleChara)
 	{
-		if (battleChara == null)
+		if (battleChara == null || !battleChara.IsValid() || battleChara.Address == nint.Zero)
 		{
 			return Vector3.Zero;
 		}

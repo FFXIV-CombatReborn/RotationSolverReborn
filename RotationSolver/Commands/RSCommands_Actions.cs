@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
+using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
@@ -372,17 +373,28 @@ namespace RotationSolver.Commands
 				for (var i = 0; i < DataCenter.AllHostileTargets.Count; i++)
 				{
 					var ht = DataCenter.AllHostileTargets[i];
-					try
+					// Pre-validate before touching the native TargetObjectId read: a
+					// try/catch around AccessViolationException does NOT protect us here
+					// (corrupted-state exceptions are no longer catchable by managed code
+					// since .NET Core), so the object must be confirmed live beforehand.
+					if (ht == null)
 					{
-						if (ht != null && ht.TargetObjectId != 0)
-						{
-							hostileTargetObjectIds.Add(ht.TargetObjectId);
-						}
-					}
-					catch (AccessViolationException)
-					{
-						// Log or ignore; object is invalid
 						continue;
+					}
+
+					if (!ht.IsValid())
+					{
+						continue;
+					}
+
+					if (ht.Address == nint.Zero)
+					{
+						continue;
+					}
+
+					if (ht.TargetObjectId != 0)
+					{
+						hostileTargetObjectIds.Add(ht.TargetObjectId);
 					}
 				}
 
@@ -489,20 +501,25 @@ namespace RotationSolver.Commands
 						for (var i = 0; i < DataCenter.AllHostileTargets.Count; i++)
 						{
 							var t = DataCenter.AllHostileTargets[i];
-							if (t != null && t is IBattleChara battleChara)
+							if (t is IBattleChara battleChara)
 							{
-								try
+								// See the note above: validate liveness before the native
+								// read instead of relying on a catch that can't fire.
+								//future me dont mess with this unneccessarily
+								if (!battleChara.IsValid())
 								{
-									if (battleChara.TargetObjectId == Player.Object.GameObjectId)
-									{
-										target = battleChara;
-										break;
-									}
-								}
-								catch (AccessViolationException)
-								{
-									// Object became invalid while reading TargetObjectId.
 									continue;
+								}
+
+								if (battleChara.Address == nint.Zero)
+								{
+									continue;
+								}
+
+								if (battleChara.TargetObjectId == Player.Object.GameObjectId)
+								{
+									target = battleChara;
+									break;
 								}
 							}
 						}
