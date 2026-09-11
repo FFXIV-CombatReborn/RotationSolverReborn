@@ -184,12 +184,12 @@ public sealed class BST_Reborn : BeastmasterRotation
 		{
 			if (FirstHornNature == OneWithNatureOrder.Tempered)
 			{
-				if (TemperedReleasePvE_47092.CanUse(out act, skipStatusNeed: !BattlehornMasteryTrait.EnoughLevel))
+				if (TemperedReleasePvE_47092.CanUse(out act))
 				{
 					return true;
 				}
 
-				if (TemperedReleasePvE.CanUse(out act, skipStatusNeed: !BattlehornMasteryTrait.EnoughLevel))
+				if (TemperedReleasePvE.CanUse(out act))
 				{
 					return true;
 				}
@@ -197,7 +197,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 
 			if (FirstHornNature == OneWithNatureOrder.Borrow)
 			{
-				if (BorrowPvE.CanUse(out act, skipStatusNeed: !BattlehornMasteryTrait.EnoughLevel))
+				if (BorrowPvE.CanUse(out act))
 				{
 					return true;
 				}
@@ -208,12 +208,12 @@ public sealed class BST_Reborn : BeastmasterRotation
 		{
 			if (SecondHornNature == OneWithNatureOrder.Tempered)
 			{
-				if (TemperedReleasePvE_47092.CanUse(out act, skipStatusNeed: !BattlehornMasteryTrait.EnoughLevel))
+				if (TemperedReleasePvE_47092.CanUse(out act))
 				{
 					return true;
 				}
 
-				if (TemperedReleasePvE.CanUse(out act, skipStatusNeed: !BattlehornMasteryTrait.EnoughLevel))
+				if (TemperedReleasePvE.CanUse(out act))
 				{
 					return true;
 				}
@@ -221,7 +221,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 
 			if (SecondHornNature == OneWithNatureOrder.Borrow)
 			{
-				if (BorrowPvE.CanUse(out act, skipStatusNeed: !BattlehornMasteryTrait.EnoughLevel))
+				if (BorrowPvE.CanUse(out act))
 				{
 					return true;
 				}
@@ -232,12 +232,12 @@ public sealed class BST_Reborn : BeastmasterRotation
 		{
 			if (ThirdHornNature == OneWithNatureOrder.Tempered)
 			{
-				if (TemperedReleasePvE_47092.CanUse(out act, skipStatusNeed: !BattlehornMasteryTrait.EnoughLevel))
+				if (TemperedReleasePvE_47092.CanUse(out act))
 				{
 					return true;
 				}
 
-				if (TemperedReleasePvE.CanUse(out act, skipStatusNeed: !BattlehornMasteryTrait.EnoughLevel))
+				if (TemperedReleasePvE.CanUse(out act))
 				{
 					return true;
 				}
@@ -245,7 +245,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 
 			if (ThirdHornNature == OneWithNatureOrder.Borrow)
 			{
-				if (BorrowPvE.CanUse(out act, skipStatusNeed: !BattlehornMasteryTrait.EnoughLevel))
+				if (BorrowPvE.CanUse(out act))
 				{
 					return true;
 				}
