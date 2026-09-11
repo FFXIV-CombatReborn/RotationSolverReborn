@@ -145,7 +145,7 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 			"RDM" => category.RDM,
 			"PCT" => category.PCT,
 			"BLU" => category.BLU,
-			// "BST" => category.BST, TODO: BST
+			"BST" => category.Unknown0,
 			_ => false
 		};
 	}

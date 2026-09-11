@@ -35,7 +35,33 @@ public readonly struct ActionBasicInfo
 	/// <summary>
 	/// Gets the range of the action.
 	/// </summary>
-	public readonly sbyte Range => _action.Action.Range;
+	public readonly sbyte Range
+	{
+		get
+		{
+			if ((ActionID)_action.Info.ID == ActionID.AvalancheAxePvE)
+			{
+				return 3;
+			}
+
+			if ((ActionID)_action.Info.ID == ActionID.SpinningAxePvE)
+			{
+				return 3;
+			}
+
+			if ((ActionID)_action.Info.ID == ActionID.MistralAxePvE)
+			{
+				return 3;
+			}
+
+			if ((ActionID)_action.Info.ID == ActionID.GaleAxePvE)
+			{
+				return 3;
+			}
+
+			return (sbyte)ActionManager.GetActionRange(_action.Info.ID);
+		}
+	}
 
 	/// <summary>
 	/// Gets the effect range of the action.

@@ -37,7 +37,7 @@ internal class ActionSingleRotationGetter(Lumina.GameData gameData, ClassJob job
 		}
 
 		var jobName = job.Abbreviation.ToString();
-		return (bool?)category.GetType().GetRuntimeProperty(jobName)?.GetValue(category) ?? false;
+		return IsJobCompatible(category, jobName);
 	}
 }
 

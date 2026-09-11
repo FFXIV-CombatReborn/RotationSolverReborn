@@ -11,12 +11,14 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using Action = Lumina.Excel.Sheets.Action;
+using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
 
@@ -56,6 +58,187 @@ internal static class DataCenter
 
 		return Svc.Condition[ConditionFlag.DutyRecorderPlayback];
 	}
+
+	/// <summary>
+	///
+	/// </summary>
+	public unsafe static Buddy.BuddyMember? ActivePet => *UIState.Instance()->Buddy.PetInfo.Pet;
+
+	/// <summary>
+	///
+	/// </summary>
+	public static bool BMPet
+	{
+		get
+		{
+			if (ActivePet == null)
+			{
+				return false;
+			}
+
+			if (ActivePet?.DataId <= 0)
+			{
+				return false;
+			}
+
+			foreach (var x in Svc.Data.GetExcelSheet<XBMPet>())
+			{
+				if (x.Unknown4 == ActivePet?.DataId)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+	}
+
+	/// <summary>
+	///
+	/// </summary>
+	public static BeastmasterKinType BMPetKinType
+	{
+		get
+		{
+			if (ActivePet == null || ActivePet?.DataId <= 0)
+			{
+				return BeastmasterKinType.None;
+			}
+
+			foreach (var row in Svc.Data.GetExcelSheet<XBMPet>())
+			{
+				if (row.Unknown4 != ActivePet?.DataId)
+				{
+					continue;
+				}
+
+				return row.Unknown7 switch
+				{
+					1 => BeastmasterKinType.Beastkin,
+					2 => BeastmasterKinType.Vilekin,
+					3 => BeastmasterKinType.Cloudkin,
+					4 => BeastmasterKinType.Seedkin,
+					5 => BeastmasterKinType.Wavekin,
+					6 => BeastmasterKinType.Scalekin,
+					7 => BeastmasterKinType.Soulkin,
+					8 => BeastmasterKinType.Ashkin,
+					_ => BeastmasterKinType.None
+				};
+			}
+
+			return BeastmasterKinType.None;
+		}
+	}
+
+	/// <summary>
+	///
+	/// </summary>
+	public static BeastmasterAffinity BMPetAffinity
+	{
+		get
+		{
+			if (ActivePet == null || ActivePet?.DataId <= 0)
+			{
+				return BeastmasterAffinity.None;
+			}
+
+			foreach (var row in Svc.Data.GetExcelSheet<XBMPet>())
+			{
+				if (row.Unknown4 != ActivePet?.DataId)
+				{
+					continue;
+				}
+
+				return (uint)row.Unknown5 switch
+				{
+					45186 => BeastmasterAffinity.Durant,
+					45187 => BeastmasterAffinity.Rampant,
+					45188 => BeastmasterAffinity.Rampant,
+					48643 => BeastmasterAffinity.Rampant,
+					48644 => BeastmasterAffinity.Durant,
+					48645 => BeastmasterAffinity.Eldritch,
+					48646 => BeastmasterAffinity.Volant,
+					48647 => BeastmasterAffinity.Eldritch,
+					48648 => BeastmasterAffinity.Durant,
+					49689 => BeastmasterAffinity.Eldritch,
+					49690 => BeastmasterAffinity.Durant,
+					49691 => BeastmasterAffinity.Rampant,
+					49692 => BeastmasterAffinity.Eldritch,
+					49693 => BeastmasterAffinity.Volant,
+					49694 => BeastmasterAffinity.Eldritch,
+					49695 => BeastmasterAffinity.Durant,
+					49696 => BeastmasterAffinity.Rampant,
+					49697 => BeastmasterAffinity.Volant,
+					49698 => BeastmasterAffinity.Volant,
+					_ => BeastmasterAffinity.None
+				};
+			}
+
+			return BeastmasterAffinity.None;
+		}
+	}
+
+	//private static readonly ExcelSheet<XBMPet> XbmPetSheet = Svc.Data.GetExcelSheet<XBMPet>();
+	//private static readonly ExcelSheet<Pet> PetSheet = Svc.Data.GetExcelSheet<Pet>();
+	//private static readonly ExcelSheet<PetMirage> PetMirageSheet = Svc.Data.GetExcelSheet<PetMirage>();
+	//private static readonly ExcelSheet<BNpcBase> BNpcBaseSheet = Svc.Data.GetExcelSheet<BNpcBase>();
+
+	//// (Model, Base) -> XBMPet RowId, built once instead of scanning 3 sheets on every lookup.
+	//private static readonly Dictionary<(uint Model, byte Base), uint> ModelToPetIdMap = BuildModelToPetIdMap();
+
+	//private static Dictionary<(uint, byte), uint> BuildModelToPetIdMap()
+	//{
+	//	var map = new Dictionary<(uint, byte), uint>();
+
+	//	foreach (var xbmPet in XbmPetSheet)
+	//	{
+	//		if (xbmPet.RowId == 0)
+	//		{
+	//			continue;
+	//		}
+
+	//		var pet = PetSheet.GetRow((uint)xbmPet.Unknown4);
+	//		var model = PetMirageSheet.GetRow(pet.Unknown8).ModelChara.Value;
+
+	//		map[(model.Model, model.Base)] = xbmPet.RowId;
+	//	}
+
+	//	return map;
+	//}
+
+	///// <summary>
+	/////
+	///// </summary>
+	//public static unsafe bool PetUnlocked(uint petId) => XBMManager.Instance()->IsPetUnlocked(petId);
+
+	//public static bool TargetIsBstPet(IBattleChara? tar) => tar != null && GetPetIdFromModel(tar) != 0;
+
+	//public static uint PetIdToModel(uint petId)
+	//{
+	//	var xbmPet = XbmPetSheet.GetRow(petId);
+	//	var pet = PetSheet.GetRow((uint)xbmPet.Unknown4);
+	//	return PetMirageSheet.GetRow(pet.Unknown8).ModelChara.Value.Model;
+	//}
+
+	//public static uint ModelToPetId(uint modelId, byte baseval) =>
+	//	ModelToPetIdMap.GetValueOrDefault((modelId, baseval));
+
+	//public static uint GetPetIdFromModel(IBattleChara? tar)
+	//{
+	//	if (tar is null)
+	//	{
+	//		return 0;
+	//	}
+
+	//	var baseNpc = BNpcBaseSheet.GetRow(tar.BaseId);
+	//	if (baseNpc.Unknown10 != 5)
+	//	{
+	//		return 0;
+	//	}
+
+	//	var model = baseNpc.ModelChara.Value;
+	//	return ModelToPetId(model.Model, model.Base);
+	//}
 
 	private static ulong _hostileTargetId = 0;
 
