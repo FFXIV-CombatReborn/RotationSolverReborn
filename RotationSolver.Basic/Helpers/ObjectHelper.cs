@@ -214,6 +214,40 @@ public static class ObjectHelper
 		return false;
 	}
 
+	private static bool _sipInRangeCache;
+	private static long _sipInRangeCacheTick = long.MinValue;
+	private const long SipInRangeTtlMs = 15;
+
+	// Whether any Forlorn enemy is within range of the player. Independent of the specific target
+	// being checked, so it's computed once per frame instead of once per IsAttackable() call.
+	private static bool IsForlornSipInRange()
+	{
+		var now = Environment.TickCount64;
+		if (_sipInRangeCacheTick != long.MinValue && now - _sipInRangeCacheTick < SipInRangeTtlMs)
+		{
+			return _sipInRangeCache;
+		}
+
+		const float sipRange = 25f;
+		var sipInRange = false;
+		if (Player.Object != null)
+		{
+			foreach (var o in Svc.Objects)
+			{
+				if (o is IBattleChara c && c.IsEnemy() && c.IsTargetable && c.IsForlorn()
+					&& Vector3.Distance(c.Position, Player.Object.Position) <= sipRange)
+				{
+					sipInRange = true;
+					break;
+				}
+			}
+		}
+
+		_sipInRangeCache = sipInRange;
+		_sipInRangeCacheTick = now;
+		return sipInRange;
+	}
+
 	internal static bool IsAttackable(this IBattleChara battleChara)
 	{
 		if (Player.Object == null)
@@ -303,27 +337,6 @@ public static class ObjectHelper
 			}
 		}
 
-		/*if (DataCenter.IsInOccultCrescentOp)
-        {
-            bool isInCE = DataCenter.IsInOccultCrescentOpCE;
-
-            if (isInCE)
-            {
-                if (!battleChara.IsOccultCEMob())
-                {
-                    return false;
-                }
-            }
-
-            if (!isInCE)
-            {
-                if (battleChara.IsOccultCEMob())
-                {
-                    return false;
-                }
-            }
-        }*/
-
 		if (Service.Config.TargetQuestThings3 && battleChara.IsOthersPlayersMob())
 		{
 			return false;
@@ -336,22 +349,7 @@ public static class ObjectHelper
 				return false;
 			}
 
-			const float sipRange = 25f;
-
-			var sipInRange = false;
-			foreach (var o in Svc.Objects)
-			{
-				if (o is IBattleChara c && c.IsEnemy() && c.IsTargetable)
-				{
-					if (c.IsForlorn() && Vector3.Distance(c.Position, Player.Object.Position) <= sipRange)
-					{
-						sipInRange = true;
-						break;
-					}
-				}
-			}
-
-			if (sipInRange && !battleChara.IsForlorn())
+			if (IsForlornSipInRange() && !battleChara.IsForlorn())
 			{
 				return false;
 			}
@@ -669,11 +667,6 @@ public static class ObjectHelper
 			return false;
 		}
 
-		if (Player.Object.GameObjectId == Player.Object.GameObjectId)
-		{
-			return true;
-		}
-
 		if (!Player.Object.IsTargetable)
 		{
 			return false;
@@ -926,12 +919,12 @@ public static class ObjectHelper
 	/// </returns>
 	internal static bool IsTopPriorityHostile(this IBattleChara battleChara)
 	{
-		var icon = battleChara.GetNamePlateIcon();
-
 		if (battleChara == null)
 		{
 			return false;
 		}
+
+		var icon = battleChara.GetNamePlateIcon();
 
 		if (battleChara.IsAllianceMember() || battleChara.IsParty())
 		{
@@ -945,6 +938,8 @@ public static class ObjectHelper
 				return true;
 			}
 		}
+
+		//TODO: 14542 - Mage in board 1 of crucible, likely needs prio logic
 
 		if (Service.Config.Treasuredungeontimed && battleChara.TreasureDungeonPrio())
 		{
@@ -1768,6 +1763,10 @@ public static class ObjectHelper
 		return battleChara.Struct()->FateId;
 	}
 
+	// The candidate methods are resolved once via reflection and reused, since the shape of the
+	// external TetherInfo API can't change at runtime.
+	private static MethodInfo[]? _tetherProviderCandidates;
+
 	/// <summary>
 	/// Attempts to retrieve all tethers currently present using the ECommons TetherInfo API via reflection.
 	/// </summary>
@@ -1775,37 +1774,45 @@ public static class ObjectHelper
 	{
 		try
 		{
-			var tType = typeof(TetherInfo);
-			// Look for a public static method that returns an array or IEnumerable of TetherInfo
-			var methods = tType.GetMethods(BindingFlags.Public | BindingFlags.Static);
-			foreach (var m in methods)
+			if (_tetherProviderCandidates == null)
 			{
-				var ret = m.ReturnType;
-				if (ret == typeof(TetherInfo[]) || typeof(System.Collections.IEnumerable).IsAssignableFrom(ret))
+				var methods = typeof(TetherInfo).GetMethods(BindingFlags.Public | BindingFlags.Static);
+				List<MethodInfo> matching = [];
+				foreach (var m in methods)
 				{
-					var res = m.Invoke(null, null);
-					if (res == null)
+					if (m.ReturnType == typeof(TetherInfo[]) || typeof(System.Collections.IEnumerable).IsAssignableFrom(m.ReturnType))
 					{
-						continue;
+						matching.Add(m);
 					}
+				}
+				_tetherProviderCandidates = [.. matching];
+			}
+			var candidates = _tetherProviderCandidates;
 
-					if (res is TetherInfo[] arr)
-					{
-						return arr;
-					}
+			foreach (var m in candidates)
+			{
+				var res = m.Invoke(null, null);
+				if (res == null)
+				{
+					continue;
+				}
 
-					if (res is System.Collections.IEnumerable ie)
+				if (res is TetherInfo[] arr)
+				{
+					return arr;
+				}
+
+				if (res is System.Collections.IEnumerable ie)
+				{
+					var list = new List<TetherInfo>();
+					foreach (var o in ie)
 					{
-						var list = new List<TetherInfo>();
-						foreach (var o in ie)
+						if (o is TetherInfo ti)
 						{
-							if (o is TetherInfo ti)
-							{
-								list.Add(ti);
-							}
+							list.Add(ti);
 						}
-						return list;
 					}
+					return list;
 				}
 			}
 		}
@@ -1905,6 +1912,16 @@ public static class ObjectHelper
 	/// Try to extract common tether fields (tether id, source object id, target object id) using reflection.
 	/// Returns true if at least source/target were obtained.
 	/// </summary>
+	// Possible names for fields/properties on the external TetherInfo type, and the members
+	// resolved from them - resolved once via reflection and reused, rather than re-scanning
+	// type metadata on every tether processed.
+	private static readonly string[] TetherIdNames = ["TetherId", "Id", "Tether"];
+	private static readonly string[] TetherSourceNames = ["SourceObjectId", "SourceId", "Source", "SourceActorId"];
+	private static readonly string[] TetherTargetNames = ["TargetObjectId", "TargetId", "Target", "TargetActorId"];
+	private static MemberInfo[]? _tetherIdMembers;
+	private static MemberInfo[]? _tetherSourceMembers;
+	private static MemberInfo[]? _tetherTargetMembers;
+
 	private static bool ExtractTetherId(TetherInfo t, out uint tetherId, out ulong sourceObjectId, out ulong targetObjectId)
 	{
 		tetherId = 0;
@@ -1913,15 +1930,13 @@ public static class ObjectHelper
 		try
 		{
 			var tType = typeof(TetherInfo);
-
-			// possible names for fields/properties
-			string[] tetherNames = ["TetherId", "Id", "Tether"];
-			string[] sourceNames = ["SourceObjectId", "SourceId", "Source", "SourceActorId"];
-			string[] targetNames = ["TargetObjectId", "TargetId", "Target", "TargetActorId"];
+			_tetherIdMembers ??= ResolveTetherMembers(tType, TetherIdNames);
+			_tetherSourceMembers ??= ResolveTetherMembers(tType, TetherSourceNames);
+			_tetherTargetMembers ??= ResolveTetherMembers(tType, TetherTargetNames);
 
 			object? val;
 
-			val = TryGetMemberValue(tType, t, tetherNames);
+			val = TryGetMemberValue(t, _tetherIdMembers);
 			if (val != null)
 			{
 				if (val is uint ui)
@@ -1938,7 +1953,7 @@ public static class ObjectHelper
 				}
 			}
 
-			val = TryGetMemberValue(tType, t, sourceNames);
+			val = TryGetMemberValue(t, _tetherSourceMembers);
 			if (val != null)
 			{
 				if (val is ulong ul)
@@ -1955,7 +1970,7 @@ public static class ObjectHelper
 				}
 			}
 
-			val = TryGetMemberValue(tType, t, targetNames);
+			val = TryGetMemberValue(t, _tetherTargetMembers);
 			if (val != null)
 			{
 				if (val is ulong ul2)
@@ -1980,27 +1995,34 @@ public static class ObjectHelper
 		}
 	}
 
-	private static object? TryGetMemberValue(Type tType, object instance, string[] names)
+	private static MemberInfo[] ResolveTetherMembers(Type tType, string[] names)
 	{
+		List<MemberInfo> members = [];
 		foreach (var n in names)
 		{
 			var f = tType.GetField(n, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 			if (f != null)
 			{
-				var v = f.GetValue(instance);
-				if (v != null)
-				{
-					return v;
-				}
+				members.Add(f);
+				continue;
 			}
 			var p = tType.GetProperty(n, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
 			if (p != null)
 			{
-				var v = p.GetValue(instance);
-				if (v != null)
-				{
-					return v;
-				}
+				members.Add(p);
+			}
+		}
+		return [.. members];
+	}
+
+	private static object? TryGetMemberValue(object instance, MemberInfo[] members)
+	{
+		foreach (var m in members)
+		{
+			var v = m is FieldInfo f ? f.GetValue(instance) : ((PropertyInfo)m).GetValue(instance);
+			if (v != null)
+			{
+				return v;
 			}
 		}
 		return null;
@@ -2146,7 +2168,10 @@ public static class ObjectHelper
 			|| battleChara.IsResistanceImmune()
 			|| battleChara.IsOmegaImmune()
 			|| battleChara.IsLimitlessBlue()
-			|| battleChara.IsHanselorGretelShielded();
+			|| battleChara.IsHanselorGretelShielded()
+			|| battleChara.IsIrminsulSawtoothImmune()
+			|| battleChara.IsCrystalOfDarknessImmune()
+			|| battleChara.IsTOPImmune();
 	}
 
 	/// <summary>
@@ -3753,7 +3778,7 @@ public static class ObjectHelper
 			return 0;
 		}
 
-		if (Player.Object.MaxHp == 0)
+		if (Player.Object.MaxMp == 0)
 		{
 			return 0; // Avoid division by zero
 		}

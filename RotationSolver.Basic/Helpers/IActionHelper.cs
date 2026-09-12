@@ -64,9 +64,9 @@ public static class IActionHelper
 	/// <param name="isAdjust">Whether to use the adjusted ID.</param>
 	/// <param name="actions">The actions to check against.</param>
 	/// <returns>True if the last GCD action matches any of the provided actions, otherwise false.</returns>
-	internal static bool IsLastGCD(bool isAdjust, params IAction[] actions)
+	internal static bool IsLastGCD(bool isAdjust, params ReadOnlySpan<IAction> actions)
 	{
-		return actions != null && IsLastGCD(GetIDFromActions(isAdjust, actions));
+		return IsActionMatch(DataCenter.LastGCD, isAdjust, actions);
 	}
 
 	/// <summary>
@@ -74,7 +74,7 @@ public static class IActionHelper
 	/// </summary>
 	/// <param name="ids">The action IDs to check against.</param>
 	/// <returns>True if the last GCD action matches any of the provided action IDs, otherwise false.</returns>
-	internal static bool IsLastGCD(params ActionID[] ids)
+	internal static bool IsLastGCD(params ReadOnlySpan<ActionID> ids)
 	{
 		return IsActionID(DataCenter.LastGCD, ids);
 	}
@@ -85,9 +85,9 @@ public static class IActionHelper
 	/// <param name="isAdjust">Whether to use the adjusted ID.</param>
 	/// <param name="actions">The actions to check against.</param>
 	/// <returns>True if the last ability matches any of the provided actions, otherwise false.</returns>
-	internal static bool IsLastAbility(bool isAdjust, params IAction[] actions)
+	internal static bool IsLastAbility(bool isAdjust, params ReadOnlySpan<IAction> actions)
 	{
-		return actions != null && IsLastAbility(GetIDFromActions(isAdjust, actions));
+		return IsActionMatch(DataCenter.LastAbility, isAdjust, actions);
 	}
 
 	/// <summary>
@@ -95,7 +95,7 @@ public static class IActionHelper
 	/// </summary>
 	/// <param name="ids">The action IDs to check against.</param>
 	/// <returns>True if the last ability matches any of the provided action IDs, otherwise false.</returns>
-	internal static bool IsLastAbility(params ActionID[] ids)
+	internal static bool IsLastAbility(params ReadOnlySpan<ActionID> ids)
 	{
 		return IsActionID(DataCenter.LastAbility, ids);
 	}
@@ -106,9 +106,9 @@ public static class IActionHelper
 	/// <param name="isAdjust">Whether to use the adjusted ID.</param>
 	/// <param name="actions">The actions to check against.</param>
 	/// <returns>True if the last action matches any of the provided actions, otherwise false.</returns>
-	internal static bool IsLastAction(bool isAdjust, params IAction[] actions)
+	internal static bool IsLastAction(bool isAdjust, params ReadOnlySpan<IAction> actions)
 	{
-		return actions != null && IsLastAction(GetIDFromActions(isAdjust, actions));
+		return IsActionMatch(DataCenter.LastAction, isAdjust, actions);
 	}
 
 	/// <summary>
@@ -116,7 +116,7 @@ public static class IActionHelper
 	/// </summary>
 	/// <param name="ids">The action IDs to check against.</param>
 	/// <returns>True if the last action matches any of the provided action IDs, otherwise false.</returns>
-	internal static bool IsLastAction(params ActionID[] ids)
+	internal static bool IsLastAction(params ReadOnlySpan<ActionID> ids)
 	{
 		return IsActionID(DataCenter.LastAction, ids);
 	}
@@ -146,9 +146,9 @@ public static class IActionHelper
 	/// <param name="isAdjust">Whether to use the adjusted ID.</param>
 	/// <param name="actions">The actions to check against.</param>
 	/// <returns>True if the action is the same as any of the provided actions, otherwise false.</returns>
-	public static bool IsTheSameTo(this IAction action, bool isAdjust, params IAction[] actions)
+	public static bool IsTheSameTo(this IAction action, bool isAdjust, params ReadOnlySpan<IAction> actions)
 	{
-		return actions != null && action.IsTheSameTo(isAdjust, GetIDFromActions(isAdjust, actions));
+		return action != null && IsActionMatch(isAdjust ? (ActionID)action.AdjustedID : (ActionID)action.ID, isAdjust, actions);
 	}
 
 	/// <summary>
@@ -158,9 +158,9 @@ public static class IActionHelper
 	/// <param name="isAdjust">Whether to use the adjusted ID.</param>
 	/// <param name="actions">The action IDs to check against.</param>
 	/// <returns>True if the action is the same as any of the provided action IDs, otherwise false.</returns>
-	public static bool IsTheSameTo(this IAction action, bool isAdjust, params ActionID[] actions)
+	public static bool IsTheSameTo(this IAction action, bool isAdjust, params ReadOnlySpan<ActionID> actions)
 	{
-		return action != null && actions != null && IsActionID(isAdjust ? (ActionID)action.AdjustedID : (ActionID)action.ID, actions);
+		return action != null && IsActionID(isAdjust ? (ActionID)action.AdjustedID : (ActionID)action.ID, actions);
 	}
 
 	/// <summary>
@@ -193,13 +193,8 @@ public static class IActionHelper
 	/// <param name="id">The action ID to check.</param>
 	/// <param name="ids">The action IDs to check against.</param>
 	/// <returns>True if the action ID matches any of the provided action IDs, otherwise false.</returns>
-	private static bool IsActionID(ActionID id, params ActionID[] ids)
+	private static bool IsActionID(ActionID id, ReadOnlySpan<ActionID> ids)
 	{
-		if (ids == null)
-		{
-			return false;
-		}
-
 		for (var i = 0; i < ids.Length; i++)
 		{
 			if (ids[i].Equals(id))
@@ -211,24 +206,25 @@ public static class IActionHelper
 	}
 
 	/// <summary>
-	/// Gets the action IDs from the provided actions.
+	/// Determines if the action ID matches any of the provided actions' IDs (resolved via <paramref name="isAdjust"/>).
 	/// </summary>
-	/// <param name="isAdjust">Whether to use the adjusted ID.</param>
-	/// <param name="actions">The actions to get the IDs from.</param>
-	/// <returns>An array of action IDs.</returns>
-	private static ActionID[] GetIDFromActions(bool isAdjust, params IAction[] actions)
+	private static bool IsActionMatch(ActionID id, bool isAdjust, ReadOnlySpan<IAction> actions)
 	{
-		if (actions == null)
-		{
-			return [];
-		}
-
-		var result = new ActionID[actions.Length];
 		for (var i = 0; i < actions.Length; i++)
 		{
-			result[i] = isAdjust ? (ActionID)actions[i].AdjustedID : (ActionID)actions[i].ID;
+			var action = actions[i];
+			if (action == null)
+			{
+				continue;
+			}
+
+			var actionId = isAdjust ? (ActionID)action.AdjustedID : (ActionID)action.ID;
+			if (actionId.Equals(id))
+			{
+				return true;
+			}
 		}
-		return result;
+		return false;
 	}
 
 	/// <summary>
@@ -237,9 +233,9 @@ public static class IActionHelper
 	/// <param name="isAdjust">Whether to use the adjusted ID.</param>
 	/// <param name="actions">The actions to check against.</param>
 	/// <returns>True if the last combo action matches any of the provided actions, otherwise false.</returns>
-	internal static bool IsLastComboAction(bool isAdjust, params IAction[] actions)
+	internal static bool IsLastComboAction(bool isAdjust, params ReadOnlySpan<IAction> actions)
 	{
-		return actions != null && IsLastComboAction(GetIDFromActions(isAdjust, actions));
+		return IsActionMatch(DataCenter.LastComboAction, isAdjust, actions);
 	}
 
 	/// <summary>
@@ -247,7 +243,7 @@ public static class IActionHelper
 	/// </summary>
 	/// <param name="ids">The action IDs to check against.</param>
 	/// <returns>True if the last combo action matches any of the provided action IDs, otherwise false.</returns>
-	internal static bool IsLastComboAction(params ActionID[] ids)
+	internal static bool IsLastComboAction(params ReadOnlySpan<ActionID> ids)
 	{
 		return IsActionID(DataCenter.LastComboAction, ids);
 	}

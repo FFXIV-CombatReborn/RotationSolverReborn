@@ -64,6 +64,27 @@ internal static class DataCenter
 	/// </summary>
 	public unsafe static Buddy.BuddyMember? ActivePet => *UIState.Instance()->Buddy.PetInfo.Pet;
 
+	// XBMPet is static game data; indexed once on first use instead of scanning the whole Excel sheet on every access.
+	private static Dictionary<int, XBMPet>? _xbmPetByDataId;
+
+	private static Dictionary<int, XBMPet> XbmPetByDataId
+	{
+		get
+		{
+			if (_xbmPetByDataId != null)
+			{
+				return _xbmPetByDataId;
+			}
+
+			Dictionary<int, XBMPet> map = [];
+			foreach (var x in Svc.Data.GetExcelSheet<XBMPet>())
+			{
+				_ = map.TryAdd(x.Unknown4, x);
+			}
+			return _xbmPetByDataId = map;
+		}
+	}
+
 	/// <summary>
 	///
 	/// </summary>
@@ -71,25 +92,8 @@ internal static class DataCenter
 	{
 		get
 		{
-			if (ActivePet == null)
-			{
-				return false;
-			}
-
-			if (ActivePet?.DataId <= 0)
-			{
-				return false;
-			}
-
-			foreach (var x in Svc.Data.GetExcelSheet<XBMPet>())
-			{
-				if (x.Unknown4 == ActivePet?.DataId)
-				{
-					return true;
-				}
-			}
-
-			return false;
+			var dataId = ActivePet?.DataId;
+			return dataId > 0 && XbmPetByDataId.ContainsKey(dataId.Value);
 		}
 	}
 
@@ -100,33 +104,24 @@ internal static class DataCenter
 	{
 		get
 		{
-			if (ActivePet == null || ActivePet?.DataId <= 0)
+			var dataId = ActivePet?.DataId;
+			if (dataId is null or <= 0 || !XbmPetByDataId.TryGetValue(dataId.Value, out var row))
 			{
 				return BeastmasterKinType.None;
 			}
 
-			foreach (var row in Svc.Data.GetExcelSheet<XBMPet>())
+			return row.Unknown7 switch
 			{
-				if (row.Unknown4 != ActivePet?.DataId)
-				{
-					continue;
-				}
-
-				return row.Unknown7 switch
-				{
-					1 => BeastmasterKinType.Beastkin,
-					2 => BeastmasterKinType.Vilekin,
-					3 => BeastmasterKinType.Cloudkin,
-					4 => BeastmasterKinType.Seedkin,
-					5 => BeastmasterKinType.Wavekin,
-					6 => BeastmasterKinType.Scalekin,
-					7 => BeastmasterKinType.Soulkin,
-					8 => BeastmasterKinType.Ashkin,
-					_ => BeastmasterKinType.None
-				};
-			}
-
-			return BeastmasterKinType.None;
+				1 => BeastmasterKinType.Beastkin,
+				2 => BeastmasterKinType.Vilekin,
+				3 => BeastmasterKinType.Cloudkin,
+				4 => BeastmasterKinType.Seedkin,
+				5 => BeastmasterKinType.Wavekin,
+				6 => BeastmasterKinType.Scalekin,
+				7 => BeastmasterKinType.Soulkin,
+				8 => BeastmasterKinType.Ashkin,
+				_ => BeastmasterKinType.None
+			};
 		}
 	}
 
@@ -137,108 +132,37 @@ internal static class DataCenter
 	{
 		get
 		{
-			if (ActivePet == null || ActivePet?.DataId <= 0)
+			var dataId = ActivePet?.DataId;
+			if (dataId is null or <= 0 || !XbmPetByDataId.TryGetValue(dataId.Value, out var row))
 			{
 				return BeastmasterAffinity.None;
 			}
 
-			foreach (var row in Svc.Data.GetExcelSheet<XBMPet>())
+			return (uint)row.Unknown5 switch
 			{
-				if (row.Unknown4 != ActivePet?.DataId)
-				{
-					continue;
-				}
-
-				return (uint)row.Unknown5 switch
-				{
-					45186 => BeastmasterAffinity.Durant,
-					45187 => BeastmasterAffinity.Rampant,
-					45188 => BeastmasterAffinity.Rampant,
-					48643 => BeastmasterAffinity.Rampant,
-					48644 => BeastmasterAffinity.Durant,
-					48645 => BeastmasterAffinity.Eldritch,
-					48646 => BeastmasterAffinity.Volant,
-					48647 => BeastmasterAffinity.Eldritch,
-					48648 => BeastmasterAffinity.Durant,
-					49689 => BeastmasterAffinity.Eldritch,
-					49690 => BeastmasterAffinity.Durant,
-					49691 => BeastmasterAffinity.Rampant,
-					49692 => BeastmasterAffinity.Eldritch,
-					49693 => BeastmasterAffinity.Volant,
-					49694 => BeastmasterAffinity.Eldritch,
-					49695 => BeastmasterAffinity.Durant,
-					49696 => BeastmasterAffinity.Rampant,
-					49697 => BeastmasterAffinity.Volant,
-					49698 => BeastmasterAffinity.Volant,
-					_ => BeastmasterAffinity.None
-				};
-			}
-
-			return BeastmasterAffinity.None;
+				45186 => BeastmasterAffinity.Durant,
+				45187 => BeastmasterAffinity.Rampant,
+				45188 => BeastmasterAffinity.Rampant,
+				48643 => BeastmasterAffinity.Rampant,
+				48644 => BeastmasterAffinity.Durant,
+				48645 => BeastmasterAffinity.Eldritch,
+				48646 => BeastmasterAffinity.Volant,
+				48647 => BeastmasterAffinity.Eldritch,
+				48648 => BeastmasterAffinity.Durant,
+				49689 => BeastmasterAffinity.Eldritch,
+				49690 => BeastmasterAffinity.Durant,
+				49691 => BeastmasterAffinity.Rampant,
+				49692 => BeastmasterAffinity.Eldritch,
+				49693 => BeastmasterAffinity.Volant,
+				49694 => BeastmasterAffinity.Eldritch,
+				49695 => BeastmasterAffinity.Durant,
+				49696 => BeastmasterAffinity.Rampant,
+				49697 => BeastmasterAffinity.Volant,
+				49698 => BeastmasterAffinity.Volant,
+				_ => BeastmasterAffinity.None
+			};
 		}
 	}
-
-	//private static readonly ExcelSheet<XBMPet> XbmPetSheet = Svc.Data.GetExcelSheet<XBMPet>();
-	//private static readonly ExcelSheet<Pet> PetSheet = Svc.Data.GetExcelSheet<Pet>();
-	//private static readonly ExcelSheet<PetMirage> PetMirageSheet = Svc.Data.GetExcelSheet<PetMirage>();
-	//private static readonly ExcelSheet<BNpcBase> BNpcBaseSheet = Svc.Data.GetExcelSheet<BNpcBase>();
-
-	//// (Model, Base) -> XBMPet RowId, built once instead of scanning 3 sheets on every lookup.
-	//private static readonly Dictionary<(uint Model, byte Base), uint> ModelToPetIdMap = BuildModelToPetIdMap();
-
-	//private static Dictionary<(uint, byte), uint> BuildModelToPetIdMap()
-	//{
-	//	var map = new Dictionary<(uint, byte), uint>();
-
-	//	foreach (var xbmPet in XbmPetSheet)
-	//	{
-	//		if (xbmPet.RowId == 0)
-	//		{
-	//			continue;
-	//		}
-
-	//		var pet = PetSheet.GetRow((uint)xbmPet.Unknown4);
-	//		var model = PetMirageSheet.GetRow(pet.Unknown8).ModelChara.Value;
-
-	//		map[(model.Model, model.Base)] = xbmPet.RowId;
-	//	}
-
-	//	return map;
-	//}
-
-	///// <summary>
-	/////
-	///// </summary>
-	//public static unsafe bool PetUnlocked(uint petId) => XBMManager.Instance()->IsPetUnlocked(petId);
-
-	//public static bool TargetIsBstPet(IBattleChara? tar) => tar != null && GetPetIdFromModel(tar) != 0;
-
-	//public static uint PetIdToModel(uint petId)
-	//{
-	//	var xbmPet = XbmPetSheet.GetRow(petId);
-	//	var pet = PetSheet.GetRow((uint)xbmPet.Unknown4);
-	//	return PetMirageSheet.GetRow(pet.Unknown8).ModelChara.Value.Model;
-	//}
-
-	//public static uint ModelToPetId(uint modelId, byte baseval) =>
-	//	ModelToPetIdMap.GetValueOrDefault((modelId, baseval));
-
-	//public static uint GetPetIdFromModel(IBattleChara? tar)
-	//{
-	//	if (tar is null)
-	//	{
-	//		return 0;
-	//	}
-
-	//	var baseNpc = BNpcBaseSheet.GetRow(tar.BaseId);
-	//	if (baseNpc.Unknown10 != 5)
-	//	{
-	//		return 0;
-	//	}
-
-	//	var model = baseNpc.ModelChara.Value;
-	//	return ModelToPetId(model.Model, model.Base);
-	//}
 
 	private static ulong _hostileTargetId = 0;
 
@@ -641,10 +565,21 @@ internal static class DataCenter
 	}
 
 	private static float _avgTTK = 0f;
+	private static long _avgTTKCacheTick = long.MinValue;
+	private const long AverageTtkTtlMs = 15;
+
+	// GetTTK() walks the RecordedHP history per hostile target, so this is cached for a
+	// single frame rather than recomputed on every CanUse()/condition check that reads it.
 	public static float AverageTTK
 	{
 		get
 		{
+			var now = Environment.TickCount64;
+			if (_avgTTKCacheTick != long.MinValue && now - _avgTTKCacheTick < AverageTtkTtlMs)
+			{
+				return _avgTTK;
+			}
+
 			var total = 0f;
 			var count = 0;
 			var targets = AllHostileTargets;
@@ -658,6 +593,7 @@ internal static class DataCenter
 				}
 			}
 			_avgTTK = count > 0 ? total / count : 0f;
+			_avgTTKCacheTick = now;
 			return _avgTTK;
 		}
 	}
@@ -688,18 +624,19 @@ internal static class DataCenter
 	/// </summary>
 	public static bool IsInQuestBattle => Territory?.ContentType == TerritoryContentType.QuestBattles;
 
+	private static readonly ushort[] _allianceTerritoryIds =
+	[
+		151, 174, 372, 508, 556, 627, 734, 776, 826, 882, 917, 966, 1054, 1118, 1178, 1248, 1304, 1368
+	];
+
 	public static bool IsInAllianceRaid
 	{
 		get
 		{
-			ushort[] allianceTerritoryIds =
-			[
-				151, 174, 372, 508, 556, 627, 734, 776, 826, 882, 917, 966, 1054, 1118, 1178, 1248, 1304, 1368
-			];
-
-			for (var i = 0; i < allianceTerritoryIds.Length; i++)
+			var territoryId = TerritoryID;
+			for (var i = 0; i < _allianceTerritoryIds.Length; i++)
 			{
-				if (allianceTerritoryIds[i] == TerritoryID)
+				if (_allianceTerritoryIds[i] == territoryId)
 				{
 					return true;
 				}
@@ -1239,10 +1176,23 @@ internal static class DataCenter
 
 	#region HP
 
+	private static Dictionary<ulong, float> _refinedHpCache = [];
+	private static long _refinedHpCacheTick = long.MinValue;
+
+	// Party HP is read many times per decision pass (once per potential heal target),
+	// so the computed dictionary is cached for a single frame instead of being rebuilt on every access.
+	private const long RefinedHpTtlMs = 15;
+
 	public static Dictionary<ulong, float> RefinedHP
 	{
 		get
 		{
+			var now = Environment.TickCount64;
+			if (_refinedHpCacheTick != long.MinValue && now - _refinedHpCacheTick < RefinedHpTtlMs)
+			{
+				return _refinedHpCache;
+			}
+
 			Dictionary<ulong, float> refinedHP = [];
 			foreach (var member in PartyMembers)
 			{
@@ -1261,10 +1211,15 @@ internal static class DataCenter
 					continue; // Skip problematic members
 				}
 			}
+
+			_refinedHpCache = refinedHP;
+			_refinedHpCacheTick = now;
 			return refinedHP;
 		}
 	}
 
+	// Tracks each member's last confirmed (non-predicted) HP, so a pending heal's predicted
+	// amount can be dropped as soon as the server's real HP update reflects it.
 	private static readonly Dictionary<ulong, uint> _lastHp = [];
 
 	private static float GetPartyMemberHPRatio(IBattleChara member)
@@ -1276,19 +1231,23 @@ internal static class DataCenter
 			return 0f;
 		}
 
-		if (!InEffectTime || !HealHP.TryGetValue(member.GameObjectId, out var healedHp))
+		var id = member.GameObjectId;
+
+		if (!InEffectTime || !HealHP.TryGetValue(id, out var healedHp))
 		{
+			_lastHp[id] = member.CurrentHp;
 			return (float)member.CurrentHp / member.MaxHp;
 		}
 
 		var currentHp = member.CurrentHp;
 		if (currentHp > 0)
 		{
-			_ = _lastHp.TryGetValue(member.GameObjectId, out var lastHp);
+			_ = _lastHp.TryGetValue(id, out var lastHp);
 
-			if (currentHp - lastHp == healedHp)
+			if (currentHp - lastHp >= healedHp)
 			{
-				_ = HealHP.Remove(member.GameObjectId);
+				_ = HealHP.Remove(id);
+				_lastHp[id] = currentHp;
 				return (float)currentHp / member.MaxHp;
 			}
 
@@ -1299,8 +1258,26 @@ internal static class DataCenter
 	}
 
 	private static readonly float[] _hpBuffer = new float[8];
+	private static long _partyHpStatsCacheTick = long.MinValue;
+	private static float _minHpCache, _avgHpCache, _stdDevHpCache, _lowestAvgHpCache, _lowestStdDevHpCache;
+	private const long PartyHpStatsTtlMs = 15;
+
+	// Each of the PartyMembers*HP properties below wants a different field of this same
+	// computation, and are often checked back-to-back in the same decision (e.g. CustomRotation_GCD),
+	// so the result is cached for a single frame rather than recomputed per property access.
 	private static void ComputePartyHpStats(out float minHp, out float avgHp, out float stdDevHp, out float lowestAvgHp, out float lowestStdDevHp)
 	{
+		var now = Environment.TickCount64;
+		if (_partyHpStatsCacheTick != long.MinValue && now - _partyHpStatsCacheTick < PartyHpStatsTtlMs)
+		{
+			minHp = _minHpCache;
+			avgHp = _avgHpCache;
+			stdDevHp = _stdDevHpCache;
+			lowestAvgHp = _lowestAvgHpCache;
+			lowestStdDevHp = _lowestStdDevHpCache;
+			return;
+		}
+
 		var hpCount = 0;
 		foreach (var member in PartyMembers)
 		{
@@ -1323,11 +1300,9 @@ internal static class DataCenter
 
 		if (hpCount == 0)
 		{
-			minHp = 0;
-			avgHp = 0;
-			stdDevHp = 0;
-			lowestAvgHp = 0;
-			lowestStdDevHp = 0;
+			minHp = avgHp = stdDevHp = lowestAvgHp = lowestStdDevHp = 0;
+			_minHpCache = _avgHpCache = _stdDevHpCache = _lowestAvgHpCache = _lowestStdDevHpCache = 0;
+			_partyHpStatsCacheTick = now;
 			return;
 		}
 
@@ -1374,6 +1349,13 @@ internal static class DataCenter
 		stdDevHp = (float)Math.Sqrt(variance / hpCount);
 		lowestAvgHp = lowestHpMembersAvg;
 		lowestStdDevHp = (float)Math.Sqrt(lowestHpMembersVariance / (hpCount > 4 ? 4 : hpCount));
+
+		_minHpCache = minHp;
+		_avgHpCache = avgHp;
+		_stdDevHpCache = stdDevHp;
+		_lowestAvgHpCache = lowestAvgHp;
+		_lowestStdDevHpCache = lowestStdDevHp;
+		_partyHpStatsCacheTick = now;
 	}
 
 	public static float PartyMembersMinHP
@@ -1558,6 +1540,8 @@ internal static class DataCenter
 		LastGCD = 0;
 		LastAbility = 0;
 		_avgTTK = 0;
+		_avgTTKCacheTick = long.MinValue;
+		_partyHpStatsCacheTick = long.MinValue;
 		_timeLastActionUsed = DateTime.Now;
 		_actions.Clear();
 
@@ -2659,20 +2643,37 @@ internal static class DataCenter
 
 	#region BossModReborn Timeline Integration
 
+	private static bool _bmrEnabledCache;
+	private static long _bmrEnabledCacheTick = long.MinValue;
+	private const long BmrEnabledTtlMs = 1000;
+
+	// Installed-plugin state changes only when the user (de)activates a plugin, so this is
+	// re-checked at most once a second instead of walking InstalledPlugins on every access.
 	public static bool BMREnabled
 	{
 		get
 		{
+			var now = Environment.TickCount64;
+			if (_bmrEnabledCacheTick != long.MinValue && now - _bmrEnabledCacheTick < BmrEnabledTtlMs)
+			{
+				return _bmrEnabledCache;
+			}
+
 			var name = "BossModReborn";
 			var installedPlugins = Svc.PluginInterface.InstalledPlugins;
+			var enabled = false;
 			foreach (var x in installedPlugins)
 			{
 				if ((x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded)
 				{
-					return true;
+					enabled = true;
+					break;
 				}
 			}
-			return false;
+
+			_bmrEnabledCache = enabled;
+			_bmrEnabledCacheTick = now;
+			return enabled;
 		}
 	}
 

@@ -746,13 +746,18 @@ public readonly struct ActionBasicInfo
 			}
 		}
 
-		ActionID[] comboActions = _action.Action.ActionCombo.RowId != 0
-								? [(ActionID)_action.Action.ActionCombo.RowId]
-								: [];
-
-		if (_action.Setting.ComboIds != null)
+		var comboActions = _action.Setting.ComboActionsCache;
+		if (comboActions == null)
 		{
-			comboActions = [.. comboActions, .. _action.Setting.ComboIds];
+			ActionID[] baseCombo = _action.Action.ActionCombo.RowId != 0
+									? [(ActionID)_action.Action.ActionCombo.RowId]
+									: [];
+
+			comboActions = _action.Setting.ComboIds != null
+				? [.. baseCombo, .. _action.Setting.ComboIds]
+				: baseCombo;
+
+			_action.Setting.ComboActionsCache = comboActions;
 		}
 
 		if (comboActions.Length > 0)

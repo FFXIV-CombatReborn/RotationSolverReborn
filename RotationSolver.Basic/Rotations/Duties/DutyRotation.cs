@@ -171,7 +171,7 @@ public partial class DutyRotation : IDisposable
 	/// </summary>
 	/// <param name="ids">True if any of this is matched.</param>
 	/// <returns></returns>
-	public static bool IsLastComboAction(params ActionID[] ids)
+	public static bool IsLastComboAction(params ReadOnlySpan<ActionID> ids)
 	{
 		CustomRotation.CountingOfLastUsing++;
 		return IActionHelper.IsLastComboAction(ids);

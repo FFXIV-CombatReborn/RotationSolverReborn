@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Statuses;
 using ECommons.Automation;
+using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
@@ -617,17 +618,22 @@ public static class StatusHelper
 
 		try
 		{
-			if (!Doomp.IsValid())
+			// Doomp may have been captured on an earlier frame (e.g. via DataCenter.PartyMembers,
+			// populated by the Update tick) and could have been despawned/invalidated by the game
+			// since - even though the checks above still pass on the held reference. Re-resolving
+			// from the live object table immediately before the native StatusList access below
+			// narrows that staleness window as much as possible.
+			if (Svc.Objects.SearchById(Doomp.GameObjectId) is not IBattleChara fresh || !fresh.IsValid())
 			{
 				return false;
 			}
 
-			if (Doomp.StatusList == null)
+			if (fresh.StatusList == null)
 			{
 				return false;
 			}
 
-			if (HasStatus(Doomp, false, DoomHealStatus))
+			if (HasStatus(fresh, false, DoomHealStatus))
 			{
 				return true;
 			}
@@ -648,7 +654,7 @@ public static class StatusHelper
 	/// <param name="isFromSelf"></param>
 	/// <param name="statusIDs"></param>
 	/// <returns></returns>
-	public static bool PlayerWillStatusEndGCD(uint gcdCount = 0, float offset = 0, bool isFromSelf = true, params StatusID[] statusIDs)
+	public static bool PlayerWillStatusEndGCD(uint gcdCount = 0, float offset = 0, bool isFromSelf = true, params ReadOnlySpan<StatusID> statusIDs)
 	{
 		if (Player.Object == null)
 		{
@@ -667,7 +673,7 @@ public static class StatusHelper
 	/// <param name="isFromSelf"></param>
 	/// <param name="statusIDs"></param>
 	/// <returns></returns>
-	public static bool WillStatusEndGCD(this IBattleChara battleChara, uint gcdCount = 0, float offset = 0, bool isFromSelf = true, params StatusID[] statusIDs)
+	public static bool WillStatusEndGCD(this IBattleChara battleChara, uint gcdCount = 0, float offset = 0, bool isFromSelf = true, params ReadOnlySpan<StatusID> statusIDs)
 	{
 		return WillStatusEnd(battleChara, DataCenter.GCDTime(gcdCount, offset), isFromSelf, statusIDs);
 	}
@@ -679,7 +685,7 @@ public static class StatusHelper
 	/// <param name="isFromSelf"></param>
 	/// <param name="statusIDs"></param>
 	/// <returns></returns>
-	public static bool PlayerWillStatusEnd(float time, bool isFromSelf = true, params StatusID[] statusIDs)
+	public static bool PlayerWillStatusEnd(float time, bool isFromSelf = true, params ReadOnlySpan<StatusID> statusIDs)
 	{
 		if (PlayerHasApplyStatus(statusIDs))
 		{
@@ -698,7 +704,7 @@ public static class StatusHelper
 	/// <param name="isFromSelf"></param>
 	/// <param name="statusIDs"></param>
 	/// <returns></returns>
-	public static bool WillStatusEnd(this IBattleChara battleChara, float time, bool isFromSelf = true, params StatusID[] statusIDs)
+	public static bool WillStatusEnd(this IBattleChara battleChara, float time, bool isFromSelf = true, params ReadOnlySpan<StatusID> statusIDs)
 	{
 		if (HasApplyStatus(battleChara, statusIDs))
 		{
@@ -713,7 +719,7 @@ public static class StatusHelper
 	/// Get the remaining time of the status (raw remaining time of the earliest matching status). Returns 0 if none.
 	/// NOTE: Previously this subtracted DefaultGCDRemain which caused premature refresh decisions.
 	/// </summary>
-	public static float PlayerStatusTime(bool isFromSelf, params StatusID[] statusIDs)
+	public static float PlayerStatusTime(bool isFromSelf, params ReadOnlySpan<StatusID> statusIDs)
 	{
 		if (Player.Object == null)
 		{
@@ -727,17 +733,7 @@ public static class StatusHelper
 				return float.MaxValue;
 			}
 
-			var times = PlayerStatusTimes(isFromSelf, statusIDs);
-			var min = float.MaxValue;
-			var found = false;
-			foreach (var t in times)
-			{
-				if (t < min)
-				{
-					min = t;
-				}
-				found = true;
-			}
+			var min = MinStatusRemainingTime(Player.Object, isFromSelf, statusIDs, out var found);
 			// Return 0 when not found (legacy behaviour expected by callers), otherwise raw remaining time.
 			return !found ? 0f : min;
 		}
@@ -752,7 +748,7 @@ public static class StatusHelper
 	/// Get the remaining time of the status (raw remaining time of the earliest matching status). Returns 0 if none.
 	/// NOTE: Previously this subtracted DefaultGCDRemain which caused premature refresh decisions.
 	/// </summary>
-	public static float StatusTime(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
+	public static float StatusTime(this IBattleChara battleChara, bool isFromSelf, params ReadOnlySpan<StatusID> statusIDs)
 	{
 		try
 		{
@@ -761,17 +757,7 @@ public static class StatusHelper
 				return float.MaxValue;
 			}
 
-			var times = battleChara.StatusTimes(isFromSelf, statusIDs);
-			var min = float.MaxValue;
-			var found = false;
-			foreach (var t in times)
-			{
-				if (t < min)
-				{
-					min = t;
-				}
-				found = true;
-			}
+			var min = MinStatusRemainingTime(battleChara, isFromSelf, statusIDs, out var found);
 			// Return 0 when not found (legacy behaviour expected by callers), otherwise raw remaining time.
 			return !found ? 0f : min;
 		}
@@ -782,34 +768,13 @@ public static class StatusHelper
 		}
 	}
 
-	internal static IEnumerable<float> PlayerStatusTimes(bool isFromSelf, params StatusID[] statusIDs)
-	{
-		if (Player.Object == null)
-		{
-			yield break;
-		}
-
-		foreach (var status in Player.Object.GetStatus(isFromSelf, statusIDs))
-		{
-			yield return status.RemainingTime == 0f ? float.MaxValue : status.RemainingTime;
-		}
-	}
-
-	internal static IEnumerable<float> StatusTimes(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
-	{
-		foreach (var status in battleChara.GetStatus(isFromSelf, statusIDs))
-		{
-			yield return status.RemainingTime == 0f ? float.MaxValue : status.RemainingTime;
-		}
-	}
-
 	/// <summary>
 	/// Get the stack count of the status.
 	/// </summary>
 	/// <param name="isFromSelf"></param>
 	/// <param name="statusIDs"></param>
 	/// <returns></returns>
-	public static byte PlayerStatusStack(bool isFromSelf, params StatusID[] statusIDs)
+	public static byte PlayerStatusStack(bool isFromSelf, params ReadOnlySpan<StatusID> statusIDs)
 	{
 		if (Player.Object == null)
 		{
@@ -821,18 +786,7 @@ public static class StatusHelper
 			return byte.MaxValue;
 		}
 
-		var stacks = PlayerStatusStacks(isFromSelf, statusIDs);
-		var min = byte.MaxValue;
-		var found = false;
-		foreach (var s in stacks)
-		{
-			if (s < min)
-			{
-				min = s;
-			}
-
-			found = true;
-		}
+		var min = MinStatusStack(Player.Object, isFromSelf, statusIDs, out var found);
 		return found ? min : (byte)0;
 	}
 
@@ -843,47 +797,15 @@ public static class StatusHelper
 	/// <param name="isFromSelf"></param>
 	/// <param name="statusIDs"></param>
 	/// <returns></returns>
-	public static byte StatusStack(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
+	public static byte StatusStack(this IBattleChara battleChara, bool isFromSelf, params ReadOnlySpan<StatusID> statusIDs)
 	{
 		if (HasApplyStatus(battleChara, statusIDs))
 		{
 			return byte.MaxValue;
 		}
 
-		var stacks = battleChara.StatusStacks(isFromSelf, statusIDs);
-		var min = byte.MaxValue;
-		var found = false;
-		foreach (var s in stacks)
-		{
-			if (s < min)
-			{
-				min = s;
-			}
-
-			found = true;
-		}
+		var min = MinStatusStack(battleChara, isFromSelf, statusIDs, out var found);
 		return found ? min : (byte)0;
-	}
-
-	private static IEnumerable<byte> PlayerStatusStacks(bool isFromSelf, params StatusID[] statusIDs)
-	{
-		if (Player.Object == null)
-		{
-			yield break;
-		}
-
-		foreach (var status in PlayerGetStatus(isFromSelf, statusIDs))
-		{
-			yield return (byte)(status.Param == 0 ? byte.MaxValue : status.Param);
-		}
-	}
-
-	private static IEnumerable<byte> StatusStacks(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
-	{
-		foreach (var status in battleChara.GetStatus(isFromSelf, statusIDs))
-		{
-			yield return (byte)(status.Param == 0 ? byte.MaxValue : status.Param);
-		}
 	}
 
 	/// <summary>
@@ -892,7 +814,7 @@ public static class StatusHelper
 	/// <param name="isFromSelf"></param>
 	/// <param name="statusIDs"></param>
 	/// <returns></returns>
-	public static bool PlayerHasStatus(bool isFromSelf, params StatusID[] statusIDs)
+	public static bool PlayerHasStatus(bool isFromSelf, params ReadOnlySpan<StatusID> statusIDs)
 	{
 		if (Player.Object == null)
 		{
@@ -909,11 +831,7 @@ public static class StatusHelper
 			return true;
 		}
 
-		foreach (var _ in PlayerGetStatus(isFromSelf, statusIDs))
-		{
-			return true;
-		}
-		return false;
+		return AnyStatusMatches(Player.Object, isFromSelf, statusIDs);
 	}
 
 	/// <summary>
@@ -923,7 +841,7 @@ public static class StatusHelper
 	/// <param name="isFromSelf"></param>
 	/// <param name="statusIDs"></param>
 	/// <returns></returns>
-	public static bool HasStatus(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
+	public static bool HasStatus(this IBattleChara battleChara, bool isFromSelf, params ReadOnlySpan<StatusID> statusIDs)
 	{
 		try
 		{
@@ -962,18 +880,13 @@ public static class StatusHelper
 				return true;
 			}
 
-			foreach (var _ in battleChara.GetStatus(isFromSelf, statusIDs))
-			{
-				return true;
-			}
+			return AnyStatusMatches(battleChara, isFromSelf, statusIDs);
 		}
 		catch
 		{
 			// StatusList threw, treat as unavailable
 			return false;
 		}
-
-		return false;
 	}
 
 	/// <summary>
@@ -984,7 +897,7 @@ public static class StatusHelper
 	/// <returns>
 	/// <c>true</c> if any of the specified statuses are currently being applied to the character; otherwise, <c>false</c>.
 	/// </returns>
-	public static bool PlayerHasApplyStatus(StatusID[] statusIDs)
+	public static bool PlayerHasApplyStatus(ReadOnlySpan<StatusID> statusIDs)
 	{
 		if (!DataCenter.PlayerAvailable())
 		{
@@ -1031,7 +944,7 @@ public static class StatusHelper
 	/// <returns>
 	/// <c>true</c> if any of the specified statuses are currently being applied to the character; otherwise, <c>false</c>.
 	/// </returns>
-	public static bool HasApplyStatus(this IBattleChara battleChara, StatusID[] statusIDs)
+	public static bool HasApplyStatus(this IBattleChara battleChara, ReadOnlySpan<StatusID> statusIDs)
 	{
 		try
 		{
@@ -1103,122 +1016,55 @@ public static class StatusHelper
 		return statusRow.RowId == 0 ? string.Empty : statusRow.Name.ToString() ?? string.Empty;
 	}
 
-	/// <summary>
-	/// Get the statuses of the specified object.
-	/// </summary>
-	/// <param name="battleChara">The object to get the statuses from.</param>
-	/// <param name="isFromSelf">Whether the statuses are from self.</param>
-	/// <param name="statusIDs">The status IDs to look for.</param>
-	/// <returns>An enumerable of statuses.</returns>
-	private static IEnumerable<IStatus> GetStatus(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
+	// Linear membership check to avoid HashSet allocation (statusIDs is small in practice)
+	private static bool ContainsId(uint id, ReadOnlySpan<StatusID> ids)
 	{
+		for (var i = 0; i < ids.Length; i++)
+		{
+			if ((uint)ids[i] == id)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// Shared scan core for HasStatus/StatusTime/StatusStack: params StatusID[] would allocate an
+	// array on every call (these are some of the most frequently called methods in the plugin), and
+	// ReadOnlySpan<T> can't cross a yield return, so the status list is scanned directly here instead
+	// of through an IEnumerable<IStatus> iterator.
+	private static bool TryGetStatusList(IBattleChara? battleChara, out StatusList? statusList)
+	{
+		statusList = null;
 		if (battleChara == null)
 		{
-			yield break;
+			return false;
 		}
 
-		StatusList statusList;
 		try
 		{
 			statusList = battleChara.StatusList;
-			if (statusList == null)
-			{
-				yield break;
-			}
+			return statusList != null;
 		}
 		catch
 		{
 			// StatusList threw, treat as unavailable
-			yield break;
-		}
-
-		// Linear membership check to avoid HashSet allocation (statusIDs is small in practice)
-		static bool ContainsId(uint id, StatusID[] ids)
-		{
-			for (var i = 0; i < ids.Length; i++)
-			{
-				if ((uint)ids[i] == id)
-				{
-					return true;
-				}
-			}
 			return false;
-		}
-
-		var playerId = Player.Object?.GameObjectId ?? 0;
-
-		for (var i = 0; i < statusList.Length; i++)
-		{
-			var status = statusList[i];
-			if (status == null)
-			{
-				continue;
-			}
-
-			if (status.StatusId == 0)
-			{
-				continue;
-			}
-
-			if (isFromSelf)
-			{
-				if (status.SourceId != playerId && status.SourceObject?.OwnerId != playerId)
-				{
-					continue;
-				}
-			}
-
-			if (ContainsId(status.StatusId, statusIDs))
-			{
-				yield return status;
-			}
 		}
 	}
 
 	/// <summary>
-	/// Get the statuses of the Player.
+	/// Returns true if any of <paramref name="statusIDs"/> is present on <paramref name="battleChara"/>.
 	/// </summary>
-	/// <param name="isFromSelf">Whether the statuses are from self.</param>
-	/// <param name="statusIDs">The status IDs to look for.</param>
-	/// <returns>An enumerable of statuses.</returns>
-	private static IEnumerable<IStatus> PlayerGetStatus(bool isFromSelf, params StatusID[] statusIDs)
+	private static bool AnyStatusMatches(IBattleChara? battleChara, bool isFromSelf, ReadOnlySpan<StatusID> statusIDs)
 	{
-		if (Player.Object == null)
+		if (!TryGetStatusList(battleChara, out var statusList))
 		{
-			yield break;
-		}
-
-		StatusList statusList;
-		try
-		{
-			statusList = Player.Object.StatusList;
-			if (statusList == null)
-			{
-				yield break;
-			}
-		}
-		catch
-		{
-			// StatusList threw, treat as unavailable
-			yield break;
-		}
-
-		// Linear membership check to avoid HashSet allocation (statusIDs is small in practice)
-		static bool ContainsId(uint id, StatusID[] ids)
-		{
-			for (var i = 0; i < ids.Length; i++)
-			{
-				if ((uint)ids[i] == id)
-				{
-					return true;
-				}
-			}
 			return false;
 		}
 
 		var playerId = Player.Object?.GameObjectId ?? 0;
-
-		for (var i = 0; i < statusList.Length; i++)
+		for (var i = 0; i < statusList!.Length; i++)
 		{
 			var status = statusList[i];
 			if (status == null || status.StatusId == 0)
@@ -1226,19 +1072,97 @@ public static class StatusHelper
 				continue;
 			}
 
-			if (isFromSelf)
+			if (isFromSelf && status.SourceId != playerId && status.SourceObject?.OwnerId != playerId)
 			{
-				if (status.SourceId != playerId && status.SourceObject?.OwnerId != playerId)
-				{
-					continue;
-				}
+				continue;
 			}
 
 			if (ContainsId(status.StatusId, statusIDs))
 			{
-				yield return status;
+				return true;
 			}
 		}
+		return false;
+	}
+
+	/// <summary>
+	/// Returns the minimum remaining time among the statuses in <paramref name="statusIDs"/> present on
+	/// <paramref name="battleChara"/>; <paramref name="found"/> is false when none match.
+	/// </summary>
+	internal static float MinStatusRemainingTime(IBattleChara? battleChara, bool isFromSelf, ReadOnlySpan<StatusID> statusIDs, out bool found)
+	{
+		found = false;
+		var min = float.MaxValue;
+		if (!TryGetStatusList(battleChara, out var statusList))
+		{
+			return min;
+		}
+
+		var playerId = Player.Object?.GameObjectId ?? 0;
+		for (var i = 0; i < statusList!.Length; i++)
+		{
+			var status = statusList[i];
+			if (status == null || status.StatusId == 0)
+			{
+				continue;
+			}
+
+			if (isFromSelf && status.SourceId != playerId && status.SourceObject?.OwnerId != playerId)
+			{
+				continue;
+			}
+
+			if (ContainsId(status.StatusId, statusIDs))
+			{
+				var t = status.RemainingTime == 0f ? float.MaxValue : status.RemainingTime;
+				if (t < min)
+				{
+					min = t;
+				}
+				found = true;
+			}
+		}
+		return min;
+	}
+
+	/// <summary>
+	/// Returns the minimum stack count among the statuses in <paramref name="statusIDs"/> present on
+	/// <paramref name="battleChara"/>; <paramref name="found"/> is false when none match.
+	/// </summary>
+	private static byte MinStatusStack(IBattleChara? battleChara, bool isFromSelf, ReadOnlySpan<StatusID> statusIDs, out bool found)
+	{
+		found = false;
+		var min = byte.MaxValue;
+		if (!TryGetStatusList(battleChara, out var statusList))
+		{
+			return min;
+		}
+
+		var playerId = Player.Object?.GameObjectId ?? 0;
+		for (var i = 0; i < statusList!.Length; i++)
+		{
+			var status = statusList[i];
+			if (status == null || status.StatusId == 0)
+			{
+				continue;
+			}
+
+			if (isFromSelf && status.SourceId != playerId && status.SourceObject?.OwnerId != playerId)
+			{
+				continue;
+			}
+
+			if (ContainsId(status.StatusId, statusIDs))
+			{
+				var s = (byte)(status.Param == 0 ? byte.MaxValue : status.Param);
+				if (s < min)
+				{
+					min = s;
+				}
+				found = true;
+			}
+		}
+		return min;
 	}
 
 
