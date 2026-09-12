@@ -17,13 +17,13 @@ public sealed class BST_Reborn : BeastmasterRotation
 	public bool Overcap { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "What to use One with Nature on for the First Horn")]
-	private OneWithNatureOrder FirstHornNature { get; set; } = OneWithNatureOrder.Neither;
+	private OneWithNatureOrder HornNatureFirst { get; set; } = OneWithNatureOrder.Tempered;
 
 	[RotationConfig(CombatType.PvE, Name = "What to use One with Nature on for the Second Horn")]
-	private OneWithNatureOrder SecondHornNature { get; set; } = OneWithNatureOrder.Neither;
+	private OneWithNatureOrder HornNatureSecond { get; set; } = OneWithNatureOrder.Tempered;
 
 	[RotationConfig(CombatType.PvE, Name = "What to use One with Nature on for the Third Horn")]
-	private OneWithNatureOrder ThirdHornNature { get; set; } = OneWithNatureOrder.Neither;
+	private OneWithNatureOrder HornNatureThird { get; set; } = OneWithNatureOrder.Borrow;
 
 	#region Countdown logic
 	// Defines logic for actions to take during the countdown before combat starts.
@@ -92,7 +92,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 
 		if (!Overcap)
 		{
-			if (TPCount >= 100)
+			if (TPCount >= 100 && !IsLastAction(true, PartingBlowPvE))
 			{
 				if (TrickPvE.CanUse(out act, skipStatusNeed: true))
 				{
@@ -122,7 +122,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 		{
 			if (NaturalInstinct == 3 || MasteredInstinct < 3)
 			{
-				if (TPCount >= 100)
+				if (TPCount >= 100 && !IsLastAction(true, PartingBlowPvE))
 				{
 					if (TrickPvE.CanUse(out act, skipStatusNeed: true))
 					{
@@ -173,16 +173,19 @@ public sealed class BST_Reborn : BeastmasterRotation
 					}
 				}
 
-				if (TrickPvE.CanUse(out act))
+				if (!IsLastAction(true, PartingBlowPvE))
 				{
-					return true;
+					if (TrickPvE.CanUse(out act))
+					{
+						return true;
+					}
 				}
 			}
 		}
 
 		if (ActiveBattlehorn == 1)
 		{
-			if (FirstHornNature == OneWithNatureOrder.Tempered)
+			if (HornNatureFirst == OneWithNatureOrder.Tempered)
 			{
 				if (TemperedReleasePvE_47092.CanUse(out act))
 				{
@@ -195,7 +198,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 				}
 			}
 
-			if (FirstHornNature == OneWithNatureOrder.Borrow)
+			if (HornNatureFirst == OneWithNatureOrder.Borrow)
 			{
 				if (BorrowPvE.CanUse(out act))
 				{
@@ -206,7 +209,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 
 		if (ActiveBattlehorn == 2)
 		{
-			if (SecondHornNature == OneWithNatureOrder.Tempered)
+			if (HornNatureSecond == OneWithNatureOrder.Tempered)
 			{
 				if (TemperedReleasePvE_47092.CanUse(out act))
 				{
@@ -219,7 +222,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 				}
 			}
 
-			if (SecondHornNature == OneWithNatureOrder.Borrow)
+			if (HornNatureSecond == OneWithNatureOrder.Borrow)
 			{
 				if (BorrowPvE.CanUse(out act))
 				{
@@ -230,7 +233,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 
 		if (ActiveBattlehorn == 3)
 		{
-			if (ThirdHornNature == OneWithNatureOrder.Tempered)
+			if (HornNatureThird == OneWithNatureOrder.Tempered)
 			{
 				if (TemperedReleasePvE_47092.CanUse(out act))
 				{
@@ -243,7 +246,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 				}
 			}
 
-			if (ThirdHornNature == OneWithNatureOrder.Borrow)
+			if (HornNatureThird == OneWithNatureOrder.Borrow)
 			{
 				if (BorrowPvE.CanUse(out act))
 				{
@@ -303,6 +306,14 @@ public sealed class BST_Reborn : BeastmasterRotation
 		if (InCombat)
 		{
 			if (BeastskinPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		if (InCombat)
+		{
+			if (SnarlPvE.CanUse(out act))
 			{
 				return true;
 			}

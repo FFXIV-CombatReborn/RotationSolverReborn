@@ -1,4 +1,5 @@
 ﻿using ECommons.ExcelServices;
+using ECommons.Logging;
 
 namespace RotationSolver.Basic.Rotations;
 
@@ -517,8 +518,7 @@ public partial class CustomRotation
 		}
 		catch (Exception ex)
 		{
-			// Log the exception or handle it as needed
-			Console.WriteLine($"Exception in GCD method: {ex.Message}");
+			PluginLog.Error($"Exception in GCD method: {ex.Message}");
 		}
 		finally
 		{

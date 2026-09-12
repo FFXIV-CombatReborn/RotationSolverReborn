@@ -247,8 +247,7 @@ public partial class CustomRotation
 		}
 		catch (Exception ex)
 		{
-			// Log the exception or handle it as needed
-			Console.WriteLine($"Exception in Invoke method: {ex.Message}");
+			PluginLog.Error($"Exception in Invoke method: {ex.Message}");
 			return null;
 		}
 		finally

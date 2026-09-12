@@ -1049,7 +1049,9 @@ public partial class BeastmasterRotation
 	{
 		//shirk
 		setting.IsFriendly = false;
-		setting.TargetType = TargetType.Provoke;
+		//setting.TargetType = TargetType.Provoke;
+		setting.TargetStatusNeed = [StatusID.UnnamedStatus_2552];
+		setting.StatusFromSelf = false;
 	}
 
 	static partial void ModifyChallengePvE(ref ActionSetting setting)
@@ -1385,7 +1387,8 @@ public partial class BeastmasterRotation
 	{
 		setting.ActionCheck = () => KinshipBattlehorn > 0 && KinshipKinType == BeastmasterKinType.Wavekin;
 		setting.StatusNeed = [StatusID.WaveKinship, StatusID.WaveKinship_4648];
-		setting.TargetStatusNeed = [StatusID.PopotoSkin, StatusID.DamageUp_2550];
+		setting.TargetStatusNeed = [StatusID.PopotoSkin, StatusID.DamageUp_2550, StatusID.PhysicalDamageUp_2074, StatusID.DamageUp_1225];
+		setting.StatusFromSelf = false;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
 		{

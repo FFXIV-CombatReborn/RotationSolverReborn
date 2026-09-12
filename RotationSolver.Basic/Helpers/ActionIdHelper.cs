@@ -35,7 +35,7 @@ public static class ActionIdHelper
 	public static unsafe bool IsCoolingDownGroup(byte cdGroup)
 	{
 		var detail = GetCoolDownDetail(cdGroup);
-		return detail != null && detail->IsActive != false;
+		return detail != null && detail->IsActive;
 	}
 
 	/// <summary>
@@ -48,7 +48,6 @@ public static class ActionIdHelper
 		var actionManager = ActionManager.Instance();
 		if (actionManager == null)
 		{
-			PluginLog.Error("ActionManager.Instance() returned null.");
 			return null;
 		}
 		if (cdGroup == 0)

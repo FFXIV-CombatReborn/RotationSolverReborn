@@ -116,20 +116,13 @@ namespace RotationSolver.Commands
 			var noCastingStatusArray = _cachedNoCastingStatusArray!;
 
 			var minStatusTime = float.MaxValue;
-			var statusTimesCount = 0;
+			var hasNoCastingStatus = false;
 			if (Player.Object != null && !DataCenter.IsPvP)
 			{
-				foreach (var t in Player.Object.StatusTimes(false, noCastingStatusArray))
-				{
-					statusTimesCount++;
-					if (t < minStatusTime)
-					{
-						minStatusTime = t;
-					}
-				}
+				minStatusTime = StatusHelper.MinStatusRemainingTime(Player.Object, false, noCastingStatusArray, out hasNoCastingStatus);
 			}
 
-			if (statusTimesCount > 0 && Player.Object != null)
+			if (hasNoCastingStatus && Player.Object != null)
 			{
 				var remainingCastTime = Player.Object.TotalCastTime - Player.Object.CurrentCastTime;
 				if (minStatusTime > remainingCastTime && minStatusTime < 3f)

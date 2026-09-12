@@ -155,6 +155,12 @@ public class ActionSetting
 	public ActionID[]? ComboIds { get; set; }
 
 	/// <summary>
+	/// Cached combined combo action list (the action's base <c>ActionCombo</c> plus <see cref="ComboIds"/>),
+	/// computed once on first combo check instead of being rebuilt on every CanUse().
+	/// </summary>
+	internal ActionID[]? ComboActionsCache { get; set; }
+
+	/// <summary>
 	/// Status that this action provides.
 	/// </summary>
 	public StatusID[]? StatusProvide { get; set; } = null;

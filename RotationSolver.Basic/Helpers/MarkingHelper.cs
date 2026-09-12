@@ -63,34 +63,50 @@ namespace RotationSolver.Basic.Helpers
 			}
 		}
 
+		private static readonly long[] _attackSignTargets = new long[8];
+		private static long _attackSignTargetsTick = long.MinValue;
+		private static readonly long[] _stopTargets = new long[2];
+		private static long _stopTargetsTick = long.MinValue;
+		private const long MarkerCacheTtlMs = 15;
+
 		/// <summary>
-		/// Gets the attack sign targets.
+		/// Gets the attack sign targets. Re-read from the game at most once per frame.
 		/// </summary>
 		internal static long[] GetAttackSignTargets()
 		{
-			return
-			[
-				GetMarker(HeadMarker.Attack1),
-				GetMarker(HeadMarker.Attack2),
-				GetMarker(HeadMarker.Attack3),
-				GetMarker(HeadMarker.Attack4),
-				GetMarker(HeadMarker.Attack5),
-				GetMarker(HeadMarker.Attack6),
-				GetMarker(HeadMarker.Attack7),
-				GetMarker(HeadMarker.Attack8),
-			];
+			var now = Environment.TickCount64;
+			if (_attackSignTargetsTick != long.MinValue && now - _attackSignTargetsTick < MarkerCacheTtlMs)
+			{
+				return _attackSignTargets;
+			}
+
+			_attackSignTargets[0] = GetMarker(HeadMarker.Attack1);
+			_attackSignTargets[1] = GetMarker(HeadMarker.Attack2);
+			_attackSignTargets[2] = GetMarker(HeadMarker.Attack3);
+			_attackSignTargets[3] = GetMarker(HeadMarker.Attack4);
+			_attackSignTargets[4] = GetMarker(HeadMarker.Attack5);
+			_attackSignTargets[5] = GetMarker(HeadMarker.Attack6);
+			_attackSignTargets[6] = GetMarker(HeadMarker.Attack7);
+			_attackSignTargets[7] = GetMarker(HeadMarker.Attack8);
+			_attackSignTargetsTick = now;
+			return _attackSignTargets;
 		}
 
 		/// <summary>
-		/// Gets the stop targets.
+		/// Gets the stop targets. Re-read from the game at most once per frame.
 		/// </summary>
 		internal static long[] GetStopTargets()
 		{
-			return
-			[
-				GetMarker(HeadMarker.Stop1),
-				GetMarker(HeadMarker.Stop2),
-			];
+			var now = Environment.TickCount64;
+			if (_stopTargetsTick != long.MinValue && now - _stopTargetsTick < MarkerCacheTtlMs)
+			{
+				return _stopTargets;
+			}
+
+			_stopTargets[0] = GetMarker(HeadMarker.Stop1);
+			_stopTargets[1] = GetMarker(HeadMarker.Stop2);
+			_stopTargetsTick = now;
+			return _stopTargets;
 		}
 
 		/// <summary>

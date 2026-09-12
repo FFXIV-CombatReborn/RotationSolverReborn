@@ -202,20 +202,22 @@ public static class TargetFilter
 	/// </summary>
 	/// <param name="validJobs">The valid jobs.</param>
 	/// <returns>True if the object is in the valid jobs, otherwise false.</returns>
-	public static bool PlayerIsJobs(params Job[] validJobs)
+	public static bool PlayerIsJobs(params ReadOnlySpan<Job> validJobs)
 	{
-		if (ECommons.GameHelpers.Player.Object == null || validJobs == null || validJobs.Length == 0)
+		if (ECommons.GameHelpers.Player.Object == null || validJobs.Length == 0)
 		{
 			return false;
 		}
 
-		HashSet<byte> validJobSet = [];
-		foreach (var job in validJobs)
+		var jobId = (byte)ECommons.GameHelpers.Player.Object.ClassJob.Value.RowId;
+		for (var i = 0; i < validJobs.Length; i++)
 		{
-			_ = validJobSet.Add((byte)(uint)job);
+			if ((byte)(uint)validJobs[i] == jobId)
+			{
+				return true;
+			}
 		}
-
-		return ECommons.GameHelpers.Player.Object.IsJobs(validJobSet);
+		return false;
 	}
 
 	/// <summary>
@@ -224,20 +226,22 @@ public static class TargetFilter
 	/// <param name="battleChara">The game object.</param>
 	/// <param name="validJobs">The valid jobs.</param>
 	/// <returns>True if the object is in the valid jobs, otherwise false.</returns>
-	public static bool IsJobs(this IBattleChara battleChara, params Job[] validJobs)
+	public static bool IsJobs(this IBattleChara battleChara, params ReadOnlySpan<Job> validJobs)
 	{
-		if (battleChara == null || validJobs == null || validJobs.Length == 0)
+		if (battleChara == null || validJobs.Length == 0)
 		{
 			return false;
 		}
 
-		HashSet<byte> validJobSet = [];
-		foreach (var job in validJobs)
+		var jobId = (byte)battleChara.ClassJob.Value.RowId;
+		for (var i = 0; i < validJobs.Length; i++)
 		{
-			_ = validJobSet.Add((byte)(uint)job);
+			if ((byte)(uint)validJobs[i] == jobId)
+			{
+				return true;
+			}
 		}
-
-		return battleChara.IsJobs(validJobSet);
+		return false;
 	}
 
 	private static bool PlayerIsJobs(HashSet<byte> validJobs)
