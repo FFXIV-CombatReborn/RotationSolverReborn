@@ -187,9 +187,12 @@ public sealed class BST_Reborn : BeastmasterRotation
 		{
 			if (HornNatureFirst == OneWithNatureOrder.Tempered)
 			{
-				if (TemperedReleasePvE_47092.CanUse(out act))
+				if (TemperedReleasePvE.IsEnabled)
 				{
-					return true;
+					if (TemperedReleasePvE_47092.CanUse(out act))
+					{
+						return true;
+					}
 				}
 
 				if (TemperedReleasePvE.CanUse(out act))
@@ -211,9 +214,12 @@ public sealed class BST_Reborn : BeastmasterRotation
 		{
 			if (HornNatureSecond == OneWithNatureOrder.Tempered)
 			{
-				if (TemperedReleasePvE_47092.CanUse(out act))
+				if (TemperedReleasePvE.IsEnabled)
 				{
-					return true;
+					if (TemperedReleasePvE_47092.CanUse(out act))
+					{
+						return true;
+					}
 				}
 
 				if (TemperedReleasePvE.CanUse(out act))
@@ -235,9 +241,12 @@ public sealed class BST_Reborn : BeastmasterRotation
 		{
 			if (HornNatureThird == OneWithNatureOrder.Tempered)
 			{
-				if (TemperedReleasePvE_47092.CanUse(out act))
+				if (TemperedReleasePvE.IsEnabled)
 				{
-					return true;
+					if (TemperedReleasePvE_47092.CanUse(out act))
+					{
+						return true;
+					}
 				}
 
 				if (TemperedReleasePvE.CanUse(out act))

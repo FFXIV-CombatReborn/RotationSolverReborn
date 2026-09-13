@@ -1083,6 +1083,7 @@ public partial class BeastmasterRotation
 		//setting.TargetType = TargetType.Provoke;
 		setting.TargetStatusNeed = [StatusID.UnnamedStatus_2552];
 		setting.StatusFromSelf = false;
+		setting.StatusProvide = [StatusID.Covered_2413];
 	}
 
 	static partial void ModifyChallengePvE(ref ActionSetting setting)
@@ -1278,7 +1279,7 @@ public partial class BeastmasterRotation
 	{
 		setting.StatusNeed = [StatusID.OneWithNature];
 		setting.MPOverride = () => 0;
-		setting.ActionCheck = () => InCombat && Service.GetAdjustedActionId(ActionID.TemperedReleasePvE) == ActionID.TemperedReleasePvE_47092;
+		setting.ActionCheck = () => InCombat && Service.GetAdjustedActionId(ActionID.TemperedReleasePvE) == ActionID.TemperedReleasePvE_47092 && TemperedReleaseReady;
 
 	}
 
@@ -1419,7 +1420,7 @@ public partial class BeastmasterRotation
 	{
 		setting.ActionCheck = () => KinshipBattlehorn > 0 && KinshipKinType == BeastmasterKinType.Wavekin;
 		setting.StatusNeed = [StatusID.WaveKinship, StatusID.WaveKinship_4648];
-		setting.TargetStatusNeed = [StatusID.PopotoSkin, StatusID.DamageUp_2550, StatusID.PhysicalDamageUp_2074, StatusID.DamageUp_1225];
+		setting.TargetStatusNeed = [StatusID.PopotoSkin, StatusID.DamageUp_2550, StatusID.PhysicalDamageUp_2074, StatusID.DamageUp_1225, StatusID.MagicDamageUp_5020, StatusID.BlazeSpikes_5465];
 		setting.StatusFromSelf = false;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()
