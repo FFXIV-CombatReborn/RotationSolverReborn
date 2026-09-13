@@ -124,7 +124,10 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void ChangeOperatingMode(StateCommandType stateCommand)
 		{
-			RSCommands.UpdateState(stateCommand, (JobRole)DataCenter.Job);
+			if (!DataCenter.IsPvP)
+			{
+				RSCommands.UpdateState(stateCommand, (JobRole)DataCenter.Job);
+			}
 			PluginLog.Debug($"IPC ChangeOperatingMode was called. StateCommand:{stateCommand}");
 		}
 
@@ -140,7 +143,10 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void AutodutyChangeOperatingMode(StateCommandType stateCommand, TargetingType targetingType)
 		{
-			RSCommands.AutodutyUpdateState(stateCommand, (JobRole)DataCenter.Job, targetingType);
+			if (!DataCenter.IsPvP)
+			{
+				RSCommands.AutodutyUpdateState(stateCommand, (JobRole)DataCenter.Job, targetingType);
+			}
 			PluginLog.Debug($"IPC AutodutyChangeOperatingMode was called. StateCommand:{stateCommand} TargetingType:{targetingType}");
 		}
 
@@ -153,7 +159,10 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void TriggerSpecialState(SpecialCommandType specialCommand)
 		{
-			RSCommands.DoSpecialCommandType(specialCommand, false);
+			if (!DataCenter.IsPvP)
+			{
+				RSCommands.DoSpecialCommandType(specialCommand, false);
+			}
 			PluginLog.Debug($"IPC TriggerSpecialState was called. SpecialCommand:{specialCommand}");
 		}
 
@@ -169,8 +178,11 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void TriggerSpecialStateWithDuration(SpecialCommandType specialCommand, float duration)
 		{
-			RSCommands.DoSpecialCommandType(specialCommand, false);
-			DataCenter.SetSpecialTypeWithDuration(specialCommand, duration);
+			if (!DataCenter.IsPvP)
+			{
+				RSCommands.DoSpecialCommandType(specialCommand, false);
+				DataCenter.SetSpecialTypeWithDuration(specialCommand, duration);
+			}
 			PluginLog.Debug($"IPC TriggerSpecialStateWithDuration was called. SpecialCommand:{specialCommand}, Duration:{duration}");
 		}
 
@@ -186,7 +198,10 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void OtherCommand(OtherCommandType otherType, string str)
 		{
-			RSCommands.DoOtherCommand(otherType, str);
+			if (!DataCenter.IsPvP)
+			{
+				RSCommands.DoOtherCommand(otherType, str);
+			}
 			PluginLog.Debug($"IPC DoOtherCommand was called. OtherCommandType:{otherType}, String:{str},");
 		}
 
@@ -204,7 +219,10 @@ namespace RotationSolver.IPC
 		{
 			var combinedString = $"{action}-{time}";
 
-			RSCommands.DoActionCommand($"{combinedString}");
+			if (!DataCenter.IsPvP)
+			{
+				RSCommands.DoActionCommand($"{combinedString}");
+			}
 			PluginLog.Debug($"IPC ActionCommand was called. Action Name:{action}, Time:{time}");
 		}
 
