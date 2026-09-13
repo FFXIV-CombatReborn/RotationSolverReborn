@@ -1010,6 +1010,36 @@ public partial class BeastmasterRotation
 	/// 
 	/// </summary>
 	public static bool HasInterestCaptured => StatusHelper.PlayerHasStatus(true, StatusID.InterestCaptured);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsInCrucible =>  DataCenter.IsInCrucible;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsinFirstBoard => DataCenter.IsinFirstBoard;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsinSecondBoard => DataCenter.IsinSecondBoard;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsinThirdBoard => DataCenter.IsinThirdBoard;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsinFirstMasterBoard => DataCenter.IsinFirstMasterBoard;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsinSecondMasterBoard => DataCenter.IsinSecondMasterBoard;
 	#endregion
 
 	#region Draw Debug
@@ -1047,6 +1077,7 @@ public partial class BeastmasterRotation
 
 	static partial void ModifySnarlPvE(ref ActionSetting setting)
 	{
+		setting.ActionCheck = () => IsInCrucible && IsinFirstBoard;
 		//shirk
 		setting.IsFriendly = false;
 		//setting.TargetType = TargetType.Provoke;
@@ -1056,6 +1087,7 @@ public partial class BeastmasterRotation
 
 	static partial void ModifyChallengePvE(ref ActionSetting setting)
 	{
+		setting.ActionCheck = () => IsInCrucible;
 		setting.IsFriendly = false;
 		setting.TargetType = TargetType.Provoke;
 	}
