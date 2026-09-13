@@ -674,7 +674,16 @@ internal static class DataCenter
 	public static bool IsInM12S => TerritoryID == 1325;
 	#endregion
 
-	#region Savage
+	#region Crucible
+	public static bool IsInCrucible => IsinFirstBoard || IsinSecondBoard || IsinThirdBoard || IsinFirstMasterBoard || IsinSecondMasterBoard;
+	public static bool IsinFirstBoard => TerritoryID == 1339;
+	public static bool IsinSecondBoard => TerritoryID == 1340;
+	public static bool IsinThirdBoard => TerritoryID == 1341;
+	public static bool IsinFirstMasterBoard => TerritoryID == 1342;
+	public static bool IsinSecondMasterBoard => TerritoryID == 1343;
+	#endregion
+
+	#region Extreme
 	public static bool IsTheUnmaking => TerritoryID == 1362;
 	#endregion
 
