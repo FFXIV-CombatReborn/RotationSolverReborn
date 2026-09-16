@@ -445,12 +445,12 @@ internal static class RotationUpdater
 			}
 			else
 			{
-				PluginLog.Debug($"Combat type {curCombatType} not found in rotations for {nowJob}. Available types: {string.Join(", ", validCustomRotations.Keys)}");
+				//PluginLog.Debug($"Combat type {curCombatType} not found in rotations for {nowJob}. Available types: {string.Join(", ", validCustomRotations.Keys)}");
 			}
 		}
 		else
 		{
-			PluginLog.Debug($"No rotations found for job {nowJob} in CustomRotationsLookup");
+			//PluginLog.Debug($"No rotations found for job {nowJob} in CustomRotationsLookup");
 		}
 
 		DataCenter.CurrentRotation = null;
