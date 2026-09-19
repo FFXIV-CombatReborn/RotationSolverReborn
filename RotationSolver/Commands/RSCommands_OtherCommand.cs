@@ -90,22 +90,10 @@ public static partial class RSCommands
 
 	private static void DoSettingCommand(string str)
 	{
-		var strs = str.Split(' ', 3);
-		if (strs.Length < 2)
-		{
-			Svc.Chat.PrintError("Invalid setting command format.");
-			return;
-		}
-
+		// The value is optional: "/rotation Settings <Name>" toggles a ConditionBoolean setting.
+		var strs = str.Trim().Split(' ', 2, StringSplitOptions.TrimEntries);
 		var settingName = strs[0];
-		string? command = null;
-		if (strs.Length > 1)
-		{
-			// Equivalent to string.Join(' ', strs.Skip(1))
-			var arr = new string[strs.Length - 1];
-			Array.Copy(strs, 1, arr, 0, strs.Length - 1);
-			command = string.Join(' ', arr);
-		}
+		var command = strs.Length > 1 ? strs[1] : null;
 
 		if (string.IsNullOrEmpty(settingName))
 		{
@@ -290,59 +278,44 @@ public static partial class RSCommands
 		}
 	}
 
-	private static Enum GetNextEnumValue(Enum currentEnumValue)
+	/// <summary>
+	/// Gets the distinct rotation and duty actions for the current content. PvE/PvP variants that don't
+	/// match are skipped so actions sharing an in-game name (e.g. "Guardian" for GuardianPvE and
+	/// GuardianPvP) aren't ambiguous when matching by name.
+	/// </summary>
+	private static IAction[] GetCommandableActions()
 	{
-		var values = Enum.GetValues(currentEnumValue.GetType());
-		var enumValues = new Enum[values.Length];
-		for (var i = 0; i < values.Length; i++)
-		{
-			enumValues[i] = (Enum)values.GetValue(i)!;
-		}
-		var nextIndex = Array.IndexOf(enumValues, currentEnumValue) + 1;
-
-		return enumValues.Length == nextIndex ? enumValues[0] : enumValues[nextIndex];
-	}
-
-	private static void ToggleActionCommand(string str)
-	{
-		var trimStr = str.Trim();
-
 		var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
 		var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
 
-		var totalLength = rotationActions.Length + dutyActions.Length;
-		List<IAction> allActionsList = new(totalLength);
+		List<IAction> allActions = new(rotationActions.Length + dutyActions.Length);
 		HashSet<IAction> seen = [];
-		for (var i = 0; i < rotationActions.Length; i++)
-		{
-			var action = rotationActions[i];
-			// Skip PvE/PvP variants that don't match the current content so that
-			// actions sharing the same in-game name (e.g. "Guardian" for GuardianPvE
-			// and GuardianPvP) aren't ambiguous when matching by name.
-			if (action is IBaseAction baseAction && baseAction.Info.IsPvP != DataCenter.IsPvP)
-			{
-				continue;
-			}
-			if (seen.Add(action))
-			{
-				allActionsList.Add(action);
-			}
-		}
-		for (var i = 0; i < dutyActions.Length; i++)
-		{
-			var action = dutyActions[i];
-			if (action is IBaseAction baseAction && baseAction.Info.IsPvP != DataCenter.IsPvP)
-			{
-				continue;
-			}
-			if (seen.Add(action))
-			{
-				allActionsList.Add(action);
-			}
-		}
-		IAction[] allActions = [.. allActionsList];
+		AddActions(rotationActions);
+		AddActions(dutyActions);
+		return [.. allActions];
 
-		// Sort by Name.Length descending (bubble sort)
+		void AddActions(IAction[] actions)
+		{
+			foreach (var action in actions)
+			{
+				if (action is IBaseAction baseAction && baseAction.Info.IsPvP != DataCenter.IsPvP)
+				{
+					continue;
+				}
+
+				if (seen.Add(action))
+				{
+					allActions.Add(action);
+				}
+			}
+		}
+	}
+	private static void ToggleActionCommand(string str)
+	{
+		var trimStr = str.Trim();
+		var allActions = GetCommandableActions();
+
+		// Longest names first so e.g. "Fire II" wins over "Fire". Stable, so equal lengths keep list order.
 		var n = allActions.Length;
 		var sortedActions = new IAction[n];
 		Array.Copy(allActions, sortedActions, n);
@@ -396,38 +369,7 @@ public static partial class RSCommands
 
 		if (double.TryParse(timeStr, out var time))
 		{
-			var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
-			var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
-
-			var totalLength = rotationActions.Length + dutyActions.Length;
-			List<IAction> allActionsList = new(totalLength);
-			HashSet<IAction> seen = [];
-			for (var i = 0; i < rotationActions.Length; i++)
-			{
-				var action = rotationActions[i];
-				if (action is IBaseAction baseAction && baseAction.Info.IsPvP != DataCenter.IsPvP)
-				{
-					continue;
-				}
-				if (seen.Add(action))
-				{
-					allActionsList.Add(action);
-				}
-			}
-			for (var i = 0; i < dutyActions.Length; i++)
-			{
-				var action = dutyActions[i];
-				if (action is IBaseAction baseAction && baseAction.Info.IsPvP != DataCenter.IsPvP)
-				{
-					continue;
-				}
-				if (seen.Add(action))
-				{
-					allActionsList.Add(action);
-				}
-			}
-			IAction[] allActions = [.. allActionsList];
-
+			var allActions = GetCommandableActions();
 			for (var i = 0; i < allActions.Length; i++)
 			{
 				var iAct = allActions[i];

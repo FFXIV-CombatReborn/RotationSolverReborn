@@ -94,7 +94,6 @@ internal static class ActionUpdater
 
 	internal static void ClearNextAction()
 	{
-		SetAction(0);
 		NextAction = NextGCDAction = null;
 		DesiredPositional = EnemyPositional.None;
 	}
@@ -134,18 +133,10 @@ internal static class ActionUpdater
 	internal static void UpdateCombatInfo()
 	{
 		var now = DateTime.Now;
-		SetAction(NextGCDAction?.AdjustedID ?? 0);
 		UpdateCombatTime(now);
 		UpdateSlots();
 		UpdateMoving(now);
 		UpdateLifetime(now);
-		UpdateMPTimer(now);
-	}
-
-	private static uint actionOverride = 0;
-	private static void SetAction(uint id)
-	{
-		actionOverride = id;
 	}
 
 	private static DateTime _startCombatTime = DateTime.MinValue;
@@ -262,35 +253,6 @@ internal static class ActionUpdater
 			: Math.Min(10, (float)(now - _startAliveTime).TotalSeconds);
 	}
 
-	private static uint _lastMP = 0;
-	private static DateTime _lastMPUpdate = DateTime.Now;
-
-	internal static float MPUpdateElapsed => (float)((DateTime.Now - _lastMPUpdate).TotalSeconds % 3);
-
-	private static void UpdateMPTimer(DateTime now)
-	{
-		if (Player.Object == null)
-		{
-			return;
-		}
-
-		if (Player.Object.ClassJob.RowId != (uint)ECommons.ExcelServices.Job.BLM)
-		{
-			return;
-		}
-
-		if (StatusHelper.PlayerHasStatus(true, StatusID.LucidDreaming))
-		{
-			return;
-		}
-
-		if (_lastMP < Player.Object.CurrentMp)
-		{
-			_lastMPUpdate = now;
-		}
-		_lastMP = Player.Object.CurrentMp;
-	}
-
 	internal static bool CanDoAction()
 	{
 		// In Target-Only mode we never perform actions.
@@ -338,24 +300,23 @@ internal static class ActionUpdater
 
 	internal static bool PlayerHasLockActions()
 	{
-		if (Player.Object == null)
+		if (DataCenter.IsPvP)
 		{
 			return false;
 		}
 
-		if (Player.Object.StatusList == null)
+		var statusList = Player.Object?.StatusList;
+		if (statusList == null)
 		{
 			return false;
 		}
 
-		foreach (var status in Player.Object.StatusList)
+		var minRemaining = 1 + DataCenter.DefaultGCDRemain;
+		foreach (var status in statusList)
 		{
-			if (!DataCenter.IsPvP)
+			if (status != null && StatusHelper.LockActions(status) == true && status.RemainingTime > minRemaining)
 			{
-				if (status != null && StatusHelper.LockActions(status) == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain)
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 		return false;

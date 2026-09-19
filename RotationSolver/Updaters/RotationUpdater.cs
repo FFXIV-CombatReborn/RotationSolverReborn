@@ -179,10 +179,31 @@ internal static class RotationUpdater
 		}
 	}
 
+	// The grouping is read by UI windows every frame; rebuild it when its inputs change or periodically
+	// (hotbar slot membership can change without any of the tracke inputs changing).
+	private static IEnumerable<IGrouping<string, IAction>>? _groupedActions;
+	private static (ICustomRotation? Rotation, DutyRotation? Duty, bool IsPvP, Job Job) _groupedActionsKey;
+	private static long _groupedActionsTick;
+	private const long GroupedActionsRefreshMs = 1000;
+
 	public static IEnumerable<IGrouping<string, IAction>>? AllGroupedActions
-		=> GroupActions([
-			.. DataCenter.CurrentRotation?.AllActions ?? [],
-			.. DataCenter.CurrentDutyRotation?.AllActions ?? []]);
+	{
+		get
+		{
+			var key = (DataCenter.CurrentRotation, DataCenter.CurrentDutyRotation, DataCenter.IsPvP, DataCenter.Job);
+			var now = Environment.TickCount64;
+			if (_groupedActions == null || key != _groupedActionsKey || now - _groupedActionsTick >= GroupedActionsRefreshMs)
+			{
+				_groupedActions = GroupActions([
+					.. key.CurrentRotation?.AllActions ?? [],
+					.. key.CurrentDutyRotation?.AllActions ?? []]);
+				_groupedActionsKey = key;
+				_groupedActionsTick = now;
+			}
+
+			return _groupedActions;
+		}
+	}
 
 	public static IEnumerable<IGrouping<string, IAction>>? GroupActions(IEnumerable<IAction> actions)
 	{

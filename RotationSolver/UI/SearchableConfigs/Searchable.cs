@@ -188,38 +188,24 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 {
 	protected readonly PropertyInfo _property = property;
 
+	// GetCustomAttribute builds a new attribute instance on every call, and these are read several
+	// times per frame for every visible setting, so look them up once.
+	private readonly UIAttribute? _ui = property.GetCustomAttribute<UIAttribute>();
+	private readonly bool _isJob = property.GetCustomAttribute<JobConfigAttribute>() != null
+		|| property.GetCustomAttribute<JobChoiceConfigAttribute>() != null;
+	private string? _popupKey;
+
 	public const float DRAG_WIDTH = 150;
 	protected static float Scale => ImGuiHelpers.GlobalScale;
 	public CheckBoxSearch? Parent { get; set; } = null;
 
 	public virtual string SearchingKeys => Name + " " + Description;
-	public virtual string Name
-	{
-		get
-		{
-			var ui = _property.GetCustomAttribute<UIAttribute>();
-			return ui == null ? string.Empty : ui.Name;
-		}
-	}
+	public virtual string Name => _ui?.Name ?? string.Empty;
 
-	public virtual string Description
-	{
-		get
-		{
-			var ui = _property.GetCustomAttribute<UIAttribute>();
-			return ui == null || string.IsNullOrEmpty(ui.Description) ? string.Empty : ui.Description;
-		}
-	}
+	public virtual string Description => string.IsNullOrEmpty(_ui?.Description) ? string.Empty : _ui.Description;
 
 	// Expose the owning UI filter so callers can navigate to the correct menu
-	public virtual string Filter
-	{
-		get
-		{
-			var ui = _property.GetCustomAttribute<UIAttribute>();
-			return ui == null ? string.Empty : ui.Filter ?? string.Empty;
-		}
-	}
+	public virtual string Filter => _ui?.Filter ?? string.Empty;
 
 	public virtual string Command
 	{
@@ -236,9 +222,8 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 		}
 	}
 	public virtual string ID => _property.Name;
-	private string Popup_Key => $"Rotation Solver RightClicking##{ID}_{GetHashCode()}";
-	protected bool IsJob => _property.GetCustomAttribute<JobConfigAttribute>() != null
-		|| _property.GetCustomAttribute<JobChoiceConfigAttribute>() != null;
+	private string Popup_Key => _popupKey ??= $"Rotation Solver RightClicking##{ID}_{GetHashCode()}";
+	protected bool IsJob => _isJob;
 
 	public uint Color { get; set; } = 0;
 
@@ -302,29 +287,25 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 		// Draw the main content
 		DrawMain();
 
-		// Prepare the group for the popup menu
-		ImGuiHelper.PrepareGroup(Popup_Key, Command, ResetToDefault);
+		// Prepare the group for the popup menu. Building the command string and reset delegate is only
+		// needed while the right-click popup is actually open.
+		if (ImGui.IsPopupOpen(Popup_Key))
+		{
+			ImGuiHelper.PrepareGroup(Popup_Key, Command, ResetToDefault);
+		}
 	}
 
 	protected abstract void DrawMain();
 
 	protected void ShowTooltip(bool showHand = true)
 	{
-		var showDesc = !string.IsNullOrEmpty(Description);
-		if (showDesc)
+		var description = Description;
+		if (!string.IsNullOrEmpty(description))
 		{
 			ImguiTooltips.ShowTooltip(() =>
 			{
-				if (showDesc)
-				{
-					ImGui.BulletText(Description);
-				}
-				if (showDesc)
-				{
-					ImGui.Separator();
-				}
-				var wholeWidth = ImGui.GetWindowWidth();
-
+				ImGui.BulletText(description);
+				ImGui.Separator();
 			});
 		}
 

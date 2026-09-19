@@ -326,7 +326,7 @@ internal class EasterEggWindow : Window
 
 	private static bool CheckWin(Cell[] board, Cell who)
 	{
-		foreach ((var a, var b, var c) in Lines())
+		foreach ((var a, var b, var c) in Lines)
 		{
 			if (board[a] == who && board[b] == who && board[c] == who)
 			{
@@ -336,17 +336,15 @@ internal class EasterEggWindow : Window
 		return false;
 	}
 
-	private bool IsEmpty(int i) => _board[i] == Cell.Empty;
-
-	private static IEnumerable<(int a, int b, int c)> Lines()
-	{
-		yield return (0, 1, 2);
-		yield return (3, 4, 5);
-		yield return (6, 7, 8);
-		yield return (0, 3, 6);
-		yield return (1, 4, 7);
-		yield return (2, 5, 8);
-		yield return (0, 4, 8);
-		yield return (2, 4, 6);
-	}
+	private static readonly (int a, int b, int c)[] Lines =
+	[
+		(0, 1, 2),
+		(3, 4, 5),
+		(6, 7, 8),
+		(0, 3, 6),
+		(1, 4, 7),
+		(2, 5, 8),
+		(0, 4, 8),
+		(2, 4, 6),
+	];
 }

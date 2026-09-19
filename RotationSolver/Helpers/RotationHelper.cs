@@ -4,8 +4,8 @@ namespace RotationSolver.Helpers;
 
 internal static class RotationHelper
 {
-	private static readonly Dictionary<ICustomRotation, bool> _extraRotation = [];
-	private static readonly Dictionary<ICustomRotation, RotationAttribute> _rotationAttributes = [];
+	private static readonly Dictionary<Type, bool> _extraRotation = [];
+	private static readonly Dictionary<Type, RotationAttribute?> _rotationAttributes = [];
 
 	public static unsafe Vector4 GetColor(this ICustomRotation rotation)
 	{
@@ -29,29 +29,25 @@ internal static class RotationHelper
 
 	public static bool IsExtra(this ICustomRotation rotation)
 	{
-		if (_extraRotation.TryGetValue(rotation, out var isExtra))
+		var type = rotation.GetType();
+		if (!_extraRotation.TryGetValue(type, out var isExtra))
 		{
-			return isExtra;
+			isExtra = type.GetCustomAttribute<ExtraRotationAttribute>() != null;
+			_extraRotation[type] = isExtra;
 		}
 
-		var extraRotationAttribute = rotation.GetType().GetCustomAttribute<ExtraRotationAttribute>();
-		_extraRotation[rotation] = extraRotationAttribute != null;
-		return _extraRotation[rotation];
+		return isExtra;
 	}
 
 	public static RotationAttribute? GetAttributes(this ICustomRotation rotation)
 	{
-		if (_rotationAttributes.TryGetValue(rotation, out var attributes))
+		var type = rotation.GetType();
+		if (!_rotationAttributes.TryGetValue(type, out var attributes))
 		{
-			return attributes;
-		}
-		attributes = rotation.GetType().GetCustomAttribute<RotationAttribute>();
-		if (attributes != null)
-		{
-			_rotationAttributes[rotation] = attributes;
+			attributes = type.GetCustomAttribute<RotationAttribute>();
+			_rotationAttributes[type] = attributes;
 		}
 
 		return attributes;
 	}
-
 }

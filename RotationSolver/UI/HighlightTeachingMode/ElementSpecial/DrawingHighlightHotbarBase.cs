@@ -47,9 +47,9 @@ public abstract class DrawingHighlightHotbarBase : IDisposable
 		}
 	}
 
-	internal async Task<IEnumerable<IDrawing2D>> To2DMain()
+	internal IEnumerable<IDrawing2D> To2DMain()
 	{
-		return !Enable ? [] : await Task.FromResult(To2D());
+		return !Enable ? [] : To2D();
 	}
 
 	internal void UpdateOnFrameMain()

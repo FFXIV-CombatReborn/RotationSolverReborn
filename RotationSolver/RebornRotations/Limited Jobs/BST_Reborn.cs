@@ -45,8 +45,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 	#region oGCD Logic
 	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
 	{
-		var rallyIncrease = 40 + (MasteredInstinct * 70);
-		var resultingTP = TPCount + rallyIncrease;
+		var resultingTP = TPCount + RallyTPRestore;
 
 		var shouldRally =
 			(MasteredInstinct == 3 && InstinctualMasteryTrait.EnoughLevel && (HasMoonstalker || HasSunstrider)) ||
@@ -60,8 +59,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 			}
 		}
 
-		var rallycheerIncrease = 40 + (NaturalInstinct * 70);
-		var resultingPetTP = TPCount + rallycheerIncrease;
+		var resultingPetTP = PetTPCount + RallyingCheerTPRestore;
 
 		var shouldRallyCheer = resultingPetTP >= 100 && resultingPetTP <= 250;
 
@@ -361,6 +359,22 @@ public sealed class BST_Reborn : BeastmasterRotation
 				HornOrder.ThirdBattlehorn => ThirdBattlehornPvE.CanUse(out act),
 				_ => false,
 			})
+			{
+				return true;
+			}
+
+			// Horn order fallback if the above fails for some reason
+			if (FirstBattlehornPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (SecondBattlehornPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (ThirdBattlehornPvE.CanUse(out act))
 			{
 				return true;
 			}

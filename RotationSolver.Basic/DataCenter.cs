@@ -126,41 +126,86 @@ internal static class DataCenter
 	}
 
 	/// <summary>
-	///
+	/// Affinity of every Beastmaster pet, indexed by <see cref="BeastmasterPet"/> (which matches the XBMPet row id).
+	/// A pet's Trick grants the Heart status matching its affinity, and that Heart decides which Instinctual axe
+	/// follows it: Volant -> Avalanche Axe -> Rampant -> Mistral Axe -> Durant -> Spinning Axe -> Eldritch -> Gale Axe -> Volant.
+	/// This kinda sucks as a way to determine a pet's affinity, but it's the only way to do it right now. TODO: Future me figure out a better way that isnt hardcoded.
+	/// </summary>
+	private static readonly BeastmasterAffinity[] PetAffinities =
+	[
+		BeastmasterAffinity.None,     // 0  (no pet)
+		BeastmasterAffinity.Rampant,  // 1  Cu Sith
+		BeastmasterAffinity.Rampant,  // 2  Squirrel
+		BeastmasterAffinity.Rampant,  // 3  Lamb
+		BeastmasterAffinity.Durant,   // 4  Pugil
+		BeastmasterAffinity.Rampant,  // 5  Opo-opo
+		BeastmasterAffinity.Eldritch, // 6  Dodo
+		BeastmasterAffinity.Eldritch, // 7  Coblyn
+		BeastmasterAffinity.Rampant,  // 8  Diremite
+		BeastmasterAffinity.Durant,   // 9  Megalocrab
+		BeastmasterAffinity.Volant,   // 10 Wespe
+		BeastmasterAffinity.Volant,   // 11 Vulture
+		BeastmasterAffinity.Rampant,  // 12 Mandragora
+		BeastmasterAffinity.Eldritch, // 13 Geshunpest
+		BeastmasterAffinity.Rampant,  // 14 Puk
+		BeastmasterAffinity.Durant,   // 15 Crab
+		BeastmasterAffinity.Durant,   // 16 Mantis
+		BeastmasterAffinity.Eldritch, // 17 Slime
+		BeastmasterAffinity.Durant,   // 18 Dullahan
+		BeastmasterAffinity.Volant,   // 19 Bat
+		BeastmasterAffinity.Volant,   // 20 Flying Trap
+		BeastmasterAffinity.Durant,   // 21 Ziz
+		BeastmasterAffinity.Rampant,  // 22 Sabotender
+		BeastmasterAffinity.Eldritch, // 23 Golem
+		BeastmasterAffinity.Durant,   // 24 Apkallu
+		BeastmasterAffinity.Eldritch, // 25 Adamantoise
+		BeastmasterAffinity.Rampant,  // 26 Buffalo
+		BeastmasterAffinity.Durant,   // 27 Uragnite
+		BeastmasterAffinity.Eldritch, // 28 Worm
+		BeastmasterAffinity.Rampant,  // 29 Spriggan
+		BeastmasterAffinity.Rampant,  // 30 Goobbue
+		BeastmasterAffinity.Eldritch, // 31 Gigantoad
+		BeastmasterAffinity.Volant,   // 32 Colibri
+		BeastmasterAffinity.Eldritch, // 33 Coeurl
+		BeastmasterAffinity.Durant,   // 34 Raptor
+		BeastmasterAffinity.Rampant,  // 35 Drake
+		BeastmasterAffinity.Eldritch, // 36 Treant
+		BeastmasterAffinity.Rampant,  // 37 Antling
+		BeastmasterAffinity.Rampant,  // 38 Chimera
+		BeastmasterAffinity.Rampant,  // 39 Morbol
+		BeastmasterAffinity.Volant,   // 40 Ghost
+		BeastmasterAffinity.Durant,   // 41 Salamander
+		BeastmasterAffinity.Durant,   // 42 Cobra
+		BeastmasterAffinity.Durant,   // 43 Hydra
+		BeastmasterAffinity.Volant,   // 44 Damselfly
+		BeastmasterAffinity.Eldritch, // 45 Rotting Goobbue
+		BeastmasterAffinity.Volant,   // 46 Zu
+		BeastmasterAffinity.Durant,   // 47 Ice Golem
+		BeastmasterAffinity.Durant,   // 48 Karlabos
+		BeastmasterAffinity.Eldritch, // 49 Rafflesia
+		BeastmasterAffinity.Eldritch, // 50 Behemoth
+	];
+
+	/// <summary>
+	/// The affinity of a specific Beastmaster pet, or <see cref="BeastmasterAffinity.None"/> when the pet is unknown.
+	/// </summary>
+	public static BeastmasterAffinity AffinityOf(BeastmasterPet pet)
+	{
+		var index = (int)pet;
+		return index > 0 && index < PetAffinities.Length ? PetAffinities[index] : BeastmasterAffinity.None;
+	}
+
+	/// <summary>
+	/// The affinity of the currently summoned Beastmaster pet.
 	/// </summary>
 	public static BeastmasterAffinity BMPetAffinity
 	{
 		get
 		{
 			var dataId = ActivePet?.DataId;
-			if (dataId is null or <= 0 || !XbmPetByDataId.TryGetValue(dataId.Value, out var row))
-			{
-				return BeastmasterAffinity.None;
-			}
-
-			return (uint)row.Unknown5 switch
-			{
-				45186 => BeastmasterAffinity.Durant,
-				45187 => BeastmasterAffinity.Rampant,
-				45188 => BeastmasterAffinity.Rampant,
-				48643 => BeastmasterAffinity.Rampant,
-				48644 => BeastmasterAffinity.Durant,
-				48645 => BeastmasterAffinity.Eldritch,
-				48646 => BeastmasterAffinity.Volant,
-				48647 => BeastmasterAffinity.Eldritch,
-				48648 => BeastmasterAffinity.Durant,
-				49689 => BeastmasterAffinity.Eldritch,
-				49690 => BeastmasterAffinity.Durant,
-				49691 => BeastmasterAffinity.Rampant,
-				49692 => BeastmasterAffinity.Eldritch,
-				49693 => BeastmasterAffinity.Volant,
-				49694 => BeastmasterAffinity.Eldritch,
-				49695 => BeastmasterAffinity.Durant,
-				49696 => BeastmasterAffinity.Rampant,
-				49697 => BeastmasterAffinity.Volant,
-				49698 => BeastmasterAffinity.Volant,
-				_ => BeastmasterAffinity.None
-			};
+			return dataId is null or <= 0 || !XbmPetByDataId.TryGetValue(dataId.Value, out var row)
+				? BeastmasterAffinity.None
+				: AffinityOf((BeastmasterPet)row.RowId);
 		}
 	}
 
@@ -195,12 +240,12 @@ internal static class DataCenter
 
 	public static bool IsActivated()
 	{
-		return Player.Available && (State || IsManual || Service.Config.TeachingMode);
+		return Player.Available && (State || IsManual || Service.Config.TeachingMode) && !PvPAutomationBlocked;
 	}
 
 	public static bool IsActivatedIPC()
 	{
-		return Player.Available && (State || IsManual);
+		return Player.Available && (State || IsManual) && !PvPAutomationBlocked;
 	}
 
 	public static bool PlayerAvailable()
@@ -2685,6 +2730,40 @@ internal static class DataCenter
 			return enabled;
 		}
 	}
+
+	private static bool _autoPvpSeriesGrindCache;
+	private static long _autoPvpSeriesGrindCacheTick = long.MinValue;
+	private const long AutoPvpSeriesGrindTtlMs = 1000;
+
+	public static bool AutoPvpSeriesGrindEnabled
+	{
+		get
+		{
+			var now = Environment.TickCount64;
+			if (_autoPvpSeriesGrindCacheTick != long.MinValue && now - _autoPvpSeriesGrindCacheTick < AutoPvpSeriesGrindTtlMs)
+			{
+				return _autoPvpSeriesGrindCache;
+			}
+
+			var enabled = false;
+			var installedPlugins = Svc.PluginInterface.InstalledPlugins;
+			foreach (var x in installedPlugins)
+			{
+				if ((x.Name.Equals("Auto PVP Series Grind", StringComparison.OrdinalIgnoreCase)
+					|| x.InternalName.Equals("AutoPvpSeriesGrind", StringComparison.OrdinalIgnoreCase)) && x.IsLoaded)
+				{
+					enabled = true;
+					break;
+				}
+			}
+
+			_autoPvpSeriesGrindCache = enabled;
+			_autoPvpSeriesGrindCacheTick = now;
+			return enabled;
+		}
+	}
+
+	public static bool PvPAutomationBlocked => IsPvP && AutoPvpSeriesGrindEnabled;
 
 	public static bool BMRHasActiveModule { get; set; }
 	public static string? BMRActiveModuleName { get; set; }

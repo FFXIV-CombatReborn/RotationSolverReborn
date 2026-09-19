@@ -12,10 +12,6 @@ namespace RotationSolver.UI;
 
 internal class ControlWindow : CtrlWindow
 {
-	public static DateTime DidTime { get; set; }
-	private static bool _isOpen = false;
-	public static bool Opened { get => _isOpen; }
-
 	public ControlWindow()
 		: base(nameof(ControlWindow))
 	{
@@ -25,14 +21,12 @@ internal class ControlWindow : CtrlWindow
 
 	public override void OnOpen()
 	{
-		_isOpen = true;
 		DataCenter.DrawingActions = true;
 		base.OnOpen();
 	}
 
 	public override void OnClose()
 	{
-		_isOpen = false;
 		DataCenter.DrawingActions = false;
 		base.OnClose();
 	}
@@ -90,12 +84,9 @@ internal class ControlWindow : CtrlWindow
 			aoeType = (ConfigTypes.AoEType)(((int)aoeType + 1) % 3);
 			Service.Config.AoEType = aoeType;
 		}
-		// Track whether the style color was pushed
-		var pushedStyleColor = false;
-
 		var isBurst = Service.Config.AutoBurst;
 		// Track whether the style color was pushed
-		pushedStyleColor = false;
+		var pushedStyleColor = false;
 		var color = *ImGui.GetStyleColorVec4(ImGuiCol.TextDisabled);
 
 		if (!isBurst)
@@ -440,9 +431,16 @@ internal class ControlWindow : CtrlWindow
 				var canDoIt = false;
 				if (action is IBaseAction act)
 				{
+					// ForceEnable is global; always restore it, or every action would stay force-enabled if CanUse threw.
 					IBaseAction.ForceEnable = true;
-					canDoIt = act.CanUse(out _, usedUp: true, skipAoeCheck: true);
-					IBaseAction.ForceEnable = false;
+					try
+					{
+						canDoIt = act.CanUse(out _, usedUp: true, skipAoeCheck: true);
+					}
+					finally
+					{
+						IBaseAction.ForceEnable = false;
+					}
 				}
 				else if (action is IBaseItem item)
 				{

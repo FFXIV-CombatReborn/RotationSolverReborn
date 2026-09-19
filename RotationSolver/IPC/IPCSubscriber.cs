@@ -140,7 +140,8 @@ namespace RotationSolver.IPC
 		{
 			var result = action();
 			var check = result.CheckResult();
-			if (!check && result == SetResult.InvalidLease)
+
+			if (!check && result == SetResult.InvalidLease && _curLease.HasValue)
 			{
 				check = action().CheckResult();
 			}
@@ -176,7 +177,7 @@ namespace RotationSolver.IPC
 		{
 			if (Register())
 			{
-				DoThing(() => SetAutoRotationState(_curLease!.Value, false));
+				DoThing(() => _curLease.HasValue ? SetAutoRotationState(_curLease.Value, false) : SetResult.InvalidLease);
 			}
 		}
 
@@ -203,12 +204,22 @@ namespace RotationSolver.IPC
 			_curLease = null;
 		}
 
+		private static readonly TimeSpan RegisterRetryInterval = TimeSpan.FromSeconds(5);
+		private static DateTime _lastRegisterAttempt = DateTime.MinValue;
+
 		private static bool Register()
 		{
 			if (_curLease.HasValue)
 			{
 				return true;
 			}
+
+			var now = DateTime.Now;
+			if (now - _lastRegisterAttempt < RegisterRetryInterval)
+			{
+				return false;
+			}
+			_lastRegisterAttempt = now;
 
 			if (!IsEnabled)
 			{
@@ -227,9 +238,27 @@ namespace RotationSolver.IPC
 
 	internal class IPCSubscriber_Common
 	{
-		internal static bool IsReady(string pluginName) => DalamudReflector.TryGetDalamudPlugin(pluginName, out _, false, true);
+		private static readonly Dictionary<string, (bool Ready, long CheckedAt)> _readyCache = [];
+		private const long ReadyCacheMs = 5000;
 
-		internal static Version Version(string pluginName) => DalamudReflector.TryGetDalamudPlugin(pluginName, out var dalamudPlugin, false, true) ? dalamudPlugin.GetType().Assembly.GetName().Version : new Version(0, 0, 0, 0);
+		internal static bool IsReady(string pluginName)
+		{
+			var now = Environment.TickCount64;
+			lock (_readyCache)
+			{
+				if (_readyCache.TryGetValue(pluginName, out var cached) && now - cached.CheckedAt < ReadyCacheMs)
+				{
+					return cached.Ready;
+				}
+			}
+
+			var ready = DalamudReflector.TryGetDalamudPlugin(pluginName, out _, false, true);
+			lock (_readyCache)
+			{
+				_readyCache[pluginName] = (ready, now);
+			}
+			return ready;
+		}
 
 		internal static void DisposeAll(EzIPCDisposalToken[] _disposalTokens)
 		{

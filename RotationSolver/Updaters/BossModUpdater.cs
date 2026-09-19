@@ -4,18 +4,11 @@ namespace RotationSolver.Updaters;
 
 internal static class BossModUpdater
 {
-	private static bool _checkedAvailability;
-	private static bool _isAvailable;
-
 	public static void Update()
 	{
-		if (!_checkedAvailability)
-		{
-			_isAvailable = BMRTimeline_IPCSubscriber.IsEnabled || BMRInfo_IPCSubscriber.IsEnabled || BMRPlan_IPCSubscriber.IsEnabled;
-			_checkedAvailability = true;
-		}
-
-		if (!_isAvailable)
+		// All BMR subscribers target the same plugin; the readiness check is cached, so polling it
+		// each update picks up BossMod being enabled or disabled after RSR has started.
+		if (!BMRTimeline_IPCSubscriber.IsEnabled)
 		{
 			DataCenter.ResetBmrData();
 			return;
@@ -98,12 +91,6 @@ internal static class BossModUpdater
 		catch
 		{
 			DataCenter.ResetBmrData();
-			_checkedAvailability = false;
 		}
-	}
-
-	public static void ResetAvailabilityCheck()
-	{
-		_checkedAvailability = false;
 	}
 }

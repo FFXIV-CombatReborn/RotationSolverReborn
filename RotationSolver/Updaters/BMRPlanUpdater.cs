@@ -13,13 +13,14 @@ namespace RotationSolver.Updaters;
 internal static class BMRPlanUpdater
 {
 	private static bool _subscribed;
-	private static bool _checkedAvailability;
-	private static bool _isAvailable;
 	private static volatile bool _dirty = true;
 	private static DateTime _lastPoll = DateTime.MinValue;
 
 	// Ids of planned actions already queued for the current activation window, so we don't re-queue every frame.
 	private static readonly HashSet<uint> _queuedActionIds = [];
+
+	// Ids of planned actions whose activation window is open this update.
+	private static readonly HashSet<uint> _activeActionIds = [];
 
 	private static readonly TimeSpan FallbackPollInterval = TimeSpan.FromSeconds(5);
 
@@ -84,16 +85,12 @@ internal static class BMRPlanUpdater
 
 		Enable();
 
-		if (!_checkedAvailability)
-		{
-			_isAvailable = BMRPlan_IPCSubscriber.IsEnabled;
-			_checkedAvailability = true;
-		}
-
-		if (!_isAvailable)
+		// The readiness check is cached, so polling it picks up BossMod loading after RSR.
+		if (!BMRPlan_IPCSubscriber.IsEnabled)
 		{
 			DataCenter.ResetBmrPlanData();
 			_queuedActionIds.Clear();
+			_dirty = true;
 			return;
 		}
 
@@ -110,7 +107,6 @@ internal static class BMRPlanUpdater
 			{
 				PluginLog.Error($"[BMRPlanUpdater] Failed to poll Plan.GetUpcomingActions: {ex}");
 				DataCenter.ResetBmrPlanData();
-				_checkedAvailability = false;
 				return;
 			}
 		}
@@ -126,46 +122,47 @@ internal static class BMRPlanUpdater
 	private static void QueueActiveActions(DateTime now)
 	{
 		var actions = DataCenter.BMRPlannedActions;
-		if (actions.Count == 0)
+		var elapsedSincePoll = (float)(now - _lastPoll).TotalSeconds;
+
+		// The same action can appear several times in a plan (e.g. a cooldown at two timestamps), so
+		// work out which ids are active before forgetting any; otherwise a later, inactive entry would
+		// clear the queued flag of the active one and it would be re-queued every other frame.
+		_activeActionIds.Clear();
+		foreach (var planned in actions)
+		{
+			if (IsActive(planned, elapsedSincePoll, out _))
+			{
+				_ = _activeActionIds.Add(planned.ActionId);
+			}
+		}
+
+		// Ids whose window has closed may be queued again the next time they come up.
+		_queuedActionIds.IntersectWith(_activeActionIds);
+
+		if (_activeActionIds.Count == 0)
 		{
 			return;
 		}
 
-		var elapsedSincePoll = (float)(now - _lastPoll).TotalSeconds;
 		var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
 		var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
 
-		for (var i = 0; i < actions.Count; i++)
+		foreach (var planned in actions)
 		{
-			var planned = actions[i];
-
-			// ActionId 0 means BMR couldn't resolve the plan entry to a concrete action.
-			if (planned.ActionId == 0)
+			if (!IsActive(planned, elapsedSincePoll, out var windowEndIn))
 			{
-				continue;
-			}
-
-			var activationIn = planned.ActivationIn - elapsedSincePoll;
-			var windowEndIn = planned.WindowEndIn - elapsedSincePoll;
-
-			if (activationIn > 0f || windowEndIn <= 0f)
-			{
-				_ = _queuedActionIds.Remove(planned.ActionId);
-				//PluginLog.Debug($"[BMRPlanUpdater] Planned action {planned.ActionId} is not active yet or already expired (ActivationIn: {activationIn:F1}s, WindowEndIn: {windowEndIn:F1}s)");
 				continue;
 			}
 
 			if (!_queuedActionIds.Add(planned.ActionId))
 			{
 				// Already queued for this activation window.
-				//PluginLog.Debug($"[BMRPlanUpdater] Planned action {planned.ActionId} already queued for this activation window.");
 				continue;
 			}
 
 			var matchingAction = ((ActionID)planned.ActionId).GetActionFromID(false, rotationActions, dutyActions);
 			if (matchingAction == null)
 			{
-				//PluginLog.Debug($"[BMRPlanUpdater] No matching action found for planned ActionId {planned.ActionId}");
 				continue;
 			}
 
@@ -174,10 +171,13 @@ internal static class BMRPlanUpdater
 		}
 	}
 
-	public static void ResetAvailabilityCheck()
+	private static bool IsActive(in BMRPlannedAction planned, float elapsedSincePoll, out float windowEndIn)
 	{
-		_checkedAvailability = false;
-		_dirty = true;
+		windowEndIn = planned.WindowEndIn - elapsedSincePoll;
+
+		// ActionId 0 means BMR couldn't resolve the plan entry to a concrete action.
+		return planned.ActionId != 0
+			&& planned.ActivationIn - elapsedSincePoll <= 0f
+			&& windowEndIn > 0f;
 	}
 }
-

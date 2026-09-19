@@ -301,6 +301,12 @@ namespace RotationSolver.Commands
 
 		public static void UpdateState(StateCommandType stateType, JobRole role)
 		{
+			if (DataCenter.PvPAutomationBlocked && stateType != StateCommandType.Off)
+			{
+				Svc.Chat.PrintError("Autorotation is blocked in PvP while 'Auto PVP Series Grind' is enabled.");
+				stateType = StateCommandType.Off;
+			}
+
 			switch (stateType)
 			{
 				case StateCommandType.Off:
@@ -404,6 +410,12 @@ namespace RotationSolver.Commands
 
 		public static void AutodutyUpdateState(StateCommandType stateType, JobRole role, TargetingType targetingType)
 		{
+			if (DataCenter.PvPAutomationBlocked && stateType != StateCommandType.Off)
+			{
+				Svc.Chat.PrintError("Autorotation is blocked in PvP while 'Auto PVP Series Grind' is enabled.");
+				stateType = StateCommandType.Off;
+			}
+
 			switch (stateType)
 			{
 				case StateCommandType.Off:
