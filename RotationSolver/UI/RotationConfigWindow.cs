@@ -43,7 +43,7 @@ public partial class RotationConfigWindow : Window
 
 	private List<IncompatiblePlugin> _crashPlugins = [];
 	private List<IncompatiblePlugin> _enabledIncompatiblePlugins = [];
-	private DiagInfo? _cachedDiagInfo;
+	private static DiagInfo? _cachedDiagInfo;
 	private RotationAttribute _curRotationAttribute = new("Unknown", CombatType.PvE);
 	private ICustomRotation? _currentRotation;
 	private Dictionary<RotationConfigWindowTab, (bool, uint)> _configWindowTabProperties = [];
@@ -58,7 +58,7 @@ public partial class RotationConfigWindow : Window
 	private bool _rsrIconTriggered = false;
 	private const double RsrIconHoldSeconds = 1.2;
 
-	public bool CNLanguageClient => _cachedDiagInfo?.Language.ToString() is "Chinese" or "ChineseSimplified";
+	public static bool CNLanguageClient => _cachedDiagInfo?.Language.ToString() is "Chinese" or "ChineseSimplified";
 
 	private static readonly string[] _supporters =
 	[
@@ -140,6 +140,48 @@ public partial class RotationConfigWindow : Window
 		"Be kind",
 		"You can remove some self-buffs with “/statusoff <Name>” (e.g., Peloton) when needed.",
 		"RSR works best with Legacy Type movement settings."
+	];
+	private static readonly string[] _baseUsageHintsCN =
+	[
+		"右键点击任意动作、设置或开关，可查看/复制其宏聊天命令。",
+		"使用 /rsr 作为 /rotation 的简短别名。",
+		"使用 /rotation Auto、/rotation Manual 或 /rotation Off 快速切换模式。",
+		"使用搜索框（左上角）直接跳转到设置。",
+		"点击搜索结果中的外链图标，可跳转到该菜单。",
+		"右键点击设置标签，可复制一条可直接使用的 /rotation Settings 命令。",
+		"技能 标签页：点击动作图标可配置、启用/禁用或设置热键。",
+		"技能：切换 '在冷却窗口中显示'，将某个动作加入冷却覆盖层。",
+		"技能：启用 'Intercepted'，让 RSR 施放你排队的动作（仅 PvE）。",
+		"界面 > 信息：启用 DTR 状态、通知、原始冷却显示以及这些提示。",
+		"界面 > 窗口：启用 Next Action、Control、Cooldown 和 Timeline 窗口。",
+		"Next Action：'No Inputs' 和 'No Move' 选项会改变覆盖层行为。",
+		"仅在副本中或附近有敌人时显示窗口：UI > Windows > Only show with hostile or in duty。",
+		"列表 标签页：管理驱散、优先级状态、击退、无敌和禁止施法列表。",
+		"列表 标签页：使用 'Reset and Update' 快速恢复精选列表。",
+		"状态列表：点击 '+' 可按名称或 ID 搜索；支持模糊搜索。",
+		"状态列表：右键点击图标可移除；在弹出窗口中也可用 Delete 键。",
+		"目标 标签页：调整目标选择、视野锥、接敌行为以及木桩/Boss 处理。",
+		"目标 标签页：设置 /rotation Cycle 行为和目标选择延迟。",
+		"通过聊天管理 TargetingTypes：/rotation Settings TargetingTypes add|remove <Type>。",
+		"自动 > 动作使用与控制：允许/禁止 oGCD，设置 AoE 风格、爆发药、打断和 True North。",
+		"自动 > 治疗用与控制：调整阈值和非治疗职业的治疗行为。",
+		"治疗职业：在 自动 > 治疗用与控制 中自定义 复活/即刻咏唱 和优先级。",
+		"地面 AoE：自动 > 治疗用与控制 中有选项可智能放置有益地面技能。",
+		"基础 > 计时器：调整 Action Ahead 和 Min Updating Time，以平衡性能与插入技能。",
+		"基础 > 自动切换：根据倒计时、死亡、区域切换等自动开启/关闭。",
+		"教学模式 会高亮目标；颜色在 界面 > 信息 中设置。",
+		"职业 标签页：在对应职业时编辑 DNC 舞伴、SGE 心关 坦克和 AST 卡片优先级。",
+		"关于 > 宏 列出了可用的聊天/宏命令和实用语法。",
+		"关于 > 链接：打开配置文件夹、GitHub、Ko-fi 和 Discord。",
+		"额外 > 内部：安全地备份/恢复配置。",
+		"额外：可选调整，例如移除动画/冷却延迟。",
+		"点击侧边栏左下角的立方体图标，将诊断信息复制到剪贴板。",
+		"时间线 窗口可可视化最近动作（界面 > 窗口）。",
+		"打出伤害，别死",
+		"治疗：唯一重要的 HP 就是最后一点",
+		"友善待人",
+		"需要时可以用“/statusoff <Name>”移除某些自身增益（例如 速行）。",
+		"RSR在 Legacy Type 移动设置下效果最佳。"
 	];
 	private int _hintIndex = 0;
 	private float _lastHintSwitch = 0f;
@@ -998,9 +1040,19 @@ public partial class RotationConfigWindow : Window
 			return $"Special thanks to supporter: {supporter}!";
 		}
 		// Defensive: fallback to base hints if index is valid, else a default message.
-		if (_baseUsageHints != null && _baseUsageHints.Length > 0 && index >= 0 && index < _baseUsageHints.Length)
+		if(CNLanguageClient)
 		{
-			return _baseUsageHints[index];
+			if (_baseUsageHintsCN != null && _baseUsageHintsCN.Length > 0 && index >= 0 && index < _baseUsageHintsCN.Length)
+			{
+				return _baseUsageHintsCN[index];
+			}
+		}
+		else
+		{
+			if (_baseUsageHints != null && _baseUsageHints.Length > 0 && index >= 0 && index < _baseUsageHints.Length)
+			{
+				return _baseUsageHints[index];
+			}
 		}
 		return "Thank you for using Rotation Solver Reborn!";
 	}
@@ -1094,9 +1146,18 @@ public partial class RotationConfigWindow : Window
 		{
 			return;
 		}
-		if (_baseUsageHints == null || _baseUsageHints.Length == 0)
+		if (CNLanguageClient)
 		{
-			return;
+			if (_baseUsageHintsCN == null || _baseUsageHintsCN.Length == 0)
+			{
+				return;
+			}
+		}
+		else {
+			if (_baseUsageHints == null || _baseUsageHints.Length == 0)
+			{
+				return;
+			}
 		}
 
 		// Advance hint periodically when no errors are present (so warnings don't rapidly cycle tips).
@@ -1108,7 +1169,7 @@ public partial class RotationConfigWindow : Window
 			{
 				_lastHintSwitch = now;
 				_hintIndex++;
-				if (_hintIndex >= _baseUsageHints.Length)
+				if (_hintIndex >= (CNLanguageClient? _baseUsageHintsCN.Length: _baseUsageHints.Length))
 				{
 					_hintIndex = 0;
 				}
@@ -1139,7 +1200,7 @@ public partial class RotationConfigWindow : Window
 			ImGui.TextWrapped(_cachedTipText);
 			if (ImGui.IsItemHovered())
 			{
-				ImguiTooltips.HoveredTooltip("Right-click to copy this tip.");
+				ImguiTooltips.HoveredTooltip(CNLanguageClient ? "右键复制该提示。" : "Right-click to copy this tip.");
 				if (ImGui.IsMouseReleased(ImGuiMouseButton.Right))
 				{
 					try
@@ -1745,7 +1806,7 @@ public partial class RotationConfigWindow : Window
 		}
 
 		ImGui.Spacing();
-		if (ImGui.Button("Open First Start Tutorial"))
+		if (ImGui.Button(CNLanguageClient ? "打开初次启动向导" : "Open First Start Tutorial"))
 		{
 			Service.Config.TutorialDone = false;
 		}
