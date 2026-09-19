@@ -342,11 +342,7 @@ public static class IconSet
 	/// <returns>The icon ID for the job.</returns>
 	public static uint GetJobIcon(Job job)
 	{
-		var classJobSheet = Svc.Data.GetExcelSheet<ClassJob>();
-		if (classJobSheet == null)
-		{
-			throw new InvalidOperationException("ClassJob sheet not found.");
-		}
+		var classJobSheet = Svc.Data.GetExcelSheet<ClassJob>() ?? throw new InvalidOperationException("ClassJob sheet not found.");
 
 		var classJobRow = classJobSheet.GetRow((uint)job);
 		return classJobRow.RowId == 0

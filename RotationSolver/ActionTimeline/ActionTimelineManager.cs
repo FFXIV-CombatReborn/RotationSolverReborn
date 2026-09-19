@@ -19,6 +19,15 @@ public class ActionTimelineManager : IDisposable
 	private static ActionTimelineManager? _instance;
 	public static ActionTimelineManager Instance => _instance ??= new ActionTimelineManager();
 
+	/// <summary>
+	///
+	/// </summary>
+	public static void DisposeInstance()
+	{
+		_instance?.Dispose();
+		_instance = null;
+	}
+
 	private readonly Queue<TimelineItem> _items = new(2048);
 	private TimelineItem? _lastItem;
 	private DateTime _lastTime = DateTime.MinValue;
@@ -31,12 +40,6 @@ public class ActionTimelineManager : IDisposable
 	private readonly Hook<OnActorControlDelegate>? _onActorControlHook;
 #pragma warning restore CS0649
 
-	private delegate void OnCastDelegate(uint sourceId, IntPtr sourceCharacter);
-	[Signature("40 53 57 48 81 EC ?? ?? ?? ?? 48 8B FA 8B D1", DetourName = nameof(OnCast))]
-#pragma warning disable CS0649
-	private readonly Hook<OnCastDelegate>? _onCastHook;
-#pragma warning restore CS0649
-
 	public DateTime EndTime { get; private set; } = DateTime.Now;
 
 	private ActionTimelineManager()
@@ -45,7 +48,6 @@ public class ActionTimelineManager : IDisposable
 		{
 			Svc.Hook.InitializeFromAttributes(this);
 			_onActorControlHook?.Enable();
-			_onCastHook?.Enable();
 			ActionEffect.ActionEffectEvent += ActionFromSelf;
 		}
 		catch (Exception e)
@@ -60,8 +62,6 @@ public class ActionTimelineManager : IDisposable
 		ActionEffect.ActionEffectEvent -= ActionFromSelf;
 		_onActorControlHook?.Disable();
 		_onActorControlHook?.Dispose();
-		_onCastHook?.Disable();
-		_onCastHook?.Dispose();
 		GC.SuppressFinalize(this);
 	}
 
@@ -87,9 +87,9 @@ public class ActionTimelineManager : IDisposable
 		}
 
 		var isRealGcd = action.CooldownGroup == GCDCooldownGroup || action.AdditionalCooldownGroup == GCDCooldownGroup;
-		return action.ActionCategory.Value.RowId == 1 // AutoAttack
+		return action.ActionCategory.RowId == 1 // AutoAttack
 			? TimelineItemType.AutoAttack
-			: !isRealGcd && action.ActionCategory.Value.RowId == 4 ? TimelineItemType.OGCD // Ability
+			: !isRealGcd && action.ActionCategory.RowId == 4 ? TimelineItemType.OGCD // Ability
 			: TimelineItemType.GCD;
 	}
 
@@ -219,12 +219,6 @@ public class ActionTimelineManager : IDisposable
 		{
 			Svc.Log.Error($"Error in OnActorControl: {ex.Message}");
 		}
-	}
-
-	private void OnCast(uint sourceId, IntPtr sourceCharacter)
-	{
-		_onCastHook?.Original(sourceId, sourceCharacter);
-		// Additional cast handling could go here
 	}
 
 	/// <summary>

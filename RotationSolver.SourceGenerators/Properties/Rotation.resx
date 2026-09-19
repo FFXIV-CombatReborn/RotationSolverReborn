@@ -36631,7 +36631,7 @@ public abstract partial class BeastmasterRotation : CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/46751"&gt;&lt;strong&gt;Snarl&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (BST) [46751] [Ability]
-    /// &lt;para&gt;Orders your familiar to use Threaten placing it at the top of a target's enmity list and increasing its enmity generation. Additional Effect: Takes all damage intended for the beastmaster Duration: 45s&lt;/para&gt;
+    /// &lt;para&gt;Orders your familiar to use Threaten placing it at the top of a target's enmity list and increasing its enmity generation. Duration: 15s Additional Effect: Takes all damage intended for the beastmaster Duration: 45s Additional Effect: Removes Enmity Up&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction SnarlPvE =&gt; _SnarlPvECreator.Value;

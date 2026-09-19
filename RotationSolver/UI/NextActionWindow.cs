@@ -109,18 +109,8 @@ internal class NextActionWindow : Window
 				return;
 			}
 
-			uint suggestedTargetId;
-			try
-			{
-				suggestedTargetId = (uint)suggestedTarget.GameObjectId;
-			}
-			catch
-			{
-				// Target became invalid or corrupted in memory
-				return;
-			}
-
-			var isCurrentTarget = Svc.Targets.Target?.GameObjectId == suggestedTarget.GameObjectId;
+			var suggestedTargetId = suggestedTarget.GameObjectId;
+			var isCurrentTarget = Svc.Targets.Target?.GameObjectId == suggestedTargetId;
 			var isSelf = suggestedTargetId == (Player.Object?.GameObjectId ?? 0);
 
 			var label = $"Target: {name}";
@@ -170,10 +160,10 @@ internal class NextActionWindow : Window
 		var cursor = ImGui.GetCursorPos() + ImGui.GetWindowPos();
 		var height = Service.Config.ControlProgressHeight;
 
-		ImGui.ProgressBar(elapsed / total, new Vector2(width, height), string.Empty);
+		// Total is 0 before the first GCD is used; avoid feeding NaN to the progress bar.
+		ImGui.ProgressBar(total > 0 ? elapsed / total : 0f, new Vector2(width, height), string.Empty);
 
-		var actionRemain = DataCenter.DefaultGCDRemain;
-		if (actionRemain > 0)
+		if (remain > 0 && total > 0)
 		{
 			var value = total - DataCenter.CalculatedActionAhead;
 

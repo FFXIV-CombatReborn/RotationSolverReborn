@@ -66,13 +66,13 @@ internal static class BMRTimeline_IPCSubscriber
 	internal static readonly Func<Vector3, bool>? IsPositionSafe;
 
 	/// <summary>
-	/// Returns true if the dash from <paramref name="from"/> to <paramref name="to"/> is safe.
+	/// Returns true if the dash from <c>from</c> to <c>to</c> is safe.
 	/// </summary>
 	[EzIPC("Hints.IsDashSafe", true)]
 	internal static readonly Func<Vector3, Vector3, bool>? IsDashSafe;
 
 	/// <summary>
-	/// Returns true if a fixed-distance dash (destination determined by the game) from <paramref name="from"/> to <paramref name="to"/> is safe.
+	/// Returns true if a fixed-distance dash (destination determined by the game) from <c>from</c> to <c>to</c> is safe.
 	/// Unlike <see cref="IsDashSafe"/>, this is used for dashes whose endpoint is not freely chosen by the player.
 	/// </summary>
 	[EzIPC("Hints.IsFixedDashSafe", true)]

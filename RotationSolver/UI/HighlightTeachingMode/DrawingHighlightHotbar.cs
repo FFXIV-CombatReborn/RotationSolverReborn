@@ -1,7 +1,6 @@
 ﻿using Dalamud.Interface.Textures;
 using Dalamud.Interface.Textures.TextureWraps;
 using ECommons.DalamudServices;
-using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -59,83 +58,140 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 	/// <summary> The action ids that </summary>
 	public HashSet<HotbarID> HotbarIDs { get; } = [];
 
+	/// <summary>
+	/// The ids the drawings are currently built from. <see cref="HotbarHighlightManager"/> sets this from
+	/// the decision being shown, which can lag <see cref="HotbarIDs"/> so a short-lived choice stays visible.
+	/// </summary>
+	private readonly HashSet<HotbarID> _displayIds = [];
+
+	internal void SetDisplayIds(IEnumerable<HotbarID> ids)
+	{
+		_displayIds.Clear();
+		foreach (var id in ids)
+		{
+			_ = _displayIds.Add(id);
+		}
+	}
+
 	private protected override unsafe IEnumerable<IDrawing2D> To2D()
 	{
-		if (_texture == null)
+		if (_texture == null || _displayIds.Count == 0)
+		{
+			return [];
+		}
+
+		var framework = Framework.Instance();
+		var uiModule = framework == null ? null : framework->GetUIModule();
+		var raptureModule = uiModule == null ? null : uiModule->GetRaptureHotbarModule();
+		var actionManager = ActionManager.Instance();
+		if (raptureModule == null || actionManager == null)
 		{
 			return [];
 		}
 
 		List<IDrawing2D> result = [];
+		var color = ImGui.ColorConvertFloat4ToU32(Color);
 
-		var hotBarIndex = 0;
-		foreach (var intPtr in EnumerateHotbarAddons())
+		HotbarAddonHelper.GetHotbarAddons(_addons);
+
+		var hotBarIndex = -1;
+		foreach (var intPtr in _addons)
 		{
+			hotBarIndex++;
+
 			var actionBar = (AddonActionBarBase*)intPtr;
-			if (actionBar != null && IsVisible(actionBar->AtkUnitBase))
+			if (!HotbarAddonHelper.IsVisible(&actionBar->AtkUnitBase))
 			{
-				var s = actionBar->AtkUnitBase.Scale;
-
-				var isCrossBar = hotBarIndex > 9;
-				if (isCrossBar)
-				{
-					if (hotBarIndex == 10)
-					{
-						var actBar = (AddonActionCross*)intPtr;
-						hotBarIndex = actBar->RaptureHotbarId;
-					}
-					else
-					{
-						var actBar = (AddonActionDoubleCrossBase*)intPtr;
-						hotBarIndex = actBar->BarTarget;
-					}
-				}
-				var hotBar = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule()->Hotbars[hotBarIndex];
-
-				var slotIndex = 0;
-				foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
-				{
-					var iconAddon = slot.Icon;
-					if ((nint)iconAddon != nint.Zero && IsVisible(&iconAddon->AtkResNode))
-					{
-						AtkResNode node = default;
-						var bar = hotBar.Slots[slotIndex];
-
-						if (isCrossBar)
-						{
-							var manager = slot.Icon->AtkResNode.ParentNode->GetAsAtkComponentNode()->Component->UldManager.NodeList[2]->GetAsAtkComponentNode()->Component->UldManager;
-
-							for (var i = 0; i < manager.NodeListCount; i++)
-							{
-								node = *manager.NodeList[i];
-								if (node.Width == 72)
-								{
-									break;
-								}
-							}
-						}
-						else
-						{
-							node = *slot.Icon->AtkResNode.ParentNode->ParentNode;
-						}
-
-						if (IsActionSlotRight(slot, bar))
-						{
-							Vector2 pt1 = new(node.ScreenX, node.ScreenY);
-							var pt2 = pt1 + new Vector2(node.Width * s, node.Height * s);
-
-							result.Add(new ImageDrawing(_texture, pt1, pt2, _uv1, _uv2, ImGui.ColorConvertFloat4ToU32(Color)));
-						}
-					}
-
-					slotIndex++;
-				}
+				continue;
 			}
 
-			hotBarIndex++;
+			var s = actionBar->AtkUnitBase.Scale;
+
+			// Resolve the RaptureHotbarModule index separately so the addon counter stays intact.
+			var isCrossBar = hotBarIndex > 9;
+			var resolvedHotbarIndex = hotBarIndex;
+			if (isCrossBar)
+			{
+				resolvedHotbarIndex = hotBarIndex == 10
+					? ((AddonActionCross*)intPtr)->RaptureHotbarId
+					: ((AddonActionDoubleCrossBase*)intPtr)->BarTarget;
+			}
+
+			if (resolvedHotbarIndex < 0 || resolvedHotbarIndex >= raptureModule->Hotbars.Length)
+			{
+				continue;
+			}
+
+			var hotBar = raptureModule->Hotbars[resolvedHotbarIndex];
+
+			var slotIndex = -1;
+			foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
+			{
+				slotIndex++;
+
+				var iconAddon = slot.Icon;
+				if (iconAddon == null || (uint)slotIndex >= hotBar.Slots.Length
+					|| !IsActionSlotRight(actionManager, slot, hotBar.Slots[slotIndex])
+					|| !HotbarAddonHelper.IsVisible(&iconAddon->AtkResNode))
+				{
+					continue;
+				}
+
+				var node = isCrossBar ? FindCrossBarFrameNode(iconAddon) : GetGrandParent(iconAddon);
+				if (node == null)
+				{
+					continue;
+				}
+
+				Vector2 pt1 = new(node->ScreenX, node->ScreenY);
+				var pt2 = pt1 + new Vector2(node->Width * s, node->Height * s);
+
+				result.Add(new ImageDrawing(_texture, pt1, pt2, _uv1, _uv2, color));
+			}
 		}
 
 		return result;
+	}
+
+	private static unsafe AtkResNode* GetGrandParent(AtkComponentNode* iconAddon)
+	{
+		var parent = iconAddon->AtkResNode.ParentNode;
+		return parent == null ? null : parent->ParentNode;
+	}
+
+	private static unsafe AtkResNode* FindCrossBarFrameNode(AtkComponentNode* iconAddon)
+	{
+		var parent = iconAddon->AtkResNode.ParentNode;
+		var parentComponent = parent == null ? null : parent->GetAsAtkComponentNode();
+		if (parentComponent == null || parentComponent->Component == null)
+		{
+			return null;
+		}
+
+		var parentUld = parentComponent->Component->UldManager;
+		if (parentUld.NodeListCount <= 2 || parentUld.NodeList[2] == null)
+		{
+			return null;
+		}
+
+		var frameComponent = parentUld.NodeList[2]->GetAsAtkComponentNode();
+		if (frameComponent == null || frameComponent->Component == null)
+		{
+			return null;
+		}
+
+		var manager = frameComponent->Component->UldManager;
+		AtkResNode* node = null;
+		for (var i = 0; i < manager.NodeListCount; i++)
+		{
+			node = manager.NodeList[i];
+			if (node != null && node->Width == 72)
+			{
+				break;
+			}
+		}
+
+		return node;
 	}
 
 	/// <inheritdoc />
@@ -149,78 +205,21 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 
 	private static IDalamudTextureWrap? _texture = null;
 
-	private static unsafe List<nint> GetAddons<T>() where T : struct
-	{
-		var attr = typeof(T).GetCustomAttribute<AddonAttribute>();
-		if (attr is not AddonAttribute on)
-		{
-			return [];
-		}
+	// Own buffer, only used from the framework thread via HotbarHighlightManager.UpdateElements.
+	private readonly List<nint> _addons = [];
 
-		List<nint> result = [];
-		foreach (var str in on.AddonIdentifiers)
-		{
-			var ptr = Svc.GameGui.GetAddonByName(str, 1);
-			if (ptr != nint.Zero)
-			{
-				result.Add(ptr);
-			}
-		}
-		return result;
+	/// <summary>
+	/// Releases the shared highlight texture. Call on plugin shutdown.
+	/// </summary>
+	internal static void DisposeTexture()
+	{
+		_texture?.Dispose();
+		_texture = null;
 	}
-
-	private static unsafe bool IsVisible(AtkUnitBase unit)
+	private unsafe bool IsActionSlotRight(ActionManager* actionManager, ActionBarSlot slot, HotbarSlot hot)
 	{
-		if (!unit.IsVisible)
-		{
-			return false;
-		}
-
-		return unit.VisibilityFlags != 1 && IsVisible(unit.RootNode);
-	}
-
-	private static IEnumerable<nint> EnumerateHotbarAddons()
-	{
-		foreach (var a in GetAddons<AddonActionBar>())
-		{
-			yield return a;
-		}
-
-		foreach (var a in GetAddons<AddonActionBarX>())
-		{
-			yield return a;
-		}
-
-		foreach (var a in GetAddons<AddonActionCross>())
-		{
-			yield return a;
-		}
-
-		foreach (var a in GetAddons<AddonActionDoubleCrossBase>())
-		{
-			yield return a;
-		}
-	}
-
-	private static unsafe bool IsVisible(AtkResNode* node)
-	{
-		while (node != null)
-		{
-			if (!node->IsVisible())
-			{
-				return false;
-			}
-
-			node = node->ParentNode;
-		}
-
-		return true;
-	}
-
-	private unsafe bool IsActionSlotRight(ActionBarSlot slot, HotbarSlot hot)
-	{
-		var actionId = ActionManager.Instance()->GetAdjustedActionId((uint)slot.ActionId);
-		foreach (var hotbarId in HotbarIDs)
+		var actionId = actionManager->GetAdjustedActionId((uint)slot.ActionId);
+		foreach (var hotbarId in _displayIds)
 		{
 			if (hot.OriginalApparentSlotType != hotbarId.SlotType)
 			{

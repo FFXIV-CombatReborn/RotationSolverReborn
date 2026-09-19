@@ -7,7 +7,7 @@ namespace RotationSolver.Basic.Rotations.Basic;
 /// <summary>
 ///
 /// </summary>
-[StructLayout(LayoutKind.Explicit, Size = 0x10)]
+[StructLayout(LayoutKind.Explicit, Size = 0x18)]
 public struct TempGauge
 {
 	/// <summary>
@@ -599,7 +599,7 @@ public partial class BeastmasterRotation
 	/// <summary>
 	///
 	/// </summary>
-	public unsafe int MasteredInstinct => (TjobGauge->Instinct & 0xC) >> 2;
+	public static unsafe int MasteredInstinct => (TjobGauge->Instinct & 0xC) >> 2;
 
 	/// <summary>
 	///
@@ -617,7 +617,7 @@ public partial class BeastmasterRotation
 	/// <summary>
 	///
 	/// </summary>
-	public unsafe int NaturalInstinct => TjobGauge->Instinct & 0x3;
+	public static unsafe int NaturalInstinct => TjobGauge->Instinct & 0x3;
 
 	/// <summary>
 	///
@@ -753,37 +753,78 @@ public partial class BeastmasterRotation
 	public static BeastmasterAffinity BMPetAffinity => DataCenter.BMPetAffinity;
 
 	/// <summary>
-	///
+	/// The affinity of the pet on the active Battlehorn, i.e. the Heart status its Trick will grant.
 	/// </summary>
 	public static BeastmasterAffinity CurrentPetAffinity()
 	{
-		if (CurrentPet == BeastmasterPet.None)
-		{
-			return BeastmasterAffinity.None;
-		}
-
-		if (CurrentPet == BeastmasterPet.CuSith)
-		{
-			return BeastmasterAffinity.Volant;
-		}
-
-		if (CurrentPet == BeastmasterPet.None)
-		{
-			return BeastmasterAffinity.Rampant;
-		}
-
-		if (CurrentPet == BeastmasterPet.None)
-		{
-			return BeastmasterAffinity.Durant;
-		}
-
-		if (CurrentPet == BeastmasterPet.None)
-		{
-			return BeastmasterAffinity.Eldritch;
-		}
-
-		return BeastmasterAffinity.None;
+		return DataCenter.AffinityOf(CurrentPet);
 	}
+
+	/// <summary>
+	/// The Instinctual axe that consumes the Heart granted by <paramref name="affinity"/>, i.e. the axe that
+	/// should follow a Trick from a pet of that affinity. <see cref="ActionID.None"/> for an unknown affinity.
+	/// </summary>
+	public static ActionID InstinctualAxeAfter(BeastmasterAffinity affinity)
+	{
+		return affinity switch
+		{
+			BeastmasterAffinity.Volant => ActionID.AvalancheAxePvE,
+			BeastmasterAffinity.Rampant => ActionID.MistralAxePvE,
+			BeastmasterAffinity.Durant => ActionID.SpinningAxePvE,
+			BeastmasterAffinity.Eldritch => ActionID.GaleAxePvE,
+			_ => ActionID.None,
+		};
+	}
+
+	/// <summary>
+	/// The Instinctual axe that should follow the current pet's Trick.
+	/// </summary>
+	public static ActionID NextInstinctualAxe => InstinctualAxeAfter(CurrentPetAffinity());
+
+	/// <summary>
+	/// TP restored by Rally / Rallying Cheer for a given number of Instinct stacks.
+	/// </summary>
+	public static int TPRestoredByStacks(int stacks)
+	{
+		return 40 + (stacks * 70);
+	}
+
+	/// <summary>
+	/// TP Rally would restore right now, based on <see cref="MasteredInstinct"/>.
+	/// </summary>
+	public static int RallyTPRestore => TPRestoredByStacks(MasteredInstinct);
+
+	/// <summary>
+	/// Pet TP Rallying Cheer would restore right now, based on <see cref="NaturalInstinct"/>.
+	/// </summary>
+	public static int RallyingCheerTPRestore => TPRestoredByStacks(NaturalInstinct);
+
+	/// <summary>
+	///
+	/// </summary>
+	public static unsafe bool RallyReady => ActionManager.Instance()->GetActionStatus(ActionType.Action, (uint)ActionID.RallyPvE) == 0;
+
+	/// <summary>
+	///
+	/// </summary>
+	public static unsafe bool RallyingCheerReady => ActionManager.Instance()->GetActionStatus(ActionType.Action, (uint)ActionID.RallyingCheerPvE) == 0;
+
+	/// <summary>
+	/// True when no Battlehorn is left to swap to.
+	/// </summary>
+	public static bool OnLastHorn => !AnyBattlehornReady;
+
+	/// <summary>
+	/// True when everything the level 100 Instinctual finisher needs is up: both TP bars full, both Rally
+	/// cooldowns available, and enough Instinct stacks banked to refill the bars mid-burst.
+	/// </summary>
+	public static bool FinisherReady => InstinctualMasteryTrait.EnoughLevel
+		&& MasteredInstinct >= 2
+		&& NaturalInstinct >= 1
+		&& TPCount >= 100
+		&& PetTPCount >= 100
+		&& RallyReady
+		&& RallyingCheerReady;
 
 	/// <summary>
 	///
@@ -1047,26 +1088,33 @@ public partial class BeastmasterRotation
 	/// <inheritdoc/>
 	public override void DisplayBaseStatus()
 	{
-		ImGui.Text("First Battlehorn: " + GetPetName(CurrentPets[0]));
-		ImGui.Text("Second Battlehorn: " + GetPetName(CurrentPets[1]));
-		ImGui.Text("Third Battlehorn: " + GetPetName(CurrentPets[2]));
+		var pets = CurrentPets;
+		ImGui.Text("First Battlehorn: " + (pets.Length > 0 ? GetPetName(pets[0]) : string.Empty));
+		ImGui.Text("Second Battlehorn: " + (pets.Length > 1 ? GetPetName(pets[1]) : string.Empty));
+		ImGui.Text("Third Battlehorn: " + (pets.Length > 2 ? GetPetName(pets[2]) : string.Empty));
 		ImGui.Text("ActiveBattlehorn: " + ActiveBattlehorn.ToString());
-		ImGui.Spacing();
+		ImGui.Text("OnLastHorn: " + OnLastHorn.ToString());
+		ImGui.Separator();
 		ImGui.Text("Current Pet: " + CurrentPet.ToString());
-		//ImGui.Text("Current Pet Affinity: " + BMPetAffinity.ToString());
-		//ImGui.Text("Current Pet Kintype: " + BMPetKinType.ToString());
-		ImGui.Spacing();
+		ImGui.Text("Current Pet Affinity: " + CurrentPetAffinity().ToString());
+		//ImGui.Text("Summoned Pet Affinity: " + BMPetAffinity.ToString());
+		//ImGui.Text("Summoned Pet Kintype: " + BMPetKinType.ToString());
+		ImGui.Text("Next Instinctual Axe: " + NextInstinctualAxe.ToString());
+		ImGui.Separator();
 		ImGui.Text("TPCount: " + TPCount.ToString());
 		ImGui.Text("PetTPCount: " + PetTPCount.ToString());
-		ImGui.Spacing();
+		ImGui.Separator();
 		ImGui.Text("MasteredInstinct: " + MasteredInstinct.ToString());
 		ImGui.Text("NaturalInstinct: " + NaturalInstinct.ToString());
-		ImGui.Spacing();
+		ImGui.Text("Rally restores: " + RallyTPRestore.ToString() + " (ready: " + RallyReady.ToString() + ")");
+		ImGui.Text("Rallying Cheer restores: " + RallyingCheerTPRestore.ToString() + " (ready: " + RallyingCheerReady.ToString() + ")");
+		ImGui.Text("FinisherReady: " + FinisherReady.ToString());
+		ImGui.Separator();
 		ImGui.Text("FamiliarTPAtLastUse: " + FamiliarTPAtLastUse.ToString());
 		ImGui.Text("InstinctualComboState: " + InstinctualComboState.ToString());
 		ImGui.Text("CurrentAffinity: " + CurrentAffinity.ToString());
 		ImGui.Text("ChainCount: " + ChainCount.ToString());
-		ImGui.Spacing();
+		ImGui.Separator();
 		ImGui.Text("KinshipState: " + KinshipStateText.ToString());
 		ImGui.Text("KinshipKinType : " + KinshipKinType.ToString());
 		ImGui.Text("KinshipBattlehorn: " + KinshipBattlehorn.ToString());

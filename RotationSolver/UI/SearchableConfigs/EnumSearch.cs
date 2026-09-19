@@ -15,7 +15,32 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 		set => _property.SetValue(Service.Config, Enum.ToObject(_property.PropertyType, value));
 	}
 
-	private string Popup_Key => $"Rotation Solver RightClicking Enum##{ID}_{GetHashCode()}";
+	private string Popup_Key => _popupKey ??= $"Rotation Solver RightClicking Enum##{ID}_{GetHashCode()}";
+	private string? _popupKey;
+
+	// Enum values and descriptions never change, so build the combo contents once instead of every frame.
+	private int[]? _enumKeys;
+	private string[]? _displayNames;
+	private float _maxDisplayNameWidth = -1f;
+	private float _measuredFontSize;
+
+	private void EnsureEnumCache()
+	{
+		if (_enumKeys != null)
+		{
+			return;
+		}
+
+		// Keyed by value so aliases collapse to one entry, matching the previous per-frame behavior.
+		Dictionary<int, string> enumValueToNameMap = [];
+		foreach (Enum enumValue in Enum.GetValues(_property.PropertyType))
+		{
+			enumValueToNameMap[Convert.ToInt32(enumValue)] = enumValue.GetDescription();
+		}
+
+		_enumKeys = [.. enumValueToNameMap.Keys];
+		_displayNames = [.. enumValueToNameMap.Values];
+	}
 
 	public override unsafe void Draw()
 	{
@@ -198,40 +223,33 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 	{
 		var currentValue = Value;
 
-		// Create a map of enum values to their descriptions
-		Dictionary<int, string> enumValueToNameMap = [];
-		foreach (Enum enumValue in Enum.GetValues(_property.PropertyType))
-		{
-			enumValueToNameMap[Convert.ToInt32(enumValue)] = enumValue.GetDescription();
-		}
-
-		string[] displayNames;
-		{
-			displayNames = new string[enumValueToNameMap.Count];
-			var idx = 0;
-			foreach (var kv in enumValueToNameMap)
-			{
-				displayNames[idx++] = kv.Value;
-			}
-		}
+		EnsureEnumCache();
+		var enumKeys = _enumKeys!;
+		var displayNames = _displayNames!;
 
 		var name = Name;
 		var drawLabelAbove = false;
 
 		if (displayNames.Length > 0)
 		{
-			// Set the width of the combo box
-			var maxText = 0f;
-			for (var i = 0; i < displayNames.Length; i++)
+			// Set the width of the combo box (text widths only change with the font, so re-measure only then)
+			var fontSize = ImGui.GetFontSize();
+			if (_maxDisplayNameWidth < 0f || fontSize != _measuredFontSize)
 			{
-				var w = ImGui.CalcTextSize(displayNames[i]).X;
-				if (w > maxText)
+				_measuredFontSize = fontSize;
+				var maxText = 0f;
+				for (var i = 0; i < displayNames.Length; i++)
 				{
-					maxText = w;
+					var w = ImGui.CalcTextSize(displayNames[i]).X;
+					if (w > maxText)
+					{
+						maxText = w;
+					}
 				}
+				_maxDisplayNameWidth = maxText;
 			}
 
-			var comboWidth = Math.Max(maxText + 30, DRAG_WIDTH) * Scale;
+			var comboWidth = Math.Max(_maxDisplayNameWidth + 30, DRAG_WIDTH) * Scale;
 
 			if (!string.IsNullOrEmpty(name))
 			{
@@ -253,43 +271,17 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 
 			ImGui.SetNextItemWidth(comboWidth);
 
-			// Find the current index of the selected value
-			var currentIndex = 0;
-			var tmpIdx = 0;
-			var found = false;
-			foreach (var kv in enumValueToNameMap)
-			{
-				if (kv.Key == currentValue)
-				{
-					currentIndex = tmpIdx;
-					found = true;
-					break;
-				}
-				tmpIdx++;
-			}
-			if (!found)
-			{
-				currentIndex = 0; // Default to first item if not found
-			}
+			// Find the current index of the selected value, defaulting to the first item if not found
+			var currentIndex = Math.Max(0, Array.IndexOf(enumKeys, currentValue));
 
 			// Cache the hash code to avoid multiple calls
 			var hashCode = GetHashCode();
 
 			// Draw the combo box
-			if (ImGui.Combo($"##Config_{ID}{hashCode}", ref currentIndex, displayNames, displayNames.Length))
+			if (ImGui.Combo($"##Config_{ID}{hashCode}", ref currentIndex, displayNames, displayNames.Length)
+				&& currentIndex >= 0 && currentIndex < enumKeys.Length)
 			{
-				var i = 0;
-				var selectedKey = currentValue;
-				foreach (var kv in enumValueToNameMap)
-				{
-					if (i == currentIndex)
-					{
-						selectedKey = kv.Key;
-						break;
-					}
-					i++;
-				}
-				Value = selectedKey;
+				Value = enumKeys[currentIndex];
 			}
 		}
 

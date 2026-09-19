@@ -53,25 +53,7 @@ internal static class StateUpdater
 			status |= AutoStatus.Positional;
 		}
 
-		if (ShouldAddHealAreaAbility())
-		{
-			status |= AutoStatus.HealAreaAbility;
-		}
-
-		if (ShouldAddHealAreaSpell())
-		{
-			status |= AutoStatus.HealAreaSpell;
-		}
-
-		if (ShouldAddHealSingleAbility())
-		{
-			status |= AutoStatus.HealSingleAbility;
-		}
-
-		if (ShouldAddHealSingleSpell())
-		{
-			status |= AutoStatus.HealSingleSpell;
-		}
+		status |= StatusFromHealing();
 
 		if (ShouldAddDefenseArea())
 		{
@@ -198,20 +180,23 @@ internal static class StateUpdater
 
 		if (DataCenter.Role == JobRole.Healer)
 		{
-			foreach (var tank in DataCenter.PartyMembers)
+			if (DataCenter.IsHostileCastingToTank)
 			{
-				var attackingTankCount = 0;
-				foreach (var hostile in DataCenter.AllHostileTargets)
+				foreach (var member in DataCenter.PartyMembers)
 				{
-					if (hostile.TargetObjectId == tank.GameObjectId)
+					var attackingCount = 0;
+					foreach (var hostile in DataCenter.AllHostileTargets)
 					{
-						attackingTankCount++;
+						if (hostile.TargetObjectId == member.GameObjectId)
+						{
+							attackingCount++;
+						}
 					}
-				}
 
-				if (attackingTankCount == 1 && DataCenter.IsHostileCastingToTank)
-				{
-					return true;
+					if (attackingCount == 1)
+					{
+						return true;
+					}
 				}
 			}
 
@@ -232,23 +217,21 @@ internal static class StateUpdater
 			}
 
 			var tarOnMeCount = 0;
-			var attackedCount = 0;
-			foreach (var hostile in DataCenter.AllHostileTargets)
+			var attacked = false;
+			var playerId = Player.Object?.GameObjectId ?? 0;
+			if (playerId != 0)
 			{
-				if (hostile.DistanceToPlayer() <= 3 && hostile.TargetObject == Player.Object)
+				foreach (var hostile in DataCenter.AllHostileTargets)
 				{
-					tarOnMeCount++;
-					if (ObjectHelper.IsAttacked(hostile))
+					if (hostile.TargetObjectId == playerId && hostile.DistanceToPlayer() <= 3)
 					{
-						attackedCount++;
+						tarOnMeCount++;
+						if (!attacked && ObjectHelper.IsAttacked(hostile))
+						{
+							attacked = true;
+						}
 					}
 				}
-			}
-
-			var attacked = false;
-			if (tarOnMeCount != 0)
-			{
-				attacked = (float)attackedCount / tarOnMeCount > 0f;
 			}
 
 			if (tarOnMeCount >= Service.Config.AutoDefenseNumber
@@ -297,20 +280,34 @@ internal static class StateUpdater
 		return true;
 	}
 
-	private static bool ShouldAddHealAreaAbility()
+	private static readonly StatusID[] HellInACellStatuses =
+	[
+		StatusID.HellInACell,
+		StatusID.HellInACell_4732,
+		StatusID.HellInACell_4733,
+		StatusID.HellInACell_4734,
+		StatusID.HellInACell_4735,
+		StatusID.HellInACell_4736,
+		StatusID.HellInACell_4737,
+		StatusID.HellInACell_4738,
+	];
+
+	private static AutoStatus StatusFromHealing()
 	{
+		// Preconditions shared by every heal flag, evaluated once per update instead of once per flag.
 		if (!DataCenter.HPNotFull || !CanUseHealAction || DataCenter.IsTyrantCastingSpecialIndicator())
 		{
-			return false;
+			return AutoStatus.None;
 		}
 
 		// Only allow non-healers to heal if there are no living healers in the party
 		if (!NonHealerHealLogic())
 		{
-			return false;
+			return AutoStatus.None;
 		}
 
-		// Prioritize area healing if multiple members have DoomNeedHealing
+		var status = AutoStatus.None;
+
 		var doomNeedHealingCount = 0;
 		foreach (var member in DataCenter.PartyMembers)
 		{
@@ -319,124 +316,34 @@ internal static class StateUpdater
 				doomNeedHealingCount++;
 			}
 		}
-		if (doomNeedHealingCount > 1)
-		{
-			return true;
-		}
 
-		var singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
+		// Heal spells are held while the player is inside a Hell in a Cell in M9S.
+		var canUseHealSpell = !DataCenter.IsInM9S || !StatusHelper.PlayerHasStatus(false, HellInACellStatuses);
+
+		var singleAbilityCount = ShouldHealSingle(StatusHelper.SingleHots,
 			Service.Config.HealthSingleAbility,
 			Service.Config.HealthSingleAbilityHot);
 
-		var canHealAreaAbility = singleAbility > 2;
+		var singleSpellCount = canUseHealSpell
+			? ShouldHealSingle(StatusHelper.SingleHots,
+				Service.Config.HealthSingleSpell,
+				Service.Config.HealthSingleSpellHot)
+			: 0;
 
-		if (DataCenter.PartyMembers.Count > 2)
-		{
-			var ratio = SelfHealingOfTimeRatio(StatusHelper.AreaHots);
-
-			if (!canHealAreaAbility)
-			{
-				// If party is larger than 4 people, we select the 4 lowest HP players
-				// in the party, and then calculate the thresholds on them instead.
-				if (DataCenter.PartyMembers.Count > 4)
-				{
-					canHealAreaAbility = DataCenter.LowestPartyMembersDifferHP < Service.Config.HealthDifference
-										 && DataCenter.LowestPartyMembersAverHP < Lerp(Service.Config.HealthAreaAbility, Service.Config.HealthAreaAbilityHot, ratio);
-				}
-				else
-				{
-					canHealAreaAbility = DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
-										 && DataCenter.PartyMembersAverHP < Lerp(Service.Config.HealthAreaAbility, Service.Config.HealthAreaAbilityHot, ratio);
-				}
-			}
-		}
-
-		return canHealAreaAbility;
-	}
-
-	private static bool ShouldAddHealAreaSpell()
-	{
-		if (!DataCenter.HPNotFull || !CanUseHealAction || DataCenter.IsTyrantCastingSpecialIndicator())
-		{
-			return false;
-		}
-
-		if (DataCenter.IsInM9S)
-		{
-			var HellInACell1 = StatusID.HellInACell;
-			var HellInACell2 = StatusID.HellInACell_4732;
-			var HellInACell3 = StatusID.HellInACell_4733;
-			var HellInACell4 = StatusID.HellInACell_4734;
-			var HellInACell5 = StatusID.HellInACell_4735;
-			var HellInACell6 = StatusID.HellInACell_4736;
-			var HellInACell7 = StatusID.HellInACell_4737;
-			var HellInACell8 = StatusID.HellInACell_4738;
-
-			if (StatusHelper.PlayerHasStatus(false, HellInACell1, HellInACell2, HellInACell3, HellInACell4, HellInACell5, HellInACell6, HellInACell7, HellInACell8))
-			{
-				return false;
-			}
-		}
-
-		// Only allow non-healers to heal if there are no living healers in the party
-		if (!NonHealerHealLogic())
-		{
-			return false;
-		}
+		var partyCount = DataCenter.PartyMembers.Count;
+		var areaHotRatio = partyCount > 2 ? SelfHealingOfTimeRatio(StatusHelper.AreaHots) : 0f;
 
 		// Prioritize area healing if multiple members have DoomNeedHealing
-		var doomNeedHealingCount = 0;
-		foreach (var member in DataCenter.PartyMembers)
+		if (doomNeedHealingCount > 1 || singleAbilityCount > 2
+			|| ShouldHealArea(partyCount, Service.Config.HealthAreaAbility, Service.Config.HealthAreaAbilityHot, areaHotRatio))
 		{
-			if (member.DoomNeedHealing())
-			{
-				doomNeedHealingCount++;
-			}
-		}
-		if (doomNeedHealingCount > 1)
-		{
-			return true;
+			status |= AutoStatus.HealAreaAbility;
 		}
 
-		var singleSpell = ShouldHealSingle(StatusHelper.SingleHots,
-			Service.Config.HealthSingleSpell,
-			Service.Config.HealthSingleSpellHot);
-
-		var canHealAreaSpell = singleSpell > 2;
-
-		if (DataCenter.PartyMembers.Count > 2)
+		if (canUseHealSpell && (doomNeedHealingCount > 1 || singleSpellCount > 2
+			|| ShouldHealArea(partyCount, Service.Config.HealthAreaSpell, Service.Config.HealthAreaSpellHot, areaHotRatio)))
 		{
-			var ratio = SelfHealingOfTimeRatio(StatusHelper.AreaHots);
-
-			if (!canHealAreaSpell)
-			{
-				if (DataCenter.PartyMembers.Count > 4)
-				{
-					canHealAreaSpell = DataCenter.LowestPartyMembersDifferHP < Service.Config.HealthDifference
-									 && DataCenter.LowestPartyMembersAverHP < Lerp(Service.Config.HealthAreaSpell, Service.Config.HealthAreaSpellHot, ratio);
-				}
-				else
-				{
-					canHealAreaSpell = DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
-									 && DataCenter.PartyMembersAverHP < Lerp(Service.Config.HealthAreaSpell, Service.Config.HealthAreaSpellHot, ratio);
-				}
-			}
-		}
-
-		return canHealAreaSpell;
-	}
-
-	private static bool ShouldAddHealSingleAbility()
-	{
-		if (!DataCenter.HPNotFull || !CanUseHealAction || DataCenter.IsTyrantCastingSpecialIndicator())
-		{
-			return false;
-		}
-
-		// Only allow non-healers to heal if there are no living healers in the party
-		if (!NonHealerHealLogic())
-		{
-			return false;
+			status |= AutoStatus.HealAreaSpell;
 		}
 
 		var onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer
@@ -445,84 +352,49 @@ internal static class StateUpdater
 		if (onlyHealSelf)
 		{
 			// Prioritize healing self if DoomNeedHealing is true
-			return StatusHelper.PlayerDoomNeedHealing() || ShouldHealSelf(StatusHelper.SingleHots,
-				Service.Config.HealthSingleAbility, Service.Config.HealthSingleAbilityHot);
+			var selfDoomed = StatusHelper.PlayerDoomNeedHealing();
+
+			if (selfDoomed || ShouldHealSelf(StatusHelper.SingleHots, Service.Config.HealthSingleAbility, Service.Config.HealthSingleAbilityHot))
+			{
+				status |= AutoStatus.HealSingleAbility;
+			}
+
+			if (canUseHealSpell && (selfDoomed || ShouldHealSelf(StatusHelper.SingleHots, Service.Config.HealthSingleSpell, Service.Config.HealthSingleSpellHot)))
+			{
+				status |= AutoStatus.HealSingleSpell;
+			}
 		}
 		else
 		{
 			// Prioritize healing any party member with DoomNeedHealing
-			foreach (var member in DataCenter.PartyMembers)
+			if (doomNeedHealingCount > 0 || singleAbilityCount > 0)
 			{
-				if (member.DoomNeedHealing())
-				{
-					return true;
-				}
+				status |= AutoStatus.HealSingleAbility;
 			}
 
-			var singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
-				Service.Config.HealthSingleAbility,
-				Service.Config.HealthSingleAbilityHot);
-
-			return singleAbility > 0;
+			if (canUseHealSpell && (doomNeedHealingCount > 0 || singleSpellCount > 0))
+			{
+				status |= AutoStatus.HealSingleSpell;
+			}
 		}
+
+		return status;
 	}
 
-	private static bool ShouldAddHealSingleSpell()
+	private static bool ShouldHealArea(int partyCount, float healArea, float healAreaHot, float ratio)
 	{
-		if (!DataCenter.HPNotFull || !CanUseHealAction || DataCenter.IsTyrantCastingSpecialIndicator())
+		if (partyCount <= 2)
 		{
 			return false;
 		}
 
-		if (DataCenter.IsInM9S)
-		{
-			var HellInACell1 = (StatusID)4731;
-			var HellInACell2 = (StatusID)4732;
-			var HellInACell3 = (StatusID)4733;
-			var HellInACell4 = (StatusID)4734;
-			var HellInACell5 = (StatusID)4735;
-			var HellInACell6 = (StatusID)4736;
-			var HellInACell7 = (StatusID)4737;
-			var HellInACell8 = (StatusID)4738;
-
-			if (StatusHelper.PlayerHasStatus(false, HellInACell1, HellInACell2, HellInACell3, HellInACell4, HellInACell5, HellInACell6, HellInACell7, HellInACell8))
-			{
-				return false;
-			}
-		}
-
-		// Only allow non-healers to heal if there are no living healers in the party
-		if (!NonHealerHealLogic())
-		{
-			return false;
-		}
-
-		var onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer
-			&& DataCenter.Role != JobRole.Healer;
-
-		if (onlyHealSelf)
-		{
-			// Explicitly prioritize "Doom" targets
-			return StatusHelper.PlayerDoomNeedHealing() || ShouldHealSelf(StatusHelper.SingleHots,
-				Service.Config.HealthSingleSpell, Service.Config.HealthSingleSpellHot);
-		}
-		else
-		{
-			// Check if any party member with "Doom" needs healing
-			foreach (var member in DataCenter.PartyMembers)
-			{
-				if (member.DoomNeedHealing())
-				{
-					return true;
-				}
-			}
-
-			var singleSpell = ShouldHealSingle(StatusHelper.SingleHots,
-				Service.Config.HealthSingleSpell,
-				Service.Config.HealthSingleSpellHot);
-
-			return singleSpell > 0;
-		}
+		// If party is larger than 4 people, we select the 4 lowest HP players
+		// in the party, and then calculate the thresholds on them instead.
+		return partyCount > 4
+			? DataCenter.LowestPartyMembersDifferHP < Service.Config.HealthDifference
+				&& DataCenter.LowestPartyMembersAverHP < Lerp(healArea, healAreaHot, ratio)
+			: DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
+				&& DataCenter.PartyMembersAverHP < Lerp(healArea, healAreaHot, ratio);
 	}
 
 	private static bool ShouldAddAntiKnockback()
@@ -555,15 +427,11 @@ internal static class StateUpdater
 
 	private static bool ShouldAddProvoke()
 	{
-		var isInCombatOrProvokeAnything = DataCenter.InCombat || Service.Config.ProvokeAnything;
-		var isTankOrHasUltimatum = DataCenter.Role == JobRole.Tank || StatusHelper.PlayerHasStatus(true, StatusID.VariantUltimatumSet);
-		var shouldAutoProvoke = Service.Config.AutoProvokeForTank || CountAllianceTanks() < 2;
-		var hasProvokeTarget = DataCenter.ProvokeTarget != null;
-
-		return isInCombatOrProvokeAnything
-			&& isTankOrHasUltimatum
-			&& shouldAutoProvoke
-			&& hasProvokeTarget;
+		// Cheapest checks first; the alliance tank count walks every alliance member.
+		return DataCenter.ProvokeTarget != null
+			&& (DataCenter.InCombat || Service.Config.ProvokeAnything)
+			&& (DataCenter.Role == JobRole.Tank || StatusHelper.PlayerHasStatus(true, StatusID.VariantUltimatumSet))
+			&& (Service.Config.AutoProvokeForTank || CountAllianceTanks() < 2);
 	}
 
 	private static bool ShouldAddInterrupt()
@@ -573,7 +441,7 @@ internal static class StateUpdater
 
 	private static bool ShouldAddTankStance()
 	{
-		return Service.Config.AutoTankStance && DataCenter.Role == JobRole.Tank && !AnyAllianceTankWithStance() && !CustomRotation.HasTankStance;
+		return Service.Config.AutoTankStance && DataCenter.Role == JobRole.Tank && !CustomRotation.HasTankStance && !AnyAllianceTankWithStance();
 	}
 
 	private static bool ShouldAddSpeed()
@@ -628,16 +496,6 @@ internal static class StateUpdater
 		var count = 0;
 		foreach (var member in DataCenter.PartyMembers)
 		{
-			if (DataCenter.IsPvP && StatusHelper.HasStatus(member, false, StatusID.Mounted))
-			{
-				continue;
-			}
-
-			if (DataCenter.IsInWindurst && StatusHelper.HasStatus(member, false, StatusID.HpRecoveryDown))
-			{
-				continue;
-			}
-
 			if (ShouldHealSingle(member, hotStatus, healSingle, healSingleHot))
 			{
 				count++;
@@ -668,11 +526,13 @@ internal static class StateUpdater
 			return false;
 		}
 
+		var doomed = StatusHelper.PlayerDoomNeedHealing();
+
 		// Calculate the ratio of remaining healing-over-time effects on the target. If they have a "Doom" status, treat dot healing as non-existent.
-		var ratio = StatusHelper.PlayerDoomNeedHealing() ? 0f : GetHealingOfTimeRatio(Player.Object, hotStatus);
+		var ratio = doomed ? 0f : GetHealingOfTimeRatio(Player.Object, hotStatus);
 
 		// Determine the target's health ratio. If they have a "Doom" status, treat their health as critically low (0.2).
-		var h = StatusHelper.PlayerDoomNeedHealing() ? 0.2f : ObjectHelper.GetPlayerHealthRatio();
+		var h = doomed ? 0.2f : ObjectHelper.GetPlayerHealthRatio();
 
 		// If the target's health is zero or they are invulnerable to healing, return false.
 		if (h == 0 || !StatusHelper.PlayerNoNeedHealingInvuln())

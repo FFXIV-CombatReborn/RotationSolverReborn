@@ -15,6 +15,10 @@ internal static partial class TargetUpdater
 		_dispelPartyTargets = new(() => Service.Config.EsunaDelay);
 
 
+	// Scratch lists reused every update; ObjectListDelay copies what it needs.
+	private static readonly List<IBattleChara> _raiseCandidates = [];
+	private static readonly List<IBattleChara> _dispelCandidates = [];
+
 	private static DateTime _lastUpdateTimeToKill = DateTime.MinValue;
 	private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(1);
 
@@ -70,10 +74,8 @@ internal static partial class TargetUpdater
 		List<IBattleChara> allianceMembers = new(capacity: allTargets.Count);
 		List<IBattleChara> hostileTargets = new(capacity: allTargets.Count);
 
-		// Track party membership by id to avoid O(n^2) Contains checks
-		HashSet<ulong> partyIds = new(capacity: 32);
-
 		var raisetype = Service.Config.RaiseType;
+		var ignoreInvincibility = DataCenter.IsPvP && Service.Config.IgnorePvPInvincibility;
 
 		// Compute player eye position once
 		var playerEye = Player.Object?.Position;
@@ -82,6 +84,7 @@ internal static partial class TargetUpdater
 			playerEye = new Vector3(playerEye.Value.X, playerEye.Value.Y + 2.0f, playerEye.Value.Z);
 		}
 
+		// GetAllTargets already filtered out untargetable objects and pets.
 		foreach (var member in allTargets)
 		{
 			try
@@ -94,44 +97,42 @@ internal static partial class TargetUpdater
 						continue;
 					}
 
-					if (member.IsTargetable && member.DistanceToPlayer() < 48 && member.CanSeeFrom(playerEye.Value))
+					if (member.DistanceToPlayer() < 48 && member.CanSeeFrom(playerEye.Value))
 					{
 						// Valid hostile target
-						var hasInvincible = false;
-						var statusList = member.StatusList;
-
-						if (statusList != null)
+						if (!ignoreInvincibility)
 						{
-							var statusCount = statusList.Length;
-							for (var i = 0; i < statusCount; i++)
+							var hasInvincible = false;
+							var statusList = member.StatusList;
+
+							if (statusList != null)
 							{
-								var status = statusList[i];
-								if (status != null && status.StatusId != 0 && status.IsInvincible())
+								var statusCount = statusList.Length;
+								for (var i = 0; i < statusCount; i++)
 								{
-									hasInvincible = true;
-									break;
+									var status = statusList[i];
+									if (status != null && status.StatusId != 0 && status.IsInvincible())
+									{
+										hasInvincible = true;
+										break;
+									}
 								}
 							}
-						}
-						if (hasInvincible && ((DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility) || !DataCenter.IsPvP))
-						{
-							continue; // Invincible enemy doesn't get added to any lists
+
+							if (hasInvincible)
+							{
+								continue; // Invincible enemy doesn't get added to any lists
+							}
 						}
 						hostileTargets.Add(member);
 					}
 				}
-				else if (member.IsPet())
-				{
-					continue; // We never target these
-				}
 				else if (member.IsParty())
 				{
-					var character = member.Character();
-					if (character != null)
+					// Party members are only added to the party list
+					if (member.Character() != null)
 					{
 						partyMembers.Add(member);
-						partyIds.Add(member.GameObjectId);
-						continue; // Party members are only added to the party list
 					}
 				}
 				else // Not a party member or hostile, so check alliance status
@@ -143,17 +144,12 @@ internal static partial class TargetUpdater
 					}
 					else if (raisetype == RaiseType.AllOutOfDuty)
 					{
-						if (member.IsOtherPlayerOutOfDuty() && !partyIds.Contains(member.GameObjectId)) // Avoid O(n) Contains on list
+						if (member.IsOtherPlayerOutOfDuty() && member.Character() != null)
 						{
-							var character = member.Character();
-							if (character != null)
-							{
-								allianceMembers.Add(member);
-								continue;
-							}
+							allianceMembers.Add(member);
 						}
 					}
-					else if (member.IsAllianceMember() && !partyIds.Contains(member.GameObjectId))
+					else if (member.IsAllianceMember())
 					{
 						var character = member.Character();
 						if (character != null)
@@ -173,37 +169,6 @@ internal static partial class TargetUpdater
 		DataCenter.AllianceMembers = allianceMembers;
 		DataCenter.AllHostileTargets = hostileTargets;
 	}
-
-	//internal static void OldUpdateTargets()
-	//{
-	//	//PluginLog.Debug("Updating targets");
-	//	DataCenter.TargetsByRange.Clear();
-	//	DataCenter.AllTargets = GetAllTargets();
-
-	//	// Early-out: avoid downstream work when there are no potential targets
-	//	if (DataCenter.AllTargets == null || DataCenter.AllTargets.Count == 0)
-	//	{
-	//		DataCenter.PartyMembers.Clear();
-	//		DataCenter.AllianceMembers.Clear();
-	//		DataCenter.AllHostileTargets.Clear();
-	//		DataCenter.DeathTarget = null;
-	//		DataCenter.DispelTarget = null;
-	//		DataCenter.ProvokeTarget = null;
-	//		DataCenter.InterruptTarget = null;
-	//		UpdateTimeToKill();
-	//		return;
-	//	}
-
-	//	DataCenter.PartyMembers = GetPartyMembers();
-	//	DataCenter.AllianceMembers = GetAllianceMembers();
-	//	DataCenter.AllHostileTargets = GetAllHostileTargets();
-	//	DataCenter.DeathTarget = GetDeathTarget();
-	//	DataCenter.DispelTarget = GetDispelTarget();
-	//	DataCenter.ProvokeTarget = (DataCenter.Role == JobRole.Tank || StatusHelper.PlayerHasStatus(true, StatusID.VariantUltimatumSet)) ? GetFirstHostileTarget(ObjectHelper.CanProvoke) : null; // Calculating this per frame rather than on-demand is actually a fair amount worse
-	//	DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt); // Tanks, Melee, RDM, and various phantom and duty actions can interrupt so just deal with it
-
-	//	UpdateTimeToKill();
-	//}
 
 	private static List<IBattleChara> GetAllTargets()
 	{
@@ -231,138 +196,6 @@ internal static partial class TargetUpdater
 		}
 
 		return allTargets;
-	}
-
-	private static unsafe List<IBattleChara> GetPartyMembers()
-	{
-		return GetMembers(DataCenter.AllTargets, isParty: true);
-	}
-
-	private static unsafe List<IBattleChara> GetAllianceMembers()
-	{
-		var raisetype = Service.Config.RaiseType;
-
-		if (raisetype == RaiseType.PartyOnly)
-		{
-			return [];
-		}
-
-		if (raisetype == RaiseType.AllOutOfDuty)
-		{
-			return GetMembers(DataCenter.AllTargets, isParty: false, isAlliance: false, IsOutDuty: true);
-		}
-
-		return GetMembers(DataCenter.AllTargets, isParty: false, isAlliance: true, IsOutDuty: false);
-	}
-
-	private static unsafe List<IBattleChara> GetMembers(List<IBattleChara> source, bool isParty, bool isAlliance = false, bool IsOutDuty = false)
-	{
-		List<IBattleChara> members = [];
-		if (source == null)
-		{
-			return members;
-		}
-
-		foreach (var member in source)
-		{
-			try
-			{
-				if (member.IsPet())
-				{
-					continue;
-				}
-
-				if (isParty && !member.IsParty())
-				{
-					continue;
-				}
-
-				if (isAlliance && (!ObjectHelper.IsAllianceMember(member) || member.IsParty()))
-				{
-					continue;
-				}
-
-				if (IsOutDuty && (!ObjectHelper.IsOtherPlayerOutOfDuty(member) || member.IsParty()))
-				{
-					continue;
-				}
-
-				var character = member.Character();
-				if (character == null)
-				{
-					continue;
-				}
-
-				members.Add(member);
-			}
-			catch (Exception ex)
-			{
-				PluginLog.Error($"Error in GetMembers: {ex.Message}");
-			}
-		}
-		return members;
-	}
-
-	private static List<IBattleChara> GetAllHostileTargets()
-	{
-		List<IBattleChara> hostileTargets = [];
-		var allTargets = DataCenter.AllTargets;
-		if (allTargets == null || allTargets.Count == 0)
-		{
-			return hostileTargets;
-		}
-
-		// Reserve capacity to minimize internal resizes
-		if (hostileTargets.Capacity < allTargets.Count)
-		{
-			hostileTargets.Capacity = allTargets.Count;
-		}
-
-		// Fix: Check if Player.Object is not null before using its Position
-		var playerEye = Player.Object?.Position;
-		if (playerEye != null)
-		{
-			playerEye = new Vector3(playerEye.Value.X, playerEye.Value.Y + 2.0f, playerEye.Value.Z);
-		}
-
-		foreach (var target in allTargets)
-		{
-			// Only proceed if playerEye is available
-			if (playerEye == null)
-			{
-				continue;
-			}
-
-			if (!target.IsEnemy() || !target.IsTargetable || !target.CanSeeFrom(playerEye.Value) || target.DistanceToPlayer() >= 48)
-			{
-				continue;
-			}
-
-			var hasInvincible = false;
-			var statusList = target.StatusList;
-			if (statusList != null)
-			{
-				var statusCount = statusList.Length;
-				for (var i = 0; i < statusCount; i++)
-				{
-					var status = statusList[i];
-					if (status != null && status.StatusId != 0 && StatusHelper.IsInvincible(status))
-					{
-						hasInvincible = true;
-						break;
-					}
-				}
-			}
-			if (hasInvincible &&
-				((DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility) || !DataCenter.IsPvP))
-			{
-				continue;
-			}
-
-			hostileTargets.Add(target);
-		}
-
-		return hostileTargets;
 	}
 
 	private static IBattleChara? GetFirstHostileTarget(Func<IBattleChara, bool> predicate)
@@ -401,45 +234,26 @@ internal static partial class TargetUpdater
 		{
 			var raisetype = Service.Config.RaiseType;
 
-			// Collect party deaths and track by id for O(1) membership tests
-			var validRaiseTargets = new List<IBattleChara>();
-			var deathPartyIds = new HashSet<ulong>();
+			var validRaiseTargets = _raiseCandidates;
+			validRaiseTargets.Clear();
 			if (DataCenter.PartyMembers != null)
 			{
-				if (raisetype != RaiseType.PartyHealersOnly)
+				foreach (var target in DataCenter.PartyMembers.GetDeath())
 				{
-					foreach (var target in DataCenter.PartyMembers.GetDeath())
+					if (raisetype != RaiseType.PartyHealersOnly || target.IsJobCategory(JobRole.Healer))
 					{
 						validRaiseTargets.Add(target);
-						_ = deathPartyIds.Add(target.GameObjectId);
-					}
-				}
-
-				if (raisetype == RaiseType.PartyHealersOnly)
-				{
-					foreach (var target in DataCenter.PartyMembers.GetDeath())
-					{
-						if (target.IsJobCategory(JobRole.Healer))
-						{
-							validRaiseTargets.Add(target);
-							_ = deathPartyIds.Add(target.GameObjectId);
-						}
 					}
 				}
 			}
 
-			// Add alliance candidates depending on raise mode without N^2 checks
+			// Alliance members never include party members (UpdateLists keeps them disjoint).
 			if (DataCenter.AllianceMembers != null)
 			{
 				if (raisetype == RaiseType.PartyAndAllianceSupports || raisetype == RaiseType.PartyAndAllianceHealers)
 				{
 					foreach (var member in DataCenter.AllianceMembers.GetDeath())
 					{
-						if (deathPartyIds.Contains(member.GameObjectId))
-						{
-							continue;
-						}
-
 						if (raisetype == RaiseType.PartyAndAllianceHealers)
 						{
 							if (member.IsJobCategory(JobRole.Healer))
@@ -460,10 +274,7 @@ internal static partial class TargetUpdater
 				{
 					foreach (var target in DataCenter.AllianceMembers.GetDeath())
 					{
-						if (!deathPartyIds.Contains(target.GameObjectId))
-						{
-							validRaiseTargets.Add(target);
-						}
+						validRaiseTargets.Add(target);
 					}
 				}
 			}
@@ -564,18 +375,17 @@ internal static partial class TargetUpdater
 	{
 		if (Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or Job.BRD or Job.CNJ)
 		{
-			List<IBattleChara> weakenPeople = [];
+			var weakenPeople = _dispelCandidates;
+			weakenPeople.Clear();
 			AddDispelTargets(DataCenter.PartyMembers, weakenPeople);
 
 			// Apply dispel delay to the candidate list
 			_dispelPartyTargets.Delay(weakenPeople);
 
-			var canDispelNonDangerous = !DataCenter.MergedStatus.HasFlag(AutoStatus.HealAreaAbility)
-										&& !DataCenter.MergedStatus.HasFlag(AutoStatus.HealAreaSpell)
-										&& !DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleAbility)
-										&& !DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleSpell)
-										&& !DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea)
-										&& !DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseSingle);
+			const AutoStatus busyStatus = AutoStatus.HealAreaAbility | AutoStatus.HealAreaSpell
+				| AutoStatus.HealSingleAbility | AutoStatus.HealSingleSpell
+				| AutoStatus.DefenseArea | AutoStatus.DefenseSingle;
+			var canDispelNonDangerous = (DataCenter.MergedStatus & busyStatus) == 0;
 
 			// Single-pass selection over the delayed set to avoid extra list allocations
 			IBattleChara? closestDangerous = null;
@@ -660,24 +470,6 @@ internal static partial class TargetUpdater
 				PluginLog.Error($"NullReferenceException in AddDispelTargets for member {member?.ToString()}: {ex.Message}");
 			}
 		}
-	}
-
-	private static IBattleChara? GetClosestTarget(List<IBattleChara> targets)
-	{
-		IBattleChara? closestTarget = null;
-		var closestDistance = float.MaxValue;
-
-		foreach (var target in targets)
-		{
-			var distance = ObjectHelper.DistanceToPlayer(target);
-			if (distance < closestDistance)
-			{
-				closestDistance = distance;
-				closestTarget = target;
-			}
-		}
-
-		return closestTarget;
 	}
 
 	// Recording new entries at 1/second and dequeuing old values to keep only the last DataCenter.HP_RECORD_TIME worth of combat time

@@ -45,7 +45,11 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 	public static DalamudLinkPayload? HideWarningLinkPayload { get; private set; }
 	private static readonly Random _random = new();
 
-	internal IPCProvider IPCProvider;
+	/// <summary>
+	/// The registered IPC provider. Only one instance may exist, since creating one registers the IPC endpoints.
+	/// </summary>
+	internal static IPCProvider IPCProvider { get; private set; } = null!;
+
 	public RotationSolverPlugin(IDalamudPluginInterface pluginInterface)
 	{
 		ECommonsMain.Init(pluginInterface, this, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
@@ -386,6 +390,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		BMRPlanUpdater.Disable();
 		ActionContextMenu.Dispose();
 		Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
+		Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
 		Svc.PluginInterface.UiBuilder.Draw -= OnDraw;
 
 		Svc.DutyState.DutyStarted -= DutyState_DutyStarted;
@@ -406,13 +411,15 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		//_nativeControlWindow?.Close();
 		//KamiToolKitLibrary.Dispose();
 		MajorUpdater.Dispose();
-		MiscUpdater.Dispose();
+		HotbarDisabledColor.ResetOnUnload();
 		HotbarHighlightManager.Dispose();
-		ActionTimelineManager.Instance.Dispose();
+		ActionTimelineManager.DisposeInstance();
+		FontManager.DisposeAll();
 
 		BMRInfo_IPCSubscriber.Dispose();
 		BMRTimeline_IPCSubscriber.Dispose();
 		BMRPlan_IPCSubscriber.Dispose();
+		Wrath_IPCSubscriber.Dispose();
 
 		ECommonsMain.Dispose();
 	}

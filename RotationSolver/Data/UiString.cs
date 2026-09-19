@@ -675,6 +675,33 @@ namespace RotationSolver.Data
 	{
 		private static readonly Dictionary<Enum, string> _enumDescriptions = [];
 
+		public static string GetDescription<T>(this T value) where T : struct, Enum
+		{
+			return DescriptionCache<T>.Get(value);
+		}
+
+		private static class DescriptionCache<T> where T : struct, Enum
+		{
+			private static readonly Dictionary<T, string> _descriptions = [];
+
+			public static string Get(T value)
+			{
+				if (!_descriptions.TryGetValue(value, out var description))
+				{
+					description = ReadDescription(typeof(T), value.ToString());
+					_descriptions[value] = description;
+				}
+
+				return description;
+			}
+		}
+
+		private static string ReadDescription(Type enumType, string name)
+		{
+			var field = enumType.GetField(name);
+			return field?.GetCustomAttribute<DescriptionAttribute>()?.Description ?? name;
+		}
+
 		public static string GetDescription(this Enum value)
 		{
 			if (_enumDescriptions.TryGetValue(value, out var description))

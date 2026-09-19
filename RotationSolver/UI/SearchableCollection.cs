@@ -64,11 +64,35 @@ internal class SearchableCollection
 		}
 	}
 
+	private readonly Dictionary<string, List<List<SearchPair>>> _sectionsByFilter = [];
+
 	public void DrawItems(string filter)
 	{
 		var isFirst = true;
-		Dictionary<byte, List<SearchPair>> filteredItems = [];
+		foreach (var items in GetSections(filter))
+		{
+			if (!isFirst)
+			{
+				ImGui.Separator();
+			}
 
+			foreach (var item in items)
+			{
+				item.Searchable.Draw();
+			}
+
+			isFirst = false;
+		}
+	}
+
+	private List<List<SearchPair>> GetSections(string filter)
+	{
+		if (_sectionsByFilter.TryGetValue(filter, out var sections))
+		{
+			return sections;
+		}
+
+		Dictionary<byte, List<SearchPair>> filteredItems = [];
 		foreach (var item in _items)
 		{
 			if (item.Attribute.Filter == filter)
@@ -83,15 +107,11 @@ internal class SearchableCollection
 			}
 		}
 
+		sections = new(filteredItems.Count);
 		foreach (var grp in filteredItems)
 		{
-			if (!isFirst)
-			{
-				ImGui.Separator();
-			}
-
 			var items = grp.Value;
-			// Simple insertion sort by Attribute.Order
+			// Simple insertion sort by Attribute.Order (stable, so equal orders keep declaration order)
 			for (var i = 1; i < items.Count; i++)
 			{
 				var temp = items[i];
@@ -104,13 +124,11 @@ internal class SearchableCollection
 				items[j + 1] = temp;
 			}
 
-			foreach (var item in items)
-			{
-				item.Searchable.Draw();
-			}
-
-			isFirst = false;
+			sections.Add(items);
 		}
+
+		_sectionsByFilter[filter] = sections;
+		return sections;
 	}
 
 	public ISearchable[] SearchItems(string searchingText)

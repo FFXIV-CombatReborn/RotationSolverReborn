@@ -1,4 +1,5 @@
-﻿using RotationSolver.Updaters;
+﻿using ECommons.Logging;
+using RotationSolver.Updaters;
 
 namespace RotationSolver.UI;
 
@@ -83,8 +84,7 @@ internal class CooldownWindow() : CtrlWindow(nameof(CooldownWindow))
 				}
 				catch (Exception ex)
 				{
-					// Log the exception or handle it as needed
-					Console.WriteLine($"Error drawing action: {ex.Message}");
+					PluginLog.Verbose($"Error drawing action {item.Name}: {ex.Message}");
 				}
 				itemIndex++;
 				if (itemIndex % count != 0)

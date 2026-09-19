@@ -123,13 +123,21 @@ internal static class ImGuiHelper
 
 		var searchingKey = searchTxt;
 
-		List<(T, string)> members = [];
+		// Score each item once; scoring inside the comparison re-split both strings on every compare.
+		List<(T Item, string Name, float Score)> scored = new(items.Length);
 		foreach (var item in items)
 		{
-			members.Add((item, getSearchName(item)));
+			var searchName = getSearchName(item);
+			scored.Add((item, searchName, SearchableCollection.Similarity(searchName, searchingKey)));
 		}
 
-		members.Sort((x, y) => SearchableCollection.Similarity(y.Item2, searchingKey).CompareTo(SearchableCollection.Similarity(x.Item2, searchingKey)));
+		scored.Sort((x, y) => y.Score.CompareTo(x.Score));
+
+		List<(T, string)> members = new(scored.Count);
+		foreach (var (Item, Name, Score) in scored)
+		{
+			members.Add((Item, Name));
+		}
 
 		ImGui.SetNextItemWidth(Math.Max(50 * ImGuiHelpers.GlobalScale, GetMaxButtonSize(members)));
 		_ = ImGui.InputTextWithHint("##Searching the member", searchingHint, ref searchTxt, 128);
@@ -184,6 +192,11 @@ internal static class ImGuiHelper
 	public static unsafe bool SelectableCombo(string popUp, string[] items, ref int index, ImFontPtr? font = null, Vector4? color = null)
 	{
 		var count = items.Length;
+		if (count == 0)
+		{
+			return false;
+		}
+
 		var originIndex = index;
 		index = Math.Max(0, index) % count;
 		var name = items[index] + "##" + popUp;
@@ -230,23 +243,28 @@ internal static class ImGuiHelper
 
 	public static unsafe bool SelectableButton(string name, ImFontPtr? font = null, Vector4? color = null)
 	{
-		List<IDisposable> disposables = new(2);
+		// Called for many buttons every frame, so push/pop directly instead of allocating disposables.
 		if (font != null)
 		{
-			disposables.Add(ImRaii.PushFont(font.Value));
+			ImGui.PushFont(font.Value);
 		}
+
+		var colorCount = 3;
 		if (color != null)
 		{
-			disposables.Add(ImRaii.PushColor(ImGuiCol.Text, color.Value));
+			ImGui.PushStyleColor(ImGuiCol.Text, color.Value);
+			colorCount++;
 		}
+
 		ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.ColorConvertFloat4ToU32(*ImGui.GetStyleColorVec4(ImGuiCol.HeaderActive)));
 		ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.ColorConvertFloat4ToU32(*ImGui.GetStyleColorVec4(ImGuiCol.HeaderHovered)));
 		ImGui.PushStyleColor(ImGuiCol.Button, 0);
 		var result = ImGui.Button(name);
-		ImGui.PopStyleColor(3);
-		foreach (var item in disposables)
+		ImGui.PopStyleColor(colorCount);
+
+		if (font != null)
 		{
-			item.Dispose();
+			ImGui.PopFont();
 		}
 
 		return result;
@@ -320,7 +338,7 @@ internal static class ImGuiHelper
 		return NoPaddingNoColorImageButton(handle, size, Vector2.Zero, Vector2.One, id);
 	}
 
-	internal static unsafe bool NoPaddingNoColorImageButton(IDalamudTextureWrap handle, Vector2 size, Vector2 uv0, Vector2 uv1, string id = "")
+	internal static bool NoPaddingNoColorImageButton(IDalamudTextureWrap handle, Vector2 size, Vector2 uv0, Vector2 uv1, string id = "")
 	{
 		if (handle == null)
 		{
@@ -413,19 +431,11 @@ internal static class ImGuiHelper
 
 	internal static void TextShade(Vector2 pos, string text, float width = 1.5f)
 	{
-		Vector2[] offsets =
-		[
-			new(0, -width),
-			new(0, width),
-			new(-width, 0),
-			new(width, 0)
-		];
-
 		var drawList = ImGui.GetWindowDrawList();
-		foreach (var offset in offsets)
-		{
-			drawList.AddText(pos + offset, Black, text);
-		}
+		drawList.AddText(pos + new Vector2(0, -width), Black, text);
+		drawList.AddText(pos + new Vector2(0, width), Black, text);
+		drawList.AddText(pos + new Vector2(-width, 0), Black, text);
+		drawList.AddText(pos + new Vector2(width, 0), Black, text);
 		drawList.AddText(pos, White, text);
 	}
 

@@ -5,6 +5,7 @@ using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using RotationSolver.Basic.Configuration;
+using RotationSolver.Helpers;
 
 namespace RotationSolver.Updaters
 {
@@ -46,6 +47,9 @@ namespace RotationSolver.Updaters
 			}
 		}
 
+		private static readonly TimeSpan ToggleCooldown = TimeSpan.FromMilliseconds(500);
+		private static DateTime _lastToggle = DateTime.MinValue;
+
 		/// <summary>
 		/// Called every frame. If auto attacks are currently active but a NoCastingStatus is
 		/// present, sends the toggle-auto-attack general action to disable them.
@@ -60,15 +64,20 @@ namespace RotationSolver.Updaters
 			try
 			{
 				var uiState = UIState.Instance();
-				if (uiState == null)
+				var actionManager = ActionManager.Instance();
+				if (uiState == null || actionManager == null)
 				{
 					return;
 				}
 
-				if (uiState->WeaponState.AutoAttackState.IsAutoAttacking && PlayerHasNoCastingStatus())
+				var now = DateTime.Now;
+				if (uiState->WeaponState.AutoAttackState.IsAutoAttacking
+					&& now - _lastToggle >= ToggleCooldown
+					&& PlayerHasNoCastingStatus())
 				{
 					// GeneralAction 1 is the auto-attack toggle — same method the game uses
-					ActionManager.Instance()->UseAction(ActionType.GeneralAction, 1);
+					actionManager->UseAction(ActionType.GeneralAction, 1);
+					_lastToggle = now;
 					PluginLog.Information("[AutoAttackUpdater] Disabled active auto attacks due to NoCastingStatus.");
 				}
 			}
@@ -82,10 +91,10 @@ namespace RotationSolver.Updaters
 		{
 			try
 			{
-				var noCastingStatus = OtherConfiguration.NoCastingStatus;
-				if (noCastingStatus == null || noCastingStatus.Count == 0)
+				// Motion Tracker and BMR's Pyretic mode block attacks regardless of the configured status list.
+				if (DataCenter.BMRSpecialModeType == SpecialMode.Pyretic)
 				{
-					return false;
+					return true;
 				}
 
 				if (Player.Object?.StatusList == null)
@@ -93,24 +102,12 @@ namespace RotationSolver.Updaters
 					return false;
 				}
 
-				// Check for Motion Tracker separately
 				if (StatusHelper.PlayerHasStatus(false, StatusID.MotionTracker))
 				{
 					return true;
 				}
 
-				if (DataCenter.BMRSpecialModeType == SpecialMode.Pyretic)
-				{
-					return true;
-				}
-
-				foreach (var status in Player.Object.StatusList)
-				{
-					if (noCastingStatus.Contains(status.StatusId))
-					{
-						return true;
-					}
-				}
+				return NoCastingStatusHelper.PlayerHasNoCastingStatus(out _);
 			}
 			catch (Exception ex)
 			{

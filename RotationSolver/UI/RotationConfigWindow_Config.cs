@@ -31,16 +31,14 @@ public partial class RotationConfigWindow
 
 	private static readonly CollapsingHeaderGroup _baseHeader = new(new Dictionary<Func<string>, Action>
 	{
-		{ UiString.ConfigWindow_Basic_Timer.GetDescription, DrawBasicTimer },
-		{ UiString.ConfigWindow_Basic_Others.GetDescription, DrawBasicOthers },
+		{ () => UiString.ConfigWindow_Basic_Timer.GetDescription(), DrawBasicTimer },
+		{ () => UiString.ConfigWindow_Basic_Others.GetDescription(), DrawBasicOthers },
 	});
 
 	private static void DrawBasicTimer()
 	{
 		_allSearchable.DrawItems(Configs.BasicTimer);
 	}
-
-	private static readonly Dictionary<int, bool> _isOpen = [];
 
 	private static void DrawBasicOthers()
 	{
@@ -57,11 +55,11 @@ public partial class RotationConfigWindow
 	private static readonly CollapsingHeaderGroup _UIHeader = new(new Dictionary<Func<string>, Action>
 	{
 		{
-			UiString.ConfigWindow_UI_Information.GetDescription,
+			() => UiString.ConfigWindow_UI_Information.GetDescription(),
 			() => _allSearchable.DrawItems(Configs.UiInformation)
 		},
 		{
-			UiString.ConfigWindow_UI_Windows.GetDescription,
+			() => UiString.ConfigWindow_UI_Windows.GetDescription(),
 			() => _allSearchable.DrawItems(Configs.UiWindows)
 		},
 	});
@@ -82,9 +80,9 @@ public partial class RotationConfigWindow
 
 	private static readonly CollapsingHeaderGroup _autoHeader = new(new Dictionary<Func<string>, Action>
 	{
-		{ UiString.ConfigWindow_Basic_AutoSwitch.GetDescription, DrawBasicAutoSwitch },
-		{ UiString.ConfigWindow_Auto_ActionUsage.GetDescription, DrawActionUsageControl },
-		{ UiString.ConfigWindow_Auto_HealingCondition.GetDescription, DrawHealingActionCondition },
+		{ () => UiString.ConfigWindow_Basic_AutoSwitch.GetDescription(), DrawBasicAutoSwitch },
+		{ () => UiString.ConfigWindow_Auto_ActionUsage.GetDescription(), DrawActionUsageControl },
+		{ () => UiString.ConfigWindow_Auto_HealingCondition.GetDescription(), DrawHealingActionCondition },
 	})
 	{
 		HeaderSize = HeaderSize,
@@ -127,8 +125,8 @@ public partial class RotationConfigWindow
 	/// </summary>
 	private static readonly CollapsingHeaderGroup _targetHeader = new(new Dictionary<Func<string>, Action>
 	{
-	{ UiString.ConfigWindow_Target_Config.GetDescription, DrawTargetConfig },
-	{ UiString.ConfigWindow_List_Hostile.GetDescription, DrawTargetHostile },
+	{ () => UiString.ConfigWindow_Target_Config.GetDescription(), DrawTargetConfig },
+	{ () => UiString.ConfigWindow_List_Hostile.GetDescription(), DrawTargetHostile },
 	});
 
 	/// <summary>
@@ -148,6 +146,7 @@ public partial class RotationConfigWindow
 		ImGui.SameLine();
 		ImGui.TextWrapped(UiString.ConfigWindow_Param_HostileDesc.GetDescription());
 
+		var names = _targetingTypeNames;
 		for (var i = 0; i < Service.Config.TargetingTypes.Count; i++)
 		{
 			var targetType = Service.Config.TargetingTypes[i];
@@ -167,7 +166,8 @@ public partial class RotationConfigWindow
 			void Down()
 			{
 				Service.Config.TargetingTypes.RemoveAt(i);
-				Service.Config.TargetingTypes.Insert(Math.Min(Service.Config.TargetingTypes.Count - 1, i + 1), targetType);
+				// After the removal, Count is the end of the list, so the last entry stays last instead of moving up.
+				Service.Config.TargetingTypes.Insert(Math.Min(Service.Config.TargetingTypes.Count, i + 1), targetType);
 			}
 
 			ImGuiHelper.DrawHotKeysPopup(key, string.Empty,
@@ -175,7 +175,12 @@ public partial class RotationConfigWindow
 				(UiString.ConfigWindow_Actions_MoveUp.GetDescription(), Up, pairsArray0),
 				(UiString.ConfigWindow_Actions_MoveDown.GetDescription(), Down, pairsArray1));
 
-			var names = Enum.GetNames<TargetingType>();
+			// Deleting the last entry from the popup shrinks the list mid-iteration.
+			if (i >= Service.Config.TargetingTypes.Count)
+			{
+				break;
+			}
+
 			var targetingType = (int)Service.Config.TargetingTypes[i];
 			var text = UiString.ConfigWindow_Param_HostileCondition.GetDescription();
 			ImGui.SetNextItemWidth(ImGui.CalcTextSize(text).X + (30 * Scale));
@@ -201,13 +206,14 @@ public partial class RotationConfigWindow
 
 	private static readonly CollapsingHeaderGroup _extraHeader = new(new Dictionary<Func<string>, Action>
 	{
-	{ UiString.ConfigWindow_EventItem.GetDescription, DrawEventTab },
-	{ UiString.ConfigWindow_Internal.GetDescription, DrawInternalTab },
+	{ () => UiString.ConfigWindow_EventItem.GetDescription(), DrawEventTab },
+	{ () => UiString.ConfigWindow_Internal.GetDescription(), DrawInternalTab },
 	{
-		UiString.ConfigWindow_Extra_Others.GetDescription,
+		() => UiString.ConfigWindow_Extra_Others.GetDescription(),
 		() => _allSearchable.DrawItems(Configs.Extra)
 	},
 	});
+	private static readonly string[] _targetingTypeNames = Enum.GetNames<TargetingType>();
 	private static readonly string[] pairsArray0 = ["↑"];
 	private static readonly string[] pairsArray1 = ["↓"];
 	private static readonly string[] pairsArray2 = ["Delete"];

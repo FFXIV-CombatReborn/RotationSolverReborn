@@ -29,35 +29,6 @@ internal class CheckBoxCondition(PropertyInfo property, params ISearchable[] chi
 		}
 	}
 
-	private abstract class CheckBoxConditionAbstract : CheckBoxSearch
-	{
-		protected readonly ConditionBoolean _condition;
-		public override string SearchingKeys => string.Empty;
-
-		public override string Command => string.Empty;
-
-		public override string ID => base.ID + Name;
-
-		public override bool ShowInChild => false;
-
-		public CheckBoxConditionAbstract(PropertyInfo property) : base(property)
-		{
-			_condition = (ConditionBoolean)property.GetValue(Service.Config)!;
-			AdditionalDraw = () =>
-			{
-				if (DataCenter.CurrentRotation == null)
-				{
-					return;
-				}
-			};
-		}
-
-		public override void ResetToDefault()
-		{
-			Value = false;
-		}
-	}
-
 	public override bool AlwaysShowChildren => false;
 	protected override void DrawMiddle()
 	{
