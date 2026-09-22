@@ -189,7 +189,7 @@ internal static class ImGuiHelper
 		return maxSize;
 	}
 
-	public static unsafe bool SelectableCombo(string popUp, string[] items, ref int index, ImFontPtr? font = null, Vector4? color = null)
+	public static bool SelectableCombo(string popUp, string[] items, ref int index, ImFontPtr? font = null, Vector4? color = null)
 	{
 		var count = items.Length;
 		if (count == 0)

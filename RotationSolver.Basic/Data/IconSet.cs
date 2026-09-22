@@ -1,6 +1,7 @@
 ﻿using Dalamud.Interface.Textures.TextureWraps;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
+using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using Lumina.Excel.Sheets;
 using Svg;
@@ -408,6 +409,77 @@ public static class IconSet
 		if (job >= 0 && job < OccultIcons.Length)
 		{
 			return OccultIcons[job];
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	///
+	/// </summary>
+	public static int JobToPixel(this Job job)
+	{
+		return job switch
+		{
+			Job.GLA or Job.PLD => 0,
+			Job.PGL or Job.MNK => 1,
+			Job.MRD or Job.WAR => 2,
+			Job.LNC or Job.DRG => 3,
+			Job.ARC => 4,
+			Job.BRD => 5,
+			Job.CNJ or Job.WHM => 6,
+			Job.THM or Job.BLM => 7,
+			Job.ACN => 8,
+			Job.SMN => 9,
+			Job.SCH => 10,
+			Job.ROG or Job.NIN => 11,
+			Job.MCH => 12,
+			Job.DRK => 13,
+			Job.AST => 14,
+			Job.SAM => 15,
+			Job.RDM => 16,
+			Job.BLU => 17,
+			Job.GNB => 18,
+			Job.DNC => 19,
+			Job.RPR => 20,
+			Job.SGE => 21,
+			Job.VPR => 22,
+			Job.PCT => 23,
+			Job.BST => 24,
+			_ => -1,
+		};
+	}
+
+	private static readonly IDalamudTextureWrap?[] JobPixelArtIcons = new IDalamudTextureWrap?[25];
+	private static bool JobPixelArtIconsLoaded = false;
+
+	/// <summary>
+	/// Gets the job pixel art icon texture.
+	/// </summary>
+	/// <returns>The icon texture for the job.</returns>
+	public static IDalamudTextureWrap? GetJobPixelArtIcon()
+	{
+		if (!Player.Available)
+		{
+			JobPixelArtIconsLoaded = false;
+			Array.Clear(JobPixelArtIcons, 0, JobPixelArtIcons.Length);
+			return null;
+		}
+
+		if (!JobPixelArtIconsLoaded)
+		{
+			var uld = Svc.PluginInterface.UiBuilder.LoadUld("ui/uld/deepdungeoninformation.uld");
+			for (var i = 0; i < JobPixelArtIcons.Length; i++)
+			{
+				JobPixelArtIcons[i] = uld.LoadTexturePart("ui/uld/DeepDungeonClassJob.tex", i);
+			}
+			JobPixelArtIconsLoaded = true;
+		}
+
+		var job = JobToPixel(DataCenter.Job);
+		if (job >= 0 && job < JobPixelArtIcons.Length)
+		{
+			return JobPixelArtIcons[job];
 		}
 
 		return null;

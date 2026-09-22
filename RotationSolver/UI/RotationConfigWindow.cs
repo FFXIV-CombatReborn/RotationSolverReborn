@@ -39,7 +39,7 @@ public partial class RotationConfigWindow : Window
 	private RotationConfigWindowTab _activeTab;
 
 	private const float MIN_COLUMN_WIDTH = 24;
-	private const float JOB_ICON_WIDTH = 50;
+	private const float JOB_ICON_WIDTH = 100;
 
 	private List<IncompatiblePlugin> _crashPlugins = [];
 	private List<IncompatiblePlugin> _enabledIncompatiblePlugins = [];
@@ -909,7 +909,8 @@ public partial class RotationConfigWindow : Window
 
 		var cursor = ImGui.GetCursorPos();
 
-		if (!rotation.GetTexture(out var jobIcon) || jobIcon?.Handle == null)
+		var jobIcon = IconSet.GetJobPixelArtIcon();
+		if (jobIcon?.Handle == null)
 		{
 			return;
 		}
@@ -937,8 +938,8 @@ public partial class RotationConfigWindow : Window
 		IDalamudTextureWrap? overlayTexture = null;
 		if (!DataCenter.IsInOccultCrescentOp || DutyRotation.GetPhantomJob() == DutyRotation.PhantomJob.None)
 		{
-			var curCombatType = DataCenter.IsPvP ? CombatType.PvP : CombatType.PvE;
-			IconSet.GetTexture(curCombatType.GetIcon(), out overlayTexture);
+			//var curCombatType = DataCenter.IsPvP ? CombatType.PvP : CombatType.PvE;
+			//IconSet.GetTexture(curCombatType.GetIcon(), out overlayTexture);
 		}
 		else
 		{
