@@ -1,6 +1,8 @@
+using System.ComponentModel;
+
 namespace RotationSolver.RebornRotations.Tank;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.56")]
 [SourceCode(Path = "main/RebornRotations/Tank/WAR_Reborn.cs")]
 
 public sealed class WAR_Reborn : WarriorRotation
@@ -8,6 +10,21 @@ public sealed class WAR_Reborn : WarriorRotation
 	#region Config Options
 	[RotationConfig(CombatType.PvE, Name = "Only use Nascent Flash if Tank Stance is off")]
 	public bool NeverscentFlash { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "Nascent Flash target priority")]
+	public NascentFlashTargetStrategy NascentFlashTarget { get; set; } = NascentFlashTargetStrategy.LowestHP;
+
+	public enum NascentFlashTargetStrategy : byte
+	{
+		[Description("Lowest HP party member")]
+		LowestHP,
+
+		[Description("Healers first, then lowest HP party member")]
+		HealerFirst,
+
+		[Description("Healers only")]
+		HealerOnly,
+	}
 
 	[RotationConfig(CombatType.PvE, Name = "Use Bloodwhetting/Raw intuition on single enemies")]
 	public bool SoloIntuition { get; set; } = false;
@@ -191,12 +208,25 @@ public sealed class WAR_Reborn : WarriorRotation
 		return base.GeneralAbility(nextGCD, out act);
 	}
 
-	[RotationDesc(ActionID.ShakeItOffPvE)]
+	[RotationDesc(ActionID.ShakeItOffPvE, ActionID.NascentFlashPvE)]
 	protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
 	{
 		if (ShakeItOffPvE.CanUse(out act, skipAoeCheck: true))
 		{
 			return true;
+		}
+
+		if (InCombat && (!NeverscentFlash || !StatusHelper.PlayerHasStatus(true, StatusID.Defiance)))
+		{
+			if (NascentFlashTarget != NascentFlashTargetStrategy.LowestHP && NascentFlashCanUse(out act, healersOnly: true))
+			{
+				return true;
+			}
+
+			if (NascentFlashTarget != NascentFlashTargetStrategy.HealerOnly && NascentFlashCanUse(out act, healersOnly: false))
+			{
+				return true;
+			}
 		}
 
 		return base.HealSingleAbility(nextGCD, out act);
@@ -397,27 +427,34 @@ public sealed class WAR_Reborn : WarriorRotation
 
 		return base.GeneralGCD(out act);
 	}
-
-	[RotationDesc(ActionID.NascentFlashPvE)]
-	protected override bool HealSingleGCD(out IAction? act)
-	{
-		if (!NeverscentFlash && NascentFlashPvE.CanUse(out act)
-			&& (InCombat && NascentFlashPvE.Target.Target?.GetHealthRatio() < FlashHeal))
-		{
-			return true;
-		}
-
-		if (NeverscentFlash && NascentFlashPvE.CanUse(out act)
-			&& (InCombat && !StatusHelper.PlayerHasStatus(true, StatusID.Defiance) && NascentFlashPvE.Target.Target?.GetHealthRatio() < FlashHeal))
-		{
-			return true;
-		}
-
-		return base.HealSingleGCD(out act);
-	}
 	#endregion
 
 	#region Extra Methods
 	private static bool IsBurstStatus => !StatusHelper.PlayerWillStatusEndGCD(0, 0, false, StatusID.InnerStrength);
+
+	// Picks the lowest HP% party member under the Nascent Flash threshold, optionally limited to healers.
+	// The target filter is swapped in for this call only and restored afterwards.
+	// Wicked bodge but it works for now
+	// TODO: make a more generic "target filter swap" method in ActionSetting
+	private bool NascentFlashCanUse(out IAction? act, bool healersOnly)
+	{
+		var setting = NascentFlashPvE.Setting;
+		var canTarget = setting.CanTarget;
+		var healRatio = Math.Min(FlashHeal, NascentFlashPvE.Config.AutoHealRatio);
+
+		setting.CanTarget = t => canTarget(t)
+			&& t.GetHealthRatio() < healRatio
+			&& !t.NoNeedHealingInvuln()
+			&& (!healersOnly || t.IsJobCategory(JobRole.Healer));
+
+		try
+		{
+			return NascentFlashPvE.CanUse(out act, targetOverride: TargetType.LowHPPercent);
+		}
+		finally
+		{
+			setting.CanTarget = canTarget;
+		}
+	}
 	#endregion
 }

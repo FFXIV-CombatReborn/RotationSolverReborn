@@ -3155,9 +3155,17 @@ public struct ActionTargetInfo(IBaseAction action)
 					}
 				}
 
-				if (ObjectHelper.GetPlayerHealthRatio() <= Service.Config.HealthSelfRatio)
+				// Only prefer self when self is actually a valid candidate for this action
+				var player = Player.Object;
+				if (player != null && ObjectHelper.GetPlayerHealthRatio() <= Service.Config.HealthSelfRatio)
 				{
-					return Player.Object;
+					foreach (var o in objs)
+					{
+						if (o.GameObjectId == player.GameObjectId)
+						{
+							return player;
+						}
+					}
 				}
 
 				var healerTar = healerTars.Count > 0 ? healerTars[0] : null;
