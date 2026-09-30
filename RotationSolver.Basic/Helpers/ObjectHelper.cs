@@ -134,17 +134,29 @@ public static class ObjectHelper
 
 		try
 		{
-			if (!battleChara.IsEnemy())
+			// battleChara can be a reference captured a frame or two earlier (e.g. the next GCD's
+			// target). It can go stale between the validity check above and the StatusList read
+			// inside HasStatus() below, most commonly right as the target dies and its object table
+			// entry gets torn down - that's a hard crash, not a catchable exception, so re-resolve
+			// from the live object table immediately before touching it instead of trusting the
+			// reference we were handed. Same approach as StatusHelper.DoomNeedHealing.
+			if (Svc.Objects.SearchById(battleChara.GameObjectId) is not IBattleChara fresh
+				|| !fresh.IsValid() || fresh.Address == nint.Zero || fresh.IsDead)
 			{
 				return false;
 			}
 
-			if (battleChara.HasStatus(false, StatusID.DirectionalDisregard))
+			if (!fresh.IsEnemy())
 			{
 				return false;
 			}
 
-			return Svc.Data.GetExcelSheet<BNpcBase>().TryGetRow(battleChara.BaseId, out var dataRow) && !dataRow.IsOmnidirectional;
+			if (fresh.HasStatus(false, StatusID.DirectionalDisregard))
+			{
+				return false;
+			}
+
+			return Svc.Data.GetExcelSheet<BNpcBase>().TryGetRow(fresh.BaseId, out var dataRow) && !dataRow.IsOmnidirectional;
 		}
 		catch
 		{
