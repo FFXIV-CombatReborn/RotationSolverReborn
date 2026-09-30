@@ -11,7 +11,17 @@ public partial class MonkRotation
 	/// <summary>
 	/// 
 	/// </summary>
-	protected static BeastChakra[] BeastChakras => JobGauge.BeastChakra;
+	public static BeastChakra BeastChakra1 => JobGauge.BeastChakra1;
+
+	/// <summary>
+	///
+	/// </summary>
+	public static BeastChakra BeastChakra2 => JobGauge.BeastChakra2;
+
+	/// <summary>
+	///
+	/// </summary>
+	public static BeastChakra BeastChakra3 => JobGauge.BeastChakra3;
 
 	/// <summary>
 	/// 
@@ -64,47 +74,29 @@ public partial class MonkRotation
 	public static bool CoeurlUnlocked => DataCenter.PlayerSyncedLevel() >= 30;
 
 	/// <summary>
-	/// Determines whether all elements in the <see cref="BeastChakras"/> array are the same.
+	/// Determines whether all three Beast Chakra slots are the same.
 	/// </summary>
 	/// <returns>
-	/// <c>true</c> if all elements are equal; otherwise, <c>false</c>.
+	/// <c>true</c> if all slots are equal; otherwise, <c>false</c>.
 	/// </returns>
 	public static bool BeastChakrasAllSame()
 	{
-		var first = BeastChakras[0];
-		for (var i = 1; i < BeastChakras.Length; i++)
-		{
-			if (!BeastChakras[i].Equals(first))
-			{
-				return false;
-			}
-		}
-		return true;
+		return BeastChakra1 == BeastChakra2 && BeastChakra2 == BeastChakra3;
 	}
 
 	/// <summary>
-	/// Determines whether all elements in the <see cref="BeastChakras"/> array are different from each other.
+	/// Determines whether all three Beast Chakra slots are different from each other.
 	/// </summary>
 	/// <returns>
-	/// <c>true</c> if all elements are unique or the array is empty; otherwise, <c>false</c>.
+	/// <c>true</c> if all slots are unique; otherwise, <c>false</c>.
 	/// </returns>
 	public static bool BeastChakrasAllDifferent()
 	{
-		for (var i = 0; i < BeastChakras.Length; i++)
-		{
-			for (var j = i + 1; j < BeastChakras.Length; j++)
-			{
-				if (BeastChakras[i].Equals(BeastChakras[j]))
-				{
-					return false;
-				}
-			}
-		}
-		return true;
+		return BeastChakra1 != BeastChakra2 && BeastChakra1 != BeastChakra3 && BeastChakra2 != BeastChakra3;
 	}
 
 	/// <summary>
-	/// Determines whether the specified <paramref name="value"/> exists in the <see cref="BeastChakras"/> array.
+	/// Determines whether the specified <paramref name="value"/> is in any of the three Beast Chakra slots.
 	/// </summary>
 	/// <param name="value">The <see cref="BeastChakra"/> value to search for.</param>
 	/// <returns>
@@ -112,33 +104,19 @@ public partial class MonkRotation
 	/// </returns>
 	public static bool BeastChakrasContains(BeastChakra value)
 	{
-		for (var i = 0; i < BeastChakras.Length; i++)
-		{
-			if (BeastChakras[i].Equals(value))
-			{
-				return true;
-			}
-		}
-		return false;
+		return BeastChakra1 == value || BeastChakra2 == value || BeastChakra3 == value;
 	}
 
 	/// <summary>
-	/// Determines whether all elements in the <see cref="BeastChakras"/> array do <b>not</b> equal the specified <paramref name="value"/>.
+	/// Determines whether none of the three Beast Chakra slots equal the specified <paramref name="value"/>.
 	/// </summary>
-	/// <param name="value">The <see cref="BeastChakra"/> value to compare against each element.</param>
+	/// <param name="value">The <see cref="BeastChakra"/> value to compare against each slot.</param>
 	/// <returns>
-	/// <c>true</c> if none of the elements equal <paramref name="value"/>; otherwise, <c>false</c>.
+	/// <c>true</c> if none of the slots equal <paramref name="value"/>; otherwise, <c>false</c>.
 	/// </returns>
 	public static bool BeastChakrasAllNot(BeastChakra value)
 	{
-		for (var i = 0; i < BeastChakras.Length; i++)
-		{
-			if (BeastChakras[i].Equals(value))
-			{
-				return false;
-			}
-		}
-		return true;
+		return !BeastChakrasContains(value);
 	}
 	#endregion
 
@@ -249,7 +227,7 @@ public partial class MonkRotation
 		ImGui.Text($"HasLunar: {HasLunar}");
 		ImGui.Text($"HasSolar: {HasSolar}");
 		ImGui.Text($"Chakra: {Chakra}");
-		ImGui.Text($"BeastChakras: {string.Join(", ", BeastChakras)}");
+		ImGui.Text($"BeastChakras: {BeastChakra1}, {BeastChakra2}, {BeastChakra3}");
 		ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
 		ImGui.Text("CelestialRevolutionPvEReady: " + CelestialRevolutionPvEReady.ToString());
 		ImGui.Text("FlintStrikePvEReady: " + FlintStrikePvEReady.ToString());

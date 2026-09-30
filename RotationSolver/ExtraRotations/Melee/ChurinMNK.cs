@@ -61,7 +61,8 @@ public sealed class ChurinMNK : MonkRotation
 		for (var i = 0; i <= maxGCD; i++)
 		{
 			var deadLine = gcdTotal * i + (gcdTotal - Math.Abs(WeaponRemain - Buffer));
-			if (action.Cooldown.WillHaveOneCharge(deadLine)) return true;
+			if (action.Cooldown.WillHaveOneCharge(deadLine))
+				return true;
 		}
 		return false;
 	}
@@ -73,7 +74,8 @@ public sealed class ChurinMNK : MonkRotation
 		for (var i = 0; i <= maxGCDs; i++)
 		{
 			var deadline = gcdTotal * i + (gcdTotal - Buffer + WeaponRemain);
-			if (action.Cooldown.RecastTimeRemain <= deadline) return i;
+			if (action.Cooldown.RecastTimeRemain <= deadline)
+				return i;
 		}
 		return -1;
 	}
@@ -82,7 +84,8 @@ public sealed class ChurinMNK : MonkRotation
 		var bhIndex = IsReadyIndex(BrotherhoodPvE, range);
 		var rofIndex = IsReadyIndex(RiddleOfFirePvE, range);
 
-		if (bhIndex == -1 || rofIndex == -1) return false;
+		if (bhIndex == -1 || rofIndex == -1)
+			return false;
 
 		var difference = Math.Abs(rofIndex - bhIndex);
 		return difference <= 0.6f;
@@ -297,7 +300,7 @@ public sealed class ChurinMNK : MonkRotation
 		var formLabel = InOpoopoForm ? "Opo-Opo" : InRaptorForm ? "Raptor" : InCoeurlForm ? "Coeurl" : "None";
 		AddTableRowColored("Current Form", formLabel, InOpoopoForm || InRaptorForm || InCoeurlForm ? yellow : gray);
 
-		AddTableRowColored("Beast Chakras", $"{BeastChakras[0]}, {BeastChakras[1]}, {BeastChakras[2]}", gray);
+		AddTableRowColored("Beast Chakras", $"{BeastChakra1}, {BeastChakra2}, {BeastChakra3}", gray);
 		AddTableRowColored("Fury Gauge State", CheckFuryGaugeState(), gray);
 
 		// GCD / Opo checks
@@ -393,7 +396,8 @@ public sealed class ChurinMNK : MonkRotation
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
 		act = null;
-		if (!EnoughWeaveTime) return false;
+		if (!EnoughWeaveTime)
+			return false;
 		return FeintPvE.CanUse(out act) || base.DefenseAreaAbility(nextGCD, out act);
 	}
 
@@ -401,7 +405,8 @@ public sealed class ChurinMNK : MonkRotation
 	protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
 	{
 		act = null;
-		if (!EnoughWeaveTime) return false;
+		if (!EnoughWeaveTime)
+			return false;
 		if (EarthsReplyPvE.CanUse(out act))
 		{
 			return true;
@@ -414,7 +419,8 @@ public sealed class ChurinMNK : MonkRotation
 	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
 	{
 		act = null;
-		if (!EnoughWeaveTime) return false;
+		if (!EnoughWeaveTime)
+			return false;
 		return RiddleOfEarthPvE.CanUse(out act, usedUp: true) || base.DefenseSingleAbility(nextGCD, out act);
 	}
 
@@ -436,8 +442,10 @@ public sealed class ChurinMNK : MonkRotation
 			return CombatElapsedLessGCD(1) ? TryUseOpenerVariation(out act) : TryUseOpoOpo(out act);
 		}
 
-		if (TryUseWindsReply(out act)) return true;
-		if (TryUseFiresReply(out act)) return true;
+		if (TryUseWindsReply(out act))
+			return true;
+		if (TryUseFiresReply(out act))
+			return true;
 
 		return TryGenerateNadi(out act)
 			|| TryUseMasterfulBlitz(out act)
@@ -454,7 +462,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryUseMeditations(out IAction? act)
 	{
 		act = null;
-		if (InCombat && HasHostilesInRange) return false;
+		if (InCombat && HasHostilesInRange)
+			return false;
 
 		if ((!HasHostilesInRange || !InCombat) && Chakra < 5)
 		{
@@ -547,7 +556,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryUseOpenerVariation(out IAction? act)
 	{
 		act = null;
-		if (!CombatElapsedLessGCD(1)) return false;
+		if (!CombatElapsedLessGCD(1))
+			return false;
 
 		return ChosenVariation switch
 		{
@@ -565,7 +575,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryGenerateNadi(out IAction? act)
 	{
 		act = null;
-		if (!HasPerfectBalance || !BeastChakrasContains(BeastChakra.None)) return false;
+		if (!HasPerfectBalance || !BeastChakrasContains(BeastChakra.None))
+			return false;
 
 		return NextNadiGoal switch
 		{
@@ -579,7 +590,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryGenerateLunarNadi(out IAction? act)
 	{
 		act = null;
-		if (!BeastChakrasContains(BeastChakra.None) || NextNadiGoal != Nadi.Lunar) return false;
+		if (!BeastChakrasContains(BeastChakra.None) || NextNadiGoal != Nadi.Lunar)
+			return false;
 
 		return TryUseOpoOpo(out act);
 	}
@@ -587,7 +599,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryGenerateSolarNadi(out IAction? act)
 	{
 		act = null;
-		if (!BeastChakrasContains(BeastChakra.None) || NextNadiGoal != Nadi.Solar) return false;
+		if (!BeastChakrasContains(BeastChakra.None) || NextNadiGoal != Nadi.Solar)
+			return false;
 
 		var furyState = CheckFuryGaugeState();
 
@@ -616,7 +629,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryUseMasterfulBlitz(out IAction? act)
 	{
 		act = null;
-		if (BeastChakrasContains(BeastChakra.None)) return false;
+		if (BeastChakrasContains(BeastChakra.None))
+			return false;
 
 		if (HasBothNadi && PhantomRushPvEReady)
 		{
@@ -643,7 +657,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryUseFiresReply(out IAction? act)
 	{
 		act = null;
-		if (!HasRiddleOfFire && !HasFiresRumination || HasPerfectBalance) return false;
+		if (!HasRiddleOfFire && !HasFiresRumination || HasPerfectBalance)
+			return false;
 
 		if (IsBurst && !HasBlitzReady)
 		{
@@ -682,7 +697,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryUseWindsReply(out IAction? act)
 	{
 		act = null;
-		if (!HasWindsRumination || HasPerfectBalance) return false;
+		if (!HasWindsRumination || HasPerfectBalance)
+			return false;
 
 		if (WindsReplyPvE.CanUse(out act))
 		{
@@ -707,7 +723,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryUseSixSidedStar(out IAction? act)
 	{
 		act = null;
-		if (!IsInHighEndDuty || (CurrentTarget != null && CurrentTarget.GetHealthRatio() > BossHealthThreshold)) return false;
+		if (!IsInHighEndDuty || (CurrentTarget != null && CurrentTarget.GetHealthRatio() > BossHealthThreshold))
+			return false;
 
 		if (CurrentTarget != null && (CurrentTarget.IsBossFromIcon() || CurrentTarget.IsBossFromTTK()))
 		{
@@ -723,7 +740,8 @@ public sealed class ChurinMNK : MonkRotation
 	{
 		act = null;
 		if (HasFormlessFist || InOpoopoForm || InCoeurlForm || InRaptorForm ||
-			HasPerfectBalance || InCombat && HasHostilesInRange) return false;
+			HasPerfectBalance || InCombat && HasHostilesInRange)
+			return false;
 
 		return FormShiftPvE.CanUse(out act);
 	}
@@ -740,7 +758,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryUsePerfectBalance(out IAction? act)
 	{
 		act = null;
-		if (HasPerfectBalance) return false;
+		if (HasPerfectBalance)
+			return false;
 
 		if (CombatElapsedLessGCD(1))
 		{
@@ -777,7 +796,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryUseBrotherhood(out IAction? act)
 	{
 		act = null;
-		if (!CanBurst || !CanEarlyWeave || !RiddleOfFirePvE.Cooldown.WillHaveOneCharge(0.5f)) return false;
+		if (!CanBurst || !CanEarlyWeave || !RiddleOfFirePvE.Cooldown.WillHaveOneCharge(0.5f))
+			return false;
 
 		var timeRequirement = ChosenVariation switch
 		{
@@ -787,7 +807,8 @@ public sealed class ChurinMNK : MonkRotation
 			_ => PerfectBalanceStacks(1) && CombatElapsedLessGCD(10)
 		};
 
-		if (timeRequirement) return BrotherhoodPvE.CanUse(out act);
+		if (timeRequirement)
+			return BrotherhoodPvE.CanUse(out act);
 
 		if (!CombatElapsedLessGCD(10))
 		{
@@ -801,7 +822,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryUseRiddleOfFire(out IAction? act)
 	{
 		act = null;
-		if (!RiddleOfFirePvE.IsEnabled || CanEarlyWeave || !CanLateWeave) return false;
+		if (!RiddleOfFirePvE.IsEnabled || CanEarlyWeave || !CanLateWeave)
+			return false;
 
 		if (RiddleOfFirePvE.CanUse(out act))
 		{
@@ -834,7 +856,8 @@ public sealed class ChurinMNK : MonkRotation
 	private bool TryUseRiddleOfWind(out IAction? act)
 	{
 		act = null;
-		if (!RiddleOfWindPvE.IsEnabled || !EnoughWeaveTime || !RiddleOfWindPvE.Cooldown.WillHaveOneCharge(WeaponRemain) && WeaponRemain <= 1.2f) return false;
+		if (!RiddleOfWindPvE.IsEnabled || !EnoughWeaveTime || !RiddleOfWindPvE.Cooldown.WillHaveOneCharge(WeaponRemain) && WeaponRemain <= 1.2f)
+			return false;
 
 		if (RiddleOfWindPvE.CanUse(out act))
 		{
@@ -866,18 +889,22 @@ public sealed class ChurinMNK : MonkRotation
 	{
 		act = null;
 
-		if (Chakra < 5 || !EnoughWeaveTime || ((IsReadySoon(BrotherhoodPvE, 1) || IsReadySoon(RiddleOfFirePvE, 1)) && !IsOpenerStart)) return false;
+		if (Chakra < 5 || !EnoughWeaveTime || ((IsReadySoon(BrotherhoodPvE, 1) || IsReadySoon(RiddleOfFirePvE, 1)) && !IsOpenerStart))
+			return false;
 
 		// AoE Check
-		if (EnlightenmentPvE.CanUse(out act)) return true;
+		if (EnlightenmentPvE.CanUse(out act))
+			return true;
 
 		if (IsOpenerStart && BlitzCount == 0)
 		{
-			if (ChosenVariation == OpenerVariation.Demolish7 && !InBurst) return false;
+			if (ChosenVariation == OpenerVariation.Demolish7 && !InBurst)
+				return false;
 			return Chakra >= 5 && TheForbiddenChakraPvE.CanUse(out act);
 		}
 
-		if (Chakra >= 5 && TheForbiddenChakraPvE.CanUse(out act)) return true;
+		if (Chakra >= 5 && TheForbiddenChakraPvE.CanUse(out act))
+			return true;
 
 		// Low level fallback
 		return !TheForbiddenChakraPvE.EnoughLevel && Chakra >= 5 && SteelPeakPvE.CanUse(out act);

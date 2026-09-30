@@ -10,9 +10,20 @@ public partial class AstrologianRotation
 	public override MedicineType MedicineType => MedicineType.Mind;
 
 	/// <summary>
-	/// NONE = 0, BALANCE = 1, BOLE = 2, ARROW = 3, SPEAR = 4, EWERS = 5, SPIRE = 6
+	/// 
 	/// </summary>
-	protected static CardType[] DrawnCard => JobGauge.DrawnCards;
+	public static CardType Card1 => JobGauge.Card1;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static CardType Card2 => JobGauge.Card2;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static CardType Card3 => JobGauge.Card3;
+
 	/// <summary>
 	/// 
 	/// </summary>
@@ -20,13 +31,21 @@ public partial class AstrologianRotation
 	{
 		get
 		{
-			foreach (var card in DrawnCard)
+			if (Card1 == CardType.Balance)
 			{
-				if (card == CardType.Balance)
-				{
-					return true;
-				}
+				return true;
 			}
+
+			else if (Card2 == CardType.Balance)
+			{
+				return true;
+			}
+
+			else if (Card3 == CardType.Balance)
+			{
+				return true;
+			}
+
 			return false;
 		}
 	}
@@ -38,12 +57,19 @@ public partial class AstrologianRotation
 	{
 		get
 		{
-			foreach (var card in DrawnCard)
+			if (Card1 == CardType.Bole)
 			{
-				if (card == CardType.Bole)
-				{
-					return true;
-				}
+				return true;
+			}
+
+			else if (Card2 == CardType.Bole)
+			{
+				return true;
+			}
+
+			else if (Card3 == CardType.Bole)
+			{
+				return true;
 			}
 			return false;
 		}
@@ -56,12 +82,19 @@ public partial class AstrologianRotation
 	{
 		get
 		{
-			foreach (var card in DrawnCard)
+			if (Card1 == CardType.Arrow)
 			{
-				if (card == CardType.Arrow)
-				{
-					return true;
-				}
+				return true;
+			}
+
+			else if (Card2 == CardType.Arrow)
+			{
+				return true;
+			}
+
+			else if (Card3 == CardType.Arrow)
+			{
+				return true;
 			}
 			return false;
 		}
@@ -74,12 +107,19 @@ public partial class AstrologianRotation
 	{
 		get
 		{
-			foreach (var card in DrawnCard)
+			if (Card1 == CardType.Spear)
 			{
-				if (card == CardType.Spear)
-				{
-					return true;
-				}
+				return true;
+			}
+
+			else if (Card2 == CardType.Spear)
+			{
+				return true;
+			}
+
+			else if (Card3 == CardType.Spear)
+			{
+				return true;
 			}
 			return false;
 		}
@@ -92,12 +132,19 @@ public partial class AstrologianRotation
 	{
 		get
 		{
-			foreach (var card in DrawnCard)
+			if (Card1 == CardType.Ewer)
 			{
-				if (card == CardType.Ewer)
-				{
-					return true;
-				}
+				return true;
+			}
+
+			else if (Card2 == CardType.Ewer)
+			{
+				return true;
+			}
+
+			else if (Card3 == CardType.Ewer)
+			{
+				return true;
 			}
 			return false;
 		}
@@ -110,12 +157,19 @@ public partial class AstrologianRotation
 	{
 		get
 		{
-			foreach (var card in DrawnCard)
+			if (Card1 == CardType.Spire)
 			{
-				if (card == CardType.Spire)
-				{
-					return true;
-				}
+				return true;
+			}
+
+			else if (Card2 == CardType.Spire)
+			{
+				return true;
+			}
+
+			else if (Card3 == CardType.Spire)
+			{
+				return true;
 			}
 			return false;
 		}
@@ -187,7 +241,9 @@ public partial class AstrologianRotation
 	/// <inheritdoc/>
 	public override void DisplayBaseStatus()
 	{
-		ImGui.Text($"DrawnCard: {string.Join(", ", DrawnCard)}");
+		ImGui.Text($"Card1: {Card1.ToString()}");
+		ImGui.Text($"Card2: {Card2.ToString()}");
+		ImGui.Text($"Card3: {Card3.ToString()}");
 		ImGui.Text($"DrawnCrownCard: {DrawnCrownCard}");
 		ImGui.Text($"ActiveDraw: {ActiveDraw}");
 		ImGui.Text($"RaiseMPMinimum: {RaiseMPMinimum}");
@@ -276,12 +332,9 @@ public partial class AstrologianRotation
 				return false;
 			}
 
-			foreach (var card in DrawnCard)
+			if (HasSpear)
 			{
-				if (card == CardType.Spear)
-				{
-					return false;
-				}
+				return false;
 			}
 			return true;
 		};
@@ -297,12 +350,9 @@ public partial class AstrologianRotation
 				return false;
 			}
 
-			foreach (var card in DrawnCard)
+			if (HasBalance)
 			{
-				if (card == CardType.Balance)
-				{
-					return false;
-				}
+				return false;
 			}
 			return true;
 		};
