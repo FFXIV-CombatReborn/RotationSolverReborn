@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace RotationSolver.RebornRotations.Melee;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.56")]
@@ -13,9 +15,6 @@ public sealed class BST_Reborn : BeastmasterRotation
 	[RotationConfig(CombatType.PvE, Name = "Third Horn")]
 	private HornOrder ThirdHorn { get; set; } = HornOrder.ThirdBattlehorn;
 
-	[RotationConfig(CombatType.PvE, Name = "Ignore this")]
-	public bool Overcap { get; set; } = false;
-
 	[RotationConfig(CombatType.PvE, Name = "What to use One with Nature on for the First Horn")]
 	private OneWithNatureOrder HornNatureFirst { get; set; } = OneWithNatureOrder.Tempered;
 
@@ -24,6 +23,45 @@ public sealed class BST_Reborn : BeastmasterRotation
 
 	[RotationConfig(CombatType.PvE, Name = "What to use One with Nature on for the Third Horn")]
 	private OneWithNatureOrder HornNatureThird { get; set; } = OneWithNatureOrder.Borrow;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Snarl and Challenge based on your HP and your familiar's HP (Crucible only)",
+		Tooltip = "Off: Snarl is never used.\nOn: Snarl gives your damage to the familiar and Challenge takes it back, based on the settings below. If one of you has to die, it will be the familiar.")]
+	private bool FamiliarTankSwap { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "Only use Snarl and Challenge on Last Horn", Parent = nameof(FamiliarTankSwap))]
+	private bool LasthornOnly { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "How to decide who takes damage", Parent = nameof(FamiliarTankSwap))]
+	private TankSwapMode TankSwap { get; set; } = TankSwapMode.Thresholds;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "Snarl when familiar HP is at or above", Parent = nameof(TankSwap), ParentValue = ThresholdsDescription)]
+	private float SnarlFamiliarHp { get; set; } = 0.7f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "Challenge when familiar HP is at or below", Parent = nameof(TankSwap), ParentValue = ThresholdsDescription)]
+	private float ChallengeFamiliarHp { get; set; } = 0.3f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "Challenge when your HP is this much higher than the familiar's", Parent = nameof(TankSwap), ParentValue = DynamicDescription,
+		Tooltip = "The familiar takes damage while its HP is at or above yours. Once your HP is higher than the familiar's by this much, Challenge takes the damage back. Higher values mean fewer swaps.")]
+	private float DynamicSwapMargin { get; set; } = 0.2f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "Your HP floor: at or below this the familiar takes all damage, even if it dies", Parent = nameof(FamiliarTankSwap))]
+	private float PlayerHpFloor { get; set; } = 0.3f;
+
+	private const string ThresholdsDescription = "Familiar HP thresholds";
+	private const string DynamicDescription = "Dynamic (compare your HP and the familiar's HP)";
+
+	public enum TankSwapMode : byte
+	{
+		[Description(ThresholdsDescription)]
+		Thresholds,
+
+		[Description(DynamicDescription)]
+		Dynamic,
+	}
 
 	#region Countdown logic
 	// Defines logic for actions to take during the countdown before combat starts.
@@ -37,8 +75,66 @@ public sealed class BST_Reborn : BeastmasterRotation
 	#region Emergency Logic
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
 	{
+		if (InCombat && FamiliarTankSwap)
+		{
+			if (!LasthornOnly || (LasthornOnly && OnLastHorn))
+			{
+				if (FamiliarTankSwapAbility(out act))
+				{
+					return true;
+				}
+			}
+		}
 
 		return base.EmergencyAbility(nextGCD, out act);
+	}
+
+	private bool FamiliarTankSwapAbility(out IAction? act)
+	{
+		act = null;
+
+		var familiar = Familiar;
+		if (!FamiliarHasHp(familiar) || Player == null)
+		{
+			return false;
+		}
+
+		var playerHp = Player.GetHealthRatio();
+		var familiarHp = familiar!.GetHealthRatio();
+
+		// at or below the floor the player never takes damage back, so the familiar dies first.
+		var playerCritical = playerHp <= PlayerHpFloor;
+
+		bool shouldSnarl;
+		bool shouldChallenge;
+		if (TankSwap == TankSwapMode.Dynamic)
+		{
+			shouldSnarl = playerCritical || familiarHp >= playerHp;
+			shouldChallenge = !playerCritical && playerHp > familiarHp + DynamicSwapMargin;
+		}
+		else
+		{
+			shouldSnarl = playerCritical || (familiarHp >= SnarlFamiliarHp && familiarHp > ChallengeFamiliarHp);
+			shouldChallenge = !playerCritical && familiarHp <= ChallengeFamiliarHp;
+		}
+
+		if (shouldSnarl)
+		{
+			if (SnarlPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+		}
+
+		if (shouldChallenge && IsFamiliarTanking(familiar))
+		{
+			if (ChallengePvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 	#endregion
 
@@ -88,7 +184,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 			return true;
 		}
 
-		if (!Overcap)
+		if (NaturalInstinct == 3 || MasteredInstinct < 3)
 		{
 			if (TPCount >= 100 && !IsLastAction(true, PartingBlowPvE))
 			{
@@ -116,67 +212,36 @@ public sealed class BST_Reborn : BeastmasterRotation
 			}
 		}
 
-		if (Overcap)
+		if (MasteredInstinct == 3 || NaturalInstinct < 3)
 		{
-			if (NaturalInstinct == 3 || MasteredInstinct < 3)
+			if (PetTPCount >= 100)
 			{
-				if (TPCount >= 100 && !IsLastAction(true, PartingBlowPvE))
+				if (GaleAxePvE.CanUse(out act, skipStatusNeed: true, usedUp: true))
 				{
-					if (TrickPvE.CanUse(out act, skipStatusNeed: true))
-					{
-						return true;
-					}
+					return true;
 				}
 
-				if (AvalancheAxePvE.CanUse(out act, usedUp: true))
+				if (SpinningAxePvE.CanUse(out act, skipStatusNeed: true, usedUp: true))
 				{
 					return true;
 				}
-				if (MistralAxePvE.CanUse(out act, usedUp: true))
+
+				if (MistralAxePvE.CanUse(out act, skipStatusNeed: true, usedUp: true))
 				{
 					return true;
 				}
-				if (SpinningAxePvE.CanUse(out act, usedUp: true))
-				{
-					return true;
-				}
-				if (GaleAxePvE.CanUse(out act, usedUp: true))
+
+				if (AvalancheAxePvE.CanUse(out act, skipStatusNeed: true, usedUp: true))
 				{
 					return true;
 				}
 			}
 
-			if (MasteredInstinct == 3 || NaturalInstinct < 3)
+			if (!IsLastAction(true, PartingBlowPvE))
 			{
-				if (PetTPCount >= 100)
+				if (TrickPvE.CanUse(out act))
 				{
-					if (GaleAxePvE.CanUse(out act, skipStatusNeed: true, usedUp: true))
-					{
-						return true;
-					}
-
-					if (SpinningAxePvE.CanUse(out act, skipStatusNeed: true, usedUp: true))
-					{
-						return true;
-					}
-
-					if (MistralAxePvE.CanUse(out act, skipStatusNeed: true, usedUp: true))
-					{
-						return true;
-					}
-
-					if (AvalancheAxePvE.CanUse(out act, skipStatusNeed: true, usedUp: true))
-					{
-						return true;
-					}
-				}
-
-				if (!IsLastAction(true, PartingBlowPvE))
-				{
-					if (TrickPvE.CanUse(out act))
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 		}
@@ -318,6 +383,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 			}
 		}
 
+		// this unbound usage is for UnnamedStatus_2552, special mech in crucible board 1 fight 1
 		if (InCombat)
 		{
 			if (SnarlPvE.CanUse(out act))

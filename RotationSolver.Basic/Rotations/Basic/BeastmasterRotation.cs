@@ -1,4 +1,6 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+﻿using Dalamud.Game.ClientState.Objects.Enums;
+using ECommons.DalamudServices;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using System.Runtime.InteropServices;
 using Buddy = FFXIVClientStructs.FFXIV.Client.Game.UI.Buddy;
 
@@ -1055,7 +1057,7 @@ public partial class BeastmasterRotation
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool IsInCrucible =>  DataCenter.IsInCrucible;
+	public static bool IsInCrucible => DataCenter.IsInCrucible;
 
 	/// <summary>
 	/// 
@@ -1081,6 +1083,86 @@ public partial class BeastmasterRotation
 	/// 
 	/// </summary>
 	public static bool IsinSecondMasterBoard => DataCenter.IsinSecondMasterBoard;
+	#endregion
+
+	#region Familiar Tracking
+	/// <summary>
+	/// 
+	/// </summary>
+	public static IBattleChara? Familiar
+	{
+		get
+		{
+			var player = Player;
+			if (player == null)
+			{
+				return null;
+			}
+
+			var pet = DataCenter.GetPet();
+			if (IsOwnFamiliar(pet, player.GameObjectId))
+			{
+				return pet;
+			}
+
+			foreach (var obj in Svc.Objects)
+			{
+				if (obj is IBattleChara battleChara && IsOwnFamiliar(battleChara, player.GameObjectId))
+				{
+					return battleChara;
+				}
+			}
+
+			return null;
+		}
+	}
+
+	private static bool IsOwnFamiliar(IBattleChara? battleChara, ulong playerId)
+	{
+		return battleChara != null
+			&& battleChara.ObjectKind == ObjectKind.BattleNpc
+			&& battleChara.OwnerId == playerId
+			&& battleChara.GetBattleNPCSubKind() == BattleNpcSubKind.Pet;
+	}
+
+	/// <summary>
+	///
+	/// </summary>
+	public static bool FamiliarHasHp(IBattleChara? familiar)
+	{
+		return familiar != null && !familiar.IsDead && familiar.MaxHp > 0;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsCoveredByFamiliar => StatusHelper.PlayerHasStatus(false, StatusID.Covered_2413);
+
+	/// <summary>
+	///
+	/// </summary>
+	public static bool IsFamiliarTanking(IBattleChara? familiar)
+	{
+		if (familiar == null)
+		{
+			return false;
+		}
+
+		if (IsCoveredByFamiliar)
+		{
+			return true;
+		}
+
+		foreach (var hostile in DataCenter.AllHostileTargets)
+		{
+			if (hostile.TargetObjectId == familiar.GameObjectId)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 	#endregion
 
 	#region Draw Debug
@@ -1118,6 +1200,12 @@ public partial class BeastmasterRotation
 		ImGui.Text("KinshipState: " + KinshipStateText.ToString());
 		ImGui.Text("KinshipKinType : " + KinshipKinType.ToString());
 		ImGui.Text("KinshipBattlehorn: " + KinshipBattlehorn.ToString());
+		ImGui.Separator();
+		var familiar = Familiar;
+		ImGui.Text("Familiar: " + (familiar?.Name.TextValue ?? "None"));
+		ImGui.Text("Familiar HP: " + (FamiliarHasHp(familiar) ? familiar!.CurrentHp + "/" + familiar.MaxHp + " (" + familiar.GetHealthRatio().ToString("P0") + ")" : "N/A"));
+		ImGui.Text("Covered by Familiar: " + IsCoveredByFamiliar.ToString());
+		ImGui.Text("Familiar Tanking: " + IsFamiliarTanking(familiar).ToString());
 	}
 	#endregion
 
@@ -1125,7 +1213,7 @@ public partial class BeastmasterRotation
 
 	static partial void ModifySnarlPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => IsInCrucible && IsinFirstBoard;
+		setting.ActionCheck = () => IsInCrucible;
 		//shirk
 		setting.IsFriendly = false;
 		//setting.TargetType = TargetType.Provoke;
@@ -1138,7 +1226,6 @@ public partial class BeastmasterRotation
 	{
 		setting.ActionCheck = () => IsInCrucible;
 		setting.IsFriendly = false;
-		setting.TargetType = TargetType.Provoke;
 	}
 
 	static partial void ModifySmashAxePvE(ref ActionSetting setting)
