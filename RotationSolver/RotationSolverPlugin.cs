@@ -342,6 +342,11 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		_firstStartTutorialWindow?.Toggle();
 	}
 
+	internal static void ShowFirstStartTutorialIfNeeded()
+	{
+		_firstStartTutorialWindow?.OpenIfFirstStart();
+	}
+
 	internal static void OpenChangelog()
 	{
 		_updateNotesWindow?.IsOpen = true;
