@@ -3,11 +3,9 @@ using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
-using Lumina.Excel.Sheets;
 using RotationSolver.Commands;
 using RotationSolver.IPC;
 using RotationSolver.UI.HighlightTeachingMode;
-using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
 namespace RotationSolver.Updaters;
 
@@ -20,9 +18,6 @@ internal static class MajorUpdater
 	private static bool _isValidThisCycle;
 	private static bool _isActivatedThisCycle;
 	private static bool _rotationsLoaded;
-
-	// Cached GeneralAction sheet lookup (RowId -> GeneralAction RowId) for teaching mode highlighting
-	private static Dictionary<uint, uint>? _generalActionLookup;
 
 	private static readonly List<VfxNewData> _vfxRemaining = [];
 	private static readonly List<string> _expiredWarnings = [];
@@ -79,6 +74,11 @@ internal static class MajorUpdater
 			if (!Service.Config.TutorialDone)
 			{
 				RotationSolverPlugin.OpenFirstStartTutorial();
+			}
+
+			if (_isValidThisCycle)
+			{
+				RotationSolverPlugin.ShowChangelogIfUpdated();
 			}
 
 			if (_isValidThisCycle && !_rotationsLoaded)
@@ -324,19 +324,7 @@ internal static class MajorUpdater
 		{
 			try
 			{
-				var nextAction = ActionUpdater.NextAction;
-				HotbarID? hotbar = null;
-				if (nextAction is IBaseItem item)
-				{
-					hotbar = new HotbarID(HotbarSlotType.Item, item.ID);
-				}
-				else if (nextAction is IBaseAction baseAction)
-				{
-					hotbar = baseAction.Action.ActionCategory.RowId is 10 or 11
-							? GetGeneralActionHotbarID(baseAction)
-							: new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID);
-				}
-
+				var hotbar = HotbarAddonHelper.GetHotbarID(ActionUpdater.NextAction);
 				if (hotbar.HasValue)
 				{
 					_ = HotbarHighlightManager.HotbarIDs.Add(hotbar.Value);
@@ -395,6 +383,15 @@ internal static class MajorUpdater
 		catch (Exception ex)
 		{
 			LogOnce("CommonUpdate Exception", ex);
+		}
+
+		try
+		{
+			HotbarKeybindHelper.Update();
+		}
+		catch (Exception ex)
+		{
+			LogOnce("HotbarKeybindHelper.Update Exception", ex);
 		}
 	}
 
@@ -578,33 +575,6 @@ internal static class MajorUpdater
 		}
 
 		_shouldRunThisCycle = false;
-	}
-
-	private static HotbarID? GetGeneralActionHotbarID(IBaseAction baseAction)
-	{
-		// Build the lookup once and cache it to avoid a full sheet scan every frame
-		if (_generalActionLookup == null)
-		{
-			var sheet = Svc.Data.GetExcelSheet<GeneralAction>();
-			if (sheet == null)
-			{
-				return null;
-			}
-
-			_generalActionLookup = [];
-			foreach (var gAct in sheet)
-			{
-				var actionRowId = gAct.Action.RowId;
-				if (actionRowId != 0)
-				{
-					_generalActionLookup.TryAdd(actionRowId, gAct.RowId);
-				}
-			}
-		}
-
-		return _generalActionLookup.TryGetValue(baseAction.ID, out var generalActionRowId)
-			? new HotbarID(HotbarSlotType.GeneralAction, generalActionRowId)
-			: null;
 	}
 
 	private static void LogOnce(string context, Exception ex)

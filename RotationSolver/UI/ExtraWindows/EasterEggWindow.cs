@@ -5,7 +5,7 @@ using ECommons.DalamudServices;
 using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
 
-namespace RotationSolver.UI;
+namespace RotationSolver.UI.ExtraWindows;
 
 internal class EasterEggWindow : Window
 {
@@ -13,13 +13,13 @@ internal class EasterEggWindow : Window
 
 	private enum Cell { Empty, X, O }
 	private readonly Cell[] _board = new Cell[9];
-	private bool _playerTurn = true; // Player is X
+	private bool _playerTurn = true;
 	private bool _gameOver = false;
 	private string _status = "You are X. Click to play.";
 	private readonly float _cellSize = 64f;
 
 	private static readonly Random _rng = new();
-	private bool _aiBlunderThisGame = false; // 1/1000 chance per match to intentionally blunder once
+	private bool _aiBlunderThisGame = false;
 	private bool _aiBlunderUsed = false;
 
 	public EasterEggWindow() : base("RSR Lab — Tic‑tac‑toe", BaseFlags)
@@ -46,7 +46,6 @@ internal class EasterEggWindow : Window
 		var size = _cellSize * scale;
 
 		using var _ = ImRaii.Group();
-		// Board 3x3
 		for (var r = 0; r < 3; r++)
 		{
 			for (var c = 0; c < 3; c++)
@@ -73,7 +72,7 @@ internal class EasterEggWindow : Window
 							OtherConfiguration.RotationSolverRecord.TicTacToeWinStar = true;
 							OtherConfiguration.SaveRotationSolverRecord();
 						}
-						catch { /* non-fatal */ }
+						catch { }
 					}
 					else if (IsDraw(_board))
 					{
@@ -133,7 +132,6 @@ internal class EasterEggWindow : Window
 		_playerTurn = true;
 		_gameOver = false;
 		_status = "You are X. Click to play.";
-		// 1/1000 chance at the start of each match for the AI to intentionally make one bad move
 		_aiBlunderThisGame = _rng.Next(0, 1000) == 0;
 		_aiBlunderUsed = false;
 	}
@@ -148,7 +146,7 @@ internal class EasterEggWindow : Window
 				move = FindWorstMoveMinimax();
 				if (move >= 0)
 				{
-					_aiBlunderUsed = true; // consume the one-time blunder
+					_aiBlunderUsed = true;
 				}
 				else
 				{
@@ -161,7 +159,6 @@ internal class EasterEggWindow : Window
 			}
 			if (move < 0)
 			{
-				// Fallback (should never happen): pick first empty
 				move = Array.FindIndex(_board, c => c == Cell.Empty);
 			}
 
@@ -193,7 +190,6 @@ internal class EasterEggWindow : Window
 		}
 	}
 
-	// Minimax with alpha-beta pruning (AI is O and maximizes)
 	private int FindBestMoveMinimax()
 	{
 		var bestScore = int.MinValue;

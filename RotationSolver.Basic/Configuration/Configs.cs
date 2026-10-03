@@ -47,6 +47,8 @@ internal partial class Configs : IPluginConfiguration
 	public string LastSeenChangelog { get; set; } = "0.0.0.0";
 	public bool TutorialDone { get; set; } = false;
 
+	public AoEType StateWindowManualAoEType { get; set; } = AoEType.Cleave;
+
 	public List<ActionEventInfo> Events { get; private set; } = [];
 	public SortedSet<Job> DisabledJobs { get; private set; } = [];
 
@@ -621,6 +623,11 @@ internal partial class Configs : IPluginConfiguration
 		Filter = BasicParams)]
 	private static readonly bool _toggleAuto = false;
 
+	[ConditionBool, UI("Show State Window",
+		Description = "A small Auto / Manual / Off switch for the autorotation state. /rotation Control shows and hides it too.",
+		Filter = UiWindows)]
+	private static readonly bool _showStateControlWindow = false;
+
 	[ConditionBool, UI("Only show these windows if there are enemies or in duty",
 		Filter = UiWindows)]
 	private static readonly bool _onlyShowWithHostileOrInDuty = false;
@@ -645,13 +652,16 @@ internal partial class Configs : IPluginConfiguration
 	[ConditionBool, UI("No Move", Parent = nameof(ShowNextActionWindow))]
 	private static readonly bool _isInfoWindowNoMove = false;
 
-	[ConditionBool, UI("Show Items' Cooldown",
-		Parent = nameof(ShowCooldownWindow))]
-	private static readonly bool _showItemsCooldown = false;
+	[ConditionBool, UI("Show Keybind (Experiemental)",
+		Description = "Show the keybind of the hotbar slot that holds the next action. Only visible hotbars are checked.",
+		Parent = nameof(ShowNextActionWindow))]
+	private static readonly bool _showNextActionKeybind = false;
 
-	[ConditionBool, UI("Show GCD Cooldown",
-		Parent = nameof(ShowCooldownWindow))]
-	private static readonly bool _showGCDCooldown = false;
+	[UI("Window Size",
+		Description = "Scales the whole Next Action window: the action icon, the GCD bar, the keybind and the target hint.",
+		Parent = nameof(ShowNextActionWindow))]
+	[Range(0.5f, 3f, ConfigUnitType.Percent, 0.01f)]
+	public float NextActionWindowScale { get; set; } = 1f;
 
 	[ConditionBool, UI("Show Original Cooldown",
 		Filter = UiInformation)]
@@ -680,6 +690,28 @@ internal partial class Configs : IPluginConfiguration
 
 	[UI("Disabled actions hotbar tint color", Parent = nameof(ReddenDisabledHotbarActions), Filter = UiInformation)]
 	public Vector4 HotbarDisabledTintColor { get; set; } = new(1f, 0f, 0f, 0.40f);
+
+	[ConditionBool, UI("Show setting descriptions inline",
+		Description = "Prints each setting's description underneath its name instead of only in the hover tooltip. Turn this off for a denser list.",
+		Filter = UiInformation)]
+	private static readonly bool _uiInlineDescriptions = true;
+
+	[UI("Interface accent colour",
+		Description = "This acts as the primary color that all other colors are derived from.",
+		Filter = UiInformation)]
+	public Vector4 UiAccentColor { get; set; } = new(0.690f, 0.125f, 0.122f, 1f);
+
+	[UI("Text size",
+		Description = "Scales the text in every Rotation Solver window, on top of Dalamud's own font settings.",
+		Filter = UiInformation)]
+	[Range(0.75f, 1.75f, ConfigUnitType.Percent, 0.01f)]
+	public float UiTextScale { get; set; } = 1f;
+
+	[UI("Element size",
+		Description = "Scales the padding, spacing and controls in every Rotation Solver window. Turn it down for a more compact layout; text keeps to the Text size setting.",
+		Filter = UiInformation)]
+	[Range(0.75f, 1.75f, ConfigUnitType.Percent, 0.01f)]
+	public float UiElementScale { get; set; } = 1f;
 
 	[ConditionBool, UI("Display do action feedback on toast",
 		Filter = UiInformation)]
@@ -796,11 +828,21 @@ internal partial class Configs : IPluginConfiguration
 	[JobConfig, UI("Use beneficial ground-targeted actions on party Tank if present, skipping other logic.", Parent = nameof(UseGroundBeneficialAbility))]
 	private static readonly bool _useTargetTankForGroundHeal = false;
 
-	[ConditionBool, UI("Show Cooldown Window", Filter = UiWindows)]
-	private static readonly bool _showCooldownWindow = false;
-
-	[ConditionBool, UI("Show Action Timeline Window", Filter = UiWindows)]
+	[ConditionBool, UI("Show Action Timeline Window",
+		Description = "A scrolling record of the actions you use: GCDs on the top lane with their cast and recast, oGCDs beneath them with their animation lock.",
+		Filter = UiWindows)]
 	private static readonly bool _showActionTimelineWindow = false;
+
+	[ConditionBool, UI("Lock timeline",
+		Description = "Stops the timeline from being moved or resized. Hover over it to unlock it again.",
+		Parent = nameof(ShowActionTimelineWindow))]
+	private static readonly bool _isActionTimelineLock = false;
+
+	[UI("Timeline size",
+		Description = "Scales the whole timeline: the icons, the lanes and how far a second stretches.",
+		Parent = nameof(ShowActionTimelineWindow))]
+	[Range(0.5f, 3f, ConfigUnitType.Percent, 0.01f)]
+	public float ActionTimelineWindowScale { get; set; } = 1f;
 
 	[ConditionBool, UI("Only show timeline in combat", Parent = nameof(ShowActionTimelineWindow))]
 	private static readonly bool _actionTimelineOnlyInCombat = true;
@@ -1050,10 +1092,6 @@ internal partial class Configs : IPluginConfiguration
 		Filter = BasicTimer, Section = 1, PvPFilter = JobFilterType.NoJob)]
 	[Range(0, 0.7f, ConfigUnitType.Seconds, 0.002f)]
 	public float CountDownAhead { get; set; } = 0.4f;
-
-	[UI("Cooldown window icon size")]
-	[Range(0, 80, ConfigUnitType.Pixels, 0.2f)]
-	public float CooldownWindowIconSize { get; set; } = 30;
 
 	[UI("Next Action Size Ratio", Parent = nameof(ShowControlWindow))]
 	[Range(0, 10, ConfigUnitType.Percent, 0.02f)]

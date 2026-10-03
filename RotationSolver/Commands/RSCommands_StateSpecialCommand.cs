@@ -63,6 +63,50 @@ namespace RotationSolver.Commands
 			});
 		}
 
+		public static void SetStateCommandType(StateCommandType stateType)
+		{
+			DoOneCommandType((type, role) => type.ToStateString(role), role =>
+			{
+				if (stateType != StateCommandType.Off)
+				{
+					if (DataCenter.IsInDutyReplay())
+					{
+						stateType = StateCommandType.Off;
+					}
+					else if (DataCenter.IsPvP && Service.Config.PvpStateControl)
+					{
+						stateType = StateCommandType.PvP;
+					}
+				}
+
+				UpdateState(stateType, role);
+
+				if (!DataCenter.AutoFaceTargetOnActionSetting() && DataCenter.MoveModeSetting() == 1)
+				{
+					Svc.GameConfig.UiControl.Set(UiControlOption.AutoFaceTargetOnAction.ToString(), 1);
+				}
+				return stateType;
+			});
+		}
+
+		public static void SetTargetingIndex(int index)
+		{
+			var count = Service.Config.TargetingTypes.Count;
+			if (count == 0)
+			{
+				return;
+			}
+
+			Service.Config.TargetingIndex = ((index % count) + count) % count;
+
+			if (!DataCenter.State || DataCenter.IsManual || DataCenter.IsAutoDuty || DataCenter.IsPvPStateEnabled)
+			{
+				return;
+			}
+
+			SetStateCommandType(DataCenter.IsTargetOnly ? StateCommandType.TargetOnly : StateCommandType.Auto);
+		}
+
 		public static void DoAutodutyStateCommandType(StateCommandType stateType, TargetingType targetingType)
 		{
 			DoOneCommandType((type, role) => type.ToStateString(role), role =>

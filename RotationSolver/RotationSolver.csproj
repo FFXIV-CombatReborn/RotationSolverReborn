@@ -22,7 +22,7 @@
 
 	<ItemGroup>
 		<!-- Keep ECommons runtime so its DLL is included -->
-		<PackageReference Include="ECommons" Version="3.2.1.20" />
+		<PackageReference Include="ECommons" Version="3.2.1.21" />
 		<PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -57,6 +57,14 @@
 		<Using Include="Dalamud.Interface" />
 		<Using Include="Dalamud.Bindings.ImGui" />
 		<Using Include="Newtonsoft.Json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Update notes. JSON, not YAML: PruneOutputDlls would strip a YAML library. -->
+		<EmbeddedResource Include="Changelog\changelog.json" LogicalName="RotationSolver.Changelog.changelog.json" />
+		<EmbeddedResource Include="Changelog\credits.json" LogicalName="RotationSolver.Changelog.credits.json" />
+		<EmbeddedResource Include="Changelog\banner.jpg" LogicalName="RotationSolver.Changelog.banner.jpg" />
+		<EmbeddedResource Include="..\Images\Logo.png" Link="Images\Logo.png" LogicalName="RotationSolver.Images.Logo.png" />
 	</ItemGroup>
 
 	<ItemGroup>

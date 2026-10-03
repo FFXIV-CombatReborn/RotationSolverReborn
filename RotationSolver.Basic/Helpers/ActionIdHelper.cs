@@ -1,5 +1,4 @@
 ﻿using ECommons.DalamudServices;
-using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Action = Lumina.Excel.Sheets.Action;
 

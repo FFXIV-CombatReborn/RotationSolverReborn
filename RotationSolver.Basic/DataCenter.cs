@@ -11,7 +11,6 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using Lumina.Excel;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;

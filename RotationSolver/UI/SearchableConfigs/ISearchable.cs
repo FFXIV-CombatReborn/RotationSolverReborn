@@ -1,4 +1,4 @@
-﻿namespace RotationSolver.UI.SearchableConfigs;
+namespace RotationSolver.UI.SearchableConfigs;
 
 internal interface ISearchable
 {
@@ -7,7 +7,6 @@ internal interface ISearchable
 	CheckBoxSearch? Parent { get; set; }
 
 	string SearchingKeys { get; }
-	bool ShowInChild { get; }
 
 	void Draw();
 }

@@ -89,13 +89,6 @@ public class BaseAction : IBaseAction
 	}
 
 	/// <inheritdoc/>
-	public bool IsOnCooldownWindow
-	{
-		get => Config.IsOnCooldownWindow;
-		set => Config.IsOnCooldownWindow = value;
-	}
-
-	/// <inheritdoc/>
 	public bool MinHPFeature
 	{
 		get => Config.MinHPFeature;

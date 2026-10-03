@@ -39,6 +39,14 @@ public static partial class RSCommands
 			case OtherCommandType.NextAction:
 				DoAction();
 				break;
+
+			case OtherCommandType.Control:
+				RotationSolverPlugin.ToggleStateControlWindow();
+				break;
+
+			case OtherCommandType.Changelog:
+				RotationSolverPlugin.OpenChangelog();
+				break;
 		}
 	}
 

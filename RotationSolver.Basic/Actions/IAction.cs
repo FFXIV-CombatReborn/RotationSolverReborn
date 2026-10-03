@@ -21,11 +21,6 @@ public interface IAction : ITexture, IEnoughLevel
 	uint SortKey { get; }
 
 	/// <summary>
-	/// Gets or sets a value indicating whether this action is in the cooldown UI window.
-	/// </summary>
-	bool IsOnCooldownWindow { get; set; }
-
-	/// <summary>
 	/// Gets or sets a value indicating whether this action is restricted by min HP.
 	/// </summary>
 	bool MinHPFeature { get; set; }

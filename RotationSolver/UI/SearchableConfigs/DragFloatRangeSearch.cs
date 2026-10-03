@@ -1,19 +1,18 @@
-﻿namespace RotationSolver.UI.SearchableConfigs;
+using RotationSolver.Data;
+using RotationSolver.UI.Material;
 
-internal class DragFloatRangeSearch : Searchable
+namespace RotationSolver.UI.SearchableConfigs;
+
+internal class DragFloatRangeSearch : UnitSearchable
 {
 	public float Min { get; }
 	public float Max { get; }
-	public float Speed { get; }
-	public ConfigUnitType Unit { get; }
 
-	public override string Description
+	public DragFloatRangeSearch(PropertyInfo property) : base(property)
 	{
-		get
-		{
-			var baseDesc = base.Description;
-			return !string.IsNullOrEmpty(baseDesc) ? $"{baseDesc}\n{Unit}" : Unit.ToString();
-		}
+		var range = _property.GetCustomAttribute<RangeAttribute>();
+		Min = range?.MinValue ?? 0f;
+		Max = range?.MaxValue ?? 1f;
 	}
 
 	protected Vector2 Value
@@ -22,93 +21,38 @@ internal class DragFloatRangeSearch : Searchable
 		set => _property.SetValue(Service.Config, value);
 	}
 
-	protected float MinValue
-	{
-		get => Value.X;
-		set
-		{
-			var v = Value;
-			v.X = value;
-			Value = v;
-		}
-	}
-
-	protected float MaxValue
-	{
-		get => Value.Y;
-		set
-		{
-			var v = Value;
-			v.Y = value;
-			Value = v;
-		}
-	}
-
-	public DragFloatRangeSearch(PropertyInfo property) : base(property)
-	{
-		var range = _property.GetCustomAttribute<RangeAttribute>();
-		Min = range?.MinValue ?? 0f;
-		Max = range?.MaxValue ?? 1f;
-		Speed = range?.Speed ?? 0.001f;
-		Unit = range?.UnitType ?? ConfigUnitType.None;
-	}
-
 	protected override void DrawMain()
 	{
-		var minValue = MinValue;
-		var maxValue = MaxValue;
-		ImGui.SetNextItemWidth(Scale * DRAG_WIDTH);
+		var bounds = Value;
+		var trackWidth = Scale * DRAG_WIDTH;
+		var controlSize = new Vector2(trackWidth + M3Widgets.SliderValueGutter(Format(Max)), M3Widgets.ButtonHeight);
 
-		// Cache the hash code to avoid multiple calls
-		var hashCode = GetHashCode();
+		var row = M3SettingRow.Begin(Name, SupportingText, Vector2.Zero, leadingIcon: RowIcon);
+		RowInteractions(row);
+		M3SettingRow.End(row);
 
-		// Draw the drag float range control
-		if (ImGui.DragFloatRange2(
-			$"##Config_{ID}{hashCode}",
-			ref minValue,
-			ref maxValue,
-			Speed,
-			Min,
-			Max,
-			Unit == ConfigUnitType.Percent ? $"{minValue * 100:F1}{Unit.ToSymbol()}" : $"{minValue:F2}{Unit.ToSymbol()}",
-			Unit == ConfigUnitType.Percent ? $"{maxValue * 100:F1}{Unit.ToSymbol()}" : $"{maxValue:F2}{Unit.ToSymbol()}"
-		))
+		using var group = M3SubGroup.Begin();
+
+		var low = bounds.X * SliderScale;
+		var lowRow = M3SettingRow.Begin(UiString.ConfigWindow_RangeLower.GetDescription(), null, controlSize);
+		ImGui.SetCursorScreenPos(lowRow.ControlPosition);
+		if (M3Widgets.Slider($"##Config_{ID}_low{GetHashCode()}", ref low, Min * SliderScale, Max * SliderScale, Format(bounds.X), trackWidth))
 		{
-			// Ensure MinValue is less than or equal to MaxValue
-			MinValue = Math.Min(minValue, maxValue);
-			MaxValue = Math.Max(minValue, maxValue);
+			Value = new Vector2(MathF.Min(low / SliderScale, bounds.Y), bounds.Y);
 		}
 
-		// Show tooltip if item is hovered
-		if (ImGui.IsItemHovered())
+		RowInteractions(lowRow);
+		M3SettingRow.End(lowRow);
+
+		var high = bounds.Y * SliderScale;
+		var highRow = M3SettingRow.Begin(UiString.ConfigWindow_RangeUpper.GetDescription(), null, controlSize);
+		ImGui.SetCursorScreenPos(highRow.ControlPosition);
+		if (M3Widgets.Slider($"##Config_{ID}_high{GetHashCode()}", ref high, Min * SliderScale, Max * SliderScale, Format(bounds.Y), trackWidth))
 		{
-			ShowTooltip();
+			Value = new Vector2(bounds.X, MathF.Max(high / SliderScale, bounds.X));
 		}
 
-		// Draw job icon if applicable
-		if (IsJob)
-		{
-			DrawJobIcon();
-		}
-
-		ImGui.SameLine();
-
-		// Set text color if specified
-		if (Color != 0)
-		{
-			ImGui.PushStyleColor(ImGuiCol.Text, Color);
-		}
-
-		ImGui.TextWrapped(Name);
-		if (Color != 0)
-		{
-			ImGui.PopStyleColor();
-		}
-
-		// Show tooltip if item is hovered
-		if (ImGui.IsItemHovered())
-		{
-			ShowTooltip(false);
-		}
+		RowInteractions(highRow);
+		M3SettingRow.End(highRow);
 	}
 }

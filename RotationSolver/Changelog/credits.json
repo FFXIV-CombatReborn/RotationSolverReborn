@@ -1,0 +1,11 @@
+{
+  "categories": [
+    {
+      "category": "Rotation Solver Reborn",
+      "icon": "Fire",
+      "items": [
+        { "name": "LTS", "role": "Lead developer", "url": "https://github.com/LTS-FFXIV" }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,8 @@
 ﻿using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
+using RotationSolver.UI.Material;
 
-namespace RotationSolver.UI;
+namespace RotationSolver.UI.ExtraWindows;
 
 internal class InterceptedActionWindow : Window
 {
@@ -16,8 +17,11 @@ internal class InterceptedActionWindow : Window
 	{
 	}
 
+	private M3.FontScope _font;
+
 	public override void PreDraw()
 	{
+		_font = M3.PushBody();
 		ImGui.PushStyleColor(ImGuiCol.WindowBg, Service.Config.InfoWindowBg);
 
 		Flags = BaseFlags;
@@ -37,35 +41,32 @@ internal class InterceptedActionWindow : Window
 	{
 		ImGui.PopStyleColor();
 		ImGui.PopStyleVar();
+		_font.Dispose();
+		_font = default;
 		base.PostDraw();
 	}
 
 	public override unsafe void Draw()
 	{
-		// Keep consistent sizing with Control/NextAction windows
 		var config = Service.Config;
 		var gcdWidth = config.ControlWindowGCDSize * config.ControlWindowNextSizeRatio;
 		var abilityWidth = config.ControlWindow0GCDSize * config.ControlWindowNextSizeRatio;
 		var totalWidth = gcdWidth + abilityWidth + ImGui.GetStyle().ItemSpacing.X;
 
-		// Title
 		var title = "Intercept System";
 		ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (totalWidth / 2) - (ImGui.CalcTextSize(title).X / 2));
 		ImGui.TextColored(ImGuiColors.DalamudYellow, title);
 
 		ImGui.Spacing();
 
-		// Draw the "current" intercepted action (left)
 		var cur = DataCenter.CurrentInterceptedAction;
 
-		// If there's no current intercepted action, show placeholder text
 		if (cur == null)
 		{
 			ImGui.TextColored(ImGuiColors.DalamudGrey, "No intercepted actions queued.");
 			return;
 		}
 
-		// Draw current intercepted action (large / left)
 		ImGui.TextColored(ImGuiColors.DalamudWhite, "Current Intercepted Action");
 		ControlWindow.DrawIAction(cur, gcdWidth, 1);
 	}

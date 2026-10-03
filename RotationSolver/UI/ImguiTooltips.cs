@@ -17,22 +17,14 @@ internal static class ImguiTooltips
 
 	private const string TooltipId = "RotationSolverReborn Tooltips";
 
-	/// <summary>
-	/// Displays a tooltip when the item is hovered.
-	/// </summary>
-	/// <param name="text">The text to display in the tooltip.</param>
 	public static void HoveredTooltip(string? text)
 	{
-		if (ImGui.IsItemHovered() && !string.IsNullOrEmpty(text))
+		if (ImGui.IsItemHovered())
 		{
-			ShowTooltip(() => ImGui.Text(text));
+			ShowTooltip(text);
 		}
 	}
 
-	/// <summary>
-	/// Displays a tooltip with the specified text.
-	/// </summary>
-	/// <param name="text">The text to display in the tooltip.</param>
 	public static void ShowTooltip(string? text)
 	{
 		if (!string.IsNullOrEmpty(text))
@@ -41,10 +33,6 @@ internal static class ImguiTooltips
 		}
 	}
 
-	/// <summary>
-	/// Displays a tooltip with the specified action.
-	/// </summary>
-	/// <param name="act">The action to perform to render the tooltip content.</param>
 	public static void ShowTooltip(Action? act)
 	{
 		if (act == null || Service.Config.ShowTooltips != true)
@@ -60,10 +48,13 @@ internal static class ImguiTooltips
 		ImGui.SetNextWindowSizeConstraints(new Vector2(150, 0) * globalScale, new Vector2(1200, 1500) * globalScale);
 		ImGui.SetWindowPos(TooltipId, ImGui.GetIO().MousePos);
 
-		if (ImGui.Begin(TooltipId, TooltipFlag))
+		// End must run whatever Begin returns.
+		var visible = ImGui.Begin(TooltipId, TooltipFlag);
+		if (visible)
 		{
 			act();
-			ImGui.End();
 		}
+
+		ImGui.End();
 	}
 }

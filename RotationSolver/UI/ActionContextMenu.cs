@@ -23,10 +23,7 @@ internal static class ActionContextMenu
 		_initialized = true;
 
 		contextMenu = Svc.ContextMenu;
-		if (contextMenu != null)
-		{
-			contextMenu.OnMenuOpened += AddActionMenu;
-		}
+		contextMenu?.OnMenuOpened += AddActionMenu;
 
 		// Subscribe to hover events once
 		Svc.GameGui.HoveredActionChanged += OnHoveredActionChanged;
@@ -42,10 +39,7 @@ internal static class ActionContextMenu
 
 		_initialized = false;
 
-		if (contextMenu != null)
-		{
-			contextMenu.OnMenuOpened -= AddActionMenu;
-		}
+		contextMenu?.OnMenuOpened -= AddActionMenu;
 
 		// Unsubscribe from events
 		Svc.GameGui.HoveredActionChanged -= OnHoveredActionChanged;
@@ -135,54 +129,15 @@ internal static class ActionContextMenu
 			return;
 		}
 
-		#region Enable/Disable Action
-		if (contextAction.IsEnabled)
+		var enabled = contextAction.IsEnabled;
+		var toggleEntry = new MenuItem
 		{
-			var enabledEntry = new MenuItem
-			{
-				Name = $"Disable {contextAction.Name}",
-				PrefixChar = 'R',
-				PrefixColor = 545
-			};
-
-			enabledEntry.OnClicked += clickedEntry => { contextAction.IsEnabled = false; };
-			args.AddMenuItem(enabledEntry);
-		}
-		else
-		{
-			var enabledEntry = new MenuItem
-			{
-				Name = $"Enable {contextAction.Name}",
-				PrefixChar = 'R',
-				PrefixColor = 545
-			};
-
-			enabledEntry.OnClicked += clickedEntry => { contextAction.IsEnabled = true; };
-			args.AddMenuItem(enabledEntry);
-		}
-		#endregion
-
-		var subMenuEntry = new MenuItem
-		{
-			Name = "Extra Functions",
-			IsSubmenu = true,
+			Name = $"{(enabled ? "Disable" : "Enable")} {contextAction.Name}",
 			PrefixChar = 'R',
 			PrefixColor = 545
 		};
 
-		subMenuEntry.OnClicked += args => BuildSubMenu(args);
-
-		//TODO: Add more functions here 
-		// args.AddMenuItem(subMenuEntry);
-	}
-
-	private static void BuildSubMenu(IMenuItemClickedArgs args)
-	{
-		var entries = new List<MenuItem>();
-
-		if (entries.Count > 0)
-		{
-			args.OpenSubmenu(entries);
-		}
+		toggleEntry.OnClicked += _ => contextAction.IsEnabled = !enabled;
+		args.AddMenuItem(toggleEntry);
 	}
 }

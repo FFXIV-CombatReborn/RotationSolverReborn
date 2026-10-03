@@ -6,11 +6,6 @@
 public class ItemConfig
 {
 	/// <summary>
-	/// Is in the cooldown window.
-	/// </summary>
-	public bool IsOnCooldownWindow { get; set; }
-
-	/// <summary>
 	/// 
 	/// </summary>
 	public bool MinHPFeature { get; set; } = false;
