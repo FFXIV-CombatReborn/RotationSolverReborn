@@ -29,7 +29,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 	private readonly WindowSystem windowSystem;
 
 	private static MainWindow? _mainWindow;
-	private static ControlWindow? _controlWindow;
+	private static FullControlWindow? _fullControlWindow;
 	private static NextActionWindow? _nextActionWindow;
 	private static InterceptedActionWindow? _interceptedActionWindow;
 	private static ActionTimelineWindow? _actionTimelineWindow;
@@ -66,7 +66,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		IPCProvider = new();
 
 		_mainWindow = new();
-		_controlWindow = new();
+		_fullControlWindow = new();
 		_nextActionWindow = new();
 		_interceptedActionWindow = new();
 		_actionTimelineWindow = new();
@@ -93,7 +93,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 		windowSystem = new WindowSystem(Name);
 		windowSystem.AddWindow(_mainWindow);
-		windowSystem.AddWindow(_controlWindow);
+		windowSystem.AddWindow(_fullControlWindow);
 		windowSystem.AddWindow(_nextActionWindow);
 		windowSystem.AddWindow(_interceptedActionWindow);
 		windowSystem.AddWindow(_actionTimelineWindow);
@@ -304,12 +304,24 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 	internal static void ToggleStateControlWindow()
 	{
+		if (_stateControlWindow is { IsOpen: true, IsMinimized: true })
+		{
+			_stateControlWindow.Restore();
+			return;
+		}
+
 		_stateControlWindow?.Toggle();
 	}
 
 	internal static void OpenStateControlWindow()
 	{
-		_stateControlWindow?.IsOpen = true;
+		if (_stateControlWindow == null)
+		{
+			return;
+		}
+
+		_stateControlWindow.IsOpen = true;
+		_stateControlWindow.Restore();
 	}
 
 	internal static void OpenTicTacToe()
@@ -365,7 +377,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 				|| Svc.Condition[ConditionFlag.BoundByDuty]
 				|| AnyHostileTargetWithinDistance(25);
 
-		_controlWindow!.IsOpen = isValid && Service.Config.ShowControlWindow;
+		_fullControlWindow!.IsOpen = isValid && Service.Config.ShowControlWindow;
 		//if (isValid && Service.Config.ShowControlWindow)
 		//{
 		//	if (!(_nativeControlWindow?.IsOpen ?? false))

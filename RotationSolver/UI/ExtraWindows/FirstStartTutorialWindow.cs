@@ -313,7 +313,7 @@ internal sealed class FirstStartTutorialWindow : Window
 		ImGui.Dummy(new Vector2(0f, M3.Space1));
 	}
 
-	private void DrawIdentity()
+	private static void DrawIdentity()
 	{
 		const string title = "Welcome to Rotation Solver Reborn";
 		const string subtitle = "First start tutorial";

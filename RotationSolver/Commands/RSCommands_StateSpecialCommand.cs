@@ -139,7 +139,15 @@ namespace RotationSolver.Commands
 			}
 			else if (stateType == StateCommandType.Auto)
 			{
-				if (Service.Config.ToggleAuto)
+				var isAlreadyAuto = DataCenter.State && !DataCenter.IsManual && !DataCenter.IsTargetOnly && !DataCenter.IsAutoDuty && !DataCenter.IsPvPStateEnabled;
+				if (!isAlreadyAuto)
+				{
+					if (index != -1)
+					{
+						UpdateTargetingIndex(ref index);
+					}
+				}
+				else if (Service.Config.ToggleAuto)
 				{
 					return StateCommandType.Off;
 				}

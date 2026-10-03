@@ -10,7 +10,7 @@ namespace RotationSolver.UI.ExtraWindows;
 
 internal class NextActionWindow : Window
 {
-	private const ImGuiWindowFlags BaseFlags = ControlWindow.BaseFlags
+	private const ImGuiWindowFlags BaseFlags = FullControlWindow.BaseFlags
 	| ImGuiWindowFlags.AlwaysAutoResize
 	| ImGuiWindowFlags.NoCollapse
 	| ImGuiWindowFlags.NoTitleBar
@@ -86,7 +86,7 @@ internal class NextActionWindow : Window
 		ImGui.SetCursorPosX(left + ((width - size) * 0.5f));
 		if (M3ActionIcon.Draw("##next_action", action, size, config.ShowCooldownsAlways))
 		{
-			ControlWindow.UseOrQueue(action);
+			FullControlWindow.UseOrQueue(action);
 		}
 
 		if (keybind.Length > 0)

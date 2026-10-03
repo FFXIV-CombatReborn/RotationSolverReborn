@@ -640,6 +640,11 @@ internal partial class Configs : IPluginConfiguration
 		Filter = UiWindows)]
 	private static readonly bool _isControlWindowLock = false;
 
+	[ConditionBool, UI("Show special buttons",
+		Description = "The Heal, Defense, Movement and Rotation buttons on the Control window. The button at the top right of the window shows and hides them too.",
+		Parent = nameof(ShowControlWindow))]
+	private static readonly bool _showControlWindowSpecials = true;
+
 	[ConditionBool, UI("Show Next Action Window", Filter = UiWindows)]
 	private static readonly bool _showNextActionWindow = false;
 
@@ -1093,17 +1098,17 @@ internal partial class Configs : IPluginConfiguration
 	[Range(0, 0.7f, ConfigUnitType.Seconds, 0.002f)]
 	public float CountDownAhead { get; set; } = 0.4f;
 
-	[UI("Next Action Size Ratio", Parent = nameof(ShowControlWindow))]
+	[UI("Next action size",
+		Description = "Scales the Next action icons in the Control window, and the icon in the Intercepted Action window. At 100% the GCD icon is 40 pixels and the oGCD icon is 30 pixels.",
+		Parent = nameof(ShowControlWindow))]
 	[Range(0, 10, ConfigUnitType.Percent, 0.02f)]
 	public float ControlWindowNextSizeRatio { get; set; } = 1.5f;
 
-	[UI("GCD icon size", Parent = nameof(ShowControlWindow))]
-	[Range(0, 80, ConfigUnitType.Pixels, 0.2f)]
-	public float ControlWindowGCDSize { get; set; } = 40;
-
-	[UI("oGCD icon size", Parent = nameof(ShowControlWindow))]
-	[Range(0, 80, ConfigUnitType.Pixels, 0.2f)]
-	public float ControlWindow0GCDSize { get; set; } = 30;
+	[UI("Special button size",
+		Description = "Scales the Control window's special buttons (Heal AoE, Forward, Dispel and the rest): their icons, labels and padding together. At 100% the GCD icon is 40 pixels and the oGCD icon is 30 pixels.",
+		Parent = nameof(ShowControlWindow))]
+	[Range(0.5f, 3f, ConfigUnitType.Percent, 0.01f)]
+	public float ControlWindowSpecialsScale { get; set; } = 1f;
 
 	[UI("Control Progress Height")]
 	[Range(2, 30, ConfigUnitType.Yalms)]

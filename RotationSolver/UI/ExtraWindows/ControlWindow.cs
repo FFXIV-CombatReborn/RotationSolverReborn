@@ -1,4 +1,5 @@
 using Dalamud.Interface.Textures.TextureWraps;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.DalamudServices;
 using RotationSolver.Basic.Configuration;
@@ -9,7 +10,7 @@ using RotationSolver.Updaters;
 
 namespace RotationSolver.UI.ExtraWindows;
 
-internal class ControlWindow : CtrlWindow
+internal class FullControlWindow : FullCtrlWindow
 {
 	private const string StatusPaneId = "##rsr_control_status";
 	private const string SpecialsPaneId = "##rsr_control_specials";
@@ -70,22 +71,48 @@ internal class ControlWindow : CtrlWindow
 		new("Full", Tooltip: "Use all available AoE actions."),
 	];
 
+	private static readonly Vector2 DefaultSize = new(700f, 380f);
+	private const float NextGcdBaseSize = 40f;
+	private const float NextAbilityBaseSize = 30f;
+	private const float SpecialGcdBaseSize = 40f;
+	private const float SpecialAbilityBaseSize = 30f;
+
+	private static readonly M3WindowAction HideSpecialsAction = new("##rsr_specials", FontAwesomeIcon.CompressAlt, "Hide the special buttons");
+	private static readonly M3WindowAction ShowSpecialsAction = new("##rsr_specials", FontAwesomeIcon.ExpandAlt, "Show the special buttons");
+	private static readonly M3WindowAction UnlockedAction = new("##rsr_lock", FontAwesomeIcon.LockOpen, "Lock the window in place");
+	private static readonly M3WindowAction LockedAction = new("##rsr_lock", FontAwesomeIcon.Lock, "Locked in place. Click to allow moving and resizing.");
+	private static readonly M3WindowAction SettingsAction = new("##rsr_settings", FontAwesomeIcon.Cog, "Open the settings");
+
 	private static float PanePadding => M3.Space3;
 	private static float PaneGap => M3.Space2;
 	private static Vector2 TilePadding => new Vector2(6f, 6f) * M3.Scale;
 	private static float TileIconGap => 3f * M3.Scale;
 	private static float TileLabelGap => 4f * M3.Scale;
 
+	internal static float NextGcdSize => NextGcdBaseSize * Service.Config.ControlWindowNextSizeRatio;
+	internal static float NextAbilitySize => NextAbilityBaseSize * Service.Config.ControlWindowNextSizeRatio;
+
+	private static float SpecialGcdSize => SpecialGcdBaseSize * Service.Config.ControlWindowSpecialsScale;
+	private static float SpecialAbilitySize => SpecialAbilityBaseSize * Service.Config.ControlWindowSpecialsScale;
+
+	private static M3WindowBrand Brand => new(MainWindow.GetLogoTexture(), "RSR");
+
+	private readonly M3WindowAction[] _actions = new M3WindowAction[3];
+	private readonly M3WindowFold _fold = new();
+
 	private M3Style.Scope _theme;
 
 	private float _contentHeight;
 	private float _minimumWidth;
+	private Vector2 _openSize;
+	private float _sideBySideWidth;
+	private bool? _specialsShown;
+	private float _wideWidth;
+	private float _pendingWidth;
 
-	public ControlWindow()
-		: base(nameof(ControlWindow))
+	public FullControlWindow()
+		: base(nameof(FullControlWindow))
 	{
-		Size = new Vector2(700f, 380f);
-		SizeCondition = ImGuiCond.FirstUseEver;
 	}
 
 	public override void OnOpen()
@@ -97,6 +124,12 @@ internal class ControlWindow : CtrlWindow
 	public override void OnClose()
 	{
 		DataCenter.DrawingActions = false;
+
+		if (!Service.Config.ShowControlWindow)
+		{
+			_fold.Reset();
+		}
+
 		base.OnClose();
 	}
 
@@ -104,38 +137,154 @@ internal class ControlWindow : CtrlWindow
 	{
 		_theme = M3Style.Push(compact: true);
 
-		if (_contentHeight > 0f)
-		{
-			ImGui.SetNextWindowSizeConstraints(
-				new Vector2(_minimumWidth, _contentHeight),
-				new Vector2(float.MaxValue, _contentHeight));
-		}
-
 		base.PreDraw();
 		Flags |= ImGuiWindowFlags.NoTitleBar;
+
+		TrackSpecials();
+
+		if (_fold.Prepare(this, _actions.Length, Brand))
+		{
+			Position = null;
+			Size = null;
+			SizeConstraints = null;
+		}
+
+		if (_fold.IsActive)
+		{
+			return;
+		}
+
+		if (_pendingWidth > 0f && _openSize.Y > 0f)
+		{
+			ImGui.SetNextWindowSize(new Vector2(_pendingWidth, _openSize.Y), ImGuiCond.Always);
+		}
+		else
+		{
+			ImGui.SetNextWindowSize(DefaultSize * ImGuiHelpers.GlobalScale, ImGuiCond.FirstUseEver);
+		}
+
+		_pendingWidth = 0f;
+
+		if (_contentHeight > 0f)
+		{
+			var maximumWidth = Service.Config.ShowControlWindowSpecials ? float.MaxValue : _minimumWidth;
+			ImGui.SetNextWindowSizeConstraints(
+				new Vector2(_minimumWidth, _contentHeight),
+				new Vector2(maximumWidth, _contentHeight));
+		}
 	}
 
 	public override void PostDraw()
 	{
+		_fold.PopStyle();
 		base.PostDraw();
 		_theme.Dispose();
 		_theme = default;
 	}
 
+	private void TrackSpecials()
+	{
+		bool shown = Service.Config.ShowControlWindowSpecials;
+		if (_specialsShown is { } was && was != shown)
+		{
+			if (shown)
+			{
+				_pendingWidth = _wideWidth > 0f ? _wideWidth : _sideBySideWidth;
+			}
+			else
+			{
+				_wideWidth = _openSize.X;
+			}
+		}
+
+		_specialsShown = shown;
+	}
+
 	public override void Draw()
 	{
-		var style = ImGui.GetStyle();
+		_fold.BeginDraw();
+		if (!_fold.IsActive)
+		{
+			_openSize = ImGui.GetWindowSize();
+		}
+
+		var folded = _fold.Amount;
+		if (folded < 1f)
+		{
+			using var alpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * (1f - MathF.Min(1f, folded * 1.4f)));
+			var (openPos, openSize) = _fold.OpenRect();
+			DrawContent(openPos, openSize);
+		}
+
+		DrawWindowBar();
+	}
+
+	private void DrawWindowBar()
+	{
+		var config = Service.Config;
+		bool locked = config.IsControlWindowLock;
+		bool specials = config.ShowControlWindowSpecials;
+
+		_actions[0] = specials ? HideSpecialsAction : ShowSpecialsAction;
+		_actions[1] = locked ? LockedAction : UnlockedAction;
+		_actions[2] = SettingsAction;
+
+		var pressed = _fold.DrawBar("##rsr_control_actions", _actions, Brand, out var closed,
+			M3.Scheme.SurfaceContainerHigh, "Hide the Control window. Turn it back on in the UI settings.");
+
+		switch (pressed)
+		{
+			case 0:
+				config.ShowControlWindowSpecials.Value = !specials;
+				break;
+
+			case 1:
+				config.IsControlWindowLock.Value = !locked;
+				break;
+
+			case 2:
+				RotationSolverPlugin.ShowConfigWindow();
+				break;
+		}
+
+		if (closed)
+		{
+			config.ShowControlWindow.Value = false;
+			config.Save();
+			IsOpen = false;
+		}
+	}
+
+	private void DrawContent(Vector2 openPos, Vector2 openSize)
+	{
+		var padding = _fold.OpenPadding;
+		ImGui.SetCursorScreenPos(openPos + padding);
+		using var content = ImRaii.Child("##rsr_control_content", Vector2.Max(Vector2.One, openSize - (padding * 2f)), false,
+			ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground);
+		if (!content)
+		{
+			return;
+		}
+
 		var width = ImGui.GetContentRegionAvail().X;
 
 		var headerWidth = DrawHeader(width);
 		ImGui.Dummy(new Vector2(0f, M3.Space1));
 
 		var statusWidth = StatusPaneWidth();
-		var specialsMinWidth = (TileSize().X * 4f) + (M3.Space1 * 3f) + (PanePadding * 2f);
+		var specialsMinWidth = SpecialsWidth(4);
 		var origin = ImGui.GetCursorScreenPos();
 		float height;
 
-		if (width >= statusWidth + PaneGap + specialsMinWidth)
+		_sideBySideWidth = statusWidth + PaneGap + specialsMinWidth + (padding.X * 2f);
+
+		if (!Service.Config.ShowControlWindowSpecials)
+		{
+			BeginPane(origin, width, M3CardHost.PreviousHeight(StatusPaneId));
+			DrawStatus(width - (PanePadding * 2f));
+			height = EndPane(StatusPaneId, origin);
+		}
+		else if (width >= statusWidth + PaneGap + specialsMinWidth)
 		{
 			var paintHeight = MathF.Max(M3CardHost.PreviousHeight(StatusPaneId), M3CardHost.PreviousHeight(SpecialsPaneId));
 			var specialsOrigin = origin + new Vector2(statusWidth + PaneGap, 0f);
@@ -168,8 +317,15 @@ internal class ControlWindow : CtrlWindow
 		ImGui.SetCursorScreenPos(origin);
 		ImGui.Dummy(new Vector2(width, height));
 
-		_minimumWidth = MathF.Max(headerWidth, statusWidth) + (style.WindowPadding.X * 2f);
-		_contentHeight = ImGui.GetCursorPosY() - style.ItemSpacing.Y + style.WindowPadding.Y;
+		// A large special button scale can make one tile wider than the status pane, so keep a single column in view.
+		var minimumContent = MathF.Max(headerWidth, statusWidth);
+		if (Service.Config.ShowControlWindowSpecials)
+		{
+			minimumContent = MathF.Max(minimumContent, SpecialsWidth(1));
+		}
+
+		_minimumWidth = minimumContent + (padding.X * 2f);
+		_contentHeight = ImGui.GetCursorPosY() - ImGui.GetStyle().ItemSpacing.Y + (padding.Y * 2f);
 	}
 
 	private static void BeginPane(Vector2 origin, float width, float paintHeight)
@@ -202,10 +358,8 @@ internal class ControlWindow : CtrlWindow
 
 	#region Header
 
-	private static float DrawHeader(float width)
+	private float DrawHeader(float width)
 	{
-		bool locked = Service.Config.IsControlWindowLock;
-
 		ReadOnlySpan<M3Segment> segments =
 		[
 			new(AutoLabel(), FontAwesomeIcon.Play, StateCommandType.Auto.GetDescription()),
@@ -214,12 +368,28 @@ internal class ControlWindow : CtrlWindow
 		];
 
 		var segmentedWidth = M3Widgets.SegmentedWidth(segments);
-		var actionsWidth = (M3Widgets.IconButtonSize * 2f) + M3.Space1;
-		var rowHeight = MathF.Max(M3Widgets.SegmentedHeight, M3Widgets.IconButtonSize);
+		var barSize = M3Widgets.WindowActionsSize(_actions.Length, Brand, 0f);
 		var origin = ImGui.GetCursorScreenPos();
 
-		ImGui.SetCursorScreenPos(origin + new Vector2(0f, (rowHeight - M3Widgets.SegmentedHeight) * 0.5f));
-		var clicked = M3Widgets.SegmentedButtons("##rsr_state", segments, CurrentStateIndex(), segmentedWidth);
+		// Too narrow for one row: the pill gets the top row and the switch spans the row below it.
+		float switchTop, switchWidth, height;
+		if (width >= segmentedWidth + M3.Space2 + barSize.X)
+		{
+			height = MathF.Max(M3Widgets.SegmentedHeight, barSize.Y);
+			switchTop = (height - M3Widgets.SegmentedHeight) * 0.5f;
+			switchWidth = segmentedWidth;
+			_fold.BarTop = (height - barSize.Y) * 0.5f;
+		}
+		else
+		{
+			switchTop = barSize.Y + M3.Space1;
+			switchWidth = width;
+			height = switchTop + M3Widgets.SegmentedHeight;
+			_fold.BarTop = 0f;
+		}
+
+		ImGui.SetCursorScreenPos(origin + new Vector2(0f, switchTop));
+		var clicked = M3Widgets.SegmentedButtons("##rsr_state", segments, CurrentStateIndex(), switchWidth);
 		if (clicked >= 0)
 		{
 			// Set, not toggled, so pressing Auto never turns it off.
@@ -231,23 +401,9 @@ internal class ControlWindow : CtrlWindow
 			});
 		}
 
-		ImGui.SetCursorScreenPos(new Vector2(origin.X + width - actionsWidth, origin.Y + ((rowHeight - M3Widgets.IconButtonSize) * 0.5f)));
-		if (M3Widgets.IconButton("##rsr_settings", FontAwesomeIcon.Cog, "Open the Rotation Solver settings."))
-		{
-			RotationSolverPlugin.OpenConfigWindow();
-		}
-
-		ImGui.SameLine(0f, M3.Space1);
-		if (M3Widgets.IconButton("##rsr_lock", locked ? FontAwesomeIcon.Lock : FontAwesomeIcon.LockOpen,
-			locked ? "Locked in place. Click to allow moving and resizing." : "Click to lock the window in place.",
-			locked ? M3ButtonStyle.Tonal : M3ButtonStyle.Text))
-		{
-			Service.Config.IsControlWindowLock.Value = !locked;
-		}
-
-		ImGui.SetCursorScreenPos(new Vector2(origin.X, origin.Y + rowHeight));
+		ImGui.SetCursorScreenPos(new Vector2(origin.X, origin.Y + height));
 		ImGui.Dummy(new Vector2(width, 0f));
-		return segmentedWidth + M3.Space2 + actionsWidth;
+		return MathF.Max(segmentedWidth, barSize.X);
 	}
 
 	private static int CurrentStateIndex()
@@ -269,8 +425,7 @@ internal class ControlWindow : CtrlWindow
 
 	private static float StatusPaneWidth()
 	{
-		var config = Service.Config;
-		var icons = ((config.ControlWindowGCDSize + config.ControlWindow0GCDSize) * config.ControlWindowNextSizeRatio) + M3.Space2;
+		var icons = NextGcdSize + NextAbilitySize + M3.Space2;
 		var content = MathF.Max(MathF.Max(icons, M3Widgets.SegmentedWidth(AoeSegments)), 232f * M3.Scale);
 		return content + (PanePadding * 2f);
 	}
@@ -282,14 +437,14 @@ internal class ControlWindow : CtrlWindow
 		Overline("Next action");
 
 		var gcd = ActionUpdater.NextGCDAction;
-		if (M3ActionIcon.Draw("##next_gcd", gcd, config.ControlWindowGCDSize * config.ControlWindowNextSizeRatio, config.ShowCooldownsAlways))
+		if (M3ActionIcon.Draw("##next_gcd", gcd, NextGcdSize, config.ShowCooldownsAlways))
 		{
 			UseOrQueue(gcd);
 		}
 
 		var ability = gcd != ActionUpdater.NextAction ? ActionUpdater.NextAction : null;
 		ImGui.SameLine(0f, M3.Space2);
-		if (M3ActionIcon.Draw("##next_ability", ability, config.ControlWindow0GCDSize * config.ControlWindowNextSizeRatio, config.ShowCooldownsAlways))
+		if (M3ActionIcon.Draw("##next_ability", ability, NextAbilitySize, config.ShowCooldownsAlways))
 		{
 			UseOrQueue(ability);
 		}
@@ -448,9 +603,24 @@ internal class ControlWindow : CtrlWindow
 
 	#region Specials pane
 
+	private static M3.WindowScaleScope PushSpecialsScale()
+	{
+		return M3.PushWindowScale(Service.Config.ControlWindowSpecialsScale);
+	}
+
+	private static float SpecialsWidth(int columns)
+	{
+		float tiles;
+		using (PushSpecialsScale())
+		{
+			tiles = (TileSize().X * columns) + (M3.Space1 * (columns - 1));
+		}
+
+		return tiles + (PanePadding * 2f);
+	}
+
 	private static Vector2 TileSize()
 	{
-		var config = Service.Config;
 		var padding = TilePadding;
 		var labelWidth = 0f;
 		float labelHeight;
@@ -468,15 +638,15 @@ internal class ControlWindow : CtrlWindow
 			labelHeight = ImGui.GetTextLineHeight();
 		}
 
-		var iconsWidth = config.ControlWindowGCDSize + TileIconGap + config.ControlWindow0GCDSize;
-		var iconsHeight = MathF.Max(config.ControlWindowGCDSize, config.ControlWindow0GCDSize);
+		var iconsWidth = SpecialGcdSize + TileIconGap + SpecialAbilitySize;
 		return new Vector2(
 			MathF.Max(iconsWidth, labelWidth) + (padding.X * 2f),
-			iconsHeight + TileLabelGap + labelHeight + (padding.Y * 2f));
+			SpecialGcdSize + TileLabelGap + labelHeight + (padding.Y * 2f));
 	}
 
 	private static void DrawSpecials(float width)
 	{
+		using var scale = PushSpecialsScale();
 		var rotation = DataCenter.CurrentRotation;
 		var spacing = M3.Space1;
 		var tile = TileSize();
@@ -583,11 +753,10 @@ internal class ControlWindow : CtrlWindow
 
 	private static void DrawTileIcons(ImDrawListPtr drawList, FontAwesomeIcon glyph, IAction? gcd, IAction? ability, Vector2 min, Vector2 max, Vector4 accent, float alpha)
 	{
-		var config = Service.Config;
 		IDalamudTextureWrap? first = null;
 		IDalamudTextureWrap? second = null;
-		var firstSize = config.ControlWindowGCDSize;
-		var secondSize = config.ControlWindow0GCDSize;
+		var firstSize = SpecialGcdSize;
+		var secondSize = SpecialAbilitySize;
 
 		if (gcd != null && gcd.GetTexture(out var gcdTexture))
 		{
@@ -611,7 +780,8 @@ internal class ControlWindow : CtrlWindow
 		{
 			var radius = MathF.Min(max.Y - min.Y, 36f * M3.Scale) * 0.5f;
 			drawList.AddCircleFilled(center, radius, M3.U32(accent, 0.16f * alpha), 32);
-			M3Draw.IconCentered(drawList, glyph, center - new Vector2(radius, radius), center + new Vector2(radius, radius), M3.Alpha(accent, alpha));
+			M3Draw.IconCentered(drawList, glyph, center - new Vector2(radius, radius), center + new Vector2(radius, radius), M3.Alpha(accent, alpha),
+				Service.Config.ControlWindowSpecialsScale);
 			return;
 		}
 
