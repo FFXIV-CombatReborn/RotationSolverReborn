@@ -99,15 +99,6 @@ public class BaseItem : IBaseItem
 	}
 
 	/// <summary>
-	/// Is the item in the cd window.
-	/// </summary>
-	public bool IsOnCooldownWindow
-	{
-		get => Config.IsOnCooldownWindow;
-		set => Config.IsOnCooldownWindow = value;
-	}
-
-	/// <summary>
 	/// Gets or sets a value indicating whether this action is restricted by min HP.
 	/// </summary>
 	public bool MinHPFeature

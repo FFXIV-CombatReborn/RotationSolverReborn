@@ -15,8 +15,10 @@ using RotationSolver.Data;
 using RotationSolver.IPC;
 //using KamiToolKit;
 using RotationSolver.UI;
+using RotationSolver.UI.ExtraWindows;
 using RotationSolver.UI.HighlightTeachingMode;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
+using RotationSolver.UI.Material;
 using RotationSolver.Updaters;
 using Player = ECommons.GameHelpers.Player;
 
@@ -26,16 +28,17 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 {
 	private readonly WindowSystem windowSystem;
 
-	private static RotationConfigWindow? _rotationConfigWindow;
+	private static MainWindow? _mainWindow;
 	private static ControlWindow? _controlWindow;
 	private static NextActionWindow? _nextActionWindow;
 	private static InterceptedActionWindow? _interceptedActionWindow;
-	private static CooldownWindow? _cooldownWindow;
 	private static ActionTimelineWindow? _actionTimelineWindow;
 	private static OverlayWindow? _overlayWindow;
 	//private static NativeControlWindow? _nativeControlWindow;
+	private static StateControlWindow? _stateControlWindow;
 	private static EasterEggWindow? _easterEggWindow;
 	private static FirstStartTutorialWindow? _firstStartTutorialWindow;
+	private static UpdateNotesWindow? _updateNotesWindow;
 
 	private static readonly List<IDisposable> _dis = [];
 	public static string Name => "Rotation Solver Reborn";
@@ -62,16 +65,17 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 		IPCProvider = new();
 
-		_rotationConfigWindow = new();
+		_mainWindow = new();
 		_controlWindow = new();
 		_nextActionWindow = new();
 		_interceptedActionWindow = new();
-		_cooldownWindow = new();
 		_actionTimelineWindow = new();
 		_overlayWindow = new();
 		//_nativeControlWindow = new();
+		_stateControlWindow = new();
 		_easterEggWindow = new();
 		_firstStartTutorialWindow = new();
+		_updateNotesWindow = new();
 
 		// Start cactbot bridge if enabled
 		//try
@@ -88,15 +92,16 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		//}
 
 		windowSystem = new WindowSystem(Name);
-		windowSystem.AddWindow(_rotationConfigWindow);
+		windowSystem.AddWindow(_mainWindow);
 		windowSystem.AddWindow(_controlWindow);
 		windowSystem.AddWindow(_nextActionWindow);
 		windowSystem.AddWindow(_interceptedActionWindow);
-		windowSystem.AddWindow(_cooldownWindow);
 		windowSystem.AddWindow(_actionTimelineWindow);
 		windowSystem.AddWindow(_overlayWindow);
+		windowSystem.AddWindow(_stateControlWindow);
 		windowSystem.AddWindow(_easterEggWindow);
 		windowSystem.AddWindow(_firstStartTutorialWindow);
+		windowSystem.AddWindow(_updateNotesWindow);
 
 		//Notify.Success("Overlay Window was added!");
 
@@ -268,13 +273,14 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 			return;
 		}
 
+		M3.BeginFrame();
 		windowSystem.Draw();
 	}
 
 	internal static void ChangeUITranslation()
 	{
-		_rotationConfigWindow!.WindowName = UiString.ConfigWindowHeader.GetDescription()
-			+ (typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?") + "###rsrConfigWindow";
+		_mainWindow!.WindowName = UiString.ConfigWindowHeader.GetDescription()
+			+ (typeof(MainWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?") + "###rsrConfigWindow";
 
 		RSCommands.Disable();
 		RSCommands.Enable();
@@ -287,7 +293,23 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 	internal static void OpenConfigWindow()
 	{
-		_rotationConfigWindow?.Toggle();
+		if (_mainWindow is { IsOpen: true, IsMinimized: true })
+		{
+			_mainWindow.Restore();
+			return;
+		}
+
+		_mainWindow?.Toggle();
+	}
+
+	internal static void ToggleStateControlWindow()
+	{
+		_stateControlWindow?.Toggle();
+	}
+
+	internal static void OpenStateControlWindow()
+	{
+		_stateControlWindow?.IsOpen = true;
 	}
 
 	internal static void OpenTicTacToe()
@@ -295,17 +317,18 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		_easterEggWindow?.IsOpen = true;
 	}
 
-	internal static void ShowConfigWindow(RotationConfigWindowTab? tab = null)
+	internal static void ShowConfigWindow(MainWindowTab? tab = null)
 	{
-		if (_rotationConfigWindow == null)
+		if (_mainWindow == null)
 		{
 			return;
 		}
 
-		_rotationConfigWindow.IsOpen = true;
+		_mainWindow.IsOpen = true;
+		_mainWindow.Restore();
 		if (tab.HasValue)
 		{
-			_rotationConfigWindow.SetActiveTab(tab.Value);
+			_mainWindow.SetActiveTab(tab.Value);
 		}
 	}
 
@@ -317,6 +340,16 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		}
 
 		_firstStartTutorialWindow?.Toggle();
+	}
+
+	internal static void OpenChangelog()
+	{
+		_updateNotesWindow?.IsOpen = true;
+	}
+
+	internal static void ShowChangelogIfUpdated()
+	{
+		_updateNotesWindow?.OpenIfUpdated();
 	}
 
 	internal static void UpdateDisplayWindow()
@@ -337,31 +370,27 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		//{
 		//	_nativeControlWindow?.Close();
 		//}
-		_cooldownWindow!.IsOpen = isValid && Service.Config.ShowCooldownWindow;
 		_nextActionWindow!.IsOpen = isValid && Service.Config.ShowNextActionWindow;
 		_interceptedActionWindow!.IsOpen = isValid && Service.Config.ShowInterceptedActionWindow;
-
-		// ActionTimeline window with additional checks
-		var showActionTimeline = isValid && Service.Config.ShowActionTimelineWindow;
-
-		if (Service.Config.ActionTimelineOnlyWhenActive)
-		{
-			showActionTimeline &= DataCenter.IsActivated();
-		}
-
-		if (Service.Config.ActionTimelineOnlyInCombat)
-		{
-			showActionTimeline &= DataCenter.InCombat;
-		}
-
-		_actionTimelineWindow!.IsOpen = showActionTimeline;
-
-		if (showActionTimeline)
-		{
-			ActionTimelineManager.Instance.UpdateCombatState();
-		}
-
+		UpdateActionTimeline(isValid);
 		_overlayWindow!.IsOpen = isValid && Service.Config.TeachingMode;
+	}
+
+	private static void UpdateActionTimeline(bool isValid)
+	{
+		var config = Service.Config;
+		if (!config.ShowActionTimelineWindow)
+		{
+			_actionTimelineWindow!.IsOpen = false;
+			ActionTimelineManager.DisposeInstance();
+			return;
+		}
+
+		ActionTimelineManager.Instance.Update();
+
+		_actionTimelineWindow!.IsOpen = isValid
+			&& (!config.ActionTimelineOnlyWhenActive || DataCenter.IsActivated())
+			&& (!config.ActionTimelineOnlyInCombat || DataCenter.InCombat);
 	}
 
 	private static bool AnyHostileTargetWithinDistance(float distance)

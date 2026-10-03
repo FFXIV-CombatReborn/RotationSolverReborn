@@ -1,45 +1,46 @@
-﻿using Dalamud.Interface.Utility.Raii;
 using ECommons.Logging;
+using RotationSolver.UI.Material;
 
 namespace RotationSolver.UI;
 
 internal class CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
 {
-	private readonly Dictionary<Func<string>, Action> _headers = headers ?? throw new ArgumentNullException(nameof(headers));
-	private int _openedIndex = -1;
+	private static int _nextGroupId;
 
-	public float HeaderSize { get; set; } = 24;
+	private readonly Dictionary<Func<string>, Action> _headers = headers ?? throw new ArgumentNullException(nameof(headers));
+	private readonly Dictionary<string, FontAwesomeIcon> _icons = [];
+	private readonly int _groupId = Interlocked.Increment(ref _nextGroupId);
+	private int _openedIndex = -1;
 
 	public void AddCollapsingHeader(Func<string> name, Action action)
 	{
 		ArgumentNullException.ThrowIfNull(name);
-
 		ArgumentNullException.ThrowIfNull(action);
 
 		_headers[name] = action;
 	}
 
-	public void RemoveCollapsingHeader(Func<string> name)
-	{
-		ArgumentNullException.ThrowIfNull(name);
-
-		_ = _headers.Remove(name);
-	}
-
 	public void ClearCollapsingHeader()
 	{
 		_headers.Clear();
+		_icons.Clear();
 	}
 
-	/// <summary>
-	/// Programmatically open a header by its display title.
-	/// </summary>
+	public void SetHeaderIcon(string title, FontAwesomeIcon icon)
+	{
+		if (!string.IsNullOrEmpty(title))
+		{
+			_icons[title] = icon;
+		}
+	}
+
 	public void OpenHeaderByTitle(string? title, bool ignoreCase = true)
 	{
 		if (string.IsNullOrEmpty(title))
 		{
 			return;
 		}
+
 		var idx = -1;
 		foreach (var header in _headers)
 		{
@@ -49,20 +50,13 @@ internal class CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
 			{
 				continue;
 			}
+
 			if (string.Equals(name, title, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
 			{
 				_openedIndex = idx;
 				return;
 			}
 		}
-	}
-
-	/// <summary>
-	/// Programmatically open a header by its 0-based index.
-	/// </summary>
-	public void OpenHeaderByIndex(int index)
-	{
-		_openedIndex = index;
 	}
 
 	public void Draw()
@@ -85,26 +79,21 @@ internal class CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
 
 			try
 			{
-				ImGui.Spacing();
-				ImGui.Separator();
-				var selected = index == _openedIndex;
-				var changed = false;
-				using (var font = ImRaii.PushFont(FontManager.GetFont(18)))
+				var expanded = index == _openedIndex;
+				var wasExpanded = expanded;
+				_ = _icons.TryGetValue(name, out var icon);
+
+				using (var card = M3ExpandableCard.Begin($"section_{_groupId}_{index}", name, ref expanded, icon, AccentFor(index)))
 				{
-					changed = ImGui.Selectable(name, selected, ImGuiSelectableFlags.DontClosePopups);
+					if (card.Expanded)
+					{
+						header.Value();
+					}
 				}
 
-				if (ImGui.IsItemHovered())
+				if (expanded != wasExpanded)
 				{
-					ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-				}
-				if (changed)
-				{
-					_openedIndex = selected ? -1 : index;
-				}
-				if (selected)
-				{
-					header.Value();
+					_openedIndex = expanded ? index : -1;
 				}
 			}
 			catch (Exception ex)
@@ -112,5 +101,16 @@ internal class CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
 				PluginLog.Warning($"An error occurred while drawing the header: {ex.Message}");
 			}
 		}
+	}
+
+	private static Vector4 AccentFor(int index)
+	{
+		var scheme = M3.Scheme;
+		return (index % 3) switch
+		{
+			0 => scheme.Primary,
+			1 => scheme.Tertiary,
+			_ => scheme.Secondary,
+		};
 	}
 }

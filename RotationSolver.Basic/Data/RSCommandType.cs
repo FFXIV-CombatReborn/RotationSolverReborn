@@ -211,4 +211,16 @@ public enum OtherCommandType : byte
 	/// </summary>
 	[Description("Cycles between states following settings in Target > Configuration.")]
 	Cycle,
+
+	/// <summary>
+	/// Open the autorotation state window with the Auto, Manual and Off buttons.
+	/// </summary>
+	[Description("Open the autorotation state window with the Auto, Manual and Off buttons.")]
+	Control,
+
+	/// <summary>
+	/// Open the update notes.
+	/// </summary>
+	[Description("Open the update notes.")]
+	Changelog,
 }

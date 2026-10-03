@@ -16,9 +16,9 @@
       },
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.2.1.20, )",
-        "resolved": "3.2.1.20",
-        "contentHash": "ftyiWsxzrJPnIHvh3VacdfW1evDqqhFgZ7CLHpq3hstZ1Stgco92vJkR5Y1tb2fnVNW2GFW4JX3FcwLjPIgB8w=="
+        "requested": "[3.2.1.21, )",
+        "resolved": "3.2.1.21",
+        "contentHash": "t8aWdB5cIOjuCT+fR8L1h9EF9+VUB/YVDdocbB9Ig5qb6s2/RYTtLmR8dskBeRlIIi0OPh840F4Y/3MVz/o3Xw=="
       },
       "Microsoft.CodeAnalysis.BannedApiAnalyzers": {
         "type": "Direct",
@@ -76,20 +76,20 @@
           "Microsoft.Win32.SystemEvents": "10.0.12"
         }
       },
-      "rotationsolver.sourcegenerators": {
+      "rotationsolver.basic": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.CodeAnalysis.CSharp": "[5.9.0, )"
-        }
-      },
-      "RotationSolverReborn.Basic": {
-        "type": "Project",
-        "dependencies": {
-          "ECommons": "[3.2.1.20, )",
+          "ECommons": "[3.2.1.21, )",
           "Microsoft.CodeAnalysis.CSharp": "[5.9.0, )",
           "RotationSolver.SourceGenerators": "[1.0.0, )",
           "Svg": "[3.4.8, )",
           "System.Drawing.Common": "[10.0.12, )"
+        }
+      },
+      "rotationsolver.sourcegenerators": {
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.CodeAnalysis.CSharp": "[5.9.0, )"
         }
       }
     }

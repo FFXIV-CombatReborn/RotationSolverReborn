@@ -192,7 +192,7 @@ internal static class PluginCompatibility
 			Icon = "https://raw.githubusercontent.com/XeldarAlz/FFXIV-AutoPVPSeriesGrind/master/AutoPvpSeriesGrind/Images/Icon.png",
 			Url = "https://github.com/XeldarAlz/FFXIV-AutoPVPSeriesGrind",
 			Features = "AI slop plugin that bot-farms PvP matches by driving RSR through its own chat commands; RSR blocks autorotation in PvP while this is enabled",
-			Type = CompatibleType.Broken
+			Type = CompatibleType.Broken | CompatibleType.Crash
 		}
 	];
 }

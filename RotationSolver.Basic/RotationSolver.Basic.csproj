@@ -1,16 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <PackageIcon>Logo.png</PackageIcon>
         <Description>A basic library for rotation development in FFXIV in RotationSolver.</Description>
-        <PackageId>RotationSolverReborn.Basic</PackageId>
-        <Title>RotationSolver.Basic</Title>
-        <RepositoryUrl>https://github.com/FFXIV-CombatReborn/RotationSolverReborn/tree/main/RotationSolver.Basic</RepositoryUrl>
-        <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
-        <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
-        <PackageTags>FFXIV, FF14, Dalamud, Rotation</PackageTags>
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <IsPackable>false</IsPackable>
         <GenerateDocumentationFile>True</GenerateDocumentationFile>
         <EnforceCodeStyleInBuild>False</EnforceCodeStyleInBuild>
         <Platforms>x64</Platforms>
@@ -79,7 +71,7 @@
         <Using Include="Dalamud.Bindings.ImGui" />
         <Using Include="Newtonsoft.Json" />
 
-        <PackageReference Include="ECommons" Version="3.2.1.20" />
+        <PackageReference Include="ECommons" Version="3.2.1.21" />
 
         <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0">
           <PrivateAssets>all</PrivateAssets>
@@ -92,18 +84,6 @@
         <PackageReference Include="System.Drawing.Common" Version="10.0.12" />
         <ProjectReference Include="..\RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj" OutputItemType="Analyzer" ExcludeAssets="All" />
 
-        <None Include="..\COPYING.LESSER">
-            <Pack>True</Pack>
-            <PackagePath>\</PackagePath>
-        </None>
-        <None Include="..\Images\Logo.png">
-            <Pack>True</Pack>
-            <PackagePath>\</PackagePath>
-        </None>
         <PackageReference Include="Svg" Version="3.4.8" />
-        <None Update="README.md">
-            <Pack>True</Pack>
-            <PackagePath>\</PackagePath>
-        </None>
     </ItemGroup>
 </Project>

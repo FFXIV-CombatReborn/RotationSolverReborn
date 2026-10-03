@@ -11,14 +11,8 @@ using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
 namespace RotationSolver.UI.HighlightTeachingMode;
 
-/// <summary> 
-/// The hotbar highlight drawing. 
-/// </summary>
 public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 {
-	/// <summary> </summary>
-	/// <param name="color"> Color </param>
-	/// <param name="ids">   action ids </param>
 	public DrawingHighlightHotbar(Vector4 color, params HotbarID[] ids)
 		: this()
 	{
@@ -26,7 +20,6 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 		HotbarIDs = [.. ids];
 	}
 
-	/// <summary> </summary>
 	public DrawingHighlightHotbar()
 	{
 		if (_texture != null)
@@ -52,10 +45,8 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 		_texture = Svc.Texture.CreateFromRaw(RawImageSpecification.Rgba32(tex.Header.Width, tex.Header.Height), array);
 	}
 
-	/// <summary> The color of highlight. </summary>
 	public Vector4 Color { get; set; } = new Vector4(0.8f, 0.5f, 0.3f, 1);
 
-	/// <summary> The action ids that </summary>
 	public HashSet<HotbarID> HotbarIDs { get; } = [];
 
 	/// <summary>
@@ -108,16 +99,8 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 			var s = actionBar->AtkUnitBase.Scale;
 
 			// Resolve the RaptureHotbarModule index separately so the addon counter stays intact.
-			var isCrossBar = hotBarIndex > 9;
-			var resolvedHotbarIndex = hotBarIndex;
-			if (isCrossBar)
-			{
-				resolvedHotbarIndex = hotBarIndex == 10
-					? ((AddonActionCross*)intPtr)->RaptureHotbarId
-					: ((AddonActionDoubleCrossBase*)intPtr)->BarTarget;
-			}
-
-			if (resolvedHotbarIndex < 0 || resolvedHotbarIndex >= raptureModule->Hotbars.Length)
+			var isCrossBar = hotBarIndex >= HotbarAddonHelper.StandardHotbarCount;
+			if (!HotbarAddonHelper.TryGetRaptureHotbarIndex(intPtr, hotBarIndex, raptureModule, out var resolvedHotbarIndex))
 			{
 				continue;
 			}
@@ -216,53 +199,28 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 		_texture?.Dispose();
 		_texture = null;
 	}
-	private unsafe bool IsActionSlotRight(ActionManager* actionManager, ActionBarSlot slot, HotbarSlot hot)
+	private unsafe bool IsActionSlotRight(ActionManager* actionManager, ActionBarSlot slot, in HotbarSlot hot)
 	{
 		var actionId = actionManager->GetAdjustedActionId((uint)slot.ActionId);
 		foreach (var hotbarId in _displayIds)
 		{
-			if (hot.OriginalApparentSlotType != hotbarId.SlotType)
+			if (HotbarAddonHelper.IsSlotMatch(actionId, hot, hotbarId))
 			{
-				continue;
+				return true;
 			}
-
-			if (hot.ApparentSlotType != hotbarId.SlotType)
-			{
-				continue;
-			}
-
-			if (actionId != hotbarId.Id)
-			{
-				continue;
-			}
-
-			return true;
 		}
 
 		return false;
 	}
 }
 
-/// <summary> 
-/// The Hot bar ID 
-/// </summary>
 public readonly record struct HotbarID(HotbarSlotType SlotType, uint Id)
 {
-	///// <summary>
-	///// Convert from a action id.
-	///// </summary>
-	///// <param name="actionId"></param>
-	//public static implicit operator HotbarID(uint actionId) => new(HotbarSlotType.Action, actionId);
 }
 
 /// <summary> Polyline drawing draws the actual border lines on the overlay window. </summary>
-/// <remarks> </remarks>
-/// <param name="pts">       </param>
-/// <param name="color">     </param>
-/// <param name="thickness"> </param>
 public readonly struct PolylineDrawing(Vector2[] pts, uint color, float thickness) : IDrawing2D
 {
-	/// <summary> Draw on the <seealso cref="ImGui" /> </summary>
 	public void Draw()
 	{
 		if (_pts == null || _pts.Length < 2)
@@ -294,30 +252,14 @@ public readonly struct PolylineDrawing(Vector2[] pts, uint color, float thicknes
 	private readonly Vector2[] _pts = pts;
 }
 
-/// <summary> 
-/// 2D drawing element. 
-/// </summary>
 public interface IDrawing2D
 {
-	/// <summary> Draw on the <seealso cref="ImGui" /> </summary>
 	void Draw();
 }
 
 /// <summary> Drawing the image. </summary>
-/// <remarks> </remarks>
-/// <param name="texture"> </param>
-/// <param name="pt1">     </param>
-/// <param name="pt2">     </param>
-/// <param name="col">     </param>
 public readonly struct ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2, uint col = uint.MaxValue) : IDrawing2D
 {
-	/// <summary> </summary>
-	/// <param name="texture"> </param>
-	/// <param name="pt1">     </param>
-	/// <param name="pt2">     </param>
-	/// <param name="uv1">     </param>
-	/// <param name="uv2">     </param>
-	/// <param name="col">     </param>
 	public ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2,
 		Vector2 uv1, Vector2 uv2, uint col = uint.MaxValue)
 		: this(texture, pt1, pt2, col)
@@ -326,7 +268,6 @@ public readonly struct ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Ve
 		_uv2 = uv2;
 	}
 
-	/// <summary> Draw on the <seealso cref="ImGui" /> </summary>
 	public void Draw()
 	{
 		ImGui.GetWindowDrawList().AddImage(_texture.Handle, _pt1, _pt2, _uv1, _uv2, _col);

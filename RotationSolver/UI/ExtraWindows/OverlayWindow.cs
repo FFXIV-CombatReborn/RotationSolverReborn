@@ -4,11 +4,8 @@ using ECommons.DalamudServices;
 using ECommons.Logging;
 using RotationSolver.UI.HighlightTeachingMode;
 
-namespace RotationSolver.UI;
+namespace RotationSolver.UI.ExtraWindows;
 
-/// <summary>
-/// The Overlay Window
-/// </summary>
 internal class OverlayWindow : Window
 {
 	private const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoBackground
@@ -43,14 +40,14 @@ internal class OverlayWindow : Window
 			return;
 		}
 
-		// The drawings are built on the framework thread; drawing only reads the latest snapshot.
+		// Built on the framework thread; this only reads the latest snapshot.
 		var elements = HotbarHighlightManager.Elements2D;
 		if (elements.Length == 0)
 		{
 			return;
 		}
 
-		// Save and disable AA fill for performance of large overlays
+		// Anti-aliased fill is slow on large overlays, so turn it off while drawing.
 		var prevAAFill = ImGui.GetStyle().AntiAliasedFill;
 		ImGui.GetStyle().AntiAliasedFill = false;
 

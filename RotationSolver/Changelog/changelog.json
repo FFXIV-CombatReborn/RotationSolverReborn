@@ -1,0 +1,180 @@
+{
+  "tagline": "8 hours of Imgui youtube tutorials later",
+  "entries": [
+    {
+      "version": "7.5.6.14",
+      "title": "Reborn Material redesign",
+      "date": "October 3, 2026",
+      "sections": [
+        {
+          "title": "Material Design 3 inspired interface redesign aka Reborn Material",
+          "icon": "PaintBrush",
+          "items": [
+            "The settings window, overlays and info windows have been rebuilt on a new Reborn Material design system.",
+            "New \"Interface accent colour\" option: pick one colour and every surface, button and highlight in RSR is derived from it.",
+            "New \"Text size\" option scales the text in every Rotation Solver window, on top of Dalamud's own font settings.",
+            "New \"Element size\" option scales the padding, spacing and controls in every Rotation Solver window. Turn it down for a more compact layout that needs less scrolling.",
+            "Setting descriptions can now be shown inline beneath each setting. Turn off \"Show setting descriptions inline\" for a denser list."
+          ]
+        },
+        {
+          "title": "Autorotation control window",
+          "icon": "ToggleOn",
+          "items": [
+            "/rotation Control opens a small window with Auto, Manual and Off buttons for switching the autorotation state."
+          ]
+        },
+        {
+          "title": "Next Action window",
+          "icon": "Keyboard",
+          "items": [
+            "New \"Show Keybind\" option shows the keybind of the hotbar slot that holds the next action. Only visible hotbars are checked.",
+            "New \"Window Size\" option scales the whole Next Action window: the action icon, the GCD bar, the keybind and the target hint."
+          ]
+        },
+        {
+          "title": "Action Timeline window",
+          "icon": "History",
+          "items": [
+            "Rebuilt in the Material 3 style. GCDs run along the top lane with their cast and recast, oGCDs sit beneath them, each action's animation lock is underlined, and auto-attacks tick along above the time axis.",
+            "Hard casts now appear the moment they start and fill in as they cast, and cancelled casts are marked in red.",
+            "Hover over an action for its name, timings and how long ago it was used. Hover over the window for buttons to lock it, open its settings or hide it.",
+            "New \"Lock timeline\" and \"Timeline size\" options. The timeline no longer shares the Control window's lock and background; it uses the Info window background.",
+            "Fixed \"Save timeline to JSON file after combat\" never saving while \"Only show timeline in combat\" was on. Each file now holds only the fight that ended, and records each action's ID."
+          ]
+        },
+        {
+          "title": "Removed",
+          "icon": "TrashAlt",
+          "items": [
+            "The Cooldown window has been removed, along with its settings and the per-action \"Show on CD window\" option. No one ever used this and I didn't want to have to go through updating it to Reborn Material standards.'"
+          ]
+        },
+        {
+          "title": "First start tutorial",
+          "icon": "GraduationCap",
+          "items": [
+            "The first start tutorial has been rebuilt as a step-by-step tour with a step list to jump around in.",
+            "It now covers modes and how to switch between them, the settings window layout, your rotation, targeting, overlays and teaching mode, and more.",
+            "Change the settings that matter on day one right in the tour: accent colour, text size, AoE usage, auto on/off, hostile targeting and the overlay windows.",
+            "Reopen it any time from the About page."
+          ]
+        },
+        {
+          "title": "Update notes",
+          "icon": "Newspaper",
+          "items": [
+            "This window! Update notes now appear after each update, along with credits for everyone who makes RSR possible.",
+            "Reopen them any time from the About page or with /rotation Changelog. The popup can be turned off in UI > Information."
+          ]
+        }
+      ]
+    },
+    {
+      "version": "7.5.6.13",
+      "title": "Snarl & Challenge",
+      "date": "September 30, 2026",
+      "sections": [
+        {
+          "title": "Rotations",
+          "icon": "Crosshairs",
+          "items": [
+            "Added Snarl and Challenge logic."
+          ]
+        },
+        {
+          "title": "Fixes",
+          "icon": "Wrench",
+          "items": [
+            "Fixed job gauge data after a Dalamud update.",
+            "Updated the invincible and no-casting status lists."
+          ]
+        }
+      ]
+    },
+    {
+      "version": "7.5.6.12",
+      "title": "Warrior and healing fixes",
+      "date": "September 28, 2026",
+      "sections": [
+        {
+          "title": "Fixes",
+          "icon": "Wrench",
+          "items": [
+            "Fixed Warrior's Nascent Flash logic.",
+            "Fixed heal action selection when the target is yourself."
+          ]
+        }
+      ]
+    },
+    {
+      "version": "7.5.6.11",
+      "title": "Pixel art job icons",
+      "date": "September 21, 2026",
+      "sections": [
+        {
+          "title": "Interface",
+          "icon": "Image",
+          "items": [
+            "Job icons in the UI now use the pixel art icons from deep dungeons."
+          ]
+        }
+      ]
+    },
+    {
+      "version": "7.5.6.10",
+      "title": "Optimisation pass",
+      "date": "September 19, 2026",
+      "sections": [
+        {
+          "title": "Performance",
+          "icon": "TachometerAlt",
+          "items": [
+            "A refactor pass across the plugin for performance."
+          ]
+        },
+        {
+          "title": "Fixes",
+          "icon": "Wrench",
+          "items": [
+            "Various fixes to core logic, Beastmaster, healing logic and PvP Guard status logic."
+          ]
+        },
+        {
+          "title": "Translations",
+          "icon": "Language",
+          "items": [
+            "More of the interface is translated into Chinese."
+          ]
+        }
+      ]
+    },
+    {
+      "version": "7.5.6.9",
+      "title": "Maintenance",
+      "date": "September 16, 2026",
+      "message": "Removed a stray debug line."
+    },
+    {
+      "version": "7.5.6.8",
+      "title": "Beastmaster fixes",
+      "date": "September 13, 2026",
+      "sections": [
+        {
+          "title": "Rotations",
+          "icon": "Crosshairs",
+          "items": [
+            "Fixed Tempered Release.",
+            "Quelling Wave is now used more intelligently."
+          ]
+        }
+      ]
+    },
+    {
+      "version": "7.5.6.7",
+      "title": "Beastmaster hotfix",
+      "date": "September 13, 2026",
+      "message": "A temporary fix for Beastmaster's Snarl."
+    }
+  ]
+}

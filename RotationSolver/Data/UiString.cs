@@ -53,10 +53,19 @@ namespace RotationSolver.Data
 		[Description("Search Result")]
 		ConfigWindow_Search_Result,
 
+		[Description("Health thresholds")]
+		ConfigWindow_HealingThresholds,
+
+		[Description("Minimum")]
+		ConfigWindow_RangeLower,
+
+		[Description("Maximum")]
+		ConfigWindow_RangeUpper,
+
 		[Description("This includes almost all information available in one combat frame, including the status of all party members, hostile target statuses, skill cooldowns, MP and HP of characters, character locations, hostile target casting status, combo state, combat duration, player level, etc.\n\nIt will then highlight the best action on the hotbar, or help you click it.")]
 		ConfigWindow_About_Description,
 
-		[Description("This is designed for GENERAL COMBAT, not for Savage or Ultimate content. \n\nUse it carefully! While not designed specifically for Savage or Ultimate content RSR works fine in them, but it will not solve mechanics for you. Pay attention and use macros.")]
+		[Description("This is designed for general combat, with optimizations for savage/ultimate content needing to be hand tuned. \n\nBe mindful of your usage in savage/ultimate content.")]
 		ConfigWindow_About_Warning,
 
 		[Description("RSR has helped you by clicking actions {0:N0} times.")]
@@ -121,9 +130,6 @@ namespace RotationSolver.Data
 
 		[Description("Used to customize when RSR uses specific actions automatically. Click on an action's icon in the left list. Below, you may set the conditions for when that specific action is used. Each action can have different conditions to override the default rotation behavior.")]
 		ConfigWindow_Actions_Description,
-
-		[Description("Show on CD window")]
-		ConfigWindow_Actions_ShowOnCDWindow,
 
 		[Description("Allow action to be intercepted by the intercept system")]
 		ConfigWindow_Actions_IsIntercepted,
@@ -418,6 +424,9 @@ namespace RotationSolver.Data
 
 		[Description("Enemy targeting logic. Adding more options cycles them when using /rotation Auto.\nUse /rotation Settings TargetingTypes add <option> to add,\n/rotation Settings TargetingTypes remove <option> to remove,\nand /rotation Settings TargetingTypes removeall to remove all options.")]
 		ConfigWindow_Param_HostileDesc,
+
+		[Description("Add targeting priority")]
+		ConfigWindow_Target_AddPriority,
 
 		[Description("Move Up")]
 		ConfigWindow_Actions_MoveUp,
@@ -720,8 +729,10 @@ namespace RotationSolver.Data
 			var attribute = field.GetCustomAttribute<DescriptionAttribute>();
 
 			var descString = attribute == null ? value.ToString() : attribute.Description;
-			if (UI.RotationConfigWindow.CNLanguageClient) {
-				descString = value switch {
+			if (UI.MainWindow.CNLanguageClient)
+			{
+				descString = value switch
+				{
 					UiString.ConfigWindow_ConditionSetDesc => "您选择的条件值。点击修改。",
 					UiString.ConfigWindow_ConditionSet => "条件值",
 					UiString.ConfigWindow_ActionSet => "动作条件",
@@ -738,6 +749,10 @@ namespace RotationSolver.Data
 					UiString.ConfigWindow_Rotation_InvalidRotation => "无效循环！\n请更新到最新版本或联系 {0}！",
 					UiString.ConfigWindow_Helper_SwitchRotation => "点击切换循环",
 					UiString.ConfigWindow_Search_Result => "搜索结果",
+					UiString.ConfigWindow_Target_AddPriority => "添加目标优先级",
+					UiString.ConfigWindow_HealingThresholds => "血量阈值",
+					UiString.ConfigWindow_RangeLower => "最小值",
+					UiString.ConfigWindow_RangeUpper => "最大值",
 					UiString.ConfigWindow_About_Description => "这包括单个战斗帧中几乎所有的可用信息，包括所有队员的状态、敌对目标状态、技能冷却、角色MP和HP、角色位置、敌对目标咏唱状态、连击状态、战斗时长、玩家等级等。\n\n随后它会在热键栏上高亮最佳动作，或帮助你点击它。",
 					UiString.ConfigWindow_About_Warning => "这是为一般战斗设计的，而不是为零式或绝境战内容设计的。\n\n请谨慎使用！虽然RSR并非专门为零式或绝境战内容设计，但在其中也能正常工作，但它不会替你处理机制。请注意并配合使用宏。",
 					UiString.ConfigWindow_About_ClickingCount => "RSR 已通过点击动作帮助了你 {0:N0} 次。",
@@ -761,7 +776,6 @@ namespace RotationSolver.Data
 					UiString.ConfigWindow_Rotation_Status => "状态",
 					UiString.ConfigWindow_DutyRotation_Status => "任务循环状态",
 					UiString.ConfigWindow_Actions_Description => "用于自定义RSR何时自动使用特定动作。在左侧列表中点击动作图标。下方可以设置该特定动作的使用条件。每个动作都可以有不同的条件，以覆盖默认循环行为。",
-					UiString.ConfigWindow_Actions_ShowOnCDWindow => "在冷却窗口中显示",
 					UiString.ConfigWindow_Actions_IsIntercepted => "允许该动作被拦截系统拦截",
 					UiString.ConfigWindow_Actions_IsRestrictedDOT => "防止对精选怪物列表（例如 狩猎人偶）使用此动作",
 					UiString.ConfigWindow_Actions_MinHPFeature => "允许该动作受最低HP功能限制",
@@ -977,6 +991,8 @@ namespace RotationSolver.Data
 					OtherCommandType.ToggleActions => "切换动作。",
 					OtherCommandType.NextAction => "执行下一个动作。",
 					OtherCommandType.Cycle => "根据 目标 > 设置 中的设置在各状态之间循环。",
+					OtherCommandType.Control => "打开包含自动、手动和关闭按钮的自动循环状态窗口。",
+					OtherCommandType.Changelog => "打开更新说明。",
 
 					ConfigUnitType.None => "无单位类型。",
 					ConfigUnitType.Seconds => "时间单位，以秒为单位。",
@@ -1000,7 +1016,7 @@ namespace RotationSolver.Data
 					CycleType.CycleAuto => "在自动和关闭之间循环。",
 					CycleType.CycleManual => "在手动和关闭之间循环。",
 					CycleType.CycleManualAuto => "在手动和自动之间循环。",
-					
+
 					DTRType.DTRNormal => "在首个自动、手动和关闭之间循环。",
 					DTRType.DTRAllAuto => "在每个自动、手动和关闭之间循环。",
 					DTRType.DTRAuto => "在自动和关闭之间循环。",
@@ -1054,7 +1070,7 @@ namespace RotationSolver.Data
 					TargetingType.PvPHealers => "PvP 中优先治疗职业。",
 					TargetingType.PvPTanks => "PvP 中优先坦克。",
 					TargetingType.PvPDPS => "PvP 中优先 DPS。",
-					
+
 					TinctureUseType.Nowhere => "不使用 Gemdraught/爆发药/药水。",
 					TinctureUseType.InHighEndDuty => "在高难度任务中使用 Gemdraught/爆发药/药水。",
 					TinctureUseType.Anywhere => "在任何地方使用 Gemdraught/爆发药/药水。",

@@ -1,6 +1,6 @@
 ﻿using Dalamud.Interface.Windowing;
 
-namespace RotationSolver.UI;
+namespace RotationSolver.UI.ExtraWindows;
 
 internal abstract class CtrlWindow(string name) : Window(name, BaseFlags)
 {

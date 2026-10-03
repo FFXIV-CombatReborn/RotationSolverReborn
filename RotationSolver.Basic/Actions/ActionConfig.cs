@@ -106,11 +106,6 @@ public class ActionConfig()
 	public float AutoHealRatio { get; set; } = 0.8f;
 
 	/// <summary>
-	/// Is this action in the cd window.
-	/// </summary>
-	public bool IsOnCooldownWindow { get; set; } = true;
-
-	/// <summary>
 	/// 
 	/// </summary>
 	public bool MinHPFeature { get; set; } = false;
