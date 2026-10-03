@@ -107,6 +107,7 @@ internal sealed class FirstStartTutorialWindow : Window
 	private double _stepShownAt;
 	private bool _scrollToTop;
 	private bool _revealStep;
+	private bool _checkedFirstStart;
 
 	private const bool PracticeToggleDefault = true;
 	private const float PracticeSliderDefault = 30f;
@@ -191,6 +192,21 @@ internal sealed class FirstStartTutorialWindow : Window
 		];
 
 		_seen = new bool[_steps.Length];
+	}
+
+	public void OpenIfFirstStart()
+	{
+		if (_checkedFirstStart)
+		{
+			return;
+		}
+
+		_checkedFirstStart = true;
+
+		if (!Service.Config.TutorialDone)
+		{
+			IsOpen = true;
+		}
 	}
 
 	public override bool DrawConditions()

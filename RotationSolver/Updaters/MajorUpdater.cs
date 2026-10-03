@@ -71,10 +71,7 @@ internal static class MajorUpdater
 			_isValidThisCycle = IsValid;
 			_isActivatedThisCycle = DataCenter.IsActivated();
 			_shouldRunThisCycle = true;
-			if (!Service.Config.TutorialDone)
-			{
-				RotationSolverPlugin.OpenFirstStartTutorial();
-			}
+			RotationSolverPlugin.ShowFirstStartTutorialIfNeeded();
 
 			if (_isValidThisCycle)
 			{
