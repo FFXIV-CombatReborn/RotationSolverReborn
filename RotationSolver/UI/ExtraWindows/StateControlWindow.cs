@@ -16,6 +16,8 @@ internal class StateControlWindow : Window
 
 	private const string Title = "Autorotation";
 
+	private static readonly Vector2 DefaultSize = new(360f, 132f);
+
 	private const float MaximumWidth = 900f;
 
 	private const int ManualIndex = 1;
@@ -47,6 +49,8 @@ internal class StateControlWindow : Window
 		new("##state_settings", FontAwesomeIcon.Cog, "Open the settings"),
 	];
 
+	private readonly M3WindowFold _fold = new();
+
 	private M3Style.Scope _theme;
 
 	private bool _shownSetting;
@@ -71,13 +75,17 @@ internal class StateControlWindow : Window
 	public StateControlWindow()
 		: base("RSR Autorotation###rsrStateControlWindow", BaseFlags)
 	{
-		Size = new Vector2(360f, 132f);
+		Size = DefaultSize;
 		SizeCondition = ImGuiCond.FirstUseEver;
 		RespectCloseHotkey = true;
 
 		AllowPinning = false;
 		AllowClickthrough = false;
 	}
+
+	internal bool IsMinimized => _fold.IsMinimized;
+
+	private static M3WindowBrand Brand => new(MainWindow.GetLogoTexture(), "RSR");
 
 	private static float TabPadding => 4f * M3.Scale;
 
@@ -122,6 +130,17 @@ internal class StateControlWindow : Window
 		base.OnOpen();
 	}
 
+	public override void OnClose()
+	{
+		_fold.Reset();
+		base.OnClose();
+	}
+
+	internal void Restore()
+	{
+		_fold.Restore();
+	}
+
 	public override void PreDraw()
 	{
 		_theme = M3Style.Push();
@@ -137,17 +156,29 @@ internal class StateControlWindow : Window
 		_tabShown = Ease(_tabTime);
 		_band = MathF.Round(TabHeight * _tabShown);
 
-		if (_placed && _band != _drawnBand)
+		Flags = BaseFlags;
+		if (_fold.Prepare(this, Actions.Length, Brand))
 		{
-			ImGui.SetNextWindowPos(new Vector2(_windowPos.X, _windowPos.Y - (_band - _drawnBand)), ImGuiCond.Always);
+			Position = null;
+			Size = DefaultSize;
+			SizeCondition = ImGuiCond.FirstUseEver;
+			SizeConstraints = null;
 		}
 
-		if (_baseHeight > 0f)
+		if (!_fold.IsActive)
 		{
-			var height = _baseHeight + _band;
-			ImGui.SetNextWindowSizeConstraints(
-				new Vector2(_minimumWidth, height),
-				new Vector2(MathF.Max(_minimumWidth, MaximumWidth * M3.Scale), height));
+			if (_placed && _band != _drawnBand)
+			{
+				ImGui.SetNextWindowPos(new Vector2(_windowPos.X, _windowPos.Y - (_band - _drawnBand)), ImGuiCond.Always);
+			}
+
+			if (_baseHeight > 0f)
+			{
+				var height = _baseHeight + _band;
+				ImGui.SetNextWindowSizeConstraints(
+					new Vector2(_minimumWidth, height),
+					new Vector2(MathF.Max(_minimumWidth, MaximumWidth * M3.Scale), height));
+			}
 		}
 
 		base.PreDraw();
@@ -155,6 +186,7 @@ internal class StateControlWindow : Window
 
 	public override void PostDraw()
 	{
+		_fold.PopStyle();
 		base.PostDraw();
 		_theme.Dispose();
 		_theme = default;
@@ -162,20 +194,52 @@ internal class StateControlWindow : Window
 
 	public override void Draw()
 	{
-		var style = ImGui.GetStyle();
-		var scale = M3.Scale;
-		var width = ImGui.GetContentRegionAvail().X;
-		var current = CurrentIndex();
+		_fold.BeginDraw();
 
 		_windowPos = ImGui.GetWindowPos();
 		_drawnBand = _band;
 		_placed = true;
 
+		var folded = _fold.Amount;
+		if (folded < 1f)
+		{
+			using var alpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * (1f - MathF.Min(1f, folded * 1.4f)));
+			var (openPos, openSize) = _fold.OpenRect();
+			DrawContent(openPos, openSize);
+		}
+
+		var pressed = _fold.DrawBar("##state_actions", Actions, Brand, out var closed, M3.Scheme.SurfaceContainerHigh);
+		if (pressed == 0)
+		{
+			RotationSolverPlugin.ShowConfigWindow();
+		}
+
+		if (closed)
+		{
+			IsOpen = false;
+		}
+	}
+
+	private void DrawContent(Vector2 openPos, Vector2 openSize)
+	{
+		var padding = _fold.OpenPadding;
+		ImGui.SetCursorScreenPos(openPos + padding);
+		using var content = ImRaii.Child("##state_content", Vector2.Max(Vector2.One, openSize - (padding * 2f)), false,
+			ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground);
+		if (!content)
+		{
+			return;
+		}
+
+		var scale = M3.Scale;
+		var width = ImGui.GetContentRegionAvail().X;
+		var current = CurrentIndex();
+
 		var headerWidth = DrawHeader(width, scale, current);
 		var switchWidth = DrawSegmentedButton(width, scale, current);
 
-		_minimumWidth = MathF.Max(headerWidth, switchWidth) + (style.WindowPadding.X * 2f);
-		_baseHeight = ImGui.GetCursorPosY() - style.ItemSpacing.Y + style.WindowPadding.Y - _band;
+		_minimumWidth = MathF.Max(headerWidth, switchWidth) + (padding.X * 2f);
+		_baseHeight = ImGui.GetCursorPosY() - ImGui.GetStyle().ItemSpacing.Y + (padding.Y * 2f) - _band;
 	}
 
 	private static int CurrentIndex()
@@ -232,7 +296,7 @@ internal class StateControlWindow : Window
 		var s = M3.Scheme;
 		var drawList = ImGui.GetWindowDrawList();
 		var origin = ImGui.GetCursorScreenPos();
-		var pillSize = M3Widgets.WindowActionsSize(Actions.Length);
+		var pillSize = M3Widgets.WindowActionsSize(Actions.Length, Brand, 0f);
 		var logoSize = 32f * scale;
 		var logoGap = 12f * scale;
 		var pillGap = 8f * scale;
@@ -273,17 +337,8 @@ internal class StateControlWindow : Window
 		drawList.AddText(new Vector2(textX, textY + titleSize.Y + lineGap), M3.U32(Segments[current].Accent(s)),
 			M3Navigation.Truncate(status, textWidth));
 
-		var pressed = M3Widgets.WindowActions("##state_actions",
-			new Vector2(origin.X + width, origin.Y + ((height - pillSize.Y) * 0.5f)), Actions, out var closed, s.SurfaceContainerHigh);
-		if (pressed == 0)
-		{
-			RotationSolverPlugin.ShowConfigWindow();
-		}
-
-		if (closed)
-		{
-			IsOpen = false;
-		}
+		// Draw draws the pill here, after the content, so it can stay on screen while the window minimizes.
+		_fold.BarTop = (height - pillSize.Y) * 0.5f;
 
 		ImGui.SetCursorScreenPos(origin);
 		ImGui.Dummy(new Vector2(width, height));

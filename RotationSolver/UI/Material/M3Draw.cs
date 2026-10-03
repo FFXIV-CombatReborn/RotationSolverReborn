@@ -124,13 +124,13 @@ internal static class M3Draw
 		drawList.AddText(UiBuilder.IconFont, ImGui.GetFontSize(), position, M3.U32(color), icon.ToIconString());
 	}
 
-	public static void IconCentered(ImDrawListPtr drawList, FontAwesomeIcon icon, Vector2 min, Vector2 max, Vector4 color)
+	public static void IconCentered(ImDrawListPtr drawList, FontAwesomeIcon icon, Vector2 min, Vector2 max, Vector4 color, float scale = 1f)
 	{
 		using var font = ImRaii.PushFont(UiBuilder.IconFont);
 		var text = icon.ToIconString();
-		var size = ImGui.CalcTextSize(text);
+		var size = ImGui.CalcTextSize(text) * scale;
 		var position = min + (((max - min) - size) * 0.5f);
-		drawList.AddText(UiBuilder.IconFont, ImGui.GetFontSize(), position, M3.U32(color), text);
+		drawList.AddText(UiBuilder.IconFont, ImGui.GetFontSize() * scale, position, M3.U32(color), text);
 	}
 
 	public static float WrappedText(string text, Vector2 position, float wrapWidth, Vector4 color)

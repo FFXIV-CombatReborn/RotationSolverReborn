@@ -6,7 +6,7 @@ namespace RotationSolver.UI.ExtraWindows;
 
 internal class InterceptedActionWindow : Window
 {
-	private const ImGuiWindowFlags BaseFlags = ControlWindow.BaseFlags
+	private const ImGuiWindowFlags BaseFlags = FullControlWindow.BaseFlags
 		| ImGuiWindowFlags.AlwaysAutoResize
 		| ImGuiWindowFlags.NoCollapse
 		| ImGuiWindowFlags.NoTitleBar
@@ -48,9 +48,8 @@ internal class InterceptedActionWindow : Window
 
 	public override unsafe void Draw()
 	{
-		var config = Service.Config;
-		var gcdWidth = config.ControlWindowGCDSize * config.ControlWindowNextSizeRatio;
-		var abilityWidth = config.ControlWindow0GCDSize * config.ControlWindowNextSizeRatio;
+		var gcdWidth = FullControlWindow.NextGcdSize;
+		var abilityWidth = FullControlWindow.NextAbilitySize;
 		var totalWidth = gcdWidth + abilityWidth + ImGui.GetStyle().ItemSpacing.X;
 
 		var title = "Intercept System";
@@ -68,6 +67,6 @@ internal class InterceptedActionWindow : Window
 		}
 
 		ImGui.TextColored(ImGuiColors.DalamudWhite, "Current Intercepted Action");
-		ControlWindow.DrawIAction(cur, gcdWidth, 1);
+		FullControlWindow.DrawIAction(cur, gcdWidth, 1);
 	}
 }

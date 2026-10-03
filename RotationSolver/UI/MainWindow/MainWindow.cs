@@ -87,7 +87,7 @@ public partial class MainWindow : Window
 		M3Motion.Reset();
 		M3CardHost.Reset();
 		M3Snackbar.Clear();
-		RestoreOnClose();
+		_fold.Reset();
 
 		base.OnClose();
 	}
@@ -110,25 +110,22 @@ public partial class MainWindow : Window
 	{
 		base.PostDraw();
 
-		// Draw normally pops these, but Draw is skipped when Begin returns false.
-		PopFoldStyle();
+		_fold.PopStyle();
 		_theme.Dispose();
 		_theme = default;
 	}
 
 	public override void Draw()
 	{
-		PopFoldStyle();
-		_windowPos = ImGui.GetWindowPos();
-		_windowSize = ImGui.GetWindowSize();
+		_fold.BeginDraw();
 
-		var folded = Folded;
+		var folded = _fold.Amount;
 		if (folded < 1f)
 		{
 			using var alpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * (1f - MathF.Min(1f, folded * 1.4f)));
-			DrawWindowBackdrop(_windowRounding);
+			DrawWindowBackdrop(_fold.Rounding);
 
-			var (openPos, openSize) = OpenRect();
+			var (openPos, openSize) = _fold.OpenRect();
 			DrawWindowContent(openPos, openSize);
 		}
 
@@ -138,8 +135,9 @@ public partial class MainWindow : Window
 
 	private void DrawWindowContent(Vector2 openPos, Vector2 openSize)
 	{
-		ImGui.SetCursorScreenPos(openPos + _openPadding);
-		using var content = ImRaii.Child("##rsr_window_content", Vector2.Max(Vector2.One, openSize - (_openPadding * 2f)), false,
+		var padding = _fold.OpenPadding;
+		ImGui.SetCursorScreenPos(openPos + padding);
+		using var content = ImRaii.Child("##rsr_window_content", Vector2.Max(Vector2.One, openSize - (padding * 2f)), false,
 			ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground);
 		if (!content)
 		{
@@ -339,7 +337,7 @@ public partial class MainWindow : Window
 		}
 
 		_shownActions = shown;
-		_barTop = (height - barSize.Y) * 0.5f;
+		_fold.BarTop = (height - barSize.Y) * 0.5f;
 
 		if (searching)
 		{
