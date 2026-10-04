@@ -153,7 +153,7 @@ internal static class ActionUpdater
 		{
 			_startCombatTime = DateTime.MinValue;
 
-			if (Service.Config.AutoOffAfterCombat && !DataCenter.IsHenched && !DataCenter.IsAutoDuty)
+			if (DataCenter.AutoOffAfterCombatEnabled && !DataCenter.IsHenched && !DataCenter.IsAutoDuty)
 			{
 				AutoCancelTime = now.AddSeconds(Service.Config.AutoOffAfterCombatTime);
 			}

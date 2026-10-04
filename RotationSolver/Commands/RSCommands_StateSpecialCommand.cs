@@ -351,7 +351,7 @@ namespace RotationSolver.Commands
 			Service.Config.TargetingIndex = index;
 		}
 
-		public static void UpdateState(StateCommandType stateType, JobRole role)
+		public static void UpdateState(StateCommandType stateType, JobRole role, IpcStateOverrides? ipcOverrides = null)
 		{
 			if (DataCenter.PvPAutomationBlocked && stateType != StateCommandType.Off)
 			{
@@ -456,11 +456,12 @@ namespace RotationSolver.Commands
 					break;
 			}
 
+			DataCenter.IpcOverrides = DataCenter.State ? ipcOverrides : null;
 			_stateString = stateType.ToStateString(role);
 			UpdateToast();
 		}
 
-		public static void AutodutyUpdateState(StateCommandType stateType, JobRole role, TargetingType targetingType)
+		public static void AutodutyUpdateState(StateCommandType stateType, JobRole role, TargetingType targetingType, IpcStateOverrides? ipcOverrides = null)
 		{
 			if (DataCenter.PvPAutomationBlocked && stateType != StateCommandType.Off)
 			{
@@ -565,6 +566,7 @@ namespace RotationSolver.Commands
 					break;
 			}
 
+			DataCenter.IpcOverrides = DataCenter.State ? ipcOverrides : null;
 			_stateString = stateType == StateCommandType.AutoDuty
 				? $"{stateType.ToStateString(role)} ({targetingType})"
 				: stateType.ToStateString(role);

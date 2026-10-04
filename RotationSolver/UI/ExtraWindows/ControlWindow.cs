@@ -95,7 +95,7 @@ internal class FullControlWindow : FullCtrlWindow
 	private static float SpecialGcdSize => SpecialGcdBaseSize * Service.Config.ControlWindowSpecialsScale;
 	private static float SpecialAbilitySize => SpecialAbilityBaseSize * Service.Config.ControlWindowSpecialsScale;
 
-	private static M3WindowBrand Brand => new(MainWindow.GetLogoTexture(), "RSR");
+	private static M3WindowBrand Brand => new(MainWindow.GetLogoTexture(), "RSR Control");
 
 	private readonly M3WindowAction[] _actions = new M3WindowAction[3];
 	private readonly M3WindowFold _fold = new();
@@ -563,7 +563,8 @@ internal class FullControlWindow : FullCtrlWindow
 			labelWidth = MathF.Max(ImGui.CalcTextSize("HOSTILE").X, ImGui.CalcTextSize("AUTO").X);
 		}
 
-		StatusLine(FontAwesomeIcon.Users, "Hostile", DataCenter.CurrentTargetToHostileType.GetDescription(), labelWidth, width);
+		var hostile = DataCenter.CurrentTargetToHostileType.GetDescription();
+		StatusLine(FontAwesomeIcon.Users, "Hostile", DataCenter.ActiveIpcOverrides?.HostileType is not null ? $"{hostile} (IPC)" : hostile, labelWidth, width);
 		StatusLine(FontAwesomeIcon.Robot, "Auto", DataCenter.AutoStatus.ToString(), labelWidth, width);
 	}
 

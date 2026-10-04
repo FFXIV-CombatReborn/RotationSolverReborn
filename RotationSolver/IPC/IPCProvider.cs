@@ -132,6 +132,32 @@ namespace RotationSolver.IPC
 		}
 
 		/// <summary>
+		/// Changes the operating mode of the plugin via IPC and temporarily overrides some settings without changing the
+		/// user's config. The overrides are cleared by any later state change, including RSR turning Off (manually, from a
+		/// timeout, or via IPC).
+		/// </summary>
+		/// <param name="stateCommand">
+		/// The <see cref="StateCommandType"/> value specifying the desired operating mode, such as Off, Auto, or Manual.
+		/// </param>
+		/// <param name="targetHostileType">
+		/// The <see cref="TargetHostileType"/> engage setting to use while this operating mode is active.
+		/// </param>
+		/// <param name="targetFreely">Override for the TargetFreely setting.</param>
+		/// <param name="autoOffAfterCombat">
+		/// Override for the AutoOffAfterCombat setting. AutoDuty and Henched modes never turn off after combat, so it has no effect there.
+		/// </param>
+		/// <param name="friendlyPartyNpcHealRaise">Override for the FriendlyPartyNpcHealRaise3 setting (heal and raise party NPCs).</param>
+		[EzIPC]
+		public void ChangeOperatingModeWithOverrides(StateCommandType stateCommand, TargetHostileType targetHostileType, SettingOverride targetFreely, SettingOverride autoOffAfterCombat, SettingOverride friendlyPartyNpcHealRaise)
+		{
+			if (!DataCenter.IsPvP)
+			{
+				RSCommands.UpdateState(stateCommand, (JobRole)DataCenter.Job, CreateOverrides(targetHostileType, targetFreely, autoOffAfterCombat, friendlyPartyNpcHealRaise));
+			}
+			PluginLog.Debug($"IPC ChangeOperatingModeWithOverrides was called. StateCommand:{stateCommand} TargetHostileType:{targetHostileType} TargetFreely:{targetFreely} AutoOffAfterCombat:{autoOffAfterCombat} FriendlyPartyNpcHealRaise:{friendlyPartyNpcHealRaise}");
+		}
+
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="stateCommand">
@@ -148,6 +174,50 @@ namespace RotationSolver.IPC
 				RSCommands.AutodutyUpdateState(stateCommand, (JobRole)DataCenter.Job, targetingType);
 			}
 			PluginLog.Debug($"IPC AutodutyChangeOperatingMode was called. StateCommand:{stateCommand} TargetingType:{targetingType}");
+		}
+
+		/// <summary>
+		/// Same as <see cref="AutodutyChangeOperatingMode"/>, but also temporarily overrides some settings without changing
+		/// the user's config. The overrides are cleared by any later state change, including RSR turning Off (manually, from
+		/// a timeout, or via IPC).
+		/// </summary>
+		/// <param name="stateCommand">
+		/// The <see cref="StateCommandType"/> value specifying the desired operating mode, such as Off, Auto, or Manual.
+		/// </param>
+		/// <param name="targetingType">
+		/// The <see cref="TargetingType"/> value specifying the desired operating mode, such as Big, LowHP, or Nearest.
+		/// </param>
+		/// <param name="targetHostileType">
+		/// The <see cref="TargetHostileType"/> engage setting to use while this operating mode is active.
+		/// </param>
+		/// <param name="targetFreely">Override for the TargetFreely setting.</param>
+		/// <param name="autoOffAfterCombat">
+		/// Override for the AutoOffAfterCombat setting. AutoDuty and Henched modes never turn off after combat, so it has no effect there.
+		/// </param>
+		/// <param name="friendlyPartyNpcHealRaise">Override for the FriendlyPartyNpcHealRaise3 setting (heal and raise party NPCs).</param>
+		[EzIPC]
+		public void AutodutyChangeOperatingModeWithOverrides(StateCommandType stateCommand, TargetingType targetingType, TargetHostileType targetHostileType, SettingOverride targetFreely, SettingOverride autoOffAfterCombat, SettingOverride friendlyPartyNpcHealRaise)
+		{
+			if (!DataCenter.IsPvP)
+			{
+				RSCommands.AutodutyUpdateState(stateCommand, (JobRole)DataCenter.Job, targetingType, CreateOverrides(targetHostileType, targetFreely, autoOffAfterCombat, friendlyPartyNpcHealRaise));
+			}
+			PluginLog.Debug($"IPC AutodutyChangeOperatingModeWithOverrides was called. StateCommand:{stateCommand} TargetingType:{targetingType} TargetHostileType:{targetHostileType} TargetFreely:{targetFreely} AutoOffAfterCombat:{autoOffAfterCombat} FriendlyPartyNpcHealRaise:{friendlyPartyNpcHealRaise}");
+		}
+
+		private static IpcStateOverrides CreateOverrides(TargetHostileType targetHostileType, SettingOverride targetFreely, SettingOverride autoOffAfterCombat, SettingOverride friendlyPartyNpcHealRaise)
+		{
+			return new(targetHostileType, ToOverrideValue(targetFreely), ToOverrideValue(autoOffAfterCombat), ToOverrideValue(friendlyPartyNpcHealRaise));
+		}
+
+		private static bool? ToOverrideValue(SettingOverride setting)
+		{
+			return setting switch
+			{
+				SettingOverride.ForceOn => true,
+				SettingOverride.ForceOff => false,
+				_ => null,
+			};
 		}
 
 		/// <summary>

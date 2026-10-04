@@ -924,6 +924,18 @@ public partial class MainWindow
 			var ipcProvider = RotationSolverPlugin.IPCProvider;
 			ipcProvider.AutodutyChangeOperatingMode(StateCommandType.AutoDuty, TargetingType.HighHPPercent);
 		}
+		if (ImGui.Button("Test ChangeOperatingModeWithOverrides IPC (Auto, AllTargetsCanAttack, TargetFreely on, AutoOffAfterCombat off, NPC heal/raise on)"))
+		{
+			var ipcProvider = RotationSolverPlugin.IPCProvider;
+			ipcProvider.ChangeOperatingModeWithOverrides(StateCommandType.Auto, TargetHostileType.AllTargetsCanAttack, SettingOverride.ForceOn, SettingOverride.ForceOff, SettingOverride.ForceOn);
+		}
+		if (ImGui.Button("Test AutodutyChangeOperatingModeWithOverrides IPC (AutoDuty, HighHPPercent, AllTargetsCanAttack, others unchanged)"))
+		{
+			var ipcProvider = RotationSolverPlugin.IPCProvider;
+			ipcProvider.AutodutyChangeOperatingModeWithOverrides(StateCommandType.AutoDuty, TargetingType.HighHPPercent, TargetHostileType.AllTargetsCanAttack, SettingOverride.UseSetting, SettingOverride.UseSetting, SettingOverride.UseSetting);
+		}
+		ImGui.Text($"IPC overrides: {DataCenter.IpcOverrides?.ToString() ?? "None"} (Active: {DataCenter.ActiveIpcOverrides is not null})");
+		ImGui.Text($"Effective: HostileType {DataCenter.CurrentTargetToHostileType}, TargetFreely {DataCenter.TargetFreelyEnabled}, AutoOffAfterCombat {DataCenter.AutoOffAfterCombatEnabled}, FriendlyPartyNpcHealRaise {DataCenter.FriendlyPartyNpcHealRaiseEnabled}");
 		if (ImGui.Button("Test Henchman IPC support"))
 		{
 			var ipcProvider = RotationSolverPlugin.IPCProvider;

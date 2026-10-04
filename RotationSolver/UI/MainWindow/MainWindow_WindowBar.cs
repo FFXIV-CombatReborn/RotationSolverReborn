@@ -34,7 +34,7 @@ public partial class MainWindow
 
 	internal bool IsMinimized => _fold.IsMinimized;
 
-	private M3WindowBrand Brand => new(GetLogoTexture(), "RSR");
+	private M3WindowBrand Brand => new(GetLogoTexture(), "RSR Settings");
 
 	internal void Restore()
 	{

@@ -516,7 +516,7 @@ internal static class MajorUpdater
 		{
 			MiscUpdater.UpdateMisc();
 
-			if ((Service.Config.TargetFreely || DataCenter.TargetFreelyOverride) && !DataCenter.IsPvP && DataCenter.State && DataCenter.InCombat)
+			if (DataCenter.TargetFreelyEnabled && !DataCenter.IsPvP && DataCenter.State && DataCenter.InCombat)
 			{
 				var nextAction2 = ActionUpdater.NextAction;
 				if (nextAction2 == null)
