@@ -85,7 +85,7 @@ internal class StateControlWindow : Window
 
 	internal bool IsMinimized => _fold.IsMinimized;
 
-	private static M3WindowBrand Brand => new(MainWindow.GetLogoTexture(), "RSR");
+	private static M3WindowBrand Brand => new(MainWindow.GetLogoTexture(), "RSR Autorotation");
 
 	private static float TabPadding => 4f * M3.Scale;
 

@@ -410,7 +410,18 @@ internal static class DataCenter
 
 		NextActs.Sort((a, b) => a.DeadTime.CompareTo(b.DeadTime));
 	}
-	public static TargetHostileType CurrentTargetToHostileType => Service.Config.HostileType;
+
+	public static IpcStateOverrides? IpcOverrides { get; set; }
+
+	public static IpcStateOverrides? ActiveIpcOverrides => State ? IpcOverrides : null;
+
+	public static TargetHostileType CurrentTargetToHostileType => ActiveIpcOverrides?.HostileType ?? Service.Config.HostileType;
+
+	public static bool TargetFreelyEnabled => ActiveIpcOverrides?.TargetFreely ?? (Service.Config.TargetFreely || TargetFreelyOverride);
+
+	public static bool AutoOffAfterCombatEnabled => ActiveIpcOverrides?.AutoOffAfterCombat ?? Service.Config.AutoOffAfterCombat;
+
+	public static bool FriendlyPartyNpcHealRaiseEnabled => ActiveIpcOverrides?.FriendlyPartyNpcHealRaise ?? Service.Config.FriendlyPartyNpcHealRaise3;
 
 	public static TargetingType? TargetingTypeOverride { get; set; }
 

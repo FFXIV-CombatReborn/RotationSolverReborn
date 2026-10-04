@@ -1,6 +1,32 @@
 {
-  "tagline": "8 hours of Imgui youtube tutorials later",
+  "tagline": "No plan survives contact with the real enemy",
   "entries": [
+    {
+      "version": "7.5.6.16",
+      "title": "Various Minor Fixes + Autoduty IPC update",
+      "date": "October 4, 2026",
+      "sections": [
+        {
+          "title": "Fixes to a bunch of little bits of the UI following feedback",
+          "icon": "PaintBrush",
+          "items": [
+            "Window fold labels have been updated.",
+            "Added setting to the Full Control Window to allow removing the state buttons for a more compact layout.",
+            "Added the ability to fold (minimize) the Full Control Window and State Window.",
+            "Fixed an issue with certain windows being permanently pinned if you had them pinned before 7.5.6.14."
+          ]
+        },
+        {
+          "title": "Autoduty IPC update",
+          "icon": "Robot",
+          "items": [
+            "Autoduty IPC updated with new functionality.",
+            "Previously Autoduty would change your settings when controlling RSR and be unable to tell what they were so it would not change them back.",
+            "Now with the new Autoduty IPC settings no longer need to be changed by Autoduty, it will temporarily override them without changing them."
+          ]
+        }
+      ]
+    },
     {
       "version": "7.5.6.14",
       "title": "Reborn Material redesign",
@@ -169,12 +195,6 @@
           ]
         }
       ]
-    },
-    {
-      "version": "7.5.6.7",
-      "title": "Beastmaster hotfix",
-      "date": "September 13, 2026",
-      "message": "A temporary fix for Beastmaster's Snarl."
     }
   ]
 }

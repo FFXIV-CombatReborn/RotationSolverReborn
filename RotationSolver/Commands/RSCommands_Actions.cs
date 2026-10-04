@@ -227,6 +227,7 @@ namespace RotationSolver.Commands
 		internal static void CancelState()
 		{
 			DataCenter.ResetAllRecords();
+			DataCenter.IpcOverrides = null;
 			if (DataCenter.State)
 			{
 				DoStateCommandType(StateCommandType.Off);
