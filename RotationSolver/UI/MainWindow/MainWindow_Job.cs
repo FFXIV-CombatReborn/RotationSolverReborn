@@ -324,27 +324,24 @@ public partial class MainWindow
 		return config switch
 		{
 			RotationConfigBoolean => M3Widgets.SwitchSize(),
-			RotationConfigCombo combo => new Vector2(
-				MathF.Min(MathF.Max(LongestValueWidth(combo.DisplayValues) + (48f * Scale), Searchable.DRAG_WIDTH * Scale), 320f * Scale),
-				M3Widgets.ComboHeight),
+			RotationConfigCombo combo => new Vector2(ComboWidth(combo), M3Widgets.ComboHeight),
 			RotationConfigString => new Vector2(240f * Scale, M3Widgets.ComboHeight),
 			_ => new Vector2((Searchable.DRAG_WIDTH * Scale) + M3Widgets.SliderValueGutter("000.00%"), M3Widgets.ButtonHeight),
 		};
 
-		static float LongestValueWidth(string[] values)
+		static float ComboWidth(RotationConfigCombo combo)
 		{
-			var widest = 0f;
-			foreach (var value in values)
-			{
-				var width = ImGui.CalcTextSize(value).X;
-				if (width > widest)
-				{
-					widest = width;
-				}
-			}
-
-			return widest;
+			var names = combo.DisplayValues;
+			var index = SelectedComboIndex(combo);
+			var label = index < names.Length ? names[index] : string.Empty;
+			return MathF.Min(MathF.Max(M3Widgets.ComboWidthFor(label), Searchable.DRAG_WIDTH * Scale),
+				M3SettingRow.MaxControlWidth());
 		}
+	}
+
+	private static int SelectedComboIndex(RotationConfigCombo combo)
+	{
+		return Math.Max(0, Array.FindIndex(combo.DisplayValues, n => n.Equals(combo.Value, StringComparison.OrdinalIgnoreCase)));
 	}
 
 	private static void DrawRotationConfigControl(IRotationConfig config, string id, float controlWidth)
@@ -354,7 +351,7 @@ public partial class MainWindow
 			case RotationConfigCombo combo:
 				{
 					var names = combo.DisplayValues;
-					var index = Math.Max(0, Array.FindIndex(names, n => n.Equals(combo.Value, StringComparison.OrdinalIgnoreCase)));
+					var index = SelectedComboIndex(combo);
 					if (M3Widgets.Combo($"{id}_combo", ref index, names, controlWidth) && index < names.Length)
 					{
 						combo.Value = names[index];

@@ -131,7 +131,7 @@ public partial class MainWindow
 
 			M3SettingRow.End(row);
 
-			ImGuiHelper.ExecuteHotKeysPopupAt(row.Hovered, key, string.Empty, string.Empty, true,
+			ImGuiHelper.ExecuteHotKeysPopupAt(row.Hovered, key, string.Empty, true,
 				(Delete, new[] { VirtualKey.DELETE }),
 				(Up, new[] { VirtualKey.UP }),
 				(Down, new[] { VirtualKey.DOWN }));

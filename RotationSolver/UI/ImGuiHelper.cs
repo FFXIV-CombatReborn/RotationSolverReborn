@@ -14,7 +14,6 @@ internal static class ImGuiHelper
 {
 	private const float INDENT_WIDTH = 180;
 
-	internal static readonly string[] BackspaceHint = ["Backspace"];
 	internal static readonly string[] DeleteHint = ["Delete"];
 	internal static readonly string[] MoveUpHint = ["↑"];
 	internal static readonly string[] MoveDownHint = ["↓"];
@@ -345,7 +344,20 @@ internal static class ImGuiHelper
 		using var popup = ImRaii.Popup(key);
 		if (popup.Success)
 		{
-			if (ImGui.BeginTable(key, 2, ImGuiTableFlags.BordersOuter))
+			var showKeys = false;
+			if (pairs != null)
+			{
+				foreach ((_, var action, var keys) in pairs)
+				{
+					if (action != null && keys is { Length: > 0 })
+					{
+						showKeys = true;
+						break;
+					}
+				}
+			}
+
+			if (ImGui.BeginTable(key, showKeys ? 2 : 1, ImGuiTableFlags.BordersOuter))
 			{
 				if (pairs != null)
 				{
@@ -356,13 +368,13 @@ internal static class ImGuiHelper
 							continue;
 						}
 
-						DrawHotKeys(name, action, keys);
+						DrawHotKeys(name, action, showKeys, keys);
 					}
 				}
 				if (!string.IsNullOrEmpty(command))
 				{
-					DrawHotKeys($"Execute \"{command}\"", () => ExecuteCommand(command), "Alt");
-					DrawHotKeys($"Copy \"{command}\"", () => CopyCommand(command), "Ctrl");
+					DrawHotKeys($"Execute \"{command}\"", () => ExecuteCommand(command), showKeys);
+					DrawHotKeys($"Copy \"{command}\"", () => CopyCommand(command), showKeys);
 				}
 				ImGui.EndTable();
 			}
@@ -373,30 +385,26 @@ internal static class ImGuiHelper
 	{
 		ArgumentNullException.ThrowIfNull(reset);
 
-		DrawHotKeysPopup(key, command, ("Reset to Default Value.", reset, BackspaceHint));
+		DrawHotKeysPopup(key, command, ("Reset to Default Value.", reset, []));
 	}
 
-	public static void ReactPopup(string key, string command, Action reset, bool showHand = true)
+	public static void ReactPopup(string key, bool showHand = true)
 	{
-		ArgumentNullException.ThrowIfNull(reset);
-
-		ExecuteHotKeysPopup(key, command, string.Empty, showHand, (reset, new VirtualKey[] { VirtualKey.BACK }));
+		ExecuteHotKeysPopup(key, string.Empty, showHand);
 	}
 
 	// For custom-drawn rows where the hovered area isn't the last ImGui item.
-	public static void ReactPopupAt(bool hovered, string key, string command, Action reset, bool showHand = true)
+	public static void ReactPopupAt(bool hovered, string key, bool showHand = true)
 	{
-		ArgumentNullException.ThrowIfNull(reset);
-
-		ExecuteHotKeysPopupAt(hovered, key, command, string.Empty, showHand, (reset, new VirtualKey[] { VirtualKey.BACK }));
+		ExecuteHotKeysPopupAt(hovered, key, string.Empty, showHand);
 	}
 
-	public static void ExecuteHotKeysPopup(string key, string command, string tooltip, bool showHand, params (Action action, VirtualKey[] keys)[] pairs)
+	public static void ExecuteHotKeysPopup(string key, string tooltip, bool showHand, params (Action action, VirtualKey[] keys)[] pairs)
 	{
-		ExecuteHotKeysPopupAt(ImGui.IsItemHovered(), key, command, tooltip, showHand, pairs);
+		ExecuteHotKeysPopupAt(ImGui.IsItemHovered(), key, tooltip, showHand, pairs);
 	}
 
-	public static void ExecuteHotKeysPopupAt(bool hovered, string key, string command, string tooltip, bool showHand, params (Action action, VirtualKey[] keys)[] pairs)
+	public static void ExecuteHotKeysPopupAt(bool hovered, string key, string tooltip, bool showHand, params (Action action, VirtualKey[] keys)[] pairs)
 	{
 		if (!hovered)
 		{
@@ -432,11 +440,6 @@ internal static class ImGuiHelper
 
 				ExecuteHotKeys(action, keys);
 			}
-		}
-		if (!string.IsNullOrEmpty(command))
-		{
-			ExecuteHotKeys(() => ExecuteCommand(command), VirtualKey.MENU);
-			ExecuteHotKeys(() => CopyCommand(command), VirtualKey.CONTROL);
 		}
 	}
 
@@ -486,7 +489,7 @@ internal static class ImGuiHelper
 		}
 	}
 
-	private static void DrawHotKeys(string name, Action action, params string[] keys)
+	private static void DrawHotKeys(string name, Action action, bool showKeys, params string[] keys)
 	{
 		if (action == null)
 		{
@@ -503,8 +506,11 @@ internal static class ImGuiHelper
 			ImGui.CloseCurrentPopup();
 		}
 
-		_ = ImGui.TableNextColumn();
-		ImGui.TextDisabled(string.Join(' ', keys));
+		if (showKeys)
+		{
+			_ = ImGui.TableNextColumn();
+			ImGui.TextDisabled(string.Join(' ', keys));
+		}
 	}
 
 	#endregion

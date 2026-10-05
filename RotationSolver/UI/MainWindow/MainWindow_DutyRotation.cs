@@ -104,7 +104,7 @@ public partial class MainWindow
 			ImguiTooltips.ShowTooltip(tooltip);
 		}
 
-		ImGuiHelper.ReactPopupAt(row.Hovered, key, command, Reset, false);
+		ImGuiHelper.ReactPopupAt(row.Hovered, key, false);
 		M3SettingRow.End(row);
 	}
 }

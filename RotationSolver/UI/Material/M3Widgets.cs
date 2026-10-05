@@ -1797,6 +1797,14 @@ internal static class M3Widgets
 
 	public static float ComboHeight => M3.FitText(38f, 8f);
 
+	private static float ComboTextInset => 12f * M3.Scale;
+	private static float ComboChevronWidth => 24f * M3.Scale;
+
+	public static float ComboWidthFor(string label)
+	{
+		return MathF.Ceiling(ImGui.CalcTextSize(label).X) + (ComboTextInset * 2f) + ComboChevronWidth + 1f;
+	}
+
 	public static bool Combo(string id, ref int index, IReadOnlyList<string> items, float width, string? emptyText = null)
 	{
 		var s = M3.Scheme;
@@ -1822,12 +1830,11 @@ internal static class M3Widgets
 		drawList.AddRectFilled(min, max, M3.U32(fill), rounding);
 		drawList.AddRect(min, max, M3.U32(open ? s.Primary : s.Outline, open ? 1f : 0.75f), rounding, ImDrawFlags.None, (open ? 2f : 1f) * scale);
 
-		var chevronWidth = 24f * scale;
 		var label = index >= 0 && index < items.Count ? items[index] : emptyText ?? string.Empty;
-		var textWidth = MathF.Max(8f * scale, width - (12f * scale * 2f) - chevronWidth);
+		var textWidth = MathF.Max(8f * scale, width - (ComboTextInset * 2f) - ComboChevronWidth);
 		var display = M3Navigation.Truncate(label, textWidth);
 		var textSize = ImGui.CalcTextSize(display);
-		drawList.AddText(new Vector2(min.X + (12f * scale), min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(s.OnSurface, 0.95f), display);
+		drawList.AddText(new Vector2(min.X + ComboTextInset, min.Y + ((height - textSize.Y) * 0.5f)), M3.U32(s.OnSurface, 0.95f), display);
 
 		var chevronCenter = new Vector2(max.X - (16f * scale), min.Y + (height * 0.5f));
 		var arm = 4.5f * scale;
@@ -1846,7 +1853,7 @@ internal static class M3Widgets
 		}
 
 		var changed = false;
-		ImGui.SetNextWindowSizeConstraints(new Vector2(MathF.Max(width, 160f * scale), 0f), new Vector2(560f * scale, 420f * scale));
+		ImGui.SetNextWindowSizeConstraints(new Vector2(MathF.Max(width, 160f * scale), 0f), new Vector2(float.MaxValue, 420f * scale));
 		using var popup = ImRaii.Popup(popupId);
 		if (popup)
 		{
