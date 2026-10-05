@@ -1,4 +1,3 @@
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Utility;
@@ -1475,14 +1474,11 @@ internal sealed class FirstStartTutorialWindow : Window
 		void Copy() => CopyToClipboard(command, $"Copied {command} (a practice command, it does nothing in chat).");
 
 		ImGuiHelper.DrawHotKeysPopup(key, string.Empty,
-			("Reset to Default Value.", reset, ImGuiHelper.BackspaceHint),
-			($"Execute \"{command}\"", reset, ["Alt"]),
-			($"Copy \"{command}\"", Copy, ["Ctrl"]));
+			("Reset to Default Value.", reset, []),
+			($"Execute \"{command}\"", reset, []),
+			($"Copy \"{command}\"", Copy, []));
 
-		ImGuiHelper.ExecuteHotKeysPopupAt(row.Hovered, key, string.Empty, string.Empty, false,
-			(reset, [VirtualKey.BACK]),
-			(reset, [VirtualKey.MENU]),
-			(Copy, [VirtualKey.CONTROL]));
+		ImGuiHelper.ReactPopupAt(row.Hovered, key, false);
 	}
 
 	private static void DrawMacro(int index, StarterMacro macro)

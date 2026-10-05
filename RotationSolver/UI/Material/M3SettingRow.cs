@@ -59,6 +59,23 @@ internal static class M3SettingRow
 
 	private static float MinLabelWidth => 120f * M3.Scale;
 
+	private static float RowWidth => MathF.Max(64f * M3.Scale, ImGui.GetContentRegionAvail().X - M3Card.RightInset);
+
+	private static float InnerWidth(float rowWidth, float iconWidth)
+	{
+		return MathF.Max(32f * M3.Scale, rowWidth - (PaddingX * 2f) - iconWidth);
+	}
+
+	private static float IconWidth(FontAwesomeIcon icon)
+	{
+		return icon == FontAwesomeIcon.None ? 0f : M3Draw.MeasureIcon(icon).X + (10f * M3.Scale);
+	}
+
+	public static float MaxControlWidth(FontAwesomeIcon leadingIcon = FontAwesomeIcon.None)
+	{
+		return InnerWidth(RowWidth, IconWidth(leadingIcon));
+	}
+
 	public static M3RowInfo Begin(
 		string label,
 		string? supporting,
@@ -75,15 +92,15 @@ internal static class M3SettingRow
 
 		// End() already starts a new line. Checking for one here would misfire in table cells.
 		var min = ImGui.GetCursorScreenPos();
-		var width = MathF.Max(64f * scale, ImGui.GetContentRegionAvail().X - M3Card.RightInset);
+		var width = RowWidth;
 
 		var texture = leadingTexture?.Handle == null ? null : leadingTexture;
 		var textureExtent = texture == null ? 0f : leadingTextureSize * scale;
 		var iconWidth = texture != null
 			? textureExtent + (10f * scale)
-			: leadingIcon == FontAwesomeIcon.None ? 0f : M3Draw.MeasureIcon(leadingIcon).X + (10f * scale);
+			: IconWidth(leadingIcon);
 		var textLeft = min.X + PaddingX + iconWidth;
-		var innerWidth = MathF.Max(32f * scale, width - (PaddingX * 2f) - iconWidth);
+		var innerWidth = InnerWidth(width, iconWidth);
 
 		var hasControl = controlSize.X > 0f && controlSize.Y > 0f;
 		var controlBelow = hasControl && innerWidth - controlSize.X - ControlGap < MinLabelWidth;

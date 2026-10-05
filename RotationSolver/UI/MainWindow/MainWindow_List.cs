@@ -274,7 +274,7 @@ public partial class MainWindow
 				}
 				_ = ImGuiHelper.NoPaddingNoColorImageButton(texture, new Vector2(IconWidth, IconHeight) * Scale, $"Status{status.RowId}");
 
-				ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, $"{status.Name} ({status.RowId})", false,
+				ImGuiHelper.ExecuteHotKeysPopup(key, $"{status.Name} ({status.RowId})", false,
 					(Delete, new[] { VirtualKey.DELETE }));
 			}
 		}
@@ -492,7 +492,7 @@ public partial class MainWindow
 
 			_ = ImGui.Selectable($"{action.Name} ({action.RowId})");
 
-			ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, string.Empty, false, (Reset, new[] { VirtualKey.DELETE }));
+			ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, false, (Reset, new[] { VirtualKey.DELETE }));
 		}
 
 		if (removeId != 0)
@@ -797,7 +797,7 @@ public partial class MainWindow
 					(UiString.ConfigWindow_List_Remove.GetDescription(), Reset, ["Delete"]));
 				_ = ImGui.Selectable(pts[i].ToString());
 
-				ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, string.Empty, false,
+				ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, false,
 					(Reset, [VirtualKey.DELETE]));
 			}
 			if (removePosIndex > -1)

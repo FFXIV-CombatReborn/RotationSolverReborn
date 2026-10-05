@@ -1,4 +1,3 @@
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
@@ -11,8 +10,6 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 {
 	private int[]? _enumKeys;
 	private string[]? _displayNames;
-	private float _maxDisplayNameWidth = -1f;
-	private float _measuredFontSize;
 
 	protected int Value
 	{
@@ -45,13 +42,13 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 			return;
 		}
 
-		using var table = ImRaii.Table(PopupKey, 2, ImGuiTableFlags.BordersOuter);
+		using var table = ImRaii.Table(PopupKey, 1, ImGuiTableFlags.BordersOuter);
 		if (!table)
 		{
 			return;
 		}
 
-		DrawHotKeys("Reset to Default Value.", ResetToDefault, ImGuiHelper.BackspaceHint);
+		DrawPopupItem("Reset to Default Value.", ResetToDefault);
 
 		var isFirst = true;
 		foreach (Enum enumValue in Enum.GetValues(_property.PropertyType))
@@ -66,12 +63,12 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 			isFirst = false;
 
 			var command = $"{Service.COMMAND} {OtherCommandType.Settings} {_property.Name} {enumValue}";
-			DrawHotKeys($"Execute \"{command}\"", () => Svc.Commands.ProcessCommand(command), ["Alt"]);
-			DrawHotKeys($"Copy \"{command}\"", () => CopyCommand(command), ["Ctrl"]);
+			DrawPopupItem($"Execute \"{command}\"", () => Svc.Commands.ProcessCommand(command));
+			DrawPopupItem($"Copy \"{command}\"", () => CopyCommand(command));
 		}
 	}
 
-	private static void DrawHotKeys(string name, Action action, string[] keys)
+	private static void DrawPopupItem(string name, Action action)
 	{
 		ImGui.TableNextRow();
 		_ = ImGui.TableNextColumn();
@@ -79,27 +76,6 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 		{
 			action();
 			ImGui.CloseCurrentPopup();
-		}
-
-		_ = ImGui.TableNextColumn();
-		ImGui.TextDisabled(string.Join(' ', keys));
-	}
-
-	private void ReactEnumPopup(bool hovered)
-	{
-		if (!hovered)
-		{
-			return;
-		}
-
-		if (ImGui.IsMouseClicked(ImGuiMouseButton.Right) && !ImGui.IsPopupOpen(PopupKey))
-		{
-			ImGui.OpenPopup(PopupKey);
-		}
-
-		if (Svc.KeyState[VirtualKey.BACK])
-		{
-			ResetToDefault();
 		}
 	}
 
@@ -120,25 +96,14 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 			return;
 		}
 
-		var fontSize = ImGui.GetFontSize();
-		if (_maxDisplayNameWidth < 0f || fontSize != _measuredFontSize)
-		{
-			_measuredFontSize = fontSize;
-			_maxDisplayNameWidth = 0f;
-			foreach (var name in displayNames)
-			{
-				_maxDisplayNameWidth = MathF.Max(_maxDisplayNameWidth, ImGui.CalcTextSize(name).X);
-			}
-		}
-
+		var currentIndex = Math.Max(0, Array.IndexOf(enumKeys, Value));
 		var comboWidth = MathF.Min(
-			MathF.Max(_maxDisplayNameWidth + (48f * Scale), DRAG_WIDTH * Scale),
-			320f * Scale);
+			MathF.Max(M3Widgets.ComboWidthFor(displayNames[currentIndex]), DRAG_WIDTH * Scale),
+			M3SettingRow.MaxControlWidth(RowIcon));
 
 		var row = M3SettingRow.Begin(Name, SupportingText, new Vector2(comboWidth, M3Widgets.ComboHeight),
 			leadingIcon: RowIcon);
 
-		var currentIndex = Math.Max(0, Array.IndexOf(enumKeys, Value));
 		ImGui.SetCursorScreenPos(row.ControlPosition);
 		if (M3Widgets.Combo($"##Config_{ID}{GetHashCode()}", ref currentIndex, displayNames, comboWidth)
 			&& currentIndex >= 0 && currentIndex < enumKeys.Length)
@@ -147,7 +112,7 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 		}
 
 		RowTooltip(row, "Right-click for the matching chat commands.");
-		ReactEnumPopup(row.Hovered);
+		ImGuiHelper.ReactPopupAt(row.Hovered, PopupKey, false);
 		M3SettingRow.End(row);
 	}
 }
