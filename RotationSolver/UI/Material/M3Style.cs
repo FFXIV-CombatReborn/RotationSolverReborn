@@ -1,11 +1,31 @@
 namespace RotationSolver.UI.Material;
 
+internal enum M3Density
+{
+	Comfortable,
+
+	Compact,
+
+	// Compact spacing, plus thin window edges and the tighter card, row and drawer padding from M3Style.Spacing.
+	Tight,
+}
+
 internal static class M3Style
 {
-	public static Scope Push(bool compact = false)
+	public static M3Density Density { get; private set; }
+
+	// Scaled padding for shared components, which pull in only inside a Tight window so the other windows keep their look.
+	public static float Spacing(float regular, float tight)
 	{
+		return (Density == M3Density.Tight ? tight : regular) * M3.PaddingScale;
+	}
+
+	public static Scope Push(M3Density density = M3Density.Comfortable)
+	{
+		var compact = density != M3Density.Comfortable;
 		var s = M3.Scheme;
 		var scale = M3.Scale;
+		var padding = M3.PaddingScale;
 		var colors = 0;
 
 		void Color(ImGuiCol target, Vector4 value)
@@ -94,11 +114,17 @@ internal static class M3Style
 			vars++;
 		}
 
-		Vec(ImGuiStyleVar.WindowPadding, (compact ? new Vector2(10f, 8f) : new Vector2(16f, 14f)) * scale);
+		Vec(ImGuiStyleVar.WindowPadding, density switch
+		{
+			M3Density.Tight => new Vector2(6f, 6f),
+			M3Density.Compact => new Vector2(10f, 8f),
+			_ => new Vector2(16f, 14f),
+		} * padding);
+		// Frame padding sets the height of inputs and combos, so it follows the element size, not the Padding setting.
 		Vec(ImGuiStyleVar.FramePadding, (compact ? new Vector2(6f, 3f) : new Vector2(10f, 6f)) * scale);
-		Vec(ImGuiStyleVar.CellPadding, (compact ? new Vector2(4f, 2f) : new Vector2(8f, 6f)) * scale);
-		Vec(ImGuiStyleVar.ItemSpacing, (compact ? new Vector2(5f, 4f) : new Vector2(8f, 8f)) * scale);
-		Vec(ImGuiStyleVar.ItemInnerSpacing, (compact ? new Vector2(4f, 3f) : new Vector2(8f, 6f)) * scale);
+		Vec(ImGuiStyleVar.CellPadding, (compact ? new Vector2(4f, 2f) : new Vector2(8f, 6f)) * padding);
+		Vec(ImGuiStyleVar.ItemSpacing, (compact ? new Vector2(5f, 4f) : new Vector2(8f, 8f)) * padding);
+		Vec(ImGuiStyleVar.ItemInnerSpacing, (compact ? new Vector2(4f, 3f) : new Vector2(8f, 6f)) * padding);
 		Vec(ImGuiStyleVar.SelectableTextAlign, new Vector2(0f, 0.5f));
 		Vec(ImGuiStyleVar.WindowTitleAlign, new Vector2(0f, 0.5f));
 		Vec(ImGuiStyleVar.ButtonTextAlign, new Vector2(0.5f, 0.5f));
@@ -118,13 +144,16 @@ internal static class M3Style
 		Num(ImGuiStyleVar.GrabRounding, M3.ShapeFull);
 		Num(ImGuiStyleVar.TabRounding, M3.ShapeSmall);
 
-		return new Scope(colors, vars, M3.PushBody());
+		var previous = Density;
+		Density = density;
+		return new Scope(colors, vars, M3.PushBody(), previous);
 	}
 
-	internal readonly struct Scope(int colors, int vars, M3.FontScope font) : IDisposable
+	internal readonly struct Scope(int colors, int vars, M3.FontScope font, M3Density previous) : IDisposable
 	{
 		public void Dispose()
 		{
+			Density = previous;
 			font.Dispose();
 
 			if (vars > 0)

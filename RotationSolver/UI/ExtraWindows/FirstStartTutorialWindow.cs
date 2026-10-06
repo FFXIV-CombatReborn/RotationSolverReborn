@@ -1420,7 +1420,7 @@ internal sealed class FirstStartTutorialWindow : Window
 	{
 		var value = Service.Config.UiTextScale;
 		if (DrawPercentRow("##tutorial_text_scale", "Text size",
-			"Scales the text in every Rotation Solver window, on top of Dalamud's own font settings.",
+			"Scales the text in every RSR window, on top of Dalamud's own font settings.",
 			ref value, 0.75f, 1.75f))
 		{
 			Service.Config.UiTextScale = MathF.Round(value, 2);
@@ -1431,7 +1431,7 @@ internal sealed class FirstStartTutorialWindow : Window
 	{
 		var value = Service.Config.UiElementScale;
 		if (DrawPercentRow("##tutorial_element_scale", "Element size",
-			"Scales the padding, spacing and controls in every Rotation Solver window. Turn it down for a more compact layout.",
+			"Scales the padding, spacing and controls in every RSR window. Turn it down for a more compact layout.",
 			ref value, 0.75f, 1.75f))
 		{
 			Service.Config.UiElementScale = MathF.Round(value, 2);

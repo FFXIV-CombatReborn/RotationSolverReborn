@@ -697,7 +697,8 @@ internal static class M3Widgets
 		return widest * segments.Length;
 	}
 
-	public static int SegmentedButtons(string id, ReadOnlySpan<M3Segment> segments, int selectedIndex, float? width = null)
+	// A label font only changes the text; the buttons keep their height and icons.
+	public static int SegmentedButtons(string id, ReadOnlySpan<M3Segment> segments, int selectedIndex, float? width = null, ImFontPtr? labelFont = null)
 	{
 		if (segments.Length == 0)
 		{
@@ -753,17 +754,21 @@ internal static class M3Widgets
 			var content = selected ? tone : M3.Alpha(s.OnSurfaceVariant, hovered ? 1f : 0.85f);
 			var iconWidth = segment.Icon == FontAwesomeIcon.None ? 0f : M3Draw.MeasureIcon(segment.Icon).X;
 			var gap = segment.Icon == FontAwesomeIcon.None ? 0f : 6f * scale;
-			var textSize = ImGui.CalcTextSize(segment.Label);
-			var cursorX = segmentMin.X + ((segmentWidth - iconWidth - gap - textSize.X) * 0.5f);
+			var iconTop = segmentMin.Y + ((height - ImGui.GetTextLineHeight()) * 0.5f);
 
-			if (segment.Icon != FontAwesomeIcon.None)
+			using (ImRaii.PushFont(labelFont.GetValueOrDefault(), labelFont.HasValue))
 			{
-				M3Draw.Icon(drawList, segment.Icon,
-					new Vector2(cursorX, segmentMin.Y + ((height - ImGui.GetTextLineHeight()) * 0.5f)), content);
-				cursorX += iconWidth + gap;
-			}
+				var textSize = ImGui.CalcTextSize(segment.Label);
+				var cursorX = segmentMin.X + ((segmentWidth - iconWidth - gap - textSize.X) * 0.5f);
 
-			drawList.AddText(new Vector2(cursorX, segmentMin.Y + ((height - textSize.Y) * 0.5f)), M3.U32(content), segment.Label);
+				if (segment.Icon != FontAwesomeIcon.None)
+				{
+					M3Draw.Icon(drawList, segment.Icon, new Vector2(cursorX, iconTop), content);
+					cursorX += iconWidth + gap;
+				}
+
+				drawList.AddText(new Vector2(cursorX, segmentMin.Y + ((height - textSize.Y) * 0.5f)), M3.U32(content), segment.Label);
+			}
 
 			if (i > 0)
 			{
@@ -1208,6 +1213,12 @@ internal static class M3Widgets
 			return;
 		}
 
+		Spinner(drawList, center, radius, s.Primary, stroke);
+	}
+
+	// The indeterminate arc of CircularProgress, drawn without taking up a layout slot.
+	public static void Spinner(ImDrawListPtr drawList, Vector2 center, float radius, Vector4 color, float stroke)
+	{
 		const float Cycle = 1.333f;
 		var time = (float)ImGui.GetTime();
 		var cycles = MathF.Floor(time / Cycle);
@@ -1218,8 +1229,8 @@ internal static class M3Widgets
 		var start = ((time * 0.25f) + (cycles * 0.75f) + tail) % 1f;
 		var end = start + (head - tail) + 0.03f;
 
-		M3Draw.Arc(drawList, center, radius, start, end, s.Primary, stroke);
-		RoundCaps(drawList, center, radius, start, end, s.Primary, stroke);
+		M3Draw.Arc(drawList, center, radius, start, end, color, stroke);
+		RoundCaps(drawList, center, radius, start, end, color, stroke);
 	}
 
 	private static float Ease(float t)
@@ -1491,7 +1502,8 @@ internal static class M3Widgets
 
 	#region Text fields
 
-	public static bool SearchField(string id, string hint, ref string text, float width, int maxLength = 128)
+	// Busy swaps the search icon for a spinner, for while the results it found are on screen.
+	public static bool SearchField(string id, string hint, ref string text, float width, int maxLength = 128, bool busy = false)
 	{
 		var s = M3.Scheme;
 		var scale = M3.Scale;
@@ -1505,11 +1517,20 @@ internal static class M3Widgets
 		drawList.AddRectFilled(min, max, M3.U32(s.SurfaceContainerHigh, hoveringField ? 1f : 0.92f), height * 0.5f);
 
 		var iconPadding = 14f * scale;
-		M3Draw.Icon(drawList, FontAwesomeIcon.Search,
-			new Vector2(min.X + iconPadding, min.Y + ((height - ImGui.GetTextLineHeight()) * 0.5f)),
-			M3.Alpha(s.OnSurfaceVariant, 0.9f));
-
 		var iconWidth = M3Draw.MeasureIcon(FontAwesomeIcon.Search).X;
+		if (busy)
+		{
+			var stroke = 2f * scale;
+			Spinner(drawList, new Vector2(min.X + iconPadding + (iconWidth * 0.5f), min.Y + (height * 0.5f)),
+				MathF.Max(1f, (iconWidth - stroke) * 0.5f), s.Primary, stroke);
+		}
+		else
+		{
+			M3Draw.Icon(drawList, FontAwesomeIcon.Search,
+				new Vector2(min.X + iconPadding, min.Y + ((height - ImGui.GetTextLineHeight()) * 0.5f)),
+				M3.Alpha(s.OnSurfaceVariant, 0.9f));
+		}
+
 		var fieldStart = min.X + iconPadding + iconWidth + (10f * scale);
 		var hasText = !string.IsNullOrEmpty(text);
 		var clearWidth = hasText ? 32f * scale : 0f;

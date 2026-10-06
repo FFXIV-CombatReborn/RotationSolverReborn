@@ -101,7 +101,7 @@ public partial class MainWindow : Window
 	// Push the theme before Begin, since Begin draws the window's background, padding and corners.
 	public override void PreDraw()
 	{
-		_theme = M3Style.Push();
+		_theme = M3Style.Push(M3Density.Tight);
 		PrepareFold();
 		base.PreDraw();
 	}
@@ -250,8 +250,9 @@ public partial class MainWindow : Window
 		var resetWidth = M3Widgets.ButtonWidth(FontAwesomeIcon.TrashAlt, resetLabel);
 		var cancelWidth = M3Widgets.ButtonWidth(FontAwesomeIcon.None, cancelLabel);
 
+		// Right-aligned against the dialog's own padding, whatever the theme sets it to.
 		ImGui.SetCursorPosX(MathF.Max(ImGui.GetCursorPosX(),
-			ImGui.GetWindowWidth() - resetWidth - cancelWidth - (M3.Space3 * 2f)));
+			ImGui.GetWindowWidth() - ImGui.GetStyle().WindowPadding.X - resetWidth - M3.Space2 - cancelWidth));
 
 		if (M3Widgets.Button("##reset_cancel", cancelLabel, M3ButtonStyle.Text))
 		{
@@ -293,9 +294,9 @@ public partial class MainWindow : Window
 		var actionsWidth = barSize.X + clearWidth + (12f * Scale);
 		var textWidth = MathF.Max(32f * Scale, width - actionsWidth);
 
-		var padTop = 6f * Scale;
-		var padBottom = 8f * Scale;
-		var lineGap = 2f * Scale;
+		var padTop = 4f * M3.PaddingScale;
+		var padBottom = 4f * M3.PaddingScale;
+		var lineGap = 2f * M3.PaddingScale;
 
 		string clippedTitle;
 		Vector2 titleSize;
@@ -315,7 +316,8 @@ public partial class MainWindow : Window
 		}
 
 		var contentHeight = titleSize.Y + (subtitleSize.Y > 0f ? lineGap + subtitleSize.Y : 0f);
-		var height = MathF.Max(52f * Scale, padTop + contentHeight + padBottom);
+		// Tall enough for the action pill to clear the divider under the bar.
+		var height = MathF.Max(barSize.Y + (4f * Scale), padTop + contentHeight + padBottom);
 
 		ImGui.Dummy(new Vector2(width, height));
 
@@ -351,7 +353,7 @@ public partial class MainWindow : Window
 
 		ImGui.SetCursorScreenPos(new Vector2(min.X, max.Y));
 		drawList.AddLine(new Vector2(min.X, max.Y), new Vector2(max.X, max.Y), M3.U32(scheme.OutlineVariant, 0.5f), 1f * Scale);
-		ImGui.Dummy(new Vector2(width, M3.Space3));
+		ImGui.Dummy(new Vector2(width, M3.Space1));
 	}
 
 	private string GetActiveTabTitle()
@@ -482,7 +484,7 @@ public partial class MainWindow : Window
 			ImGui.TextWrapped(text);
 		}
 
-		ImGui.Dummy(new Vector2(0f, M3.Space2));
+		ImGui.Dummy(new Vector2(0f, M3.Space1));
 	}
 
 	private static CollapsingHeaderGroup BuildHeaderGroup(

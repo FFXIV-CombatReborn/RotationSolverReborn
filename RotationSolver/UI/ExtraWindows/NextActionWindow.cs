@@ -31,7 +31,7 @@ internal class NextActionWindow : Window
 	public override void PreDraw()
 	{
 		_scale = M3.PushWindowScale(Service.Config.NextActionWindowScale);
-		_theme = M3Style.Push(compact: true);
+		_theme = M3Style.Push(M3Density.Compact);
 
 		ImGui.PushStyleColor(ImGuiCol.WindowBg, Service.Config.InfoWindowBg);
 

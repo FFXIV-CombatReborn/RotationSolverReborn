@@ -16,14 +16,20 @@ internal static class M3
 
 	private static float _elementScale = ElementBaseline;
 
+	private static float _paddingScale = 1f;
+
 	public static float Scale => ImGuiHelpers.GlobalScale * _elementScale * _windowScale;
 
-	// Keeps the old size while a control is held, so the size slider doesn't resize under the mouse.
+	// Padding and spacing also follow the Padding setting, so they can shrink or grow without the controls changing size.
+	public static float PaddingScale => Scale * _paddingScale;
+
+	// Keeps the old size while a control is held, so the size sliders don't resize under the mouse.
 	public static void BeginFrame()
 	{
 		if (!ImGui.IsAnyItemActive())
 		{
 			_elementScale = ElementBaseline * Math.Clamp(Service.Config.UiElementScale, 0.5f, 2.5f);
+			_paddingScale = Math.Clamp(Service.Config.UiPaddingScale, 0f, 3f);
 		}
 	}
 
@@ -63,9 +69,9 @@ internal static class M3
 	public static float ShapeExtraLarge => 28f * Scale;
 	public static float ShapeFull => 999f;
 
-	public static float Space1 => 4f * Scale;
-	public static float Space2 => 8f * Scale;
-	public static float Space3 => 12f * Scale;
+	public static float Space1 => 4f * PaddingScale;
+	public static float Space2 => 8f * PaddingScale;
+	public static float Space3 => 12f * PaddingScale;
 
 	public const float StateHover = 0.08f;
 	public const float StatePressed = 0.10f;

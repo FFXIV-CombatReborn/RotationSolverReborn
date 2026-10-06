@@ -66,9 +66,9 @@ public partial class MainWindow
 			SearchingBox(wholeWidth);
 		}
 
-		ImGui.Dummy(new Vector2(0f, M3.Space2));
+		ImGui.Dummy(new Vector2(0f, M3.Space1));
 
-		var footerHeight = M3Widgets.PillSize(string.Empty).Y + (10f * Scale);
+		var footerHeight = M3Widgets.PillSize(string.Empty).Y + ImGui.GetStyle().ItemSpacing.Y + (2f * Scale);
 		var listHeight = MathF.Max(80f * Scale, ImGui.GetContentRegionAvail().Y - footerHeight);
 
 		using (var list = ImRaii.Child("Rotation Solver Nav List", new Vector2(-1f, listHeight), false))
@@ -246,8 +246,8 @@ public partial class MainWindow
 		var rotationName = attribute.Name ?? string.Empty;
 
 		var iconExtent = MathF.Min(wholeWidth - (16f * 2), (expanded ? 56f : 40f) * 2);
-		var padding = 10f * Scale;
-		var nameGap = 6f * Scale;
+		var padding = 6f * M3.PaddingScale;
+		var nameGap = 4f * M3.PaddingScale;
 		var nameWidth = MathF.Max(16f * Scale, wholeWidth - (padding * 2f));
 		var nameSize = ImGui.CalcTextSize(rotationName);
 		var height = (padding * 2f) + iconExtent + nameGap + nameSize.Y;
