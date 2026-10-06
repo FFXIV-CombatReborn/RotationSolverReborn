@@ -1,6 +1,37 @@
 {
-  "tagline": "No plan survives contact with the real enemy",
+  "tagline": "There's a setting for that'",
   "entries": [
+    {
+      "version": "7.5.6.19",
+      "title": "Control window rework + Padding option",
+      "date": "October 6, 2026",
+      "sections": [
+        {
+          "title": "Full Control Window",
+          "icon": "SlidersH",
+          "items": [
+            "The AoE switch now sits directly under the Auto / Manual / Off switch, and its buttons are ordered Full, Cleave, Off so each one lines up under Auto, Manual and Off.",
+            "New link toggles between Auto and Full, and between Manual and Cleave. While linked, choosing that state in the Control window also sets the matching AoE type, like the State Window does.",
+            "The window remembers one width for when the special buttons are shown and another for when they're hidden.",
+          ]
+        },
+        {
+          "title": "Padding",
+          "icon": "CompressAlt",
+          "items": [
+            "New \"Padding\" option in UI > Information scales the space around and between things in every RSR window, from 25% to 200%. Buttons, icons and text keep their size.",
+            "The settings window, State Window and Control window now use a tighter layout: thinner window edges, and less padding in cards, setting rows and the sidebar."
+          ]
+        },
+        {
+          "title": "Settings window",
+          "icon": "Search",
+          "items": [
+            "The search icon turns into a spinner while search results are showing. I just think its neat :)"
+          ]
+        }
+      ]
+    },
     {
       "version": "7.5.6.16",
       "title": "Various Minor Fixes + Autoduty IPC update",

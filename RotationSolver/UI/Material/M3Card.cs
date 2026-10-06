@@ -41,11 +41,14 @@ internal enum M3CardStyle
 
 internal static class M3Card
 {
-	public static float ContentInset => 16f * M3.Scale;
-	public static float RightInset => 16f * M3.Scale;
-	public static float TopPadding => 14f * M3.Scale;
-	public static float BottomPadding => 14f * M3.Scale;
-	public static float Gap => 10f * M3.Scale;
+	public static float ContentInset => M3Style.Spacing(16f, 10f);
+	public static float RightInset => M3Style.Spacing(16f, 10f);
+	public static float TopPadding => M3Style.Spacing(14f, 8f);
+	public static float BottomPadding => M3Style.Spacing(14f, 8f);
+	public static float Gap => M3Style.Spacing(10f, 6f);
+
+	// The space left under a card, before whatever comes next.
+	public static float Margin => M3Style.Spacing(8f, 4f);
 
 	public static Scope Begin(string id, string? title = null, FontAwesomeIcon icon = FontAwesomeIcon.None, Vector4? accent = null, M3CardStyle style = M3CardStyle.Filled, string? subtitle = null)
 	{
@@ -154,7 +157,7 @@ internal static class M3Card
 			var bottom = MathF.Max(contentBottom + BottomPadding, min.Y + (40f * scale));
 			M3CardHost.RecordHeight(id, bottom - min.Y);
 
-			ImGui.SetCursorScreenPos(new Vector2(min.X, bottom + (8f * scale)));
+			ImGui.SetCursorScreenPos(new Vector2(min.X, bottom + Margin));
 			ImGui.Dummy(new Vector2(width, 0f));
 		}
 	}
@@ -170,7 +173,7 @@ internal static class M3ExpandableCard
 
 		var min = ImGui.GetCursorScreenPos();
 		var width = MathF.Max(64f * scale, ImGui.GetContentRegionAvail().X);
-		var headerHeight = M3.FitText(48f, 12f);
+		var headerHeight = M3Style.Density == M3Density.Tight ? M3.FitText(36f, 8f) : M3.FitText(48f, 12f);
 
 		var previousHeight = MathF.Max(M3CardHost.PreviousHeight(id), headerHeight);
 		Paint(ImGui.GetWindowDrawList(), min, new Vector2(min.X + width, min.Y + previousHeight), tone, expanded);
@@ -324,7 +327,6 @@ internal static class M3ExpandableCard
 
 		public void Dispose()
 		{
-			var scale = M3.Scale;
 			var contentBottom = ImGui.GetCursorScreenPos().Y;
 
 			if (indent > 0f)
@@ -336,7 +338,7 @@ internal static class M3ExpandableCard
 			var bottom = contentBottom + (expanded ? M3Card.BottomPadding : 0f);
 			M3CardHost.RecordHeight(id, bottom - min.Y);
 
-			ImGui.SetCursorScreenPos(new Vector2(min.X, bottom + (8f * scale)));
+			ImGui.SetCursorScreenPos(new Vector2(min.X, bottom + M3Card.Margin));
 			ImGui.Dummy(new Vector2(width, 0f));
 		}
 	}

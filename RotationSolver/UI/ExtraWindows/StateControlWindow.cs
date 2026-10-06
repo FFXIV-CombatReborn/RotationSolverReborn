@@ -143,7 +143,7 @@ internal class StateControlWindow : Window
 
 	public override void PreDraw()
 	{
-		_theme = M3Style.Push();
+		_theme = M3Style.Push(M3Density.Tight);
 
 		var target = CurrentIndex() == ManualIndex ? 1f : 0f;
 		if (_tabTime != target)
@@ -298,9 +298,9 @@ internal class StateControlWindow : Window
 		var origin = ImGui.GetCursorScreenPos();
 		var pillSize = M3Widgets.WindowActionsSize(Actions.Length, Brand, 0f);
 		var logoSize = 32f * scale;
-		var logoGap = 12f * scale;
-		var pillGap = 8f * scale;
-		var lineGap = 2f * scale;
+		var logoGap = 8f * M3.PaddingScale;
+		var pillGap = 6f * M3.PaddingScale;
+		var lineGap = 2f * M3.PaddingScale;
 		var status = RSCommands.EntryString;
 
 		Vector2 titleSize;

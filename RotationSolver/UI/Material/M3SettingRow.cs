@@ -53,9 +53,9 @@ internal readonly struct M3RowInfo
 
 internal static class M3SettingRow
 {
-	private static float PaddingX => 12f * M3.Scale;
-	private static float PaddingY => 9f * M3.Scale;
-	private static float ControlGap => 16f * M3.Scale;
+	private static float PaddingX => M3Style.Spacing(12f, 8f);
+	private static float PaddingY => M3Style.Spacing(9f, 5f);
+	private static float ControlGap => M3Style.Spacing(16f, 10f);
 
 	private static float MinLabelWidth => 120f * M3.Scale;
 

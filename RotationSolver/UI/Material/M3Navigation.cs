@@ -22,7 +22,7 @@ internal static class M3Navigation
 {
 	public const float DrawerBreakpoint = 128f;
 
-	private static float DrawerRowHeight => M3.FitText(48f, 12f);
+	private static float DrawerRowHeight => M3Style.Density == M3Density.Tight ? M3.FitText(36f, 8f) : M3.FitText(48f, 12f);
 
 	private static float RailItemHeight
 	{
@@ -88,10 +88,10 @@ internal static class M3Navigation
 		var textColor = M3ColorMath.Mix(M3.Alpha(s.OnSurfaceVariant, 0.95f), s.OnSecondaryContainer, selection);
 
 		var iconSize = M3Draw.MeasureIcon(item.Icon);
-		var iconX = min.X + (16f * scale);
+		var iconX = min.X + M3Style.Spacing(16f, 12f);
 		M3Draw.Icon(drawList, item.Icon, new Vector2(iconX, min.Y + ((height - iconSize.Y) * 0.5f)), iconColor);
 
-		var textX = iconX + MathF.Max(iconSize.X, 18f * scale) + (14f * scale);
+		var textX = iconX + MathF.Max(iconSize.X, 18f * scale) + M3Style.Spacing(14f, 10f);
 		var available = MathF.Max(16f * scale, max.X - textX - (12f * scale));
 		var label = Truncate(item.Label, available);
 		var labelSize = ImGui.CalcTextSize(label);
