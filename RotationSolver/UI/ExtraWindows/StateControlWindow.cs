@@ -1,7 +1,7 @@
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using RebornMaterial;
 using RotationSolver.Commands;
-using RotationSolver.UI.Material;
 using RotationSolver.Updaters;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 

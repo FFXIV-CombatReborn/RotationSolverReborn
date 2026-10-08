@@ -1,7 +1,7 @@
 using ECommons.GameHelpers;
+using RebornMaterial;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
-using RotationSolver.UI.Material;
 
 namespace RotationSolver.UI;
 

@@ -1,4 +1,4 @@
-using RotationSolver.UI.Material;
+using RebornMaterial;
 
 namespace RotationSolver.UI.SearchableConfigs;
 

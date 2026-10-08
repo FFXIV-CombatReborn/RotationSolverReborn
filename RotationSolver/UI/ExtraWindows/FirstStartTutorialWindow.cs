@@ -4,11 +4,11 @@ using Dalamud.Utility;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
+using RebornMaterial;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
-using RotationSolver.UI.Material;
 
 namespace RotationSolver.UI.ExtraWindows;
 

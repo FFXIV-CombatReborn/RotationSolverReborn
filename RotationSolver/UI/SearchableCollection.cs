@@ -1,4 +1,5 @@
-﻿using RotationSolver.Basic.Configuration;
+﻿using RebornMaterial;
+using RotationSolver.Basic.Configuration;
 using RotationSolver.UI.SearchableConfigs;
 
 namespace RotationSolver.UI;
@@ -66,7 +67,7 @@ internal class SearchableCollection
 		{
 			if (!isFirst)
 			{
-				Material.M3Widgets.Divider(6f);
+				M3Widgets.Divider(6f);
 			}
 
 			foreach (var item in items)

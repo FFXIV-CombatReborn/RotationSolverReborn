@@ -2,10 +2,10 @@ using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.DalamudServices;
+using RebornMaterial;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
 using RotationSolver.Data;
-using RotationSolver.UI.Material;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.UI.ExtraWindows;
@@ -641,14 +641,14 @@ internal class FullControlWindow : FullCtrlWindow
 		Overline("Next action");
 
 		var gcd = ActionUpdater.NextGCDAction;
-		if (M3ActionIcon.Draw("##next_gcd", gcd, NextGcdSize, config.ShowCooldownsAlways))
+		if (ActionIcon.Draw("##next_gcd", gcd, NextGcdSize, config.ShowCooldownsAlways))
 		{
 			UseOrQueue(gcd);
 		}
 
 		var ability = gcd != ActionUpdater.NextAction ? ActionUpdater.NextAction : null;
 		ImGui.SameLine(0f, M3.Space2);
-		if (M3ActionIcon.Draw("##next_ability", ability, NextAbilitySize, config.ShowCooldownsAlways))
+		if (ActionIcon.Draw("##next_ability", ability, NextAbilitySize, config.ShowCooldownsAlways))
 		{
 			UseOrQueue(ability);
 		}

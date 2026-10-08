@@ -3,10 +3,10 @@ using Dalamud.Interface.Utility.Raii;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
+using RebornMaterial;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
-using RotationSolver.UI.Material;
 using RotationSolver.UI.SearchableConfigs;
 
 namespace RotationSolver.UI;
