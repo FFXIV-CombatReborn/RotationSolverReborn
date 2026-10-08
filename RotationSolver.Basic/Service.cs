@@ -6,6 +6,7 @@ using ECommons.Logging;
 using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel;
+using RebornMaterial;
 using RotationSolver.Basic.Configuration;
 using System.Buffers;
 using System.Collections.Concurrent;
@@ -96,7 +97,19 @@ internal class Service : IDisposable
 	/// <summary>
 	/// Gets or sets the configuration.
 	/// </summary>
-	public static Configs Config { get; set; } = new Configs();
+	public static Configs Config
+	{
+		get => _config;
+		set
+		{
+			_config = value;
+
+			// The configuration is replaced on load, reset and restore, so the UI theme has to follow it.
+			M3.Settings = value;
+		}
+	}
+
+	private static Configs _config = new();
 
 	/// <summary>
 	/// Gets the default configuration.

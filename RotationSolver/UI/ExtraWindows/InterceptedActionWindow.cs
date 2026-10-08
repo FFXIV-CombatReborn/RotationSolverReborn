@@ -1,6 +1,6 @@
 ﻿using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
-using RotationSolver.UI.Material;
+using RebornMaterial;
 
 namespace RotationSolver.UI.ExtraWindows;
 

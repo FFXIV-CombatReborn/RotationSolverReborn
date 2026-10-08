@@ -1,8 +1,8 @@
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using RebornMaterial;
 using RotationSolver.ActionTimeline;
-using RotationSolver.UI.Material;
 
 namespace RotationSolver.UI.ExtraWindows;
 

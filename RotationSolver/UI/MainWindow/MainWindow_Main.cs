@@ -1,9 +1,9 @@
 using Dalamud.Interface.Utility.Raii;
 using ECommons.DalamudServices;
 using ECommons.Logging;
+using RebornMaterial;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Data;
-using RotationSolver.UI.Material;
 using System.Diagnostics;
 
 namespace RotationSolver.UI;

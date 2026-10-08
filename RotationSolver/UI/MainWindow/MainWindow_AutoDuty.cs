@@ -2,7 +2,7 @@ using Dalamud.Interface.Utility.Raii;
 using ECommons.DalamudServices;
 using ECommons.Logging;
 using ECommons.Reflection;
-using RotationSolver.UI.Material;
+using RebornMaterial;
 
 namespace RotationSolver.UI;
 

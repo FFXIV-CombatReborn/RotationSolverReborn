@@ -8,6 +8,7 @@ using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using Lumina.Excel.Sheets;
+using RebornMaterial;
 using RotationSolver.ActionTimeline;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
@@ -18,7 +19,6 @@ using RotationSolver.UI;
 using RotationSolver.UI.ExtraWindows;
 using RotationSolver.UI.HighlightTeachingMode;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
-using RotationSolver.UI.Material;
 using RotationSolver.Updaters;
 using Player = ECommons.GameHelpers.Player;
 
@@ -57,6 +57,12 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 	{
 		ECommonsMain.Init(pluginInterface, this, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
 		//KamiToolKitLibrary.Initialize(pluginInterface);
+
+		// RSR's 100% element size is a quarter smaller than the Material spec.
+		M3.ElementBaseline = 0.75f;
+		M3.Initialize(pluginInterface, Service.Config);
+		M3Tooltip.Handler = ImguiTooltips.ShowTooltip;
+
 		IconSet.Init();
 
 		_dis.Add(new Service());
@@ -460,7 +466,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		HotbarDisabledColor.ResetOnUnload();
 		HotbarHighlightManager.Dispose();
 		ActionTimelineManager.DisposeInstance();
-		FontManager.DisposeAll();
+		M3.Dispose();
 
 		BMRInfo_IPCSubscriber.Dispose();
 		BMRTimeline_IPCSubscriber.Dispose();

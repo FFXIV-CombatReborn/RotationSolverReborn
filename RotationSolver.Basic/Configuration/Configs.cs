@@ -2,12 +2,13 @@
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.Logging;
+using RebornMaterial;
 using System.Collections.Concurrent;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 
 namespace RotationSolver.Basic.Configuration;
 
-internal partial class Configs : IPluginConfiguration
+internal partial class Configs : IPluginConfiguration, IM3Settings
 {
 	[JsonIgnore]
 	public const string

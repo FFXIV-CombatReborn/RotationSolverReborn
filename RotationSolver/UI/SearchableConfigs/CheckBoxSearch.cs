@@ -1,6 +1,6 @@
 using Dalamud.Interface.Textures.TextureWraps;
+using RebornMaterial;
 using RotationSolver.Basic.Configuration;
-using RotationSolver.UI.Material;
 
 namespace RotationSolver.UI.SearchableConfigs;
 

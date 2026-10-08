@@ -1,5 +1,5 @@
 using ECommons.Logging;
-using RotationSolver.UI.Material;
+using RebornMaterial;
 
 namespace RotationSolver.UI;
 

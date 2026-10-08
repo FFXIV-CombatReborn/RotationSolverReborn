@@ -1,7 +1,7 @@
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
+using RebornMaterial;
 using RotationSolver.Data;
-using RotationSolver.UI.Material;
 
 namespace RotationSolver.UI;
 

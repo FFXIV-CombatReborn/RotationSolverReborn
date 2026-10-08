@@ -4,7 +4,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Utility;
 using ECommons.DalamudServices;
 using ECommons.Logging;
-using RotationSolver.UI.Material;
+using RebornMaterial;
 using System.Globalization;
 
 namespace RotationSolver.UI.ExtraWindows;

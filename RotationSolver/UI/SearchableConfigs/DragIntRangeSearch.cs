@@ -1,5 +1,5 @@
+using RebornMaterial;
 using RotationSolver.Data;
-using RotationSolver.UI.Material;
 
 namespace RotationSolver.UI.SearchableConfigs;
 

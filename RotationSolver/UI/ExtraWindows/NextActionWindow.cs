@@ -2,8 +2,8 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
+using RebornMaterial;
 using RotationSolver.UI.HighlightTeachingMode;
-using RotationSolver.UI.Material;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.UI.ExtraWindows;
@@ -84,7 +84,7 @@ internal class NextActionWindow : Window
 		DrawGcdProgress(size, showTime: false, windowScale);
 
 		ImGui.SetCursorPosX(left + ((width - size) * 0.5f));
-		if (M3ActionIcon.Draw("##next_action", action, size, config.ShowCooldownsAlways))
+		if (ActionIcon.Draw("##next_action", action, size, config.ShowCooldownsAlways))
 		{
 			FullControlWindow.UseOrQueue(action);
 		}

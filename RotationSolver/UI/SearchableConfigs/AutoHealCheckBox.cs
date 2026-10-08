@@ -1,7 +1,7 @@
 using Dalamud.Interface.Utility.Raii;
+using RebornMaterial;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Data;
-using RotationSolver.UI.Material;
 
 namespace RotationSolver.UI.SearchableConfigs;
 

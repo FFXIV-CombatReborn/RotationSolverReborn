@@ -7,9 +7,9 @@ using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using ECommons.Reflection;
+using RebornMaterial;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Data;
-using RotationSolver.UI.Material;
 
 namespace RotationSolver.UI;
 

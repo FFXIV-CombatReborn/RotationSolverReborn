@@ -24,6 +24,12 @@
           "Microsoft.CodeAnalysis.Common": "[5.9.0]"
         }
       },
+      "RebornMaterial": {
+        "type": "Direct",
+        "requested": "[7.5.6.1, )",
+        "resolved": "7.5.6.1",
+        "contentHash": "jFrp7rlChGAYQFn+1z2tdZ5shtoLa0MJFntSNADYIvLAuDSFcfZlBTuG5qroFlDgU2nP+3vdBwX2M5qXjQvUEQ=="
+      },
       "Svg": {
         "type": "Direct",
         "requested": "[3.4.8, )",
