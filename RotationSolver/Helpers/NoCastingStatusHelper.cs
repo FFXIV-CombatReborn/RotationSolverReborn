@@ -6,6 +6,13 @@ namespace RotationSolver.Helpers;
 internal static class NoCastingStatusHelper
 {
 	/// <summary>
+	/// Seconds before a timed no-casting status resolves during which RSR stops acting and cancels any cast in progress.
+	/// Shared by DoAction and <see cref="Updaters.CancelCastUpdater"/>: if they disagree, a cast DoAction is willing to start
+	/// gets cancelled as soon as it registers and is immediately started again, looping until the status is nearly over.
+	/// </summary>
+	internal const float ResolveWindow = 3f;
+
+	/// <summary>
 	/// Scans the player's statuses against <see cref="OtherConfiguration.NoCastingStatus"/>.
 	/// Reads the configured set directly each call so edits made in the UI apply immediately.
 	/// </summary>

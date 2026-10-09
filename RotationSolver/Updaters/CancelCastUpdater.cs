@@ -36,8 +36,10 @@ internal static class CancelCastUpdater
 		// Cancel raise cast if target already has Raise status
 		var tarHasRaise = castTarget != null && castTarget.HasStatus(false, StatusID.Raise);
 
-		// Cancel immediately if the player currently has any active NoCastingStatus
-		var hasNoCastingStatus = NoCastingStatusHelper.PlayerHasNoCastingStatus(out _);
+		// Cancel if a NoCastingStatus is about to resolve - same window and PvP exemption as DoAction, which still starts casts outside of it
+		var hasNoCastingStatus = !DataCenter.IsPvP
+			&& NoCastingStatusHelper.PlayerHasNoCastingStatus(out var noCastingRemaining)
+			&& noCastingRemaining < NoCastingStatusHelper.ResolveWindow;
 
 		// Cancel cast in PvP if an enemy target gains Guard and the action does not ignore Guard
 		var tarHasGuard = DataCenter.IsPvP && Service.Config.PvpGuardCancel
