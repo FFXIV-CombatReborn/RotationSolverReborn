@@ -17,15 +17,16 @@ internal static class BMRInfo_IPCSubscriber
 	internal static bool IsEnabled => IPCSubscriber_Common.IsReady("BossModReborn");
 
 	/// <summary>
-	/// True if BossMod's boss module AI hints are requesting the current cast be cancelled.
+	/// True if BossMod's AI hints are requesting the current cast be cancelled because of a mechanic (e.g. pyretic, gaze).
+	/// BossMod only acts on this flag itself; its separate leeway/strategy driven "Other" flag is intentionally not consumed.
 	/// </summary>
-	[EzIPC("Hints.ForceCancelCast", true)]
+	[EzIPC("Hints.ForceCancelCastMechanic", true)]
 	internal static readonly Func<bool>? ForceCancelCast;
 
 	/// <summary>
-	/// True if BossMod's AI controller is requesting the current cast be cancelled.
+	/// True if BossMod's AI controller is requesting the current cast be cancelled because of a mechanic.
 	/// </summary>
-	[EzIPC("Hints.ForceCancelCastAI", true)]
+	[EzIPC("Hints.ForceCancelCastMechanicAI", true)]
 	internal static readonly Func<bool>? ForceCancelCastAI;
 
 	/// <summary>

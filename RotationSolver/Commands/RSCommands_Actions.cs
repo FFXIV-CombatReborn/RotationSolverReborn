@@ -98,7 +98,7 @@ namespace RotationSolver.Commands
 				&& NoCastingStatusHelper.PlayerHasNoCastingStatus(out var minStatusTime))
 			{
 				var remainingCastTime = player.TotalCastTime - player.CurrentCastTime;
-				if (minStatusTime > remainingCastTime && minStatusTime < 3f)
+				if (minStatusTime > remainingCastTime && minStatusTime < NoCastingStatusHelper.ResolveWindow)
 				{
 					return;
 				}
