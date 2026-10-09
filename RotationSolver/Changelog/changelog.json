@@ -1,6 +1,20 @@
 {
-  "tagline": "There's a setting for that'",
+  "tagline": "How many times do i have to teach you this lesson old man",
   "entries": [
+    {
+      "version": "7.5.6.21",
+      "title": "BMR IPC fixes",
+      "date": "October 9, 2026",
+      "sections": [
+        {
+          "title": "Stutter casting fixed (I hope)",
+          "icon": "Wrench",
+          "items": [
+            "Issue with BMR Movement causing movement/casting stuttering issues.",
+          ]
+        }
+      ]
+    },
     {
       "version": "7.5.6.19",
       "title": "Control window rework + Padding option",
@@ -12,7 +26,7 @@
           "items": [
             "The AoE switch now sits directly under the Auto / Manual / Off switch, and its buttons are ordered Full, Cleave, Off so each one lines up under Auto, Manual and Off.",
             "New link toggles between Auto and Full, and between Manual and Cleave. While linked, choosing that state in the Control window also sets the matching AoE type, like the State Window does.",
-            "The window remembers one width for when the special buttons are shown and another for when they're hidden.",
+            "The window remembers one width for when the special buttons are shown and another for when they're hidden."
           ]
         },
         {
