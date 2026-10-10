@@ -15,6 +15,8 @@ namespace RotationSolver.Updaters
 		// Delegate for ActionManager UseAction
 		private unsafe delegate bool UseActionDelegate(ActionManager* actionManager, uint actionType, uint actionID, ulong targetObjectID, uint param, uint useType, int pvp, bool* isGroundTarget);
 
+		private const ulong InvalidGameObjectId = 0xE0000000;
+
 		public static void Enable()
 		{
 			// Initialize hooks
@@ -138,6 +140,11 @@ namespace RotationSolver.Updaters
 
 							if (matchingAction != null && !BlackListedInterceptActionsContains((ActionID)matchingAction.ID))
 							{
+								// Keep the target the macro resolved, e.g. <mo>.
+								CommandTarget? macroTarget = useType == (uint)ActionManager.UseActionMode.Macro && targetObjectID != 0 && targetObjectID != InvalidGameObjectId
+									? CommandTarget.FromObject(targetObjectID)
+									: null;
+
 								//PluginLog.Debug($"[ActionQueueManager] Matching action decided: {matchingAction.Name} (ID: {matchingAction.ID}, AdjustedID: {matchingAction.AdjustedID})");
 
 								if (_useActionHook?.Original != null && matchingAction.IsIntercepted && ((ActionUpdater.NextAction != null && matchingAction != ActionUpdater.NextAction) || ActionUpdater.NextAction == null))
@@ -191,12 +198,12 @@ namespace RotationSolver.Updaters
 											}
 										}
 
-										HandleInterceptedAction(matchingAction, actionID);
+										HandleInterceptedAction(matchingAction, actionID, macroTarget);
 										return false;
 									}
 									else
 									{
-										HandleInterceptedAction(matchingAction, actionID);
+										HandleInterceptedAction(matchingAction, actionID, macroTarget);
 										if (Service.Config.InterceptPassing)
 										{
 											return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
@@ -301,7 +308,7 @@ namespace RotationSolver.Updaters
 			return action is IBaseAction baseAction && baseAction.Cooldown.CooldownCheck(false, gcdCount);
 		}
 
-		private static void HandleInterceptedAction(IAction matchingAction, uint actionID)
+		private static void HandleInterceptedAction(IAction matchingAction, uint actionID, CommandTarget? target)
 		{
 			try
 			{
@@ -325,10 +332,10 @@ namespace RotationSolver.Updaters
 				}
 
 				RSCommands.DoSpecialCommandType(SpecialCommandType.Intercepting);
-				DataCenter.AddCommandAction(matchingAction, Service.Config.InterceptActionTime);
+				DataCenter.AddCommandAction(matchingAction, Service.Config.InterceptActionTime, target);
 
 				// Let the AddCommandAction system handle executing the queued action (do not attempt immediate execution here).
-				PluginLog.Debug($"[ActionQueueManager] Queued intercepted action: {matchingAction.Name} (OriginalID: {actionID}, AdjustedID: {matchingAction.AdjustedID})");
+				PluginLog.Debug($"[ActionQueueManager] Queued intercepted action: {matchingAction.Name} (OriginalID: {actionID}, AdjustedID: {matchingAction.AdjustedID}, Target: {target?.ObjectId.ToString("X") ?? "auto"})");
 			}
 			catch (Exception ex)
 			{

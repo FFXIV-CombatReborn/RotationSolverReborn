@@ -1,6 +1,30 @@
 {
-  "tagline": "How many times do i have to teach you this lesson old man",
+  "tagline": "Macking on macros",
   "entries": [
+    {
+      "version": "7.5.6.22",
+      "title": "Targets for DoActions and intercepted macros",
+      "date": "October 10, 2026",
+      "sections": [
+        {
+          "title": "DoActions targets",
+          "icon": "Crosshairs",
+          "items": [
+            "DoActions can now end with a target, like a game macro: \"/rotation DoActions Cure II-5 <f>\".",
+            "Any placeholder the game's macros accept works, such as <t>, <f>, <tt>, <mo>, <me> and <2> to <8>.",
+            "Targeting types work too, such as <LowHP>, <Big>, <Nearest> or <HighHPPercent>. The target is picked when the action is used.",
+            "If the target can't be hit when the action fires (out of range, out of sight, or the placeholder found nothing), RSR picks the target like before."
+          ]
+        },
+        {
+          "title": "Intercepted macros",
+          "icon": "HandPointer",
+          "items": [
+            "When an intercepted action comes from a macro, RSR now uses it on the target the macro picked, e.g. /ac \"Cure II\" <mo>."
+          ]
+        }
+      ]
+    },
     {
       "version": "7.5.6.21",
       "title": "BMR IPC fixes",
