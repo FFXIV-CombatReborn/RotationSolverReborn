@@ -191,7 +191,7 @@ public enum OtherCommandType : byte
 	/// <summary>
 	/// Perform the actions.
 	/// </summary>
-	[Description("Perform the actions.")]
+	[Description("Use an action within the given seconds, e.g. \"Cure II-5\". End it with a macro target such as <t>, <f>, <mo> or <2>, or a targeting type such as <LowHP> or <Big>, to choose who it's used on.")]
 	DoActions,
 
 	/// <summary>

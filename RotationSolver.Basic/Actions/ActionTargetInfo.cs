@@ -746,6 +746,13 @@ public struct ActionTargetInfo(IBaseAction action)
 			return null;
 		}
 
+		var commandTarget = DataCenter.GetCommandTarget(action);
+		if (commandTarget is { ObjectId: not 0 } objectTarget
+			&& FindCommandObjectTarget(objectTarget.ObjectId, canAffects, skipStatusProvideCheck, skipTargetStatusNeedCheck) is { } commandResult)
+		{
+			return commandResult;
+		}
+
 		if (IsTargetArea)
 		{
 			return FindTargetArea(canTargets, canAffects, Range, Player.Object, targetOverride);
@@ -753,9 +760,10 @@ public struct ActionTargetInfo(IBaseAction action)
 
 		List<IBattleChara> targetsList = [.. GetMostCanTargetObjects(canTargets, canAffects, skipAoeCheck ? 0 : action.Config.AoeCount)];
 
+		var commandTargeting = commandTarget?.TargetingType;
 		var target = targetsList.Count > 0
-			? FindTargetByType(targetsList, type, action.Config.AutoHealRatio, action.Setting.SpecialType, targetOverride, action.Setting.IsFriendly)
-			: FindTargetByType([], type, action.Config.AutoHealRatio, action.Setting.SpecialType, targetOverride, action.Setting.IsFriendly);
+			? FindTargetByType(targetsList, type, action.Config.AutoHealRatio, action.Setting.SpecialType, targetOverride, action.Setting.IsFriendly, commandTargeting)
+			: FindTargetByType([], type, action.Config.AutoHealRatio, action.Setting.SpecialType, targetOverride, action.Setting.IsFriendly, commandTargeting);
 
 		IBattleChara[] affectedTargets;
 		if (target != null)
@@ -786,6 +794,37 @@ public struct ActionTargetInfo(IBaseAction action)
 		}
 
 		return target == null ? null : new TargetResult(target, affectedTargets, target.Position);
+	}
+
+	// User-picked target: skips RSR's preference filters, only checks the action can land on it.
+	private readonly TargetResult? FindCommandObjectTarget(ulong objectId, IEnumerable<IBattleChara> canAffects, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
+	{
+		if (Player.Object == null || Svc.Objects.SearchById(objectId) is not IBattleChara target)
+		{
+			return null;
+		}
+
+		if (IsTargetArea)
+		{
+			if (Vector3.Distance(Player.Object.Position, target.Position) > Range
+				|| (ShouldCheckMoveSafety() && !CheckMovementSafety(target.Position)))
+			{
+				return null;
+			}
+
+			return new TargetResult(target, [.. GetAffectsVector(target.Position, canAffects)], target.Position);
+		}
+
+		if (target.DistanceToPlayer() > Range
+			|| !CanUseTo(target)
+			|| !CheckStatus(target, skipStatusProvideCheck, skipTargetStatusNeedCheck)
+			|| !action.Setting.CanTarget(target)
+			|| (ShouldCheckMoveSafety() && !CheckMovementSafety(target.Position, target)))
+		{
+			return null;
+		}
+
+		return new TargetResult(target, [.. GetAffectsTarget(target, canAffects)], target.Position);
 	}
 
 	/// <summary>
@@ -1706,6 +1745,11 @@ public struct ActionTargetInfo(IBaseAction action)
 	/// <returns></returns>
 	public static IBattleChara? FindTargetByType(IEnumerable<IBattleChara> battleChara, TargetType type, float healRatio, SpecialActionType actionType, TargetType targetOverride, bool isFriendly)
 	{
+		return FindTargetByType(battleChara, type, healRatio, actionType, targetOverride, isFriendly, null);
+	}
+
+	private static IBattleChara? FindTargetByType(IEnumerable<IBattleChara> battleChara, TargetType type, float healRatio, SpecialActionType actionType, TargetType targetOverride, bool isFriendly, TargetingType? commandTargeting)
+	{
 		if (battleChara == null)
 		{
 			return null;
@@ -1847,10 +1891,11 @@ public struct ActionTargetInfo(IBaseAction action)
 				return Player.Object;
 		}
 
-		{
-			// targetOverride, when set, takes precedence over the action's own target type.
-			var effectiveType = targetOverride == default ? type : targetOverride;
+		// Command targeting, then targetOverride, then the action's own type.
+		var effectiveType = commandTargeting.HasValue ? ToTargetType(commandTargeting.Value)
+			: targetOverride == default ? type : targetOverride;
 
+		{
 			switch (effectiveType)
 			{
 				case TargetType.Death:
@@ -1940,9 +1985,8 @@ public struct ActionTargetInfo(IBaseAction action)
 
 			List<IBattleChara> filtered = [.. objects];
 
-			// targetOverride, when set, takes precedence over the action's own target type.
 			{
-				switch (targetOverride == default ? type : targetOverride)
+				switch (effectiveType)
 				{
 					case TargetType.Small:
 						if (Service.Config.SmallHp)
@@ -3277,7 +3321,7 @@ public struct ActionTargetInfo(IBaseAction action)
 			List<IBattleChara> objects = [.. battleChara];
 
 			List<IBattleChara> filtered;
-			switch (DataCenter.TargetingType)
+			switch (commandTargeting ?? DataCenter.TargetingType)
 			{
 				case TargetingType.Small:
 					if (Service.Config.SmallHp)
@@ -3737,6 +3781,23 @@ public struct ActionTargetInfo(IBaseAction action)
 
 		return bestTarget;
 	}
+
+	private static TargetType ToTargetType(TargetingType targetingType) => targetingType switch
+	{
+		TargetingType.Small => TargetType.Small,
+		TargetingType.HighHP => TargetType.HighHP,
+		TargetingType.LowHP => TargetType.LowHP,
+		TargetingType.HighHPPercent => TargetType.HighHPPercent,
+		TargetingType.LowHPPercent => TargetType.LowHPPercent,
+		TargetingType.HighMaxHP => TargetType.HighMaxHP,
+		TargetingType.LowMaxHP => TargetType.LowMaxHP,
+		TargetingType.Nearest => TargetType.Nearest,
+		TargetingType.Farthest => TargetType.Farthest,
+		TargetingType.PvPHealers => TargetType.PvPHealers,
+		TargetingType.PvPTanks => TargetType.PvPTanks,
+		TargetingType.PvPDPS => TargetType.PvPDPS,
+		_ => TargetType.Big,
+	};
 
 	private static bool IsNeededRole(IBattleChara character)
 	{

@@ -5,4 +5,5 @@
 /// </summary>
 /// <param name="Act">The action itself.</param>
 /// <param name="DeadTime">The time when the action should stop.</param>
-public record NextAct(IAction Act, DateTime DeadTime);
+/// <param name="Target">The target it was issued with, if any.</param>
+public record NextAct(IAction Act, DateTime DeadTime, CommandTarget? Target = null);

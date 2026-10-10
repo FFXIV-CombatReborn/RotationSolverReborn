@@ -1,4 +1,6 @@
 ﻿using ECommons.DalamudServices;
+using ECommons.Logging;
+using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
@@ -365,6 +367,16 @@ public static partial class RSCommands
 
 	public static void DoActionCommand(string str)
 	{
+		// Optional trailing target, e.g. "Cure II-5 <f>".
+		str = str.Trim();
+		CommandTarget? target = null;
+		var tagStart = str.EndsWith('>') ? str.LastIndexOf('<') : -1;
+		if (tagStart >= 0)
+		{
+			target = ResolveCommandTarget(str[(tagStart + 1)..^1].Trim());
+			str = str[..tagStart].TrimEnd();
+		}
+
 		var lastHyphenIndex = str.LastIndexOf('-');
 		if (lastHyphenIndex == -1 || lastHyphenIndex == str.Length - 1)
 		{
@@ -383,11 +395,11 @@ public static partial class RSCommands
 				var iAct = allActions[i];
 				if (actName.Equals(iAct.Name, StringComparison.OrdinalIgnoreCase))
 				{
-					DataCenter.AddCommandAction(iAct, time);
+					DataCenter.AddCommandAction(iAct, time, target);
 
 					if (Service.Config.ShowToastsAboutDoAction)
 					{
-						Svc.Toasts.ShowQuest($"Inserted action {iAct.Name} with time {time}",
+						Svc.Toasts.ShowQuest($"Inserted action {iAct.Name} with time {time}{DescribeCommandTarget(target)}",
 							new Dalamud.Game.Gui.Toast.QuestToastOptions()
 							{
 								IconId = iAct.IconID,
@@ -400,6 +412,42 @@ public static partial class RSCommands
 		}
 
 		Svc.Chat.PrintError(UiString.CommandsInsertActionFailure.GetDescription());
+	}
+
+	private static unsafe CommandTarget? ResolveCommandTarget(string tag)
+	{
+		foreach (var targetingType in Enum.GetValues<TargetingType>())
+		{
+			if (tag.Equals(targetingType.ToString(), StringComparison.OrdinalIgnoreCase))
+			{
+				return CommandTarget.FromTargetingType(targetingType);
+			}
+		}
+
+		var pronounModule = PronounModule.Instance();
+		var obj = pronounModule == null ? null : pronounModule->ResolvePlaceholder($"<{tag.ToLowerInvariant()}>", 0, 0);
+		if (obj == null)
+		{
+			PluginLog.Debug($"[DoAction] <{tag}> did not resolve to an object, RSR will pick the target.");
+			return null;
+		}
+
+		return CommandTarget.FromObject(obj->GetGameObjectId());
+	}
+
+	private static string DescribeCommandTarget(CommandTarget? target)
+	{
+		if (target is not { } commandTarget)
+		{
+			return string.Empty;
+		}
+
+		if (commandTarget.TargetingType is { } targetingType)
+		{
+			return $" targeting {targetingType}";
+		}
+
+		return $" on {Svc.Objects.SearchById(commandTarget.ObjectId)?.Name.TextValue ?? commandTarget.ObjectId.ToString("X")}";
 	}
 
 	private static void DoRotationCommand(ICustomRotation customCombo, string str)

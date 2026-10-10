@@ -386,7 +386,21 @@ internal static class DataCenter
 		}
 	}
 
-	internal static void AddCommandAction(IAction act, double time)
+	internal static CommandTarget? GetCommandTarget(IAction act)
+	{
+		for (var i = 0; i < NextActs.Count; i++)
+		{
+			var next = NextActs[i];
+			if (next.Act.ID == act.ID && next.DeadTime >= DateTime.Now)
+			{
+				return next.Target;
+			}
+		}
+
+		return null;
+	}
+
+	internal static void AddCommandAction(IAction act, double time, CommandTarget? target = null)
 	{
 		var index = -1;
 		for (var i = 0; i < NextActs.Count; i++)
@@ -398,7 +412,7 @@ internal static class DataCenter
 			}
 		}
 
-		NextAct newItem = new(act, DateTime.Now.AddSeconds(time));
+		NextAct newItem = new(act, DateTime.Now.AddSeconds(time), target);
 		if (index < 0)
 		{
 			NextActs.Add(newItem);
