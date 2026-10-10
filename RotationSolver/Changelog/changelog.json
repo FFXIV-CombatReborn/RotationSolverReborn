@@ -2,6 +2,20 @@
   "tagline": "Macking on macros",
   "entries": [
     {
+      "version": "7.5.6.23",
+      "title": "Crash fix",
+      "date": "October 10, 2026",
+      "sections": [
+        {
+          "title": "Fixes",
+          "icon": "Wrench",
+          "items": [
+            "Fixed a game crash when the control window was open, most often on tanks using healing or party mitigation on someone who had left or despawned."
+          ]
+        }
+      ]
+    },
+    {
       "version": "7.5.6.22",
       "title": "Targets for DoActions and intercepted macros",
       "date": "October 10, 2026",
