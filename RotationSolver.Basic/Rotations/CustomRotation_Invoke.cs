@@ -17,11 +17,17 @@ public partial class CustomRotation
 		{
 			UpdateInfo(); // Rotation specific info updates
 			IBaseAction.ActionPreview = true;
-			if (DataCenter.DrawingActions)
+			try
 			{
-				UpdateActions(Role);
+				if (DataCenter.DrawingActions)
+				{
+					UpdateActions(Role);
+				}
 			}
-			IBaseAction.ActionPreview = false;
+			finally
+			{
+				IBaseAction.ActionPreview = false;
+			}
 
 			CountingOfLastUsing = CountingOfCombatTimeUsing = 0;
 			newAction = Invoke(out gcdAction);
