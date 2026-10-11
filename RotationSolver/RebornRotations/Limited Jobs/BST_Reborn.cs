@@ -329,7 +329,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 
 		if (!BorrowReady && !TemperedReleaseReady)
 		{
-			if (AnyBattlehornReady)
+			if (AnyBattlehornReady && ((!IsLastAction(true, TrickPvE) && TrickPvE.Cooldown.HasOneCharge) || !TrickPvE.EnoughLevel))
 			{
 				if (PartingBlowPvE.CanUse(out act))
 				{
@@ -355,7 +355,7 @@ public sealed class BST_Reborn : BeastmasterRotation
 			return true;
 		}
 
-		if (ShieldChargePvE.CanUse(out act, usedUp: true))
+		if (ShieldChargePvE.CanUse(out act, usedUp: CurrentPet != BeastmasterPet.None))
 		{
 			return true;
 		}

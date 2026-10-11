@@ -53,6 +53,8 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 	public bool ControlWindowLinkAutoFull { get; set; } = false;
 	public bool ControlWindowLinkManualCleave { get; set; } = false;
 
+	public bool IsMainWindowLock { get; set; } = false;
+
 	public List<ActionEventInfo> Events { get; private set; } = [];
 	public SortedSet<Job> DisabledJobs { get; private set; } = [];
 
@@ -261,6 +263,11 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 	Description = "Sets mobs with number plates as top priority in order from lowest to highest to resolve extra loot mechanic.",
 	Filter = DutySpecificTreasureDungeon)]
 	private static readonly bool _treasuredungeonnumbered = true;
+
+	[ConditionBool, UI("Crucible of the Unbroken - Ymir logic.",
+	Description = "Treat Ymir as immune if it has the Vulnerability Down buff.",
+	Filter = DutySpecificCrucibleOfTheUnbroken)]
+	private static readonly bool _crucibleYmir = true;
 	#endregion
 
 	#region PvP
