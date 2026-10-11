@@ -26,6 +26,13 @@ public partial class MainWindow
 		new("##window_discord", FontAwesomeIcon.Comments, "Join the Discord"),
 		new("##window_kofi", FontAwesomeIcon.MugHot, "Support the developer on Ko-fi"),
 		new("##window_reset", FontAwesomeIcon.Skull, "Reset all plugin settings"),
+		new("##window_lock", FontAwesomeIcon.LockOpen, "Lock the window in place"),
+	];
+
+	private static readonly M3WindowAction[] _lockedWindowActions =
+	[
+		.. _windowActions[..^1],
+		new("##window_lock", FontAwesomeIcon.Lock, "Locked in place. Click to allow moving and resizing."),
 	];
 
 	private readonly M3WindowFold _fold = new();
@@ -44,6 +51,11 @@ public partial class MainWindow
 	private void PrepareFold()
 	{
 		Flags = BaseFlags;
+		if (Service.Config.IsMainWindowLock)
+		{
+			Flags |= ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize;
+		}
+
 		if (_fold.Prepare(this, _shownActions, Brand))
 		{
 			Position = null;
@@ -55,8 +67,10 @@ public partial class MainWindow
 
 	private void DrawWindowBar()
 	{
-		var first = _windowActions.Length - _shownActions;
-		var pressed = _fold.DrawBar("##rsr_window_actions", _windowActions.AsSpan(first), Brand, out var closed,
+		var locked = Service.Config.IsMainWindowLock;
+		var actions = locked ? _lockedWindowActions : _windowActions;
+		var first = actions.Length - _shownActions;
+		var pressed = _fold.DrawBar("##rsr_window_actions", actions.AsSpan(first), Brand, out var closed,
 			M3.Scheme.SurfaceContainerHigh);
 
 		// Indices follow _windowActions.
@@ -72,6 +86,10 @@ public partial class MainWindow
 
 			case 2:
 				_showResetPopup = true;
+				break;
+
+			case 3:
+				Service.Config.IsMainWindowLock = !locked;
 				break;
 		}
 

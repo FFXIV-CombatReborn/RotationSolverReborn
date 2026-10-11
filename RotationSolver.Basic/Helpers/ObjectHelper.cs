@@ -2156,6 +2156,7 @@ public static class ObjectHelper
 	public static bool IsSpecialImmune(this IBattleChara battleChara)
 	{
 		return battleChara.TreatTinyMageImmune()
+			|| battleChara.IsYmirImmune()
 			|| battleChara.ForkedNormalHeadsImmune()
 			|| battleChara.MathCEMobImmune()
 			|| battleChara.IsDMUBossImmune()
@@ -2184,6 +2185,32 @@ public static class ObjectHelper
 			|| battleChara.IsIrminsulSawtoothImmune()
 			|| battleChara.IsCrystalOfDarknessImmune()
 			|| battleChara.IsTOPImmune();
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="battleChara">the object.</param>
+	/// <returns></returns>
+	public static bool IsYmirImmune(this IBattleChara battleChara)
+	{
+		if (Service.Config.CrucibleYmir && DataCenter.IsinThirdBoard)
+		{
+			var YmirPiece = battleChara.NameId == 14569;
+
+			var ImmuneShellActive = StatusHelper.PlayerHasStatus(false, StatusID.VulnerabilityDown_2198);
+
+			if (YmirPiece && ImmuneShellActive)
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsYmirImmune: ImmuneShell status found");
+				}
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/// <summary>
