@@ -535,7 +535,7 @@ internal static class StateUpdater
 		var h = doomed ? 0.2f : ObjectHelper.GetPlayerHealthRatio();
 
 		// If the target's health is zero or they are invulnerable to healing, return false.
-		if (h == 0 || !StatusHelper.PlayerNoNeedHealingInvuln())
+		if (h == 0 || !StatusHelper.PlayerCanBeHealed())
 		{
 			return false;
 		}
@@ -573,7 +573,7 @@ internal static class StateUpdater
 		var h = target.GetHealthRatio();
 
 		// If the target's health is zero or they are invulnerable to healing, return false.
-		if (h == 0 || !target.NoNeedHealingInvuln())
+		if (h == 0 || !target.CanBeHealed())
 		{
 			return false;
 		}
