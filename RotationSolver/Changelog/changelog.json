@@ -2,6 +2,20 @@
   "tagline": "Double neagives >.>",
   "entries": [
     {
+      "version": "7.5.7.2",
+      "title": "Settings window fix",
+      "date": "October 14, 2026",
+      "sections": [
+        {
+          "title": "Settings window",
+          "icon": "Lock",
+          "items": [
+            "A locked settings window now moves itself back on screen if it ends up partly off the edge, for example after a plugin update or a resolution change."
+          ]
+        }
+      ]
+    },
+    {
       "version": "7.5.7.1",
       "title": "Warrior and Scholar fixes",
       "date": "October 13, 2026",
