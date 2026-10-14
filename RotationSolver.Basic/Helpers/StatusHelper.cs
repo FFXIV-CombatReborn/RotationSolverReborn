@@ -553,10 +553,9 @@ public static class StatusHelper
 	}
 
 	/// <summary>
-	/// Check whether the Player needs to be healing.
+	/// True when the player has no <see cref="NoNeedHealingStatus"/> (invuln, healing block) lasting beyond 2 GCDs.
 	/// </summary>
-	/// <returns></returns>
-	public static bool PlayerNoNeedHealingInvuln()
+	public static bool PlayerCanBeHealed()
 	{
 		if (Player.Object == null)
 		{
@@ -567,13 +566,11 @@ public static class StatusHelper
 	}
 
 	/// <summary>
-	/// Check whether the target needs to be healing.
+	/// True when the target has no <see cref="NoNeedHealingStatus"/> (invuln, healing block) lasting beyond 2 GCDs.
 	/// </summary>
-	/// <param name="Invulnp"></param>
-	/// <returns></returns>
-	public static bool NoNeedHealingInvuln(this IBattleChara Invulnp)
+	public static bool CanBeHealed(this IBattleChara battleChara)
 	{
-		return Invulnp.WillStatusEndGCD(2, 0, false, NoNeedHealingStatus);
+		return battleChara.WillStatusEndGCD(2, 0, false, NoNeedHealingStatus);
 	}
 
 	/// <summary>

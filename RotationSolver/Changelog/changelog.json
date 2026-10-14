@@ -1,6 +1,23 @@
 {
-  "tagline": "Witty tagline (idk what to put here)",
+  "tagline": "Double neagives >.>",
   "entries": [
+    {
+      "version": "7.5.7.1",
+      "title": "Warrior and Scholar fixes",
+      "date": "October 13, 2026",
+      "sections": [
+        {
+          "title": "Fixed invulnerability check caused by a double negative lol",
+          "icon": "Wrench",
+          "items": [
+            "Warrior now uses Nascent Flash on party members again. It was skipping every target that wasn't under an invulnerability.",
+            "Scholar now uses Recitation for Excogitation when a tank is low, instead of only when the tank is under an invulnerability.",
+            "Scholar now follows up Recitation with Excogitation when a tankbuster is coming. Before, Recitation was pressed but the Excogitation was held back.",
+            "Scholar can now use Excogitation and Indomitability with Recitation when out of Aetherflow, like the game allows."
+          ]
+        }
+      ]
+    },
     {
       "version": "7.5.6.24",
       "title": "Beastmaster and UI fixes",

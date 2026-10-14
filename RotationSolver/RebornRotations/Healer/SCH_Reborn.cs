@@ -448,7 +448,7 @@ public sealed class SCH_Reborn : ScholarRotation
 			return true;
 		}
 
-		if (!HasRecitation && !IsLastAbility(false, RecitationPvE) && ExcogitationPvE.CanUse(out act))
+		if ((HasRecitation || !IsLastAbility(false, RecitationPvE)) && ExcogitationPvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -823,7 +823,7 @@ public sealed class SCH_Reborn : ScholarRotation
 			var tanks = PartyMembers.GetJobCategory(JobRole.Tank);
 			foreach (var member in tanks)
 			{
-				if (member.GetHealthRatio() <= ExcogHeal && !member.NoNeedHealingInvuln())
+				if (member.GetHealthRatio() <= ExcogHeal && member.CanBeHealed())
 				{
 					tankNeedsExcog = true;
 					break;

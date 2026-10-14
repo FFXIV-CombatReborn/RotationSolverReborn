@@ -235,7 +235,7 @@ public partial class ScholarRotation
 
 	static partial void ModifyIndomitabilityPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => HasAetherflow;
+		setting.ActionCheck = () => HasAetherflow || HasRecitation;
 		setting.UnlockedByQuestID = 67208;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -276,7 +276,7 @@ public partial class ScholarRotation
 
 	static partial void ModifyExcogitationPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => HasAetherflow;
+		setting.ActionCheck = () => HasAetherflow || HasRecitation;
 	}
 
 	static partial void ModifyBroilIiPvE(ref ActionSetting setting)

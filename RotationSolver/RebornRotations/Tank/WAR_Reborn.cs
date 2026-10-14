@@ -444,7 +444,7 @@ public sealed class WAR_Reborn : WarriorRotation
 
 		setting.CanTarget = t => canTarget(t)
 			&& t.GetHealthRatio() < healRatio
-			&& !t.NoNeedHealingInvuln()
+			&& t.CanBeHealed()
 			&& (!healersOnly || t.IsJobCategory(JobRole.Healer));
 
 		try

@@ -16,9 +16,9 @@
       },
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.2.1.22, )",
-        "resolved": "3.2.1.22",
-        "contentHash": "dGjjULRQtFbTdau9Cu1VcIQTwsbdomRxugyLciWrawHQ7nfNm76H8oUwAZFztwKtt3moiMdevzRVGIBsrgHO3g=="
+        "requested": "[3.2.1.24, )",
+        "resolved": "3.2.1.24",
+        "contentHash": "VmmXyQfomFi7kbWyPuXHN6A1ftyNgDzptRoPOGynWnnqMrl5/Q4Oonq/B74Wj9WzuuiM6OwoqFPeXEdJ+urZYA=="
       },
       "Microsoft.CodeAnalysis.BannedApiAnalyzers": {
         "type": "Direct",
@@ -62,8 +62,8 @@
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "10.0.12",
-        "contentHash": "kdj5cqOwgZCMltEhQ4+WVUoFkMHG08EJfy1MDyS9H+FBg66vTTFyX8YcNl8IQh5wRQv79P+iduQgDGY8ucBR+w=="
+        "resolved": "10.0.13",
+        "contentHash": "rtd1rRf5uiusn/r+hNsODiCjvA+nErw+1EQb2uCv0EedLi2GEYWgLK0V31SXzcZ2b0D7VeoOrHJ0WCQqfbO67Q=="
       },
       "Svg": {
         "type": "Transitive",
@@ -76,21 +76,21 @@
       },
       "System.Drawing.Common": {
         "type": "Transitive",
-        "resolved": "10.0.12",
-        "contentHash": "FBUxiucg2gsnyItbpGgyXI5u8FYLcqdLKS1XJkHHTj3RK1c6kpsJr/Y9i4edUNF7LqCYFrHqpHEvpt8/lNBe9w==",
+        "resolved": "10.0.13",
+        "contentHash": "s8JRuC+ec1djwT471SbZRXWCBFXCKkNNGILWD/OCmIcdL0KP0w4arMjyEZzNUuKxolperKtlxHhS+34rA4N3XA==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "10.0.12"
+          "Microsoft.Win32.SystemEvents": "10.0.13"
         }
       },
       "rotationsolver.basic": {
         "type": "Project",
         "dependencies": {
-          "ECommons": "[3.2.1.22, )",
+          "ECommons": "[3.2.1.24, )",
           "Microsoft.CodeAnalysis.CSharp": "[5.9.0, )",
           "RebornMaterial": "[7.5.6.2, )",
           "RotationSolver.SourceGenerators": "[1.0.0, )",
           "Svg": "[3.4.8, )",
-          "System.Drawing.Common": "[10.0.12, )"
+          "System.Drawing.Common": "[10.0.13, )"
         }
       },
       "rotationsolver.sourcegenerators": {
