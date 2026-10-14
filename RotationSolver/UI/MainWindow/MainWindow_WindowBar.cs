@@ -39,6 +39,9 @@ public partial class MainWindow
 
 	private int _shownActions = _windowActions.Length;
 
+	private Vector2 _windowPos;
+	private Vector2 _windowSize;
+
 	internal bool IsMinimized => _fold.IsMinimized;
 
 	private M3WindowBrand Brand => new(GetLogoTexture(), "RSR Settings");
@@ -51,7 +54,8 @@ public partial class MainWindow
 	private void PrepareFold()
 	{
 		Flags = BaseFlags;
-		if (Service.Config.IsMainWindowLock)
+		var locked = Service.Config.IsMainWindowLock;
+		if (locked)
 		{
 			Flags |= ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize;
 		}
@@ -63,6 +67,33 @@ public partial class MainWindow
 			SizeCondition = ImGuiCond.FirstUseEver;
 			SizeConstraints = DefaultSizeConstraints;
 		}
+
+		if (!_fold.IsActive)
+		{
+			Position = locked ? OnScreenPosition() : null;
+			PositionCondition = ImGuiCond.Always;
+		}
+	}
+
+	// A locked window can't be dragged back, so keep it on screen. Null when it already fits.
+	private Vector2? OnScreenPosition()
+	{
+		if (_windowSize == Vector2.Zero)
+		{
+			return null;
+		}
+
+		var viewport = ImGui.GetMainViewport();
+		var min = viewport.WorkPos;
+		var max = viewport.WorkPos + viewport.WorkSize;
+
+		// The action pill with the lock is top-right, so the top and right edges win on a window bigger than the screen.
+		var x = MathF.Min(MathF.Max(_windowPos.X, min.X), max.X - _windowSize.X);
+		var y = MathF.Max(MathF.Min(_windowPos.Y, max.Y - _windowSize.Y), min.Y);
+
+		// Whole pixels, since ImGui truncates window positions.
+		var pos = new Vector2(MathF.Floor(x), MathF.Floor(y));
+		return pos == _windowPos ? null : pos;
 	}
 
 	private void DrawWindowBar()

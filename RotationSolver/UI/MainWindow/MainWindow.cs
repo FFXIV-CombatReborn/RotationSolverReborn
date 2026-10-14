@@ -118,6 +118,8 @@ public partial class MainWindow : Window
 	public override void Draw()
 	{
 		_fold.BeginDraw();
+		_windowPos = ImGui.GetWindowPos();
+		_windowSize = ImGui.GetWindowSize();
 
 		var folded = _fold.Amount;
 		if (folded < 1f)
