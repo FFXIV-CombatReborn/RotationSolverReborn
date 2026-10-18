@@ -417,6 +417,11 @@ public partial class DutyRotation : IDisposable
 
 	public static PhantomJob GetPhantomJob()
 	{
+		if (!DataCenter.IsInOccultCrescentOp)
+		{
+            return PhantomJob.None;
+        }
+
 		if (FreelancerLevel > 0)
 		{
 			return PhantomJob.Freelancer;
