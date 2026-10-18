@@ -215,6 +215,7 @@ public partial class DarkKnightRotation
 	{
 		setting.StatusProvide = [StatusID.Darkside];
 		setting.UnlockedByQuestID = 67590;
+		setting.MPOverride = () => HasDarkArts ? 0 : null;
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 2,
@@ -254,6 +255,7 @@ public partial class DarkKnightRotation
 	{
 		setting.StatusProvide = [StatusID.Darkside];
 		setting.UnlockedByQuestID = 67592;
+		setting.MPOverride = () => HasDarkArts ? 0 : null;
 	}
 
 	static partial void ModifyDarkMindPvE(ref ActionSetting setting)

@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Healer;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.55")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Healer/SGE_Default.PVP.cs")]
 
 public class SGE_DefaultPVP : SageRotation

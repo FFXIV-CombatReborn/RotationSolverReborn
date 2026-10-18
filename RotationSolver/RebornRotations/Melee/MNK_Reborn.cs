@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55", Description = "Uses Lunar Solar Opener from The Balance")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57", Description = "Uses Lunar Solar Opener from The Balance")]
 [SourceCode(Path = "main/RebornRotations/Melee/MNK_Reborn.cs")]
 
 public sealed class MNK_Reborn : MonkRotation
@@ -77,7 +77,7 @@ public sealed class MNK_Reborn : MonkRotation
 		}
 
 		// formShift to prep opening
-		return remainTime < 15 && FormShiftPvE.CanUse(out act) ? act : base.CountDownAction(remainTime);
+		return AutoFormShift && remainTime < 15 && FormShiftPvE.CanUse(out act) ? act : base.CountDownAction(remainTime);
 	}
 	#endregion
 
@@ -254,27 +254,9 @@ public sealed class MNK_Reborn : MonkRotation
 				return true;
 			}
 		}
-		else
+		else if (!BrotherhoodPvE.Cooldown.IsCoolingDown || !BrotherhoodPvE.Cooldown.WillHaveOneChargeGCD(1))
 		{
 			// 'If you are not in brotherhood and brotherhood is about to be available, hold for burst.'
-			if (BrotherhoodPvE.Cooldown.WillHaveOneChargeGCD(1) && TheForbiddenChakraPvE.CanUse(out act))
-			{
-				return true;
-			}
-			// 'If you are not high enough level for brotherhood, use it.'
-			if (TheForbiddenChakraPvE.CanUse(out act))
-			{
-				return true;
-			}
-			// 'If you are not high enough level for TheForbiddenChakra, use immediately at 5 chakra.'
-			if (!TheForbiddenChakraPvE.Info.EnoughLevelAndQuest() && SteelPeakPvE.CanUse(out act))
-			{
-				return true;
-			}
-		}
-		if (!BrotherhoodPvE.EnoughLevel)
-		{
-			// 'If you are not high enough level for brotherhood, use it.'
 			if (TheForbiddenChakraPvE.CanUse(out act))
 			{
 				return true;
@@ -288,7 +270,7 @@ public sealed class MNK_Reborn : MonkRotation
 
 		// use bh when bh and rof are ready (opener) or ask bh to wait for rof's cd to be close and then use bh
 		if (!CombatElapsedLessGCD(2)
-			&& ((!BrotherhoodPvE.Cooldown.IsCoolingDown && !RiddleOfFirePvE.Cooldown.IsCoolingDown) || Math.Abs(BrotherhoodPvE.Cooldown.CoolDownGroup - RiddleOfFirePvE.Cooldown.CoolDownGroup) < 3)
+			&& RiddleOfFirePvE.Cooldown.WillHaveOneCharge(3)
 			&& IsBurst && BrotherhoodPvE.CanUse(out act))
 		{
 			return true;

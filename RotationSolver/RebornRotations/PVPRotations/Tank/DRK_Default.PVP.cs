@@ -1,7 +1,7 @@
 namespace RotationSolver.RebornRotations.PVPRotations.Tank;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.55")]
-[SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/DRK_Default.PvP.cs")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.57")]
+[SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/DRK_Default.PVP.cs")]
 
 public sealed class DRK_DefaultPvP : DarkKnightRotation
 {

@@ -1,7 +1,7 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Ranged;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.55")]
-[SourceCode(Path = "main/RebornRotations/PVPRotations/Ranged/DNC_Default.PvP.cs")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.57")]
+[SourceCode(Path = "main/RebornRotations/PVPRotations/Ranged/DNC_Default.PVP.cs")]
 
 public sealed class DNC_DefaultPvP : DancerRotation
 {

@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Melee/NIN_Reborn.cs")]
 
 public sealed class NIN_Reborn : NinjaRotation
@@ -15,7 +15,7 @@ public sealed class NIN_Reborn : NinjaRotation
 	public bool AutoUnhide { get; set; } = true;
 
 	[RotationConfig(CombatType.PvE, Name = "Use Mudras outside of combat when enemies are near")]
-	public bool CombatMudra { get; set; } = true;
+	public bool CombatMudra { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "Use both stacks of Mudras")]
 	public bool BurnMudraStacks { get; set; } = false;
@@ -128,7 +128,7 @@ public sealed class NIN_Reborn : NinjaRotation
 		}
 
 		// Side-effect: decide/refresh ninjutsu aim; do not consume the oGCD slot here.
-		if ((InCombat || (InCombat && CombatMudra)) && ((InCombat && HasHostilesInMaxRange) || (CombatMudra && HasHostilesInMaxRange && TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges)))
+		if ((InCombat && HasHostilesInMaxRange) || (CombatMudra && HasHostilesInMaxRange && TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges))
 		{
 			_ = ChoiceNinjutsu(out _);
 		}
@@ -332,7 +332,7 @@ public sealed class NIN_Reborn : NinjaRotation
 		// Checks for Kassatsu status to prioritize high-impact Ninjutsu due to its buff.
 		if (HasKassatsu)
 		{
-			if (GokaMekkyakuPvE.Target.Target != null && GokaMekkyakuPvE.Target.AffectedTargets.Length > 1 && GokaMekkyakuPvE.EnoughLevel && !IsLastAction(false, GokaMekkyakuPvE) && GokaMekkyakuPvE.IsEnabled && ChiPvE.Info.IsQuestUnlocked())
+			if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && GokaMekkyakuPvE.EnoughLevel && !IsLastAction(false, GokaMekkyakuPvE) && GokaMekkyakuPvE.IsEnabled && ChiPvE.Info.IsQuestUnlocked())
 			{
 				SetNinjutsu(GokaMekkyakuPvE);
 			}
@@ -938,7 +938,7 @@ public sealed class NIN_Reborn : NinjaRotation
 		}
 
 		// Side-effect: decide/refresh ninjutsu aim; do not consume the oGCD slot here.
-		if ((InCombat || (InCombat && CombatMudra)) && ((InCombat && HasHostilesInMaxRange) || (CombatMudra && HasHostilesInMaxRange && TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges)))
+		if ((InCombat && HasHostilesInMaxRange) || (CombatMudra && HasHostilesInMaxRange && TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges))
 		{
 			_ = ChoiceNinjutsu(out _);
 		}
@@ -958,7 +958,7 @@ public sealed class NIN_Reborn : NinjaRotation
 			return true;
 		}
 
-		if (_ninActionAim != null && GCDTime() == 0f)
+		if (_ninActionAim != null)
 		{
 			if (DoGokaMekkyaku(out act))
 			{

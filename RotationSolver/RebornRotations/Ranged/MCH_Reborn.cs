@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Ranged;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Ranged/MCH_Reborn.cs")]
 
 public sealed class MCH_Reborn : MachinistRotation
@@ -75,6 +75,10 @@ public sealed class MCH_Reborn : MachinistRotation
 			UpdateQueenStep();
 			UpdateFoundStepPair();
 		}
+		else
+		{
+			ResetQueenStep();
+		}
 
 		if (HyperchargePvE.EnoughLevel)
 		{
@@ -85,7 +89,7 @@ public sealed class MCH_Reborn : MachinistRotation
 					return true;
 				}
 			}
-			if (!FullMetalFieldPvE.EnoughLevel && (HasWildfire || (WildfirePvE.Cooldown.IsCoolingDown && Battery == 100)))
+			if (!FullMetalFieldPvE.EnoughLevel && (HasWildfire || (WildfirePvE.Cooldown.IsCoolingDown && Heat == 100)))
 			{
 				if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
 				{
@@ -517,7 +521,7 @@ public sealed class MCH_Reborn : MachinistRotation
 		(70, 100, 8),
 		(100, 50, 9),
 		(50, 80, 10),
-		(70, 100, 11),
+		(80, 100, 11),
 		(100, 50, 12),
 		(50, 60, 13)
 	];
@@ -542,16 +546,23 @@ public sealed class MCH_Reborn : MachinistRotation
 		}
 	}
 
-	private byte _lastTrackedSummonBatteryPower = 0;
+	private bool _wasRobotActive = false;
 
 	public void UpdateQueenStep()
 	{
-		// If LastSummonBatteryPower has changed since last check, advance the step
-		if (_lastTrackedSummonBatteryPower != LastSummonBatteryPower)
+		// Advance once per summon; LastSummonBatteryPower can repeat between pulls.
+		if (IsRobotActive && !_wasRobotActive)
 		{
-			_lastTrackedSummonBatteryPower = LastSummonBatteryPower;
 			AdvanceStep();
 		}
+		_wasRobotActive = IsRobotActive;
+	}
+
+	private void ResetQueenStep()
+	{
+		_currentStep = 0;
+		foundStepPair = false;
+		_wasRobotActive = IsRobotActive;
 	}
 
 	private void AdvanceStep()

@@ -576,7 +576,7 @@ public partial class RedMageRotation
 
 	static partial void ModifyScorchPvE(ref ActionSetting setting)
 	{
-		setting.ComboIds = [ActionID.VerholyPvE, ActionID.VerfirePvE];
+		setting.ComboIds = [ActionID.VerholyPvE, ActionID.VerflarePvE];
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 1,

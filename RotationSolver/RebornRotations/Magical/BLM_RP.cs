@@ -1,7 +1,7 @@
 ﻿namespace RotationSolver.RebornRotations.Magical;
 
-[Rotation("RebornPowerdox(TESTING)", CombatType.PvE, GameVersion = "7.55")]
-[SourceCode(Path = "main/BasicRotations/Magical/BLM_RP.cs")]
+[Rotation("RebornPowerdox(TESTING)", CombatType.PvE, GameVersion = "7.57")]
+[SourceCode(Path = "main/RebornRotations/Magical/BLM_RP.cs")]
 
 public class BLM_RP : BlackMageRotation
 {
@@ -103,13 +103,13 @@ public class BLM_RP : BlackMageRotation
 		}
 
 		if (ThunderIvPvE.CanUse(out act)
-			&& (ThunderIvPvE.Target.Target?.WillStatusEndGCD(ThunderIvPvE.Config.StatusRefreshGcdCount, 0, true, ThunderIvPvE.Setting.TargetStatusNeed ?? []) ?? false))
+			&& (ThunderIvPvE.Target.Target?.WillStatusEndGCD(ThunderIvPvE.Config.StatusRefreshGcdCount, 0, true, ThunderIvPvE.Setting.TargetStatusProvide ?? []) ?? false))
 		{
 			return true;
 		}
 
 		if (ThunderIiPvE.CanUse(out act)
-			&& (ThunderIiPvE.Target.Target?.WillStatusEndGCD(ThunderIiPvE.Config.StatusRefreshGcdCount, 0, true, ThunderIiPvE.Setting.TargetStatusNeed ?? []) ?? false))
+			&& (ThunderIiPvE.Target.Target?.WillStatusEndGCD(ThunderIiPvE.Config.StatusRefreshGcdCount, 0, true, ThunderIiPvE.Setting.TargetStatusProvide ?? []) ?? false))
 		{
 			return true;
 		}
@@ -122,13 +122,13 @@ public class BLM_RP : BlackMageRotation
 		}
 
 		if (ThunderIiiPvE.CanUse(out act)
-			&& (ThunderIiiPvE.Target.Target?.WillStatusEndGCD(ThunderIiiPvE.Config.StatusRefreshGcdCount, 0, true, ThunderIiiPvE.Setting.TargetStatusNeed ?? []) ?? false))
+			&& (ThunderIiiPvE.Target.Target?.WillStatusEndGCD(ThunderIiiPvE.Config.StatusRefreshGcdCount, 0, true, ThunderIiiPvE.Setting.TargetStatusProvide ?? []) ?? false))
 		{
 			return true;
 		}
 
 		if (!ThunderIiiPvE.Info.EnoughLevelAndQuest() && ThunderPvE.CanUse(out act)
-			&& (ThunderPvE.Target.Target?.WillStatusEndGCD(ThunderPvE.Config.StatusRefreshGcdCount, 0, true, ThunderPvE.Setting.TargetStatusNeed ?? []) ?? false))
+			&& (ThunderPvE.Target.Target?.WillStatusEndGCD(ThunderPvE.Config.StatusRefreshGcdCount, 0, true, ThunderPvE.Setting.TargetStatusProvide ?? []) ?? false))
 		{
 			return true;
 		}

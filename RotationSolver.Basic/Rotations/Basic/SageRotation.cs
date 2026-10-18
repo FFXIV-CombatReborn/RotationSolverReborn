@@ -337,7 +337,7 @@ public partial class SageRotation
 
 	static partial void ModifyRhizomataPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => Addersting < 3;
+		setting.ActionCheck = () => Addersgall < 3;
 		setting.IsFriendly = true;
 		setting.TargetType = TargetType.Self;
 	}

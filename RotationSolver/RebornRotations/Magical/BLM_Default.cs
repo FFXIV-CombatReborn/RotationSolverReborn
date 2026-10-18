@@ -1,16 +1,13 @@
 ﻿namespace RotationSolver.RebornRotations.Magical;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
-[SourceCode(Path = "main/BasicRotations/Magical/BLM_Default.cs")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
+[SourceCode(Path = "main/RebornRotations/Magical/BLM_Default.cs")]
 
 public class BLM_Default : BlackMageRotation
 {
 	#region Config Options
 	[RotationConfig(CombatType.PvE, Name = "Use Transpose to Astral Fire before Paradox")]
 	public bool UseTransposeForParadox { get; set; } = true;
-
-	[RotationConfig(CombatType.PvE, Name = "Extend Astral Fire time more conservatively (3 GCDs) (Default is 2 GCDs)")]
-	public bool ExtendTimeSafely { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = @"Use ""Double Paradox"" rotation [N15]")]
 	public bool UseN15 { get; set; } = false;
@@ -207,7 +204,7 @@ public class BLM_Default : BlackMageRotation
 
 		if (TriplecastPvE.CanUse(out act))
 		{
-			if (nextGCD.Equals(ActionID.OccultCometPvE))
+			if (nextGCD.IsTheSameTo(true, ActionID.OccultCometPvE))
 			{
 				return true;
 			}
@@ -529,13 +526,6 @@ public class BLM_Default : BlackMageRotation
 				break;
 		}
 
-		//if (ElementTimeEndAfterGCD(ExtendTimeSafely ? 3u : 2u))
-		//{
-		//    if (CurrentMp >= FirePvE.Info.MPNeed * 2 + 800 && FirePvE.CanUse(out act)) return true;
-		//    if (FlarePvE.CanUse(out act)) return true;
-		//    if (DespairPvE.CanUse(out act)) return true;
-		//}
-
 		return false;
 	}
 
@@ -560,8 +550,7 @@ public class BLM_Default : BlackMageRotation
 			return true;
 		}
 
-		if (AddThunder(out act, 0) && StatusHelper.PlayerWillStatusEndGCD(1, 0, true,
-			StatusID.Thundercloud))
+		if (AddThunder(out act, 0))
 		{
 			return true;
 		}
@@ -632,13 +621,13 @@ public class BLM_Default : BlackMageRotation
 
 		//So long for thunder.
 		if (ThunderIiiPvE.EnoughLevel && ThunderIiiPvE.CanUse(out _) && (!ThunderIiiPvE.Target.Target?.WillStatusEndGCD(gcdCount, 0, true,
-			StatusID.Thunder, StatusID.ThunderIi, StatusID.ThunderIii, StatusID.ThunderIv, StatusID.HighThunder_3872) ?? false))
+			StatusID.Thunder, StatusID.ThunderIi, StatusID.ThunderIii, StatusID.ThunderIv, StatusID.HighThunder, StatusID.HighThunder_3872) ?? false))
 		{
 			return false;
 		}
 
 		if (!ThunderIiiPvE.Info.EnoughLevelAndQuest() && ThunderPvE.CanUse(out _) && (!ThunderPvE.Target.Target?.WillStatusEndGCD(gcdCount, 0, true,
-			StatusID.Thunder, StatusID.ThunderIi, StatusID.ThunderIii, StatusID.ThunderIv, StatusID.HighThunder_3872) ?? false))
+			StatusID.Thunder, StatusID.ThunderIi, StatusID.ThunderIii, StatusID.ThunderIv, StatusID.HighThunder, StatusID.HighThunder_3872) ?? false))
 		{
 			return false;
 		}

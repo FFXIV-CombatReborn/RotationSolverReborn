@@ -2,7 +2,7 @@
 
 namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Melee/SAM_Reborn.cs")]
 
 public sealed class SAM_Reborn : SamuraiRotation
@@ -23,7 +23,7 @@ public sealed class SAM_Reborn : SamuraiRotation
 	[RotationConfig(CombatType.PvE, Name = "Health threshold needed to use Tengentsu/ThirdEye outside of AOE mit scenarios.")]
 	public float TengentsuHealth { get; set; } = 0.5f;
 
-	[Range(0, 1, ConfigUnitType.Seconds)]
+	[Range(0, 20, ConfigUnitType.Seconds)]
 	[RotationConfig(CombatType.PvE, Name = "Meikyo Shisui countdown timing.")]
 	public float MeikyoShisuiCountdown { get; set; } = 14f;
 
@@ -196,7 +196,7 @@ public sealed class SAM_Reborn : SamuraiRotation
 			}
 		}
 
-		if (!HiganbanaTargets || (HiganbanaTargets && NumberOfAllHostilesInRange < 2) && HasFugetsuAndFuka && !WillFugetsuEnd && !WillFukaEnd && !HasMeikyoShisui && !MidareSetsugekkaReady)
+		if ((!HiganbanaTargets || NumberOfAllHostilesInRange < 2) && HasFugetsuAndFuka && !WillFugetsuEnd && !WillFukaEnd && !HasMeikyoShisui && !MidareSetsugekkaReady)
 		{
 			if (HiganbanaPvE.CanUse(out act, skipComboCheck: true, skipTTKCheck: isTargetBoss || IsInHighEndDuty))
 			{
@@ -269,7 +269,7 @@ public sealed class SAM_Reborn : SamuraiRotation
 
 		if (HasFugetsuAndFuka)
 		{
-			if (!OkaPvE.EnoughLevel && MangetsuPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: HasMeikyoShisui && !HasKa))
+			if (!OkaPvE.EnoughLevel && MangetsuPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: HasMeikyoShisui && !HasGetsu))
 			{
 				return true;
 			}
@@ -277,7 +277,7 @@ public sealed class SAM_Reborn : SamuraiRotation
 			switch (FugetsuOrFukaEndsFirst)
 			{
 				case "Fugetsu":
-					if (MangetsuPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: HasMeikyoShisui && !HasKa))
+					if (MangetsuPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: HasMeikyoShisui && !HasGetsu))
 					{
 						return true;
 					}
@@ -292,7 +292,7 @@ public sealed class SAM_Reborn : SamuraiRotation
 					break;
 				case "Equal":
 				case null:
-					if (MangetsuPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: HasMeikyoShisui && !HasKa))
+					if (MangetsuPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: HasMeikyoShisui && !HasGetsu))
 					{
 						return true;
 					}
@@ -307,7 +307,7 @@ public sealed class SAM_Reborn : SamuraiRotation
 		}
 		if (!HasFugetsuAndFuka)
 		{
-			if (!OkaPvE.EnoughLevel && MangetsuPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: HasMeikyoShisui && !HasKa))
+			if (!OkaPvE.EnoughLevel && MangetsuPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: HasMeikyoShisui && !HasGetsu))
 			{
 				return true;
 			}

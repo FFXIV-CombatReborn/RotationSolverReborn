@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Magical;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Magical/PCT_Reborn.cs")]
 
 public sealed class PCT_Reborn : PictomancerRotation
@@ -136,7 +136,7 @@ public sealed class PCT_Reborn : PictomancerRotation
 		{
 			return true;
 		}
-		return base.DefenseAreaAbility(nextGCD, out act);
+		return base.DefenseSingleAbility(nextGCD, out act);
 	}
 
 	#endregion
@@ -225,7 +225,7 @@ public sealed class PCT_Reborn : PictomancerRotation
 			return true;
 		}
 
-		return base.AttackAbility(nextGCD, out act);
+		return base.GeneralAbility(nextGCD, out act);
 	}
 	#endregion
 

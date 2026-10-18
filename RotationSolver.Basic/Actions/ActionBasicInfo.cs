@@ -685,7 +685,7 @@ public readonly struct ActionBasicInfo
 			return false;
 		}
 
-		return Player.Object.StatusList != null && !skipStatusNeed && _action.Setting.StatusNeed != null && Player.Object.WillStatusEndGCD(_action.Config.StatusRefreshGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
+		return Player.Object.StatusList != null && !skipStatusNeed && _action.Setting.StatusNeed != null && Player.Object.WillStatusEndGCD(0, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
 	}
 
 	private bool IsStatusProvided(bool skipStatusProvideCheck)

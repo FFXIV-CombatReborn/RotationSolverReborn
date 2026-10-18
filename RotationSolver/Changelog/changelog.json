@@ -2,6 +2,101 @@
   "tagline": "Double neagives >.>",
   "entries": [
     {
+      "version": "7.5.7.3",
+      "title": "Rotation fixes",
+      "date": "October 14, 2026",
+      "sections": [
+        {
+          "title": "Tanks",
+          "icon": "ShieldAlt",
+          "items": [
+            "Paladin's emergency Intervention now also works while Guardian is up.",
+            "Dark Knight only uses The Blackest Night on party members when that option is on.",
+            "Dark Knight's \"Keep at least 3000 MP\" option now keeps MP back when dumping Edge of Shadow in burst."
+          ]
+        },
+        {
+          "title": "Healers",
+          "icon": "Heartbeat",
+          "items": [
+            "White Mage no longer lets Divine Caress expire after Temperance.",
+            "White Mage only uses Thin Air right after a spell, and counts Medica III's regen when deciding whether to recast it.",
+            "Scholar uses Baneful Impaction before it expires, and removes Aetherpact through Dissolve Union.",
+            "Astrologian uses Sun Sign before Suntouched runs out, and its single-target shield no longer waits on Macrocosmos or Collective Unconscious.",
+            "Sage uses Rhizomata based on Addersgall instead of Addersting."
+          ]
+        },
+        {
+          "title": "Melee",
+          "icon": "FistRaised",
+          "items": [
+            "Auto True North now waits until the last weave before the positional, giving you time to get into position first.",
+            "Auto True North is no longer used on enemies that are about to die, or when you're actually in position but standing at a different height or right on top of the enemy.",
+            "Monk lines up Brotherhood with Riddle of Fire and holds The Forbidden Chakra when Brotherhood is about to come up.",
+            "Monk uses Earth's, Fire's and Wind's Reply before they expire, and the \"Use Form Shift\" option now controls the pre-pull Form Shift.",
+            "Dragoon only uses Stardiver right after a weaponskill so it doesn't clip.",
+            "Dragoon saves Life Surge and Wyrmwind Thrust for Battle Litany or Life of the Dragon, and no longer holds Lance Charge for a full minute when it drifts.",
+            "Removed Dragoon's Doom Spike option, which had no effect.",
+            "Ninja uses Goka Mekkyaku with Kassatsu on groups of enemies instead of letting Kassatsu expire.",
+            "Ninja's \"Use Mudras outside of combat\" option now works. It is off by default.",
+            "Samurai's Higanbana target option no longer skips Higanbana's other checks when turned off.",
+            "Samurai uses Mangetsu correctly under Meikyo Shisui, and the Meikyo countdown slider now goes up to 20 seconds.",
+            "Reaper uses Enshroud based on the Shroud gauge or Ideal Host instead of the Soul gauge."
+          ]
+        },
+        {
+          "title": "Physical ranged",
+          "icon": "Crosshairs",
+          "items": [
+            "Bard no longer stops using weaponskills in some burst windows.",
+            "Bard no longer reapplies Caustic Bite or Venomous Bite early, and the Apex Arrow Soul Voice setting works below 100.",
+            "Removed Bard's unused oGCD slot option.",
+            "Machinist's Automaton Queen schedule now resets between pulls and runs to the end.",
+            "Machinist below level 90 uses Hypercharge at 100 Heat while Wildfire is on cooldown."
+          ]
+        },
+        {
+          "title": "Casters",
+          "icon": "Magic",
+          "items": [
+            "Red Mage uses Impact in AoE with Dualcast or Acceleration, and uses Prefulgence before it expires.",
+            "Summoner's \"Use Radiant Aegis on cooldown\" option now works. When it's off, Radiant Aegis is kept for incoming damage.",
+            "Summoner uses Lux Solaris before Refulgent Lux runs out.",
+            "Pictomancer uses Tempera Grassa before Tempera Coat runs out.",
+            "Black Mage no longer spends Thunderhead while High Thunder is still ticking, and uses Triplecast before Occult Comet.",
+            "Removed unused Summoner and Black Mage options."
+          ]
+        },
+        {
+          "title": "Blue Mage and duties",
+          "icon": "Dungeon",
+          "items": [
+            "Blue Mage's Devour and Missile HP thresholds now work, and its Mighty Guard and Basic Instinct options are respected.",
+            "Occult Crescent: Occult Ether and Occult Potion on other players now use the right action.",
+            "Occult Crescent: the Drain Touch and Occult Chakra HP thresholds now work.",
+            "Occult Crescent: Cannoneer no longer keeps targeting by HP after an immune enemy.",
+          ]
+        },
+        {
+          "title": "PvP",
+          "icon": "Skull",
+          "items": [
+            "Paladin's Guardian follows its HP threshold settings.",
+            "White Mage and Bard now use Guard, Recuperate and the Elixir like other jobs.",
+            "Reaper uses Fate Sealed before Death Warrant ends."
+          ]
+        },
+        {
+          "title": "General",
+          "icon": "Wrench",
+          "items": [
+            "Fixed the early-weave check, which always thought an oGCD had already been woven.",
+            "Fixed the source code links for several rotations."
+          ]
+        }
+      ]
+    },
+    {
       "version": "7.5.7.2",
       "title": "Settings window fix",
       "date": "October 14, 2026",

@@ -141,9 +141,11 @@ internal static class StateUpdater
 			try
 			{
 				if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out var positional)
-					&& target.HasPositional() && positional != target.FindEnemyPositional())
+					&& target.HasPositional())
 				{
-					return true;
+					// None means the position couldn't be read, which is not a miss.
+					var current = target.FindEnemyPositional();
+					return current != EnemyPositional.None && current != positional && !target.IsDying();
 				}
 			}
 			catch

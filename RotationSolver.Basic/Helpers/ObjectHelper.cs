@@ -3910,25 +3910,26 @@ public static class ObjectHelper
 			return EnemyPositional.None;
 		}
 
-		var pPosition = enemy.Position;
 		var faceVec = enemy.GetFaceVector();
 
-		var dir = Player.Object.Position - pPosition;
-		dir = Vector3.Normalize(dir);
-		faceVec = Vector3.Normalize(faceVec);
+		// Positionals are judged on the ground plane, so height differences must not skew the angle.
+		var offset = Player.Object.Position - enemy.Position;
+		var dir = new Vector2(offset.X, offset.Z);
+		if (dir.LengthSquared() < 0.0001f)
+		{
+			return EnemyPositional.None;
+		}
 
-		// Calculate the angle between the direction vector and the facing vector
-		double dotProduct = Vector3.Dot(faceVec, dir);
-		var angle = Math.Acos(dotProduct);
+		var dotProduct = Vector2.Dot(Vector2.Normalize(dir), new Vector2(faceVec.X, faceVec.Z));
 
-		const double frontAngle = Math.PI / 4;
-		const double rearAngle = Math.PI * 3 / 4;
+		// 90° sectors: front and rear are within 45° of the facing axis.
+		const float sectorCos = 0.70710677f;
 
-		if (angle < frontAngle)
+		if (dotProduct > sectorCos)
 		{
 			return EnemyPositional.Front;
 		}
-		else if (angle > rearAngle)
+		else if (dotProduct < -sectorCos)
 		{
 			return EnemyPositional.Rear;
 		}

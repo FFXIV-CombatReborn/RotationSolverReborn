@@ -2,7 +2,7 @@
 
 namespace RotationSolver.RebornRotations.Magical;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Magical/SMN_Reborn.cs")]
 
 public sealed class SMN_Reborn : SummonerRotation
@@ -56,9 +56,6 @@ public sealed class SMN_Reborn : SummonerRotation
 
 	[RotationConfig(CombatType.PvE, Name = "Use Radiant Aegis on cooldown while in combat")]
 	public bool RadiantOnCooldownSpam { get; set; } = false;
-
-	[RotationConfig(CombatType.PvE, Name = "Use this if there's no other raid buff in your party")]
-	public bool SecondTypeOpenerLogic { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "Use Physick above level 30")]
 	public bool Healbot { get; set; } = false;
@@ -154,7 +151,7 @@ public sealed class SMN_Reborn : SummonerRotation
 			return true;
 		}
 
-		if (!IsLastAction(false, RadiantAegisPvE) && InCombat)
+		if (RadiantOnCooldownSpam && !IsLastAction(false, RadiantAegisPvE) && InCombat)
 		{
 			if (RadiantAegisPvE.CanUse(out act, usedUp: true))
 			{
@@ -415,16 +412,6 @@ public sealed class SMN_Reborn : SummonerRotation
 			return true;
 		}
 		if (!SummonBahamutPvE.Info.EnoughLevelAndQuest() && DreadwyrmTrancePvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if ((HasSearingLight || SearingLightPvE.Cooldown.IsCoolingDown) && SummonBahamutPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (IsBurst && !SearingLightPvE.Cooldown.IsCoolingDown && SummonSolarBahamutPvE.CanUse(out act))
 		{
 			return true;
 		}

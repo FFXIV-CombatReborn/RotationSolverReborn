@@ -65,7 +65,7 @@ internal class HardboiledDefault : HardboiledRotation
 			return true;
 		}
 
-		return base.HealSingleGCD(out act);
+		return base.DefenseAreaGCD(out act);
 	}
 
 	public override bool HealSingleGCD(out IAction? act)

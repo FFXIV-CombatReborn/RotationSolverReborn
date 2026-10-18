@@ -5,6 +5,9 @@ namespace RotationSolver.Basic.Rotations;
 
 public partial class CustomRotation
 {
+	// True North's 0.63s clip guard plus one oGCD animation lock, so another weave before it can't push it out.
+	private const float TrueNorthLastWeaveRemain = 1.35f;
+
 	/// <summary>
 	/// Determines if an ability can be used based on various conditions.
 	/// </summary>
@@ -158,7 +161,9 @@ public partial class CustomRotation
 		{
 			IBaseAction.ShouldEndSpecial = true;
 		}
-		if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional) && !StatusHelper.PlayerHasStatus(true, StatusID.Mudra) && !StatusHelper.PlayerHasStatus(true, StatusID.TrueNorth) && TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(false, TrueNorthPvE) && TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
+		// Auto True North waits for the last weave slot before the positional GCD so the player has time to move into position.
+		var trueNorthWindow = DataCenter.CommandStatus.HasFlag(AutoStatus.Positional) || WeaponRemain <= TrueNorthLastWeaveRemain;
+		if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional) && trueNorthWindow && !StatusHelper.PlayerHasStatus(true, StatusID.Mudra) && !StatusHelper.PlayerHasStatus(true, StatusID.TrueNorth) && TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(false, TrueNorthPvE) && TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
 		{
 			return true;
 		}

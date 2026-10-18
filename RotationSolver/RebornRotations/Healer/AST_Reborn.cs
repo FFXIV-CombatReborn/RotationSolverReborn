@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Healer;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Healer/AST_Reborn.cs")]
 
 public sealed class AST_Reborn : AstrologianRotation
@@ -454,18 +454,12 @@ public sealed class AST_Reborn : AstrologianRotation
 	#region GCD Logic
 	protected override bool DefenseSingleGCD(out IAction? act)
 	{
-		if ((MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150))
-			|| (CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)))
-		{
-			return base.DefenseAreaGCD(out act);
-		}
-
 		if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) && AspectedBeneficPvE.CanUse(out act))
 		{
 			return true;
 		}
 
-		return base.DefenseAreaGCD(out act);
+		return base.DefenseSingleGCD(out act);
 	}
 
 	[RotationDesc(ActionID.MacrocosmosPvE)]
