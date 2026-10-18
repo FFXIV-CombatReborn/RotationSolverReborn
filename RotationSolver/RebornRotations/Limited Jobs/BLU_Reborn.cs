@@ -1,7 +1,7 @@
 namespace RotationSolver.RebornRotations.Magical;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
-[SourceCode(Path = "main/BasicRotations/Limited Jobs/BLU_Reborn.cs")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
+[SourceCode(Path = "main/RebornRotations/Limited Jobs/BLU_Reborn.cs")]
 
 public sealed class BLU_Reborn : BlueMageRotation
 {
@@ -233,7 +233,7 @@ public sealed class BLU_Reborn : BlueMageRotation
 			}
 		}
 
-		if (IsTank || HasBasicInstinct)
+		if (UseMightyGuard && (IsTank || HasBasicInstinct))
 		{
 			if (MightyGuardPvE.CanUse(out act))
 			{
@@ -241,7 +241,7 @@ public sealed class BLU_Reborn : BlueMageRotation
 			}
 		}
 
-		if (BasicInstinctPvE.CanUse(out act))
+		if (UseBasicInstinct && BasicInstinctPvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -456,7 +456,7 @@ public sealed class BLU_Reborn : BlueMageRotation
 			return true;
 		}
 
-		if (DevourPvE.CanUse(out act, skipStatusProvideCheck: Player?.GetEffectiveHpPercent() <= DevourHealThreshold || IsTank))
+		if (DevourPvE.CanUse(out act, skipStatusProvideCheck: Player?.GetHealthRatio() <= DevourHealThreshold || IsTank))
 		{
 			return true;
 		}
@@ -473,7 +473,7 @@ public sealed class BLU_Reborn : BlueMageRotation
 
 		if (MissilePvE.CanUse(out act))
 		{
-			if (MissilePvE.Target.Target != null && MissilePvE.Target.Target.GetEffectiveHpPercent() >= TheMissileKnowsWhereItIs)
+			if (MissilePvE.Target.Target != null && MissilePvE.Target.Target.GetHealthRatio() >= TheMissileKnowsWhereItIs)
 			{
 				return true;
 			}

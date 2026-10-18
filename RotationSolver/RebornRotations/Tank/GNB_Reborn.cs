@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Tank;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Tank/GNB_Reborn.cs")]
 
 public sealed class GNB_Reborn : GunbreakerRotation
@@ -250,55 +250,61 @@ public sealed class GNB_Reborn : GunbreakerRotation
 	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
 	{
 		// ST No Mercy Logic
-		if (ReignOfBeastsPvE.EnoughLevel && HasBloodfest && NoMercyPvE.CanUse(out act))
+		if (NoMercyPvE.CanUse(out act))
 		{
-			return true;
-		}
+			if ((ReignOfBeastsPvE.EnoughLevel && HasBloodfest) || !BloodfestPvE.IsEnabled)
+			{
+				return true;
+			}
 
-		if (!ReignOfBeastsPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)GnashingFangPvE.ID, (ActionID)ReignOfBeastsPvE.ID) && NoMercyPvE.CanUse(out act))
-		{
-			return true;
-		}
+			if (!ReignOfBeastsPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)GnashingFangPvE.ID, (ActionID)ReignOfBeastsPvE.ID))
+			{
+				return true;
+			}
 
-		if (!GnashingFangPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)BurstStrikePvE.ID) && NoMercyPvE.CanUse(out act))
-		{
-			return true;
-		}
+			if (!GnashingFangPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)BurstStrikePvE.ID))
+			{
+				return true;
+			}
 
-		if (!BurstStrikePvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)SolidBarrelPvE.ID) && NoMercyPvE.CanUse(out act))
-		{
-			return true;
-		}
+			if (!BurstStrikePvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)SolidBarrelPvE.ID))
+			{
+				return true;
+			}
 
-		if (!SolidBarrelPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)BrutalShellPvE.ID) && NoMercyPvE.CanUse(out act))
-		{
-			return true;
-		}
+			if (!SolidBarrelPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)BrutalShellPvE.ID))
+			{
+				return true;
+			}
 
-		if (!BrutalShellPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)KeenEdgePvE.ID) && NoMercyPvE.CanUse(out act))
-		{
-			return true;
+			if (!BrutalShellPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)KeenEdgePvE.ID))
+			{
+				return true;
+			}
 		}
 
 		// AOE No Mercy Logic
-		if (DemonSlicePvE.CanUse(out _) && nextGCD.IsTheSameTo(false, (ActionID)DoubleDownPvE.ID) && NoMercyPvE.CanUse(out act))
+		if (NoMercyPvE.CanUse(out act))
 		{
-			return true;
-		}
+			if (DemonSlicePvE.CanUse(out _) && nextGCD.IsTheSameTo(false, (ActionID)DoubleDownPvE.ID))
+			{
+				return true;
+			}
 
-		if (!DoubleDownPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)FatedCirclePvE.ID) && NoMercyPvE.CanUse(out act))
-		{
-			return true;
-		}
+			if (!DoubleDownPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)FatedCirclePvE.ID))
+			{
+				return true;
+			}
 
-		if (!FatedCirclePvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)DemonSlaughterPvE.ID) && NoMercyPvE.CanUse(out act))
-		{
-			return true;
-		}
+			if (!FatedCirclePvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)DemonSlaughterPvE.ID))
+			{
+				return true;
+			}
 
-		if (!DemonSlaughterPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)DemonSlicePvE.ID) && NoMercyPvE.CanUse(out act))
-		{
-			return true;
+			if (!DemonSlaughterPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)DemonSlicePvE.ID))
+			{
+				return true;
+			}
 		}
 
 		if (BloodfestPvE.CanUse(out act))

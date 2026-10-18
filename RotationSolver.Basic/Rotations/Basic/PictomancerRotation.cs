@@ -172,7 +172,7 @@ public partial class PictomancerRotation
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool ThunderInMagentaPvEReady => Service.GetAdjustedActionId(ActionID.StoneInYellowPvE) == ActionID.ThunderInMagentaPvE && HasSubtractivePalette;
+	public static bool ThunderInMagentaPvEReady => Service.GetAdjustedActionId(ActionID.BlizzardInCyanPvE) == ActionID.ThunderInMagentaPvE && HasSubtractivePalette;
 
 	/// <summary>
 	/// 

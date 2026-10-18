@@ -1,7 +1,7 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Tank;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.55")]
-[SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/PLD_Default.PvP.cs")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.57")]
+[SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/PLD_Default.PVP.cs")]
 
 public sealed class PLD_DefaultPvP : PaladinRotation
 {
@@ -80,22 +80,6 @@ public sealed class PLD_DefaultPvP : PaladinRotation
 		if (ImperatorPvP.CanUse(out action))
 		{
 			return true;
-		}
-
-		if (GuardianFree)
-		{
-			if (GuardianPvP.CanUse(out action, targetOverride: TargetType.LowHP))
-			{
-				return true;
-			}
-		}
-
-		if (StatusHelper.PlayerHasStatus(true, StatusID.HallowedGround_1302))
-		{
-			if (GuardianPvP.CanUse(out action, targetOverride: TargetType.LowHP))
-			{
-				return true;
-			}
 		}
 
 		return base.AttackAbility(nextGCD, out action);

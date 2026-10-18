@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Tank;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Tank/PLD_Reborn.cs")]
 
 public sealed class PLD_Reborn : PaladinRotation
@@ -100,7 +100,7 @@ public sealed class PLD_Reborn : PaladinRotation
 			return true;
 		}
 
-		if (StatusHelper.PlayerHasStatus(true, StatusID.Rampart) || StatusHelper.PlayerHasStatus(true, StatusID.Sentinel))
+		if (StatusHelper.PlayerHasStatus(true, StatusID.Rampart, StatusID.Sentinel, StatusID.Guardian))
 		{
 			if (InterventionPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
 			{

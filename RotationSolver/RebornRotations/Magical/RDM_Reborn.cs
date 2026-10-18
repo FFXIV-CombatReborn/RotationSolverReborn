@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Magical;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Magical/RDM_Reborn.cs")]
 
 public sealed class RDM_Reborn : RedMageRotation
@@ -45,22 +45,6 @@ public sealed class RDM_Reborn : RedMageRotation
 			{
 				return act;
 			}
-		}
-
-		//Remove Swift
-		if (HasDualcast && remainTime < 0f && !InCombat)
-		{
-			StatusHelper.StatusOff(StatusID.Dualcast);
-		}
-
-		if (HasAccelerate && remainTime < 0f)
-		{
-			StatusHelper.StatusOff(StatusID.Acceleration);
-		}
-
-		if (HasSwift && remainTime < 0f)
-		{
-			StatusHelper.StatusOff(StatusID.Swiftcast);
 		}
 
 		return base.CountDownAction(remainTime);
@@ -367,9 +351,9 @@ public sealed class RDM_Reborn : RedMageRotation
 				}
 			}
 
-			if (!ImpactPvE.EnoughLevel && ImpactPvE.EnoughLevel)
+			if (ImpactPvE.EnoughLevel)
 			{
-				if (ImpactPvE.CanUse(out act))
+				if (ImpactPvE.CanUse(out act, skipCastingCheck: HasAccelerate))
 				{
 					return true;
 				}

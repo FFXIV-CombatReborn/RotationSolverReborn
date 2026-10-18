@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Healer;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Healer/WHM_Reborn.cs")]
 
 public sealed class WHM_Reborn : WhiteMageRotation
@@ -108,7 +108,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
 	{
 		var useLastThinAirCharge = ThinAirLastChargeUsage == ThinAirUsageStrategy.UseAllCharges || (ThinAirLastChargeUsage == ThinAirUsageStrategy.ReserveLastChargeForRaise && nextGCD == RaisePvE);
-		if (((nextGCD is IBaseAction action && action.Info.MPNeed >= ThinAirNeed && IsLastAction() == IsLastGCD()) || ((MergedStatus.HasFlag(AutoStatus.Raise) || (nextGCD == RaisePvE)) && IsLastAction() == IsLastGCD())) &&
+		if (((nextGCD is IBaseAction action && action.Info.MPNeed >= ThinAirNeed && IActionHelper.IsLastActionGCD()) || ((MergedStatus.HasFlag(AutoStatus.Raise) || (nextGCD == RaisePvE)) && IActionHelper.IsLastActionGCD())) &&
 			ThinAirPvE.CanUse(out act, usedUp: useLastThinAirCharge))
 		{
 			return true;
@@ -148,6 +148,11 @@ public sealed class WHM_Reborn : WhiteMageRotation
 	[RotationDesc(ActionID.TemperancePvE, ActionID.LiturgyOfTheBellPvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
+		if (DivineCaressPvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		if ((TemperancePvE.Cooldown.IsCoolingDown && !TemperancePvE.Cooldown.WillHaveOneCharge(100))
 			|| (LiturgyOfTheBellPvE.Cooldown.IsCoolingDown && !LiturgyOfTheBellPvE.Cooldown.WillHaveOneCharge(160)))
 		{
@@ -168,11 +173,6 @@ public sealed class WHM_Reborn : WhiteMageRotation
 		}
 
 		if (TemperancePvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (DivineCaressPvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -295,7 +295,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 		var hasMedica2 = 0;
 		foreach (var n in PartyMembers)
 		{
-			if (n.HasStatus(true, StatusID.MedicaIi))
+			if (n.HasStatus(true, StatusID.MedicaIi, StatusID.MedicaIii))
 			{
 				hasMedica2++;
 			}

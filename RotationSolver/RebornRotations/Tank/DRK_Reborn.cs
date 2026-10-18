@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Tank;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Tank/DRK_Reborn.cs")]
 
 public sealed class DRK_Reborn : DarkKnightRotation
@@ -125,7 +125,7 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	[RotationDesc(ActionID.DarkMissionaryPvE, ActionID.ReprisalPvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
-		if (!InTwoMIsBurst && TheBlackestNightPvE.CanUse(out act, targetOverride: TargetType.LowHP) && !TheBlackestNightPvE.Target.Target.HasStatus(false, StatusID.Transcendent) && TheBlackestNightPvE.Target.Target.GetHealthRatio() <= BlackLanternRatio)
+		if (!InTwoMIsBurst && BlackLantern && TheBlackestNightPvE.CanUse(out act, targetOverride: TargetType.LowHP) && !TheBlackestNightPvE.Target.Target.HasStatus(false, StatusID.Transcendent) && TheBlackestNightPvE.Target.Target.GetHealthRatio() <= BlackLanternRatio)
 		{
 			return true;
 		}
@@ -417,30 +417,6 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	// Indicates whether the Dark Knight can heal using a single ability.
 	public override bool CanHealSingleAbility => false;
 
-	// Logic to determine when to use blood-based abilities.
-	private bool UseBlood
-	{
-		get
-		{
-			// Conditions based on player statuses and ability cooldowns.
-			if (!DeliriumPvE.EnoughLevel || !LivingShadowPvE.EnoughLevel)
-			{
-				return true;
-			}
-
-			if (StatusHelper.PlayerHasStatus(true, StatusID.Delirium_3836))
-			{
-				return true;
-			}
-
-			if ((StatusHelper.PlayerHasStatus(true, StatusID.Delirium_1972) || StatusHelper.PlayerHasStatus(true, StatusID.Delirium_3836)) && LivingShadowPvE.Cooldown.IsCoolingDown)
-			{
-				return true;
-			}
-
-			return (DeliriumPvE.Cooldown.WillHaveOneChargeGCD(1) && !LivingShadowPvE.Cooldown.WillHaveOneChargeGCD(3)) || (Blood >= 90 && !LivingShadowPvE.Cooldown.WillHaveOneChargeGCD(1));
-		}
-	}
 	// Determines if currently in a burst phase based on cooldowns of key abilities.
 	private bool InTwoMIsBurst => BloodWeaponPvE.Cooldown.IsCoolingDown && DeliriumPvE.Cooldown.IsCoolingDown && ((LivingShadowPvE.Cooldown.IsCoolingDown && !LivingShadowPvE.Cooldown.ElapsedAfter(15)) || !LivingShadowPvE.EnoughLevel);
 
@@ -459,12 +435,13 @@ public sealed class DRK_Reborn : DarkKnightRotation
 				return true;
 			}
 
-			if (InTwoMIsBurst && BloodWeaponPvE.Cooldown.IsCoolingDown && LivingShadowPvE.Cooldown.IsCoolingDown && SaltedEarthPvE.Cooldown.IsCoolingDown && ShadowbringerPvE.Cooldown.CurrentCharges == 0 && CarveAndSpitPvE.Cooldown.IsCoolingDown)
+			if (InTwoMIsBurst && BloodWeaponPvE.Cooldown.IsCoolingDown && LivingShadowPvE.Cooldown.IsCoolingDown && SaltedEarthPvE.Cooldown.IsCoolingDown && ShadowbringerPvE.Cooldown.CurrentCharges == 0 && CarveAndSpitPvE.Cooldown.IsCoolingDown
+				&& (!TheBlackestNight || CurrentMp >= 6000))
 			{
 				return true;
 			}
 
-			return (!TheBlackestNight || CurrentMp >= 6000) && CurrentMp >= 8500;
+			return CurrentMp >= 8500;
 		}
 	}
 	#endregion

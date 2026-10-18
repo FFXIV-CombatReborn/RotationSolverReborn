@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Ranged;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.55")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
 [SourceCode(Path = "main/RebornRotations/Ranged/DNC_Reborn.cs")]
 
 public sealed class DNC_Reborn : DancerRotation
@@ -91,12 +91,6 @@ public sealed class DNC_Reborn : DancerRotation
 			&& UseBurstMedicine(out act))
 		{
 			return true;
-		}
-
-		//If dancing or about to dance avoid using abilities to avoid animation lock delaying the dance, except for Devilment
-		if (!IsDancing && !(StandardStepPvE.Cooldown.ElapsedAfter(28) || TechnicalStepPvE.Cooldown.ElapsedAfter(118)))
-		{
-			return base.EmergencyAbility(nextGCD, out act); // Fallback to base class method if none of the above conditions are met
 		}
 
 		return base.EmergencyAbility(nextGCD, out act);
@@ -326,12 +320,7 @@ public sealed class DNC_Reborn : DancerRotation
 			return true;
 		}
 
-		if (Esprit <= 100 && StarfallDancePvE.CanUse(out act, skipAoeCheck: true))
-		{
-			return true;
-		}
-
-		if (StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.Devilment) && StarfallDancePvE.CanUse(out act, skipAoeCheck: true))
+		if (StarfallDancePvE.CanUse(out act, skipAoeCheck: true))
 		{
 			return true;
 		}
