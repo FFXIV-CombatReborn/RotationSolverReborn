@@ -50,6 +50,9 @@ public sealed class BeirutaRDM : RedMageRotation
 	[RotationConfig(CombatType.PvE, Name = "Hold melee combo up to 2s if out of range")]
 	public bool HoldMeleeComboIfOutOfRange { get; set; } = true;
 
+	[RotationConfig(CombatType.PvE, Name = "Do not start melee combo when moving (does not affect Manafication version)")]
+    public bool NoComboStartWhileMoving { get; set; } = false;
+
 	[RotationConfig(CombatType.PvE, Name = "Delay Prefulgence/Vice of Thorns for buff alignment (about 3 gcd after Embolden)")]
 	public bool DelayBuffOGCDs { get; set; } = true;
 
@@ -450,7 +453,9 @@ public sealed class BeirutaRDM : RedMageRotation
 			return false;
 		}
 
-		if (!HasSwift && !HasDualcast && EnchantedRipostePvE.CanUse(out act))
+		if (!HasSwift && !HasDualcast && 
+		   !(NoComboStartWhileMoving && IsMoving) &&
+		   EnchantedRipostePvE.CanUse(out act))
 		{
 			RegisterMeleeStarter(MeleeComboTrack.SingleTarget, embRem);
 			return true;
@@ -741,15 +746,15 @@ public sealed class BeirutaRDM : RedMageRotation
 				return true;
 		}
 
-		if (CanUseManaficationNow(gateMelee) && ManaficationPvE.CanUse(out act))
-			return true;
-
 		bool emboldenAllowed = !IsOpen && IsBurst && InCombat && (AnyonesMeleeRule ? InMeleeRange3 : HasHostilesInRange);
 		if (emboldenAllowed && EmboldenPvE.CanUse(out act))
 		{
 			_emboldenUsedAtMs = Environment.TickCount64;
 			return true;
 		}
+
+		if (CanUseManaficationNow(gateMelee) && ManaficationPvE.CanUse(out act))
+			return true;
 
 		return base.EmergencyAbility(nextGCD, out act);
 	}
@@ -1047,10 +1052,10 @@ public sealed class BeirutaRDM : RedMageRotation
 	{
 		act = null;
 
-		if (!IsOpen || IsAnyMeleeComboInProgress() || ManaStacks == 3 || !InCombat || !HasHostilesInMaxRange)
+		if (!IsOpen || IsAnyMeleeComboInProgress() || ManaStacks != 0 || !InCombat || !HasHostilesInMaxRange)
 			return false;
 
-		if (!(HasDualcast || HasSwift || HasAccelerate))
+		if (!(HasDualcast || HasSwift || HasAccelerate || HasEmbolden || HasManafication))
 			return false;
 
 		if (ShouldUseImpactInOpener() && ImpactPvE.CanUse(out act))
