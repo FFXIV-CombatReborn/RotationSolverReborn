@@ -457,6 +457,36 @@ public static class StatusHelper
 	];
 
 	/// <summary>
+	/// M9S Hell in a Cell statuses on the player. Each one pairs with the <see cref="HeelOfTheCellStatus"/> at the same index.
+	/// </summary>
+	public static StatusID[] HellInACellStatus { get; } =
+	[
+		StatusID.HellInACell,
+		StatusID.HellInACell_4732,
+		StatusID.HellInACell_4733,
+		StatusID.HellInACell_4734,
+		StatusID.HellInACell_4735,
+		StatusID.HellInACell_4736,
+		StatusID.HellInACell_4737,
+		StatusID.HellInACell_4738,
+	];
+
+	/// <summary>
+	/// M9S Heel in a Cell statuses on the Charnel Cells. Each one pairs with the <see cref="HellInACellStatus"/> at the same index.
+	/// </summary>
+	public static StatusID[] HeelOfTheCellStatus { get; } =
+	[
+		StatusID.HeelOfTheCell,
+		StatusID.HeelOfTheCell_4740,
+		StatusID.HeelOfTheCell_4741,
+		StatusID.HeelOfTheCell_4742,
+		StatusID.HeelOfTheCell_4743,
+		StatusID.HeelOfTheCell_4744,
+		StatusID.HeelOfTheCell_4745,
+		StatusID.HeelOfTheCell_4746,
+	];
+
+	/// <summary>
 	/// Statuses for the Phantom Oracle spell PredictPvE.
 	/// </summary>
 	public static StatusID[] OracleStatuses { get; } =

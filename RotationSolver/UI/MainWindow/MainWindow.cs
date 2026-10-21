@@ -28,7 +28,16 @@ public partial class MainWindow : Window
 	// Keep this in this file: the page files read it while setting up, and this file is set up first.
 	internal static SearchableCollection _allSearchable = new();
 
-	public static bool CNLanguageClient => _cachedDiagInfo?.Language.ToString() is "Chinese" or "ChineseSimplified";
+	private static bool? _cnLanguageClient;
+
+	public static bool CNLanguageClient => _cnLanguageClient ??= GetClientLanguage() is "Chinese" or "ChineseSimplified";
+
+	private static string GetClientLanguage()
+	{
+		return DalamudReflector.TryGetDalamudStartInfo(out var startInfo, Svc.PluginInterface)
+			? startInfo.Language.ToString()
+			: Svc.ClientState.ClientLanguage.ToString();
+	}
 
 	internal sealed class DiagInfo(DalamudStartInfo startInfo)
 	{

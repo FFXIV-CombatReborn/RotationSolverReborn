@@ -217,6 +217,14 @@ internal static class ActionUpdater
 	private static DateTime _startDeadTime = DateTime.MinValue;
 	private static DateTime _startAliveTime = DateTime.Now;
 	private static bool _isDead = true;
+	private static bool _changedArea;
+
+	// Updates are skipped during loading screens, so the transition is flagged here and applied on the next update.
+	internal static void MarkAreaChange()
+	{
+		_changedArea = true;
+	}
+
 	public static void UpdateLifetime(DateTime now)
 	{
 		var player = Player.Object;
@@ -230,8 +238,9 @@ internal static class ActionUpdater
 		var lastDead = _isDead;
 		_isDead = player.IsDead;
 
-		if (Svc.Condition[ConditionFlag.BetweenAreas])
+		if (_changedArea)
 		{
+			_changedArea = false;
 			_startAliveTime = now;
 		}
 		switch (lastDead)

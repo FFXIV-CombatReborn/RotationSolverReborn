@@ -78,10 +78,7 @@ public partial class SageRotation
 	static partial void ModifyDiagnosisPvE(ref ActionSetting setting)
 	{
 		setting.TargetType = TargetType.BeAttacked;
-		setting.CreateConfig = () => new ActionConfig()
-		{
-			GCDSingleHeal = true,
-		};
+		setting.GCDSingleHeal = true;
 		setting.IsFriendly = true;
 	}
 

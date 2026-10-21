@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Melee;
 
-[Rotation("BeirutaNIN", CombatType.PvE, GameVersion = "7.5")]
+[Rotation("BeirutaNIN", CombatType.PvE, GameVersion = "7.5", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/ExtraRotations/Melee/BeirutaNIN.cs")]
 [ExtraRotation]
 
@@ -307,10 +307,26 @@ public sealed class BeirutaNIN : NinjaRotation
 	private bool ExecuteStandardQueuedNinjutsu(NinjutsuExecutionDef d, out IAction? act)
 	{
 		act = null;
-		if (KeepKassatsuinBurst || !Q(d.QueuedAction)) return false;
-		if (RabbitMediumCurrent) { ClearNinjutsu(); return false; }
-		if (d.CurrentCheck()) return d.FinalCast(out act);
-		foreach (var s in d.Steps) if (s.When()) return s.Use(out act);
+		if (KeepKassatsuinBurst || !Q(d.QueuedAction))
+		{
+			return false;
+		}
+
+		if (RabbitMediumCurrent)
+		{ ClearNinjutsu(); return false; }
+		if (d.CurrentCheck())
+		{
+			return d.FinalCast(out act);
+		}
+
+		foreach (var s in d.Steps)
+		{
+			if (s.When())
+			{
+				return s.Use(out act);
+			}
+		}
+
 		return false;
 	}
 
@@ -325,13 +341,27 @@ public sealed class BeirutaNIN : NinjaRotation
 		act = null;
 		if (aoe)
 		{
-			if (aoe1(out act)) return true;
-			if (aoe2(out act)) return true;
+			if (aoe1(out act))
+			{
+				return true;
+			}
+
+			if (aoe2(out act))
+			{
+				return true;
+			}
 		}
 		else
 		{
-			if (st1(out act)) return true;
-			if (st2(out act)) return true;
+			if (st1(out act))
+			{
+				return true;
+			}
+
+			if (st2(out act))
+			{
+				return true;
+			}
 		}
 		return false;
 	}
@@ -340,8 +370,10 @@ public sealed class BeirutaNIN : NinjaRotation
 	{
 		if (dotonAoe)
 		{
-			if (CanQueueDoton) { SetNinjutsu(DotonPvE); return; }
-			if (katonAoe && CanQueueKaton) { SetNinjutsu(KatonPvE); return; }
+			if (CanQueueDoton)
+			{ SetNinjutsu(DotonPvE); return; }
+			if (katonAoe && CanQueueKaton)
+			{ SetNinjutsu(KatonPvE); return; }
 		}
 		else if (katonAoe && CanQueueKaton)
 		{
@@ -351,15 +383,24 @@ public sealed class BeirutaNIN : NinjaRotation
 
 		if (!dotonAoe && !katonAoe && !ShouldQueueBurstPrepSuitonOrHuton)
 		{
-			if (CanQueueRaiton) SetNinjutsu(RaitonPvE);
-			if (CanQueueFuma) SetNinjutsu(FumaShurikenPvE);
+			if (CanQueueRaiton)
+			{
+				SetNinjutsu(RaitonPvE);
+			}
+
+			if (CanQueueFuma)
+			{
+				SetNinjutsu(FumaShurikenPvE);
+			}
 		}
 	}
 
 	private bool TryQueueBurstPrepSuitonOrHuton(bool hutonAoe)
 	{
 		if (!ShouldQueueBurstPrepSuitonOrHuton || TenPvE.Cooldown.CurrentCharges <= 0)
+		{
 			return false;
+		}
 
 		if (hutonAoe && CanQueueHuton)
 		{
@@ -463,18 +504,27 @@ public sealed class BeirutaNIN : NinjaRotation
 
 	private int GetTargetAoeCount(IBaseAction action)
 	{
-		int maxAoeCount = 0;
-		if (AllHostileTargets == null) return 0;
+		var maxAoeCount = 0;
+		if (AllHostileTargets == null)
+		{
+			return 0;
+		}
 
 		foreach (var centerTarget in AllHostileTargets)
 		{
 			if (centerTarget == null || !centerTarget.CanSee() || centerTarget.DistanceToPlayer() > action.Info.Range)
+			{
 				continue;
-			int currentAoeCount = 0;
+			}
+
+			var currentAoeCount = 0;
 
 			foreach (var otherTarget in AllHostileTargets)
 			{
-				if (otherTarget == null) continue;
+				if (otherTarget == null)
+				{
+					continue;
+				}
 
 				if (Vector3.Distance(centerTarget.Position, otherTarget.Position) <
 					(action.Info.EffectRange + otherTarget.HitboxRadius))
@@ -509,41 +559,60 @@ public sealed class BeirutaNIN : NinjaRotation
 
 	private bool ShouldClearQueuedNinjutsu()
 	{
-		if (_ninActionAim == null) return false;
+		if (_ninActionAim == null)
+		{
+			return false;
+		}
 
 		// Clear after successful execution of normal queued ninjutsu.
 		if (IsLastAction(false, FumaShurikenPvE, KatonPvE, RaitonPvE, HyotonPvE, DotonPvE, SuitonPvE))
+		{
 			return true;
+		}
 
 		// Prep queues invalidated by ShadowWalking.
 		if (IsShadowWalking && (_ninActionAim == SuitonPvE || _ninActionAim == HutonPvE))
+		{
 			return true;
+		}
 
 		// Kassatsu queues invalidated after use or if Kassatsu dropped.
 		if (_ninActionAim == GokaMekkyakuPvE && IsLastGCD(false, GokaMekkyakuPvE))
+		{
 			return true;
+		}
 
 		if (_ninActionAim == HyoshoRanryuPvE && IsLastGCD(false, HyoshoRanryuPvE))
+		{
 			return true;
+		}
 
 		if ((_ninActionAim == GokaMekkyakuPvE || _ninActionAim == HyoshoRanryuPvE) && !HasKassatsu)
+		{
 			return true;
+		}
 
 		// Do not clear mid-mudra.
 		if (IsExecutingMudra)
+		{
 			return false;
+		}
 
 		// Clear stale burst-prep queues if prep is no longer valid.
 		if (_ninActionAim == SuitonPvE && !ShouldQueueBurstPrepSuitonOrHuton)
+		{
 			return true;
+		}
 
 		if (_ninActionAim == HutonPvE && !ShouldQueueBurstPrepSuitonOrHuton)
+		{
 			return true;
+		}
 
-		bool katonAoe = IsTargetAoe3Plus(KatonPvE);
-		bool dotonAoe = IsSelfAoe3Plus(DotonPvE);
+		var katonAoe = IsTargetAoe3Plus(KatonPvE);
+		var dotonAoe = IsSelfAoe3Plus(DotonPvE);
 
-		bool disengageFallbackStillValid =
+		var disengageFallbackStillValid =
 			ShouldUseDisengageNinjutsuFallback &&
 			IsBurst &&
 			!CombatElapsedLess(BurstBuffOpenTiming) &&
@@ -551,7 +620,7 @@ public sealed class BeirutaNIN : NinjaRotation
 			!HasTenChiJin &&
 			!ShouldQueueBurstPrepSuitonOrHuton;
 
-		bool standardDamageStillValid =
+		var standardDamageStillValid =
 			InBurstPhase ||
 			ShouldSpendDamageMudraNow ||
 			disengageFallbackStillValid;
@@ -559,17 +628,23 @@ public sealed class BeirutaNIN : NinjaRotation
 		// ST queues should not remain if AoE became correct, or if no valid queue reason remains.
 		if ((_ninActionAim == RaitonPvE || _ninActionAim == FumaShurikenPvE) &&
 			(!standardDamageStillValid || dotonAoe || katonAoe))
+		{
 			return true;
+		}
 
 		// Katon should not remain if target-AoE is no longer correct, or if no valid queue reason remains.
 		if (_ninActionAim == KatonPvE &&
 			(!standardDamageStillValid || !katonAoe))
+		{
 			return true;
+		}
 
 		// Doton should not remain if self-AoE is no longer correct, or if no valid queue reason remains.
 		if (_ninActionAim == DotonPvE &&
 			(!standardDamageStillValid || !dotonAoe))
+		{
 			return true;
+		}
 
 		return false;
 	}
@@ -581,13 +656,20 @@ public sealed class BeirutaNIN : NinjaRotation
 			_ = ChoiceNinjutsu(out _);
 		}
 
-		if (!InCombat) ClearNinjutsu();
+		if (!InCombat)
+		{
+			ClearNinjutsu();
+		}
 	}
 
 	private bool TryUseRaidBuff(out IAction? act)
 	{
 		act = null;
-		if (!IsBurst || CombatElapsedLess(RaidBuffOpenTiming)) return false;
+		if (!IsBurst || CombatElapsedLess(RaidBuffOpenTiming))
+		{
+			return false;
+		}
+
 		return !DokumoriPvE.EnoughLevel ? MugPvE.CanUse(out act) : DokumoriPvE.CanUse(out act);
 	}
 
@@ -595,18 +677,29 @@ public sealed class BeirutaNIN : NinjaRotation
 	{
 		act = null;
 
-		if (CombatElapsedLess(BurstBuffOpenTiming)) return false;
+		if (CombatElapsedLess(BurstBuffOpenTiming))
+		{
+			return false;
+		}
 
-
-		if (RequireLateWeaveForBurstBuff && !CanLateWeave) return false;
+		if (RequireLateWeaveForBurstBuff && !CanLateWeave)
+		{
+			return false;
+		}
 
 		if (!KunaisBanePvE.EnoughLevel)
 		{
-			if (TrickAttackPvE.CanUse(out act, skipStatusProvideCheck: IsShadowWalking)) return true;
+			if (TrickAttackPvE.CanUse(out act, skipStatusProvideCheck: IsShadowWalking))
+			{
+				return true;
+			}
 		}
 		else
 		{
-			if (KunaisBanePvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: IsShadowWalking)) return true;
+			if (KunaisBanePvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: IsShadowWalking))
+			{
+				return true;
+			}
 		}
 
 		if (TrickAttackPvE.Cooldown.IsCoolingDown &&
@@ -623,7 +716,11 @@ public sealed class BeirutaNIN : NinjaRotation
 
 	private bool ShouldUsePotionNow()
 	{
-		if (!PotionUsageEnabled || !InCombat || !IsShadowWalking) return false;
+		if (!PotionUsageEnabled || !InCombat || !IsShadowWalking)
+		{
+			return false;
+		}
+
 		return PotionUsagePreset switch
 		{
 			NINPotionPreset.Standard0611 => DokumoriPvE.EnoughLevel
@@ -646,9 +743,12 @@ public sealed class BeirutaNIN : NinjaRotation
 	{
 		_ = IsLastAction(false, HutonPvE);
 
-		if (remainTime > 6) ClearNinjutsu();
+		if (remainTime > 6)
+		{
+			ClearNinjutsu();
+		}
 
-		if (DoSuiton(out IAction? act))
+		if (DoSuiton(out var act))
 		{
 			return act == SuitonPvE && remainTime > CountDownAhead ? null : act;
 		}
@@ -673,7 +773,11 @@ public sealed class BeirutaNIN : NinjaRotation
 	[RotationDesc(ActionID.ForkedRaijuPvE)]
 	protected override bool MoveForwardGCD(out IAction? act)
 	{
-		if (ForkedRaijuPvE.CanUse(out act)) return true;
+		if (ForkedRaijuPvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		return base.MoveForwardGCD(out act);
 	}
 
@@ -683,12 +787,26 @@ public sealed class BeirutaNIN : NinjaRotation
 
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
 	{
-		if (ShouldClearQueuedNinjutsu()) ClearNinjutsu();
-		RefreshNinjutsuChoice();
-		if (!InCombat) ClearNinjutsu();
+		if (ShouldClearQueuedNinjutsu())
+		{
+			ClearNinjutsu();
+		}
 
-		if (RabbitMediumPvE.CanUse(out act)) return true;
-		if (!NoNinjutsu || !InCombat) return base.EmergencyAbility(nextGCD, out act);
+		RefreshNinjutsuChoice();
+		if (!InCombat)
+		{
+			ClearNinjutsu();
+		}
+
+		if (RabbitMediumPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (!NoNinjutsu || !InCombat)
+		{
+			return base.EmergencyAbility(nextGCD, out act);
+		}
 
 		if (NoNinjutsu &&
 			!nextGCD.IsTheSameTo(false, ActionID.TenPvE, ActionID.ChiPvE, ActionID.JinPvE) &&
@@ -706,10 +824,25 @@ public sealed class BeirutaNIN : NinjaRotation
 			return true;
 		}
 
-		if (TenriJindoPvE.CanUse(out act)) return true;
-		if (CanLateWeave && ShouldUsePotionNow() && UseBurstMedicine(out act)) return true;
-		if (TryUseRaidBuff(out act)) return true;
-		if (TryUseBurstBuff(out act)) return true;
+		if (TenriJindoPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (CanLateWeave && ShouldUsePotionNow() && UseBurstMedicine(out act))
+		{
+			return true;
+		}
+
+		if (TryUseRaidBuff(out act))
+		{
+			return true;
+		}
+
+		if (TryUseBurstBuff(out act))
+		{
+			return true;
+		}
 
 		if (IsBurst && !CombatElapsedLess(RaidBuffOpenTiming) && (InBurstPhase || HasBuffs))
 		{
@@ -721,10 +854,13 @@ public sealed class BeirutaNIN : NinjaRotation
 
 	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
 	{
-		if (!NoNinjutsu || !InCombat) return base.AttackAbility(nextGCD, out act);
+		if (!NoNinjutsu || !InCombat)
+		{
+			return base.AttackAbility(nextGCD, out act);
+		}
 
-		bool lateRaidWindow = CanLateWeave && !CombatElapsedLess(RaidBuffOpenTiming);
-		bool canSpendNinkiNormally =
+		var lateRaidWindow = CanLateWeave && !CombatElapsedLess(RaidBuffOpenTiming);
+		var canSpendNinkiNormally =
 			(!InMug || InTrickAttack) &&
 			(!BunshinPvE.Cooldown.WillHaveOneCharge(10) || HasPhantomKamaitachi || MugPvE.Cooldown.WillHaveOneCharge(2));
 
@@ -736,23 +872,51 @@ public sealed class BeirutaNIN : NinjaRotation
 			return true;
 		}
 
-		if (lateRaidWindow && BunshinPvE.CanUse(out act)) return true;
-		if (TryUseRaidBuff(out act)) return true;
+		if (lateRaidWindow && BunshinPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (TryUseRaidBuff(out act))
+		{
+			return true;
+		}
 
 		if (InBurstPhase)
 		{
-			if (DreamWithinADreamPvE.CanUse(out act)) return true;
-			if (!DreamWithinADreamPvE.Info.EnoughLevelAndQuest() && AssassinatePvE.CanUse(out act)) return true;
+			if (DreamWithinADreamPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (!DreamWithinADreamPvE.Info.EnoughLevelAndQuest() && AssassinatePvE.CanUse(out act))
+			{
+				return true;
+			}
 		}
 
 		if (canSpendNinkiNormally)
 		{
-			if (TryUseNinkiSpender(out act)) return true;
-			if (TenriJindoPvE.CanUse(out act)) return true;
+			if (TryUseNinkiSpender(out act))
+			{
+				return true;
+			}
+
+			if (TenriJindoPvE.CanUse(out act))
+			{
+				return true;
+			}
 		}
 
-		if (Ninki >= 90 && TryUseNinkiSpender(out act)) return true;
-		if (MergedStatus.HasFlag(AutoStatus.MoveForward) && MoveForwardAbility(nextGCD, out act)) return true;
+		if (Ninki >= 90 && TryUseNinkiSpender(out act))
+		{
+			return true;
+		}
+
+		if (MergedStatus.HasFlag(AutoStatus.MoveForward) && MoveForwardAbility(nextGCD, out act))
+		{
+			return true;
+		}
 
 		return base.AttackAbility(nextGCD, out act);
 	}
@@ -763,7 +927,10 @@ public sealed class BeirutaNIN : NinjaRotation
 
 	private void SetNinjutsu(IBaseAction act)
 	{
-		if (act == null || AdjustId(ActionID.NinjutsuPvE) == ActionID.RabbitMediumPvE) return;
+		if (act == null || AdjustId(ActionID.NinjutsuPvE) == ActionID.RabbitMediumPvE)
+		{
+			return;
+		}
 
 		if (_ninActionAim != null &&
 			IsLastAction(false, TenPvE, JinPvE, ChiPvE, FumaShurikenPvE_18873, FumaShurikenPvE_18874, FumaShurikenPvE_18875))
@@ -771,12 +938,19 @@ public sealed class BeirutaNIN : NinjaRotation
 			return;
 		}
 
-		if (_ninActionAim != act) _ninActionAim = act;
+		if (_ninActionAim != act)
+		{
+			_ninActionAim = act;
+		}
 	}
 
 	private void ClearNinjutsu()
 	{
-		if (_ninActionAim == null) return;
+		if (_ninActionAim == null)
+		{
+			return;
+		}
+
 		_lastNinActionAim = _ninActionAim;
 		_ninActionAim = null;
 	}
@@ -785,11 +959,11 @@ public sealed class BeirutaNIN : NinjaRotation
 	{
 		act = null;
 
-		bool dotonAoe = IsSelfAoe3Plus(DotonPvE);
-		bool katonAoe = IsTargetAoe3Plus(KatonPvE);
-		bool gokaAoe = IsTargetAoe3Plus(GokaMekkyakuPvE);
-		bool hutonAoe = IsTargetAoe3Plus(HutonPvE);
-		bool canQueueDamageMudra =
+		var dotonAoe = IsSelfAoe3Plus(DotonPvE);
+		var katonAoe = IsTargetAoe3Plus(KatonPvE);
+		var gokaAoe = IsTargetAoe3Plus(GokaMekkyakuPvE);
+		var hutonAoe = IsTargetAoe3Plus(HutonPvE);
+		var canQueueDamageMudra =
 			_ninActionAim == null &&
 			ShouldSpendDamageMudraNow;
 
@@ -862,16 +1036,27 @@ public sealed class BeirutaNIN : NinjaRotation
 			return false;
 		}
 
-		if (_ninActionAim != null) return false;
+		if (_ninActionAim != null)
+		{
+			return false;
+		}
 
 		// Burst prep has top priority when inside configured burst timing window.
-		if (TryQueueBurstPrepSuitonOrHuton(hutonAoe)) return false;
+		if (TryQueueBurstPrepSuitonOrHuton(hutonAoe))
+		{
+			return false;
+		}
 
 		// Disengaged fallback sits below burst prep.
-		if (TryQueueDisengageFallbackNinjutsu(katonAoe)) return false;
+		if (TryQueueDisengageFallbackNinjutsu(katonAoe))
+		{
+			return false;
+		}
 
 		if (InBurstPhase || canQueueDamageMudra)
+		{
 			QueueStandardDamageNinjutsu(dotonAoe, katonAoe);
+		}
 
 		return false;
 	}
@@ -883,8 +1068,16 @@ public sealed class BeirutaNIN : NinjaRotation
 	private bool DoRabbitMedium(out IAction? act)
 	{
 		act = null;
-		if (AdjustId(NinjutsuPvE.ID) != RabbitMediumPvE.ID) return false;
-		if (RabbitMediumPvE.CanUse(out act)) return true;
+		if (AdjustId(NinjutsuPvE.ID) != RabbitMediumPvE.ID)
+		{
+			return false;
+		}
+
+		if (RabbitMediumPvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		ClearNinjutsu();
 		return false;
 	}
@@ -892,37 +1085,58 @@ public sealed class BeirutaNIN : NinjaRotation
 	private bool DoTenChiJin(out IAction? act)
 	{
 		act = null;
-		if (!HasTenChiJin) return false;
+		if (!HasTenChiJin)
+		{
+			return false;
+		}
 
-		uint tenId = AdjustId(TenPvE.ID);
-		uint chiId = AdjustId(ChiPvE.ID);
-		uint jinId = AdjustId(JinPvE.ID);
+		var tenId = AdjustId(TenPvE.ID);
+		var chiId = AdjustId(ChiPvE.ID);
+		var jinId = AdjustId(JinPvE.ID);
 
 		if (tenId == FumaShurikenPvE_18873.ID &&
 			!IsLastAction(false, FumaShurikenPvE_18875, FumaShurikenPvE_18873))
 		{
 			if (IsSelfAoe3PlusForTcj())
 			{
-				if (FumaShurikenPvE_18875.CanUse(out act)) return true;
+				if (FumaShurikenPvE_18875.CanUse(out act))
+				{
+					return true;
+				}
 			}
 
-			if (FumaShurikenPvE_18873.CanUse(out act)) return true;
+			if (FumaShurikenPvE_18873.CanUse(out act))
+			{
+				return true;
+			}
 		}
 		else if (tenId == KatonPvE_18876.ID && !IsLastAction(false, KatonPvE_18876))
 		{
-			if (KatonPvE_18876.CanUse(out act, skipAoeCheck: true)) return true;
+			if (KatonPvE_18876.CanUse(out act, skipAoeCheck: true))
+			{
+				return true;
+			}
 		}
 		else if (chiId == RaitonPvE_18877.ID && !IsLastAction(false, RaitonPvE_18877))
 		{
-			if (RaitonPvE_18877.CanUse(out act, skipAoeCheck: true)) return true;
+			if (RaitonPvE_18877.CanUse(out act, skipAoeCheck: true))
+			{
+				return true;
+			}
 		}
 		else if (jinId == SuitonPvE_18881.ID && !IsLastAction(false, SuitonPvE_18881))
 		{
-			if (SuitonPvE_18881.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
+			if (SuitonPvE_18881.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true))
+			{
+				return true;
+			}
 		}
 		else if (chiId == DotonPvE_18880.ID && !IsLastAction(false, DotonPvE_18880) && !HasDoton)
 		{
-			if (DotonPvE_18880.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
+			if (DotonPvE_18880.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true))
+			{
+				return true;
+			}
 		}
 
 		return false;
@@ -940,11 +1154,28 @@ public sealed class BeirutaNIN : NinjaRotation
 			return false;
 		}
 
-		if (!Q(HyoshoRanryuPvE)) return false;
-		if (RabbitMediumCurrent) { ClearNinjutsu(); return false; }
-		if (C(ActionID.HyoshoRanryuPvE)) return HyoshoRanryuPvE.CanUse(out act, skipAoeCheck: true);
-		if (C(ActionID.FumaShurikenPvE)) return JinPvE_18807.CanUse(out act, usedUp: true);
-		if (NoActiveNinjutsu) return ChiPvE_18806.CanUse(out act, usedUp: true);
+		if (!Q(HyoshoRanryuPvE))
+		{
+			return false;
+		}
+
+		if (RabbitMediumCurrent)
+		{ ClearNinjutsu(); return false; }
+		if (C(ActionID.HyoshoRanryuPvE))
+		{
+			return HyoshoRanryuPvE.CanUse(out act, skipAoeCheck: true);
+		}
+
+		if (C(ActionID.FumaShurikenPvE))
+		{
+			return JinPvE_18807.CanUse(out act, usedUp: true);
+		}
+
+		if (NoActiveNinjutsu)
+		{
+			return ChiPvE_18806.CanUse(out act, usedUp: true);
+		}
+
 		return false;
 	}
 
@@ -960,11 +1191,28 @@ public sealed class BeirutaNIN : NinjaRotation
 			return false;
 		}
 
-		if (!Q(GokaMekkyakuPvE)) return false;
-		if (RabbitMediumCurrent) { ClearNinjutsu(); return false; }
-		if (C(ActionID.GokaMekkyakuPvE)) return GokaMekkyakuPvE.CanUse(out act, skipAoeCheck: true);
-		if (C(ActionID.FumaShurikenPvE)) return TenPvE_18805.CanUse(out act, usedUp: true);
-		if (NoActiveNinjutsu) return ChiPvE_18806.CanUse(out act, usedUp: true);
+		if (!Q(GokaMekkyakuPvE))
+		{
+			return false;
+		}
+
+		if (RabbitMediumCurrent)
+		{ ClearNinjutsu(); return false; }
+		if (C(ActionID.GokaMekkyakuPvE))
+		{
+			return GokaMekkyakuPvE.CanUse(out act, skipAoeCheck: true);
+		}
+
+		if (C(ActionID.FumaShurikenPvE))
+		{
+			return TenPvE_18805.CanUse(out act, usedUp: true);
+		}
+
+		if (NoActiveNinjutsu)
+		{
+			return ChiPvE_18806.CanUse(out act, usedUp: true);
+		}
+
 		return false;
 	}
 
@@ -982,9 +1230,9 @@ public sealed class BeirutaNIN : NinjaRotation
 
 	protected override bool GeneralGCD(out IAction? act)
 	{
-		bool noMudra = !IsExecutingMudra;
-		bool noNin = NoNinjutsu;
-		bool notTcj = Player != null && !StatusHelper.PlayerHasStatus(true, StatusID.TenChiJin);
+		var noMudra = !IsExecutingMudra;
+		var noNin = NoNinjutsu;
+		var notTcj = Player != null && !StatusHelper.PlayerHasStatus(true, StatusID.TenChiJin);
 
 		if (noMudra &&
 			(InTrickAttack || InMug) &&
@@ -996,32 +1244,92 @@ public sealed class BeirutaNIN : NinjaRotation
 			return true;
 		}
 
-		if (noMudra && FleetingRaijuPvE.CanUse(out act)) return true;
-		if (DoTenChiJin(out act)) return true;
-		if (DoRabbitMedium(out act)) return true;
+		if (noMudra && FleetingRaijuPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (DoTenChiJin(out act))
+		{
+			return true;
+		}
+
+		if (DoRabbitMedium(out act))
+		{
+			return true;
+		}
 
 		if (_ninActionAim != null && GCDTime() == 0f)
 		{
-			if (DoGokaMekkyaku(out act)) return true;
-			if (DoHuton(out act)) return true;
-			if (DoDoton(out act)) return true;
-			if (DoKaton(out act)) return true;
-			if (DoHyoshoRanryu(out act)) return true;
-			if (DoSuiton(out act)) return true;
-			if (DoHyoton(out act)) return true;
-			if (DoRaiton(out act)) return true;
-			if (DoFumaShuriken(out act)) return true;
+			if (DoGokaMekkyaku(out act))
+			{
+				return true;
+			}
+
+			if (DoHuton(out act))
+			{
+				return true;
+			}
+
+			if (DoDoton(out act))
+			{
+				return true;
+			}
+
+			if (DoKaton(out act))
+			{
+				return true;
+			}
+
+			if (DoHyoshoRanryu(out act))
+			{
+				return true;
+			}
+
+			if (DoSuiton(out act))
+			{
+				return true;
+			}
+
+			if (DoHyoton(out act))
+			{
+				return true;
+			}
+
+			if (DoRaiton(out act))
+			{
+				return true;
+			}
+
+			if (DoFumaShuriken(out act))
+			{
+				return true;
+			}
 		}
 
-		if (IsExecutingMudra) return base.GeneralGCD(out act);
-		if (IsSelfAoe3Plus(HakkeMujinsatsuPvE) && HakkeMujinsatsuPvE.CanUse(out act)) return true;
-		if (IsSelfAoe3Plus(DeathBlossomPvE) && DeathBlossomPvE.CanUse(out act)) return true;
+		if (IsExecutingMudra)
+		{
+			return base.GeneralGCD(out act);
+		}
+
+		if (IsSelfAoe3Plus(HakkeMujinsatsuPvE) && HakkeMujinsatsuPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (IsSelfAoe3Plus(DeathBlossomPvE) && DeathBlossomPvE.CanUse(out act))
+		{
+			return true;
+		}
 
 		if (AeolianEdgePvE.EnoughLevel)
 		{
 			if (!ArmorCrushPvE.EnoughLevel)
 			{
-				if (AeolianEdgePvE.CanUse(out act)) return true;
+				if (AeolianEdgePvE.CanUse(out act))
+				{
+					return true;
+				}
 			}
 			else
 			{
@@ -1030,40 +1338,67 @@ public sealed class BeirutaNIN : NinjaRotation
 					AeolianEdgePvE.CanUse(out act) &&
 					AeolianEdgePvE.Target.Target != null &&
 					CanHitPositional(EnemyPositional.Rear, AeolianEdgePvE.Target.Target))
+				{
 					return true;
+				}
 
 				if (InBurstPhase &&
 					Kazematoi > 0 &&
 					AeolianEdgePvE.CanUse(out act))
+				{
 					return true;
+				}
 
 				if (Kazematoi < 2 &&
 					ArmorCrushPvE.CanUse(out act) &&
 					ArmorCrushPvE.Target.Target != null &&
 					CanHitPositional(EnemyPositional.Flank, ArmorCrushPvE.Target.Target))
+				{
 					return true;
+				}
 
-				if (Kazematoi == 0 && ArmorCrushPvE.CanUse(out act)) return true;
+				if (Kazematoi == 0 && ArmorCrushPvE.CanUse(out act))
+				{
+					return true;
+				}
 
 				if (Kazematoi > 0 &&
 					AeolianEdgePvE.CanUse(out act) &&
 					AeolianEdgePvE.Target.Target != null &&
 					CanHitPositional(EnemyPositional.Rear, AeolianEdgePvE.Target.Target))
+				{
 					return true;
+				}
 
 				if (Kazematoi < 4 &&
 					ArmorCrushPvE.CanUse(out act) &&
 					ArmorCrushPvE.Target.Target != null &&
 					CanHitPositional(EnemyPositional.Flank, ArmorCrushPvE.Target.Target))
+				{
 					return true;
+				}
 
-				if (Kazematoi > 0 && AeolianEdgePvE.CanUse(out act)) return true;
-				if (Kazematoi < 4 && ArmorCrushPvE.CanUse(out act)) return true;
+				if (Kazematoi > 0 && AeolianEdgePvE.CanUse(out act))
+				{
+					return true;
+				}
+
+				if (Kazematoi < 4 && ArmorCrushPvE.CanUse(out act))
+				{
+					return true;
+				}
 			}
 		}
 
-		if (GustSlashPvE.CanUse(out act)) return true;
-		if (SpinningEdgePvE.CanUse(out act)) return true;
+		if (GustSlashPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (SpinningEdgePvE.CanUse(out act))
+		{
+			return true;
+		}
 
 		if (noMudra &&
 			noNin &&
@@ -1082,8 +1417,15 @@ public sealed class BeirutaNIN : NinjaRotation
 			_ = ChoiceNinjutsu(out _);
 		}
 
-		if (noMudra && ThrowingDaggerPvE.CanUse(out act)) return true;
-		if (StateEnabled && IsHidden) StatusHelper.StatusOff(StatusID.Hidden);
+		if (noMudra && ThrowingDaggerPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (StateEnabled && IsHidden)
+		{
+			StatusHelper.StatusOff(StatusID.Hidden);
+		}
 
 		if (!InCombat &&
 			_ninActionAim == null &&

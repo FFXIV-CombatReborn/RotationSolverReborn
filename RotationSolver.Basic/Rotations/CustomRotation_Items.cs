@@ -7,22 +7,49 @@ namespace RotationSolver.Basic.Rotations;
 /// </summary>
 public partial class CustomRotation
 {
-	private static readonly BaseItem PhoenixDownItemNumber = new(4570);
+	internal static PhoenixDownItem[] PhoenixDowns { get; } = [new PhoenixDownItem(Service.GetSheet<Item>().GetRow(4570))];
 
-	internal static PhoenixDownItem[] PhoenixDowns { get; } = GetPhoenixDownItem();
-
-	private static PhoenixDownItem[] GetPhoenixDownItem()
+	// Every consumable list comes from one pass over the Item sheet, newest item first.
+	private static class Consumables
 	{
-		var items = Service.GetSheet<Item>();
-		var list = new List<PhoenixDownItem>();
-		foreach (var i in items)
+		internal static readonly MedicineItem[] Medicines;
+		internal static readonly MpPotionItem[] MpPotions;
+		internal static readonly HpPotionItem[] HpPotions;
+
+		static Consumables()
 		{
-			if (i.RowId == PhoenixDownItemNumber.ID)
+			List<MedicineItem> medicines = [];
+			List<MpPotionItem> mpPotions = [];
+			List<HpPotionItem> hpPotions = [];
+			foreach (var i in Service.GetSheet<Item>())
 			{
-				list.Add(new PhoenixDownItem(i));
+				var isMedicineCategory = i.ItemSearchCategory.RowId == 43;
+				if (isMedicineCategory && i.FilterGroup == 6)
+				{
+					var medicine = new MedicineItem(i);
+					if (medicine.Type != MedicineType.None)
+					{
+						medicines.Add(medicine);
+					}
+				}
+				else if (isMedicineCategory && i.FilterGroup == 9)
+				{
+					mpPotions.Add(new MpPotionItem(i));
+				}
+
+				if ((isMedicineCategory && i.FilterGroup == 8) || i.RowId is 22306 or 47102 or 20309)
+				{
+					hpPotions.Add(new HpPotionItem(i));
+				}
 			}
+
+			medicines.Reverse();
+			mpPotions.Reverse();
+			hpPotions.Reverse();
+			Medicines = [.. medicines];
+			MpPotions = [.. mpPotions];
+			HpPotions = [.. hpPotions];
 		}
-		return [.. list];
 	}
 
 	/// <summary>
@@ -77,32 +104,7 @@ public partial class CustomRotation
 	/// <summary>
 	/// Gets the collection of available medicines.
 	/// </summary>
-	internal static MedicineItem[] Medicines { get; } = GetMedicines();
-
-	private static MedicineItem[] GetMedicines()
-	{
-		var items = Service.GetSheet<Item>();
-		var list = new List<MedicineItem>();
-		foreach (var i in items)
-		{
-			if (i.FilterGroup == 6 && i.ItemSearchCategory.RowId == 43)
-			{
-				var med = new MedicineItem(i);
-				if (med.Type != MedicineType.None)
-				{
-					list.Add(med);
-				}
-			}
-		}
-		// Reverse the list
-		var n = list.Count;
-		var arr = new MedicineItem[n];
-		for (var i = 0; i < n; i++)
-		{
-			arr[i] = list[n - i - 1];
-		}
-		return arr;
-	}
+	internal static MedicineItem[] Medicines => Consumables.Medicines;
 
 	/// <summary>
 	/// Uses the burst medicines.
@@ -149,28 +151,7 @@ public partial class CustomRotation
 	/// <summary>
 	/// Gets the collection of available MP potions.
 	/// </summary>
-	internal static MpPotionItem[] MpPotions { get; } = GetMpPotions();
-
-	private static MpPotionItem[] GetMpPotions()
-	{
-		var items = Service.GetSheet<Item>();
-		var list = new List<MpPotionItem>();
-		foreach (var i in items)
-		{
-			if (i.FilterGroup == 9 && i.ItemSearchCategory.RowId == 43)
-			{
-				list.Add(new MpPotionItem(i));
-			}
-		}
-		// Reverse the list
-		var n = list.Count;
-		var arr = new MpPotionItem[n];
-		for (var i = 0; i < n; i++)
-		{
-			arr[i] = list[n - i - 1];
-		}
-		return arr;
-	}
+	internal static MpPotionItem[] MpPotions => Consumables.MpPotions;
 
 	/// <summary>
 	/// Uses an MP potion.
@@ -201,28 +182,7 @@ public partial class CustomRotation
 	/// <summary>
 	/// Gets the collection of available HP potions.
 	/// </summary>
-	internal static HpPotionItem[] HpPotions { get; } = GetHpPotions();
-
-	private static HpPotionItem[] GetHpPotions()
-	{
-		var items = Service.GetSheet<Item>();
-		var list = new List<HpPotionItem>();
-		foreach (var i in items)
-		{
-			if ((i.FilterGroup == 8 && i.ItemSearchCategory.RowId == 43) || i.RowId == 22306 || i.RowId == 47102 || i.RowId == 20309)
-			{
-				list.Add(new HpPotionItem(i));
-			}
-		}
-		// Reverse the list
-		var n = list.Count;
-		var arr = new HpPotionItem[n];
-		for (var i = 0; i < n; i++)
-		{
-			arr[i] = list[n - i - 1];
-		}
-		return arr;
-	}
+	internal static HpPotionItem[] HpPotions => Consumables.HpPotions;
 
 	/// <summary>
 	/// Uses an HP potion.

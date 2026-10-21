@@ -80,7 +80,9 @@ internal static class ImGuiHelper
 	{
 		ImGui.SetNextItemWidth(50);
 
-		if (ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.GetDescription()}##MacroIndex{info.GetHashCode()}", ref info.MacroIndex, 1, -1, 99))
+		// Saved when the edit ends, not on every drag frame.
+		_ = ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.GetDescription()}##MacroIndex{info.GetHashCode()}", ref info.MacroIndex, 1, -1, 99);
+		if (ImGui.IsItemDeactivatedAfterEdit())
 		{
 			Service.Config.Save();
 		}
@@ -98,6 +100,10 @@ internal static class ImGuiHelper
 		if (ImGui.InputText($"{UiString.ConfigWindow_Events_ActionName.GetDescription()}##ActionName{info.GetHashCode()}", ref name, 100))
 		{
 			info.Name = name;
+		}
+
+		if (ImGui.IsItemDeactivatedAfterEdit())
+		{
 			Service.Config.Save();
 		}
 

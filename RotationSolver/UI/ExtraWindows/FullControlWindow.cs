@@ -973,15 +973,9 @@ internal class FullControlWindow : FullCtrlWindow
 			var canDoIt = false;
 			if (action is IBaseAction act)
 			{
-				// ForceEnable is global, so always turn it back off, even if CanUse throws.
-				IBaseAction.ForceEnable = true;
-				try
+				using (new ForceEnableScope())
 				{
 					canDoIt = act.CanUse(out _, usedUp: true, skipAoeCheck: true);
-				}
-				finally
-				{
-					IBaseAction.ForceEnable = false;
 				}
 			}
 			else if (action is IBaseItem item)

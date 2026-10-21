@@ -243,7 +243,7 @@ internal static partial class Util
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"<\s*[,)]", "", RegexOptions.IgnoreCase);
 
 		// Remove standalone parentheses and commas that might be remnants
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"\s*[,)]\s*(?=\s|$)", "", RegexOptions.IgnoreCase);
+		description = System.Text.RegularExpressions.Regex.Replace(description, @"(?<=^|\s)[,)]+(?=\s|$)", "", RegexOptions.IgnoreCase);
 
 		// Clean up multiple spaces
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"\s+", " ");

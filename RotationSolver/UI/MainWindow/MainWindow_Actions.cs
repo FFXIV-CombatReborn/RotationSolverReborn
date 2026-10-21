@@ -265,7 +265,7 @@ public partial class MainWindow
 					ImGui.Spacing();
 					ImGui.Text("ID: " + action.Info.ID);
 					ImGui.Text("Cast Type: " + action.Info.CastType);
-					ImGui.Text("GCDSingleHeal: " + action.Config.GCDSingleHeal);
+					ImGui.Text("GCDSingleHeal: " + action.Setting.GCDSingleHeal);
 					ImGui.Text("MinHPPercent: " + action.MinHPPercent);
 					ImGui.Text("AdjustedID: " + Service.GetAdjustedActionId(action.Info.ID));
 					ImGui.Text($"IsQuestUnlocked: {action.Info.IsQuestUnlocked()} ({action.Action.UnlockLink.RowId})");
@@ -282,8 +282,8 @@ public partial class MainWindow
 
 					if (ActionManager.Instance() != null && action.AdjustedID != 0)
 					{
-						ImGui.Text("Resources: " + ActionManager.Instance()->CheckActionResources(ActionType.Action, action.AdjustedID));
-						ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Action, action.AdjustedID));
+						ImGui.Text("Resources: " + (ActionStatus)ActionManager.Instance()->CheckActionResources(ActionType.Action, action.AdjustedID));
+						ImGui.Text("Status: " + (ActionStatus)ActionManager.Instance()->GetActionStatus(ActionType.Action, action.AdjustedID));
 					}
 					ImGui.Text("Cast Time: " + action.Info.CastTime);
 					ImGui.Text("MP: " + action.Info.MPNeed);
@@ -347,8 +347,8 @@ public partial class MainWindow
 				{
 					if (ActionManager.Instance() != null)
 					{
-						ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Item, item.ID).ToString());
-						ImGui.Text("Status HQ: " + ActionManager.Instance()->GetActionStatus(ActionType.Item, item.ID + 1000000).ToString());
+						ImGui.Text("Status: " + ((ActionStatus)ActionManager.Instance()->GetActionStatus(ActionType.Item, item.ID)).ToString());
+						ImGui.Text("Status HQ: " + ((ActionStatus)ActionManager.Instance()->GetActionStatus(ActionType.Item, item.ID + 1000000)).ToString());
 						var remain = ActionManager.Instance()->GetRecastTime(ActionType.Item, item.ID) - ActionManager.Instance()->GetRecastTimeElapsed(ActionType.Item, item.ID);
 						ImGui.Text("remain: " + remain.ToString());
 						ImGui.Text("ID: " + item.ID.ToString());

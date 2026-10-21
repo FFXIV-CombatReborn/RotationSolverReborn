@@ -572,7 +572,7 @@ public partial class MainWindow
 		ImGui.Text($"IsCastingMultiHit: {DataCenter.IsCastingMultiHit()}");
 		ImGui.Text($"IsCastingAreaVfx: {DataCenter.IsCastingAreaVfx()}");
 		ImGui.Text($"IsCastingTankVfx: {DataCenter.IsCastingTankVfx()}");
-		ImGui.Text($"TankbusterTargets: {DataCenter.TankbusterTargets.Count}");
+		ImGui.Text($"TankbusterTargets: {DataCenter.TankbusterTargetIds.Count}");
 		ImGui.Spacing();
 		ImGui.Text($"IsInM11S: {DataCenter.IsInM11S}");
 		ImGui.Text($"IsTyrantCastingSpecialIndicator2: {DataCenter.IsTyrantCastingSpecialIndicator2()}");

@@ -265,9 +265,14 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 	private static readonly bool _treasuredungeonnumbered = true;
 
 	[ConditionBool, UI("Crucible of the Unbroken - Ymir logic.",
-	Description = "Treat Ymir as immune if it has the Vulnerability Down buff.",
+	Description = "Prioritize the Sahagin Piece until it has Paralyzing Spikes, then the Ymir Shell, then the Ymir Piece once its shell is gone. Ymir is treated as immune while it has Vulnerability Down, and the spiked Sahagin while Ymir is up.",
 	Filter = DutySpecificCrucibleOfTheUnbroken)]
 	private static readonly bool _crucibleYmir = true;
+
+	[ConditionBool, UI("Crucible of the Unbroken - Siren logic.",
+	Description = "Prioritize Crawling Pieces, which bind you in place.",
+	Filter = DutySpecificCrucibleOfTheUnbroken)]
+	private static readonly bool _crucibleSiren = true;
 	#endregion
 
 	#region PvP
@@ -772,6 +777,10 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 	/// </markdown>
 	[ConditionBool, UI("Auto-use oGCD abilities", Filter = AutoActionUsage)]
 	private static readonly bool _useAbility = true;
+
+	[ConditionBool, UI("Auto-use duty actions", Filter = AutoActionUsage,
+		Description = "Allow the duty rotation to use duty actions, such as Bozja Lost Actions, Occult Crescent Phantom actions and Variant actions. Manually used or intercepted duty actions are unaffected.")]
+	private static readonly bool _useDutyActions = true;
 
 	[ConditionBool, UI("Use defensive actions", Filter = AutoActionUsage, Description = "It is recommended to check this option if you are playing Raids or you can plan the heal and defense ability usage by yourself.")]
 	private static readonly bool _useDefenseAbility = true;

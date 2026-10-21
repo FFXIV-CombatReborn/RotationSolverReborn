@@ -121,34 +121,29 @@ internal class RotationConfigCombo : RotationConfigBase
 			return false;
 		}
 
-		var numStr = str[Name.Length..].Trim();
-		var length = DisplayValues.Length;
+		Value = DisplayValues[ResolveIndex(DisplayValues, EnumNames, Value, str[Name.Length..].Trim())];
+		return true;
+	}
 
-		var currentIndex = Array.IndexOf(DisplayValues, Value);
-		if (currentIndex == -1)
+	internal static int ResolveIndex(string[] displayValues, string[] enumNames, string current, string arg)
+	{
+		var length = displayValues.Length;
+
+		if (int.TryParse(arg, out var num))
 		{
-			currentIndex = 0;
+			return ((num % length) + length) % length;
 		}
 
-		var nextId = (currentIndex + 1) % length;
-		if (int.TryParse(numStr, out var num))
+		for (var i = 0; i < length; i++)
 		{
-			nextId = num % length;
-		}
-		else
-		{
-			for (var i = 0; i < length; i++)
+			if (displayValues[i].Equals(arg, StringComparison.OrdinalIgnoreCase) ||
+				enumNames[i].Equals(arg, StringComparison.OrdinalIgnoreCase))
 			{
-				if (DisplayValues[i].Equals(numStr, StringComparison.OrdinalIgnoreCase) ||
-					EnumNames[i].Equals(numStr, StringComparison.OrdinalIgnoreCase))
-				{
-					nextId = i;
-					break;
-				}
+				return i;
 			}
 		}
 
-		Value = DisplayValues[nextId];
-		return true;
+		// No match: cycle to the next value.
+		return (Math.Max(Array.IndexOf(displayValues, current), 0) + 1) % length;
 	}
 }

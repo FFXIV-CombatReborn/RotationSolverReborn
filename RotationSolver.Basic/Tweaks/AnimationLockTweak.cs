@@ -86,10 +86,10 @@ public sealed unsafe class AnimationLockTweak
 	}
 
 	/// <summary>
-	/// Perform sanity check to detect conflicting plugins: disable the tweak if condition is false
+	/// Turns the tweak off when another plugin (XivAlexander, NoClippy, BossMod) changes the packet, so the reductions don't stack.
 	/// </summary>
-	/// <param name="packetOriginalAnimLock">Original animation lock from packet</param>
-	/// <param name="packetModifiedAnimLock">Modified animation lock from packet</param>
+	/// <param name="packetOriginalAnimLock">Animation lock in the packet before the game handled it</param>
+	/// <param name="packetModifiedAnimLock">Animation lock in the packet after the game and later hooks handled it</param>
 	/// <param name="gameCurrAnimLock">Current animation lock from game</param>
 	private static void SanityCheck(float packetOriginalAnimLock, float packetModifiedAnimLock, float gameCurrAnimLock)
 	{
@@ -98,20 +98,8 @@ public sealed unsafe class AnimationLockTweak
 			return; // Tweak is disabled
 		}
 
-		if (DataCenter.IsActivated())
-		{
-			return;
-		}
-
-		// If we don't have distinct packet data, skip this check
-		if (packetOriginalAnimLock == packetModifiedAnimLock &&
-			packetOriginalAnimLock == gameCurrAnimLock)
-		{
-			return;
-		}
-
-		// If the packet value appears to be aligned to 10ms increments, it's likely untouched and fine
-		if ((packetOriginalAnimLock % 0.01f) is <= 0.0005f or >= 0.0095f)
+		// Server values come in whole 10ms steps, so anything else was rewritten before it reached the game.
+		if (packetOriginalAnimLock == packetModifiedAnimLock && (packetOriginalAnimLock % 0.01f) is <= 0.0005f or >= 0.0095f)
 		{
 			return;
 		}

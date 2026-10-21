@@ -198,21 +198,9 @@ public class ActionSetting
 	{
 		get
 		{
+			// The BeAttacked override only applies to friendly actions.
 			var type = IBaseAction.TargetOverride ?? _type;
-			if (IsFriendly)
-			{
-
-			}
-			else
-			{
-				switch (type)
-				{
-					case TargetType.BeAttacked:
-						return _type;
-				}
-			}
-
-			return type;
+			return !IsFriendly && type == TargetType.BeAttacked ? _type : type;
 		}
 		set => _type = value;
 	}

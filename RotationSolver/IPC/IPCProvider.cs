@@ -126,7 +126,7 @@ namespace RotationSolver.IPC
 		{
 			if (!DataCenter.IsPvP)
 			{
-				RSCommands.UpdateState(stateCommand, (JobRole)DataCenter.Job);
+				RSCommands.UpdateState(stateCommand, DataCenter.Role);
 			}
 			PluginLog.Debug($"IPC ChangeOperatingMode was called. StateCommand:{stateCommand}");
 		}
@@ -152,7 +152,7 @@ namespace RotationSolver.IPC
 		{
 			if (!DataCenter.IsPvP)
 			{
-				RSCommands.UpdateState(stateCommand, (JobRole)DataCenter.Job, CreateOverrides(targetHostileType, targetFreely, autoOffAfterCombat, friendlyPartyNpcHealRaise));
+				RSCommands.UpdateState(stateCommand, DataCenter.Role, CreateOverrides(targetHostileType, targetFreely, autoOffAfterCombat, friendlyPartyNpcHealRaise));
 			}
 			PluginLog.Debug($"IPC ChangeOperatingModeWithOverrides was called. StateCommand:{stateCommand} TargetHostileType:{targetHostileType} TargetFreely:{targetFreely} AutoOffAfterCombat:{autoOffAfterCombat} FriendlyPartyNpcHealRaise:{friendlyPartyNpcHealRaise}");
 		}
@@ -171,7 +171,7 @@ namespace RotationSolver.IPC
 		{
 			if (!DataCenter.IsPvP)
 			{
-				RSCommands.AutodutyUpdateState(stateCommand, (JobRole)DataCenter.Job, targetingType);
+				RSCommands.AutodutyUpdateState(stateCommand, DataCenter.Role, targetingType);
 			}
 			PluginLog.Debug($"IPC AutodutyChangeOperatingMode was called. StateCommand:{stateCommand} TargetingType:{targetingType}");
 		}
@@ -200,7 +200,7 @@ namespace RotationSolver.IPC
 		{
 			if (!DataCenter.IsPvP)
 			{
-				RSCommands.AutodutyUpdateState(stateCommand, (JobRole)DataCenter.Job, targetingType, CreateOverrides(targetHostileType, targetFreely, autoOffAfterCombat, friendlyPartyNpcHealRaise));
+				RSCommands.AutodutyUpdateState(stateCommand, DataCenter.Role, targetingType, CreateOverrides(targetHostileType, targetFreely, autoOffAfterCombat, friendlyPartyNpcHealRaise));
 			}
 			PluginLog.Debug($"IPC AutodutyChangeOperatingModeWithOverrides was called. StateCommand:{stateCommand} TargetingType:{targetingType} TargetHostileType:{targetHostileType} TargetFreely:{targetFreely} AutoOffAfterCombat:{autoOffAfterCombat} FriendlyPartyNpcHealRaise:{friendlyPartyNpcHealRaise}");
 		}

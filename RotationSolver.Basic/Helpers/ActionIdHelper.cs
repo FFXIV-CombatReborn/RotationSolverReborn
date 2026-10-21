@@ -1,6 +1,4 @@
-﻿using ECommons.DalamudServices;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using Action = Lumina.Excel.Sheets.Action;
+﻿using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace RotationSolver.Basic.Helpers;
 
@@ -16,14 +14,8 @@ public static class ActionIdHelper
 	/// <returns>True if the action is cooling down, otherwise false.</returns>
 	public static unsafe bool IsCoolingDown(this ActionID actionID)
 	{
-		var action = actionID.GetAction();
-		if (!action.HasValue)
-		{
-			return false;
-		}
-
-		// Use IsActionOffCooldown to determine if the action is off cooldown
-		return !ActionManager.Instance()->IsActionOffCooldown(ActionType.Action, (uint)actionID);
+		var actionManager = ActionManager.Instance();
+		return actionManager != null && !actionManager->IsActionOffCooldown(ActionType.Action, (uint)actionID);
 	}
 
 	/// <summary>
@@ -54,16 +46,6 @@ public static class ActionIdHelper
 			return null;
 		}
 		return actionManager->GetRecastGroupDetail((byte)(cdGroup - 1));
-	}
-
-	/// <summary>
-	/// Gets the action associated with the action ID.
-	/// </summary>
-	/// <param name="actionID">The action ID.</param>
-	/// <returns>The action associated with the action ID.</returns>
-	private static Action? GetAction(this ActionID actionID)
-	{
-		return Svc.Data.GetExcelSheet<Action>()?.GetRow((uint)actionID);
 	}
 
 	/// <summary>

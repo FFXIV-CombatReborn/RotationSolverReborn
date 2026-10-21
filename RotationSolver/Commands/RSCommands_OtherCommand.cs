@@ -295,8 +295,8 @@ public static partial class RSCommands
 	/// </summary>
 	private static IAction[] GetCommandableActions()
 	{
-		var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
-		var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
+		var rotationActions = RotationUpdater.CurrentRotationActions;
+		var dutyActions = RotationUpdater.CurrentDutyRotationActions;
 
 		List<IAction> allActions = new(rotationActions.Length + dutyActions.Length);
 		HashSet<IAction> seen = [];

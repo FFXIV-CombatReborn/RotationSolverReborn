@@ -50,9 +50,6 @@ internal static class BMRTimeline_IPCSubscriber
 	[EzIPC("Hints.NextTankbusterDamageIn", true)]
 	internal static readonly Func<float>? NextTankbusterDamageIn;
 
-	[EzIPC("Debug.TimelineWalk", true)]
-	internal static readonly Func<string?>? DebugTimelineWalk;
-
 	[EzIPC("Hints.SpecialModeIn", true)]
 	internal static readonly Func<float>? SpecialModeIn;
 

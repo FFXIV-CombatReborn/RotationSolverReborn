@@ -2,8 +2,8 @@
 
 namespace RotationSolver.ExtraRotations.Ranged;
 
-[Rotation("Churin MCH", CombatType.PvE, GameVersion = "7.3", Description = "Kill it with kindness. And if that fails, kill it with sharp sticks or knives...or guns!")]
-[SourceCode(Path = "ArgentiRotations/Ranged/Machinist/ChurinMCH.cs")]
+[Rotation("Churin MCH", CombatType.PvE, GameVersion = "7.3", RotationType = RotationType.Reborn, Description = "Kill it with kindness. And if that fails, kill it with sharp sticks or knives...or guns!")]
+[SourceCode(Path = "main/ExtraRotations/Ranged/ChurinMCH.cs")]
 [ExtraRotation]
 public sealed class ChurinMCH : MachinistRotation
 {
@@ -139,7 +139,11 @@ public sealed class ChurinMCH : MachinistRotation
 
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
 	{
-		if (_churinPotions.ShouldUsePotion(this, out act)) return true;
+		if (_churinPotions.ShouldUsePotion(this, out act))
+		{
+			return true;
+		}
+
 		if (InCombat)
 		{
 			UpdateQueenStep();
@@ -154,8 +158,16 @@ public sealed class ChurinMCH : MachinistRotation
 
 	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
 	{
-		if (TryUseReassemble(nextGCD, out act)) return true;
-		if (TryUsePingPong(out act)) return true;
+		if (TryUseReassemble(nextGCD, out act))
+		{
+			return true;
+		}
+
+		if (TryUsePingPong(out act))
+		{
+			return true;
+		}
+
 		return TryUseBarrelStabilizer(out act) || base.AttackAbility(nextGCD, out act);
 	}
 	#endregion
@@ -163,11 +175,31 @@ public sealed class ChurinMCH : MachinistRotation
 	#region GCD Logic
 	protected override bool GeneralGCD(out IAction? act)
 	{
-		if (TryUseTools(out act)) return true;
-		if (TryUseFullMetalField(out act)) return true;
-		if (OverheatedStacks > 0 && TryUseOverheatedGCD(out act)) return true;
-		if (TryUseCombo(out act)) return true;
-		if (TryUseAOEGCDs(out act)) return true;
+		if (TryUseTools(out act))
+		{
+			return true;
+		}
+
+		if (TryUseFullMetalField(out act))
+		{
+			return true;
+		}
+
+		if (OverheatedStacks > 0 && TryUseOverheatedGCD(out act))
+		{
+			return true;
+		}
+
+		if (TryUseCombo(out act))
+		{
+			return true;
+		}
+
+		if (TryUseAOEGCDs(out act))
+		{
+			return true;
+		}
+
 		return TryUseFillerGCD(out act) || base.GeneralGCD(out act);
 	}
 	#endregion
@@ -181,10 +213,21 @@ public sealed class ChurinMCH : MachinistRotation
 	private bool TryUseTools(out IAction? act)
 	{
 		act = null;
-		if (HasOverheated || OverheatedStacks >= 1) return false;
+		if (HasOverheated || OverheatedStacks >= 1)
+		{
+			return false;
+		}
 
-		if (TryUseAirAnchor(out act)) return true;
-		if (TryUseDrill(out act)) return true;
+		if (TryUseAirAnchor(out act))
+		{
+			return true;
+		}
+
+		if (TryUseDrill(out act))
+		{
+			return true;
+		}
+
 		return TryUseChainSaw(out act) ||
 			   TryUseExcavator(out act);
 	}
@@ -214,7 +257,11 @@ public sealed class ChurinMCH : MachinistRotation
 	private bool TryUseAirAnchor(out IAction? act)
 	{
 		act = null;
-		if (HotShotMasteryTrait.EnoughLevel && AirAnchorPvE.CanUse(out act)) return true;
+		if (HotShotMasteryTrait.EnoughLevel && AirAnchorPvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		return !AirAnchorPvE.EnoughLevel && HotShotPvE.CanUse(out act);
 	}
 
@@ -229,7 +276,10 @@ public sealed class ChurinMCH : MachinistRotation
 		act = null;
 
 		if ((WildfirePvE.Cooldown.HasOneCharge ||
-			 WildfirePvE.Cooldown.WillHaveOneChargeGCD(1)) && ExcavatorPvE.CanUse(out act)) return true;
+			 WildfirePvE.Cooldown.WillHaveOneChargeGCD(1)) && ExcavatorPvE.CanUse(out act))
+		{
+			return true;
+		}
 
 		byte nextTargetBattery = 0;
 		if (_queenStep < _queenStepPairs.Length)
@@ -262,7 +312,10 @@ public sealed class ChurinMCH : MachinistRotation
 			if (!WildfirePvE.Cooldown.IsCoolingDown || IsLastAbility(true, WildfirePvE) ||
 				WildfirePvE.Cooldown.IsCoolingDown && WildfirePvE.Cooldown.WillHaveOneChargeGCD(1))
 			{
-				if (FullMetalFieldPvE.CanUse(out act)) return true;
+				if (FullMetalFieldPvE.CanUse(out act))
+				{
+					return true;
+				}
 			}
 		}
 
@@ -272,32 +325,53 @@ public sealed class ChurinMCH : MachinistRotation
 	{
 		if (IsLastComboAction(true, SlugShotPvE) && LiveComboTime >= GCDTime(1) && LiveComboTime <= GCDTime(2) && !IsOverheated)
 		{
-			if (CleanShotPvE.CanUse(out act)) return true;
+			if (CleanShotPvE.CanUse(out act))
+			{
+				return true;
+			}
 		}
 
 		if (IsLastComboAction(true, SplitShotPvE) && LiveComboTime >= GCDTime(1) && LiveComboTime <= GCDTime(2) && !IsOverheated)
 		{
-			if (SlugShotPvE.CanUse(out act)) return true;
+			if (SlugShotPvE.CanUse(out act))
+			{
+				return true;
+			}
 		}
 
 		return SetActToNull(out act);
 	}
 	private bool TryUseOverheatedGCD(out IAction? act)
 	{
-		if (!IsOverheated || OverheatedStacks < 1) return SetActToNull(out act);
+		if (!IsOverheated || OverheatedStacks < 1)
+		{
+			return SetActToNull(out act);
+		}
 
 		return AutoCrossbowPvE.CanUse(out act) ||
 			   HeatBlastPvE.CanUse(out act);
 	}
 	private bool TryUseAOEGCDs(out IAction? act)
 	{
-		if (IsOverheated || OverheatedStacks > 0) return SetActToNull(out act);
-		if ((BioMove || (!IsMoving && !BioMove)) && BioblasterPvE.CanUse(out act, usedUp: true)) return true;
+		if (IsOverheated || OverheatedStacks > 0)
+		{
+			return SetActToNull(out act);
+		}
+
+		if ((BioMove || (!IsMoving && !BioMove)) && BioblasterPvE.CanUse(out act, usedUp: true))
+		{
+			return true;
+		}
+
 		return SpreadShotPvE.CanUse(out act);
 	}
 	private bool TryUseFillerGCD(out IAction? act)
 	{
-		if (IsOverheated || OverheatedStacks > 0) return SetActToNull(out act);
+		if (IsOverheated || OverheatedStacks > 0)
+		{
+			return SetActToNull(out act);
+		}
+
 		return HeatedCleanShotPvE.CanUse(out act) ||
 			   HeatedSlugShotPvE.CanUse(out act) ||
 			   HeatedSplitShotPvE.CanUse(out act) ||
@@ -432,7 +506,10 @@ public sealed class ChurinMCH : MachinistRotation
 
 	private bool ShouldUseHypercharge()
 	{
-		if (AreToolsComingOffCooldown()) return false;
+		if (AreToolsComingOffCooldown())
+		{
+			return false;
+		}
 
 		return IsBurstWindow() ||
 			   IsOptimalHeatThreshold() ||
@@ -474,8 +551,16 @@ public sealed class ChurinMCH : MachinistRotation
 
 	private bool IsOptimalHeatThreshold()
 	{
-		if (CombatElapsedLess(60) && Heat >= 50) return true;
-		if (BurstSoon && Heat >= 50) return false;
+		if (CombatElapsedLess(60) && Heat >= 50)
+		{
+			return true;
+		}
+
+		if (BurstSoon && Heat >= 50)
+		{
+			return false;
+		}
+
 		return InFiller && Heat >= 50;         // Filler phase
 											   //return InRebuildPhase && Heat >= 50; // Rebuild phase
 	}
@@ -521,11 +606,15 @@ public sealed class ChurinMCH : MachinistRotation
 		{
 			// Use during Hypercharge
 			if (IsOverheated && WildfirePvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			// Use when about to Hypercharge
 			if (Heat >= 45 && HyperchargePvE.CanUse(out _) && CanLateWeave && WildfirePvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 
 		return false;
@@ -571,8 +660,15 @@ public sealed class ChurinMCH : MachinistRotation
 	}
 	private bool TryUsePingPong(out IAction? act)
 	{
-		if (TryUseCheckmate(out act)) return true;
-		if (TryUseDoubleCheck(out act)) return true;
+		if (TryUseCheckmate(out act))
+		{
+			return true;
+		}
+
+		if (TryUseDoubleCheck(out act))
+		{
+			return true;
+		}
 
 		var whichToUse = RicochetPvE.EnoughLevel switch
 		{
@@ -587,12 +683,18 @@ public sealed class ChurinMCH : MachinistRotation
 			case "Ricochet":
 				if (BarrelStabilizerPvE.Cooldown.IsCoolingDown &&
 					(FullMetalFieldPvE.CanUse(out _) || FullMetalFieldPvE.Cooldown.IsCoolingDown) && RicochetPvE.CanUse(out act, usedUp: true))
+				{
 					return true;
+				}
+
 				break;
 			case "GaussRound":
 				if (BarrelStabilizerPvE.Cooldown.IsCoolingDown &&
 					(FullMetalFieldPvE.CanUse(out _) || FullMetalFieldPvE.Cooldown.IsCoolingDown) && GaussRoundPvE.CanUse(out act, usedUp: true))
+				{
 					return true;
+				}
+
 				break;
 		}
 
@@ -639,7 +741,7 @@ public sealed class ChurinMCH : MachinistRotation
 			}
 
 			// Check opener timing: if it's an opener potion and countdown is within configured time
-			float countDown = Service.CountDownTime;
+			var countDown = Service.CountDownTime;
 			if (IsOpenerPotion(timing) && countDown > 0 && countDown <= OpenerPotionTime)
 			{
 				return true;

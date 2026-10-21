@@ -22,8 +22,6 @@ internal class Service : IDisposable
 {
 	public const string COMMAND = "/rotation";
 	public const string ALTCOMMAND = "/rsr";
-	public const string AUTOCOMMAND = "/rotation Auto";
-	public const string OFFCOMMAND = "/rotation Off";
 	public const string USERNAME = "FFXIV-CombatReborn";
 	public const string REPO = "RotationSolverReborn";
 

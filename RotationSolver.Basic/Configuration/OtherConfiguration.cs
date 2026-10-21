@@ -10,7 +10,7 @@ internal class OtherConfiguration
 	private static readonly HttpClient Http = CreateHttpClient();
 	private static HttpClient CreateHttpClient()
 	{
-		var c = new HttpClient();
+		var c = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
 		try
 		{
 			c.DefaultRequestHeaders.UserAgent.ParseAdd("RotationSolver");
@@ -110,31 +110,73 @@ internal class OtherConfiguration
 
 	public static RotationSolverRecord RotationSolverRecord = new();
 
-	public static void Init()
+	private abstract class ListFile(string name, bool download)
 	{
-		if (!Directory.Exists(Svc.PluginInterface.ConfigDirectory.FullName))
+		public string Name { get; } = name;
+		public bool Download { get; } = download;
+
+		public abstract void Load(bool forceDownload);
+
+		public abstract string Serialize();
+	}
+
+	private sealed class ListFile<T>(string name, Func<T> get, Action<T> set, bool download = true) : ListFile(name, download) where T : new()
+	{
+		public override void Load(bool forceDownload)
 		{
-			_ = Directory.CreateDirectory(Svc.PluginInterface.ConfigDirectory.FullName);
+			set(InitOne(get(), Name, Download, forceDownload));
 		}
 
-		_ = Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)));
-		_ = Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
-		_ = Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
-		_ = Task.Run(() => InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority)));
-		_ = Task.Run(() => InitOne(ref TheSpearPriority, nameof(TheSpearPriority)));
-		_ = Task.Run(() => InitOne(ref TheBalancePriority, nameof(TheBalancePriority)));
-		_ = Task.Run(() => InitOne(ref KardiaTankPriority, nameof(KardiaTankPriority)));
-		_ = Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
-		_ = Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
-		_ = Task.Run(() => InitOne(ref HostileCastingArea, nameof(HostileCastingArea)));
-		_ = Task.Run(() => InitOne(ref HostileCastingTank, nameof(HostileCastingTank)));
-		_ = Task.Run(() => InitOne(ref BeneficialPositions, nameof(BeneficialPositions)));
-		_ = Task.Run(() => InitOne(ref RotationSolverRecord, nameof(RotationSolverRecord), false));
-		_ = Task.Run(() => InitOne(ref NoCastingStatus, nameof(NoCastingStatus)));
-		_ = Task.Run(() => InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback)));
-		_ = Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)));
-		_ = Task.Run(() => InitOne(ref NorthHornWeaknessRecords, nameof(NorthHornWeaknessRecords), false));
-		_ = Task.Run(() => InitOne(ref SouthHornWeaknessRecords, nameof(SouthHornWeaknessRecords), false));
+		public override string Serialize()
+		{
+			return JsonConvert.SerializeObject(get(), Formatting.Indented, SerializerSettings);
+		}
+	}
+
+	private static readonly JsonSerializerSettings SerializerSettings = new()
+	{
+		TypeNameHandling = TypeNameHandling.None,
+	};
+
+	private static readonly JsonSerializerSettings DeserializerSettings = new()
+	{
+		TypeNameHandling = TypeNameHandling.None,
+		Converters = [new StringEnumConverter()],
+	};
+
+	private static readonly ListFile[] Files =
+	[
+		new ListFile<HashSet<uint>>(nameof(DangerousStatus), () => DangerousStatus, v => DangerousStatus = v),
+		new ListFile<HashSet<uint>>(nameof(PriorityStatus), () => PriorityStatus, v => PriorityStatus = v),
+		new ListFile<HashSet<uint>>(nameof(InvincibleStatus), () => InvincibleStatus, v => InvincibleStatus = v),
+		new ListFile<List<Job>>(nameof(DancePartnerPriority), () => DancePartnerPriority, v => DancePartnerPriority = v),
+		new ListFile<List<Job>>(nameof(TheSpearPriority), () => TheSpearPriority, v => TheSpearPriority = v),
+		new ListFile<List<Job>>(nameof(TheBalancePriority), () => TheBalancePriority, v => TheBalancePriority = v),
+		new ListFile<List<Job>>(nameof(KardiaTankPriority), () => KardiaTankPriority, v => KardiaTankPriority = v),
+		new ListFile<Dictionary<uint, string[]>>(nameof(NoHostileNames), () => NoHostileNames, v => NoHostileNames = v),
+		new ListFile<Dictionary<uint, string[]>>(nameof(NoProvokeNames), () => NoProvokeNames, v => NoProvokeNames = v),
+		new ListFile<HashSet<uint>>(nameof(HostileCastingArea), () => HostileCastingArea, v => HostileCastingArea = v),
+		new ListFile<HashSet<uint>>(nameof(HostileCastingTank), () => HostileCastingTank, v => HostileCastingTank = v),
+		new ListFile<Dictionary<uint, Vector3[]>>(nameof(BeneficialPositions), () => BeneficialPositions, v => BeneficialPositions = v),
+		new ListFile<RotationSolverRecord>(nameof(RotationSolverRecord), () => RotationSolverRecord, v => RotationSolverRecord = v, false),
+		new ListFile<HashSet<uint>>(nameof(NoCastingStatus), () => NoCastingStatus, v => NoCastingStatus = v),
+		new ListFile<HashSet<uint>>(nameof(HostileCastingKnockback), () => HostileCastingKnockback, v => HostileCastingKnockback = v),
+		new ListFile<HashSet<uint>>(nameof(HostileCastingStop), () => HostileCastingStop, v => HostileCastingStop = v),
+		new ListFile<Dictionary<uint, List<string>>>(nameof(NorthHornWeaknessRecords), () => NorthHornWeaknessRecords, v => NorthHornWeaknessRecords = v, false),
+		new ListFile<Dictionary<uint, List<string>>>(nameof(SouthHornWeaknessRecords), () => SouthHornWeaknessRecords, v => SouthHornWeaknessRecords = v, false),
+	];
+
+	private static ListFile GetFile(string name)
+	{
+		foreach (var file in Files)
+		{
+			if (file.Name == name)
+			{
+				return file;
+			}
+		}
+
+		throw new ArgumentException($"Unknown list file {name}", nameof(name));
 	}
 
 	public static async Task InitAsync(CancellationToken cancellationToken = default)
@@ -144,232 +186,113 @@ internal class OtherConfiguration
 			_ = Directory.CreateDirectory(Svc.PluginInterface.ConfigDirectory.FullName);
 		}
 
-		await Task.WhenAll(
-			Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)), cancellationToken),
-			Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)), cancellationToken),
-			Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)), cancellationToken),
-			Task.Run(() => InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority)), cancellationToken),
-			Task.Run(() => InitOne(ref TheSpearPriority, nameof(TheSpearPriority)), cancellationToken),
-			Task.Run(() => InitOne(ref TheBalancePriority, nameof(TheBalancePriority)), cancellationToken),
-			Task.Run(() => InitOne(ref KardiaTankPriority, nameof(KardiaTankPriority)), cancellationToken),
-			Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)), cancellationToken),
-			Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)), cancellationToken),
-			Task.Run(() => InitOne(ref HostileCastingArea, nameof(HostileCastingArea)), cancellationToken),
-			Task.Run(() => InitOne(ref HostileCastingTank, nameof(HostileCastingTank)), cancellationToken),
-			Task.Run(() => InitOne(ref BeneficialPositions, nameof(BeneficialPositions)), cancellationToken),
-			Task.Run(() => InitOne(ref RotationSolverRecord, nameof(RotationSolverRecord), false), cancellationToken),
-			Task.Run(() => InitOne(ref NoCastingStatus, nameof(NoCastingStatus)), cancellationToken),
-			Task.Run(() => InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback)), cancellationToken),
-			Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)), cancellationToken),
-			Task.Run(() => InitOne(ref NorthHornWeaknessRecords, nameof(NorthHornWeaknessRecords), false), cancellationToken),
-			Task.Run(() => InitOne(ref SouthHornWeaknessRecords, nameof(SouthHornWeaknessRecords), false), cancellationToken)
-		);
+		var tasks = new Task[Files.Length];
+		for (var i = 0; i < Files.Length; i++)
+		{
+			var file = Files[i];
+			tasks[i] = Task.Run(() => file.Load(false), cancellationToken);
+		}
+
+		await Task.WhenAll(tasks);
 	}
 
 	public static Task Save()
 	{
-		return Task.Run(async () =>
+		// Serialized on the calling thread so the lists aren't read while the game thread changes them.
+		var contents = new (string Path, string Json)[Files.Length];
+		for (var i = 0; i < Files.Length; i++)
 		{
-			await SavePriorityStatus();
-			await SaveDangerousStatus();
-			await SaveInvincibleStatus();
-			await SaveDancePartnerPriority();
-			await SaveTheSpearPriority();
-			await SaveTheBalancePriority();
-			await SaveKardiaTankPriority();
-			await SaveNoHostileNames();
-			await SaveHostileCastingArea();
-			await SaveHostileCastingTank();
-			await SaveBeneficialPositions();
-			await SaveRotationSolverRecord();
-			await SaveNoProvokeNames();
-			await SaveNoCastingStatus();
-			await SaveHostileCastingKnockback();
-			await SaveHostileCastingStop();
-			await SaveNorthHornWeaknessRecords();
-			await SaveSouthHornWeaknessRecords();
+			contents[i] = (GetFilePath(Files[i].Name), Files[i].Serialize());
+		}
+
+		return Task.Run(() =>
+		{
+			foreach (var (path, json) in contents)
+			{
+				WriteFile(path, json);
+			}
 		});
 	}
+
+	// Writes one list file, so editing a list doesn't rewrite all of them.
+	internal static Task SaveList(string name)
+	{
+		var path = GetFilePath(name);
+		var json = GetFile(name).Serialize();
+		return Task.Run(() => WriteFile(path, json));
+	}
+
+	// Downloads in the background so the game thread isn't blocked by the request.
+	private static void ResetFile(string name)
+	{
+		var file = GetFile(name);
+		_ = Task.Run(() => file.Load(true));
+	}
+
 	#region Action Tab
-	public static void ResetHostileCastingArea()
-	{
-		InitOne(ref HostileCastingArea, nameof(HostileCastingArea), true, true);
-		SaveHostileCastingArea().Wait();
-	}
+	public static void ResetHostileCastingArea() => ResetFile(nameof(HostileCastingArea));
 
-	public static void ResetHostileCastingTank()
-	{
-		InitOne(ref HostileCastingTank, nameof(HostileCastingTank), true, true);
-		SaveHostileCastingTank().Wait();
-	}
+	public static void ResetHostileCastingTank() => ResetFile(nameof(HostileCastingTank));
 
-	public static void ResetHostileCastingKnockback()
-	{
-		InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback), true, true);
-		SaveHostileCastingKnockback().Wait();
-	}
+	public static void ResetHostileCastingKnockback() => ResetFile(nameof(HostileCastingKnockback));
 
-	public static void ResetHostileCastingStop()
-	{
-		InitOne(ref HostileCastingStop, nameof(HostileCastingStop), true, true);
-		SaveHostileCastingStop().Wait();
-	}
+	public static void ResetHostileCastingStop() => ResetFile(nameof(HostileCastingStop));
 
-	public static Task SaveHostileCastingArea()
-	{
-		return Task.Run(() => Save(HostileCastingArea, nameof(HostileCastingArea)));
-	}
+	public static Task SaveHostileCastingArea() => SaveList(nameof(HostileCastingArea));
 
-	public static Task SaveHostileCastingTank()
-	{
-		return Task.Run(() => Save(HostileCastingTank, nameof(HostileCastingTank)));
-	}
+	public static Task SaveHostileCastingTank() => SaveList(nameof(HostileCastingTank));
 
-	private static Task SaveHostileCastingKnockback()
-	{
-		return Task.Run(() => Save(HostileCastingKnockback, nameof(HostileCastingKnockback)));
-	}
-
-	private static Task SaveHostileCastingStop()
-	{
-		return Task.Run(() => Save(HostileCastingStop, nameof(HostileCastingStop)));
-	}
+	public static Task SaveHostileCastingKnockback() => SaveList(nameof(HostileCastingKnockback));
 	#endregion
 
 	#region Status Tab
+	public static void ResetPriorityStatus() => ResetFile(nameof(PriorityStatus));
 
-	public static void ResetPriorityStatus()
-	{
-		InitOne(ref PriorityStatus, nameof(PriorityStatus), true, true);
-		SavePriorityStatus().Wait();
-	}
+	public static void ResetInvincibleStatus() => ResetFile(nameof(InvincibleStatus));
 
-	public static void ResetInvincibleStatus()
-	{
-		InitOne(ref InvincibleStatus, nameof(InvincibleStatus), true, true);
-		SaveInvincibleStatus().Wait();
-	}
+	public static void ResetDangerousStatus() => ResetFile(nameof(DangerousStatus));
 
-	public static void ResetDangerousStatus()
-	{
-		InitOne(ref DangerousStatus, nameof(DangerousStatus), true, true);
-		SaveDangerousStatus().Wait();
-	}
-
-	public static void ResetNoCastingStatus()
-	{
-		InitOne(ref NoCastingStatus, nameof(NoCastingStatus), true, true);
-		SaveNoCastingStatus().Wait();
-	}
-
-	public static Task SavePriorityStatus()
-	{
-		return Task.Run(() => Save(PriorityStatus, nameof(PriorityStatus)));
-	}
-
-	public static Task SaveInvincibleStatus()
-	{
-		return Task.Run(() => Save(InvincibleStatus, nameof(InvincibleStatus)));
-	}
-
-	public static Task SaveDangerousStatus()
-	{
-		return Task.Run(() => Save(DangerousStatus, nameof(DangerousStatus)));
-	}
-
-	public static Task SaveNoCastingStatus()
-	{
-		return Task.Run(() => Save(NoCastingStatus, nameof(NoCastingStatus)));
-	}
-
+	public static void ResetNoCastingStatus() => ResetFile(nameof(NoCastingStatus));
 	#endregion
-	public static Task SaveRotationSolverRecord()
-	{
-		return Task.Run(() => Save(RotationSolverRecord, nameof(RotationSolverRecord)));
-	}
 
-	public static Task SaveNoProvokeNames()
-	{
-		return Task.Run(() => Save(NoProvokeNames, nameof(NoProvokeNames)));
-	}
+	public static Task SaveRotationSolverRecord() => SaveList(nameof(RotationSolverRecord));
 
-	public static Task SaveBeneficialPositions()
-	{
-		return Task.Run(() => Save(BeneficialPositions, nameof(BeneficialPositions)));
-	}
+	public static Task SaveNoProvokeNames() => SaveList(nameof(NoProvokeNames));
 
-	public static void ResetDancePartnerPriority()
-	{
-		InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority), true, true);
-		SaveDancePartnerPriority().Wait();
-	}
+	public static Task SaveBeneficialPositions() => SaveList(nameof(BeneficialPositions));
 
-	public static void ResetTheSpearPriority()
-	{
-		InitOne(ref TheSpearPriority, nameof(TheSpearPriority), true, true);
-		SaveTheSpearPriority().Wait();
-	}
+	public static void ResetDancePartnerPriority() => ResetFile(nameof(DancePartnerPriority));
 
-	public static void ResetTheBalancePriority()
-	{
-		InitOne(ref TheBalancePriority, nameof(TheBalancePriority), true, true);
-		SaveTheBalancePriority().Wait();
-	}
+	public static void ResetTheSpearPriority() => ResetFile(nameof(TheSpearPriority));
 
-	public static void ResetKardiaTankPriority()
-	{
-		InitOne(ref KardiaTankPriority, nameof(KardiaTankPriority), true, true);
-		SaveKardiaTankPriority().Wait();
-	}
+	public static void ResetTheBalancePriority() => ResetFile(nameof(TheBalancePriority));
 
-	public static Task SaveDancePartnerPriority()
-	{
-		return Task.Run(() => Save(DancePartnerPriority, nameof(DancePartnerPriority)));
-	}
+	public static void ResetKardiaTankPriority() => ResetFile(nameof(KardiaTankPriority));
 
-	public static Task SaveTheSpearPriority()
-	{
-		return Task.Run(() => Save(TheSpearPriority, nameof(TheSpearPriority)));
-	}
+	public static Task SaveDancePartnerPriority() => SaveList(nameof(DancePartnerPriority));
 
-	public static Task SaveTheBalancePriority()
-	{
-		return Task.Run(() => Save(TheBalancePriority, nameof(TheBalancePriority)));
-	}
+	public static Task SaveTheSpearPriority() => SaveList(nameof(TheSpearPriority));
 
-	public static Task SaveKardiaTankPriority()
-	{
-		return Task.Run(() => Save(KardiaTankPriority, nameof(KardiaTankPriority)));
-	}
+	public static Task SaveTheBalancePriority() => SaveList(nameof(TheBalancePriority));
 
-	public static Task SaveNoHostileNames()
-	{
-		return Task.Run(() => Save(NoHostileNames, nameof(NoHostileNames)));
-	}
+	public static Task SaveKardiaTankPriority() => SaveList(nameof(KardiaTankPriority));
+
+	public static Task SaveNoHostileNames() => SaveList(nameof(NoHostileNames));
 
 	#region Occult Crescent Weakness Tracking
 
-	public static Task SaveNorthHornWeaknessRecords()
-	{
-		return Task.Run(() => Save(NorthHornWeaknessRecords, nameof(NorthHornWeaknessRecords)));
-	}
+	public static Task SaveNorthHornWeaknessRecords() => SaveList(nameof(NorthHornWeaknessRecords));
 
-	public static Task SaveSouthHornWeaknessRecords()
-	{
-		return Task.Run(() => Save(SouthHornWeaknessRecords, nameof(SouthHornWeaknessRecords)));
-	}
+	public static Task SaveSouthHornWeaknessRecords() => SaveList(nameof(SouthHornWeaknessRecords));
 
 	public static void ResetOccultWeaknessRecords()
 	{
-		NorthHornWeaknessRecords.Clear();
-		SouthHornWeaknessRecords.Clear();
-		SaveNorthHornWeaknessRecords().Wait();
-		SaveSouthHornWeaknessRecords().Wait();
+		NorthHornWeaknessRecords = [];
+		SouthHornWeaknessRecords = [];
+		_ = SaveNorthHornWeaknessRecords();
+		_ = SaveSouthHornWeaknessRecords();
 	}
 
-	/// <summary>
-	///
-	/// </summary>
 	public static bool RecordOccultWeakness(uint nameId, StatusID weakness)
 	{
 		if (nameId == 0)
@@ -407,104 +330,87 @@ internal class OtherConfiguration
 		}
 
 		list.Add(weaknessName);
-
 		return true;
 	}
 
 	#endregion
 
-
 	private static string GetFilePath(string name)
 	{
-		var directory = Svc.PluginInterface.ConfigDirectory.FullName;
-
-		return directory + $"\\{name}.json";
+		return Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, $"{name}.json");
 	}
 
-	private static void Save<T>(T value, string name)
+	// Written to a temp file first, so a crash mid-write can't leave a half-written list.
+	private static void WriteFile(string path, string json)
 	{
-		SavePath(value, GetFilePath(name));
-	}
-
-	private static void SavePath<T>(T value, string path)
-	{
-		var retryCount = 3;
-		var delay = 1000; // 1 second delay
-
+		const int retryCount = 3;
 		for (var i = 0; i < retryCount; i++)
 		{
 			try
 			{
-				File.WriteAllText(path,
-				JsonConvert.SerializeObject(value, Formatting.Indented, new JsonSerializerSettings()
-				{
-					TypeNameHandling = TypeNameHandling.None,
-				}));
-				return; // Exit the method if successful
+				var tempPath = path + ".tmp";
+				File.WriteAllText(tempPath, json);
+				File.Move(tempPath, path, true);
+				return;
 			}
 			catch (IOException ex) when (i < retryCount - 1)
 			{
-				PluginLog.Warning($"Failed to save the file to {path}. Retrying in {delay}ms...: {ex.Message}");
-				Thread.Sleep(delay); // Wait before retrying
+				PluginLog.Warning($"Failed to save the file to {path}. Retrying in 1s...: {ex.Message}");
+				Thread.Sleep(1000);
 			}
 			catch (Exception ex)
 			{
 				PluginLog.Warning($"Failed to save the file to {path}: {ex.Message}");
-				return; // Exit the method if an unexpected exception occurs
+				return;
 			}
 		}
 	}
 
-	private static void InitOne<T>(ref T value, string name, bool download = true, bool forceDownload = false) where T : new()
+	private static T InitOne<T>(T current, string name, bool download, bool forceDownload) where T : new()
 	{
 		var path = GetFilePath(name);
 		PluginLog.Information($"Initializing {name} from {path}");
 
-		if (File.Exists(path) && !forceDownload)
+		var hasLocalFile = File.Exists(path);
+		if (hasLocalFile && !forceDownload)
 		{
 			try
 			{
-				value = JsonConvert.DeserializeObject<T>(File.ReadAllText(path), new JsonSerializerSettings
-				{
-					TypeNameHandling = TypeNameHandling.None,
-					Converters = [new StringEnumConverter()] // Add this line
-				})! ?? throw new Exception("Deserialized value is null.");
+				var value = JsonConvert.DeserializeObject<T>(File.ReadAllText(path), DeserializerSettings)
+					?? throw new Exception("Deserialized value is null.");
 				PluginLog.Information($"Loaded {name} from local file.");
+				return value;
 			}
 			catch (Exception ex)
 			{
 				PluginLog.Warning($"Failed to load {name} from local file. Reinitializing to default: {ex.Message}");
-				value = new T(); // Reinitialize to default
+				return new T();
 			}
 		}
-		else if (download || forceDownload)
+
+		if (!download && !forceDownload)
 		{
-			try
-			{
-				var url = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/{name}.json";
-				var str = Http.GetStringAsync(url).Result;
-
-				File.WriteAllText(path, str);
-				value = JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings
-				{
-					TypeNameHandling = TypeNameHandling.None,
-					Converters = [new StringEnumConverter()] // Add this line
-				})! ?? throw new Exception("Deserialized value is null.");
-
-				PluginLog.Information($"Downloaded and loaded {name} from GitHub.");
-			}
-			catch (Exception ex)
-			{
-				PluginLog.Warning($"Failed to download {name} from GitHub. Reinitializing to default. Exception: {ex.Message}");
-				_ = BasicWarningHelper.AddSystemWarning($"Github download failed.");
-				value = new T(); // Reinitialize to default
-				SavePath(value, path); // Save the default value
-			}
+			return new T();
 		}
-		else
+
+		try
 		{
-			value = new T(); // Reinitialize to default
-			SavePath(value, path); // Save the default value
+			var url = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/{name}.json";
+			var str = Http.GetStringAsync(url).GetAwaiter().GetResult();
+			var value = JsonConvert.DeserializeObject<T>(str, DeserializerSettings)
+				?? throw new Exception("Deserialized value is null.");
+
+			// Only a list that parsed is written, so a bad download never replaces the local copy.
+			WriteFile(path, str);
+			PluginLog.Information($"Downloaded and loaded {name} from GitHub.");
+			return value;
+		}
+		catch (Exception ex)
+		{
+			// Nothing is written on failure, so the download is tried again next time.
+			PluginLog.Warning($"Failed to download {name} from GitHub. Exception: {ex.Message}");
+			_ = BasicWarningHelper.AddSystemWarning($"Github download failed.");
+			return forceDownload ? current : new T();
 		}
 	}
 }

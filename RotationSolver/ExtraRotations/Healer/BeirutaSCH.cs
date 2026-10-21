@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Healer;
 
-[Rotation("BeirutaSCH", CombatType.PvE, GameVersion = "7.45", Description = "Semi-Automatic Savage/Ultimate rotation, need to used with CD planner or manual inputs")]
+[Rotation("BeirutaSCH", CombatType.PvE, GameVersion = "7.45", RotationType = RotationType.Reborn, Description = "Semi-Automatic Savage/Ultimate rotation, need to used with CD planner or manual inputs")]
 [SourceCode(Path = "main/ExtraRotations/Healer/BeirutaSCH.cs")]
 [ExtraRotation]
 
@@ -214,13 +214,24 @@ public sealed class BeirutaSCH : ScholarRotation
 	{
 		get
 		{
-			if (PartyMembers == null) return false;
+			if (PartyMembers == null)
+			{
+				return false;
+			}
+
 			foreach (var member in PartyMembers)
 			{
-				if (member?.StatusList == null) continue;
+				if (member?.StatusList == null)
+				{
+					continue;
+				}
+
 				foreach (var status in member.StatusList)
 				{
-					if (status.StatusId == (uint)StatusID.Medicated) return true;
+					if (status.StatusId == (uint)StatusID.Medicated)
+					{
+						return true;
+					}
 				}
 			}
 			return false;
@@ -229,10 +240,14 @@ public sealed class BeirutaSCH : ScholarRotation
 	private bool CanUseCountdownShieldGCD(out IAction? act)
 	{
 		if (ConcitationPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (SuccorPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		act = null;
 		return false;
@@ -243,12 +258,17 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	private static float EstimateRemainingSeconds(dynamic cooldown, float maxProbeSeconds, float stepSeconds = 0.5f)
 	{
-		if (cooldown.HasOneCharge) return 0f;
+		if (cooldown.HasOneCharge)
+		{
+			return 0f;
+		}
 
-		for (float t = 0f; t <= maxProbeSeconds; t += stepSeconds)
+		for (var t = 0f; t <= maxProbeSeconds; t += stepSeconds)
 		{
 			if (cooldown.WillHaveOneCharge(t))
+			{
 				return t;
+			}
 		}
 
 		return -1f;
@@ -256,13 +276,21 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	private float SummonSeraphRem()
 	{
-		if (!SummonSeraphPvE.EnoughLevel) return -1f;
+		if (!SummonSeraphPvE.EnoughLevel)
+		{
+			return -1f;
+		}
+
 		return EstimateRemainingSeconds(SummonSeraphPvE.Cooldown, 180f, 0.5f);
 	}
 
 	private float DissipationRem()
 	{
-		if (!DissipationPvE.EnoughLevel) return -1f;
+		if (!DissipationPvE.EnoughLevel)
+		{
+			return -1f;
+		}
+
 		return EstimateRemainingSeconds(DissipationPvE.Cooldown, 180f, 0.5f);
 	}
 
@@ -271,7 +299,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		get
 		{
 			if (CurrentTarget == null)
+			{
 				return false;
+			}
 
 			return CurrentTarget.HasStatus(true, StatusID.ChainStratagem) &&
 				   CurrentTarget.WillStatusEnd(5f, true, StatusID.ChainStratagem);
@@ -280,8 +310,8 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	private bool ShouldUseSummonEos()
 	{
-		float summonSeraphRem = SummonSeraphRem();
-		float dissipationRem = DissipationRem();
+		var summonSeraphRem = SummonSeraphRem();
+		var dissipationRem = DissipationRem();
 
 		return summonSeraphRem < 90f && dissipationRem < 140f;
 	}
@@ -314,7 +344,7 @@ public sealed class BeirutaSCH : ScholarRotation
 			return true;
 		}
 
-		if (CanUseCurrentBio(out IAction? bioAct) &&
+		if (CanUseCurrentBio(out var bioAct) &&
 			nextGCD == bioAct)
 		{
 			return true;
@@ -344,20 +374,28 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	protected override IAction? CountDownAction(float remainTime)
 	{
-		if ((remainTime is < 14f and > 7f || remainTime is < 4f and > 3f) && SummonEosPvE.CanUse(out IAction? act))
+		if ((remainTime is < 14f and > 7f || remainTime is < 4f and > 3f) && SummonEosPvE.CanUse(out var act))
+		{
 			return act;
+		}
 
 		if (remainTime < RuinPvE.Info.CastTime + CountDownAhead && RuinPvE.CanUse(out act))
+		{
 			return act;
+		}
 
 		if (remainTime < 3f && UseBurstMedicine(out act))
+		{
 			return act;
+		}
 
 		switch (CountdownOpener)
 		{
 			case CountdownOpenerStrategy.RecitationAdloquiumDeploymentTactics:
 				if (remainTime is < 4f and > 3f && DeploymentTacticsPvE.CanUse(out act))
+				{
 					return act;
+				}
 
 				if (remainTime is < 7f and > 6f &&
 					AdloquiumPvE.CanUse(out act, targetOverride: TargetType.Tank))
@@ -375,7 +413,9 @@ public sealed class BeirutaSCH : ScholarRotation
 
 			case CountdownOpenerStrategy.AdloquiumDeploymentTactics:
 				if (remainTime is < 4f and > 3f && DeploymentTacticsPvE.CanUse(out act))
+				{
 					return act;
+				}
 
 				if (remainTime is < 7f and > 6f &&
 					AdloquiumPvE.CanUse(out act, targetOverride: TargetType.Tank))
@@ -387,12 +427,17 @@ public sealed class BeirutaSCH : ScholarRotation
 
 			case CountdownOpenerStrategy.ConcitationOrSuccor:
 				if (remainTime is < 7f and > 6f && CanUseCountdownShieldGCD(out act))
+				{
 					return act;
+				}
+
 				break;
 
 			case CountdownOpenerStrategy.RecitationConcitationOrSuccor:
 				if (remainTime is < 7f and > 6f && CanUseCountdownShieldGCD(out act))
+				{
 					return act;
+				}
 
 				if (remainTime is < 14f and > 9f &&
 					RecitationPvE.CanUse(out act))
@@ -417,25 +462,33 @@ public sealed class BeirutaSCH : ScholarRotation
 	{
 		UpdateActionTracking();
 
-		int closeTargetCount = NumberOfHostilesInRangeOf(5);
+		var closeTargetCount = NumberOfHostilesInRangeOf(5);
 
 		if (HasHealingLockout)
 		{
 			if (TryUseBurstSupportActions(out act))
+			{
 				return true;
+			}
 
 			if (!HasAetherflow && AetherflowPvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			if (ShouldUseBanefulImpaction(closeTargetCount, out act))
+			{
 				return true;
+			}
 
 			act = null;
 			return false;
 		}
 
 		if (ShouldUseRecitationForDeploymentTactics() && RecitationPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (ShouldSwiftcastForAdloquium() &&
 			SwiftcastPvE.CanUse(out act))
@@ -451,7 +504,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		}
 
 		if (InFirst5sAfterAdloquium && DeploymentTacticsPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (UseFirstConsolationAsapWhenSeraphIsOut &&
 			ConsolationPvE.Cooldown.CurrentCharges == 2 &&
@@ -467,16 +522,24 @@ public sealed class BeirutaSCH : ScholarRotation
 		}
 
 		if (TryUseBurstSupportActions(out act))
+		{
 			return true;
+		}
 
 		if (!HasAetherflow && AetherflowPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (SeraphTime < 3 && ConsolationPvE.CanUse(out act, usedUp: true))
+		{
 			return true;
+		}
 
 		if (ShouldUseBanefulImpaction(closeTargetCount, out act))
+		{
 			return true;
+		}
 
 		return base.EmergencyAbility(nextGCD, out act);
 	}
@@ -493,7 +556,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		act = null;
 
 		if (HasHealingLockout)
+		{
 			return false;
+		}
 
 		if (PartyMembersAverHP < ConsolationHeal &&
 			ConsolationPvE.CanUse(out act, usedUp: true))
@@ -504,10 +569,14 @@ public sealed class BeirutaSCH : ScholarRotation
 		if (PartyMembersAverHP < EmergencyHealPercent)
 		{
 			if (FeyBlessingPvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			if (IndomitabilityPvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 
 		if (PartyMembersAverHP < WhisperingDawnHeal &&
@@ -543,9 +612,11 @@ public sealed class BeirutaSCH : ScholarRotation
 		act = null;
 
 		if (HasHealingLockout)
+		{
 			return false;
+		}
 
-		bool hasLink = HasPartyMemberWithOwnStatus(StatusID.FeyUnion_1223);
+		var hasLink = HasPartyMemberWithOwnStatus(StatusID.FeyUnion_1223);
 
 		if (AetherpactPvE.CanUse(out act) &&
 			FairyGauge >= MinimumFairyGaugeForLinkPriority &&
@@ -591,7 +662,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		}
 
 		if (ConsolationPvE.CanUse(out act, usedUp: true))
+		{
 			return true;
+		}
 
 		return base.DefenseAreaAbility(nextGCD, out act);
 	}
@@ -604,7 +677,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		act = null;
 
 		if (HasHealingLockout)
+		{
 			return false;
+		}
 
 		if (!HasRecitation &&
 			!IsLastAbility(false, RecitationPvE) &&
@@ -623,7 +698,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		UpdateActionTracking();
 
 		if (InCombat && ExpedientPvE.CanUse(out act, usedUp: true))
+		{
 			return true;
+		}
 
 		return base.SpeedAbility(nextGCD, out act);
 	}
@@ -639,7 +716,7 @@ public sealed class BeirutaSCH : ScholarRotation
 	{
 		UpdateActionTracking();
 
-		int closeTargetCount = NumberOfHostilesInRangeOf(5);
+		var closeTargetCount = NumberOfHostilesInRangeOf(5);
 
 		if (ShouldSwiftcastForMovement(nextGCD) &&
 			MovingTime > MovementTimeThreshold + 0.5f &&
@@ -649,9 +726,11 @@ public sealed class BeirutaSCH : ScholarRotation
 		}
 
 		if (TryUseBurstSupportActions(out act))
+		{
 			return true;
+		}
 
-		bool shouldDumpAether =
+		var shouldDumpAether =
 			(UseDissipationDuringBurst &&
 			 DissipationPvE.EnoughLevel &&
 			 DissipationPvE.Cooldown.WillHaveOneChargeGCD(3) &&
@@ -666,10 +745,14 @@ public sealed class BeirutaSCH : ScholarRotation
 		}
 
 		if (CombatTime > 5 && shouldDumpAether && EnergyDrainPvE.CanUse(out act, usedUp: true))
+		{
 			return true;
+		}
 
 		if (!HasAetherflow && AetherflowPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (IsBurst &&
 	 (IsPartyMedicated || ChainStratagemPvE.Cooldown.WillHaveOneCharge(5)) &&
@@ -679,7 +762,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		}
 
 		if (ShouldUseBanefulImpaction(closeTargetCount, out act))
+		{
 			return true;
+		}
 
 		return base.AttackAbility(nextGCD, out act);
 	}
@@ -700,7 +785,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		}
 
 		if (ShouldDeferToRaise())
+		{
 			return base.HealAreaGCD(out act);
+		}
 
 		if (HasEmergencyTactics &&
 			!HasRecitation &&
@@ -755,7 +842,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		}
 
 		if (ShouldDeferToRaise())
+		{
 			return base.HealSingleGCD(out act);
+		}
 
 		if (HasEmergencyTactics &&
 			PartyMembersAverHP > 0.8f &&
@@ -779,10 +868,14 @@ public sealed class BeirutaSCH : ScholarRotation
 		}
 
 		if (ShouldDeferToRaise())
+		{
 			return base.DefenseAreaGCD(out act);
+		}
 
 		if (AccessionPvE.CanUse(out act, skipCastingCheck: true))
+		{
 			return true;
+		}
 
 		return base.DefenseAreaGCD(out act);
 	}
@@ -793,7 +886,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		UpdateActionTracking();
 
 		if (ResurrectionPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		return base.RaiseGCD(out act);
 	}
@@ -803,10 +898,14 @@ public sealed class BeirutaSCH : ScholarRotation
 		UpdateActionTracking();
 
 		if (ShouldDeferToRaise())
+		{
 			return base.GeneralGCD(out act);
+		}
 
 		if (CurrentMp < EmergencyHealingMPThreshold)
+		{
 			return base.GeneralGCD(out act);
+		}
 
 		if (ShouldUseSummonEos() &&
 			SummonEosPvE.CanUse(out act))
@@ -821,8 +920,8 @@ public sealed class BeirutaSCH : ScholarRotation
 			return true;
 		}
 
-		int nearbyHostiles = NumberOfHostilesInRangeOf(5);
-		float expectedHPToLive12Seconds = CalculateExpectedHpToLive12Seconds();
+		var nearbyHostiles = NumberOfHostilesInRangeOf(5);
+		var expectedHPToLive12Seconds = CalculateExpectedHpToLive12Seconds();
 
 		if (InCombat &&
 			InFirst20sAfterChainStratagem &&
@@ -839,21 +938,31 @@ public sealed class BeirutaSCH : ScholarRotation
 		if (!BioIiPvE.EnoughLevel)
 		{
 			if (BioPvE.CanUse(out act) && BioPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds)
+			{
 				return true;
+			}
 
 			if (RuinPvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			if (BioPvE.CanUse(out act, skipTTKCheck: true))
+			{
 				return true;
+			}
 		}
 		else if (!ArtOfWarPvE.EnoughLevel)
 		{
 			if (BioIiPvE.CanUse(out act) && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds)
+			{
 				return true;
+			}
 
 			if (RuinPvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 		else if (!BroilMasteryTrait.EnoughLevel)
 		{
@@ -865,10 +974,14 @@ public sealed class BeirutaSCH : ScholarRotation
 			}
 
 			if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 0 && InCombat)
+			{
 				return true;
+			}
 
 			if (RuinPvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 		else if (!BroilMasteryIiTrait.EnoughLevel)
 		{
@@ -880,13 +993,19 @@ public sealed class BeirutaSCH : ScholarRotation
 			}
 
 			if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1 && InCombat)
+			{
 				return true;
+			}
 
 			if (BroilPvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 0 && InCombat)
+			{
 				return true;
+			}
 		}
 		else if (!BroilIiiPvE.EnoughLevel)
 		{
@@ -898,10 +1017,14 @@ public sealed class BeirutaSCH : ScholarRotation
 			}
 
 			if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1 && InCombat)
+			{
 				return true;
+			}
 
 			if (BroilIiPvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 		else if (!BroilIvPvE.EnoughLevel)
 		{
@@ -913,10 +1036,14 @@ public sealed class BeirutaSCH : ScholarRotation
 			}
 
 			if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1 && InCombat)
+			{
 				return true;
+			}
 
 			if (BroilIiiPvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 		else
 		{
@@ -928,10 +1055,14 @@ public sealed class BeirutaSCH : ScholarRotation
 			}
 
 			if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1 && InCombat)
+			{
 				return true;
+			}
 
 			if (BroilIvPvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 
 		if (HasSufficientMovement &&
@@ -970,7 +1101,9 @@ public sealed class BeirutaSCH : ScholarRotation
 	private bool ShouldUseDeploymentAdloquium()
 	{
 		if (!DeploymentTacticsPvE.Cooldown.WillHaveOneChargeGCD(2) || HasGalvanize)
+		{
 			return false;
+		}
 
 		return DeploymentTacticsUsage switch
 		{
@@ -998,7 +1131,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		act = null;
 
 		if (!IsBurst)
+		{
 			return false;
+		}
 
 		if (CombatTime > 5 && ChainStratagemPvE.CanUse(out act))
 		{
@@ -1011,18 +1146,26 @@ public sealed class BeirutaSCH : ScholarRotation
 			if (PrioritizeAetherflowOverDissipation)
 			{
 				if (AetherflowPvE.CanUse(out act))
+				{
 					return true;
+				}
 
 				if (DissipationPvE.CanUse(out act))
+				{
 					return true;
+				}
 			}
 			else
 			{
 				if (DissipationPvE.CanUse(out act))
+				{
 					return true;
+				}
 
 				if (AetherflowPvE.CanUse(out act))
+				{
 					return true;
+				}
 			}
 		}
 
@@ -1034,7 +1177,9 @@ public sealed class BeirutaSCH : ScholarRotation
 		act = null;
 
 		if (InFirst5sAfterChainStratagem)
+		{
 			return false;
+		}
 
 		return BanefulImpactionPvE.CanUse(out act) &&
 			   (closeTargetCount > 3 ||
@@ -1048,19 +1193,25 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	private int CountEmergencyTacticsTargets()
 	{
-		int count = 0;
+		var count = 0;
 
-		foreach (IBattleChara member in PartyMembers)
+		foreach (var member in PartyMembers)
 		{
 			if (member.DistanceToPlayer() > 15)
+			{
 				continue;
+			}
 
 			if (!member.DoomNeedHealing() && member.GetHealthRatio() >= EmergencyTacticsHeal)
+			{
 				continue;
+			}
 
 			count++;
 			if (count > 1)
+			{
 				break;
+			}
 		}
 
 		return count;
@@ -1068,7 +1219,7 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	private bool ShouldRemoveAetherpact()
 	{
-		foreach (IBattleChara member in PartyMembers)
+		foreach (var member in PartyMembers)
 		{
 			if (member.HasStatus(true, StatusID.FeyUnion_1223) &&
 				member.GetHealthRatio() >= AetherpactRemoveHpThreshold)
@@ -1082,10 +1233,12 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	private bool HasPartyMemberWithOwnStatus(StatusID statusId)
 	{
-		foreach (IBattleChara member in PartyMembers)
+		foreach (var member in PartyMembers)
 		{
 			if (member.HasStatus(true, statusId))
+			{
 				return true;
+			}
 		}
 
 		return false;
@@ -1094,7 +1247,9 @@ public sealed class BeirutaSCH : ScholarRotation
 	private bool HasSingleAbilityLockoutStatus(IBattleChara? target)
 	{
 		if (target == null)
+		{
 			return true;
+		}
 
 		try
 		{
@@ -1110,7 +1265,9 @@ public sealed class BeirutaSCH : ScholarRotation
 	private bool HasDefenseSingleLockoutStatus(IBattleChara? target)
 	{
 		if (target == null)
+		{
 			return true;
+		}
 
 		try
 		{
@@ -1128,7 +1285,9 @@ public sealed class BeirutaSCH : ScholarRotation
 	private bool CanUseSingleAbilityTarget(IBattleChara? target)
 	{
 		if (target == null || HasSingleAbilityLockoutStatus(target))
+		{
 			return false;
+		}
 
 		return ExcogTargetIsTank(target) || PartyMembersAverHP > SingleAbilityNonTankPartyAverageGate;
 	}
@@ -1136,12 +1295,16 @@ public sealed class BeirutaSCH : ScholarRotation
 	private bool ExcogTargetIsTank(IBattleChara? target)
 	{
 		if (target == null)
+		{
 			return false;
+		}
 
-		foreach (IBattleChara tank in PartyMembers.GetJobCategory(JobRole.Tank))
+		foreach (var tank in PartyMembers.GetJobCategory(JobRole.Tank))
 		{
 			if (tank == target)
+			{
 				return true;
+			}
 		}
 
 		return false;
@@ -1154,13 +1317,19 @@ public sealed class BeirutaSCH : ScholarRotation
 	private int GetAoWBreakevenTargets()
 	{
 		if (!ArtOfWarPvE.EnoughLevel)
+		{
 			return 100;
+		}
 
 		if (!BroilMasteryTrait.EnoughLevel)
+		{
 			return 3 - DotOffsetMobs;
+		}
 
 		if (!ArtOfWarMasteryTrait.EnoughLevel)
+		{
 			return 4 - DotOffsetMobs;
+		}
 
 		return 5 - DotOffsetMobs;
 	}
@@ -1168,11 +1337,15 @@ public sealed class BeirutaSCH : ScholarRotation
 	private float CalculateExpectedHpToLive12Seconds()
 	{
 		if (Player is null || !EnableBallparkTtkEstimator)
+		{
 			return 1f;
+		}
 
-		int partyMemberCount = 0;
-		foreach (IBattleChara _ in PartyMembers)
+		var partyMemberCount = 0;
+		foreach (var _ in PartyMembers)
+		{
 			partyMemberCount++;
+		}
 
 		return BallparkDamagePercent * Player.MaxHp * partyMemberCount * 12;
 	}
@@ -1180,7 +1353,9 @@ public sealed class BeirutaSCH : ScholarRotation
 	private bool CurrentTargetBioMissingOrEnding(float remainingSeconds)
 	{
 		if (CurrentTarget == null)
+		{
 			return false;
+		}
 
 		return
 			(BiolysisPvE.EnoughLevel &&

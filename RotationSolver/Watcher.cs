@@ -3,7 +3,6 @@ using ECommons.GameHelpers;
 using ECommons.Hooks;
 using ECommons.Hooks.ActionEffectTypes;
 using ECommons.Logging;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using System.Text.RegularExpressions;
@@ -83,7 +82,7 @@ public static class Watcher
 						if (set.Action.HasValue && Service.Config.RecordKnockbackies
 							&& OtherConfiguration.HostileCastingKnockback.Add(set.Action.Value.RowId))
 						{
-							_ = OtherConfiguration.Save();
+							_ = OtherConfiguration.SaveHostileCastingKnockback();
 						}
 					}
 					break;
@@ -93,7 +92,7 @@ public static class Watcher
 			var partyMembers = DataCenter.PartyMembers;
 			var partyMemberCount = partyMembers.Count;
 
-			if (Service.Config.RecordCastingArea && set.Header.ActionType == ActionType.Action && partyMemberCount >= 4 && set.Action?.Cast100ms > 0)
+			if (Service.Config.RecordCastingArea && partyMemberCount >= 4 && set.Action?.Cast100ms > 0)
 			{
 				var type = set.Action?.GetActionCate();
 				if (type is ActionCate.Spell or ActionCate.Weaponskill or ActionCate.Ability)
@@ -154,14 +153,7 @@ public static class Watcher
 				return;
 			}
 
-			// Only process real actions/items. Mounts and other non-action types (e.g. ActionType.Mount)
-			// reuse the Action sheet's row IDs, which can collide with unrelated GCDs/abilities and
-			// corrupt LastAction/LastComboAction tracking if not filtered out here.
-			//if (set.Header.ActionType is not ActionType.Action and not ActionType.Item)
-			//{
-			//	return;
-			//}
-
+			// ECommons leaves Action null for items and mounts, so this also keeps mount IDs out of combo tracking.
 			if (set.Action == null)
 			{
 				//PluginLog.Debug("ActionFromSelf: set.Action is null. Exiting.");
