@@ -1,6 +1,20 @@
 {
-  "tagline": "Rotation engine tune up",
+  "tagline": "Just a crashfix",
   "entries": [
+    {
+      "version": "7.5.7.6",
+      "title": "Crash fix",
+      "date": "October 21, 2026",
+      "sections": [
+        {
+          "title": "Fixes",
+          "icon": "Wrench",
+          "items": [
+            "Fixed a game crash that could happen right after your target died or despawned, often while a rotation was checking raid buffs before using a potion."
+          ]
+        }
+      ]
+    },
     {
       "version": "7.5.7.5",
       "title": "Command, targeting, and core fixes",
