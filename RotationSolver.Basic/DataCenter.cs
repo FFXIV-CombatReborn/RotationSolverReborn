@@ -303,28 +303,32 @@ internal static class DataCenter
 		return Svc.GameConfig.UiControl.GetUInt(UiControlOption.MoveMode.ToString());
 	}
 
-	private static IBattleChara? _hostileTarget;
-	private static long _hostileTargetTick = long.MinValue;
+	private static int _hostileTargetIndex = -1;
 
-	// Rotations read this many times per decision, so the live object is looked up once per frame.
+	// Never hold the object itself: Dalamud reuses one wrapper per table slot, and a held one keeps pointing at freed
+	// memory once the target despawns. The slot is remembered so the usual read is O(1), but it is re-read every time.
 	internal static IBattleChara? HostileTarget
 	{
 		get
 		{
-			var now = Environment.TickCount64;
-			if (_hostileTargetTick == long.MinValue || now - _hostileTargetTick >= 15)
+			if (_hostileTargetId == 0)
 			{
-				_hostileTarget = _hostileTargetId == 0 ? null : Svc.Objects.SearchById(_hostileTargetId) as IBattleChara;
-				_hostileTargetTick = now;
+				return null;
 			}
 
-			return _hostileTarget;
+			if (_hostileTargetIndex >= 0 && Svc.Objects[_hostileTargetIndex] is IBattleChara inSlot && inSlot.GameObjectId == _hostileTargetId)
+			{
+				return inSlot;
+			}
+
+			var target = Svc.Objects.SearchById(_hostileTargetId) as IBattleChara;
+			_hostileTargetIndex = target?.ObjectIndex ?? -1;
+			return target;
 		}
 		set
 		{
 			_hostileTargetId = value?.GameObjectId ?? 0;
-			_hostileTarget = value;
-			_hostileTargetTick = Environment.TickCount64;
+			_hostileTargetIndex = -1;
 		}
 	}
 
