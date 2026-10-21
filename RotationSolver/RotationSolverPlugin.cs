@@ -176,6 +176,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 			AutoAttackUpdater.Enable();
 			Watcher.Enable();
 			ActionQueueManager.Enable();
+			ActionManagerEx.Enable();
 			BMRPlanUpdater.Enable();
 			ActionContextMenu.Init();
 			HotbarHighlightManager.Init();
@@ -430,15 +431,20 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 	public async ValueTask DisposeAsync()
 	{
+		// Unhook the per-frame update first, so it can't run while the rest is torn down.
+		MajorUpdater.Dispose();
+
 		ActionTracer.Shutdown();
 
 		Service.Config.Save();
-		await OtherConfiguration.Save();
 
-		AutoAttackUpdater.Disable();
+		// The lists are serialized now; the file writes are awaited only after the teardown below.
+		var saveLists = OtherConfiguration.Save();
+
 		RSCommands.Disable();
 		Watcher.Disable();
 		ActionQueueManager.Disable();
+		ActionManagerEx.DisposeInstance();
 		BMRPlanUpdater.Disable();
 		ActionContextMenu.Dispose();
 		Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
@@ -462,7 +468,6 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 		//_nativeControlWindow?.Close();
 		//KamiToolKitLibrary.Dispose();
-		MajorUpdater.Dispose();
 		HotbarDisabledColor.ResetOnUnload();
 		HotbarHighlightManager.Dispose();
 		ActionTimelineManager.DisposeInstance();
@@ -472,6 +477,8 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		BMRTimeline_IPCSubscriber.Dispose();
 		BMRPlan_IPCSubscriber.Dispose();
 		Wrath_IPCSubscriber.Dispose();
+
+		await saveLists;
 
 		ECommonsMain.Dispose();
 	}

@@ -201,15 +201,9 @@ public static class ObjectHelper
 		}
 
 		// If the mob's owner is a party member it belongs to our party and can be attacked
-		if (Player.Object != null && battleChara.OwnerId != 0)
+		if (Player.Object != null && battleChara.OwnerId != 0 && PartyEntityIds.Contains(battleChara.OwnerId))
 		{
-			foreach (var p in Svc.Party)
-			{
-				if (p.GameObject?.GameObjectId == battleChara.OwnerId)
-				{
-					return false;
-				}
-			}
+			return false;
 		}
 
 		// SpecialType but no NamePlateIcon — check whether the mob's event type matches one of the
@@ -679,20 +673,35 @@ public static class ObjectHelper
 			return false;
 		}
 
-		if (!Player.Object.IsTargetable)
-		{
-			return false;
-		}
+		return Player.Object.IsTargetable && PartyEntityIds.Contains(Player.Object.EntityId);
+	}
 
-		foreach (var p in Svc.Party)
+	private static readonly HashSet<uint> _partyEntityIds = [];
+	private static long _partyEntityIdsTick = long.MinValue;
+
+	// Ids of the real party members, read once per frame: membership is checked for every candidate of every action.
+	private static HashSet<uint> PartyEntityIds
+	{
+		get
 		{
-			if (p.GameObject?.GameObjectId == Player.Object.GameObjectId)
+			var now = Environment.TickCount64;
+			if (_partyEntityIdsTick != long.MinValue && now - _partyEntityIdsTick < 15)
 			{
-				return true;
+				return _partyEntityIds;
 			}
-		}
 
-		return false;
+			_partyEntityIds.Clear();
+			foreach (var p in Svc.Party)
+			{
+				if (p.EntityId is not 0 and not 0xE0000000)
+				{
+					_ = _partyEntityIds.Add(p.EntityId);
+				}
+			}
+
+			_partyEntityIdsTick = now;
+			return _partyEntityIds;
+		}
 	}
 
 	/// <summary>
@@ -725,12 +734,9 @@ public static class ObjectHelper
 			return false;
 		}
 
-		foreach (var p in Svc.Party)
+		if (PartyEntityIds.Contains(battleChara.EntityId))
 		{
-			if (p.GameObject?.GameObjectId == battleChara.GameObjectId)
-			{
-				return true;
-			}
+			return true;
 		}
 
 		if (DataCenter.FriendlyPartyNpcHealRaiseEnabled && battleChara.IsNpcPartyMember())
@@ -751,6 +757,28 @@ public static class ObjectHelper
 		if (Service.Config.FocusTargetIsParty && battleChara.IsFocusTarget() && battleChara.IsAllianceMember())
 		{
 			return true;
+		}
+
+		return false;
+	}
+
+	// Finds an object the player placed, e.g. the marker an object-based movement action teleports to.
+	internal static bool TryGetOwnedObjectPosition(uint baseId, out Vector3 position)
+	{
+		position = default;
+		var playerId = Player.Object?.GameObjectId ?? 0;
+		if (playerId == 0)
+		{
+			return false;
+		}
+
+		foreach (var obj in Svc.Objects)
+		{
+			if (obj != null && obj.BaseId == baseId && obj.OwnerId == playerId)
+			{
+				position = obj.Position;
+				return true;
+			}
 		}
 
 		return false;
@@ -973,6 +1001,11 @@ public static class ObjectHelper
 			return true;
 		}
 
+		if (battleChara.IsCrucibleThirdBoardPriority())
+		{
+			return true;
+		}
+
 		// Check IBattleChara bespoke IsSpecialInclusionPriority method
 		if (battleChara.IsSpecialInclusionPriority())
 		{
@@ -1117,234 +1150,106 @@ public static class ObjectHelper
 	public static bool HasFatalFlail => AnyHostileHasNameId(14302);
 
 	/// <summary>
-	/// 
+	/// M9S add priority: the Charnel Cell matching the player's Hell in a Cell, and Deadly Doornail or Fatal Flail depending on role.
 	/// </summary>
 	public static bool IsM9SavagePriority(this IBattleChara battleChara)
 	{
-		if (Player.Object == null)
+		if (Player.Object == null || !Service.Config.M9SAdsTargeting || !DataCenter.IsInM9S)
 		{
 			return false;
 		}
 
-		if (Service.Config.M9SAdsTargeting && DataCenter.IsInM9S)
+		var role = DataCenter.Role;
+		var isMeleeOrTank = role is JobRole.Melee or JobRole.Tank;
+		var priority = battleChara.NameId switch
 		{
-			var DeadlyDoornail = battleChara.NameId == 14303;
-			var FatalFlail = battleChara.NameId == 14302;
-			var CharnelCell = battleChara.NameId == 14304;
+			14304 => IsPlayersCharnelCell(battleChara),
+			// Deadly Doornail: ranged and healers always, melee and tanks only when it's close and no Fatal Flail is up.
+			14303 => role is JobRole.RangedPhysical or JobRole.RangedMagical or JobRole.Healer
+				|| (isMeleeOrTank && battleChara.DistanceToPlayer() < 5f && !HasFatalFlail),
+			// Fatal Flail: melee and tanks always, everyone else only when no Deadly Doornail is up.
+			14302 => isMeleeOrTank || !HasDeadlyDoornail,
+			_ => false,
+		};
 
-			if (CharnelCell)
+		if (priority && Service.Config.InDebug)
+		{
+			PluginLog.Information($"IsM9SavagePriority: {battleChara.NameId} is a priority target for {role}");
+		}
+
+		return priority;
+	}
+
+	// Each Heel in a Cell on a Charnel Cell pairs with the Hell in a Cell at the same index on the player.
+	private static bool IsPlayersCharnelCell(IBattleChara cell)
+	{
+		for (var i = 0; i < StatusHelper.HeelOfTheCellStatus.Length; i++)
+		{
+			if (cell.HasStatus(false, StatusHelper.HeelOfTheCellStatus[i]) && StatusHelper.PlayerHasStatus(false, StatusHelper.HellInACellStatus[i]))
 			{
-				// Heel (on target) vs Hell (on player) pairs
-				var HeelInACell1 = StatusID.HeelOfTheCell;
-				var HellInACell1 = StatusID.HellInACell;
-
-				var HeelInACell2 = StatusID.HeelOfTheCell_4740;
-				var HellInACell2 = StatusID.HellInACell_4732;
-
-				var HeelInACell3 = StatusID.HeelOfTheCell_4741;
-				var HellInACell3 = StatusID.HellInACell_4733;
-
-				var HeelInACell4 = StatusID.HeelOfTheCell_4742;
-				var HellInACell4 = StatusID.HellInACell_4734;
-
-				var HeelInACell5 = StatusID.HeelOfTheCell_4743;
-				var HellInACell5 = StatusID.HellInACell_4735;
-
-				var HeelInACell6 = StatusID.HeelOfTheCell_4744;
-				var HellInACell6 = StatusID.HellInACell_4736;
-
-				var HeelInACell7 = StatusID.HeelOfTheCell_4745;
-				var HellInACell7 = StatusID.HellInACell_4737;
-
-				var HeelInACell8 = StatusID.HeelOfTheCell_4746;
-				var HellInACell8 = StatusID.HellInACell_4738;
-
-				// Iterate all Heel/Hell pairs; priority if target has Heel and player does have corresponding Hell
-				foreach ((var heel, var hell) in new (StatusID heel, StatusID hell)[]
-				{
-					(HeelInACell1, HellInACell1),
-					(HeelInACell2, HellInACell2),
-					(HeelInACell3, HellInACell3),
-					(HeelInACell4, HellInACell4),
-					(HeelInACell5, HellInACell5),
-					(HeelInACell6, HellInACell6),
-					(HeelInACell7, HellInACell7),
-					(HeelInACell8, HellInACell8),
-				})
-				{
-					if (battleChara.HasStatus(false, heel) && StatusHelper.PlayerHasStatus(false, hell))
-					{
-						if (Service.Config.InDebug)
-						{
-							PluginLog.Information("IsM9SavagePriority: CharnelCell priority due to Heel/Hell match");
-						}
-						return true;
-					}
-				}
+				return true;
 			}
-
-			if (DeadlyDoornail)
-			{
-				var role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
-
-				if (role == JobRole.RangedPhysical)
-				{
-					if (Service.Config.InDebug)
-					{
-						PluginLog.Information("IsM9SavagePriority DeadlyDoornail mob found on RangedPhysical");
-					}
-					return true;
-				}
-				if (role == JobRole.RangedMagical)
-				{
-					if (Service.Config.InDebug)
-					{
-						PluginLog.Information("IsM9SavagePriority DeadlyDoornail mob found on RangedMagical");
-					}
-					return true;
-				}
-				if (role == JobRole.Healer)
-				{
-					if (Service.Config.InDebug)
-					{
-						PluginLog.Information("IsM9SavagePriority DeadlyDoornail mob found on Healer");
-					}
-					return true;
-				}
-
-				if (role == JobRole.Melee && battleChara.DistanceToPlayer() < 5f && !HasFatalFlail)
-				{
-					if (Service.Config.InDebug)
-					{
-						PluginLog.Information("IsM9SavagePriority DeadlyDoornail mob found on Melee and in range");
-					}
-					return true;
-				}
-
-				if (role == JobRole.Tank && battleChara.DistanceToPlayer() < 5f && !HasFatalFlail)
-				{
-					if (Service.Config.InDebug)
-					{
-						PluginLog.Information("IsM9SavagePriority DeadlyDoornail mob found on Tank and in range");
-					}
-					return true;
-				}
-			}
-
-			if (FatalFlail)
-			{
-				var role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
-
-				if (role == JobRole.Melee)
-				{
-					if (Service.Config.InDebug)
-					{
-						PluginLog.Information("IsM9SavagePriority FatalFlail mob found on Melee");
-					}
-					return true;
-				}
-
-				if (role == JobRole.Tank)
-				{
-					if (Service.Config.InDebug)
-					{
-						PluginLog.Information("IsM9SavagePriority FatalFlail mob found on Tank");
-					}
-					return true;
-				}
-
-				if (role != JobRole.Tank && role != JobRole.Melee && !HasDeadlyDoornail)
-				{
-					if (Service.Config.InDebug)
-					{
-						PluginLog.Information("IsM9SavagePriority FatalFlail mob found on NonMelee");
-					}
-					return true;
-				}
-			}
-
 		}
 
 		return false;
 	}
 
 	/// <summary>
-	/// 
+	/// M10 (Normal and Savage) priority: Red Hot while the player has Firesnaking, Deep Blue while the player has Watersnaking.
 	/// </summary>
 	public static bool IsM10SavagePriority(this IBattleChara battleChara)
 	{
-		if (Player.Object == null)
+		if (Player.Object == null || !Service.Config.M10SBroTargeting || !(DataCenter.IsInM10S || DataCenter.TerritoryID == 1322))
 		{
 			return false;
 		}
 
-		if (Service.Config.M10SBroTargeting && DataCenter.IsInM10S)
+		var priority = battleChara.NameId switch
 		{
-			var RedHot = battleChara.NameId == 14370;
-			var DeepBlue = battleChara.NameId == 14369;
+			14370 => StatusHelper.PlayerHasStatus(false, StatusID.Firesnaking),
+			14369 => StatusHelper.PlayerHasStatus(false, StatusID.Watersnaking),
+			_ => false,
+		};
 
-			var Firesnaking = StatusHelper.PlayerHasStatus(false, StatusID.Firesnaking);
-			var Watersnaking = StatusHelper.PlayerHasStatus(false, StatusID.Watersnaking);
-
-			if (RedHot && Firesnaking)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsM10SavagePriority RedHot status found");
-				}
-				return true;
-			}
-
-			if (DeepBlue && Watersnaking)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsM10SavagePriority DeepBlue status found");
-				}
-				return true;
-			}
-
+		if (priority && Service.Config.InDebug)
+		{
+			PluginLog.Information($"IsM10SavagePriority: {battleChara.NameId} is a priority target");
 		}
 
-		return false;
+		return priority;
 	}
 
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsBroPriority(this IBattleChara battleChara)
+	// Crucible third board: Sahagin Piece until it has Paralyzing Spikes, then Ymir Shell, then Ymir Piece; Crawling Piece always.
+	internal static bool IsCrucibleThirdBoardPriority(this IBattleChara battleChara)
 	{
-		if (Player.Object == null)
+		if (!DataCenter.IsinThirdBoard)
 		{
 			return false;
 		}
 
-		if (Service.Config.M10SBroTargeting && DataCenter.TerritoryID == 1322)
+		return battleChara.NameId switch
 		{
-			var RedHot = battleChara.NameId == 14370;
-			var DeepBlue = battleChara.NameId == 14369;
+			14571 => Service.Config.CrucibleYmir && !battleChara.HasStatus(false, StatusID.ParalyzingSpikes), // Sahagin Piece
+			14570 => Service.Config.CrucibleYmir && !HasUnspikedSahagin(), // Ymir Shell
+			14569 => Service.Config.CrucibleYmir && !HasUnspikedSahagin() && !AnyLivingHostile(14570), // Ymir Piece
+			14586 => Service.Config.CrucibleSiren, // Crawling Piece
+			_ => false,
+		};
 
-			var Firesnaking = StatusHelper.PlayerHasStatus(false, StatusID.Firesnaking);
-			var Watersnaking = StatusHelper.PlayerHasStatus(false, StatusID.Watersnaking);
+		static bool HasUnspikedSahagin()
+		{
+			return AnyLivingHostile(14571, static s => !s.HasStatus(false, StatusID.ParalyzingSpikes));
+		}
+	}
 
-			if (RedHot && Firesnaking)
+	private static bool AnyLivingHostile(uint nameId, Func<IBattleChara, bool>? predicate = null)
+	{
+		foreach (var hostile in DataCenter.AllHostileTargets)
+		{
+			if (hostile != null && hostile.NameId == nameId && hostile.CurrentHp > 0 && (predicate == null || predicate(hostile)))
 			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsBroPriority RedHot status found");
-				}
 				return true;
 			}
-
-			if (DeepBlue && Watersnaking)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsBroPriority DeepBlue status found");
-				}
-				return true;
-			}
-
 		}
 
 		return false;
@@ -1354,8 +1259,7 @@ public static class ObjectHelper
 	{
 		if (battleChara.NameId == 8145
 			|| battleChara.NameId == 10259
-			|| battleChara.NameId == 12704
-			|| battleChara.NameId == 14052)
+			|| battleChara.NameId == 12704)
 		{
 			return true;
 		}
@@ -1363,19 +1267,11 @@ public static class ObjectHelper
 		//10259 Cinduruva in The Tower of Zot
 		//12704 Crystalline Debris
 
-		//14052 hellmaker
-		if (DataCenter.TerritoryID == 1292)
+		//14052 hellmaker, only for the Cell Block C and D prisoners
+		if (DataCenter.TerritoryID == 1292 && battleChara.NameId == 14052
+			&& StatusHelper.PlayerHasStatus(false, (StatusID)4544, (StatusID)4545))
 		{
-			if (battleChara.NameId == 14052)
-			{
-				var CellBlockCPrisoner = (StatusID)4544;
-				var CellBlockDPrisoner = (StatusID)4545;
-
-				if (StatusHelper.PlayerHasStatus(false, CellBlockCPrisoner) || StatusHelper.PlayerHasStatus(false, CellBlockDPrisoner))
-				{
-					return true;
-				}
-			}
+			return true;
 		}
 
 		// striking shrublet - Floor 10 boss ads
@@ -2155,1232 +2051,7 @@ public static class ObjectHelper
 	/// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
 	public static bool IsSpecialImmune(this IBattleChara battleChara)
 	{
-		return battleChara.TreatTinyMageImmune()
-			|| battleChara.IsYmirImmune()
-			|| battleChara.ForkedNormalHeadsImmune()
-			|| battleChara.MathCEMobImmune()
-			|| battleChara.IsDMUBossImmune()
-			|| battleChara.IsEnuoGauntletImmune()
-			|| battleChara.IsWindurstAlexanderImmune()
-			|| battleChara.IsOrbonneImmune()
-			|| battleChara.IsM9SavageImmune()
-			|| battleChara.IsColossusRubricatusImmune()
-			|| battleChara.IsTrueHeartImmune()
-			|| battleChara.IsEminentGriefImmune()
-			|| battleChara.IsLOTAImmune()
-			|| battleChara.IsMesoImmune()
-			|| battleChara.IsJagdDollImmune()
-			|| battleChara.IsLyreImmune()
-			|| battleChara.IsDrakeImmune()
-			|| battleChara.IsWolfImmune()
-			|| battleChara.IsSuperiorFlightUnitImmune()
-			|| battleChara.IsJeunoBossImmune()
-			|| battleChara.IsDeadStarImmune()
-			|| battleChara.IsCODBossImmune()
-			|| battleChara.IsCinderDriftImmune()
-			|| battleChara.IsResistanceImmune()
-			|| battleChara.IsOmegaImmune()
-			|| battleChara.IsLimitlessBlue()
-			|| battleChara.IsHanselorGretelShielded()
-			|| battleChara.IsIrminsulSawtoothImmune()
-			|| battleChara.IsCrystalOfDarknessImmune()
-			|| battleChara.IsTOPImmune();
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsYmirImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.CrucibleYmir && DataCenter.IsinThirdBoard)
-		{
-			var YmirPiece = battleChara.NameId == 14569;
-
-			var ImmuneShellActive = StatusHelper.PlayerHasStatus(false, StatusID.VulnerabilityDown_2198);
-
-			if (YmirPiece && ImmuneShellActive)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsYmirImmune: ImmuneShell status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool ForkedNormalHeadsImmune(this IBattleChara battleChara)
-	{
-		if (DataCenter.IsInNorthHorn && Service.Config.ForkedtowerFirstBossVillianHero)
-		{
-			var Greenhead = battleChara.NameId == 14490;
-			var Bluehead = battleChara.NameId == 14491;
-
-			var FatedVillain = battleChara.HasStatus(false, StatusID.FatedVillain_5401);
-			var EpicVillain = battleChara.HasStatus(false, StatusID.EpicVillain_5400);
-
-			var FatedHero = StatusHelper.PlayerHasStatus(false, StatusID.FatedHero);
-			var EpicHero = StatusHelper.PlayerHasStatus(false, StatusID.EpicHero);
-
-			if ((Greenhead || Bluehead) && EpicVillain && FatedHero)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("ForkedNormalHeadsImmune: EpicVillain status found");
-				}
-				return true;
-			}
-
-			if ((Greenhead || Bluehead) && FatedVillain && EpicHero)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("ForkedNormalHeadsImmune: FatedVillain status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool MathCEMobImmune(this IBattleChara battleChara)
-	{
-		if (DataCenter.IsInNorthHorn)
-		{
-			var Page64 = battleChara.NameId == 3915;
-			var Page16 = battleChara.NameId == 14521;
-			var Page8 = battleChara.NameId == 14522;
-			var Page512 = battleChara.NameId == 14528;
-
-			if (Page64 || Page16 || Page8 || Page512)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool TreatTinyMageImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.NorthHornTinyMage && DataCenter.IsInNorthHorn)
-		{
-			const uint MeteorCastID = 48327;
-
-			if (battleChara.CastActionId == MeteorCastID)
-			{
-				var hostileTargets = DataCenter.AllHostileTargets;
-				if (hostileTargets != null)
-				{
-					IBattleChara? lowestRemainingCastTimeTarget = null;
-					var lowestRemainingCastTime = float.MaxValue;
-
-					foreach (var hostile in hostileTargets)
-					{
-						if (hostile == null || hostile.CastActionId != MeteorCastID)
-						{
-							continue;
-						}
-
-						if (hostile.RemainingCastTime < lowestRemainingCastTime)
-						{
-							lowestRemainingCastTime = hostile.RemainingCastTime;
-							lowestRemainingCastTimeTarget = hostile;
-						}
-					}
-
-					if (lowestRemainingCastTimeTarget != null
-						&& !battleChara.Equals(lowestRemainingCastTimeTarget)
-						&& battleChara.DistanceToPlayer() > 5)
-					{
-						if (Service.Config.InDebug)
-						{
-							PluginLog.Information("TreatTinyMageImmune: Not the lowest remaining cast time Meteor caster and more than 5 yalms away, treating as immune.");
-						}
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	///
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsDMUBossImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.DmuBossImmune && DataCenter.IsInDMU)
-		{
-			var FatedVillain = battleChara.HasStatus(false, StatusID.FatedVillain);
-			var VauntedVillain = battleChara.HasStatus(false, StatusID.VauntedVillain);
-			var EpicVillain = battleChara.HasStatus(false, StatusID.EpicVillain);
-
-			var VauntedHero = StatusHelper.PlayerHasStatus(false, StatusID.VauntedHero);
-			var FatedHero = StatusHelper.PlayerHasStatus(false, StatusID.FatedHero);
-			var EpicHero = StatusHelper.PlayerHasStatus(false, StatusID.EpicHero);
-
-			if (EpicVillain && (VauntedHero || FatedHero))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsDMUBossImmune: EpicVillain status found");
-				}
-				return true;
-			}
-
-			if (VauntedVillain && (EpicHero || FatedHero))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsDMUBossImmune: VauntedVillain status found");
-				}
-				return true;
-			}
-
-			if (FatedVillain && (EpicHero || VauntedHero))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsDMUBossImmune: FatedVillain status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsEnuoGauntletImmune(this IBattleChara battleChara)
-	{
-		if (Player.Object == null)
-		{
-			return false;
-		}
-
-		if (Service.Config.TheUnmakingShadow && DataCenter.IsTheUnmaking)
-		{
-			var Looming = battleChara.NameId == 14752;
-			var Protective = battleChara.NameId == 14755;
-			var Aggressive = battleChara.NameId == 14756;
-			var Soothing = battleChara.NameId == 14757;
-
-			// GauntletThrown (on target) vs GauntletTaken (on player) pairs
-			var GauntletTaken1 = StatusID.GauntletTaken;
-			var GauntletThrown1 = StatusID.GauntletThrown;
-
-			var GauntletTaken2 = StatusID.GauntletTaken_5358;
-			var GauntletThrown2 = StatusID.GauntletThrown_5366;
-
-			var GauntletTaken3 = StatusID.GauntletTaken_5359;
-			var GauntletThrown3 = StatusID.GauntletThrown_5367;
-
-			var GauntletTaken4 = StatusID.GauntletTaken_5360;
-			var GauntletThrown4 = StatusID.GauntletThrown_5368;
-
-			var GauntletTaken5 = StatusID.GauntletTaken_5361;
-			var GauntletThrown5 = StatusID.GauntletThrown_5369;
-
-			var GauntletTaken6 = StatusID.GauntletTaken_5362;
-			var GauntletThrown6 = StatusID.GauntletThrown_5370;
-
-			var GauntletTaken7 = StatusID.GauntletTaken_5363;
-			var GauntletThrown7 = StatusID.GauntletThrown_5371;
-
-			var GauntletTaken8 = StatusID.GauntletTaken_5364;
-			var GauntletThrown8 = StatusID.GauntletThrown_5372;
-
-			if (Looming || Protective || Aggressive || Soothing)
-			{
-				// Iterate all GauntletTaken/GauntletThrown pairs; immune if target has GauntletThrown and player does NOT have corresponding GauntletTaken
-				foreach ((var taken, var thrown) in new (StatusID taken, StatusID thrown)[]
-				{
-					(GauntletTaken1, GauntletThrown1),
-					(GauntletTaken2, GauntletThrown2),
-					(GauntletTaken3, GauntletThrown3),
-					(GauntletTaken4, GauntletThrown4),
-					(GauntletTaken5, GauntletThrown5),
-					(GauntletTaken6, GauntletThrown6),
-					(GauntletTaken7, GauntletThrown7),
-					(GauntletTaken8, GauntletThrown8),
-				})
-				{
-					if (battleChara.HasStatus(false, thrown) && !StatusHelper.PlayerHasStatus(false, taken))
-					{
-						if (Service.Config.InDebug)
-						{
-							PluginLog.Information("IsEnuoGauntletImmune: Shadow immune due to GauntletTaken/GauntletThrown mismatch");
-						}
-						return true;
-					}
-
-					if (StatusHelper.PlayerHasStatus(false, taken) && !battleChara.HasStatus(false, thrown))
-					{
-						if (Service.Config.InDebug)
-						{
-							PluginLog.Information("IsEnuoGauntletImmune: Shadow immune due to GauntletTaken/GauntletThrown mismatch");
-						}
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsWindurstAlexanderImmune(this IBattleChara battleChara)
-	{
-		if (Player.Object == null)
-		{
-			return false;
-		}
-
-		if (Service.Config.AlexanderImmune && DataCenter.IsInWindurst)
-		{
-			if (battleChara.HasStatus(false, StatusID.PerfectDefense))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsWindurstAlexanderImmune: PerfectDefense detected");
-				}
-				return true;
-			}
-			if (battleChara.HasStatus(false, StatusID.PerfectDefense_5377))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsWindurstAlexanderImmune: PerfectDefense_5377 detected");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsOrbonneImmune(this IBattleChara battleChara)
-	{
-		if (Player.Object == null)
-		{
-			return false;
-		}
-
-		if (DataCenter.Orbonne)
-		{
-			if (battleChara.HasStatus(false, StatusID.VulnerabilityDown_1782))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsOrbonneImmune: VulnerabilityDown_1782 detected");
-				}
-				return true;
-			}
-			if (battleChara.HasStatus(false, StatusID.VulnerabilityDown_350))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsOrbonneImmune: VulnerabilityDown_350 detected");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsM9SavageImmune(this IBattleChara battleChara)
-	{
-		if (Player.Object == null)
-		{
-			return false;
-		}
-
-		if (Service.Config.M9SCellTargeting && DataCenter.IsInM9S)
-		{
-			var CharnelCell = battleChara.NameId == 14304;
-
-			// Heel (on target) vs Hell (on player) pairs
-			var HeelInACell1 = (StatusID)4739;
-			var HellInACell1 = (StatusID)4731;
-
-			var HeelInACell2 = (StatusID)4740;
-			var HellInACell2 = (StatusID)4732;
-
-			var HeelInACell3 = (StatusID)4741;
-			var HellInACell3 = (StatusID)4733;
-
-			var HeelInACell4 = (StatusID)4742;
-			var HellInACell4 = (StatusID)4734;
-
-			var HeelInACell5 = (StatusID)4743;
-			var HellInACell5 = (StatusID)4735;
-
-			var HeelInACell6 = (StatusID)4744;
-			var HellInACell6 = (StatusID)4736;
-
-			var HeelInACell7 = (StatusID)4745;
-			var HellInACell7 = (StatusID)4737;
-
-			var HeelInACell8 = (StatusID)4746;
-			var HellInACell8 = (StatusID)4738;
-
-			if (CharnelCell)
-			{
-				// Iterate all Heel/Hell pairs; immune if target has Heel and player does NOT have corresponding Hell
-				foreach ((var heel, var hell) in new (StatusID heel, StatusID hell)[]
-				{
-					(HeelInACell1, HellInACell1),
-					(HeelInACell2, HellInACell2),
-					(HeelInACell3, HellInACell3),
-					(HeelInACell4, HellInACell4),
-					(HeelInACell5, HellInACell5),
-					(HeelInACell6, HellInACell6),
-					(HeelInACell7, HellInACell7),
-					(HeelInACell8, HellInACell8),
-				})
-				{
-					if (battleChara.HasStatus(false, heel) && !StatusHelper.PlayerHasStatus(false, hell))
-					{
-						if (Service.Config.InDebug)
-						{
-							PluginLog.Information("IsM9SavageImmune: CharnelCell immune due to Heel/Hell mismatch");
-						}
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsColossusRubricatusImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.ColossusRubricatusImmune && DataCenter.TerritoryID == 1174)
-		{
-			var ColossusRubricatus = battleChara.NameId == 9511;
-
-			if (ColossusRubricatus)
-			{
-				if (battleChara.CastActionId == 14574)
-				{
-					if (Service.Config.InDebug)
-					{
-						PluginLog.Information("IsColossusRubricatusImmune action found, ignoring mob");
-					}
-				}
-				return true;
-			}
-
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsEminentGriefImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.Eminent && (DataCenter.TerritoryID == 1311 || DataCenter.TerritoryID == 1333 || DataCenter.TerritoryID == 1290))
-		{
-			var EminentGrief = battleChara.NameId == 14037;
-			var DevouredEater = battleChara.NameId == 14038;
-
-			var LightVengeance = StatusHelper.PlayerHasStatus(false, StatusID.LightVengeance);
-			var DarkVengeance = StatusHelper.PlayerHasStatus(false, StatusID.DarkVengeance);
-
-			if (EminentGrief && !LightVengeance)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsEminentGriefImmune status found");
-				}
-				return true;
-			}
-
-			if (DevouredEater && !DarkVengeance)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsEminentGriefImmune status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsLOTAImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.ThanatosImmune && DataCenter.TerritoryID == 174)
-		{
-			var Thanatos = battleChara.NameId == 710;
-			var AstralRealignment = StatusHelper.PlayerHasStatus(false, StatusID.AstralRealignment);
-
-			if (Thanatos && !AstralRealignment)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsLOTAImmune status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsMesoImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.JailerImmune && DataCenter.TerritoryID == 1292)
-		{
-			var CellJailerA = (StatusID)4546;
-			var CellJailerB = (StatusID)4547;
-			var CellJailerC = (StatusID)4548;
-			var CellJailerD = (StatusID)4549;
-
-			var JailerA = battleChara.HasStatus(false, CellJailerA);
-			var JailerB = battleChara.HasStatus(false, CellJailerB);
-			var JailerC = battleChara.HasStatus(false, CellJailerC);
-			var JailerD = battleChara.HasStatus(false, CellJailerD);
-
-			var CellBlockAPrisoner = (StatusID)4542;
-			var CellBlockBPrisoner = (StatusID)4543;
-			var CellBlockCPrisoner = (StatusID)4544;
-			var CellBlockDPrisoner = (StatusID)4545;
-
-			var CellBlockA = StatusHelper.PlayerHasStatus(false, CellBlockAPrisoner);
-			var CellBlockB = StatusHelper.PlayerHasStatus(false, CellBlockBPrisoner);
-			var CellBlockC = StatusHelper.PlayerHasStatus(false, CellBlockCPrisoner);
-			var CellBlockD = StatusHelper.PlayerHasStatus(false, CellBlockDPrisoner);
-
-			if (JailerA && (CellBlockB || CellBlockC || CellBlockD))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsMesoImmune status found");
-				}
-				return true;
-			}
-
-			if (JailerB && (CellBlockA || CellBlockC || CellBlockD))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsMesoImmune status found");
-				}
-				return true;
-			}
-
-			if (JailerC && (CellBlockA || CellBlockB || CellBlockD))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsMesoImmune status found");
-				}
-				return true;
-			}
-
-			if (JailerD && (CellBlockA || CellBlockB || CellBlockC))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsMesoImmune status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsJagdDollImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.TeaJagdDoll && DataCenter.TerritoryID == 887)
-		{
-			var JagdDoll = battleChara.NameId == 9214;
-			var HealthThreshold = battleChara.GetEffectiveHpPercent();
-
-			if (JagdDoll && HealthThreshold < 25f)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsTrueHeartImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.TeaTrueHeart && DataCenter.TerritoryID == 887) // In TEA
-		{
-			var TrueHeart = battleChara.NameId == 9223;
-
-			if (TrueHeart)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsTrueHeartImmune mob found, ignoring mob");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsCrystalOfDarknessImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.FruCrystalOfDarkness && DataCenter.TerritoryID == 1238)
-		{
-			var CrystalOfDarkness = battleChara.NameId == 13556;
-
-			if (CrystalOfDarkness)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsCrystalOfDarknessImmune mob found, ignoring mob");
-				}
-				return true;
-			}
-
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsLyreImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.DohnMhegLyre && DataCenter.TerritoryID == 821)
-		{
-			var LiarsLyre = battleChara.NameId == 8958;
-			var Unfooled = StatusHelper.PlayerHasStatus(false, StatusID.Unfooled);
-
-			if (LiarsLyre && !Unfooled)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	public static bool IsDrakeImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.DrakeImmune && DataCenter.TerritoryID == 1069)
-		{
-			// NameIds for each drake
-			const uint DrakefatherId = 11463;
-			const uint DrakemotherId = 11464;
-			const uint DrakebrotherId = 11465;
-			const uint DrakesisterId = 11466;
-			const uint DrakelingId = 11467;
-
-			var nameId = battleChara.NameId;
-
-			// Drakemother is immune if Drakefather is alive
-			if (nameId == DrakemotherId && CheckDrakesAlive(DrakemotherId, DrakefatherId))
-			{
-				return true;
-			}
-			// Drakebrother is immune if Drakemother is alive
-			if (nameId == DrakebrotherId && CheckDrakesAlive(DrakebrotherId, DrakemotherId))
-			{
-				return true;
-			}
-			// Drakesister is immune if Drakebrother is alive
-			if (nameId == DrakesisterId && CheckDrakesAlive(DrakesisterId, DrakebrotherId))
-			{
-				return true;
-			}
-			// Drakeling is immune if Drakesister is alive
-			if (nameId == DrakelingId && CheckDrakesAlive(DrakelingId, DrakesisterId))
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private static bool CheckDrakesAlive(uint targetNameId, uint dependentNameId)
-	{
-		var targetAlive = false;
-		var dependentAlive = false;
-
-		var targets = DataCenter.AllHostileTargets;
-		for (int i = 0, count = targets.Count; i < count; i++)
-		{
-			var obj = targets[i];
-			if (obj?.CurrentHp > 0)
-			{
-				if (obj.NameId == targetNameId)
-				{
-					targetAlive = true;
-				}
-				else if (obj.NameId == dependentNameId)
-				{
-					dependentAlive = true;
-				}
-
-				if (targetAlive && dependentAlive)
-				{
-					break;
-				}
-			}
-		}
-
-		return targetAlive && dependentAlive;
-	}
-
-	/// <summary>
-	/// Is target Wolf add immune.
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsWolfImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.M8SWindStone && DataCenter.TerritoryID == 1263)
-		{
-			var WolfOfWind = battleChara.NameId == 13846;
-			var WolfOfStone = battleChara.NameId == 13847;
-
-			var WindPackPlayer = StatusHelper.PlayerHasStatus(false, StatusID.Windpack);
-			var StonePackPlayer = StatusHelper.PlayerHasStatus(false, StatusID.Stonepack);
-
-			if (WolfOfWind && WindPackPlayer)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsWolfImmune: WindPack status found");
-				}
-				return true;
-			}
-
-			if (WolfOfStone && StonePackPlayer)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsWolfImmune: StonePack status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsIrminsulSawtoothImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.IrminsulSawtoothImmune && DataCenter.TerritoryID == 508)
-		{
-			var RangedPhysicalRole = Player.Job.IsPhysicalRangedDps();
-			var RangedMagicalRole = Player.Job.IsMagicalRangedDps();
-			var HealerRole = Player.Job.IsHealer();
-
-			var RangedResistance = battleChara.HasStatus(false, StatusID.RangedResistance);
-			var MagicResistance = battleChara.HasStatus(false, StatusID.MagicResistance);
-
-			if (RangedResistance && RangedPhysicalRole)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsIrminsulSawtoothImmune: Sawtooth Immune status found");
-				}
-				return true;
-			}
-
-			if (MagicResistance && (RangedMagicalRole || HealerRole))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsIrminsulSawtoothImmune: Irminsul Immune status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsSuperiorFlightUnitImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.SuperiorFlightUnitImmune && DataCenter.TerritoryID == 917)
-		{
-			var ShieldProtocolAPlayer = StatusHelper.PlayerHasStatus(false, StatusID.ShieldProtocolA);
-			var ShieldProtocolBPlayer = StatusHelper.PlayerHasStatus(false, StatusID.ShieldProtocolB);
-			var ShieldProtocolCPlayer = StatusHelper.PlayerHasStatus(false, StatusID.ShieldProtocolC);
-
-			var ProcessOfEliminationA = battleChara.HasStatus(false, StatusID.ProcessOfEliminationA);
-			var ProcessOfEliminationB = battleChara.HasStatus(false, StatusID.ProcessOfEliminationB);
-			var ProcessOfEliminationC = battleChara.HasStatus(false, StatusID.ProcessOfEliminationC);
-
-			if (ProcessOfEliminationA && (ShieldProtocolBPlayer || ShieldProtocolCPlayer))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsSuperiorFlightUnitImmune: ProcessOfEliminationA Immune status found");
-				}
-				return true;
-			}
-
-			if (ProcessOfEliminationB && (ShieldProtocolAPlayer || ShieldProtocolCPlayer))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsSuperiorFlightUnitImmune: ProcessOfEliminationB Immune status found");
-				}
-				return true;
-			}
-
-			if (ProcessOfEliminationC && (ShieldProtocolAPlayer || ShieldProtocolBPlayer))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsSuperiorFlightUnitImmune: ProcessOfEliminationC Immune status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Is target Hansel or Gretel and has the Strong of Shield status.
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsHanselorGretelShielded(this IBattleChara battleChara)
-	{
-		if (Service.Config.HanselorGretelShieldedImmune && DataCenter.TerritoryID == 966)
-		{
-			var strongOfShieldPositional = EnemyPositional.Front;
-			var strongOfShieldStatus = StatusID.StrongOfShield;
-
-			if (battleChara.HasStatus(false, strongOfShieldStatus) &&
-					strongOfShieldPositional != battleChara.FindEnemyPositional())
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsHanselorGretelShielded: StrongOfShield status found, ignoring status haver if player is out of position");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Is target Jeuno Boss immune.
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsJeunoBossImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.JeunoBossImmune && DataCenter.TerritoryID == 1248)
-		{
-			var FatedVillain = battleChara.HasStatus(false, StatusID.FatedVillain);
-			var VauntedVillain = battleChara.HasStatus(false, StatusID.VauntedVillain);
-			var EpicVillain = battleChara.HasStatus(false, StatusID.EpicVillain);
-
-			var VauntedHero = StatusHelper.PlayerHasStatus(false, StatusID.VauntedHero);
-			var FatedHero = StatusHelper.PlayerHasStatus(false, StatusID.FatedHero);
-			var EpicHero = StatusHelper.PlayerHasStatus(false, StatusID.EpicHero);
-
-			if (EpicVillain && (VauntedHero || FatedHero))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsJeunoBossImmune: EpicVillain status found");
-				}
-				return true;
-			}
-
-			if (VauntedVillain && (EpicHero || FatedHero))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsJeunoBossImmune: VauntedVillain status found");
-				}
-				return true;
-			}
-
-			if (FatedVillain && (EpicHero || VauntedHero))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsJeunoBossImmune: FatedVillain status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Is target Dead Star immune.
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsDeadStarImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.ForkedtowerDeadStar && DataCenter.IsInForkedTowerBlood)
-		{
-			var PhobosicGravity = StatusHelper.PlayerHasStatus(false, StatusID.PhobosicGravity);
-			var TritonicGravity = StatusHelper.PlayerHasStatus(false, StatusID.TritonicGravity);
-			var NereidicGravity = StatusHelper.PlayerHasStatus(false, StatusID.NereidicGravity);
-
-			if (battleChara.IsNamed(NPCName.Triton) && (NereidicGravity || PhobosicGravity))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsDeadStarImmune: Triton immune");
-				}
-				return true;
-			}
-
-			if (battleChara.IsNamed(NPCName.Nereid) && (TritonicGravity || PhobosicGravity))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsDeadStarImmune: Nereid immune");
-				}
-				return true;
-			}
-
-			if (battleChara.IsNamed(NPCName.Phobos) && (TritonicGravity || NereidicGravity))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsDeadStarImmune: Phobos immune");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Is target COD Boss immune.
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsCODBossImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.CodImmune && DataCenter.TerritoryID == 1241)
-		{
-			var CloudOfDarknessStatus = battleChara.HasStatus(false, StatusID.VeilOfDarkness);
-			var StygianStatus = battleChara.HasStatus(false, StatusID.UnnamedStatus_4388);
-
-			var AntiCloudOfDarknessStatus = StatusHelper.PlayerHasStatus(false, StatusID.OuterDarkness);
-			var AntiStygianStatus = StatusHelper.PlayerHasStatus(false, StatusID.InnerDarkness);
-
-			if (CloudOfDarknessStatus && AntiCloudOfDarknessStatus)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsCODBossImmune: OuterDarkness status found, CloudOfDarkness immune");
-				}
-				return true;
-			}
-
-			if (StygianStatus && AntiStygianStatus)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsCODBossImmune: InnerDarkness status found, Stygian immune");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Is target Limitless Blue immune.
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsLimitlessBlue(this IBattleChara battleChara)
-	{
-		if (Service.Config.LimitlessBlueTargeting && (DataCenter.TerritoryID == 436 || DataCenter.TerritoryID == 447))
-		{
-			var WillOfTheWater = StatusID.WillOfTheWater;
-			var WillOfTheWind = StatusID.WillOfTheWind;
-			var WhaleBack = StatusID.Whaleback;
-
-			var Green = battleChara.NameId == 3654;
-			var Blue = battleChara.NameId == 3655;
-			var BismarkShell = battleChara.NameId == 3656;
-			var BismarkCorona = battleChara.NameId == 3657;
-
-			if ((BismarkShell || BismarkCorona) &&
-					!StatusHelper.PlayerHasStatus(false, WhaleBack))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsLimitlessBlue: Bismark found, WhaleBack status not found");
-				}
-				return true;
-			}
-
-			if (Blue &&
-				StatusHelper.PlayerHasStatus(false, WillOfTheWater))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsLimitlessBlue: WillOfTheWater status found");
-				}
-				return true;
-			}
-
-			if (Green &&
-				StatusHelper.PlayerHasStatus(false, WillOfTheWind))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsLimitlessBlue: WillOfTheWind status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Is target Cinder Drift Boss immune.
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsCinderDriftImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.CinderDriftPallTargeting && DataCenter.TerritoryID == 912)
-		{
-			var GriefAdd = battleChara.HasStatus(false, StatusID.BlindToGrief);
-			var RageAdd = battleChara.HasStatus(false, StatusID.BlindToRage);
-
-			var AntiRageAdd = StatusHelper.PlayerHasStatus(false, StatusID.PallOfRage);
-			var AntiGriefAdd = StatusHelper.PlayerHasStatus(false, StatusID.PallOfGrief);
-
-			if (GriefAdd && AntiGriefAdd)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsCinderDriftImmune: AntiGriefAdd status found, GriefAdd immune");
-				}
-				return true;
-			}
-
-			if (RageAdd && AntiRageAdd)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsCinderDriftImmune: AntiRageAdd status found, RageAdd immune");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Is target Resistance immune.
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsResistanceImmune(this IBattleChara battleChara)
-	{
-		if (DataCenter.TerritoryID == 508 || DataCenter.TerritoryID == 281 || DataCenter.TerritoryID == 359)
-		{
-			var VoidArkMagicResistance = StatusID.MagicResistance;
-			var VoidArkRangedResistance = StatusID.RangedResistance;
-			var LeviMagicResistance = StatusID.MantleOfTheWhorl;
-			var LeviRangedResistance = StatusID.VeilOfTheWhorl;
-			var role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
-
-			if (battleChara.HasStatus(false, VoidArkMagicResistance, LeviMagicResistance) &&
-					(role == JobRole.RangedMagical || role == JobRole.Healer))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsResistanceImmune: MagicResistance status found");
-				}
-				return true;
-			}
-
-			if (battleChara.HasStatus(false, VoidArkRangedResistance, LeviRangedResistance) &&
-				role == JobRole.RangedPhysical)
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsResistanceImmune: RangedResistance status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Is target Omega Boss immune.
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsTOPImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.TopOmegaMf && DataCenter.TerritoryID == 1122)
-		{
-			var AntiOmegaF_Ultimate = StatusID.PacketFilterF_3500;
-			var AntiOmegaM_Ultimate = StatusID.PacketFilterM_3499;
-
-			var OmegaF = StatusID.OmegaF;
-			var OmegaM = StatusID.Omega;
-			var OmegaM2 = StatusID.OmegaM_3454;
-
-			if (battleChara.HasStatus(false, OmegaF) &&
-					StatusHelper.PlayerHasStatus(false, AntiOmegaF_Ultimate))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsTOPImmune: PacketFilterF status found");
-				}
-				return true;
-			}
-
-			if (battleChara.HasStatus(false, OmegaM, OmegaM2) &&
-				StatusHelper.PlayerHasStatus(false, AntiOmegaM_Ultimate))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsTOPImmune: PacketFilterM status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/// <summary>
-	/// Is target Omega Boss immune.
-	/// </summary>
-	/// <param name="battleChara">the object.</param>
-	/// <returns></returns>
-	public static bool IsOmegaImmune(this IBattleChara battleChara)
-	{
-		if (Service.Config.O12SOmegaMf && (DataCenter.TerritoryID == 801 || DataCenter.TerritoryID == 805))
-		{
-			var AntiOmegaF = StatusID.PacketFilterF;
-			var AntiOmegaF_Extreme = StatusID.PacketFilterF_3500;
-			var AntiOmegaM = StatusID.PacketFilterM;
-			var AntiOmegaM_Extreme = StatusID.PacketFilterM_3499;
-
-			var OmegaF = StatusID.OmegaF;
-			var OmegaM = StatusID.OmegaM;
-			var OmegaM2 = StatusID.OmegaM_3454;
-
-			if (battleChara.HasStatus(false, OmegaF) &&
-					StatusHelper.PlayerHasStatus(false, AntiOmegaF, AntiOmegaF_Extreme))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsOmegaImmune: PacketFilterF status found");
-				}
-				return true;
-			}
-
-			if (battleChara.HasStatus(false, OmegaM, OmegaM2) &&
-				StatusHelper.PlayerHasStatus(false, AntiOmegaM, AntiOmegaM_Extreme))
-			{
-				if (Service.Config.InDebug)
-				{
-					PluginLog.Information("IsOmegaImmune: PacketFilterM status found");
-				}
-				return true;
-			}
-		}
-
-		return false;
+		return EncounterImmunity.IsImmune(battleChara);
 	}
 
 	/// <summary>
@@ -3537,6 +2208,30 @@ public static class ObjectHelper
 			return 999.99f;
 		}
 
+		// Every CanUse checks each target's TTK, so the history walk below runs once per target per frame.
+		var now = Environment.TickCount64;
+		var id = battleChara.GameObjectId;
+		if (_ttkCache.TryGetValue(id, out var cached) && now - cached.Tick < TtkCacheMs)
+		{
+			return wholeTime ? cached.Whole : cached.Remaining;
+		}
+
+		if (_ttkCache.Count > 512)
+		{
+			_ttkCache.Clear();
+		}
+
+		var whole = ComputeTTK(battleChara, out var remaining);
+		_ttkCache[id] = (now, whole, remaining);
+		return wholeTime ? whole : remaining;
+	}
+
+	private const long TtkCacheMs = 15;
+	private static readonly Dictionary<ulong, (long Tick, float Whole, float Remaining)> _ttkCache = [];
+
+	private static float ComputeTTK(IBattleChara battleChara, out float remaining)
+	{
+		remaining = float.NaN;
 		const int movingAverageWindow = 5;
 		var objId = battleChara.GameObjectId;
 
@@ -3544,7 +2239,7 @@ public static class ObjectHelper
 		var initialHpRatio = 0f;
 
 		// Small fixed-size window for last ratios without copying the whole queue
-		var window = new float[movingAverageWindow];
+		Span<float> window = stackalloc float[movingAverageWindow];
 		var wCount = 0;
 
 		foreach ((var time, var hpRatiosDict) in DataCenter.RecordedHP)
@@ -3564,7 +2259,7 @@ public static class ObjectHelper
 				else
 				{
 					// shift left by one; window is very small so this is cheap
-					Array.Copy(window, 1, window, 0, movingAverageWindow - 1);
+					window[1..].CopyTo(window);
 					window[movingAverageWindow - 1] = ratio;
 				}
 			}
@@ -3596,48 +2291,22 @@ public static class ObjectHelper
 		}
 
 		var elapsedTime = (float)(DateTime.Now - startTime).TotalSeconds;
-		return elapsedTime / hpRatioDifference * (wholeTime ? 1 : currentHealthRatio);
+		var whole = elapsedTime / hpRatioDifference;
+		remaining = whole * currentHealthRatio;
+		return whole;
 	}
 
 	private static readonly ConcurrentDictionary<ulong, DateTime> _aliveStartTimes = [];
+	private static readonly ConcurrentDictionary<ulong, DateTime> _deadStartTimes = [];
 
 	/// <summary>
-	/// Gets how long the Player has been alive in seconds since their last death.
-	/// </summary>
-	/// <returns>
-	/// The time in seconds since the character's last death or first appearance, or float.NaN if unable to determine.
-	/// </returns>
-	internal static float PlayerTimeAlive()
-	{
-		if (Player.Object == null)
-		{
-			return float.NaN;
-		}
-
-		// If the character is dead, reset their alive time
-		if (Player.Object.IsDead || Svc.Condition[ConditionFlag.BetweenAreas])
-		{
-			_ = _aliveStartTimes.TryRemove(Player.Object.GameObjectId, out _);
-			return 0;
-		}
-
-		// If we haven't tracked this character yet, start tracking them
-		if (!_aliveStartTimes.ContainsKey(Player.Object.GameObjectId))
-		{
-			_aliveStartTimes[Player.Object.GameObjectId] = DateTime.Now;
-		}
-
-		return (float)(DateTime.Now - _aliveStartTimes[Player.Object.GameObjectId]).TotalSeconds > 30 ? 30 : (float)(DateTime.Now - _aliveStartTimes[Player.Object.GameObjectId]).TotalSeconds;
-	}
-
-	/// <summary>
-	/// Gets how long the battleChara has been alive in seconds since their last death.
+	/// Gets how long the battleChara has been alive in seconds since their last death, capped at 30.
 	/// </summary>
 	/// <param name="battleChara">The battle character to check.</param>
 	/// <returns>
 	/// The time in seconds since the character's last death or first appearance, or float.NaN if unable to determine.
 	/// </returns>
-	internal static float TimeAlive(this IBattleChara battleChara)
+	internal static float TimeAlive(this IBattleChara? battleChara)
 	{
 		if (battleChara == null)
 		{
@@ -3651,23 +2320,15 @@ public static class ObjectHelper
 			return 0;
 		}
 
-		// If we haven't tracked this character yet, start tracking them
-		if (!_aliveStartTimes.ContainsKey(battleChara.GameObjectId))
-		{
-			_aliveStartTimes[battleChara.GameObjectId] = DateTime.Now;
-		}
-
-		return (float)(DateTime.Now - _aliveStartTimes[battleChara.GameObjectId]).TotalSeconds > 30 ? 30 : (float)(DateTime.Now - _aliveStartTimes[battleChara.GameObjectId]).TotalSeconds;
+		return SecondsSinceFirstSeen(_aliveStartTimes, battleChara.GameObjectId);
 	}
 
-	private static readonly ConcurrentDictionary<ulong, DateTime> _deadStartTimes = [];
-
 	/// <summary>
-	/// Gets how long the character has been dead in seconds since their last death.
+	/// Gets how long the character has been dead in seconds, capped at 30.
 	/// </summary>
 	/// <param name="battleChara">The battle character to check.</param>
 	/// <returns>
-	/// The time in seconds since the character's death, or float.NaN if unable to determine or character is alive.
+	/// The time in seconds since the character's death, 0 while alive, or float.NaN if unable to determine.
 	/// </returns>
 	internal static float TimeDead(this IBattleChara battleChara)
 	{
@@ -3683,23 +2344,24 @@ public static class ObjectHelper
 			return 0;
 		}
 
-		// If we haven't tracked this character's death yet, start tracking them
-		if (!_deadStartTimes.ContainsKey(battleChara.GameObjectId))
-		{
-			_deadStartTimes[battleChara.GameObjectId] = DateTime.Now;
-		}
+		return SecondsSinceFirstSeen(_deadStartTimes, battleChara.GameObjectId);
+	}
 
-		return (float)(DateTime.Now - _deadStartTimes[battleChara.GameObjectId]).TotalSeconds > 30 ? 30 : (float)(DateTime.Now - _deadStartTimes[battleChara.GameObjectId]).TotalSeconds;
+	private static float SecondsSinceFirstSeen(ConcurrentDictionary<ulong, DateTime> startTimes, ulong id)
+	{
+		var start = startTimes.GetOrAdd(id, static _ => DateTime.Now);
+		return MathF.Min(30, (float)(DateTime.Now - start).TotalSeconds);
 	}
 
 	/// <summary>
-	/// Determines if the specified battle character has been attacked within the last second.
+	/// Determines whether the player has been hitting the specified battle character for at least a second,
+	/// counted from the player's first damaging hit on it.
 	/// </summary>
 	/// <param name="battleChara">The battle character to check.</param>
 	/// <returns>
-	/// <c>true</c> if the battle character has been attacked within the last second; otherwise, <c>false</c>.
+	/// <c>true</c> if the player's first hit on the battle character is at least one second old; otherwise, <c>false</c>.
 	/// </returns>
-	internal static bool IsAttacked(this IBattleChara battleChara)
+	internal static bool IsEngagedByPlayer(this IBattleChara battleChara)
 	{
 		if (battleChara == null)
 		{
@@ -3866,12 +2528,32 @@ public static class ObjectHelper
 			return 0; // This may need to be changed to 100
 		}
 
-		if (battleChara.IsParty())
+		// Called for every candidate of every action, sorts included, so each target is worked out once per frame.
+		var id = battleChara.GameObjectId;
+		var now = Environment.TickCount64;
+		if (_healthRatioCache.TryGetValue(id, out var cached) && now - cached.Tick < HealthRatioTtlMs)
 		{
-			if (battleChara.DoomNeedHealing())
-			{
-				return 0.01f;
-			}
+			return cached.Ratio;
+		}
+
+		if (_healthRatioCache.Count > 512)
+		{
+			_healthRatioCache.Clear();
+		}
+
+		var ratio = ComputeHealthRatio(battleChara);
+		_healthRatioCache[id] = (now, ratio);
+		return ratio;
+	}
+
+	private const long HealthRatioTtlMs = 15;
+	private static readonly Dictionary<ulong, (long Tick, float Ratio)> _healthRatioCache = [];
+
+	private static float ComputeHealthRatio(IBattleChara battleChara)
+	{
+		if (battleChara.IsParty() && battleChara.DoomNeedHealing())
+		{
+			return 0.01f;
 		}
 
 		if (DataCenter.RefinedHP.TryGetValue(battleChara.GameObjectId, out var hp))
@@ -3881,12 +2563,7 @@ public static class ObjectHelper
 
 		try
 		{
-			if (battleChara.MaxHp == 0)
-			{
-				return 0; // Avoid division by zero
-			}
-
-			return (float)battleChara.CurrentHp / battleChara.MaxHp;
+			return battleChara.MaxHp == 0 ? 0 : (float)battleChara.CurrentHp / battleChara.MaxHp;
 		}
 		catch (Exception)
 		{

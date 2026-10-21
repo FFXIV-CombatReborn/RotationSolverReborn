@@ -115,10 +115,7 @@ public partial class WhiteMageRotation
 
 	static partial void ModifyCurePvE(ref ActionSetting setting)
 	{
-		setting.CreateConfig = () => new ActionConfig()
-		{
-			GCDSingleHeal = true,
-		};
+		setting.GCDSingleHeal = true;
 	}
 
 	static partial void ModifyAeroPvE(ref ActionSetting setting)
@@ -155,10 +152,7 @@ public partial class WhiteMageRotation
 	static partial void ModifyCureIiPvE(ref ActionSetting setting)
 	{
 		setting.UnlockedByQuestID = 65977;
-		setting.CreateConfig = () => new ActionConfig()
-		{
-			GCDSingleHeal = true,
-		};
+		setting.GCDSingleHeal = true;
 	}
 
 	static partial void ModifyPresenceOfMindPvE(ref ActionSetting setting)

@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.ExcelServices;
+using System.Collections.Concurrent;
 
 namespace RotationSolver.Basic.Rotations.Duties;
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
@@ -419,155 +420,36 @@ public partial class DutyRotation : IDisposable
 	{
 		if (!DataCenter.IsInOccultCrescentOp)
 		{
-            return PhantomJob.None;
-        }
-
-		if (FreelancerLevel > 0)
-		{
-			return PhantomJob.Freelancer;
+			return PhantomJob.None;
 		}
 
-		if (KnightLevel > 0)
-		{
-			return PhantomJob.Knight;
-		}
-
-		if (MonkLevel > 0)
-		{
-			return PhantomJob.Monk;
-		}
-
-		if (BardLevel > 0)
-		{
-			return PhantomJob.Bard;
-		}
-
-		if (ChemistLevel > 0)
-		{
-			return PhantomJob.Chemist;
-		}
-
-		if (TimeMageLevel > 0)
-		{
-			return PhantomJob.TimeMage;
-		}
-
-		if (CannoneerLevel > 0)
-		{
-			return PhantomJob.Cannoneer;
-		}
-
-		if (OracleLevel > 0)
-		{
-			return PhantomJob.Oracle;
-		}
-
-		if (BerserkerLevel > 0)
-		{
-			return PhantomJob.Berserker;
-		}
-
-		if (RangerLevel > 0)
-		{
-			return PhantomJob.Ranger;
-		}
-
-		if (ThiefLevel > 0)
-		{
-			return PhantomJob.Thief;
-		}
-
-		if (SamuraiLevel > 0)
-		{
-			return PhantomJob.Samurai;
-		}
-
-		if (GeomancerLevel > 0)
-		{
-			return PhantomJob.Geomancer;
-		}
-
-		if (GladiatorLevel > 0)
-		{
-			return PhantomJob.Gladiator;
-		}
-
-		if (DancerLevel > 0)
-		{
-			return PhantomJob.Dancer;
-		}
-
-		if (MysticKnightLevel > 0)
-		{
-			return PhantomJob.MysticKnight;
-		}
-
-		if (NinjaLevel > 0)
-		{
-			return PhantomJob.Ninja;
-		}
-
-		if (BlackMageLevel > 0)
-		{
-			return PhantomJob.BlackMage;
-		}
-
-		if (WhiteMageLevel > 0)
-		{
-			return PhantomJob.WhiteMage;
-		}
-
-		if (DragoonLevel > 0)
-		{
-			return PhantomJob.Dragoon;
-		}
-
-		if (SummonerLevel > 0)
-		{
-			return PhantomJob.Summoner;
-		}
-
-		if (NecromancerLevel > 0)
-		{
-			return PhantomJob.Necromancer;
-		}
-
-		if (BlueMageLevel > 0)
-		{
-			return PhantomJob.BlueMage;
-		}
-
-		if (RedMageLevel > 0)
-		{
-			return PhantomJob.RedMage;
-		}
-
-		return PhantomJob.None;
+		RefreshPhantomLevels();
+		return _activePhantomJob;
 	}
 
 	/// <summary>
 	/// Does player have swift cast, dual cast or triple cast.
 	/// </summary>
 	[Description("Has Swift")]
-	public static bool HasSwift => Player?.HasStatus(true, StatusHelper.SwiftcastStatus) ?? false;
+	public static bool HasSwift => CustomRotation.HasSwift;
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	[Description("Has tank stance")]
-	public static bool HasTankStance => Player?.HasStatus(true, StatusHelper.TankStanceStatus) ?? false;
+	public static bool HasTankStance => CustomRotation.HasTankStance;
 
 	/// <summary>
-	/// 
+	///
 	/// </summary>
 	[Description("Has tank stance")]
-	public static bool HasTankInvuln => Player?.HasStatus(true, StatusHelper.NoNeedHealingStatus) ?? false;
+	public static bool HasTankInvuln => CustomRotation.HasTankInvuln;
 
 	/// <summary>
 	/// In the burst status.
 	/// </summary>
 	[Description("Is burst")]
-	public static bool IsBurst => MergedStatus.HasFlag(AutoStatus.Burst);
+	public static bool IsBurst => CustomRotation.IsBurst;
 
 	/// <summary>
 	/// Is RSR enabled.
@@ -650,221 +532,124 @@ public partial class DutyRotation : IDisposable
 	/// </summary>
 	public static string? ActivePhantomJob => GetPhantomJob().ToString();
 
-	public static byte FreelancerLevel
+	private static readonly Dictionary<StatusID, PhantomJob> PhantomJobByStatus = new()
 	{
-		get
+		[StatusID.PhantomFreelancer] = PhantomJob.Freelancer,
+		[StatusID.PhantomKnight] = PhantomJob.Knight,
+		[StatusID.PhantomMonk] = PhantomJob.Monk,
+		[StatusID.PhantomBard] = PhantomJob.Bard,
+		[StatusID.PhantomChemist] = PhantomJob.Chemist,
+		[StatusID.PhantomTimeMage] = PhantomJob.TimeMage,
+		[StatusID.PhantomCannoneer] = PhantomJob.Cannoneer,
+		[StatusID.PhantomOracle] = PhantomJob.Oracle,
+		[StatusID.PhantomBerserker] = PhantomJob.Berserker,
+		[StatusID.PhantomRanger] = PhantomJob.Ranger,
+		[StatusID.PhantomThief] = PhantomJob.Thief,
+		[StatusID.PhantomSamurai] = PhantomJob.Samurai,
+		[StatusID.PhantomGeomancer] = PhantomJob.Geomancer,
+		[StatusID.PhantomMysticKnight] = PhantomJob.MysticKnight,
+		[StatusID.PhantomDancer] = PhantomJob.Dancer,
+		[StatusID.PhantomGladiator] = PhantomJob.Gladiator,
+		[StatusID.PhantomNinja] = PhantomJob.Ninja,
+		[StatusID.PhantomBlackMage] = PhantomJob.BlackMage,
+		[StatusID.PhantomWhiteMage] = PhantomJob.WhiteMage,
+		[StatusID.PhantomDragoon] = PhantomJob.Dragoon,
+		[StatusID.PhantomSummoner] = PhantomJob.Summoner,
+		[StatusID.PhantomNecromancer] = PhantomJob.Necromancer,
+		[StatusID.PhantomBlueMage] = PhantomJob.BlueMage,
+		[StatusID.PhantomRedMage] = PhantomJob.RedMage,
+	};
+
+	private static readonly byte[] _phantomLevels = new byte[(int)PhantomJob.None];
+	private static PhantomJob _activePhantomJob = PhantomJob.None;
+	private static long _phantomLevelsTick = long.MinValue;
+
+	// Read many times per decision, so the player's statuses are scanned once per frame for every Phantom Job at once.
+	private static void RefreshPhantomLevels()
+	{
+		var now = Environment.TickCount64;
+		if (_phantomLevelsTick != long.MinValue && now - _phantomLevelsTick < 15)
 		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomFreelancer);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
+			return;
+		}
+
+		_phantomLevelsTick = now;
+		Array.Clear(_phantomLevels);
+		_activePhantomJob = PhantomJob.None;
+
+		var player = Player;
+		if (player?.StatusList is not { } statusList)
+		{
+			return;
+		}
+
+		foreach (var status in statusList)
+		{
+			if (status != null && status.SourceId == player.GameObjectId
+				&& PhantomJobByStatus.TryGetValue((StatusID)status.StatusId, out var job) && status.Param > 0)
+			{
+				_phantomLevels[(int)job] = (byte)status.Param;
+				if (_activePhantomJob == PhantomJob.None)
+				{
+					_activePhantomJob = job;
+				}
+			}
 		}
 	}
 
-	public static byte KnightLevel
+	private static byte GetPhantomLevel(PhantomJob job)
 	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomKnight);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
+		RefreshPhantomLevels();
+		return _phantomLevels[(int)job];
 	}
 
-	public static byte MonkLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomMonk);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte FreelancerLevel => GetPhantomLevel(PhantomJob.Freelancer);
 
-	public static byte BardLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomBard);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte KnightLevel => GetPhantomLevel(PhantomJob.Knight);
 
-	public static byte ChemistLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomChemist);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte MonkLevel => GetPhantomLevel(PhantomJob.Monk);
 
-	public static byte TimeMageLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomTimeMage);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte BardLevel => GetPhantomLevel(PhantomJob.Bard);
 
-	public static byte CannoneerLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomCannoneer);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte ChemistLevel => GetPhantomLevel(PhantomJob.Chemist);
 
-	public static byte OracleLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomOracle);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte TimeMageLevel => GetPhantomLevel(PhantomJob.TimeMage);
 
-	public static byte BerserkerLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomBerserker);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte CannoneerLevel => GetPhantomLevel(PhantomJob.Cannoneer);
 
-	public static byte RangerLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomRanger);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte OracleLevel => GetPhantomLevel(PhantomJob.Oracle);
 
-	public static byte ThiefLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomThief);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte BerserkerLevel => GetPhantomLevel(PhantomJob.Berserker);
 
-	public static byte SamuraiLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomSamurai);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte RangerLevel => GetPhantomLevel(PhantomJob.Ranger);
 
-	public static byte GeomancerLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomGeomancer);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte ThiefLevel => GetPhantomLevel(PhantomJob.Thief);
 
-	public static byte MysticKnightLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomMysticKnight);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte SamuraiLevel => GetPhantomLevel(PhantomJob.Samurai);
 
-	public static byte DancerLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomDancer);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte GeomancerLevel => GetPhantomLevel(PhantomJob.Geomancer);
 
-	public static byte GladiatorLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomGladiator);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte MysticKnightLevel => GetPhantomLevel(PhantomJob.MysticKnight);
 
-	public static byte NinjaLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomNinja);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte DancerLevel => GetPhantomLevel(PhantomJob.Dancer);
 
-	public static byte BlackMageLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomBlackMage);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte GladiatorLevel => GetPhantomLevel(PhantomJob.Gladiator);
 
-	public static byte WhiteMageLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomWhiteMage);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte NinjaLevel => GetPhantomLevel(PhantomJob.Ninja);
 
-	public static byte DragoonLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomDragoon);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte BlackMageLevel => GetPhantomLevel(PhantomJob.BlackMage);
 
-	public static byte SummonerLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomSummoner);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte WhiteMageLevel => GetPhantomLevel(PhantomJob.WhiteMage);
 
-	public static byte NecromancerLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomNecromancer);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte DragoonLevel => GetPhantomLevel(PhantomJob.Dragoon);
 
-	public static byte BlueMageLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomBlueMage);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte SummonerLevel => GetPhantomLevel(PhantomJob.Summoner);
 
-	public static byte RedMageLevel
-	{
-		get
-		{
-			var stacks = StatusHelper.PlayerStatusStack(true, StatusID.PhantomRedMage);
-			return stacks == byte.MaxValue ? (byte)0 : stacks;
-		}
-	}
+	public static byte NecromancerLevel => GetPhantomLevel(PhantomJob.Necromancer);
+
+	public static byte BlueMageLevel => GetPhantomLevel(PhantomJob.BlueMage);
+
+	public static byte RedMageLevel => GetPhantomLevel(PhantomJob.RedMage);
 
 	#endregion
 
@@ -883,55 +668,39 @@ public partial class DutyRotation : IDisposable
 	{
 		get
 		{
-			var runtimeProperties = GetType().GetRuntimeProperties();
-			var propertiesList = new List<PropertyInfo>();
 			var questBattleActionIds = DataCenter.IsInQuestBattle ? QuestBattleActionIds : [];
-
-			foreach (var p in runtimeProperties)
+			var actions = new List<IAction>();
+			foreach (var (property, id) in GetActionProperties(GetType()))
 			{
-				var attr = p.GetCustomAttribute<IDAttribute>();
-				var id = attr != null ? attr.ID : uint.MaxValue;
-
-				var hasdutyAction = false;
-				foreach (var dutyaction in DataCenter.DutyActions)
+				if ((Array.IndexOf(DataCenter.DutyActions, id) >= 0 || Array.IndexOf(questBattleActionIds, id) >= 0)
+					&& property.GetValue(this) is IAction action)
 				{
-					if (dutyaction == id)
-					{
-						hasdutyAction = true;
-						break;
-					}
-				}
-
-				if (!hasdutyAction)
-				{
-					foreach (var dutyaction in questBattleActionIds)
-					{
-						if (dutyaction == id)
-						{
-							hasdutyAction = true;
-							break;
-						}
-					}
-				}
-
-				if (hasdutyAction)
-				{
-					propertiesList.Add(p);
+					actions.Add(action);
 				}
 			}
 
-			var actionsList = new List<IAction>();
-			foreach (var prop in propertiesList)
-			{
-				var value = prop.GetValue(this);
-				if (value is IAction action)
-				{
-					actionsList.Add(action);
-				}
-			}
-
-			return [.. actionsList];
+			return [.. actions];
 		}
+	}
+
+	private static readonly ConcurrentDictionary<Type, (PropertyInfo Property, uint Id)[]> _actionProperties = new();
+
+	// The generated action properties never change, so each type is reflected over once.
+	private static (PropertyInfo Property, uint Id)[] GetActionProperties(Type type)
+	{
+		return _actionProperties.GetOrAdd(type, static t =>
+		{
+			List<(PropertyInfo, uint)> properties = [];
+			foreach (var p in t.GetRuntimeProperties())
+			{
+				if (p.GetCustomAttribute<IDAttribute>() is { } attr)
+				{
+					properties.Add((p, attr.ID));
+				}
+			}
+
+			return [.. properties];
+		});
 	}
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

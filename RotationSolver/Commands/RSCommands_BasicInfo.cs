@@ -1,6 +1,5 @@
 ﻿using Dalamud.Game.Command;
 using ECommons.DalamudServices;
-using ECommons.GameHelpers;
 using RotationSolver.Data;
 
 namespace RotationSolver.Commands
@@ -9,30 +8,21 @@ namespace RotationSolver.Commands
 	{
 		internal static void Enable()
 		{
-			DataCenter.OnSpecialTypeChanged = specialType =>
-			{
-				var role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
-				_specialString = specialType.ToSpecialString(role);
-			};
+			DataCenter.OnSpecialTypeChanged = specialType => _specialString = specialType.ToSpecialString();
+
+			// A command name can't contain a space, so Auto and Off are listed in the help text instead of registered.
+			var helpMessage = $"{UiString.Commands_Rotation.GetDescription()}\n"
+				+ $"{Service.COMMAND} Auto → {UiString.Commands_Start.GetDescription()}\n"
+				+ $"{Service.COMMAND} Off → {UiString.Commands_Off.GetDescription()}";
 
 			_ = Svc.Commands.AddHandler(Service.COMMAND, new CommandInfo(OnCommand)
 			{
-				HelpMessage = UiString.Commands_Rotation.GetDescription(),
+				HelpMessage = helpMessage,
 				ShowInHelp = true,
 			});
 			_ = Svc.Commands.AddHandler(Service.ALTCOMMAND, new CommandInfo(OnCommand)
 			{
-				HelpMessage = UiString.Commands_Rotation.GetDescription(),
-				ShowInHelp = true,
-			});
-			_ = Svc.Commands.AddHandler(Service.AUTOCOMMAND, new CommandInfo(OnCommand)
-			{
-				HelpMessage = UiString.Commands_Start.GetDescription(),
-				ShowInHelp = true,
-			});
-			_ = Svc.Commands.AddHandler(Service.OFFCOMMAND, new CommandInfo(OnCommand)
-			{
-				HelpMessage = UiString.Commands_Off.GetDescription(),
+				HelpMessage = $"{UiString.Commands_Rotation.GetDescription()}\n",
 				ShowInHelp = true,
 			});
 		}
@@ -41,8 +31,6 @@ namespace RotationSolver.Commands
 		{
 			_ = Svc.Commands.RemoveHandler(Service.COMMAND);
 			_ = Svc.Commands.RemoveHandler(Service.ALTCOMMAND);
-			_ = Svc.Commands.RemoveHandler(Service.AUTOCOMMAND);
-			_ = Svc.Commands.RemoveHandler(Service.OFFCOMMAND);
 		}
 
 		private static void OnCommand(string command, string arguments)
@@ -131,7 +119,9 @@ namespace RotationSolver.Commands
 			var spaceIdx = command.IndexOf(' ');
 			var token = spaceIdx >= 0 ? command[..spaceIdx] : command;
 
-			return Enum.TryParse(token, ignoreCase: true, out type);
+			// Enum.TryParse also accepts numbers and comma lists, which aren't command names.
+			return token.Length > 0 && char.IsLetter(token[0]) && !token.Contains(',')
+				&& Enum.TryParse(token, ignoreCase: true, out type) && Enum.IsDefined(type);
 		}
 
 		internal static string GetCommandStr(this Enum command, string extraCommand = "")

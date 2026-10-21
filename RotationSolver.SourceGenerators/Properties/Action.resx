@@ -89,7 +89,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/3"&gt;&lt;strong&gt;Sprint&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (All Classes) [3] [System]
-    /// &lt;para&gt;Increases movement speed. Duration: 10s (20s when not in combat Additional Effect: Grants Jog when the effect expires Jog Effect: Movement speed is increased Effect ends when enmity is generated. Has no effect in battle. ※Unavailable in PvP.&lt;/para&gt;
+    /// &lt;para&gt;Increases movement speed. Duration: 10s (20s when not in combat) Additional Effect: Grants Jog when the effect expires Jog Effect: Movement speed is increased Effect ends when enmity is generated. Has no effect in battle. ※Unavailable in PvP.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction SprintPvE =&gt; _SprintPvECreator.Value;
@@ -227,7 +227,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/7533"&gt;&lt;strong&gt;Provoke&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA MRD PLD WAR DRK GNB) [7533] [Ability]
-    /// &lt;para&gt;Gesture threateningly placing yourself at the top of a target's enmity list while gaining additional enmity.&lt;/para&gt;
+    /// &lt;para&gt;Gesture threateningly, placing yourself at the top of a target's enmity list while gaining additional enmity.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction ProvokePvE =&gt; _ProvokePvECreator.Value;
@@ -411,7 +411,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/7548"&gt;&lt;strong&gt;Arm's Length&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvE&lt;/i&gt; (GLA PGL MRD LNC ARC PLD MNK WAR DRG BRD ROG NIN MCH DRK SAM GNB DNC RPR VPR) [7548] [Ability]
-    /// &lt;para&gt;Nullifies most knockback and draw-in effects. Duration: 6s Additional Effect: When you are struck by a physical attack the striker will be afflicted with Slow +20% Duration: 15s&lt;/para&gt;
+    /// &lt;para&gt;Nullifies most knockback and draw-in effects. Duration: 6s Additional Effect: When you are struck by a physical attack, the striker will be afflicted with Slow +20% Duration: 15s&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction ArmsLengthPvE =&gt; _ArmsLengthPvECreator.Value;
@@ -733,7 +733,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/9973"&gt;&lt;strong&gt;Spin Crusher&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9973] [Special]
-    /// &lt;para&gt;Delivers an attack with a potency of 50,000 to all opposing warmachina in a cone before you. 5,000 when attacking a player mammet or object.&lt;/para&gt;
+    /// &lt;para&gt;Delivers an attack with a potency of 50,000 to all opposing warmachina in a cone before you. 5,000 when attacking a player, mammet, or object.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction SpinCrusherPvP =&gt; _SpinCrusherPvPCreator.Value;
@@ -779,7 +779,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/9975"&gt;&lt;strong&gt;3000-tonze Missile&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9975] [Special]
-    /// &lt;para&gt;Deals damage with a potency of 1,000,000 to all objects near point of impact. 20,000 to opposing players warmachina or mammets. Potency decreases the greater the target's distance from point of impact to a maximum of 30 yalms.&lt;/para&gt;
+    /// &lt;para&gt;Deals damage with a potency of 1,000,000 to all objects near point of impact. 20,000 to opposing players, warmachina, or mammets. Potency decreases the greater the target's distance from point of impact, to a maximum of 30 yalms.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction _3000TonzeMissilePvP =&gt; __3000TonzeMissilePvPCreator.Value;
@@ -848,7 +848,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/9979"&gt;&lt;strong&gt;Double Rocket Punch&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9979] [Special]
-    /// &lt;para&gt;Deals damage with a potency of 600,000 to all objects near point of impact. 30,000 when attacking opposing players warmachina or mammets. Additional Effect: Stun Duration: 3s&lt;/para&gt;
+    /// &lt;para&gt;Deals damage with a potency of 600,000 to all objects near point of impact. 30,000 when attacking opposing players, warmachina, or mammets. Additional Effect: Stun Duration: 3s&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction DoubleRocketPunchPvP =&gt; _DoubleRocketPunchPvPCreator.Value;
@@ -894,7 +894,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/9981"&gt;&lt;strong&gt;Ceruleum Refill&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (All Classes) [9981] [Special]
-    /// &lt;para&gt;Uses 25 units of ceruleum fuel (CE to restore 5000 EP to currently mounted warmachina.&lt;/para&gt;
+    /// &lt;para&gt;Uses 25 units of ceruleum fuel (CE) to restore 5000 EP to currently mounted warmachina.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction CeruleumRefillPvP =&gt; _CeruleumRefillPvPCreator.Value;
@@ -1009,7 +1009,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/29054"&gt;&lt;strong&gt;Guard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29054] [Ability]
-    /// &lt;para&gt;Reduces damage taken by 99% and grants immunity to Stun Heavy Bind Silence Deep Freeze and knockback and draw-in effects. Duration: 4s Movement speed is reduced by 33% for the duration of this effect. Effect ends upon reuse using another action or when the effect duration expires.&lt;/para&gt;
+    /// &lt;para&gt;Reduces damage taken by 99% and grants immunity to Stun, Heavy, Bind, Silence, Deep Freeze, and knockback and draw-in effects. Duration: 4s Movement speed is reduced by 33% for the duration of this effect. Effect ends upon reuse, using another action, or when the effect duration expires.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction GuardPvP =&gt; _GuardPvPCreator.Value;
@@ -1055,7 +1055,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/29056"&gt;&lt;strong&gt;Purify&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29056] [Ability]
-    /// &lt;para&gt;Removes Stun Heavy Bind Silence Deep Freeze and Miracle of Nature. Additional Effect: Grants Resilience Resilience Effect: Nullifies status afflictions that can be removed by Purify as well as knockback and draw-in effects Duration: 2s Can be used even when under the effect of certain status afflictions.&lt;/para&gt;
+    /// &lt;para&gt;Removes Stun, Heavy, Bind, Silence, Deep Freeze, and Miracle of Nature. Additional Effect: Grants Resilience Resilience Effect: Nullifies status afflictions that can be removed by Purify, as well as knockback and draw-in effects Duration: 2s Can be used even when under the effect of certain status afflictions.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction PurifyPvP =&gt; _PurifyPvPCreator.Value;
@@ -1147,7 +1147,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/29735"&gt;&lt;strong&gt;Guard&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (Jobs of the Disciples of War or Magic) [29735] [Ability]
-    /// &lt;para&gt;Reduces damage taken by 99% and grants immunity to Stun Heavy Bind Silence Deep Freeze and knockback and draw-in effects. Duration: 4s Movement speed is reduced by 33% for the duration of this effect. Effect ends upon reuse using another action or when the effect duration expires.&lt;/para&gt;
+    /// &lt;para&gt;Reduces damage taken by 99% and grants immunity to Stun, Heavy, Bind, Silence, Deep Freeze, and knockback and draw-in effects. Duration: 4s Movement speed is reduced by 33% for the duration of this effect. Effect ends upon reuse, using another action, or when the effect duration expires.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction GuardPvP_29735 =&gt; _GuardPvP_29735Creator.Value;
@@ -1308,7 +1308,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/43246"&gt;&lt;strong&gt;Bloodbath&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MNK DRG NIN SAM RPR VPR) [43246] [Ability]
-    /// &lt;para&gt;Increases damage dealt by 25% and converts 100% of damage dealt into HP. Duration: 10s&lt;/para&gt;
+    /// &lt;para&gt;Increases damage dealt by 25%, and converts 100% of damage dealt into HP. Duration: 10s&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction BloodbathPvP =&gt; _BloodbathPvPCreator.Value;
@@ -1331,7 +1331,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/43247"&gt;&lt;strong&gt;Swift&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MNK DRG NIN SAM RPR VPR) [43247] [Ability]
-    /// &lt;para&gt;Increases movement speed by 100% and grants immunity to Stun Heavy Bind Silence Deep Freeze and knockback and draw-in effects. Duration: 4s Effect ends when riding a mount.&lt;/para&gt;
+    /// &lt;para&gt;Increases movement speed by 100% and grants immunity to Stun, Heavy, Bind, Silence, Deep Freeze, and knockback and draw-in effects. Duration: 4s Effect ends when riding a mount.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction SwiftPvP =&gt; _SwiftPvPCreator.Value;
@@ -1354,7 +1354,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/43248"&gt;&lt;strong&gt;Smite&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (MNK DRG NIN SAM RPR VPR) [43248] [Ability]
-    /// &lt;para&gt;Delivers an attack with a potency of 6,000. Potency increases up to 18,000 as the target's HP decreases reaching its maximum value when the target has 25% HP or less. Ignores the effects of Guard when dealing damage. Recast time resets upon earning a kill or an assist.&lt;/para&gt;
+    /// &lt;para&gt;Delivers an attack with a potency of 6,000. Potency increases up to 18,000 as the target's HP decreases, reaching its maximum value when the target has 25% HP or less. Ignores the effects of Guard when dealing damage. Recast time resets upon earning a kill or an assist.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction SmitePvP =&gt; _SmitePvPCreator.Value;
@@ -1377,7 +1377,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/43249"&gt;&lt;strong&gt;Dervish&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BRD MCH DNC) [43249] [Ability]
-    /// &lt;para&gt;Reduces cast time and recast time of spells and weaponskills by 10% and increases movement speed by 33% for self and nearby party members. This action's effects extend through obstructions. Duration: 12s&lt;/para&gt;
+    /// &lt;para&gt;Reduces cast time and recast time of spells and weaponskills by 10%, and increases movement speed by 33% for self and nearby party members. This action's effects extend through obstructions. Duration: 12s&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction DervishPvP =&gt; _DervishPvPCreator.Value;
@@ -1400,7 +1400,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/43250"&gt;&lt;strong&gt;Bravery&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BRD MCH DNC) [43250] [Ability]
-    /// &lt;para&gt;Increases damage dealt by a party member or self by 25% and reduces damage taken by 25%. Duration: 15s&lt;/para&gt;
+    /// &lt;para&gt;Increases damage dealt by a party member or self by 25%, and reduces damage taken by 25%. Duration: 15s&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction BraveryPvP =&gt; _BraveryPvPCreator.Value;
@@ -1446,7 +1446,7 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#action/43252"&gt;&lt;strong&gt;Comet&lt;/strong&gt;&lt;/see&gt; &lt;i&gt;PvP&lt;/i&gt; (BLM SMN RDM PCT) [43252] [Spell]
-    /// &lt;para&gt;Deals magic damage to enemies at the designated area with a potency of 20,000. This action's effects extend through obstructions. You cannot move while casting nor can you cancel the spell once cast.&lt;/para&gt;
+    /// &lt;para&gt;Deals magic damage to enemies at the designated area with a potency of 20,000. This action's effects extend through obstructions. You cannot move while casting, nor can you cancel the spell once cast.&lt;/para&gt;
     /// &lt;/summary&gt;
     
     public IBaseAction CometPvP =&gt; _CometPvPCreator.Value;
@@ -1580,14 +1580,14 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4559"&gt;&lt;strong&gt;Elixir&lt;/strong&gt;&lt;/see&gt; [4559]
-    /// &lt;para&gt;This special blend of herbal extracts and aetheric essence rejuvenates body and mind instantly restoring HP and MP.&lt;/para&gt;
+    /// &lt;para&gt;This special blend of herbal extracts and aetheric essence rejuvenates body and mind, instantly restoring HP and MP.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem BottleOfElixir =&gt; _BottleOfElixirCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _BottleOfHielixirCreator = new(() =&gt; new BaseItem(4560));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4560"&gt;&lt;strong&gt;Hi-Elixir&lt;/strong&gt;&lt;/see&gt; [4560]
-    /// &lt;para&gt;This special blend of herbal extracts and aetheric essence rejuvenates body and mind instantly restoring HP and MP.&lt;/para&gt;
+    /// &lt;para&gt;This special blend of herbal extracts and aetheric essence rejuvenates body and mind, instantly restoring HP and MP.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem BottleOfHielixir =&gt; _BottleOfHielixirCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _BottleOfAntidoteCreator = new(() =&gt; new BaseItem(4564));
@@ -1636,140 +1636,140 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4570"&gt;&lt;strong&gt;Phoenix Down&lt;/strong&gt;&lt;/see&gt; [4570]
-    /// &lt;para&gt;The billowy plumage of the fledgling Phoenix─a legendary bird that upon each fiery death is said to rise from its own ashes in a literal “blaze of glory.” When placed within fifteen yalms of one who is incapacitated it will instantly revive the person. While some cultures insist that the tailfeather's restorative properties trump those of down these claims have yet to be proven in any sort of scientific capacity. ※Cannot be used during certain duties.&lt;/para&gt;
+    /// &lt;para&gt;The billowy plumage of the fledgling Phoenix─a legendary bird that, upon each fiery death, is said to rise from its own ashes in a literal “blaze of glory.” When placed within fifteen yalms of one who is incapacitated, it will instantly revive the person. While some cultures insist that the tailfeather's restorative properties trump those of down, these claims have yet to be proven in any sort of scientific capacity. ※Cannot be used during certain duties.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem TuftOfPhoenixDown =&gt; _TuftOfPhoenixDownCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _FireWardPotionCreator = new(() =&gt; new BaseItem(4614));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4614"&gt;&lt;strong&gt;Fire Ward Potion&lt;/strong&gt;&lt;/see&gt; [4614]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to fire-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to fire-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem FireWardPotion =&gt; _FireWardPotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _IceWardPotionCreator = new(() =&gt; new BaseItem(4615));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4615"&gt;&lt;strong&gt;Ice Ward Potion&lt;/strong&gt;&lt;/see&gt; [4615]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to ice-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to ice-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem IceWardPotion =&gt; _IceWardPotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _WindWardPotionCreator = new(() =&gt; new BaseItem(4616));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4616"&gt;&lt;strong&gt;Wind Ward Potion&lt;/strong&gt;&lt;/see&gt; [4616]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to wind-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to wind-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem WindWardPotion =&gt; _WindWardPotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _EarthWardPotionCreator = new(() =&gt; new BaseItem(4617));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4617"&gt;&lt;strong&gt;Earth Ward Potion&lt;/strong&gt;&lt;/see&gt; [4617]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to earth-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to earth-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem EarthWardPotion =&gt; _EarthWardPotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _LightningWardPotionCreator = new(() =&gt; new BaseItem(4618));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4618"&gt;&lt;strong&gt;Lightning Ward Potion&lt;/strong&gt;&lt;/see&gt; [4618]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to lightning-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to lightning-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem LightningWardPotion =&gt; _LightningWardPotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _WaterWardPotionCreator = new(() =&gt; new BaseItem(4619));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4619"&gt;&lt;strong&gt;Water Ward Potion&lt;/strong&gt;&lt;/see&gt; [4619]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to water-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction slightly increases resistance to water-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem WaterWardPotion =&gt; _WaterWardPotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _FireWardHipotionCreator = new(() =&gt; new BaseItem(4620));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4620"&gt;&lt;strong&gt;Fire Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4620]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to fire-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to fire-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem FireWardHipotion =&gt; _FireWardHipotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _IceWardHipotionCreator = new(() =&gt; new BaseItem(4621));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4621"&gt;&lt;strong&gt;Ice Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4621]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to ice-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to ice-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem IceWardHipotion =&gt; _IceWardHipotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _WindWardHipotionCreator = new(() =&gt; new BaseItem(4622));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4622"&gt;&lt;strong&gt;Wind Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4622]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to wind-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to wind-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem WindWardHipotion =&gt; _WindWardHipotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _EarthWardHipotionCreator = new(() =&gt; new BaseItem(4623));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4623"&gt;&lt;strong&gt;Earth Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4623]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to earth-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to earth-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem EarthWardHipotion =&gt; _EarthWardHipotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _LightningWardHipotionCreator = new(() =&gt; new BaseItem(4624));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4624"&gt;&lt;strong&gt;Lightning Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4624]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to lightning-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to lightning-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem LightningWardHipotion =&gt; _LightningWardHipotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _WaterWardHipotionCreator = new(() =&gt; new BaseItem(4625));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4625"&gt;&lt;strong&gt;Water Ward Hi-Potion&lt;/strong&gt;&lt;/see&gt; [4625]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to water-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction increases resistance to water-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem WaterWardHipotion =&gt; _WaterWardHipotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _FireWardMegapotionCreator = new(() =&gt; new BaseItem(4626));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4626"&gt;&lt;strong&gt;Fire Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4626]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to fire-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to fire-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem FireWardMegapotion =&gt; _FireWardMegapotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _IceWardMegapotionCreator = new(() =&gt; new BaseItem(4627));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4627"&gt;&lt;strong&gt;Ice Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4627]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to ice-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to ice-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem IceWardMegapotion =&gt; _IceWardMegapotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _WindWardMegapotionCreator = new(() =&gt; new BaseItem(4628));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4628"&gt;&lt;strong&gt;Wind Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4628]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to wind-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to wind-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem WindWardMegapotion =&gt; _WindWardMegapotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _EarthWardMegapotionCreator = new(() =&gt; new BaseItem(4629));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4629"&gt;&lt;strong&gt;Earth Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4629]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to earth-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to earth-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem EarthWardMegapotion =&gt; _EarthWardMegapotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _LightningWardMegapotionCreator = new(() =&gt; new BaseItem(4630));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4630"&gt;&lt;strong&gt;Lightning Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4630]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to lightning-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to lightning-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem LightningWardMegapotion =&gt; _LightningWardMegapotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _WaterWardMegapotionCreator = new(() =&gt; new BaseItem(4631));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/4631"&gt;&lt;strong&gt;Water Ward Mega-Potion&lt;/strong&gt;&lt;/see&gt; [4631]
-    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to water-aspected damage. What few people know however is that after long periods of disuse the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons PvP areas or raids.&lt;/para&gt;
+    /// &lt;para&gt;Everyone knows this elementally charged concoction significantly increases resistance to water-aspected damage. What few people know, however, is that after long periods of disuse, the liquid undergoes a natural alchemical transformation that grants it the same coloring properties as common dye. Cannot be opened in instanced areas such as dungeons, PvP areas, or raids.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem WaterWardMegapotion =&gt; _WaterWardMegapotionCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _VialOfCordialCreator = new(() =&gt; new BaseItem(6141));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/6141"&gt;&lt;strong&gt;Cordial&lt;/strong&gt;&lt;/see&gt; [6141]
-    /// &lt;para&gt;A sweet fermented concoction that instantly restores 300 GP (350 if the cordial is of high quality).&lt;/para&gt;
+    /// &lt;para&gt;A sweet, fermented concoction that instantly restores 300 GP (350 if the cordial is of high quality).&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem VialOfCordial =&gt; _VialOfCordialCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _PhialOfRetainerFantasiaCreator = new(() =&gt; new BaseItem(8841));
@@ -1783,14 +1783,14 @@ public abstract partial class CustomRotation
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/16911"&gt;&lt;strong&gt;Watered Cordial&lt;/strong&gt;&lt;/see&gt; [16911]
-    /// &lt;para&gt;A sweet fermented concoction that instantly restores 150 GP (200 if the cordial is of high quality).&lt;/para&gt;
+    /// &lt;para&gt;A sweet, fermented concoction that instantly restores 150 GP (200 if the cordial is of high quality).&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem VialOfWateredCordial =&gt; _VialOfWateredCordialCreator.Value;
     private readonly Lazy&lt;IBaseItem&gt; _OccultPotionCreator = new(() =&gt; new BaseItem(47741));
     
     /// &lt;summary&gt;
     /// &lt;see href="https://garlandtools.org/db/#item/47741"&gt;&lt;strong&gt;Occult Potion&lt;/strong&gt;&lt;/see&gt; [47741]
-    /// &lt;para&gt;This special blend of herbal extracts and aetheric essence rejuvenates body and mind instantly restoring HP or MP. Consumed upon use of Occult Potion or Occult Ether. ※Only available for use on the Occult Crescent.&lt;/para&gt;
+    /// &lt;para&gt;This special blend of herbal extracts and aetheric essence rejuvenates body and mind, instantly restoring HP or MP. Consumed upon use of Occult Potion or Occult Ether. ※Only available for use on the Occult Crescent.&lt;/para&gt;
     /// &lt;/summary&gt;
     public IBaseItem OccultPotion =&gt; _OccultPotionCreator.Value;
 

@@ -59,18 +59,12 @@ public partial class MainWindow
 		var list = new List<GAction>();
 		foreach (var a in sheet)
 		{
-			if (!string.IsNullOrEmpty(a.ToString()) && !a.IsPvP && !a.IsPlayerAction
-				&& a.Cast100ms > 0)
+			if (!a.Name.IsEmpty && !a.IsPvP && !a.IsPlayerAction && a.Cast100ms > 0)
 			{
 				list.Add(a);
 			}
 		}
-		var result = new GAction[list.Count];
-		for (var i = 0; i < list.Count; i++)
-		{
-			result[i] = list[i];
-		}
-		return result;
+		return [.. list];
 	});
 
 	internal static GAction[] AllActions => _allActions.Value;
@@ -168,7 +162,7 @@ public partial class MainWindow
 		}
 	}
 
-	private static void FromClipBoardButton(HashSet<uint> items)
+	private static void FromClipBoardButton(string name, HashSet<uint> items)
 	{
 		const string CopyErrorMessage = "Failed to copy the values to the clipboard.";
 		const string PasteErrorMessage = "Failed to copy the values from the clipboard.";
@@ -206,7 +200,7 @@ public partial class MainWindow
 			}
 			finally
 			{
-				_ = OtherConfiguration.Save();
+				_ = OtherConfiguration.SaveList(name);
 				ImGui.CloseCurrentPopup();
 			}
 		}
@@ -220,7 +214,7 @@ public partial class MainWindow
 		const uint DefaultNotLoadId = 0;
 
 		ImGui.PushID(name);
-		FromClipBoardButton(statuses);
+		FromClipBoardButton(name, statuses);
 
 		uint removeStatusId = 0;
 		var notLoadId = DefaultNotLoadId;
@@ -230,7 +224,7 @@ public partial class MainWindow
 		StatusPopUp(popupId, allStatus, ref _statusSearching, status =>
 		{
 			_ = statuses.Add(status.RowId);
-			_ = OtherConfiguration.Save();
+			_ = OtherConfiguration.SaveList(name);
 		}, notLoadId);
 
 		var count = Math.Max(1, (int)MathF.Floor(ImGui.GetColumnWidth() / ((IconWidth * Scale) + ImGui.GetStyle().ItemSpacing.X)));
@@ -282,7 +276,7 @@ public partial class MainWindow
 		if (removeStatusId != 0)
 		{
 			_ = statuses.Remove(removeStatusId);
-			_ = OtherConfiguration.Save();
+			_ = OtherConfiguration.SaveList(name);
 		}
 		ImGui.PopID();
 	}
@@ -451,7 +445,7 @@ public partial class MainWindow
 		}
 
 		ImGui.SameLine();
-		FromClipBoardButton(actions);
+		FromClipBoardButton(name, actions);
 
 		ImGui.Spacing();
 
@@ -498,15 +492,15 @@ public partial class MainWindow
 		if (removeId != 0)
 		{
 			_ = actions.Remove(removeId);
-			_ = OtherConfiguration.Save();
+			_ = OtherConfiguration.SaveList(name);
 		}
 
-		ActionPopup(popupId, actions);
+		ActionPopup(popupId, name, actions);
 
 		ImGui.PopID();
 	}
 
-	private static void ActionPopup(string popupId, HashSet<uint> actions)
+	private static void ActionPopup(string popupId, string name, HashSet<uint> actions)
 	{
 		const float InputWidth = 200f;
 		const float ChildHeight = 400f;
@@ -586,7 +580,7 @@ public partial class MainWindow
 							if (selected)
 							{
 								_ = actions.Add(action.RowId);
-								_ = OtherConfiguration.Save();
+								_ = OtherConfiguration.SaveList(name);
 								ImGui.CloseCurrentPopup();
 							}
 						}
@@ -665,6 +659,10 @@ public partial class MainWindow
 					UiString.ConfigWindow_List_NoHostilesName.GetDescription(), ref libs[i], 1024))
 				{
 					OtherConfiguration.NoHostileNames[territoryId] = libs;
+				}
+
+				if (ImGui.IsItemDeactivatedAfterEdit())
+				{
 					_ = OtherConfiguration.SaveNoHostileNames();
 				}
 				ImGui.SameLine();
@@ -726,6 +724,10 @@ public partial class MainWindow
 					UiString.ConfigWindow_List_NoProvokeName.GetDescription(), ref libs[i], 1024))
 				{
 					OtherConfiguration.NoProvokeNames[territoryId] = libs;
+				}
+
+				if (ImGui.IsItemDeactivatedAfterEdit())
+				{
 					_ = OtherConfiguration.SaveNoProvokeNames();
 				}
 				ImGui.SameLine();

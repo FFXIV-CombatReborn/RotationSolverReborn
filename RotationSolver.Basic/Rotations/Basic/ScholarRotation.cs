@@ -111,10 +111,7 @@ public partial class ScholarRotation
 	static partial void ModifyPhysickPvE(ref ActionSetting setting)
 	{
 		setting.IsFriendly = true;
-		setting.CreateConfig = () => new ActionConfig()
-		{
-			GCDSingleHeal = true,
-		};
+		setting.GCDSingleHeal = true;
 	}
 
 	static partial void ModifySummonEosPvE(ref ActionSetting setting)
@@ -158,10 +155,7 @@ public partial class ScholarRotation
 			StatusID.Galvanize
 		];
 		setting.IsFriendly = true;
-		setting.CreateConfig = () => new ActionConfig()
-		{
-			GCDSingleHeal = true,
-		};
+		setting.GCDSingleHeal = true;
 		setting.UnlockedByQuestID = 66633;
 	}
 
@@ -414,10 +408,7 @@ public partial class ScholarRotation
 		];
 		setting.StatusFromSelf = false;
 		setting.IsFriendly = true;
-		setting.CreateConfig = () => new ActionConfig()
-		{
-			GCDSingleHeal = true,
-		};
+		setting.GCDSingleHeal = true;
 	}
 
 	static partial void ModifyAccessionPvE(ref ActionSetting setting)

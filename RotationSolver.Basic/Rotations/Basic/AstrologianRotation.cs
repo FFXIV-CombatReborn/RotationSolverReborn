@@ -25,155 +25,39 @@ public partial class AstrologianRotation
 	public static CardType Card3 => JobGauge.Card3;
 
 	/// <summary>
-	/// 
+	/// Whether any of the three drawn cards is <paramref name="card"/>.
 	/// </summary>
-	public static bool HasBalance
-	{
-		get
-		{
-			if (Card1 == CardType.Balance)
-			{
-				return true;
-			}
-
-			else if (Card2 == CardType.Balance)
-			{
-				return true;
-			}
-
-			else if (Card3 == CardType.Balance)
-			{
-				return true;
-			}
-
-			return false;
-		}
-	}
+	public static bool HasCard(CardType card) => Card1 == card || Card2 == card || Card3 == card;
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool HasBole
-	{
-		get
-		{
-			if (Card1 == CardType.Bole)
-			{
-				return true;
-			}
-
-			else if (Card2 == CardType.Bole)
-			{
-				return true;
-			}
-
-			else if (Card3 == CardType.Bole)
-			{
-				return true;
-			}
-			return false;
-		}
-	}
+	public static bool HasBalance => HasCard(CardType.Balance);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool HasArrow
-	{
-		get
-		{
-			if (Card1 == CardType.Arrow)
-			{
-				return true;
-			}
-
-			else if (Card2 == CardType.Arrow)
-			{
-				return true;
-			}
-
-			else if (Card3 == CardType.Arrow)
-			{
-				return true;
-			}
-			return false;
-		}
-	}
+	public static bool HasBole => HasCard(CardType.Bole);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool HasSpear
-	{
-		get
-		{
-			if (Card1 == CardType.Spear)
-			{
-				return true;
-			}
-
-			else if (Card2 == CardType.Spear)
-			{
-				return true;
-			}
-
-			else if (Card3 == CardType.Spear)
-			{
-				return true;
-			}
-			return false;
-		}
-	}
+	public static bool HasArrow => HasCard(CardType.Arrow);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool HasEwer
-	{
-		get
-		{
-			if (Card1 == CardType.Ewer)
-			{
-				return true;
-			}
-
-			else if (Card2 == CardType.Ewer)
-			{
-				return true;
-			}
-
-			else if (Card3 == CardType.Ewer)
-			{
-				return true;
-			}
-			return false;
-		}
-	}
+	public static bool HasSpear => HasCard(CardType.Spear);
 
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool HasSpire
-	{
-		get
-		{
-			if (Card1 == CardType.Spire)
-			{
-				return true;
-			}
+	public static bool HasEwer => HasCard(CardType.Ewer);
 
-			else if (Card2 == CardType.Spire)
-			{
-				return true;
-			}
-
-			else if (Card3 == CardType.Spire)
-			{
-				return true;
-			}
-			return false;
-		}
-	}
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool HasSpire => HasCard(CardType.Spire);
 
 	/// <summary>
 	/// Indicates the state of Minor Arcana and which card will be used next when activating Minor Arcana, LORD = 7, LADY = 8
@@ -269,10 +153,7 @@ public partial class AstrologianRotation
 	static partial void ModifyBeneficPvE(ref ActionSetting setting)
 	{
 		setting.IsFriendly = true;
-		setting.CreateConfig = () => new ActionConfig()
-		{
-			GCDSingleHeal = true,
-		};
+		setting.GCDSingleHeal = true;
 	}
 
 	static partial void ModifyCombustPvE(ref ActionSetting setting)
@@ -317,10 +198,7 @@ public partial class AstrologianRotation
 	static partial void ModifyBeneficIiPvE(ref ActionSetting setting)
 	{
 		setting.IsFriendly = true;
-		setting.CreateConfig = () => new ActionConfig()
-		{
-			GCDSingleHeal = true,
-		};
+		setting.GCDSingleHeal = true;
 	}
 
 	static partial void ModifyAstralDrawPvE(ref ActionSetting setting)
@@ -427,10 +305,7 @@ public partial class AstrologianRotation
 	static partial void ModifyAspectedBeneficPvE(ref ActionSetting setting)
 	{
 		setting.TargetStatusProvide = [StatusID.AspectedBenefic];
-		setting.CreateConfig = () => new ActionConfig()
-		{
-			GCDSingleHeal = true,
-		};
+		setting.GCDSingleHeal = true;
 		setting.IsFriendly = true;
 	}
 

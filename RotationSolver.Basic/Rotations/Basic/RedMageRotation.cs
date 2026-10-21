@@ -500,10 +500,7 @@ public partial class RedMageRotation
 	static partial void ModifyVercurePvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.Dualcast];
-		setting.CreateConfig = () => new ActionConfig()
-		{
-			GCDSingleHeal = true,
-		};
+		setting.GCDSingleHeal = true;
 	}
 
 	static partial void ModifyContreSixtePvE(ref ActionSetting setting)

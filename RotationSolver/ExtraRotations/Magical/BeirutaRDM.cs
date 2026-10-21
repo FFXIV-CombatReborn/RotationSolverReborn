@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Magical;
 
-[Rotation("BeirutaRDM", CombatType.PvE, GameVersion = "7.45")]
+[Rotation("BeirutaRDM", CombatType.PvE, GameVersion = "7.45", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/ExtraRotations/Magical/BeirutaRDM.cs")]
 [ExtraRotation]
 public sealed class BeirutaRDM : RedMageRotation
@@ -176,8 +176,12 @@ public sealed class BeirutaRDM : RedMageRotation
 	private static bool TryUse(out IAction? act, params IBaseAction[] actions)
 	{
 		foreach (var a in actions)
+		{
 			if (a.CanUse(out act))
+			{
 				return true;
+			}
+		}
 
 		act = null;
 		return false;
@@ -186,8 +190,12 @@ public sealed class BeirutaRDM : RedMageRotation
 	private static bool TryUseSkipStatus(out IAction? act, params IBaseAction[] actions)
 	{
 		foreach (var a in actions)
+		{
 			if (a.CanUse(out act, skipStatusProvideCheck: true))
+			{
 				return true;
+			}
+		}
 
 		act = null;
 		return false;
@@ -242,14 +250,14 @@ public sealed class BeirutaRDM : RedMageRotation
 			return;
 		}
 
-		bool hasAoEContinuation = EnchantedMoulinetDeuxPvE.CanUse(out _) || EnchantedMoulinetTroisPvE.CanUse(out _);
+		var hasAoEContinuation = EnchantedMoulinetDeuxPvE.CanUse(out _) || EnchantedMoulinetTroisPvE.CanUse(out _);
 		if (hasAoEContinuation)
 		{
 			_activeMeleeTrack = MeleeComboTrack.AoE;
 			return;
 		}
 
-		bool hasSTContinuation =
+		var hasSTContinuation =
 			EnchantedZwerchhauPvE.CanUse(out _) || EnchantedZwerchhauPvE_45961.CanUse(out _) ||
 			EnchantedRedoublementPvE.CanUse(out _) || EnchantedRedoublementPvE_45962.CanUse(out _);
 		if (hasSTContinuation)
@@ -259,17 +267,25 @@ public sealed class BeirutaRDM : RedMageRotation
 		}
 
 		if (!IsAnyMeleeComboInProgress())
+		{
 			_activeMeleeTrack = MeleeComboTrack.None;
+		}
 	}
 
 	private static float EstimateRemainingSeconds(dynamic cooldown, float maxProbeSeconds, float stepSeconds = 0.5f)
 	{
 		if (cooldown.HasOneCharge)
+		{
 			return 0f;
+		}
 
-		for (float t = 0f; t <= maxProbeSeconds; t += stepSeconds)
+		for (var t = 0f; t <= maxProbeSeconds; t += stepSeconds)
+		{
 			if (cooldown.WillHaveOneCharge(t))
+			{
 				return t;
+			}
+		}
 
 		return -1f;
 	}
@@ -288,7 +304,9 @@ public sealed class BeirutaRDM : RedMageRotation
 		}
 
 		if (!_tripleComboReached && BlackMana >= TripleB && WhiteMana >= TripleW)
+		{
 			_tripleComboReached = true;
+		}
 	}
 
 	private void UpdateMeleeCommitLock()
@@ -300,7 +318,9 @@ public sealed class BeirutaRDM : RedMageRotation
 		}
 
 		if (HasEmbolden)
+		{
 			_emboldenSeenDuringCommit = true;
+		}
 
 		if (_emboldenSeenDuringCommit && !HasEmbolden)
 		{
@@ -312,13 +332,19 @@ public sealed class BeirutaRDM : RedMageRotation
 	private bool ShouldGateMeleeStarterAndManafication(float embRem)
 	{
 		if (HasEmbolden || _meleeCommitLockActive || !IsPoolingWindow(embRem))
+		{
 			return false;
+		}
 
 		if (embRem <= UnlockAt)
+		{
 			return false;
+		}
 
 		if (TryTripleCombo && embRem <= TripleDecisionStart && _tripleComboReached)
+		{
 			return false;
+		}
 
 		return true;
 	}
@@ -389,7 +415,9 @@ public sealed class BeirutaRDM : RedMageRotation
 		_activeMeleeTrack = track;
 		_meleeStarterUsedAtMs = Environment.TickCount64;
 		if (IsMeleeCommitWindow(embRem))
+		{
 			_meleeCommitLockActive = true;
+		}
 	}
 
 	private bool ShouldBlockUtilityCast() =>
@@ -399,7 +427,7 @@ public sealed class BeirutaRDM : RedMageRotation
 
 	private bool ShouldHighManaDumpWithEnchantedReprise()
 	{
-		float embRem = EmboldenRem();
+		var embRem = EmboldenRem();
 		return NearManaCap
 			&& !ShouldGateMeleeStarterAndManafication(embRem)
 			&& !InMeleeRange3
@@ -417,12 +445,16 @@ public sealed class BeirutaRDM : RedMageRotation
 			return false;
 		}
 
-		long now = Environment.TickCount64;
+		var now = Environment.TickCount64;
 		if (_meleeHoldUntilMs == 0)
+		{
 			_meleeHoldUntilMs = now + HoldMeleeComboMs;
+		}
 
 		if (now < _meleeHoldUntilMs)
+		{
 			return true;
+		}
 
 		_meleeHoldUntilMs = 0;
 		return false;
@@ -434,12 +466,16 @@ public sealed class BeirutaRDM : RedMageRotation
 		UpdateMeleeCommitLock();
 
 		if (ShouldGateMeleeStarterAndManafication(embRem))
+		{
 			return false;
+		}
 
 		if (desiredTrack == MeleeComboTrack.AoE)
 		{
 			if (CanHoldOrWaitForMeleeRange())
+			{
 				return false;
+			}
 
 			if (!HasSwift && !HasDualcast && EnchantedMoulinetPvE.CanUse(out act))
 			{
@@ -464,7 +500,9 @@ public sealed class BeirutaRDM : RedMageRotation
 		}
 
 		if (CanHoldOrWaitForMeleeRange())
+		{
 			return false;
+		}
 
 		return false;
 	}
@@ -480,7 +518,10 @@ public sealed class BeirutaRDM : RedMageRotation
 	{
 		act = null;
 
-		if (IsAnyMeleeComboInProgress() || InFinisherChain() || ManaStacks == 3) return false;
+		if (IsAnyMeleeComboInProgress() || InFinisherChain() || ManaStacks == 3)
+		{
+			return false;
+		}
 
 		if (AccelerationPvE.EnoughLevel
 			&& !blockAccel
@@ -488,10 +529,14 @@ public sealed class BeirutaRDM : RedMageRotation
 			&& !HasSwift
 			&& !CanGrandImpact
 			&& AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+		{
 			return true;
+		}
 
 		if (!blockSwift && SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+		{
 			return true;
+		}
 
 		return false;
 	}
@@ -501,22 +546,29 @@ public sealed class BeirutaRDM : RedMageRotation
 	private int GetTargetAoeCount(IBaseAction action)
 	{
 		if (AllHostileTargets == null)
+		{
 			return 0;
+		}
 
-		int maxAoeCount = 0;
+		var maxAoeCount = 0;
 		float castRange = action.Info.Range;
 		float effectRange = action.Info.EffectRange;
 
 		foreach (var centerTarget in AllHostileTargets)
 		{
 			if (centerTarget == null || !centerTarget.CanSee() || centerTarget.DistanceToPlayer() > castRange)
+			{
 				continue;
-			int currentAoeCount = 0;
+			}
+
+			var currentAoeCount = 0;
 
 			foreach (var otherTarget in AllHostileTargets)
 			{
 				if (otherTarget == null)
+				{
 					continue;
+				}
 
 				if (Vector3.Distance(centerTarget.Position, otherTarget.Position) <=
 					(effectRange + otherTarget.HitboxRadius))
@@ -564,33 +616,39 @@ public sealed class BeirutaRDM : RedMageRotation
 	private bool ShouldUseFallbackAoeSpells() =>
 		IsSpellAoeDesired();
 	private bool IsUnsafeForManafication()
-{
-	return
-		IsLastGCD(
-			ActionID.EnchantedRipostePvE, ActionID.EnchantedRipostePvE_45960,
-			ActionID.EnchantedZwerchhauPvE, ActionID.EnchantedZwerchhauPvE_45961,
-			ActionID.RedoublementPvE,
-			ActionID.EnchantedRedoublementPvE,
-			ActionID.EnchantedRedoublementPvE_45962,
-			ActionID.EnchantedMoulinetPvE,
-			ActionID.EnchantedMoulinetDeuxPvE,
-			ActionID.EnchantedMoulinetTroisPvE,
-			ActionID.VerholyPvE,
-			ActionID.VerflarePvE,
-			ActionID.ScorchPvE) ||
-		ScorchPvE.CanUse(out _) ||
-		ResolutionPvE.CanUse(out _);
-}
+	{
+		return
+			IsLastGCD(
+				ActionID.EnchantedRipostePvE, ActionID.EnchantedRipostePvE_45960,
+				ActionID.EnchantedZwerchhauPvE, ActionID.EnchantedZwerchhauPvE_45961,
+				ActionID.RedoublementPvE,
+				ActionID.EnchantedRedoublementPvE,
+				ActionID.EnchantedRedoublementPvE_45962,
+				ActionID.EnchantedMoulinetPvE,
+				ActionID.EnchantedMoulinetDeuxPvE,
+				ActionID.EnchantedMoulinetTroisPvE,
+				ActionID.VerholyPvE,
+				ActionID.VerflarePvE,
+				ActionID.ScorchPvE) ||
+			ScorchPvE.CanUse(out _) ||
+			ResolutionPvE.CanUse(out _);
+	}
 	private bool CanUseManaficationNow(bool gateMelee)
 	{
 		if (gateMelee)
+		{
 			return false;
+		}
 
 		if (IsUnsafeForManafication())
+		{
 			return false;
+		}
 
 		if (NearManaCap && InMeleeRange3)
+		{
 			return false;
+		}
 
 		return
 			!IsOpen &&
@@ -621,7 +679,7 @@ public sealed class BeirutaRDM : RedMageRotation
 
 	private bool WantsInstantForOgcdWindow(IAction nextGCD, bool finisherChain, bool blockInstantOgcds, bool nextIsInstant)
 	{
-		bool meleeStepComing = NextGcdIsAnyMeleeStep(nextGCD);
+		var meleeStepComing = NextGcdIsAnyMeleeStep(nextGCD);
 
 		return
 			InCombatWithTarget &&
@@ -647,25 +705,31 @@ public sealed class BeirutaRDM : RedMageRotation
 	private bool TrySelectTwoAimingGap11(out IAction? act)
 	{
 		act = null;
-		int diff = BlackMana - WhiteMana;
-		int gap = Math.Abs(diff);
-		bool blackLeads = diff >= 0;
-		bool belowDouble = BlackMana < DoubleB || WhiteMana < DoubleW;
-		bool atOrAboveTriple = BlackMana >= TripleB && WhiteMana >= TripleW;
-		bool betweenBands = !belowDouble && !atOrAboveTriple;
+		var diff = BlackMana - WhiteMana;
+		var gap = Math.Abs(diff);
+		var blackLeads = diff >= 0;
+		var belowDouble = BlackMana < DoubleB || WhiteMana < DoubleW;
+		var atOrAboveTriple = BlackMana >= TripleB && WhiteMana >= TripleW;
+		var betweenBands = !belowDouble && !atOrAboveTriple;
 
 		if (betweenBands)
+		{
 			return diff > 0 ? (TryUseAeroPair(out act, true) || TryUseThunderPair(out act, true))
 				 : diff < 0 ? (TryUseThunderPair(out act, true) || TryUseAeroPair(out act, true))
 				 : (TryUseThunderPair(out act, true) || TryUseAeroPair(out act, true));
+		}
 
 		if (gap > TargetManaGap)
+		{
 			return blackLeads ? (TryUseAeroPair(out act, true) || TryUseThunderPair(out act, true))
 							  : (TryUseThunderPair(out act, true) || TryUseAeroPair(out act, true));
+		}
 
 		if (gap < TargetManaGap)
+		{
 			return blackLeads ? (TryUseThunderPair(out act, true) || TryUseAeroPair(out act, true))
 							  : (TryUseAeroPair(out act, true) || TryUseThunderPair(out act, true));
+		}
 
 		return blackLeads ? (TryUseThunderPair(out act, true) || TryUseAeroPair(out act, true))
 						  : (TryUseAeroPair(out act, true) || TryUseThunderPair(out act, true));
@@ -675,17 +739,25 @@ public sealed class BeirutaRDM : RedMageRotation
 	#region Countdown Logic
 	protected override IAction? CountDownAction(float remainTime)
 	{
-		if (HasDualcast && VerthunderPvEStartUp.CanUse(out IAction? act))
+		if (HasDualcast && VerthunderPvEStartUp.CanUse(out var act))
+		{
 			return act;
+		}
 
 		if (remainTime < VeraeroPvEStartUp.Info.CastTime + CountDownAhead && VeraeroPvEStartUp.CanUse(out act))
+		{
 			return act;
+		}
 
 		if (HasAccelerate && remainTime < 0f)
+		{
 			StatusHelper.StatusOff(StatusID.Acceleration);
+		}
 
 		if (HasSwift && remainTime < 0f)
+		{
 			StatusHelper.StatusOff(StatusID.Swiftcast);
+		}
 
 		return base.CountDownAction(remainTime);
 	}
@@ -696,7 +768,9 @@ public sealed class BeirutaRDM : RedMageRotation
 	protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
 	{
 		if (CorpsacorpsPvE.CanUse(out act, usedUp: true))
+		{
 			return true;
+		}
 
 		return base.MoveForwardAbility(nextGCD, out act);
 	}
@@ -705,7 +779,9 @@ public sealed class BeirutaRDM : RedMageRotation
 	protected override bool MoveBackAbility(IAction nextGCD, out IAction? act)
 	{
 		if (DisplacementPvE.CanUse(out act, usedUp: true))
+		{
 			return true;
+		}
 
 		return base.MoveBackAbility(nextGCD, out act);
 	}
@@ -714,10 +790,14 @@ public sealed class BeirutaRDM : RedMageRotation
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
 		if (AddlePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (MagickBarrierPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		return base.DefenseAreaAbility(nextGCD, out act);
 	}
@@ -727,24 +807,30 @@ public sealed class BeirutaRDM : RedMageRotation
 		UpdateActiveMeleeTrack();
 		UpdateMeleeCommitLock();
 
-		float embRem = EmboldenRem();
+		var embRem = EmboldenRem();
 		UpdateTripleComboReached(embRem);
 
-		bool gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
+		var gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
 
 		if (IsOpen && IsBurst)
 		{
 			if (SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+			{
 				return true;
+			}
 
 			if (CombatTime > 1f && UseBurstMedicine(out act))
+			{
 				return true;
+			}
 		}
 
 		if (CanUseManaficationNow(gateMelee) && ManaficationPvE.CanUse(out act))
+		{
 			return true;
+		}
 
-		bool emboldenAllowed = !IsOpen && IsBurst && InCombat && (AnyonesMeleeRule ? InMeleeRange3 : HasHostilesInRange);
+		var emboldenAllowed = !IsOpen && IsBurst && InCombat && (AnyonesMeleeRule ? InMeleeRange3 : HasHostilesInRange);
 		if (emboldenAllowed && EmboldenPvE.CanUse(out act))
 		{
 			_emboldenUsedAtMs = Environment.TickCount64;
@@ -759,48 +845,48 @@ public sealed class BeirutaRDM : RedMageRotation
 		act = null;
 		UpdateActiveMeleeTrack();
 
-		bool comboInProgress = IsAnyMeleeComboInProgress();
-		bool finisherChain = InFinisherChain();
-		bool meleeOrFinisherLocked = comboInProgress || finisherChain;
+		var comboInProgress = IsAnyMeleeComboInProgress();
+		var finisherChain = InFinisherChain();
+		var meleeOrFinisherLocked = comboInProgress || finisherChain;
 
-		bool meleeCheck = NextGcdIsAnyMeleeStep(nextGCD);
-		bool blockInstantOgcds = meleeOrFinisherLocked || NextGcdIsBlockedForInstants(nextGCD);
-		bool blockSwift = meleeOrFinisherLocked || blockInstantOgcds;
+		var meleeCheck = NextGcdIsAnyMeleeStep(nextGCD);
+		var blockInstantOgcds = meleeOrFinisherLocked || NextGcdIsBlockedForInstants(nextGCD);
+		var blockSwift = meleeOrFinisherLocked || blockInstantOgcds;
 
-		long now = Environment.TickCount64;
+		var now = Environment.TickCount64;
 
-		bool emboldenSoon =
+		var emboldenSoon =
 			EmboldenPvE.EnoughLevel &&
 			!HasEmbolden &&
 			EmboldenPvE.Cooldown.WillHaveOneCharge(25f);
 
-		bool burstPrepHoldAccel =
+		var burstPrepHoldAccel =
 			emboldenSoon &&
 			ManaStacks == 0 &&
 			BlackMana >= 50 &&
 			WhiteMana >= 50 &&
 			!comboInProgress;
 
-		bool inFirst5sAfterEmbolden =
+		var inFirst5sAfterEmbolden =
 			_emboldenUsedAtMs != 0 &&
 			(now - _emboldenUsedAtMs) < AccelLockAfterEmboldenMs;
 
-		bool blockAccel = meleeOrFinisherLocked || burstPrepHoldAccel || inFirst5sAfterEmbolden;
+		var blockAccel = meleeOrFinisherLocked || burstPrepHoldAccel || inFirst5sAfterEmbolden;
 
-		bool nextIsInstant =
+		var nextIsInstant =
 			HasDualcast ||
 			HasSwift ||
 			HasAccelerate ||
 			(!IsOpenForGrandImpact && CanGrandImpact);
 
-		bool needsMovementRescue = NeedsMovementRescue(nextIsInstant, meleeCheck);
+		var needsMovementRescue = NeedsMovementRescue(nextIsInstant, meleeCheck);
 
-		bool canUseSwiftForMovement =
+		var canUseSwiftForMovement =
 			!meleeOrFinisherLocked &&
 			!meleeCheck &&
 			ShouldUseSwiftForMovement(blockSwift);
 
-		bool canUseAccelForMovement =
+		var canUseAccelForMovement =
 			!meleeOrFinisherLocked &&
 			!meleeCheck &&
 			ShouldUseAccelerationForMovement(blockAccel, blockInstantOgcds);
@@ -811,31 +897,43 @@ public sealed class BeirutaRDM : RedMageRotation
 			{
 				if (canUseSwiftForMovement &&
 					SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+				{
 					return true;
+				}
 
 				if (UseBurstMedicine(out act))
+				{
 					return true;
+				}
 
 				if (FlechePvE.CanUse(out act))
+				{
 					return true;
+				}
 
 				if (canUseAccelForMovement &&
 					AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+				{
 					return true;
+				}
 			}
 			else if (MoveThresholdMetForRescue)
 			{
 				if (canUseAccelForMovement &&
 					AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+				{
 					return true;
+				}
 
 				if (canUseSwiftForMovement &&
 					SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+				{
 					return true;
+				}
 			}
 		}
 
-		bool canUseAccelGenerically =
+		var canUseAccelGenerically =
 			!needsMovementRescue &&
 			!meleeOrFinisherLocked &&
 			!meleeCheck &&
@@ -845,7 +943,7 @@ public sealed class BeirutaRDM : RedMageRotation
 
 		if (canUseAccelGenerically && !CanGrandImpact && HasValidTarget)
 		{
-			bool usedUp =
+			var usedUp =
 				HasEmbolden ||
 				!EmboldenPvE.EnoughLevel ||
 				AccelerationPvE.Cooldown.WillHaveXChargesGCD(2, 1);
@@ -854,7 +952,9 @@ public sealed class BeirutaRDM : RedMageRotation
 			{
 				if ((HasEmbolden || !EmboldenPvE.EnoughLevel) &&
 					AccelerationPvE.CanUse(out act))
+				{
 					return true;
+				}
 			}
 			else if (AccelerationPvE.CanUse(out act, usedUp: usedUp))
 			{
@@ -862,11 +962,11 @@ public sealed class BeirutaRDM : RedMageRotation
 			}
 		}
 
-		bool accelAboutToCap =
+		var accelAboutToCap =
 			AccelerationPvE.EnoughLevel &&
 			AccelerationPvE.Cooldown.WillHaveXChargesGCD(2, 2);
 
-		bool canUseAccelForCap =
+		var canUseAccelForCap =
 			accelAboutToCap &&
 			!needsMovementRescue &&
 			!meleeOrFinisherLocked &&
@@ -878,14 +978,16 @@ public sealed class BeirutaRDM : RedMageRotation
 
 		if (canUseAccelForCap &&
 			AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+		{
 			return true;
+		}
 
-		bool swiftHardGate =
+		var swiftHardGate =
 			InCombat &&
 			InCombatWithTarget &&
 			!finisherChain;
 
-		bool canUseSwiftGenerically =
+		var canUseSwiftGenerically =
 			swiftHardGate &&
 			!needsMovementRescue &&
 			!meleeOrFinisherLocked &&
@@ -904,24 +1006,34 @@ public sealed class BeirutaRDM : RedMageRotation
 			if (!CanVerFire && !CanVerStone &&
 				IsLastGCD(false, VerthunderPvE, VerthunderIiiPvE, VeraeroPvE, VeraeroIiiPvE) &&
 				SwiftcastPvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			if (!CanVerStone &&
 				nextGCD.IsTheSameTo(false, VeraeroPvE, VeraeroIiiPvE) &&
 				SwiftcastPvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			if (!CanVerFire &&
 				nextGCD.IsTheSameTo(false, VerthunderPvE, VerthunderIiiPvE) &&
 				SwiftcastPvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 
 		if (FlechePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (!IsOpenForGrandImpact && ContreSixtePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (UseWindowAlignment &&
 			!meleeOrFinisherLocked &&
@@ -929,14 +1041,18 @@ public sealed class BeirutaRDM : RedMageRotation
 		{
 			if (CanUseAccelerationForWindowAlignment(blockAccel, blockInstantOgcds) &&
 				AccelerationPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+			{
 				return true;
+			}
 
 			if (!HasSwift &&
 				SwiftcastPvE.CanUse(out act, usedUp: true, skipCastingCheck: true))
+			{
 				return true;
+			}
 		}
 
-		bool emboldenDelayOK =
+		var emboldenDelayOK =
 			!DelayBuffOGCDs ||
 			_emboldenUsedAtMs == 0 ||
 			(Environment.TickCount64 - _emboldenUsedAtMs >= BuffOgcdDelayMs);
@@ -945,36 +1061,48 @@ public sealed class BeirutaRDM : RedMageRotation
 		{
 			if ((HasEmbolden || StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.PrefulgenceReady)) &&
 				PrefulgencePvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			if (ViceOfThornsPvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 		else
 		{
 			if (HasEmbolden &&
 				(emboldenDelayOK || StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.PrefulgenceReady)) &&
 				PrefulgencePvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			if (HasEmbolden &&
 				emboldenDelayOK &&
 				ViceOfThornsPvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 
 		if (InCombat && !IsOpen)
 		{
-			bool usedUp = HasEmbolden || !EmboldenPvE.EnoughLevel;
+			var usedUp = HasEmbolden || !EmboldenPvE.EnoughLevel;
 
 			if (!IsOpenForGrandImpact &&
 				EngagementPvE.CanUse(out act, usedUp: usedUp || EngagementPvE.Cooldown.WillHaveXChargesGCD(2, 1)))
+			{
 				return true;
+			}
 
 			if (!IsOpenForGrandImpact &&
 				!IsMoving &&
 				CorpsacorpsPvE.CanUse(out act, usedUp: usedUp || CorpsacorpsPvE.Cooldown.WillHaveXChargesGCD(2, 1)))
+			{
 				return true;
+			}
 		}
 
 		return base.AttackAbility(nextGCD, out act);
@@ -982,16 +1110,22 @@ public sealed class BeirutaRDM : RedMageRotation
 
 	protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
 	{
-		bool emboldenReadyIn15 = EmboldenPvE.EnoughLevel && EmboldenPvE.Cooldown.WillHaveOneCharge(15f);
+		var emboldenReadyIn15 = EmboldenPvE.EnoughLevel && EmboldenPvE.Cooldown.WillHaveOneCharge(15f);
 
 		if (IsOpen && IsBurst && UseBurstMedicine(out act))
+		{
 			return true;
+		}
 
 		if (!IsOpen && IsBurst && InCombat && emboldenReadyIn15 && IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE, ActionID.ScorchPvE) && UseBurstMedicine(out act))
+		{
 			return true;
+		}
 
 		if (!IsOpen && HasEmbolden && InCombat && UseBurstMedicine(out act))
+		{
 			return true;
+		}
 
 		return base.GeneralAbility(nextGCD, out act);
 	}
@@ -1002,10 +1136,14 @@ public sealed class BeirutaRDM : RedMageRotation
 	protected override bool HealSingleGCD(out IAction? act)
 	{
 		if (PreventHeal && ShouldBlockUtilityCast())
+		{
 			return base.HealSingleGCD(out act);
+		}
 
 		if (VercurePvE.CanUse(out act, skipStatusProvideCheck: true))
+		{
 			return true;
+		}
 
 		return base.HealSingleGCD(out act);
 	}
@@ -1014,10 +1152,14 @@ public sealed class BeirutaRDM : RedMageRotation
 	protected override bool RaiseGCD(out IAction? act)
 	{
 		if (PreventRaising && ShouldBlockUtilityCast())
+		{
 			return base.RaiseGCD(out act);
+		}
 
 		if (VerraisePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		return base.RaiseGCD(out act);
 	}
@@ -1027,18 +1169,53 @@ public sealed class BeirutaRDM : RedMageRotation
 		UpdateActiveMeleeTrack();
 		UpdateMeleeCommitLock();
 
-		float embRem = EmboldenRem();
+		var embRem = EmboldenRem();
 		UpdateTripleComboReached(embRem);
 
-		if (TryFinisherGCD(out act)) return true;
-		if (TryOpenerGCD(out act)) return true;
-		if (TryContinueComboGCD(out act)) return true;
-		if (TryStartComboGCD(out act, embRem)) return true;
-		if (TryRepriseGCD(out act)) return true;
-		if (TryGrandImpactGCD(out act)) return true;
-		if (TryLongCastTwoGCD(out act)) return true;
-		if (TryProcGCD(out act)) return true;
-		if (TryFallbackGCD(out act)) return true;
+		if (TryFinisherGCD(out act))
+		{
+			return true;
+		}
+
+		if (TryOpenerGCD(out act))
+		{
+			return true;
+		}
+
+		if (TryContinueComboGCD(out act))
+		{
+			return true;
+		}
+
+		if (TryStartComboGCD(out act, embRem))
+		{
+			return true;
+		}
+
+		if (TryRepriseGCD(out act))
+		{
+			return true;
+		}
+
+		if (TryGrandImpactGCD(out act))
+		{
+			return true;
+		}
+
+		if (TryLongCastTwoGCD(out act))
+		{
+			return true;
+		}
+
+		if (TryProcGCD(out act))
+		{
+			return true;
+		}
+
+		if (TryFallbackGCD(out act))
+		{
+			return true;
+		}
 
 		return base.GeneralGCD(out act);
 	}
@@ -1048,13 +1225,19 @@ public sealed class BeirutaRDM : RedMageRotation
 		act = null;
 
 		if (!IsOpen || IsAnyMeleeComboInProgress() || ManaStacks == 3 || !InCombat || !HasHostilesInMaxRange)
+		{
 			return false;
+		}
 
 		if (!(HasDualcast || HasSwift || HasAccelerate))
+		{
 			return false;
+		}
 
 		if (ShouldUseImpactInOpener() && ImpactPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		return TryUse(out act, VerthunderIiiPvE, VerthunderPvE);
 	}
@@ -1064,35 +1247,78 @@ public sealed class BeirutaRDM : RedMageRotation
 		act = null;
 
 		if (ResolutionPvE.CanUse(out act, skipStatusProvideCheck: true))
+		{
 			return true;
+		}
 
 		if (ScorchPvE.CanUse(out act, skipStatusProvideCheck: true))
+		{
 			return true;
+		}
 
 		if (ManaStacks != 3)
+		{
 			return false;
+		}
 
-		int diff = BlackMana - WhiteMana;
-		int gap = Math.Abs(diff);
-		bool forceBalance = HasEmbolden || gap >= 19;
+		var diff = BlackMana - WhiteMana;
+		var gap = Math.Abs(diff);
+		var forceBalance = HasEmbolden || gap >= 19;
 
 		if (forceBalance)
 		{
-			if (diff > 0 && VerholyPvE.CanUse(out act)) return true;
-			if (diff < 0 && VerflarePvE.CanUse(out act)) return true;
+			if (diff > 0 && VerholyPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (diff < 0 && VerflarePvE.CanUse(out act))
+			{
+				return true;
+			}
 		}
 		else
 		{
-			if (CanVerFire && VerholyPvE.CanUse(out act)) return true;
-			if (CanVerStone && VerflarePvE.CanUse(out act)) return true;
+			if (CanVerFire && VerholyPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (CanVerStone && VerflarePvE.CanUse(out act))
+			{
+				return true;
+			}
 		}
 
-		if (diff > 0 && VerholyPvE.CanUse(out act)) return true;
-		if (diff < 0 && VerflarePvE.CanUse(out act)) return true;
-		if (CanVerFire && !CanVerStone && VerholyPvE.CanUse(out act)) return true;
-		if (CanVerStone && !CanVerFire && VerflarePvE.CanUse(out act)) return true;
-		if (VerholyPvE.CanUse(out act)) return true;
-		if (VerflarePvE.CanUse(out act)) return true;
+		if (diff > 0 && VerholyPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (diff < 0 && VerflarePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (CanVerFire && !CanVerStone && VerholyPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (CanVerStone && !CanVerFire && VerflarePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (VerholyPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (VerflarePvE.CanUse(out act))
+		{
+			return true;
+		}
 
 		return false;
 	}
@@ -1116,9 +1342,11 @@ public sealed class BeirutaRDM : RedMageRotation
 
 		if (HoldMeleeComboIfOutOfRange)
 		{
-			long now = Environment.TickCount64;
+			var now = Environment.TickCount64;
 			if (_meleeHoldUntilMs == 0)
+			{
 				_meleeHoldUntilMs = now + HoldMeleeComboMs;
+			}
 
 			if (now < _meleeHoldUntilMs)
 			{
@@ -1142,15 +1370,21 @@ public sealed class BeirutaRDM : RedMageRotation
 		UpdateActiveMeleeTrack();
 
 		if (ResolutionPvE.CanUse(out _) || ScorchPvE.CanUse(out _) || ManaStacks == 3 || !IsBurst || HasSwift)
+		{
 			return false;
+		}
 
 		if (_activeMeleeTrack != MeleeComboTrack.None || IsAnyMeleeComboInProgress())
+		{
 			return false;
+		}
 
-		bool gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
-		bool blockMeleeStartersAndReprise = gateMelee && !NearPoolingCap;
+		var gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
+		var blockMeleeStartersAndReprise = gateMelee && !NearPoolingCap;
 		if (blockMeleeStartersAndReprise || InFinisherChain())
+		{
 			return false;
+		}
 
 		bool enoughToStart;
 		bool burstStartOK;
@@ -1163,14 +1397,16 @@ public sealed class BeirutaRDM : RedMageRotation
 		}
 		else
 		{
-			bool poolCapReached = NearManaCap;
+			var poolCapReached = NearManaCap;
 			burstStartOK = !IsOpen &&
 				(poolCapReached || HasManafication || StatusHelper.PlayerWillStatusEndGCD(4, 0, true, StatusID.MagickedSwordplay) || (HasEmbolden && CanMagickedSwordplay));
 			enoughToStart = EnoughManaComboNoPooling || poolCapReached || EnoughManaComboPooling;
 		}
 
 		if (!enoughToStart || !burstStartOK)
+		{
 			return false;
+		}
 
 		return TryStartTrackedMeleeStarter(DesiredMeleeTrackForCurrentState(), out act, embRem);
 	}
@@ -1180,10 +1416,14 @@ public sealed class BeirutaRDM : RedMageRotation
 		act = null;
 
 		if (AccelerateEndingSoon)
+		{
 			return false;
+		}
 
 		if (IsAnyMeleeComboInProgress() || InFinisherChain() || ManaStacks == 3)
+		{
 			return false;
+		}
 
 		return !IsOpen && !IsOpenForGrandImpact &&
 			   GrandImpactPvE.CanUse(out act, skipStatusProvideCheck: CanGrandImpact, skipCastingCheck: true);
@@ -1194,29 +1434,42 @@ public sealed class BeirutaRDM : RedMageRotation
 		act = null;
 
 		if (IsAnyMeleeComboInProgress() || InFinisherChain() || ManaStacks == 3)
+		{
 			return false;
+		}
 
 		if (AccelerateEndingSoon)
 		{
 			if (ShouldUseImpactAsAccelExpirySaver() && ImpactPvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			if (TrySelectTwoAimingGap11(out act))
+			{
 				return true;
+			}
 		}
 
 		if (CanInstantCast && !CanVerEither)
 		{
-			if (ScatterPvE.CanUse(out act)) return true;
-			if (TrySelectTwoAimingGap11(out act)) return true;
+			if (ScatterPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (TrySelectTwoAimingGap11(out act))
+			{
+				return true;
+			}
 		}
 
-		bool finisherChain = InFinisherChain();
-		bool canRepriseNow = RangedSwordplay && ManaStacks == 0 && (BlackMana < 50 || WhiteMana < 50) && EnchantedReprisePvE.CanUse(out _);
-		bool noOtherMoveResources = !CanGrandImpact && !HasSwift && !HasDualcast && !canRepriseNow && !IsAnyMeleeComboInProgress() && !finisherChain && ManaStacks != 3;
+		var finisherChain = InFinisherChain();
+		var canRepriseNow = RangedSwordplay && ManaStacks == 0 && (BlackMana < 50 || WhiteMana < 50) && EnchantedReprisePvE.CanUse(out _);
+		var noOtherMoveResources = !CanGrandImpact && !HasSwift && !HasDualcast && !canRepriseNow && !IsAnyMeleeComboInProgress() && !finisherChain && ManaStacks != 3;
 
-		bool shouldSpendAccelOn2Soon = ShouldSpendAccelerationOnTwoTargetSpell(finisherChain, noOtherMoveResources);
-		bool shouldUseTwoTargetImpactForMovement =
+		var shouldSpendAccelOn2Soon = ShouldSpendAccelerationOnTwoTargetSpell(finisherChain, noOtherMoveResources);
+		var shouldUseTwoTargetImpactForMovement =
 			!IsAnyMeleeComboInProgress() &&
 			ManaStacks != 3 &&
 			HasAccelerate &&
@@ -1225,7 +1478,7 @@ public sealed class BeirutaRDM : RedMageRotation
 			HasValidTarget &&
 			MoveThresholdMetForRescue;
 
-		bool shouldUseThreeTargetImpactForInstantSpend =
+		var shouldUseThreeTargetImpactForInstantSpend =
 			!IsAnyMeleeComboInProgress() &&
 			ManaStacks != 3 &&
 			InCombat &&
@@ -1235,19 +1488,27 @@ public sealed class BeirutaRDM : RedMageRotation
 		if (shouldSpendAccelOn2Soon || shouldUseTwoTargetImpactForMovement)
 		{
 			if (ShouldUseImpactAtTwoTargets() && ImpactPvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			if (TrySelectTwoAimingGap11(out act))
+			{
 				return true;
+			}
 		}
 
 		if (shouldUseThreeTargetImpactForInstantSpend)
 		{
 			if (ShouldUseImpactAtThreeTargets() && ImpactPvE.CanUse(out act))
+			{
 				return true;
+			}
 
 			if (TrySelectTwoAimingGap11(out act))
+			{
 				return true;
+			}
 		}
 
 		return false;
@@ -1258,32 +1519,64 @@ public sealed class BeirutaRDM : RedMageRotation
 		act = null;
 
 		if (IsAnyMeleeComboInProgress() || InFinisherChain() || ManaStacks == 3)
+		{
 			return false;
+		}
 
 		if (!IsAnyMeleeComboInProgress() && ManaStacks != 3 && HasValidTarget && CanVerBoth && !IsMoving && !HasInstantBuffToSpend)
 		{
 			switch (VerEndsFirst)
 			{
 				case "VerFire":
-					if (VerfirePvE.CanUse(out act)) return true;
-					if (VerstonePvE.CanUse(out act)) return true;
+					if (VerfirePvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					if (VerstonePvE.CanUse(out act))
+					{
+						return true;
+					}
+
 					break;
 
 				case "VerStone":
-					if (VerstonePvE.CanUse(out act)) return true;
-					if (VerfirePvE.CanUse(out act)) return true;
+					if (VerstonePvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					if (VerfirePvE.CanUse(out act))
+					{
+						return true;
+					}
+
 					break;
 
 				default:
 					if (WhiteMana < BlackMana)
 					{
-						if (VerstonePvE.CanUse(out act)) return true;
-						if (VerfirePvE.CanUse(out act)) return true;
+						if (VerstonePvE.CanUse(out act))
+						{
+							return true;
+						}
+
+						if (VerfirePvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 					else
 					{
-						if (VerfirePvE.CanUse(out act)) return true;
-						if (VerstonePvE.CanUse(out act)) return true;
+						if (VerfirePvE.CanUse(out act))
+						{
+							return true;
+						}
+
+						if (VerstonePvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 					break;
 			}
@@ -1296,34 +1589,57 @@ public sealed class BeirutaRDM : RedMageRotation
 				switch (VerEndsFirst)
 				{
 					case "VerFire":
-						if (VerfirePvE.CanUse(out act)) return true;
+						if (VerfirePvE.CanUse(out act))
+						{
+							return true;
+						}
+
 						break;
 
 					case "VerStone":
-						if (VerstonePvE.CanUse(out act)) return true;
+						if (VerstonePvE.CanUse(out act))
+						{
+							return true;
+						}
+
 						break;
 
 					case "Equal":
 						if (WhiteMana < BlackMana)
 						{
-							if (VerstonePvE.CanUse(out act)) return true;
+							if (VerstonePvE.CanUse(out act))
+							{
+								return true;
+							}
 						}
 						else
 						{
-							if (VerfirePvE.CanUse(out act)) return true;
+							if (VerfirePvE.CanUse(out act))
+							{
+								return true;
+							}
 						}
 						break;
 				}
 			}
 			else
 			{
-				if (VerfirePvE.CanUse(out act)) return true;
-				if (VerstonePvE.CanUse(out act)) return true;
+				if (VerfirePvE.CanUse(out act))
+				{
+					return true;
+				}
+
+				if (VerstonePvE.CanUse(out act))
+				{
+					return true;
+				}
 			}
 		}
 
 		if (!VerstonePvE.EnoughLevel && !HasInstantBuffToSpend && VerfirePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		return false;
 	}
@@ -1332,9 +1648,11 @@ public sealed class BeirutaRDM : RedMageRotation
 		act = null;
 
 		if (ShouldHighManaDumpWithEnchantedReprise() && InCombat && HasHostilesInRange && EnchantedReprisePvE.CanUse(out act))
+		{
 			return true;
+		}
 
-		bool canRepriseForMove =
+		var canRepriseForMove =
 			RangedSwordplay &&
 			MoveThresholdMetForReprise &&
 			ManaStacks == 0 &&
@@ -1343,17 +1661,21 @@ public sealed class BeirutaRDM : RedMageRotation
 			EnchantedReprisePvE.CanUse(out _);
 
 		if (!canRepriseForMove)
+		{
 			return false;
+		}
 
-		float embRem = EmboldenRem();
+		var embRem = EmboldenRem();
 		UpdateTripleComboReached(embRem);
 
-		bool gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
+		var gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
 		if (gateMelee && !NearPoolingCap)
+		{
 			return false;
+		}
 
-		bool blockInstantOgcds = IsAnyMeleeComboInProgress() || InFinisherChain();
-		bool canRescueMovementWithOgcd =
+		var blockInstantOgcds = IsAnyMeleeComboInProgress() || InFinisherChain();
+		var canRescueMovementWithOgcd =
 			HasValidTarget &&
 			MoveThresholdMetForRescue &&
 			!IsAnyMeleeComboInProgress() &&
@@ -1365,7 +1687,9 @@ public sealed class BeirutaRDM : RedMageRotation
 				out _);
 
 		if (!canRescueMovementWithOgcd && EnchantedReprisePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		return false;
 	}
@@ -1375,7 +1699,9 @@ public sealed class BeirutaRDM : RedMageRotation
 		act = null;
 
 		if (IsAnyMeleeComboInProgress() || InFinisherChain() || ManaStacks == 3)
+		{
 			return false;
+		}
 
 		if (MoveThresholdMetForRescue && HasValidTarget && ManaStacks != 3 && !HasAnyInstantTool)
 		{
@@ -1389,22 +1715,40 @@ public sealed class BeirutaRDM : RedMageRotation
 			{
 				if (WhiteMana < BlackMana)
 				{
-					if (VeraeroIiPvE.CanUse(out act)) return true;
-					if (VerthunderIiPvE.CanUse(out act)) return true;
+					if (VeraeroIiPvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					if (VerthunderIiPvE.CanUse(out act))
+					{
+						return true;
+					}
 				}
 				else
 				{
-					if (VerthunderIiPvE.CanUse(out act)) return true;
-					if (VeraeroIiPvE.CanUse(out act)) return true;
+					if (VerthunderIiPvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					if (VeraeroIiPvE.CanUse(out act))
+					{
+						return true;
+					}
 				}
 			}
 
 			if (!HasInstantBuffToSpend && JoltPvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 
 		if (UseVercure && !InCombat && VercurePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		return false;
 	}
@@ -1414,10 +1758,14 @@ public sealed class BeirutaRDM : RedMageRotation
 	{
 		get
 		{
-			int aliveHealerCount = 0;
-			foreach (IBattleChara healer in PartyMembers.GetJobCategory(JobRole.Healer))
+			var aliveHealerCount = 0;
+			foreach (var healer in PartyMembers.GetJobCategory(JobRole.Healer))
+			{
 				if (!healer.IsDead)
+				{
 					aliveHealerCount++;
+				}
+			}
 
 			return base.CanHealSingleSpell && (GCDHeal || aliveHealerCount == 0);
 		}

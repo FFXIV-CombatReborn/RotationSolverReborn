@@ -208,8 +208,8 @@ public class BaseItem : IBaseItem
 			return false;
 		}
 
-		if (ConfigurationHelper.BadStatus.Contains(ActionManager.Instance()->GetActionStatus(ActionType.Item, ID))
-			&& ConfigurationHelper.BadStatus.Contains(ActionManager.Instance()->GetActionStatus(ActionType.Item, ID + 1000000)))
+		if (ConfigurationHelper.BadStatus.Contains((ActionStatus)ActionManager.Instance()->GetActionStatus(ActionType.Item, ID))
+			&& ConfigurationHelper.BadStatus.Contains((ActionStatus)ActionManager.Instance()->GetActionStatus(ActionType.Item, ID + 1000000)))
 		{
 			return false;
 		}

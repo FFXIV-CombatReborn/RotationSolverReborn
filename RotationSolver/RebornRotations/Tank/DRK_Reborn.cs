@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Tank;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/Tank/DRK_Reborn.cs")]
 
 public sealed class DRK_Reborn : DarkKnightRotation

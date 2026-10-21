@@ -238,7 +238,15 @@ internal abstract class RotationConfigBase : IRotationConfig
 	/// <returns><c>true</c> if the command was executed; otherwise, <c>false</c>.</returns>
 	public virtual bool DoCommand(IRotationConfigSet set, string str)
 	{
-		return str.StartsWith(Name);
+		return IsCommandFor(Name, str);
+	}
+
+	// The whole name must match
+	internal static bool IsCommandFor(string name, string? str)
+	{
+		return str != null
+			&& str.StartsWith(name, StringComparison.Ordinal)
+			&& (str.Length == name.Length || char.IsWhiteSpace(str[name.Length]));
 	}
 
 	/// <summary>

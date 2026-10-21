@@ -131,8 +131,8 @@ namespace RotationSolver.Updaters
 						if (ShouldInterceptAction(adjustedActionId))
 						{
 							// More efficient action lookup - avoid creating new collections
-							var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
-							var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
+							var rotationActions = RotationUpdater.CurrentRotationActions;
+							var dutyActions = RotationUpdater.CurrentDutyRotationActions;
 
 							//PluginLog.Debug($"[ActionQueueManager] Detected player input: ID={actionID}, AdjustedID={adjustedActionId}");
 
@@ -167,35 +167,11 @@ namespace RotationSolver.Updaters
 									}
 									else if (matchingAction is IBaseAction baseMovAction && baseMovAction.Setting.SpecialType == SpecialActionType.ObjectBasedMovement && Service.Config.BmrSafetyCheckIntercept)
 									{
-										if (baseMovAction.TargetInfo.ShouldCheckMoveSafety() && baseMovAction.Setting.ObjectBasedMovementObjectOID != 0 && Player.Object != null)
+										if (baseMovAction.TargetInfo.ShouldCheckMoveSafety() && baseMovAction.Setting.ObjectBasedMovementObjectOID != 0
+											&& (!ObjectHelper.TryGetOwnedObjectPosition(baseMovAction.Setting.ObjectBasedMovementObjectOID, out var position)
+												|| !DataCenter.IsMovementDestinationSafe(position)))
 										{
-											var position = default(Vector3);
-											IGameObject? movementobj = null;
-											var playerId = Player.Object.GameObjectId;
-											foreach (var obj in Svc.Objects)
-											{
-												if (obj != null && obj.BaseId == baseMovAction.Setting.ObjectBasedMovementObjectOID && obj.OwnerId == playerId)
-												{
-													position = obj.Position;
-													movementobj = obj;
-													if (Service.Config.InDebug)
-													{
-														PluginLog.Debug($"[AQM.ObjectBasedMovement] Found object with OID {baseMovAction.Setting.ObjectBasedMovementObjectOID} at position {position} for player {playerId}.");
-													}
-
-													break;
-												}
-											}
-
-											if (movementobj == null)
-											{
-												return false;
-											}
-
-											if (!DataCenter.IsMovementDestinationSafe(position))
-											{
-												return false;
-											}
+											return false;
 										}
 
 										HandleInterceptedAction(matchingAction, actionID, macroTarget);
@@ -291,21 +267,9 @@ namespace RotationSolver.Updaters
 				return true;
 			}
 
-			// Guard against invalid GCD totals to avoid division by zero
-			var gcdTotal = DataCenter.DefaultGCDTotal;
-			if (gcdTotal <= 0)
-			{
-				return false;
-			}
-
-			// We check if the skill will fit inside the intercept action time window
-			var gcdCount = (byte)Math.Floor(Service.Config.InterceptActionTime / gcdTotal);
-			if (gcdCount < 1)
-			{
-				gcdCount = 1;
-			}
-
-			return action is IBaseAction baseAction && baseAction.Cooldown.CooldownCheck(false, gcdCount);
+			// Queue it only if a charge comes back while the intercept window is still open.
+			return action is IBaseAction baseAction
+				&& (baseAction.Cooldown.HasOneCharge || baseAction.Cooldown.RecastTimeRemainOneChargeRaw <= Service.Config.InterceptActionTime);
 		}
 
 		private static void HandleInterceptedAction(IAction matchingAction, uint actionID, CommandTarget? target)

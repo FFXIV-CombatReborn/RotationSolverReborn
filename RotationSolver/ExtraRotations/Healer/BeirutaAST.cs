@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Healer;
 
-[Rotation("BeirutaAST", CombatType.PvE, GameVersion = "7.45", Description = "Semi-Automatic Savage/Ultimate rotation, need to used with CD planner or manual inputs")]
+[Rotation("BeirutaAST", CombatType.PvE, GameVersion = "7.45", RotationType = RotationType.Reborn, Description = "Semi-Automatic Savage/Ultimate rotation, need to used with CD planner or manual inputs")]
 [SourceCode(Path = "main/ExtraRotations/Healer/BeirutaAST.cs")]
 [ExtraRotation]
 
@@ -233,22 +233,32 @@ public sealed class BeirutaAST : AstrologianRotation
 		get
 		{
 			if (!DivinationPvE.EnoughLevel)
+			{
 				return false;
+			}
 
 			if (DivIn > 60f)
+			{
 				return false;
+			}
 
 			if (BurstPrep)
+			{
 				return false;
+			}
 
 			if (LightspeedPvE.Cooldown.CurrentCharges != 1)
+			{
 				return false;
+			}
 
 			if (HasLightspeed)
+			{
 				return false;
+			}
 
-			float lsMustBeBackBy = MathF.Max(0f, DivIn - 4f);
-			bool spendingLastLsIsSafe = LightspeedNextChargeIn <= lsMustBeBackBy;
+			var lsMustBeBackBy = MathF.Max(0f, DivIn - 4f);
+			var spendingLastLsIsSafe = LightspeedNextChargeIn <= lsMustBeBackBy;
 
 			return !spendingLastLsIsSafe;
 		}
@@ -260,15 +270,19 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	private void RefreshNeutralSectStamp()
 	{
-		bool isUpNow = HasNeutralSect;
+		var isUpNow = HasNeutralSect;
 
 		if (isUpNow && !_neutralSectWasUp)
+		{
 			_neutralSectUsedAtMs = Environment.TickCount64;
+		}
 
 		_neutralSectWasUp = isUpNow;
 
 		if (!isUpNow)
+		{
 			_neutralSectUsedAtMs = 0;
+		}
 	}
 
 	private void StampDivinationUse() => _divinationUsedAtMs = Environment.TickCount64;
@@ -284,10 +298,14 @@ public sealed class BeirutaAST : AstrologianRotation
 		}
 
 		if (IsLastAction(ActionID.LightspeedPvE))
+		{
 			_lastLightspeedUseCombatTime = CombatTime;
+		}
 
 		if (IsLastAction(ActionID.SwiftcastPvE))
+		{
 			_lastSwiftcastUseCombatTime = CombatTime;
+		}
 
 		if (IsLastAction(ActionID.AspectedBeneficPvE) ||
 			IsLastAction(ActionID.MacrocosmosPvE) ||
@@ -303,13 +321,15 @@ public sealed class BeirutaAST : AstrologianRotation
 	{
 		get
 		{
-			int count = 0;
-			IEnumerable<IBattleChara> healers = PartyMembers.GetJobCategory(JobRole.Healer);
+			var count = 0;
+			var healers = PartyMembers.GetJobCategory(JobRole.Healer);
 
-			foreach (IBattleChara healer in healers)
+			foreach (var healer in healers)
 			{
 				if (!healer.IsDead)
+				{
 					count++;
+				}
 			}
 
 			return count;
@@ -320,11 +340,13 @@ public sealed class BeirutaAST : AstrologianRotation
 	{
 		get
 		{
-			int count = 0;
-			foreach (IBattleChara member in PartyMembers)
+			var count = 0;
+			foreach (var member in PartyMembers)
 			{
 				if (!member.IsDead)
+				{
 					count++;
+				}
 			}
 
 			return count;
@@ -334,13 +356,17 @@ public sealed class BeirutaAST : AstrologianRotation
 	private bool IsTank(IBattleChara? target)
 	{
 		if (target == null)
+		{
 			return false;
+		}
 
-		IEnumerable<IBattleChara> tanks = PartyMembers.GetJobCategory(JobRole.Tank);
-		foreach (IBattleChara tank in tanks)
+		var tanks = PartyMembers.GetJobCategory(JobRole.Tank);
+		foreach (var tank in tanks)
 		{
 			if (tank == target)
+			{
 				return true;
+			}
 		}
 
 		return false;
@@ -349,7 +375,9 @@ public sealed class BeirutaAST : AstrologianRotation
 	private static bool HasCelestialIntersection(IBattleChara? target)
 	{
 		if (target == null)
+		{
 			return false;
+		}
 
 		try
 		{
@@ -364,7 +392,9 @@ public sealed class BeirutaAST : AstrologianRotation
 	private static bool HasAspectedBeneficFromSelf(IBattleChara? target)
 	{
 		if (target == null)
+		{
 			return false;
+		}
 
 		try
 		{
@@ -379,7 +409,9 @@ public sealed class BeirutaAST : AstrologianRotation
 	private static bool HasSingleHealLockoutStatus(IBattleChara? target)
 	{
 		if (target == null)
+		{
 			return true;
+		}
 
 		try
 		{
@@ -396,13 +428,19 @@ public sealed class BeirutaAST : AstrologianRotation
 	private bool CanUseCurrentCombust(out IAction? act, bool skipStatusProvideCheck = false)
 	{
 		if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+		{
 			return true;
+		}
 
 		if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+		{
 			return true;
+		}
 
 		if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+		{
 			return true;
+		}
 
 		act = null;
 		return false;
@@ -411,10 +449,14 @@ public sealed class BeirutaAST : AstrologianRotation
 	private bool CanUseCurrentGravity(out IAction? act)
 	{
 		if (GravityIiPvE.EnoughLevel && GravityIiPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (!GravityIiPvE.EnoughLevel && GravityPvE.EnoughLevel && GravityPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		act = null;
 		return false;
@@ -423,19 +465,29 @@ public sealed class BeirutaAST : AstrologianRotation
 	private bool CanUseCurrentMalefic(out IAction? act)
 	{
 		if (FallMaleficPvE.EnoughLevel && FallMaleficPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (!FallMaleficPvE.EnoughLevel && MaleficIvPvE.EnoughLevel && MaleficIvPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (!MaleficIvPvE.EnoughLevel && MaleficIiiPvE.EnoughLevel && MaleficIiiPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (!MaleficIiiPvE.EnoughLevel && MaleficIiPvE.EnoughLevel && MaleficIiPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (!MaleficIiPvE.Info.EnoughLevelAndQuest() && MaleficPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		act = null;
 		return false;
@@ -444,7 +496,9 @@ public sealed class BeirutaAST : AstrologianRotation
 	private bool CurrentTargetCombustMissingOrEnding(float remainingSeconds)
 	{
 		if (CurrentTarget == null)
+		{
 			return false;
+		}
 
 		return
 			(CombustIiiPvE.EnoughLevel &&
@@ -463,9 +517,11 @@ public sealed class BeirutaAST : AstrologianRotation
 	private float GetExpectedHpToLive12Seconds()
 	{
 		if (Player == null)
+		{
 			return 0f;
+		}
 
-		int partyCount = Math.Max(1, AlivePartyMemberCount);
+		var partyCount = Math.Max(1, AlivePartyMemberCount);
 		return BallparkPercent * Player.MaxHp * partyCount * 12f;
 	}
 
@@ -478,22 +534,32 @@ public sealed class BeirutaAST : AstrologianRotation
 	private bool CanCastTankSynastry(IBaseAction actionCheck, IAction next)
 	{
 		if (!next.IsTheSameTo(false, actionCheck))
+		{
 			return false;
+		}
 
-		IBattleChara? target = actionCheck.Target.Target;
-		IBattleChara? synastryTarget = SynastryPvE.Target.Target;
+		var target = actionCheck.Target.Target;
+		var synastryTarget = SynastryPvE.Target.Target;
 
 		if (target == null || synastryTarget == null)
+		{
 			return false;
+		}
 
 		if (target != synastryTarget)
+		{
 			return false;
+		}
 
 		if (!IsTank(target))
+		{
 			return false;
+		}
 
 		if (HasSingleHealLockoutStatus(target))
+		{
 			return false;
+		}
 
 		return target.GetHealthRatio() < SynastryHeal;
 	}
@@ -501,9 +567,11 @@ public sealed class BeirutaAST : AstrologianRotation
 	private bool IsMovementPreferredNextGCD(IAction nextGCD)
 	{
 		if (nextGCD.IsTheSameTo(false, AspectedBeneficPvE, MacrocosmosPvE))
+		{
 			return true;
+		}
 
-		if (CanUseCurrentCombust(out IAction? combustAct) &&
+		if (CanUseCurrentCombust(out var combustAct) &&
 			nextGCD == combustAct)
 		{
 			return true;
@@ -569,14 +637,20 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	protected override IAction? CountDownAction(float remainTime)
 	{
-		if (remainTime < MaleficPvE.Info.CastTime + CountDownAhead && MaleficPvE.CanUse(out IAction? act))
+		if (remainTime < MaleficPvE.Info.CastTime + CountDownAhead && MaleficPvE.CanUse(out var act))
+		{
 			return act;
+		}
 
 		if (remainTime < 3 && UseBurstMedicine(out act))
+		{
 			return act;
+		}
 
 		if (remainTime < UseEarthlyStarTime && EarthlyStarPvE.CanUse(out act, skipTTKCheck: true))
+		{
 			return act;
+		}
 
 		return remainTime < 30 && AstralDrawPvE.CanUse(out act)
 			? act
@@ -603,10 +677,14 @@ public sealed class BeirutaAST : AstrologianRotation
 		}
 
 		if (MicroPrio && HasMacrocosmos)
+		{
 			return base.EmergencyAbility(nextGCD, out act);
+		}
 
 		if (!InCombat)
+		{
 			return base.EmergencyAbility(nextGCD, out act);
+		}
 
 		if (SynastryPvE.CanUse(out act, targetOverride: TargetType.Tank))
 		{
@@ -644,7 +722,9 @@ public sealed class BeirutaAST : AstrologianRotation
 		}
 
 		if (!IsOpen && DivinationPvE.CanUse(out _) && UseBurstMedicine(out act))
+		{
 			return true;
+		}
 
 		return base.EmergencyAbility(nextGCD, out act);
 	}
@@ -655,13 +735,19 @@ public sealed class BeirutaAST : AstrologianRotation
 		UpdateMovementCooldownTracking();
 
 		if (!HasDivining && InCombat && TheSpirePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (!HasDivining && InCombat && TheBolePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (ExaltationPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (CelestialIntersectionPvE.Target.Target != null &&
 			CelestialIntersectionPvE.Cooldown.CurrentCharges == 1 &&
@@ -681,7 +767,9 @@ public sealed class BeirutaAST : AstrologianRotation
 		UpdateMovementCooldownTracking();
 
 		if (SunSignPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		return base.DefenseAreaAbility(nextGCD, out act);
 	}
@@ -694,7 +782,9 @@ public sealed class BeirutaAST : AstrologianRotation
 		act = null;
 
 		if (HasDivining || HasMacrocosmos)
+		{
 			return false;
+		}
 
 		if (HasGiantDominance &&
 			PartyMembersAverHP < StellarDetonationHeal &&
@@ -704,10 +794,14 @@ public sealed class BeirutaAST : AstrologianRotation
 		}
 
 		if (PartyMembersAverHP < MicrocosmosHeal && MicrocosmosPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (MicroPrio && HasMacrocosmos)
+		{
 			return base.HealAreaAbility(nextGCD, out act);
+		}
 
 		if (!HasGiantDominance &&
 			!HasEarthlyDominance &&
@@ -742,7 +836,9 @@ public sealed class BeirutaAST : AstrologianRotation
 		}
 
 		if (LadyOfCrownsPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		return base.HealAreaAbility(nextGCD, out act);
 	}
@@ -755,13 +851,19 @@ public sealed class BeirutaAST : AstrologianRotation
 		act = null;
 
 		if (HasDivining || HasHealingLockout)
+		{
 			return false;
+		}
 
 		if (MicroPrio && HasMacrocosmos)
+		{
 			return base.HealSingleAbility(nextGCD, out act);
+		}
 
 		if (!IsOpen && InCombat && TheArrowPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (InCombat &&
 			TheEwerPvE.CanUse(out act) &&
@@ -852,33 +954,45 @@ public sealed class BeirutaAST : AstrologianRotation
 			StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.Suntouched))
 		{
 			if (SunSignPvE.CanUse(out act, skipAoeCheck: true, skipTTKCheck: true))
+			{
 				return true;
+			}
 		}
 
 		if (PartyMembersAverHP < LadyOfHeals && LadyOfCrownsPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (AstralDrawPvE.Cooldown.WillHaveOneCharge(5) && LadyOfCrownsPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (AstralDrawPvE.CanUse(out act))
+		{
 			return true;
+		}
 
-		bool divLearned = DivinationPvE.EnoughLevel;
-		bool burstCardsAllowed =
+		var divLearned = DivinationPvE.EnoughLevel;
+		var burstCardsAllowed =
 			CardsUnderDivinationOnly
 				? (!divLearned || HasDivination)
 				: (HasDivination || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !divLearned);
 
 		if (burstCardsAllowed && InCombat && TheBalancePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (!IsOpen && InCombat && LordOfCrownsPvE.CanUse(out act))
 		{
 			if (CardsUnderDivinationOnly)
 			{
 				if (!divLearned || HasDivination)
+				{
 					return true;
+				}
 			}
 			else
 			{
@@ -892,35 +1006,49 @@ public sealed class BeirutaAST : AstrologianRotation
 			}
 		}
 
-		bool hasBurstCardToPlay =
+		var hasBurstCardToPlay =
 			InCombat &&
 			burstCardsAllowed &&
 			(TheBalancePvE.CanUse(out _) || TheSpearPvE.CanUse(out _));
 
-		bool hasLordToSpend =
+		var hasLordToSpend =
 			InCombat &&
 			LordOfCrownsPvE.CanUse(out _);
 
 		if (UmbralDrawPvE.CanUse(out act) && !(hasBurstCardToPlay && hasLordToSpend))
+		{
 			return true;
+		}
 
 		if (burstCardsAllowed && InCombat && TheSpearPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (InCombat && !OracleGatedByDivination && OraclePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (!HasDivining && AstralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheEwerPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (!HasDivining && AstralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheBolePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (!HasDivining && UmbralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheArrowPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		if (UmbralDrawPvE.Cooldown.WillHaveOneCharge(10) && InCombat && TheSpirePvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		return base.GeneralAbility(nextGCD, out act);
 	}
@@ -931,7 +1059,7 @@ public sealed class BeirutaAST : AstrologianRotation
 
 		act = null;
 
-		bool combustSoonForMovement =
+		var combustSoonForMovement =
 			CurrentTarget != null &&
 			MovingCombustRefreshSeconds > 0f &&
 			CurrentTargetCombustMissingOrEnding(MovingCombustRefreshSeconds);
@@ -951,12 +1079,16 @@ public sealed class BeirutaAST : AstrologianRotation
 			return true;
 		}
 
-		bool openerLightspeed = IsOpen && !HasLightspeed;
+		var openerLightspeed = IsOpen && !HasLightspeed;
 		if (openerLightspeed && LightspeedPvE.CanUse(out act, usedUp: true))
+		{
 			return true;
+		}
 
 		if (AstralDrawPvE.CanUse(out act, usedUp: IsBurst))
+		{
 			return true;
+		}
 
 		if (!HasLightspeed &&
 			InCombat &&
@@ -985,7 +1117,9 @@ public sealed class BeirutaAST : AstrologianRotation
 			}
 
 			if (!HasGiantDominance && !HasEarthlyDominance && EarthlyStarPvE.CanUse(out act))
+			{
 				return true;
+			}
 		}
 
 		return base.AttackAbility(nextGCD, out act);
@@ -1012,10 +1146,14 @@ public sealed class BeirutaAST : AstrologianRotation
 		}
 
 		if (ShouldHoldRaiseSwift)
+		{
 			return base.HealAreaGCD(out act);
+		}
 
 		if (MicroPrio && HasMacrocosmos)
+		{
 			return base.HealAreaGCD(out act);
+		}
 
 		if (CelestialOppositionPvE.Cooldown.IsCoolingDown &&
 			!CelestialOppositionPvE.Cooldown.WillHaveOneCharge(60) &&
@@ -1064,15 +1202,21 @@ public sealed class BeirutaAST : AstrologianRotation
 		act = null;
 
 		if (HasHealingLockout)
+		{
 			return false;
+		}
 
 		if (ShouldHoldRaiseSwift)
+		{
 			return base.HealSingleGCD(out act);
+		}
 
 		if (MicroPrio && HasMacrocosmos)
+		{
 			return base.HealSingleGCD(out act);
+		}
 
-		bool shouldUseEssentialDignity =
+		var shouldUseEssentialDignity =
 			(EssentialPrio2 == EssentialPrioStrategy.AnyCharges &&
 			 EssentialDignityPvE.EnoughLevel &&
 			 EssentialDignityPvE.Cooldown.CurrentCharges > 0)
@@ -1082,9 +1226,11 @@ public sealed class BeirutaAST : AstrologianRotation
 			 EssentialDignityPvE.Cooldown.CurrentCharges == EssentialDignityPvE.Cooldown.MaxCharges);
 
 		if (shouldUseEssentialDignity)
+		{
 			return base.HealSingleGCD(out act);
+		}
 
-		bool movingHealWindow =
+		var movingHealWindow =
 			InCombat &&
 			!HoldLastLightspeedForDivination &&
 			!HasLightspeed &&
@@ -1129,7 +1275,9 @@ public sealed class BeirutaAST : AstrologianRotation
 		UpdateMovementCooldownTracking();
 
 		if (AscendPvE.CanUse(out act))
+		{
 			return true;
+		}
 
 		return base.RaiseGCD(out act);
 	}
@@ -1142,7 +1290,9 @@ public sealed class BeirutaAST : AstrologianRotation
 		RefreshNeutralSectStamp();
 
 		if (ShouldHoldRaiseSwift)
+		{
 			return base.GeneralGCD(out act);
+		}
 
 		if (AutoUpgradeHoroscope &&
 			((HasHoroscope && !HasHoroscopeHelios) ||
@@ -1162,9 +1312,11 @@ public sealed class BeirutaAST : AstrologianRotation
 		}
 
 		if (CanUseCurrentGravity(out act))
+		{
 			return true;
+		}
 
-		float expectedHPToLive12Seconds = GetExpectedHpToLive12Seconds();
+		var expectedHPToLive12Seconds = GetExpectedHpToLive12Seconds();
 
 		if (InCombat &&
 			HasSufficientMovement &&
@@ -1193,7 +1345,9 @@ public sealed class BeirutaAST : AstrologianRotation
 		}
 
 		if (CanUseCurrentMalefic(out act))
+		{
 			return true;
+		}
 
 		return base.GeneralGCD(out act);
 	}

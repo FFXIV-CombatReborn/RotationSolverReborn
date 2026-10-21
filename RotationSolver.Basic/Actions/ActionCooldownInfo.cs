@@ -75,7 +75,7 @@ public readonly struct ActionCooldownInfo : ICooldown
 	/// <summary>
 	/// Gets the raw remaining recast time for one charge.
 	/// </summary>
-	private float RecastTimeRemainOneChargeRaw => RecastTimeRemain % RecastTimeOneChargeRaw;
+	internal float RecastTimeRemainOneChargeRaw => RecastTimeRemain % RecastTimeOneChargeRaw;
 
 	/// <summary>
 	/// Gets the elapsed recast time for one charge minus the default GCD elapsed.

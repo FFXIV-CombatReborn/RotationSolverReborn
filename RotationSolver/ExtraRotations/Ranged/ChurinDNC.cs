@@ -6,7 +6,7 @@ using CombatRole = ECommons.GameFunctions.CombatRole;
 
 namespace RotationSolver.ExtraRotations.Ranged;
 
-[Rotation("Churin DNC", CombatType.PvE, GameVersion = "7.5",
+[Rotation("Churin DNC", CombatType.PvE, GameVersion = "7.5", RotationType = RotationType.Reborn,
 	Description =
 		"Candles lit, runes drawn upon the floor, sacrifice prepared. Everything is ready for the summoning. I begin the incantation: \"Shakira, Shakira!\"")]
 [SourceCode(Path = "main/ExtraRotations/Ranged/ChurinDNC.cs")]
@@ -146,16 +146,27 @@ public sealed class ChurinDNC : DancerRotation
 	{
 		get
 		{
-			if (Medicines.Length == 0) return false;
+			if (Medicines.Length == 0)
+			{
+				return false;
+			}
 
-			if (!IsMedicated) return false;
+			if (!IsMedicated)
+			{
+				return false;
+			}
 
 			foreach (var medicine in Medicines)
 			{
 				if (medicine.Type != MedicineType)
+				{
 					return false;
+				}
+
 				if (!IsLastAction(false, new IAction[medicine.ID]))
+				{
 					return false;
+				}
 			}
 
 			return true;
@@ -166,8 +177,8 @@ public sealed class ChurinDNC : DancerRotation
 	private static bool HasFlourishingProcs => HasActiveStatus(FlourishingProcs) || IsLastAbility(ActionID.FlourishPvE);
 	private static bool HasAnyProc => HasSilkenProcs || HasFlourishingProcs;
 	private static bool HasFinishingMove => (HasActiveStatus(StatusID.FinishingMoveReady) || IsLastAbility(ActionID.FlourishPvE)) && !IsLastGCD(ActionID.FinishingMovePvE);
-	private static bool HasStarfall => (HasActiveStatus(StatusID.FlourishingStarfall) || IsLastAbility(ActionID.DevilmentPvE))  && !IsLastGCD(ActionID.StarfallDancePvE);
-	private bool HasDanceOfTheDawn => (HasActiveStatus(StatusID.DanceOfTheDawnReady)|| IsLastGCD(_techFinishes)) && !IsLastGCD(ActionID.DanceOfTheDawnPvE);
+	private static bool HasStarfall => (HasActiveStatus(StatusID.FlourishingStarfall) || IsLastAbility(ActionID.DevilmentPvE)) && !IsLastGCD(ActionID.StarfallDancePvE);
+	private bool HasDanceOfTheDawn => (HasActiveStatus(StatusID.DanceOfTheDawnReady) || IsLastGCD(_techFinishes)) && !IsLastGCD(ActionID.DanceOfTheDawnPvE);
 
 	/// <summary>
 	/// Calculates the effective animation lock duration taking the maximum of the base AnimationLock and an estimated value,
@@ -203,7 +214,7 @@ public sealed class ChurinDNC : DancerRotation
 			}
 
 			if ((HasDanceOfTheDawn || !DanceOfTheDawnPvE.EnoughLevel) &&
-			    (!HasLastDance || CanSaberDance || IsLastGCD(ActionID.TillanaPvE)))
+				(!HasLastDance || CanSaberDance || IsLastGCD(ActionID.TillanaPvE)))
 			{
 				return SaberDanceEspritCost;
 			}
@@ -213,7 +224,10 @@ public sealed class ChurinDNC : DancerRotation
 				return HasLastDance ? MidEspritThreshold : SaberDanceEspritCost;
 			}
 
-			if (HasStarfall && StarfallEndingSoon) return HighEspritThreshold;
+			if (HasStarfall && StarfallEndingSoon)
+			{
+				return HighEspritThreshold;
+			}
 
 			return SaberDanceEspritCost;
 		}
@@ -237,13 +251,22 @@ public sealed class ChurinDNC : DancerRotation
 	{
 		get
 		{
-			if (!InCombat && !IsDancing) return false;
+			if (!InCombat && !IsDancing)
+			{
+				return false;
+			}
 
-			if (AllHostileTargets == null) return false;
+			if (AllHostileTargets == null)
+			{
+				return false;
+			}
 
 			foreach (var target in AllHostileTargets)
 			{
-				if (target.DistanceToPlayer() <= DanceTargetRange) return true;
+				if (target.DistanceToPlayer() <= DanceTargetRange)
+				{
+					return true;
+				}
 			}
 
 			return false;
@@ -272,9 +295,15 @@ public sealed class ChurinDNC : DancerRotation
 	private bool HasAvailableDancePartner(bool restrictToDps)
 	{
 		var targetPartner = ClosedPositionPvE.Target.Target;
-		if (targetPartner == null) return false;
+		if (targetPartner == null)
+		{
+			return false;
+		}
 
-		if (!IsValidDancePartner(targetPartner)) return false;
+		if (!IsValidDancePartner(targetPartner))
+		{
+			return false;
+		}
 
 		return !restrictToDps || IsDPSinParty(targetPartner);
 	}
@@ -292,8 +321,16 @@ public sealed class ChurinDNC : DancerRotation
 	/// </returns>
 	private static bool IsDPSinParty(IBattleChara? p)
 	{
-		if (p == null) return false;
-		if (!p.IsParty()) return false;
+		if (p == null)
+		{
+			return false;
+		}
+
+		if (!p.IsParty())
+		{
+			return false;
+		}
+
 		return p.GetRole() == CombatRole.DPS;
 	}
 	/// <summary>
@@ -309,8 +346,16 @@ public sealed class ChurinDNC : DancerRotation
 	/// </returns>
 	private static bool IsValidDancePartner(IBattleChara? p)
 	{
-		if (p == null) return false;
-		if (p.IsDead) return false;
+		if (p == null)
+		{
+			return false;
+		}
+
+		if (p.IsDead)
+		{
+			return false;
+		}
+
 		return !p.HasApplyStatus(HasWeaknessOrDamageDown);
 	}
 
@@ -467,10 +512,20 @@ public sealed class ChurinDNC : DancerRotation
 	// Override the method for actions to be taken during the countdown phase of combat
 	protected override IAction? CountDownAction(float remainTime)
 	{
-		if (!HasClosedPosition && TryUseClosedPosition(out var act)) return act;
-		if (ChurinPotions.ShouldUsePotion(this, out var potionAct, false)) return potionAct;
+		if (!HasClosedPosition && TryUseClosedPosition(out var act))
+		{
+			return act;
+		}
 
-		if (remainTime > OpenerStandardStepTime) return base.CountDownAction(remainTime);
+		if (ChurinPotions.ShouldUsePotion(this, out var potionAct, false))
+		{
+			return potionAct;
+		}
+
+		if (remainTime > OpenerStandardStepTime)
+		{
+			return base.CountDownAction(remainTime);
+		}
 
 		act = ChosenOpener switch
 		{
@@ -491,14 +546,25 @@ public sealed class ChurinDNC : DancerRotation
 	{
 		IAction? act;
 		if (remainTime <= OpenerStandardStepTime && !IsDancing)
+		{
 			if (StandardStepPvE.CanUse(out act))
+			{
 				return act;
+			}
+		}
 
 		if (!CanStandardFinish)
+		{
 			if (ExecuteStepGCD(out act))
+			{
 				return act;
+			}
+		}
 
-		if (!(remainTime <= OpenerStandardFinishTime) || !CanStandardFinish) return null;
+		if (!(remainTime <= OpenerStandardFinishTime) || !CanStandardFinish)
+		{
+			return null;
+		}
 
 		return TryFinishDance(out act, false) ? act : null;
 	}
@@ -515,34 +581,45 @@ public sealed class ChurinDNC : DancerRotation
 			if (remainTime > OpenerTechTime)
 			{
 				if (!HasStandardFinish && StandardStepPvE.CanUse(out act))
+				{
 					return act;
+				}
 			}
 			else if (readyToTechStep)
 			{
 				if (TechnicalStepPvE.CanUse(out act))
+				{
 					return act;
+				}
 			}
 		}
 
 		if (IsDancing && !CanTechnicalFinish)
 		{
 			if (ExecuteStepGCD(out act))
+			{
 				return act;
+			}
 		}
 
-		var finishStandard =  IsDancing
+		var finishStandard = IsDancing
 							 && HasStandardStep
 							 && !AreDanceTargetsInRange;
 		if (finishStandard)
 		{
 			if (DoubleStandardFinishPvE.CanUse(out act))
+			{
 				return act;
+			}
 		}
 
 		var readyToTechFinish = CanTechnicalFinish
 								&& remainTime <= OpenerTechFinishTime;
 
-		if (!readyToTechFinish) return null;
+		if (!readyToTechFinish)
+		{
+			return null;
+		}
 
 		return TryFinishDance(out act, true) ? act : null;
 	}
@@ -560,8 +637,15 @@ public sealed class ChurinDNC : DancerRotation
 			act = potionAct;
 			return true;
 		}
-		if (TryUseDevilment(out act)) return true;
-		if (SwapDancePartner(out act) || TryUseClosedPosition(out act)) return true;
+		if (TryUseDevilment(out act))
+		{
+			return true;
+		}
+
+		if (SwapDancePartner(out act) || TryUseClosedPosition(out act))
+		{
+			return true;
+		}
 
 		return !Showtime && CanWeave && base.EmergencyAbility(nextGCD, out act);
 	}
@@ -570,10 +654,13 @@ public sealed class ChurinDNC : DancerRotation
 	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
 	{
 		act = null;
-		if (!CanWeave) return base.AttackAbility(nextGCD, out act);
+		if (!CanWeave)
+		{
+			return base.AttackAbility(nextGCD, out act);
+		}
 
 		return TryUseFlourish(out act)
-		       ||TryUseFeatherProcs(out act)
+			   || TryUseFeatherProcs(out act)
 			   || TryUseFeathers(out act);
 	}
 
@@ -591,8 +678,16 @@ public sealed class ChurinDNC : DancerRotation
 				: TryFinishDance(out act, false);
 		}
 
-		if (Showtime) return TryUseStep(out act);
-		if (TryUseBurstGCD(out act)) return true;
+		if (Showtime)
+		{
+			return TryUseStep(out act);
+		}
+
+		if (TryUseBurstGCD(out act))
+		{
+			return true;
+		}
+
 		return TryUseFillerGCD(out act)
 			   || base.GeneralGCD(out act);
 	}
@@ -628,7 +723,7 @@ public sealed class ChurinDNC : DancerRotation
 	/// available resources, and configuration settings,
 	/// </summary>
 	private bool Showtime => (IsDancing || AboutToDance || IsLastGCD(_danceSteps))
-	                         && (!IsLastGCD(_standardFinishes) || !IsLastGCD(_techFinishes));
+							 && (!IsLastGCD(_standardFinishes) || !IsLastGCD(_techFinishes));
 
 	/// <summary>
 	/// Determines if the player can use Finishing Move as a finisher for their dance
@@ -639,9 +734,21 @@ public sealed class ChurinDNC : DancerRotation
 	{
 		get
 		{
-			if (!FinishingMovePvE.EnoughLevel || !FinishingMovePvE.IsEnabled) return false;
-			if (!InCombat || !FlourishPvE.IsEnabled) return false;
-			if (FlourishPvE.Cooldown.IsCoolingDown && !HasFinishingMove) return false;
+			if (!FinishingMovePvE.EnoughLevel || !FinishingMovePvE.IsEnabled)
+			{
+				return false;
+			}
+
+			if (!InCombat || !FlourishPvE.IsEnabled)
+			{
+				return false;
+			}
+
+			if (FlourishPvE.Cooldown.IsCoolingDown && !HasFinishingMove)
+			{
+				return false;
+			}
+
 			return HasFinishingMove;
 		}
 	}
@@ -654,13 +761,25 @@ public sealed class ChurinDNC : DancerRotation
 	{
 		get
 		{
-			if (!InCombat && (IsDancing || HasStandardStep)) return false;
+			if (!InCombat && (IsDancing || HasStandardStep))
+			{
+				return false;
+			}
 
-			if (!ActiveStandardWillHaveCharge) return false;
+			if (!ActiveStandardWillHaveCharge)
+			{
+				return false;
+			}
 
-			if (IsLastGCD(_standardFinishes)) return false;
+			if (IsLastGCD(_standardFinishes))
+			{
+				return false;
+			}
 
-			if (HasStandardFinish && TechnicalRecastRemain < SecondsToCompleteTech && ShouldUseTechStep) return false;
+			if (HasStandardFinish && TechnicalRecastRemain < SecondsToCompleteTech && ShouldUseTechStep)
+			{
+				return false;
+			}
 
 			return (StatusHelper.PlayerWillStatusEnd(ActiveStandardRecastRemain + WeaponTotal, true, StatusID.StandardFinish)
 					|| !HasStandardFinish) && ActiveStandard.CanUse(out _);
@@ -672,13 +791,16 @@ public sealed class ChurinDNC : DancerRotation
 		ActiveStandard.Cooldown.WillHaveOneCharge(SecondsToCompleteTech + WeaponTotal);
 
 	private bool ActiveStandardNextGCD => ActiveStandard.Cooldown.RecastTimeRemain < WeaponTotal
-	                                      && IsTimingOk(ActiveStandardRecastRemain, ActiveStandard);
+										  && IsTimingOk(ActiveStandardRecastRemain, ActiveStandard);
 
 	private bool CanUseStandardStepInBurst
 	{
 		get
 		{
-			if (!DisableStandardInBurst || !FinishingMovePvE.EnoughLevel) return true;
+			if (!DisableStandardInBurst || !FinishingMovePvE.EnoughLevel)
+			{
+				return true;
+			}
 
 			return DisableStandardInBurst && HasFinishingMove;
 		}
@@ -689,10 +811,16 @@ public sealed class ChurinDNC : DancerRotation
 		get
 		{
 			var devilmentRemain = DevilmentPvE.Cooldown.RecastTimeRemain;
-			if (!ShouldUseTechStep) return false;
+			if (!ShouldUseTechStep)
+			{
+				return false;
+			}
 
 			if (DevilmentPvE.Cooldown.IsCoolingDown && TechnicalStepPvE.Cooldown.IsCoolingDown
-				&& Math.Abs(devilmentRemain - TechnicalRecastRemain) > SecondsToCompleteTech - WeaponRemain) return false;
+				&& Math.Abs(devilmentRemain - TechnicalRecastRemain) > SecondsToCompleteTech - WeaponRemain)
+			{
+				return false;
+			}
 
 			return DevilmentPvE.Cooldown.WillHaveOneCharge(SecondsToCompleteTech)
 				   || DevilmentPvE.CanUse(out _);
@@ -753,7 +881,11 @@ public sealed class ChurinDNC : DancerRotation
 									  && (!CanFinishingMove || !HasFinishingMove)
 									  && !HasStandardStep;
 
-		if (!shouldHoldTechStep && !shouldHoldStandardStep) return true;
+		if (!shouldHoldTechStep && !shouldHoldStandardStep)
+		{
+			return true;
+		}
+
 		return AreDanceTargetsInRange;
 	}
 	private bool CanHoldFinishOnly(HoldStrategy strategy)
@@ -765,19 +897,28 @@ public sealed class ChurinDNC : DancerRotation
 										&& ActiveStandard.IsEnabled
 										&& (CanFinishingMove || HasStandardStep);
 
-		if (!shouldHoldTechFinish && !shouldHoldStandardFinish) return true;
+		if (!shouldHoldTechFinish && !shouldHoldStandardFinish)
+		{
+			return true;
+		}
 
 		return AreDanceTargetsInRange;
 	}
 
 	private void RemoveFinishingMove()
 	{
-		if (!DataCenter.BMREnabled || !HasFinishingMove) return;
+		if (!DataCenter.BMREnabled || !HasFinishingMove)
+		{
+			return;
+		}
 
-		if (DataCenter.BMRNextDowntimeIn >= 15f) return;
+		if (DataCenter.BMRNextDowntimeIn >= 15f)
+		{
+			return;
+		}
 
 		if (DataCenter.BMRNextDowntimeIn < FinishingMoveExecutionTime + ActiveStandardRecastRemain
-		    || DataCenter.BMRNextDowntimeEndIn < 15f)
+			|| DataCenter.BMRNextDowntimeEndIn < 15f)
 		{
 			StatusHelper.StatusOff(StatusID.FinishingMoveReady);
 		}
@@ -787,15 +928,30 @@ public sealed class ChurinDNC : DancerRotation
 	{
 		get
 		{
-			if (!ShouldUseTechStep) return false;
+			if (!ShouldUseTechStep)
+			{
+				return false;
+			}
 
-			if (IsDancing || IsLastGCD(_danceSteps) || HasTechnicalStep) return false;
+			if (IsDancing || IsLastGCD(_danceSteps) || HasTechnicalStep)
+			{
+				return false;
+			}
 
-			if (IsLastGCD(_techFinishes) || HasTechnicalFinish || HasTillana) return false;
+			if (IsLastGCD(_techFinishes) || HasTechnicalFinish || HasTillana)
+			{
+				return false;
+			}
 
-			if (!DevilmentReady) return false;
+			if (!DevilmentReady)
+			{
+				return false;
+			}
 
-			if (HasToRefreshStandardFinish) return false;
+			if (HasToRefreshStandardFinish)
+			{
+				return false;
+			}
 
 			return IsTimingOk(TechnicalRecastRemain, TechnicalStepPvE)
 				   && CanUseStepHoldCheck(TechHoldStrategy);
@@ -809,24 +965,45 @@ public sealed class ChurinDNC : DancerRotation
 			var cantFinishingMove = HasFinishingMove && !FinishingMovePvE.IsEnabled;
 			var cantStandardStep = !HasFinishingMove && !StandardStepPvE.IsEnabled;
 
-			if (cantFinishingMove || cantStandardStep) return false;
+			if (cantFinishingMove || cantStandardStep)
+			{
+				return false;
+			}
 
-			if (IsDancing || IsLastGCD(_danceSteps) || HasStandardStep || IsLastGCD(_standardFinishes)) return false;
+			if (IsDancing || IsLastGCD(_danceSteps) || HasStandardStep || IsLastGCD(_standardFinishes))
+			{
+				return false;
+			}
 
-			if (HasLastDance) return false;
+			if (HasLastDance)
+			{
+				return false;
+			}
 
-			if (TechnicalRecastRemain <  SecondsToCompleteTech && ShouldUseTechStep) return false;
+			if (TechnicalRecastRemain < SecondsToCompleteTech && ShouldUseTechStep)
+			{
+				return false;
+			}
 
-			if (IsLastGCD(_techFinishes) && !HasDevilment) return false;
+			if (IsLastGCD(_techFinishes) && !HasDevilment)
+			{
+				return false;
+			}
 
-			if (ShouldUseTechStep && TechnicalStepPvE.CanUse(out _) && !HasTillana) return false;
+			if (ShouldUseTechStep && TechnicalStepPvE.CanUse(out _) && !HasTillana)
+			{
+				return false;
+			}
 
-			if (IsBurstPhase && (CanSpendEspritNow || !CanUseStandardStepInBurst)) return false;
+			if (IsBurstPhase && (CanSpendEspritNow || !CanUseStandardStepInBurst))
+			{
+				return false;
+			}
 
 			if (!DataCenter.BMREnabled)
 			{
 				return IsTimingOk(ActiveStandardRecastRemain, ActiveStandard)
-				       && CanUseStepHoldCheck(StandardHoldStrategy);
+					   && CanUseStepHoldCheck(StandardHoldStrategy);
 			}
 
 			if (HasFinishingMove)
@@ -840,11 +1017,14 @@ public sealed class ChurinDNC : DancerRotation
 			}
 			else
 			{
-				if (DataCenter.BMRNextDowntimeEndIn > 15f && DataCenter.BMRNextDowntimeEndIn < float.MaxValue) return false;
+				if (DataCenter.BMRNextDowntimeEndIn > 15f && DataCenter.BMRNextDowntimeEndIn < float.MaxValue)
+				{
+					return false;
+				}
 			}
 
 			return IsTimingOk(ActiveStandardRecastRemain, ActiveStandard)
-			       && CanUseStepHoldCheck(StandardHoldStrategy);
+				   && CanUseStepHoldCheck(StandardHoldStrategy);
 		}
 	}
 
@@ -861,9 +1041,15 @@ public sealed class ChurinDNC : DancerRotation
 		{
 			if (CanUseTechStep
 				|| (TechnicalStepPvE.Cooldown.WillHaveOneCharge(15f)
-					&& ShouldUseTechStep && !HasTillana)) return false;
+					&& ShouldUseTechStep && !HasTillana))
+			{
+				return false;
+			}
 
-			if (!IsBurstPhase) return !IsSaberDancePrimed;
+			if (!IsBurstPhase)
+			{
+				return !IsSaberDancePrimed;
+			}
 
 			if (ActiveStandardWillHaveCharge)
 			{
@@ -896,7 +1082,10 @@ public sealed class ChurinDNC : DancerRotation
 	private bool TryUseStep(out IAction? act)
 	{
 		act = null;
-		if (IsDancing) return false;
+		if (IsDancing)
+		{
+			return false;
+		}
 
 		if (CanUseTechStep)
 		{
@@ -908,7 +1097,11 @@ public sealed class ChurinDNC : DancerRotation
 			return true;
 		}
 
-		if (!CanUseActiveStandard) return false;
+		if (!CanUseActiveStandard)
+		{
+			return false;
+		}
+
 		if (act == UseActiveStandard)
 		{
 			return true;
@@ -961,7 +1154,10 @@ public sealed class ChurinDNC : DancerRotation
 				   && QuadrupleTechnicalFinishPvE.CanUse(out act);
 		}
 
-		if (!HasStandardStep) return false;
+		if (!HasStandardStep)
+		{
+			return false;
+		}
 
 		if (CompletedSteps < 2)
 		{
@@ -999,20 +1195,51 @@ public sealed class ChurinDNC : DancerRotation
 	private bool TryUseBurstGCD(out IAction? act)
 	{
 		act = null;
-		if (!IsBurstPhase) return false;
-		if (Showtime && TryUseStep(out act)) return true;
-		if (TryUseDanceOfTheDawn(out act)) return true;
-		if (CanSpendEspritNow && TryUseSaberDance(out act)) return true;
-		if (TryUseTillana(out act)) return true;
-		if (TryUseLastDance(out act)) return true;
-		if (TryUseStarfallDance(out act)) return true;
+		if (!IsBurstPhase)
+		{
+			return false;
+		}
+
+		if (Showtime && TryUseStep(out act))
+		{
+			return true;
+		}
+
+		if (TryUseDanceOfTheDawn(out act))
+		{
+			return true;
+		}
+
+		if (CanSpendEspritNow && TryUseSaberDance(out act))
+		{
+			return true;
+		}
+
+		if (TryUseTillana(out act))
+		{
+			return true;
+		}
+
+		if (TryUseLastDance(out act))
+		{
+			return true;
+		}
+
+		if (TryUseStarfallDance(out act))
+		{
+			return true;
+		}
+
 		return TryUseFillerGCD(out act);
 	}
 
 	private bool TryUseDanceOfTheDawn(out IAction? act)
 	{
 		act = null;
-		if (!IsSaberDancePrimed || IsLastGCD(ActionID.DanceOfTheDawnPvE)) return false;
+		if (!IsSaberDancePrimed || IsLastGCD(ActionID.DanceOfTheDawnPvE))
+		{
+			return false;
+		}
 
 		return HasDanceOfTheDawn && DanceOfTheDawnPvE.CanUse(out act);
 	}
@@ -1020,7 +1247,10 @@ public sealed class ChurinDNC : DancerRotation
 	private bool TryUseTillana(out IAction? act)
 	{
 		act = null;
-		if (!HasTillana || IsLastGCD(ActionID.TillanaPvE)) return false;
+		if (!HasTillana || IsLastGCD(ActionID.TillanaPvE))
+		{
+			return false;
+		}
 
 		var blockTillana = false;
 
@@ -1043,7 +1273,10 @@ public sealed class ChurinDNC : DancerRotation
 	private bool TryUseLastDance(out IAction? act)
 	{
 		act = null;
-		if (!HasLastDance || IsLastGCD(ActionID.LastDancePvE)) return false;
+		if (!HasLastDance || IsLastGCD(ActionID.LastDancePvE))
+		{
+			return false;
+		}
 
 		return ShouldUseLastDance && LastDancePvE.CanUse(out act);
 	}
@@ -1054,7 +1287,10 @@ public sealed class ChurinDNC : DancerRotation
 		if (!HasStarfall
 			|| CanUseActiveStandard
 			|| (ActiveStandardWillHaveCharge && HasLastDance)
-			|| Showtime) return false;
+			|| Showtime)
+		{
+			return false;
+		}
 
 		return !IsSaberDancePrimed && StarfallDancePvE.CanUse(out act);
 	}
@@ -1066,28 +1302,83 @@ public sealed class ChurinDNC : DancerRotation
 	private bool TryUseFillerGCD(out IAction? act)
 	{
 		act = null;
-		if (Showtime) return false;
-		if (TryUseProcs(out act)) return true;
-		if (TryUseSaberDance(out act)) return true;
-		if (TryUseTillana(out act)) return true;
-		if (TryUseFeatherGCD(out act)) return true;
-		if (HasLastDance && TryUseLastDance(out act)) return true;
+		if (Showtime)
+		{
+			return false;
+		}
+
+		if (TryUseProcs(out act))
+		{
+			return true;
+		}
+
+		if (TryUseSaberDance(out act))
+		{
+			return true;
+		}
+
+		if (TryUseTillana(out act))
+		{
+			return true;
+		}
+
+		if (TryUseFeatherGCD(out act))
+		{
+			return true;
+		}
+
+		if (HasLastDance && TryUseLastDance(out act))
+		{
+			return true;
+		}
+
 		return TryUseBasicGCD(out act);
 	}
 
 	private bool TryUseBasicGCD(out IAction? act)
 	{
 		act = null;
-		if (Showtime) return TryUseStep(out act)
+		if (Showtime)
+		{
+			return TryUseStep(out act)
 			|| base.GeneralGCD(out act);
+		}
 
-		if (BloodshowerPvE.CanUse(out act)) return true;
-		if (FountainfallPvE.CanUse(out act)) return true;
-		if (RisingWindmillPvE.CanUse(out act)) return true;
-		if (ReverseCascadePvE.CanUse(out act)) return true;
-		if (BladeshowerPvE.CanUse(out act)) return true;
-		if (FountainPvE.CanUse(out act)) return true;
-		if (WindmillPvE.CanUse(out act)) return true;
+		if (BloodshowerPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (FountainfallPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (RisingWindmillPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (ReverseCascadePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (BladeshowerPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (FountainPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (WindmillPvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		return CascadePvE.CanUse(out act)
 			|| base.GeneralGCD(out act);
 	}
@@ -1095,19 +1386,29 @@ public sealed class ChurinDNC : DancerRotation
 	private bool TryUseFeatherGCD(out IAction? act)
 	{
 		act = null;
-		if (!HasEnoughFeathers || Showtime) return false;
+		if (!HasEnoughFeathers || Showtime)
+		{
+			return false;
+		}
 
 		var hasSilkenProcs = HasSilkenFlow || HasSilkenSymmetry;
 		var hasFlourishingProcs = HasFlourishingFlow || HasFlourishingSymmetry;
 
-		if (hasSilkenProcs && !hasFlourishingProcs) return CanSaberDance && SaberDancePvE.CanUse(out act);
+		if (hasSilkenProcs && !hasFlourishingProcs)
+		{
+			return CanSaberDance && SaberDancePvE.CanUse(out act);
+		}
+
 		return FountainPvE.CanUse(out act) || CascadePvE.CanUse(out act);
 	}
 
 	private bool TryUseSaberDance(out IAction? act)
 	{
 		act = null;
-		if (Showtime || !CanSaberDance) return false;
+		if (Showtime || !CanSaberDance)
+		{
+			return false;
+		}
 
 		return IsSaberDancePrimed && SaberDancePvE.CanUse(out act);
 	}
@@ -1116,17 +1417,27 @@ public sealed class ChurinDNC : DancerRotation
 	{
 		act = null;
 
-		if (IsBurstPhase || !ShouldUseTechStep || CanUseTechStep) return false;
+		if (IsBurstPhase || !ShouldUseTechStep || CanUseTechStep)
+		{
+			return false;
+		}
 
 		var gcdsUntilTech = 0;
 		for (var i = 1; i <= 5; i++)
 		{
-			if (!TechnicalStepPvE.Cooldown.WillHaveOneChargeGCD((uint)i, 0.5f)) continue;
+			if (!TechnicalStepPvE.Cooldown.WillHaveOneChargeGCD((uint)i, 0.5f))
+			{
+				continue;
+			}
+
 			gcdsUntilTech = i;
 			break;
 		}
 
-		if (gcdsUntilTech == 0 || Showtime) return false;
+		if (gcdsUntilTech == 0 || Showtime)
+		{
+			return false;
+		}
 
 		switch (gcdsUntilTech)
 		{
@@ -1136,9 +1447,21 @@ public sealed class ChurinDNC : DancerRotation
 				return IsSaberDancePrimed ? TryUseSaberDance(out act) : TryUseBasicGCD(out act);
 			case 2:
 			case 1:
-				if (HasAnyProc) return TryUseBasicGCD(out act);
-				if (CanSaberDance) return SaberDancePvE.CanUse(out act);
-				if (HasLastDance) return LastDancePvE.CanUse(out act);
+				if (HasAnyProc)
+				{
+					return TryUseBasicGCD(out act);
+				}
+
+				if (CanSaberDance)
+				{
+					return SaberDancePvE.CanUse(out act);
+				}
+
+				if (HasLastDance)
+				{
+					return LastDancePvE.CanUse(out act);
+				}
+
 				break;
 		}
 
@@ -1163,7 +1486,10 @@ public sealed class ChurinDNC : DancerRotation
 						  (HasStandardFinish || IsLastGCD(_standardFinishes));
 
 		if (!DevilmentPvE.EnoughLevel || DevilmentPvE.Cooldown.IsCoolingDown
-		                              || HasDevilment || IsLastAbility(ActionID.DevilmentPvE)) return false;
+									  || HasDevilment || IsLastAbility(ActionID.DevilmentPvE))
+		{
+			return false;
+		}
 
 		if (canUseTech || cantUseTech)
 		{
@@ -1177,15 +1503,30 @@ public sealed class ChurinDNC : DancerRotation
 	{
 		act = null;
 
-		if (HasThreefoldFanDance  || IsDancing) return false;
+		if (HasThreefoldFanDance || IsDancing)
+		{
+			return false;
+		}
 
-		if (IsLastAbility(ActionID.FlourishPvE)) return false;
+		if (IsLastAbility(ActionID.FlourishPvE))
+		{
+			return false;
+		}
 
-		if (IsBurstPhase && FlourishPvE.CanUse(out act)) return true;
+		if (IsBurstPhase && FlourishPvE.CanUse(out act))
+		{
+			return true;
+		}
 
-		if (CanTechnicalFinish) return false;
+		if (CanTechnicalFinish)
+		{
+			return false;
+		}
 
-		if (!ShouldUseTechStep && FlourishPvE.CanUse(out act)) return true;
+		if (!ShouldUseTechStep && FlourishPvE.CanUse(out act))
+		{
+			return true;
+		}
 
 		return FlourishPvE.CanUse(out act) && TechnicalStepPvE.Cooldown.IsCoolingDown
 			   && !TechnicalStepPvE.Cooldown.WillHaveOneCharge(35);
@@ -1198,9 +1539,15 @@ public sealed class ChurinDNC : DancerRotation
 	private bool TryUseFeatherProcs(out IAction? act)
 	{
 		act = null;
-		if (!HasFeatherProcs) return false;
+		if (!HasFeatherProcs)
+		{
+			return false;
+		}
 
-		if (!EnoughWeaveTime) return false;
+		if (!EnoughWeaveTime)
+		{
+			return false;
+		}
 
 		return (HasThreefoldFanDance && FanDanceIiiPvE.CanUse(out act))
 			   || (HasFourfoldFanDance && FanDanceIvPvE.CanUse(out act));
@@ -1209,7 +1556,10 @@ public sealed class ChurinDNC : DancerRotation
 	private bool TryUseFeathers(out IAction? act)
 	{
 		act = null;
-		if (Feathers <= 0 || !EnoughWeaveTime) return false;
+		if (Feathers <= 0 || !EnoughWeaveTime)
+		{
+			return false;
+		}
 
 		var overcapRisk = HasEnoughFeathers && (HasAnyProc || FlourishPvE.Cooldown.WillHaveOneChargeGCD(1)) &&
 						  !CanUseTechStep;
@@ -1235,7 +1585,9 @@ public sealed class ChurinDNC : DancerRotation
 		if (HasClosedPosition
 			|| IsDancing
 			|| !HasAvailableDancePartner(RestrictDPTarget))
+		{
 			return false;
+		}
 
 		return ClosedPositionPvE.CanUse(out act);
 	}
@@ -1247,7 +1599,10 @@ public sealed class ChurinDNC : DancerRotation
 			|| !ShouldSwapDancePartner
 			|| !ClosedPositionPvE.IsEnabled
 			|| IsDancing)
+		{
 			return false;
+		}
+
 		return EndingPvE.CanUse(out act);
 	}
 
@@ -1272,10 +1627,16 @@ public sealed class ChurinDNC : DancerRotation
 
 		public override bool IsConditionMet()
 		{
-			if (!IsDancing && !InCombat) return false;
+			if (!IsDancing && !InCombat)
+			{
+				return false;
+			}
 
 			var timing = GetTimingsArray();
-			if (timing.Length == 0) return false;
+			if (timing.Length == 0)
+			{
+				return false;
+			}
 
 			return PotsDuringStep switch
 			{
@@ -1301,7 +1662,10 @@ public sealed class ChurinDNC : DancerRotation
 					case DancerOpener.Standard:
 					default:
 						{
-							if (!IsOddMinuteWindow(timing)) return lateTiming && lateTimingDiff <= TimingWindowSeconds;
+							if (!IsOddMinuteWindow(timing))
+							{
+								return lateTiming && lateTimingDiff <= TimingWindowSeconds;
+							}
 
 							// Odd-minute special handling: allow both sides within earlyTimingWindow.
 							return timingDiff <= earlyTimingWindow;
@@ -1317,8 +1681,16 @@ public sealed class ChurinDNC : DancerRotation
 			// Check opener timing: OpenerPotionTime == 0 means disabled
 			var countDown = Service.CountDownTime;
 
-			if (!IsOpenerPotion(timing)) return false;
-			if (ChurinDNC.OpenerPotionTime == 0f) return false;
+			if (!IsOpenerPotion(timing))
+			{
+				return false;
+			}
+
+			if (ChurinDNC.OpenerPotionTime == 0f)
+			{
+				return false;
+			}
+
 			return countDown > 0f && countDown <= ChurinDNC.OpenerPotionTime;
 		}
 	}

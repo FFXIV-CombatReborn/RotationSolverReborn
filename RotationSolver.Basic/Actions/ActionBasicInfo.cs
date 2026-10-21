@@ -25,7 +25,7 @@ public readonly struct ActionBasicInfo
 	/// <summary>
 	/// Gets the name of the action.
 	/// </summary>
-	public readonly string Name => _action.Action.Name.ExtractText();
+	public string Name { get; }
 
 	/// <summary>
 	/// Gets the unique identifier of the action.
@@ -35,32 +35,12 @@ public readonly struct ActionBasicInfo
 	/// <summary>
 	/// Gets the range of the action.
 	/// </summary>
-	public readonly sbyte Range
+	public readonly sbyte Range => IsInstinctualAxe(ID) ? (sbyte)3 : (sbyte)ActionManager.GetActionRange(ID);
+
+	// The Beastmaster axes report the pet's range, but are used at melee range.
+	internal static bool IsInstinctualAxe(uint id)
 	{
-		get
-		{
-			if ((ActionID)_action.Info.ID == ActionID.AvalancheAxePvE)
-			{
-				return 3;
-			}
-
-			if ((ActionID)_action.Info.ID == ActionID.SpinningAxePvE)
-			{
-				return 3;
-			}
-
-			if ((ActionID)_action.Info.ID == ActionID.MistralAxePvE)
-			{
-				return 3;
-			}
-
-			if ((ActionID)_action.Info.ID == ActionID.GaleAxePvE)
-			{
-				return 3;
-			}
-
-			return (sbyte)ActionManager.GetActionRange(_action.Info.ID);
-		}
+		return (ActionID)id is ActionID.AvalancheAxePvE or ActionID.SpinningAxePvE or ActionID.MistralAxePvE or ActionID.GaleAxePvE;
 	}
 
 	/// <summary>
@@ -112,15 +92,7 @@ public readonly struct ActionBasicInfo
 	/// </summary>
 	public bool HasAttackType(AttackType attackType)
 	{
-		var attackTypes = AttackTypes;
-		for (var i = 0; i < attackTypes.Count; i++)
-		{
-			if (attackTypes[i] == attackType)
-			{
-				return true;
-			}
-		}
-		return false;
+		return AttackType == attackType || Array.IndexOf(_action.Setting.AdditionalAttackTypes ?? [], attackType) >= 0;
 	}
 
 	/// <summary>
@@ -157,15 +129,7 @@ public readonly struct ActionBasicInfo
 	/// </summary>
 	public bool HasAspect(Aspect aspect)
 	{
-		var aspects = Aspects;
-		for (var i = 0; i < aspects.Count; i++)
-		{
-			if (aspects[i] == aspect)
-			{
-				return true;
-			}
-		}
-		return false;
+		return Aspect == aspect || Array.IndexOf(_action.Setting.AdditionalAspects ?? [], aspect) >= 0;
 	}
 
 	/// <summary>
@@ -430,6 +394,7 @@ public readonly struct ActionBasicInfo
 	public ActionBasicInfo(IBaseAction action, bool isDutyAction)
 	{
 		_action = action;
+		Name = _action.Action.Name.ExtractText();
 		IsGeneralGCD = _action.Action.IsGeneralGCD();
 		IsRealGCD = _action.Action.IsRealGCD();
 		IsLimitBreak = (ActionCate?)_action.Action.ActionCategory.Value.RowId
@@ -505,12 +470,8 @@ public readonly struct ActionBasicInfo
 			return false;
 		}
 
+		// ActionConfig.IsEnabled already returns true while ForceEnable is set.
 		if (!IsActionEnabled())
-		{
-			return false;
-		}
-
-		if (IsActionDisabled())
 		{
 			return false;
 		}
@@ -532,43 +493,10 @@ public readonly struct ActionBasicInfo
 			return false;
 		}
 
-		if (!_action.Setting.IgnoresBadStatus)
+		if (!_action.Setting.IgnoresBadStatus && (IsRealGCD || IsAbility)
+			&& Array.IndexOf(ConfigurationHelper.BadStatusAction, (ActionStatus)ActionManager.Instance()->GetActionStatus(ActionType.Action, AdjustedID)) >= 0)
 		{
-			if (IsRealGCD)
-			{
-				var status = ActionManager.Instance()->GetActionStatus(ActionType.Action, AdjustedID);
-				var statusFound = false;
-				foreach (var badStatus in ConfigurationHelper.BadStatusGCD)
-				{
-					if (badStatus == status)
-					{
-						statusFound = true;
-						break;
-					}
-				}
-				if (statusFound)
-				{
-					return false;
-				}
-			}
-
-			if (IsAbility && !IsRealGCD)
-			{
-				var status = ActionManager.Instance()->GetActionStatus(ActionType.EventAction, AdjustedID);
-				var statusFound = false;
-				foreach (var badStatus in ConfigurationHelper.BadStatusAbility)
-				{
-					if (badStatus == status)
-					{
-						statusFound = true;
-						break;
-					}
-				}
-				if (statusFound)
-				{
-					return false;
-				}
-			}
+			return false;
 		}
 
 		// Status checks: need or provide
@@ -638,11 +566,6 @@ public readonly struct ActionBasicInfo
 	private bool IsActionEnabled()
 	{
 		return _action.Config?.IsEnabled ?? false;
-	}
-
-	private bool IsActionDisabled()
-	{
-		return !IBaseAction.ForceEnable && _action.Config?.IsEnabled == false;
 	}
 
 	/// <summary>

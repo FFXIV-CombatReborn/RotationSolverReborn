@@ -1,7 +1,4 @@
-﻿using ECommons.ExcelServices;
-using ECommons.GameHelpers;
-using System.Collections.Concurrent;
-using Action = Lumina.Excel.Sheets.Action;
+﻿using Action = Lumina.Excel.Sheets.Action;
 
 namespace RotationSolver.Basic.Helpers;
 
@@ -18,9 +15,6 @@ internal static class ActionHelper
 	internal const byte AbilityCooldownGroup = 19;
 
 	internal const byte OGCDCooldownGroup = 71;
-
-	/// <inheritdoc/>
-	public static float AnimationLockTime => Player.AnimationLock;
 
 	/// <summary>
 	/// Gets the action category of the specified action.
@@ -63,8 +57,6 @@ internal static class ActionHelper
 		return group == 0 ? GCDCooldownGroup : group;
 	}
 
-	private static readonly ConcurrentDictionary<Job, PropertyInfo?> JobPropertyCache = new();
-
 	/// <summary>
 	/// Determines whether the specified action is in the current job.
 	/// </summary>
@@ -72,34 +64,7 @@ internal static class ActionHelper
 	/// <returns><c>true</c> if the action is in the current job; otherwise, <c>false</c>.</returns>
 	internal static bool IsInJob(this Action action)
 	{
-		var cate = action.ClassJobCategory.ValueNullable;
-		if (cate != null)
-		{
-			var property = JobPropertyCache.GetOrAdd(DataCenter.Job, job =>
-			{
-				// Cache the property info for this job once
-				var t = cate.GetType();
-				return t.GetProperty(job.ToString());
-			});
-
-			if (property != null)
-			{
-				var val = property.GetValue(cate);
-				if (val is bool b)
-				{
-					return b;
-				}
-
-				if (val is byte by)
-				{
-					return by != 0;
-				}
-
-				return true;
-			}
-		}
-
-		return true;
+		return action.ClassJobCategory.ValueNullable?.DoesJobMatchCategory(DataCenter.Job) ?? true;
 	}
 
 	/// <summary>

@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Magical;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.57")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Magical/SMN_Default.PVP.cs")]
 
 public class SMN_DefaultPvP : SummonerRotation

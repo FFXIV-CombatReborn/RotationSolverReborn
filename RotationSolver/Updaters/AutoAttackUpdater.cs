@@ -117,8 +117,8 @@ namespace RotationSolver.Updaters
 
 		private static unsafe bool SetAutoAttackStateDetour(AutoAttackState* self, bool value, bool sendPacket, bool isInstant)
 		{
-			// Block attempts to enable auto attacks while a NoCastingStatus is active
-			if (value && Player.Available && PlayerHasNoCastingStatus())
+			// Block attempts to enable auto attacks while a NoCastingStatus is active, only while RSR is running
+			if (value && Player.Available && DataCenter.IsActivated() && PlayerHasNoCastingStatus())
 			{
 				PluginLog.Debug("[AutoAttackUpdater] Prevented auto attack activation due to NoCastingStatus.");
 				return true;

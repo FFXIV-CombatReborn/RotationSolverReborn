@@ -32,38 +32,28 @@ internal static class ConfigurationHelper
 		{ ActionID.SwiftskinsCoilPvE, EnemyPositional.Rear }
 	};
 
-	public static readonly uint[] BadStatus =
+	public static readonly ActionStatus[] BadStatus =
 	[
-		583, // No items
-        582, // Item on cooldown
-        581, // Unable to use item
-        579, // Between Area
-        574, // Wrong Job
-        573, // Not learned or not high enough level
-        572, // Unable to use action
-    ];
+		ActionStatus.NoItem,
+		ActionStatus.OnCooldown,
+		ActionStatus.StatusAffliction,
+		ActionStatus.CannotExecute,
+		ActionStatus.WrongClass,
+		ActionStatus.NotLearned,
+		ActionStatus.RequirementNotMet,
+	];
 
-	public static readonly uint[] BadStatusGCD =
+	// Action statuses that block both GCDs and abilities.
+	public static readonly ActionStatus[] BadStatusAction =
 	[
-		583, // Action not ready
-        579, // Between Area
-        574, // Wrong Job
-        573, // Not learned or not high enough level
-        572, // Unable to use action
-        5209, // Duty Action out of charges
-        9301, // BLU action not in slot
-    ];
-
-	public static readonly uint[] BadStatusAbility =
-	[
-		583, // Action not ready
-        579, // Between Area
-        574, // Wrong Job
-        573, // Not learned or not high enough level
-        572, // Unable to use action
-        5209, // Duty Action out of charges
-        9301, // BLU action not in slot
-    ];
+		ActionStatus.NoItem,
+		ActionStatus.CannotExecute,
+		ActionStatus.WrongClass,
+		ActionStatus.NotLearned,
+		ActionStatus.RequirementNotMet,
+		ActionStatus.NoDutyActionCharges,
+		ActionStatus.NotInActiveSet,
+	];
 
 	public static VirtualKey ToVirtual(this ConsoleModifiers modifiers)
 	{

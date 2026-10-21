@@ -1,5 +1,4 @@
-﻿using ECommons.GameHelpers;
-using FFXIVClientStructs.FFXIV.Client.Game;
+﻿using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace RotationSolver.Basic.Helpers
 {
@@ -16,8 +15,6 @@ namespace RotationSolver.Basic.Helpers
 		{
 			return ActionManager.Instance();
 		}
-
-		public static unsafe float AnimationLock => Player.AnimationLock;
 
 		/// <summary>
 		/// Gets the recast time for a specific action.

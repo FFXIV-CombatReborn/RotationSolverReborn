@@ -5,8 +5,8 @@ using System.Diagnostics;
 
 namespace RotationSolver.ExtraRotations.Magical;
 
-[Rotation("Rabbs Blackest Mage", CombatType.PvE, GameVersion = "7.3")]
-[SourceCode(Path = "main/ExtraRotations/Magical/Rabbs_BLM_All_Levels.cs")]
+[Rotation("Rabbs Blackest Mage", CombatType.PvE, GameVersion = "7.3", RotationType = RotationType.Reborn)]
+[SourceCode(Path = "main/ExtraRotations/Magical/RabbsBLM.cs")]
 [ExtraRotation]
 
 public sealed class Rabbs_BLM : BlackMageRotation
@@ -88,7 +88,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
 
 	private readonly Lazy<IBaseAction> _AltFlareOpenerPvE = new(static delegate
 	{
-		Basic.Actions.ActionSetting setting460 = new BaseAction(ActionID.FlarePvE).Setting;
+		var setting460 = new BaseAction(ActionID.FlarePvE).Setting;
 		ModifyAltFlareOpenerPvE(ref setting460);
 		new BaseAction(ActionID.FlarePvE).Setting = setting460;
 		return new BaseAction(ActionID.FlarePvE);
@@ -113,13 +113,24 @@ public sealed class Rabbs_BLM : BlackMageRotation
 	{
 		get
 		{
-			if (PartyMembers == null) return false;
+			if (PartyMembers == null)
+			{
+				return false;
+			}
+
 			foreach (var member in PartyMembers)
 			{
-				if (member?.StatusList == null) continue;
+				if (member?.StatusList == null)
+				{
+					continue;
+				}
+
 				foreach (var status in member.StatusList)
 				{
-					if (burstStatusIds.Contains(status.StatusId)) return true;
+					if (burstStatusIds.Contains(status.StatusId))
+					{
+						return true;
+					}
 				}
 			}
 			return false;
@@ -130,13 +141,24 @@ public sealed class Rabbs_BLM : BlackMageRotation
 	{
 		get
 		{
-			if (PartyMembers == null) return false;
+			if (PartyMembers == null)
+			{
+				return false;
+			}
+
 			foreach (var member in PartyMembers)
 			{
-				if (member?.StatusList == null) continue;
+				if (member?.StatusList == null)
+				{
+					continue;
+				}
+
 				foreach (var status in member.StatusList)
 				{
-					if (status.StatusId == (uint)StatusID.Medicated) return true;
+					if (status.StatusId == (uint)StatusID.Medicated)
+					{
+						return true;
+					}
 				}
 			}
 			return false;
@@ -147,10 +169,17 @@ public sealed class Rabbs_BLM : BlackMageRotation
 	{
 		get
 		{
-			if (AllHostileTargets == null) return false;
+			if (AllHostileTargets == null)
+			{
+				return false;
+			}
+
 			foreach (var hostile in AllHostileTargets)
 			{
-				if (hostile.IsBossFromIcon() || hostile.IsBossFromTTK()) return true;
+				if (hostile.IsBossFromIcon() || hostile.IsBossFromTTK())
+				{
+					return true;
+				}
 			}
 			return false;
 		}
@@ -206,19 +235,24 @@ public sealed class Rabbs_BLM : BlackMageRotation
 			const double soonThreshold = 3.0;
 			float aoeRange = ThunderIiPvE.Info.EffectRange;
 
-			bool hasAny = false;
-			foreach (var _ in AllHostileTargets) { hasAny = true; break; }
+			var hasAny = false;
+			foreach (var _ in AllHostileTargets)
+			{ hasAny = true; break; }
 			if (AllHostileTargets == null || !hasAny)
+			{
 				return false;
+			}
 
 			foreach (var centerTarget in AllHostileTargets)
 			{
-				int needThunder = 0;
+				var needThunder = 0;
 
 				foreach (var t in AllHostileTargets)
 				{
 					if (Vector3.Distance(centerTarget.Position, t.Position) >= aoeRange + centerTarget.HitboxRadius)
+					{
 						continue;
+					}
 
 					if (!t.HasStatus(true, ThunderStatusIds) ||
 						t.StatusTime(true, ThunderStatusIds) <= soonThreshold)
@@ -227,7 +261,9 @@ public sealed class Rabbs_BLM : BlackMageRotation
 					}
 
 					if (needThunder >= minTargets)
+					{
 						return true;
+					}
 				}
 			}
 
@@ -243,9 +279,9 @@ public sealed class Rabbs_BLM : BlackMageRotation
 			{
 				const int openerMinGcd = 9;
 				const int openerMaxGcd = 12;
-				double gcdDuration = 2.5; // TODO: Replace with player’s actual GCD
+				var gcdDuration = 2.5; // TODO: Replace with player’s actual GCD
 
-				int currentGcdEstimate = (int)(CombatTime / gcdDuration);
+				var currentGcdEstimate = (int)(CombatTime / gcdDuration);
 
 				return StatusHelper.PlayerHasStatus(true, StatusID.Thunderhead) &&
 					   currentGcdEstimate >= openerMinGcd &&
@@ -294,9 +330,9 @@ public sealed class Rabbs_BLM : BlackMageRotation
 		{
 			const int baseFireFourCost = 1600;
 			const int fireFourCostWithHeart = 800;
-			int soulDeficit = 6 - AstralSoulStacks;
-			int discountedCasts = Math.Min(soulDeficit, UmbralHearts);
-			int normalCasts = soulDeficit - discountedCasts;
+			var soulDeficit = 6 - AstralSoulStacks;
+			var discountedCasts = Math.Min(soulDeficit, UmbralHearts);
+			var normalCasts = soulDeficit - discountedCasts;
 
 			// If Manafont is available, we can likely cast enough spells to get 6 stacks
 			// before running out of MP (given its significant MP recovery).
@@ -311,7 +347,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				return true;
 			}
 			// calculate the mp needed to get to 6 stacks
-			int howMuchManaINeed = (discountedCasts * fireFourCostWithHeart) + (normalCasts * baseFireFourCost);
+			var howMuchManaINeed = (discountedCasts * fireFourCostWithHeart) + (normalCasts * baseFireFourCost);
 
 			if (CurrentMp >= howMuchManaINeed)
 			{
@@ -327,8 +363,8 @@ public sealed class Rabbs_BLM : BlackMageRotation
 	{
 		get
 		{
-			int soulDeficit = 6 - AstralSoulStacks;
-			int flaresNeeded = (int)Math.Ceiling((double)soulDeficit / 3); // Flare grants 3 stacks
+			var soulDeficit = 6 - AstralSoulStacks;
+			var flaresNeeded = (int)Math.Ceiling((double)soulDeficit / 3); // Flare grants 3 stacks
 
 			// Manafont check still applies
 			if (!ManafontPvE.Cooldown.IsCoolingDown || AstralSoulStacks == 6)
@@ -348,10 +384,12 @@ public sealed class Rabbs_BLM : BlackMageRotation
 			}
 
 			if (flaresNeeded == 1)
+			{
 				if (CurrentMp >= 800)
 				{
 					return true;
 				}
+			}
 
 			return false; // If we can afford all the needed Flare casts
 		}
@@ -359,7 +397,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
 
 	public static int GetAoeCount(IBaseAction action)
 	{
-		int maxAoeCount = 0;
+		var maxAoeCount = 0;
 
 		if (!IsManual)
 		{
@@ -367,8 +405,12 @@ public sealed class Rabbs_BLM : BlackMageRotation
 			{
 				foreach (var centerTarget in AllHostileTargets)
 				{
-					if (centerTarget.DistanceToPlayer() >= action.Info.Range || !centerTarget.CanSee()) continue;
-					int currentAoeCount = 0;
+					if (centerTarget.DistanceToPlayer() >= action.Info.Range || !centerTarget.CanSee())
+					{
+						continue;
+					}
+
+					var currentAoeCount = 0;
 					foreach (var otherTarget in AllHostileTargets)
 					{
 						if (Vector3.Distance(centerTarget.Position, otherTarget.Position) < (action.Info.EffectRange + centerTarget.HitboxRadius))
@@ -383,7 +425,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
 		}
 		else if (AllHostileTargets != null && CurrentTarget != null) // Use action.Target.Target
 		{
-			int count = 0;
+			var count = 0;
 			foreach (var otherTarget in AllHostileTargets)
 			{
 				if (Vector3.Distance(CurrentTarget.Position, otherTarget.Position) < (action.Info.EffectRange + otherTarget.HitboxRadius))
@@ -592,9 +634,14 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{ return true; }
 			}
 			if (PolyglotStacks > 0 && IsInOpener && CombatTime < 30 && Openerchoice == Openchoice.Standard && CurrentMp < FireIvPvE.Info.MPNeed)
+			{
 				return true;
+			}
+
 			if (PolyglotStacks > 0 && IsInOpener && CombatTime < 30 && Openerchoice == Openchoice.AltFlare && AstralSoulStacks == 2)
+			{
 				return true;
+			}
 
 			return false;
 		}
@@ -627,7 +674,10 @@ public sealed class Rabbs_BLM : BlackMageRotation
 			IAction act;
 			if (remainTime < FireIiiPvE.Info.CastTime + CountDownAhead && remainTime > 1)
 			{
-				if (FireIiiPvE.CanUse(out act)) return act;
+				if (FireIiiPvE.CanUse(out act))
+				{
+					return act;
+				}
 			}
 			if (remainTime < FireIiiPvE.Info.CastTime - CountDownAhead && IsMoving)
 			{
@@ -635,7 +685,10 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (CanMakeInstant)
 					{
-						if (SwiftcastPvE.CanUse(out act)) return act;
+						if (SwiftcastPvE.CanUse(out act))
+						{
+							return act;
+						}
 					}
 				}
 			}
@@ -652,7 +705,10 @@ public sealed class Rabbs_BLM : BlackMageRotation
 		{
 			if (ShouldTranspose)
 			{
-				if (TransposePvE.CanUse(out act, skipCastingCheck: true, skipComboCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipTTKCheck: true, usedUp: true)) return true;
+				if (TransposePvE.CanUse(out act, skipCastingCheck: true, skipComboCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipTTKCheck: true, usedUp: true))
+				{
+					return true;
+				}
 			}
 
 			if (nextGCD.IsTheSameTo(true, BlizzardIiiPvE) && ManafontPvE.Cooldown.IsCoolingDown)
@@ -661,10 +717,20 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (IsInOpener)
 					{
-						if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
+						if (TriplecastPvE.CanUse(out act, usedUp: true))
+						{
+							return true;
+						}
 					}
-					if (SwiftcastPvE.CanUse(out act)) return true;
-					if (TriplecastPvE.CanUse(out act, usedUp: true) && TCB3) return true;
+					if (SwiftcastPvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					if (TriplecastPvE.CanUse(out act, usedUp: true) && TCB3)
+					{
+						return true;
+					}
 				}
 			}
 
@@ -672,7 +738,10 @@ public sealed class Rabbs_BLM : BlackMageRotation
 			{
 				if (CurrentMp < 800 && AstralSoulStacks < 6 && !WillBeAbleToFlareStarMT && !WillBeAbleToFlareStarST && (!IsParadoxActive || CurrentMp < 1600) && ManafontPvE.Cooldown.IsCoolingDown)
 				{
-					if (SwiftcastPvE.CanUse(out act)) return true;
+					if (SwiftcastPvE.CanUse(out act))
+					{
+						return true;
+					}
 				}
 			}
 
@@ -681,7 +750,10 @@ public sealed class Rabbs_BLM : BlackMageRotation
 			{
 				if (AmplifierPvE.Cooldown.IsCoolingDown && !StatusHelper.PlayerHasStatus(true, StatusID.LeyLines))
 				{
-					if (LeyLinesPvE.CanUse(out act)) return true;
+					if (LeyLinesPvE.CanUse(out act))
+					{
+						return true;
+					}
 				}
 			}
 
@@ -692,13 +764,22 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (!NextGCDisInstant && CombatTime < 30)
 					{
-						if (SwiftcastPvE.CanUse(out act)) return true;
+						if (SwiftcastPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 					if (!IsPolyglotStacksMaxed)
 					{
-						if (AmplifierPvE.CanUse(out act)) return true;
+						if (AmplifierPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
-					if (IsPotReady && UseBurstMedicine(out act)) return true;
+					if (IsPotReady && UseBurstMedicine(out act))
+					{
+						return true;
+					}
 				}
 
 
@@ -709,8 +790,10 @@ public sealed class Rabbs_BLM : BlackMageRotation
 			{
 				if (!NextGCDisInstant && CanMakeInstant)
 				{
-					if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
-
+					if (TriplecastPvE.CanUse(out act, usedUp: true))
+					{
+						return true;
+					}
 				}
 
 			}
@@ -726,7 +809,10 @@ public sealed class Rabbs_BLM : BlackMageRotation
 						{
 							if (!NextGCDisInstant && TriplecastPvE.Cooldown.CurrentCharges > 0 && InCombat)
 							{
-								if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
+								if (TriplecastPvE.CanUse(out act, usedUp: true))
+								{
+									return true;
+								}
 							}
 
 						}
@@ -736,7 +822,10 @@ public sealed class Rabbs_BLM : BlackMageRotation
 
 			if (!ManafontPvE.Cooldown.IsCoolingDown && CurrentMp < 800 && AstralSoulStacks < 6 && InAstralFire)
 			{
-				if (ManafontPvE.CanUse(out act, skipCastingCheck: true, skipComboCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipTTKCheck: true, usedUp: true)) return true;
+				if (ManafontPvE.CanUse(out act, skipCastingCheck: true, skipComboCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipTTKCheck: true, usedUp: true))
+				{
+					return true;
+				}
 			}
 		}
 
@@ -746,14 +835,22 @@ public sealed class Rabbs_BLM : BlackMageRotation
 	[RotationDesc(ActionID.AetherialManipulationPvE)]
 	protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
 	{
-		if (AetherialManipulationPvE.CanUse(out act)) return true;
+		if (AetherialManipulationPvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		return base.MoveForwardAbility(nextGCD, out act);
 	}
 
 	[RotationDesc(ActionID.BetweenTheLinesPvE)]
 	protected override bool MoveBackAbility(IAction nextGCD, out IAction? act)
 	{
-		if (BetweenTheLinesPvE.CanUse(out act)) return true;
+		if (BetweenTheLinesPvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		return base.MoveBackAbility(nextGCD, out act);
 	}
 
@@ -762,15 +859,27 @@ public sealed class Rabbs_BLM : BlackMageRotation
 	[RotationDesc(ActionID.ManawardPvE)]
 	protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
-		if (ManawardPvE.CanUse(out act)) return true;
+		if (ManawardPvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		return base.DefenseAreaAbility(nextGCD, out act);
 	}
 
 	[RotationDesc(ActionID.ManawardPvE, ActionID.AddlePvE)]
 	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
 	{
-		if (ManawardPvE.CanUse(out act)) return true;
-		if (AddlePvE.CanUse(out act)) return true;
+		if (ManawardPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (AddlePvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		return base.DefenseSingleAbility(nextGCD, out act);
 	}
 
@@ -782,7 +891,10 @@ public sealed class Rabbs_BLM : BlackMageRotation
 	[RotationDesc(ActionID.TransposePvE, ActionID.LeyLinesPvE, ActionID.RetracePvE)]
 	protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
 	{
-		if (ShouldLeyLine && InCombat && HasHostilesInRange && LeyLinesPvE.CanUse(out act, usedUp: ShouldLeyLine)) return true;
+		if (ShouldLeyLine && InCombat && HasHostilesInRange && LeyLinesPvE.CanUse(out act, usedUp: ShouldLeyLine))
+		{
+			return true;
+		}
 		//if (!IsLastAbility(ActionID.LeyLinesPvE) && UseRetrace && InCombat && HasHostilesInRange && !StatusHelper.PlayerHasStatus(true, StatusID.CircleOfPower) && RetracePvE.CanUse(out act)) return true;
 
 		return base.GeneralAbility(nextGCD, out act);
@@ -799,7 +911,10 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (IsLastAction(ActionID.TransposePvE))
 					{
-						if (SwiftcastPvE.CanUse(out act)) return true;
+						if (SwiftcastPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 				}
 
@@ -807,9 +922,15 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (!IsPolyglotStacksMaxed)
 					{
-						if (AmplifierPvE.CanUse(out act)) return true;
+						if (AmplifierPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
-					if (IsPotReady && UseBurstMedicine(out act)) return true;
+					if (IsPotReady && UseBurstMedicine(out act))
+					{
+						return true;
+					}
 				}
 
 			}
@@ -818,19 +939,31 @@ public sealed class Rabbs_BLM : BlackMageRotation
 		{
 			if (!IsPolyglotStacksMaxed)
 			{
-				if (AmplifierPvE.CanUse(out act)) return true;
+				if (AmplifierPvE.CanUse(out act))
+				{
+					return true;
+				}
 			}
 			if (!ManafontPvE.Cooldown.IsCoolingDown && CurrentMp < 800 && InAstralFire)
 			{
-				if (ManafontPvE.CanUse(out act, skipCastingCheck: true, skipComboCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipTTKCheck: true, usedUp: true)) return true;
+				if (ManafontPvE.CanUse(out act, skipCastingCheck: true, skipComboCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipTTKCheck: true, usedUp: true))
+				{
+					return true;
+				}
 			}
 			if (IsLastAction(true, DespairPvE) && ManafontPvE.Cooldown.IsCoolingDown && !NextGCDisInstant)
 			{
-				if (SwiftcastPvE.CanUse(out act)) return true;
+				if (SwiftcastPvE.CanUse(out act))
+				{
+					return true;
+				}
 			}
 			if (InAstralFire && ManafontPvE.Cooldown.IsCoolingDown && CurrentMp < 5000)
 			{
-				if (LucidDreamingPvE.CanUse(out act)) return true;
+				if (LucidDreamingPvE.CanUse(out act))
+				{
+					return true;
+				}
 			}
 
 		}
@@ -855,28 +988,44 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (UmbralIceStacks < 3 || UmbralHearts < 3)
 					{
-						if (UmbralSoulPvE.CanUse(out act)) return true;
+						if (UmbralSoulPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 				}
 				if (InUmbralIce && DataCenter.PlayerSyncedLevel() >= 35)
 				{
 					if (CurrentMp < Player?.MaxMp)
 					{
-						if (UmbralSoulPvE.CanUse(out act)) return true;
+						if (UmbralSoulPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 				}
 				if (InAstralFire)
 				{
 					if ((InCombat && GetTimeSinceNoHostilesInCombat() > 5f) || (!InCombat && TimeSinceLastAction.TotalSeconds > 4.5))
 					{
-						if (TransposePvE.CanUse(out act)) return true;
+						if (TransposePvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 				}
 			}
 			if (ShouldThunder)
 			{
-				if (ThunderIiPvE.CanUse(out act)) return true;
-				if (ThunderPvE.CanUse(out act)) return true;
+				if (ThunderIiPvE.CanUse(out act))
+				{
+					return true;
+				}
+
+				if (ThunderPvE.CanUse(out act))
+				{
+					return true;
+				}
 			}
 			if (!InUmbralIce && !InAstralFire) // assume just starting dungeon or death
 			{
@@ -885,26 +1034,54 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (CurrentMp == 10000)
 					{
-						if (FireIiPvE.CanUse(out act, skipAoeCheck: true)) return true;
-						if (FirePvE.CanUse(out act, skipAoeCheck: true)) return true;
+						if (FireIiPvE.CanUse(out act, skipAoeCheck: true))
+						{
+							return true;
+						}
+
+						if (FirePvE.CanUse(out act, skipAoeCheck: true))
+						{
+							return true;
+						}
 					}
 					if (CurrentMp < 10000)
 					{
-						if (BlizzardIiPvE.CanUse(out act, skipAoeCheck: true)) return true;
-						if (BlizzardPvE.CanUse(out act, skipAoeCheck: true)) return true;
+						if (BlizzardIiPvE.CanUse(out act, skipAoeCheck: true))
+						{
+							return true;
+						}
+
+						if (BlizzardPvE.CanUse(out act, skipAoeCheck: true))
+						{
+							return true;
+						}
 					}
 				}
 				if (GetAoeCount(FlarePvE) < 3)
 				{
 					if (CurrentMp == 10000)
 					{
-						if (FireIiiPvE.CanUse(out act)) return true;
-						if (FirePvE.CanUse(out act)) return true;
+						if (FireIiiPvE.CanUse(out act))
+						{
+							return true;
+						}
+
+						if (FirePvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 					if (CurrentMp < 10000)
 					{
-						if (BlizzardIiiPvE.CanUse(out act)) return true;
-						if (BlizzardPvE.CanUse(out act)) return true;
+						if (BlizzardIiiPvE.CanUse(out act))
+						{
+							return true;
+						}
+
+						if (BlizzardPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 				}
 			}
@@ -913,55 +1090,110 @@ public sealed class Rabbs_BLM : BlackMageRotation
 			{
 				if (ShouldTransposeLowLevel)
 				{
-					if (TransposePvE.CanUse(out act)) return true;
-					else return false;
+					if (TransposePvE.CanUse(out act))
+					{
+						return true;
+					}
+					else
+					{
+						return false;
+					}
 				}
 				if (GetAoeCount(FlarePvE) >= 3)
 				{
 
 					if (DataCenter.PlayerSyncedLevel() < 58)
 					{
-						if (FoulPvE.CanUse(out act, skipAoeCheck: true)) return true;
+						if (FoulPvE.CanUse(out act, skipAoeCheck: true))
+						{
+							return true;
+						}
+
 						if (CurrentMp < FireIiPvE.Info.MPNeed)
 						{
-							if (FlarePvE.CanUse(out act, skipAoeCheck: true)) return true;
+							if (FlarePvE.CanUse(out act, skipAoeCheck: true))
+							{
+								return true;
+							}
 						}
 					}
 					if (DataCenter.PlayerSyncedLevel() >= 58)
 					{
-						if (FlarePvE.CanUse(out act, skipAoeCheck: true)) return true;
+						if (FlarePvE.CanUse(out act, skipAoeCheck: true))
+						{
+							return true;
+						}
 					}
 
-					if (FireIiPvE.CanUse(out act, skipAoeCheck: true)) return true;
-					if (FirePvE.CanUse(out act, skipAoeCheck: true)) return true;
+					if (FireIiPvE.CanUse(out act, skipAoeCheck: true))
+					{
+						return true;
+					}
+
+					if (FirePvE.CanUse(out act, skipAoeCheck: true))
+					{
+						return true;
+					}
 				}
 				if (GetAoeCount(FlarePvE) < 3)
 				{
 
-					if (ParadoxPvE.CanUse(out act) && ParadoxPvEReady) return true;
+					if (ParadoxPvE.CanUse(out act) && ParadoxPvEReady)
+					{
+						return true;
+					}
+
 					if (CurrentMp < FireIvPvE.Info.MPNeed)
 					{
-						if (DespairPvE.CanUse(out act)) return true;
+						if (DespairPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 					if (DataCenter.PlayerSyncedLevel() >= 35 && DataCenter.PlayerSyncedLevel() < 60)
 					{
 						if (CurrentMp < FireIiiPvE.Info.MPNeed)
 						{
-							if (BlizzardIiiPvE.CanUse(out act)) return true;
+							if (BlizzardIiiPvE.CanUse(out act))
+							{
+								return true;
+							}
 						}
 					}
 					if (DataCenter.PlayerSyncedLevel() >= 60)
 					{
 						if (CurrentMp < FireIvPvE.Info.MPNeed)
 						{
-							if (BlizzardIiiPvE.CanUse(out act)) return true;
+							if (BlizzardIiiPvE.CanUse(out act))
+							{
+								return true;
+							}
 						}
 					}
-					if (XenoglossyPvE.CanUse(out act)) return true;
-					if (FoulPvE.CanUse(out act)) return true;
-					if (FireIvPvE.CanUse(out act) && IsSoulStacksMaxed) return true;
-					if (FireIiiPvE.CanUse(out act)) return true;
-					if (FirePvE.CanUse(out act)) return true;
+					if (XenoglossyPvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					if (FoulPvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					if (FireIvPvE.CanUse(out act) && IsSoulStacksMaxed)
+					{
+						return true;
+					}
+
+					if (FireIiiPvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					if (FirePvE.CanUse(out act))
+					{
+						return true;
+					}
 				}
 			}
 
@@ -978,18 +1210,36 @@ public sealed class Rabbs_BLM : BlackMageRotation
 					if (GetAoeCount(FlarePvE) >= 3 && !ShouldTransposeLowLevel)
 					{
 
-						if (FreezePvE.CanUse(out act, skipAoeCheck: true)) return true;
-						if (BlizzardIiPvE.CanUse(out act, skipAoeCheck: true)) return true;
+						if (FreezePvE.CanUse(out act, skipAoeCheck: true))
+						{
+							return true;
+						}
+
+						if (BlizzardIiPvE.CanUse(out act, skipAoeCheck: true))
+						{
+							return true;
+						}
 					}
 					if (GetAoeCount(FlarePvE) < 3 && !ShouldTransposeLowLevel)
 					{
-						if (BlizzardIvPvE.CanUse(out act) && IsSoulStacksMaxed) return true;
+						if (BlizzardIvPvE.CanUse(out act) && IsSoulStacksMaxed)
+						{
+							return true;
+						}
+
 						if (DataCenter.PlayerSyncedLevel() < 35)
 						{
 							if (CurrentMp < 10000)
 							{
-								if (BlizzardIiiPvE.CanUse(out act)) return true;
-								if (BlizzardPvE.CanUse(out act)) return true;
+								if (BlizzardIiiPvE.CanUse(out act))
+								{
+									return true;
+								}
+
+								if (BlizzardPvE.CanUse(out act))
+								{
+									return true;
+								}
 							}
 
 						}
@@ -997,10 +1247,20 @@ public sealed class Rabbs_BLM : BlackMageRotation
 						{
 							if (IsSoulStacksMaxed && CurrentMp == 10000 && (DataCenter.PlayerSyncedLevel() < 58 || UmbralHearts > 0))
 							{
-								if (FireIiiPvE.CanUse(out act)) return true;
+								if (FireIiiPvE.CanUse(out act))
+								{
+									return true;
+								}
 							}
-							if (BlizzardIiiPvE.CanUse(out act)) return true;
-							if (BlizzardPvE.CanUse(out act)) return true;
+							if (BlizzardIiiPvE.CanUse(out act))
+							{
+								return true;
+							}
+
+							if (BlizzardPvE.CanUse(out act))
+							{
+								return true;
+							}
 						}
 					}
 				}
@@ -1016,21 +1276,30 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (UmbralIceStacks < 3 || UmbralHearts < 3)
 					{
-						if (UmbralSoulPvE.CanUse(out act)) return true;
+						if (UmbralSoulPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 				}
 				if (InUmbralIce && DataCenter.PlayerSyncedLevel() >= 35)
 				{
 					if (CurrentMp < Player?.MaxMp)
 					{
-						if (UmbralSoulPvE.CanUse(out act)) return true;
+						if (UmbralSoulPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 				}
 				if (InAstralFire)
 				{
 					if ((InCombat && GetTimeSinceNoHostilesInCombat() > 5f) || (!InCombat && TimeSinceLastAction.TotalSeconds > 4.5) && AstralSoulStacks < 6)
 					{
-						if (TransposePvE.CanUse(out act)) return true;
+						if (TransposePvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 				}
 			}
@@ -1046,21 +1315,39 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				if (InAstralFire)
 				{
 
-					if (FlareStarPvE.CanUse(out act)) return true;
-					if (FlarePvE.CanUse(out act, skipAoeCheck: true)) return true;
+					if (FlareStarPvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					if (FlarePvE.CanUse(out act, skipAoeCheck: true))
+					{
+						return true;
+					}
+
 					if (AstralSoulStacks == 0)
 					{
-						if (ThunderIiPvE.CanUse(out act, skipAoeCheck: true) && ShouldThunder) return true;
+						if (ThunderIiPvE.CanUse(out act, skipAoeCheck: true) && ShouldThunder)
+						{
+							return true;
+						}
+
 						if (WillHave2PolyglotWithin2GCDs)
 						{
-							if (FoulPvE.CanUse(out act, skipAoeCheck: true)) return true;
+							if (FoulPvE.CanUse(out act, skipAoeCheck: true))
+							{
+								return true;
+							}
 						}
 
 					}
 					//failsafe to use transpose per balance recommendation /Clipping Transpose after Flare Star is only a small clip and allows for conserving filler spells for Umbral Ice, which is needed to wait out the Transpose cooldown/
 					if (AstralSoulStacks != 6 && CurrentMp < 800)
 					{
-						if (TransposePvE.CanUse(out act, skipCastingCheck: true)) return true;
+						if (TransposePvE.CanUse(out act, skipCastingCheck: true))
+						{
+							return true;
+						}
 					}
 				}
 
@@ -1068,21 +1355,41 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (UmbralHearts > 0)
 					{
-						if (TransposePvE.CanUse(out act, skipCastingCheck: true)) return true;
+						if (TransposePvE.CanUse(out act, skipCastingCheck: true))
+						{
+							return true;
+						}
 					}
 					//if (lastAction != null && lastAction.Action.RowId == FreezePvE.ID)
 					if (IsLastAction(true, FreezePvE))
 					{
-						if (ThunderIiPvE.CanUse(out act, skipAoeCheck: true) && ShouldThunder) return true;
-						if (FoulPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
-						if (ParadoxPvE.CanUse(out act, skipAoeCheck: true)) return true;
+						if (ThunderIiPvE.CanUse(out act, skipAoeCheck: true) && ShouldThunder)
+						{
+							return true;
+						}
+
+						if (FoulPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
+						{
+							return true;
+						}
+
+						if (ParadoxPvE.CanUse(out act, skipAoeCheck: true))
+						{
+							return true;
+						}
 					}
-					if (FreezePvE.CanUse(out act, skipAoeCheck: true) && UmbralHearts == 0) return true;
+					if (FreezePvE.CanUse(out act, skipAoeCheck: true) && UmbralHearts == 0)
+					{
+						return true;
+					}
 				}
 				//assumes neither, either start of combat in dungeon or death recovery, use high blizard II as there are no other options
 				if (!InUmbralIce && !InAstralFire)
 				{
-					if (HighBlizzardIiPvE.CanUse(out act, skipAoeCheck: true)) return true;
+					if (HighBlizzardIiPvE.CanUse(out act, skipAoeCheck: true))
+					{
+						return true;
+					}
 				}
 
 			}
@@ -1102,19 +1409,40 @@ public sealed class Rabbs_BLM : BlackMageRotation
 					if (IsLastAction(true, FlareStarPvE))
 					{
 
-						if (ThunderIiPvE.CanUse(out act, skipAoeCheck: true) && ShouldThunder) return true;
+						if (ThunderIiPvE.CanUse(out act, skipAoeCheck: true) && ShouldThunder)
+						{
+							return true;
+						}
+
 						if (WillHave2PolyglotWithin2GCDs)
 						{
-							if (FoulPvE.CanUse(out act, skipAoeCheck: true)) return true;
+							if (FoulPvE.CanUse(out act, skipAoeCheck: true))
+							{
+								return true;
+							}
 						}
 						//failsafe to use transpose per balance recommendation /Clipping Transpose after Flare Star is only a small clip and allows for conserving filler spells for Umbral Ice, which is needed to wait out the Transpose cooldown/
-						if (TransposePvE.CanUse(out act, skipCastingCheck: true)) return true;
+						if (TransposePvE.CanUse(out act, skipCastingCheck: true))
+						{
+							return true;
+						}
 					}
-					if (FlareStarPvE.CanUse(out act)) return true;
-					if (FlarePvE.CanUse(out act, skipAoeCheck: true)) return true;
+					if (FlareStarPvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					if (FlarePvE.CanUse(out act, skipAoeCheck: true))
+					{
+						return true;
+					}
+
 					if (AstralSoulStacks != 6 && CurrentMp < 800)
 					{
-						if (TransposePvE.CanUse(out act, skipCastingCheck: true)) return true;
+						if (TransposePvE.CanUse(out act, skipCastingCheck: true))
+						{
+							return true;
+						}
 					}
 
 				}
@@ -1123,31 +1451,58 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (UmbralHearts > 0)
 					{
-						if (TransposePvE.CanUse(out act, skipCastingCheck: true)) return true;
+						if (TransposePvE.CanUse(out act, skipCastingCheck: true))
+						{
+							return true;
+						}
 					}
 					//if (lastAction != null && lastAction.Action.RowId == FreezePvE.ID)
 					if (IsLastAction(true, FreezePvE))
 					{
-						if (ThunderIiPvE.CanUse(out act, skipAoeCheck: true) && ShouldThunder) return true;
-						if (FoulPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
-						if (ParadoxPvE.CanUse(out act, skipAoeCheck: true)) return true;
+						if (ThunderIiPvE.CanUse(out act, skipAoeCheck: true) && ShouldThunder)
+						{
+							return true;
+						}
+
+						if (FoulPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
+						{
+							return true;
+						}
+
+						if (ParadoxPvE.CanUse(out act, skipAoeCheck: true))
+						{
+							return true;
+						}
 					}
-					if (BlizzardIvPvE.CanUse(out act, skipAoeCheck: true)) return true;
+					if (BlizzardIvPvE.CanUse(out act, skipAoeCheck: true))
+					{
+						return true;
+					}
 				}
 				//assumes neither, either start of combat in dungeon or death recovery, use blizzard 4
 
 				if (!InUmbralIce && !InAstralFire)
 				{
-					if (HighBlizzardIiPvE.CanUse(out act, skipAoeCheck: true)) return true;
+					if (HighBlizzardIiPvE.CanUse(out act, skipAoeCheck: true))
+					{
+						return true;
+					}
 				}
 			}
 			if (GetAoeCount(FlarePvE) < 2)
 			{
 				//single target section starts here
-				if (ThunderPvE.CanUse(out act) && ShouldThunder) return true;
+				if (ThunderPvE.CanUse(out act) && ShouldThunder)
+				{
+					return true;
+				}
+
 				if (ShouldXeno)
 				{
-					if (XenoglossyPvE.CanUse(out act, usedUp: ShouldXeno)) return true;
+					if (XenoglossyPvE.CanUse(out act, usedUp: ShouldXeno))
+					{
+						return true;
+					}
 				}
 				if (InAstralFire)
 				{
@@ -1155,13 +1510,23 @@ public sealed class Rabbs_BLM : BlackMageRotation
 					{
 						if (AstralSoulStacks == 4 && CombatTime < 30 && ManafontPvE.Cooldown.HasOneCharge)
 						{
-							if (DespairPvE.CanUse(out act)) return true;
+							if (DespairPvE.CanUse(out act))
+							{
+								return true;
+							}
 						}
 
 						if (ManafontPvE.Cooldown.IsCoolingDown && ManafontPvE.Cooldown.RecastTimeElapsed > 6 && AstralSoulStacks == 4)
 						{
-							if (ParadoxPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-							if (AltFlareOpenerPvE.CanUse(out act, skipAoeCheck: true)) return true;
+							if (ParadoxPvE.CanUse(out act, skipStatusProvideCheck: true))
+							{
+								return true;
+							}
+
+							if (AltFlareOpenerPvE.CanUse(out act, skipAoeCheck: true))
+							{
+								return true;
+							}
 						}
 
 					}
@@ -1169,27 +1534,54 @@ public sealed class Rabbs_BLM : BlackMageRotation
 					{
 						if (HasFire)
 						{
-							if (FireIiiPvE.CanUse(out act)) return true;
+							if (FireIiiPvE.CanUse(out act))
+							{
+								return true;
+							}
 						}
-						if (ParadoxPvE.CanUse(out act)) return true;
+						if (ParadoxPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
 					if (WillBeAbleToFlareStarMT && !WillBeAbleToFlareStarST)
 					{
-						if (AltFlareOpenerPvE.CanUse(out act, skipAoeCheck: true)) return true;
+						if (AltFlareOpenerPvE.CanUse(out act, skipAoeCheck: true))
+						{
+							return true;
+						}
 					}
 
 					if (CurrentMp < FireIvPvE.Info.MPNeed && (!IsParadoxActive || CurrentMp < ParadoxPvE.Info.MPNeed) && AstralSoulStacks < 6)
 					{
-						if (DespairPvE.CanUse(out act)) return true;
+						if (DespairPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
-					if (FlareStarPvE.CanUse(out act)) return true;
-					if (FireIvPvE.CanUse(out act) && CurrentMp >= FireIvPvE.Info.MPNeed + (IsParadoxActive && AstralSoulStacks != 5 ? 1600 : 0)) return true;
-					if (ParadoxPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+					if (FlareStarPvE.CanUse(out act))
+					{
+						return true;
+					}
+
+					if (FireIvPvE.CanUse(out act) && CurrentMp >= FireIvPvE.Info.MPNeed + (IsParadoxActive && AstralSoulStacks != 5 ? 1600 : 0))
+					{
+						return true;
+					}
+
+					if (ParadoxPvE.CanUse(out act, skipStatusProvideCheck: true))
+					{
+						return true;
+					}
+
 					if (!NextGCDisInstant)
 					{
 
 						{
-							if (BlizzardIiiPvE.CanUse(out act)) return true; // skip transpose if we can't make b3 instant per balance stuff
+							if (BlizzardIiiPvE.CanUse(out act))
+							{
+								return true; // skip transpose if we can't make b3 instant per balance stuff
+							}
 						}
 					}
 
@@ -1198,14 +1590,23 @@ public sealed class Rabbs_BLM : BlackMageRotation
 					{
 						if (PolyglotStacks > 0)
 						{
-							if (XenoglossyPvE.CanUse(out act, usedUp: true)) return true;
+							if (XenoglossyPvE.CanUse(out act, usedUp: true))
+							{
+								return true;
+							}
 						}
 						if (CanMakeInstant)
 						{
 
-							if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
+							if (TriplecastPvE.CanUse(out act, usedUp: true))
+							{
+								return true;
+							}
 
-							if (SwiftcastPvE.CanUse(out act)) return true;
+							if (SwiftcastPvE.CanUse(out act))
+							{
+								return true;
+							}
 						}
 					}
 				}
@@ -1214,31 +1615,53 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (UmbralIceStacks < 3)
 					{
-						if (BlizzardIiiPvE.CanUse(out act) && !IsLastGCD(true, BlizzardIiiPvE)) return true;
+						if (BlizzardIiiPvE.CanUse(out act) && !IsLastGCD(true, BlizzardIiiPvE))
+						{
+							return true;
+						}
 					}
 
 					if (UmbralHearts < 3)
 					{
-						if (BlizzardIvPvE.CanUse(out act) && !IsLastGCD(true, BlizzardIvPvE)) return true;
+						if (BlizzardIvPvE.CanUse(out act) && !IsLastGCD(true, BlizzardIvPvE))
+						{
+							return true;
+						}
 					}
 					if (IsParadoxActive)
 					{
-						if (ParadoxPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+						if (ParadoxPvE.CanUse(out act, skipStatusProvideCheck: true))
+						{
+							return true;
+						}
 					}
 
-					if (BlizzardIiiPvE.CanUse(out act) && CurrentMp < 10000 && !IsLastGCD(true, BlizzardIvPvE) && !IsLastGCD(true, BlizzardIiiPvE)) return true;
+					if (BlizzardIiiPvE.CanUse(out act) && CurrentMp < 10000 && !IsLastGCD(true, BlizzardIvPvE) && !IsLastGCD(true, BlizzardIiiPvE))
+					{
+						return true;
+					}
+
 					if (InCombat && IsMoving && !NextGCDisInstant && HasHostilesInRange && NextAbilityToNextGCD < 0.5)
 					{
 						if (PolyglotStacks > 0)
 						{
-							if (XenoglossyPvE.CanUse(out act, usedUp: true)) return true;
+							if (XenoglossyPvE.CanUse(out act, usedUp: true))
+							{
+								return true;
+							}
 						}
 						if (CanMakeInstant)
 						{
 
-							if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
+							if (TriplecastPvE.CanUse(out act, usedUp: true))
+							{
+								return true;
+							}
 
-							if (SwiftcastPvE.CanUse(out act)) return true;
+							if (SwiftcastPvE.CanUse(out act))
+							{
+								return true;
+							}
 						}
 					}
 
@@ -1248,9 +1671,15 @@ public sealed class Rabbs_BLM : BlackMageRotation
 				{
 					if (CurrentMp == Player?.MaxMp)
 					{
-						if (FireIiiPvE.CanUse(out act)) return true;
+						if (FireIiiPvE.CanUse(out act))
+						{
+							return true;
+						}
 					}
-					if (BlizzardIiiPvE.CanUse(out act, skipAoeCheck: true)) return true;
+					if (BlizzardIiiPvE.CanUse(out act, skipAoeCheck: true))
+					{
+						return true;
+					}
 				}
 			}
 		}

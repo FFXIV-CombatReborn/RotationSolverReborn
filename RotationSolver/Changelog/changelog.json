@@ -1,6 +1,129 @@
 {
-  "tagline": "Double neagives >.>",
+  "tagline": "Rotation engine tune up",
   "entries": [
+    {
+      "version": "7.5.7.5",
+      "title": "Command, targeting, and core fixes",
+      "date": "October 21, 2026",
+      "sections": [
+        {
+          "title": "Commands",
+          "icon": "Keyboard",
+          "items": [
+            "Rotation setting commands now change the exact setting you name. Before, a setting whose name starts the same way could be changed instead, such as Warrior's YEET instead of YEETBurst.",
+            "Picking a list option by a negative number in a rotation setting command no longer causes an error. It now counts back from the end of the list.",
+            "Adding a number to /rotation Auto or /rotation TargetOnly now picks that targeting type even when RSR is off.",
+            "A command that is only a number, such as /rotation 3, is no longer read as a state.",
+            "Commands can no longer turn RSR on during a duty recorder playback.",
+            "/rotation Auto and /rotation Off are now listed in the /rotation help text. They were registered as separate commands, which the game can't run because of the space."
+          ]
+        },
+        {
+          "title": "Healing",
+          "icon": "Heartbeat",
+          "items": [
+            "Single target heals go to the lowest health party member again, with healers and tanks first under their own thresholds. Before, the pick skipped everyone who could be healed, so heals fell back to the tank or the first party member, and someone under Holmgang, Living Dead or HP Recovery Down was even preferred.",
+            "\"Stop single target GCD healing after reaching threshold\" works now. It never recognised any heal as one it could cancel.",
+            "Party health checks now count everyone in parties with chocobos or NPC members, so the ninth member is no longer left out.",
+            "A forced raise from the Raise special state no longer targets someone who is already being raised or who your raise settings leave out."
+          ]
+        },
+        {
+          "title": "Duties",
+          "icon": "Dungeon",
+          "items": [
+            "New \"Auto-use duty actions\" setting in Auto > Action Usage and Control. Turn it off to stop RSR from using duty actions like Bozja Lost Actions, Phantom actions and Variant actions on its own.",
+            "Bozja's area heals can now be used by auto healing. Before, duty area heals were only tried in Occult Crescent and variant dungeons. Better support for Bozja actions is on my todo list.",
+            "Phantom Geomancer's Battle Bell is no longer placed on someone who already has another player's Battle Bell.",
+            "Hellmaker is now only prioritized while you're a Cell Block C or D prisoner, as intended.",
+            "The M10 Firesnaking/Watersnaking targeting setting now also works in the Normal version.",
+            "Crucible of the Unbroken, Ymir Piece: the Sahagin Piece is now prioritized until it has Paralyzing Spikes, then the Ymir Shell, then the Ymir Piece once its shell is gone. The spiked Sahagin is left alone while Ymir is up.",
+            "The Ymir logic now treats Ymir as immune while Ymir has Vulnerability Down. Before, it checked you for the buff instead, so it never worked.",
+            "Crucible of the Unbroken, Siren Piece: Crawling Pieces are now prioritized so they can't bind you in place."
+          ]
+        },
+        {
+          "title": "Targeting",
+          "icon": "Crosshairs",
+          "items": [
+            "When picking party members by role, Pugilists now count as melee DPS and Archers no longer count as casters. Idk I think I was tired.",
+            "The alliance list now fills in alliance content whatever your raise setting is, so \"Auto turn on auto mode when alliance is in combat\" works again.",
+            "Fixed issue with \"Auto provoke when there is another tank in party\" setting, it now works lol.",
+            "Auto tank stance no longer turns on while another tank in your party already has their stance on.",
+            "Fixed an issue where actions picked while a raise, Esuna or provoke is the next GCD would use the wrong target.",
+            "Fixed an issue with numbered treasure dungeon mobs not being attacked in order.",
+            "Targets that other plugins prioritize through IPC are now actually attacked first. Before, they were only allowed as targets.",
+            "In PvP, tanks and melee now use their attack oGCDs from 5y instead of waiting until 3y. On Gunbreaker this stopped Jugular Rip, Abdomen Tear, Eye Gouge and Hypervelocity from firing, which held up the rest of the rotation.",
+            "In PvP, single target actions on other players no longer get stuck at the edge of their range. The game measures PvP range half a yalm shorter than RSR did, so RSR kept trying actions on players the game said were out of range."
+          ]
+        },
+        {
+          "title": "Combat",
+          "icon": "Wrench",
+          "items": [
+            "Stopping a cast when the target dies works again. The delay before cancelling never finished, so casts were never stopped.",
+            "Raid buffs, Neutral Sect, Earthly Star and other actions with a time-to-kill limit are no longer held back for the first seconds of each pull or during downtime.",
+            "Fixed a rare issue where healing would pause in combat while no enemy's time to kill is known yet.",
+            "A heal is no longer forgotten when its target takes damage before it lands, so RSR no longer heals the same person twice.",
+            "Actions that need a status on the target, such as Deployment Tactics, can now be used until that status runs out, not only until two GCDs before.",
+            "\"Record AoE actions\" now records raid-wide casts again.",
+            "After BossMod Reborn is unloaded or RSR is turned off, RSR no longer keeps BossMod's last state, which in rare cases could stop all casting or cancel every cast.",
+            "Actions you turned off are no longer used right after a queued command action.",
+            "RSR now asks the game whether an ability can be used the same way it does for weaponskills and spells.",
+            "A failing rotation now logs its error once instead of every frame, and an error in the action preview no longer stops the rotation.",
+            "Fixes for \"Remove extra lag-induced animation lock delay\" and \"Remove extra framerate-induced cooldown delay\" tweaks in Extra menu.",
+            "Intercepted abilities that come off cooldown within the intercept window are now queued, the same as weaponskills and spells.",
+            "Minor fix to potion inventory stuff, now properly reads you have a potion available if you get it while RSR is active, if that makes sense idk its a minor thing.",
+            "Party buff timing, used by some extra rotations such as Churin's Dark Knight, now counts buffs and debuffs from other players.",
+            "Tankbuster targeting no longer holds on to characters from an earlier fight, a rare cause of crashes.",
+            "Starting auto-attack is no longer blocked by a no-casting status while RSR state is off, while this is technically beneficial to leave bugged I'd rather RSR not affect you when its not active'"
+          ]
+        },
+        {
+          "title": "Clicking",
+          "icon": "ToggleOn",
+          "items": [
+            "The random delay between clicks is now spread evenly over the range you set, instead of usually landing near the shortest delay.",
+            "The number of simulated key presses can now reach the top of its range, it was bounding down on accident.",
+            "The click counter on the main menu now counts even when \"Simulate the effect of pressing abilities\" is off."
+          ]
+        },
+        {
+          "title": "Lists",
+          "icon": "Newspaper",
+          "items": [
+            "If downloading a status or action list fails, RSR tries again next time instead of keeping an empty list.",
+            "The reset buttons on the lists no longer freeze the game while they download.",
+            "Lists are saved safely, so a crash while saving can't leave a list half written.",
+            "Editing a list now saves only that list instead of all of them.",
+            "The action picker on the Lists tab no longer offers actions without a name."
+          ]
+        },
+        {
+          "title": "Hotbars",
+          "icon": "PaintBrush",
+          "items": [
+            "Turning off the red tint for disabled actions now also clears it on hotbars that were hidden at the time."
+          ]
+        },
+        {
+          "title": "Language",
+          "icon": "Language",
+          "items": [
+            "Chinese translations show again, in every window and not only while the main window is open."
+          ]
+        },
+        {
+          "title": "Performance",
+          "icon": "TachometerAlt",
+          "items": [
+            "Choosing targets and checking enemy casts takes much less work each frame, which should help with framerate cost especially on lower end machines.",
+            "Party membership, health and target lookups are now worked out once per frame instead of once per action, and target picks no longer sort whole lists to find one target.",
+            "Duty actions, Phantom job levels, raid buff tracking and the disabled-action hotbar tint now cost far less each frame, and RSR no longer polls BossMod for unused debug text."
+          ]
+        }
+      ]
+    },
     {
       "version": "7.5.7.3",
       "title": "Rotation fixes",
@@ -74,7 +197,7 @@
             "Blue Mage's Devour and Missile HP thresholds now work, and its Mighty Guard and Basic Instinct options are respected.",
             "Occult Crescent: Occult Ether and Occult Potion on other players now use the right action.",
             "Occult Crescent: the Drain Touch and Occult Chakra HP thresholds now work.",
-            "Occult Crescent: Cannoneer no longer keeps targeting by HP after an immune enemy.",
+            "Occult Crescent: Cannoneer no longer keeps targeting by HP after an immune enemy."
           ]
         },
         {
@@ -202,7 +325,7 @@
           "title": "Stutter casting fixed (I hope)",
           "icon": "Wrench",
           "items": [
-            "Issue with BMR Movement causing movement/casting stuttering issues.",
+            "Issue with BMR Movement causing movement/casting stuttering issues."
           ]
         }
       ]

@@ -1555,7 +1555,7 @@ public partial class BeastmasterRotation
 	{
 		setting.ActionCheck = () => KinshipBattlehorn > 0 && KinshipKinType == BeastmasterKinType.Wavekin;
 		setting.StatusNeed = [StatusID.WaveKinship, StatusID.WaveKinship_4648];
-		setting.TargetStatusNeed = [StatusID.PopotoSkin, StatusID.DamageUp_2550, StatusID.PhysicalDamageUp_2074, StatusID.DamageUp_1225, StatusID.MagicDamageUp_5020, StatusID.BlazeSpikes_5465];
+		setting.TargetStatusNeed = [StatusID.PopotoSkin, StatusID.PhysicalDamageUp_2074, StatusID.DamageUp_1225, StatusID.MagicDamageUp_5020, StatusID.BlazeSpikes_5465]; // StatusID.DamageUp_2550 maybe, one fight it cannot be dispelled
 		setting.StatusFromSelf = false;
 		setting.IsFriendly = false;
 		setting.CreateConfig = () => new ActionConfig()

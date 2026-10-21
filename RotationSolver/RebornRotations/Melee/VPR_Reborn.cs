@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/Melee/VPR_Reborn.cs")]
 
 public sealed class VPR_Reborn : ViperRotation

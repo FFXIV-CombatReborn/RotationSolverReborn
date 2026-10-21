@@ -173,14 +173,10 @@ internal static class HotbarDisabledColor
 	{
 		HotbarAddonHelper.GetHotbarAddons(_addons);
 
+		// Hidden bars too, or a bar hidden while tinted would keep the tint when shown again.
 		foreach (var intPtr in _addons)
 		{
 			var actionBar = (AddonActionBarBase*)intPtr;
-			if (!HotbarAddonHelper.IsVisible(&actionBar->AtkUnitBase))
-			{
-				continue;
-			}
-
 			foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
 			{
 				if (slot.Icon == null)
@@ -196,16 +192,11 @@ internal static class HotbarDisabledColor
 	private static void CollectDisabledActionIds()
 	{
 		_disabledActionIds.Clear();
-		Collect(DataCenter.CurrentRotation?.AllActions);
-		Collect(DataCenter.CurrentDutyRotation?.AllActions);
+		Collect(RotationUpdater.CurrentRotationActions);
+		Collect(RotationUpdater.CurrentDutyRotationActions);
 
-		static void Collect(IAction[]? actions)
+		static void Collect(IAction[] actions)
 		{
-			if (actions == null)
-			{
-				return;
-			}
-
 			foreach (var a in actions)
 			{
 				if (a is IBaseAction ba && !ba.IsEnabled)

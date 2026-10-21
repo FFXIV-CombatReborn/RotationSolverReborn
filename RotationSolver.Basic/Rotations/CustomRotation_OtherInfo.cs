@@ -2,6 +2,7 @@
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
+using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Lumina.Excel;
@@ -249,7 +250,7 @@ public partial class CustomRotation
 						continue;
 					}
 
-					var remaining = StatusHelper.PlayerStatusTime(true, buff.Ids[0]);
+					var remaining = StatusHelper.PlayerStatusTime(false, buff.Ids);
 					if (remaining > maxDuration)
 					{
 						maxDuration = remaining;
@@ -267,7 +268,7 @@ public partial class CustomRotation
 						continue;
 					}
 
-					var remaining = HostileTarget.StatusTime(true, buff.Ids[0]);
+					var remaining = HostileTarget.StatusTime(false, buff.Ids);
 					if (remaining > maxDuration)
 					{
 						maxDuration = remaining;
@@ -287,62 +288,59 @@ public partial class CustomRotation
 	public static List<StatusInfo> Buffs { get; } = [];
 
 	/// <summary>
-	/// Populates the <see cref="Buffs"/> list with status effects (buffs and debuffs) based on the current party composition or the player's job.
-	/// <para>This method clears any existing entries in <see cref="Buffs"/> and rebuilds the list to reflect the jobs present in the party or the solo player's job.</para>
-	/// <para>If <see cref="PartyComposition"/> is null (indicating a solo scenario), it adds buffs specific to the player's current job abbreviation.</para>
-	/// <para>If <see cref="PartyComposition"/> is available, it iterates through each party member's job and adds relevant buffs, avoiding duplicates via a processed jobs set.</para>
-	/// <para>The <see cref="AddJobBuffs"/> method is called for each unique job abbreviation to append appropriate <see cref="StatusInfo"/> entries to <see cref="Buffs"/>.</para>
-	/// <para>This ensures that <see cref="Buffs"/> contains only the status effects pertinent to the current group setup.</para>
+	/// Populates the <see cref="Buffs"/> list with the raid buffs and debuffs of every job in the party, or of the player's job when solo.
+	/// The list is rebuilt at most once per frame.
 	/// </summary>
 	public static void StatusList()
 	{
-		Buffs.Clear();
-		var processedJobs = new HashSet<string>();
-
-		if (PartyComposition == null)
-		{
-			if (Player?.ClassJob.Value.Abbreviation != null)
-			{
-				var abbr = Player.ClassJob.Value.Abbreviation.ToString();
-				AddJobBuffs(abbr, processedJobs);
-			}
-		}
-		else
-		{
-			foreach (var job in PartyComposition)
-			{
-				var abbr = job.Value.Abbreviation.ToString();
-				AddJobBuffs(abbr, processedJobs);
-			}
-		}
-	}
-
-	private static readonly Dictionary<string, List<StatusInfo>> JobBuffs = new()
-	{
-		{ "AST", [new StatusInfo("Divination", "AST", StatusType.Buff, StatusID.Divination)] },
-		{ "BRD", [new StatusInfo("Battle Voice", "BRD", StatusType.Buff, StatusID.BattleVoice),
-			new StatusInfo("Radiant Finale", "BRD", StatusType.Buff, StatusID.RadiantFinale_2964,
-					StatusID.RadiantFinale)] },
-		{ "DNC", [new StatusInfo("Technical Finish", "DNC", StatusType.Buff, StatusID.TechnicalFinish)] },
-		{ "DRG", [new StatusInfo("Battle Litany", "DRG", StatusType.Buff, StatusID.BattleLitany)] },
-		{ "MNK", [new StatusInfo("Brotherhood", "MNK", StatusType.Buff, StatusID.Brotherhood)] },
-		{ "NIN", [new StatusInfo("Mug", "NIN", StatusType.Debuff, StatusID.Mug),
-			new StatusInfo("Dokumori", "NIN", StatusType.Debuff, StatusID.Dokumori, StatusID.Dokumori_4303)] },
-		{ "PCT", [new StatusInfo("Starry Muse", "PCT", StatusType.Buff, StatusID.StarryMuse)] },
-		{ "RPR", [new StatusInfo("Arcane Circle", "RPR", StatusType.Buff, StatusID.ArcaneCircle)] },
-		{ "RDM", [new StatusInfo("Embolden", "RDM", StatusType.Buff, StatusID.Embolden, StatusID.Embolden_1297)] },
-		{ "SCH", [new StatusInfo("Chain Stratagem", "SCH", StatusType.Debuff, StatusID.ChainStratagem, StatusID.ChainStratagem_1406)] },
-		{ "SMN", [new StatusInfo("Searing Light", "SMN", StatusType.Buff, StatusID.SearingLight)] }
-	};
-
-	private static void AddJobBuffs(string abbr, HashSet<string> processedJobs)
-	{
-		if (!processedJobs.Add(abbr))
+		// Read many times per decision, so the list is rebuilt at most once a frame.
+		var now = Environment.TickCount64;
+		if (_buffsTick != long.MinValue && now - _buffsTick < 15)
 		{
 			return;
 		}
 
-		if (JobBuffs.TryGetValue(abbr, out var buffs))
+		_buffsTick = now;
+		Buffs.Clear();
+		_buffJobs.Clear();
+		foreach (var member in PartyMembers)
+		{
+			if (member != null)
+			{
+				AddJobBuffs((Job)member.ClassJob.RowId);
+			}
+		}
+
+		if (_buffJobs.Count == 0 && Player != null)
+		{
+			AddJobBuffs((Job)Player.ClassJob.RowId);
+		}
+	}
+
+	private static long _buffsTick = long.MinValue;
+	private static readonly HashSet<Job> _buffJobs = [];
+
+	private static readonly Dictionary<Job, List<StatusInfo>> JobBuffs = new()
+	{
+		{ Job.AST, [new StatusInfo("Divination", "AST", StatusType.Buff, StatusID.Divination)] },
+		{ Job.BRD, [new StatusInfo("Battle Voice", "BRD", StatusType.Buff, StatusID.BattleVoice),
+			new StatusInfo("Radiant Finale", "BRD", StatusType.Buff, StatusID.RadiantFinale_2964,
+					StatusID.RadiantFinale)] },
+		{ Job.DNC, [new StatusInfo("Technical Finish", "DNC", StatusType.Buff, StatusID.TechnicalFinish)] },
+		{ Job.DRG, [new StatusInfo("Battle Litany", "DRG", StatusType.Buff, StatusID.BattleLitany)] },
+		{ Job.MNK, [new StatusInfo("Brotherhood", "MNK", StatusType.Buff, StatusID.Brotherhood)] },
+		{ Job.NIN, [new StatusInfo("Mug", "NIN", StatusType.Debuff, StatusID.Mug),
+			new StatusInfo("Dokumori", "NIN", StatusType.Debuff, StatusID.Dokumori, StatusID.Dokumori_4303)] },
+		{ Job.PCT, [new StatusInfo("Starry Muse", "PCT", StatusType.Buff, StatusID.StarryMuse)] },
+		{ Job.RPR, [new StatusInfo("Arcane Circle", "RPR", StatusType.Buff, StatusID.ArcaneCircle)] },
+		{ Job.RDM, [new StatusInfo("Embolden", "RDM", StatusType.Buff, StatusID.Embolden, StatusID.Embolden_1297)] },
+		{ Job.SCH, [new StatusInfo("Chain Stratagem", "SCH", StatusType.Debuff, StatusID.ChainStratagem, StatusID.ChainStratagem_1406)] },
+		{ Job.SMN, [new StatusInfo("Searing Light", "SMN", StatusType.Buff, StatusID.SearingLight)] }
+	};
+
+	private static void AddJobBuffs(Job job)
+	{
+		if (_buffJobs.Add(job) && JobBuffs.TryGetValue(job, out var buffs))
 		{
 			Buffs.AddRange(buffs);
 		}
@@ -842,21 +840,19 @@ public partial class CustomRotation
 	{
 		get
 		{
-			var controller = UIState.Instance()->LimitBreakController;
-			var barValue = *(ushort*)&controller.BarCount;
-			return barValue == 0 ? (byte)0 : (byte)(controller.BarCount / barValue);
+			var controller = &UIState.Instance()->LimitBreakController;
+			return controller->BarUnits == 0 ? (byte)0 : (byte)(controller->CurrentUnits / controller->BarUnits);
 		}
 	}
 
 	/// <summary>
-	/// Is the <see cref="AverageTTK"/> larger than <paramref name="time"/>.
+	/// Is the <see cref="AverageTTK"/> larger than <paramref name="time"/>. True while no time to kill is known yet.
 	/// </summary>
 	/// <param name="time">Time</param>
 	/// <returns>Is Longer.</returns>
 	public static bool IsLongerThan(float time)
 	{
-		//if (IsInHighEndDuty) return true;
-		return AverageTTK > time;
+		return !DataCenter.IsAverageTTKKnown || AverageTTK > time;
 	}
 
 	/// <summary>

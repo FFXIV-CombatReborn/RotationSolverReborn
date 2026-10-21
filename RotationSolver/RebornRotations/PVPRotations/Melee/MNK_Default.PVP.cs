@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Melee;
 
-[Rotation("Default PvP", CombatType.PvP, GameVersion = "7.57")]
+[Rotation("Default PvP", CombatType.PvP, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Melee/MNK_Default.PVP.cs")]
 
 public sealed class MNK_DefaultPvP : MonkRotation
