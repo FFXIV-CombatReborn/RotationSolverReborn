@@ -135,6 +135,11 @@ public class ActionSetting
 	public StatusID[]? TargetStatusProvide { get; set; } = null;
 
 	/// <summary>
+	/// The damage over time effect behind <see cref="TargetStatusProvide"/>. When set and DoT tick timing is on, refreshes are timed from the target's ticks and time to kill instead of <see cref="ActionConfig.StatusRefreshGcdCount"/>.
+	/// </summary>
+	public DotEffect? Dot { get; set; } = null;
+
+	/// <summary>
 	/// The status that it needs on the target.
 	/// </summary>
 	public StatusID[]? TargetStatusNeed { get; set; } = null;

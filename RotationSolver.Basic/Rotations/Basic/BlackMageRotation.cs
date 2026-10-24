@@ -253,6 +253,12 @@ public partial class BlackMageRotation
 	{
 		setting.ActionCheck = () => HasThunder;
 		setting.TargetStatusProvide = [StatusID.Thunder];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 24,
+			HitPotency = () => 100,
+			TickPotency = () => 45,
+		};
 		setting.MPOverride = () => 0;
 	}
 
@@ -281,6 +287,12 @@ public partial class BlackMageRotation
 	{
 		setting.ActionCheck = () => HasThunder;
 		setting.TargetStatusProvide = [StatusID.ThunderIi];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 18,
+			HitPotency = () => 60,
+			TickPotency = () => 30,
+		};
 		setting.MPOverride = () => 0;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -331,6 +343,12 @@ public partial class BlackMageRotation
 	static partial void ModifyThunderIiiPvE(ref ActionSetting setting)
 	{
 		setting.TargetStatusProvide = [StatusID.ThunderIii];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 27,
+			HitPotency = () => 120,
+			TickPotency = () => 50,
+		};
 		setting.ActionCheck = () => HasThunder;
 		setting.UnlockedByQuestID = 66612;
 		setting.MPOverride = () => 0;
@@ -390,6 +408,12 @@ public partial class BlackMageRotation
 	static partial void ModifyThunderIvPvE(ref ActionSetting setting)
 	{
 		setting.TargetStatusProvide = [StatusID.ThunderIv];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 21,
+			HitPotency = () => 80,
+			TickPotency = () => 35,
+		};
 		setting.ActionCheck = () => HasThunder;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -456,6 +480,12 @@ public partial class BlackMageRotation
 	{
 		setting.ActionCheck = () => HasThunder;
 		setting.TargetStatusProvide = [StatusID.HighThunder];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			HitPotency = () => 150,
+			TickPotency = () => 60,
+		};
 		setting.MPOverride = () => 0;
 	}
 
@@ -463,6 +493,12 @@ public partial class BlackMageRotation
 	{
 		setting.ActionCheck = () => HasThunder;
 		setting.TargetStatusProvide = [StatusID.HighThunder_3872];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 24,
+			HitPotency = () => 100,
+			TickPotency = () => 40,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 2,

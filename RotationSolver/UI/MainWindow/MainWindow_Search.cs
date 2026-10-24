@@ -59,14 +59,18 @@ public partial class MainWindow
 	private static Dictionary<string, FilterLocation> FilterLocations => _filterLocations ??= new()
 	{
 		[Configs.BasicTimer] = new(MainWindowTab.Basic, _baseHeader, UiString.ConfigWindow_Basic_Timer),
-		[Configs.BasicParams] = new(MainWindowTab.Basic, _baseHeader, UiString.ConfigWindow_Basic_Others),
+		[Configs.BasicCommands] = new(MainWindowTab.Basic, _baseHeader, UiString.ConfigWindow_Basic_Commands),
 
 		[Configs.UiInformation] = new(MainWindowTab.UI, _UIHeader, UiString.ConfigWindow_UI_Information),
+		[Configs.UiCustomize] = new(MainWindowTab.UI, _UIHeader, UiString.ConfigWindow_UI_Customize),
 		[Configs.UiWindows] = new(MainWindowTab.UI, _UIHeader, UiString.ConfigWindow_UI_Windows),
+		[Configs.UiHotbars] = new(MainWindowTab.UI, _UIHeader, UiString.ConfigWindow_UI_Hotbars),
 
 		[Configs.BasicAutoSwitch] = new(MainWindowTab.Auto, _autoHeader, UiString.ConfigWindow_Basic_AutoSwitch),
 		[Configs.AutoActionUsage] = new(MainWindowTab.Auto, _autoHeader, UiString.ConfigWindow_Auto_ActionUsage),
+		[Configs.AutoIntercept] = new(MainWindowTab.Auto, _autoHeader, UiString.ConfigWindow_Auto_Intercept),
 		[Configs.HealingActionCondition] = new(MainWindowTab.Auto, _autoHeader, UiString.ConfigWindow_Auto_HealingCondition),
+		[Configs.RaiseActionCondition] = new(MainWindowTab.Auto, _autoHeader, UiString.ConfigWindow_Auto_RaiseCondition),
 
 		[Configs.DutySpecificUltimate] = new(MainWindowTab.Duty, _dutySpecificHeader, UiString.ConfigWindow_Duty_Ultimate),
 		[Configs.DutySpecificSavage] = new(MainWindowTab.Duty, _dutySpecificHeader, UiString.ConfigWindow_Duty_Savage),
@@ -83,11 +87,10 @@ public partial class MainWindow
 		[Configs.DutySpecificCrucibleOfTheUnbroken] = new(MainWindowTab.Duty, _dutySpecificHeader, UiString.ConfigWindow_Duty_CrucibleOfTheUnbroken),
 
 		[Configs.TargetConfig] = new(MainWindowTab.Target, _targetHeader, UiString.ConfigWindow_Target_Config),
-		[Configs.Extra] = new(MainWindowTab.Extra, _extraHeader, UiString.ConfigWindow_Extra_Others),
+		[Configs.Extra] = new(MainWindowTab.Extra, _extraHeader, UiString.ConfigWindow_Extra_Tweaks),
 
-		[Configs.List] = new(MainWindowTab.List, _idsHeader, UiString.ConfigWindow_List_Actions),
-		[Configs.List2] = new(MainWindowTab.List, _idsHeader, UiString.ConfigWindow_List_Actions),
-		[Configs.List3] = new(MainWindowTab.List, _idsHeader, UiString.ConfigWindow_List_Actions),
+		[Configs.ListCastingArea] = new(MainWindowTab.List, _idsHeader, UiString.ConfigWindow_List_Actions),
+		[Configs.ListKnockback] = new(MainWindowTab.List, _idsHeader, UiString.ConfigWindow_List_Actions),
 
 		[Configs.Debug] = new(MainWindowTab.Debug, null, null),
 	};

@@ -42,6 +42,19 @@ internal class SearchableCollection
 			}
 		}
 
+		// Stable insertion sort by Attribute.Order, so equal orders keep declaration order. Children are sorted too.
+		for (var i = 1; i < pairs.Count; i++)
+		{
+			var temp = pairs[i];
+			var j = i - 1;
+			while (j >= 0 && pairs[j].Attribute.Order > temp.Attribute.Order)
+			{
+				pairs[j + 1] = pairs[j];
+				j--;
+			}
+			pairs[j + 1] = temp;
+		}
+
 		_items = new List<SearchPair>(pairs.Count);
 
 		foreach (var pair in pairs)
@@ -86,7 +99,7 @@ internal class SearchableCollection
 			return sections;
 		}
 
-		Dictionary<byte, List<SearchPair>> filteredItems = [];
+		SortedDictionary<byte, List<SearchPair>> filteredItems = [];
 		foreach (var item in _items)
 		{
 			if (item.Attribute.Filter == filter)
@@ -104,21 +117,7 @@ internal class SearchableCollection
 		sections = new(filteredItems.Count);
 		foreach (var grp in filteredItems)
 		{
-			var items = grp.Value;
-			// Simple insertion sort by Attribute.Order (stable, so equal orders keep declaration order)
-			for (var i = 1; i < items.Count; i++)
-			{
-				var temp = items[i];
-				var j = i - 1;
-				while (j >= 0 && items[j].Attribute.Order > temp.Attribute.Order)
-				{
-					items[j + 1] = items[j];
-					j--;
-				}
-				items[j + 1] = temp;
-			}
-
-			sections.Add(items);
+			sections.Add(grp.Value);
 		}
 
 		_sectionsByFilter[filter] = sections;

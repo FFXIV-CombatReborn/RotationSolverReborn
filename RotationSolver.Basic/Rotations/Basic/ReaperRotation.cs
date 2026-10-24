@@ -249,6 +249,33 @@ public partial class ReaperRotation
 	}
 	#endregion
 
+	#region DoT Data
+	// Average potency per GCD of the Slice combo at the current level, for Death's Design break-even checks.
+	private static float SingleTargetFiller()
+	{
+		return (Player?.Level ?? 0) switch
+		{
+			>= 94 => 506.7f,
+			>= 84 => 406.7f,
+			>= 60 => 380,
+			>= 30 => 340,
+			>= 5 => 300,
+			_ => 260,
+		};
+	}
+
+	// Average potency per GCD of the Spinning Scythe combo, per target.
+	private static float AreaFiller()
+	{
+		return (Player?.Level ?? 0) switch
+		{
+			>= 60 => 160,
+			>= 45 => 140,
+			_ => 120,
+		};
+	}
+	#endregion
+
 	#region PvE Actions
 	static partial void ModifySlicePvE(ref ActionSetting setting)
 	{
@@ -263,6 +290,14 @@ public partial class ReaperRotation
 	static partial void ModifyShadowOfDeathPvE(ref ActionSetting setting)
 	{
 		setting.TargetStatusProvide = [StatusID.DeathsDesign];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			MaxDuration = 60,
+			HitPotency = () => Player?.Level >= 60 ? 300 : 240,
+			DamageTakenBonus = 0.1f,
+			FillerPotency = SingleTargetFiller,
+		};
 		setting.ActionCheck = () => !HasSoulReaver;
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -303,6 +338,14 @@ public partial class ReaperRotation
 	{
 		setting.ActionCheck = () => !HasSoulReaver;
 		setting.TargetStatusProvide = [StatusID.DeathsDesign];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			MaxDuration = 60,
+			HitPotency = () => Player?.Level >= 60 ? 100 : 80,
+			DamageTakenBonus = 0.1f,
+			FillerPotency = AreaFiller,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,

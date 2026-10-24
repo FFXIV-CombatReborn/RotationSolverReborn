@@ -207,9 +207,9 @@ public enum OtherCommandType : byte
 	NextAction,
 
 	/// <summary>
-	/// Cycles between states following settings in Target > Configuration.
+	/// Cycles between states following the /rotation Cycle behavior setting in Basic > Commands.
 	/// </summary>
-	[Description("Cycles between states following settings in Target > Configuration.")]
+	[Description("Cycles between states following the /rotation Cycle behavior setting in Basic > Commands.")]
 	Cycle,
 
 	/// <summary>

@@ -67,6 +67,28 @@ public partial class SageRotation
 	public static bool HasKardia => StatusHelper.PlayerHasStatus(true, StatusID.Kardia);
 	#endregion
 
+	#region DoT Data
+	// Best single target filler at the current level, for DoT break-even checks.
+	private static float SingleTargetFiller()
+	{
+		return (Player?.Level ?? 0) switch
+		{
+			>= 94 => 380, // Dosis III
+			>= 82 => 330,
+			>= 72 => 320, // Dosis II
+			>= 64 => 300, // Dosis
+			>= 54 => 250,
+			_ => 180,
+		};
+	}
+
+	// Eukrasia takes a GCD of its own unless it is already up.
+	private static float EukrasiaGcds()
+	{
+		return HasEukrasia ? 0 : 1;
+	}
+	#endregion
+
 	#region PvE Actions
 	private protected sealed override IBaseAction Raise => EgeiroPvE;
 
@@ -180,6 +202,18 @@ public partial class SageRotation
 			StatusID.EukrasianDosisIii,
 			StatusID.EukrasianDyskrasia
 		];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			TickPotency = () => (Player?.Level ?? 0) switch
+			{
+				>= 64 => 40,
+				>= 54 => 35,
+				_ => 30,
+			},
+			FillerPotency = SingleTargetFiller,
+			ExtraGcds = EukrasiaGcds,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,
@@ -325,6 +359,13 @@ public partial class SageRotation
 			StatusID.EukrasianDosisIii,
 			StatusID.EukrasianDyskrasia
 		];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			TickPotency = () => 60,
+			FillerPotency = SingleTargetFiller,
+			ExtraGcds = EukrasiaGcds,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,
@@ -384,6 +425,13 @@ public partial class SageRotation
 			StatusID.EukrasianDosisIii,
 			StatusID.EukrasianDyskrasia
 		];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			TickPotency = () => Player?.Level >= 94 ? 90 : 80,
+			FillerPotency = SingleTargetFiller,
+			ExtraGcds = EukrasiaGcds,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,
@@ -405,6 +453,13 @@ public partial class SageRotation
 		[
 			StatusID.EukrasianDyskrasia
 		];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			TickPotency = () => 40,
+			FillerPotency = () => 170, // Dyskrasia II, per target
+			ExtraGcds = EukrasiaGcds,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			AoeCount = 3,
