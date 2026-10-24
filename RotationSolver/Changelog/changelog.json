@@ -1,6 +1,64 @@
 {
-  "tagline": "Just a crashfix",
+  "tagline": "Yet another attempt at improving time to kill accuracy",
   "entries": [
+    {
+      "version": "7.5.7.7",
+      "title": "Time to kill accuracy",
+      "date": "October 24, 2026",
+      "sections": [
+        {
+          "title": "Time to kill",
+          "icon": "Stopwatch",
+          "items": [
+            "Time to kill estimates are much more accurate early in a fight. They used to read two to three times too long for the first few seconds of damage, so trash could briefly count as a boss and dying enemies were spotted late.",
+            "Time to kill now follows the last 30 seconds of damage, so it catches up quickly when the party switches targets or finishes a pack with single target attacks.",
+            "An enemy that heals or resets to full health now starts a fresh time to kill estimate instead of reusing its old health history."
+          ]
+        },
+        {
+          "title": "DoT timing",
+          "icon": "Hourglass",
+          "items": [
+            "New experimental Auto setting: time DoT refreshes from DoT ticks and time to kill. It is off by default.",
+            "When it is on, White Mage, Scholar, Astrologian, Sage, Black Mage and Reaper (Death's Design) refresh on the last GCD that doesn't lose a DoT tick, instead of a set number of GCDs early.",
+            "Healers and Reaper also skip a DoT when the target will die before it would out-damage their normal attack.",
+            "While it is on, the \"Number of GCDs before the DOT/Status effect is reapplied\" action setting is hidden for those actions, since it no longer applies."
+          ]
+        },
+        {
+          "title": "Lists",
+          "icon": "List",
+          "items": [
+            "The status, action, territory and job priority lists are now built into RSR instead of being downloaded from GitHub, so they work offline and never fail to load.",
+            "Your own additions and removals are saved separately from the built-in lists. Updates to the built-in lists now reach you with each RSR update, without needing the reset button and without losing your changes.",
+            "The reset buttons now clear your changes and go back to the built-in list.",
+            "Your existing additions carry over automatically. Removals you made before, and custom Dance Partner, Kardia, Spear and Balance orders, are reset once, so set them again if you changed them."
+          ]
+        },
+        {
+          "title": "Settings",
+          "icon": "SlidersH",
+          "items": [
+            "Settings have been reorganized and many have shorter, clearer names. Your saved values and /rotation Settings commands are unchanged.",
+            "The accent colour, text size, element size, padding and inline description settings moved from UI > Information to their own UI > Customize UI section.",
+            "The raise settings moved from Auto > Healing Usage and Control to their own Auto > Raise Usage and Control section.",
+            "The intercept settings moved to their own Auto > Action Interception section, with the execution window and the BossModReborn check for intercepted movement actions now under the main intercept switch.",
+            "Teaching mode, hotbar press effects, the disabled action tint and the action right-click menu toggle moved to a new UI > Hotbars section.",
+            "Basic > Others is now Basic > Commands. It also holds /rotation Cycle behavior (from Target), the special state duration (from Timing), and the chat and toast feedback for commands (from UI > Information).",
+            "Basic > Timer is now Basic > Timing, and the out of combat delay moved there. Extra > Others is now Extra > Tweaks.",
+            "Stop casting when the target dies (from Extra), the Lucid Dreaming MP threshold (from Healing) and the dispel delay (from Healing) moved to Auto > Action Usage and Control. The gap closer distance moved to Target, next to the other movement action settings.",
+            "The AoE heal HP spread setting moved from Extra to Auto > Healing Usage and Control, and the click counter moved from Extra to UI > Information.",
+            "Stop healing when enemies will die within is now shown for every job. It always applied to healers, but was only shown under the non-healer healing setting.",
+            "The Next Action window's GCD bar height is now shown under Show Next Action window. Before, it could only be found by searching.",
+            "Lock Control window and the original cooldown option are now under Show Control window. The click-through and lock options moved out from under Show Next Action window, since they also apply to the Intercepted Action window.",
+            "Settings sections in the same group now always show in the intended order. Before, the intercept settings showed at the top of Action Usage and Control, for example.",
+            "Provoke any enemy not on the Don't provoke list is now greyed out on non-tanks, and the dispel delay on jobs that can't dispel, like other job-specific settings.",
+            "Removed the unused Target color setting.",
+            "Removed the \"Set Blue Mage Actions Automatically\", \"Enable cactbot timeline integration\" and \"Show cactbot event toasts\" settings. None of them did anything anymore."
+          ]
+        }
+      ]
+    },
     {
       "version": "7.5.7.6",
       "title": "Crash fix",

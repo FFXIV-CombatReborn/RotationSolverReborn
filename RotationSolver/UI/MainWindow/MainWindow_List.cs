@@ -86,6 +86,8 @@ public partial class MainWindow
 
 	internal static Status[] BadStatus => _badStatus.Value;
 
+	private const string ResetListTooltip = "Clears your additions and removals. The built-in list updates with RSR on its own.";
+
 	private static void DrawList()
 	{
 		DrawPageIntro(UiString.ConfigWindow_List_Description.GetDescription());
@@ -115,31 +117,35 @@ public partial class MainWindow
 			ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update Invuln Status List"))
+			if (ImGui.Button("Reset Invuln Status List"))
 			{
 				OtherConfiguration.ResetInvincibleStatus();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_Invincibility.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update Priority Status List"))
+			if (ImGui.Button("Reset Priority Status List"))
 			{
 				OtherConfiguration.ResetPriorityStatus();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_Priority.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update Dispell Debuff List"))
+			if (ImGui.Button("Reset Dispel Debuff List"))
 			{
 				OtherConfiguration.ResetDangerousStatus();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_DangerousStatus.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update No Casting Status List"))
+			if (ImGui.Button("Reset No Casting Status List"))
 			{
 				OtherConfiguration.ResetNoCastingStatus();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_NoCastingStatus.GetDescription());
 
 			ImGui.TableNextRow();
@@ -370,31 +376,35 @@ public partial class MainWindow
 			ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update Tankbuster List"))
+			if (ImGui.Button("Reset Tankbuster List"))
 			{
 				OtherConfiguration.ResetHostileCastingTank();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingTank.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update AOE List"))
+			if (ImGui.Button("Reset AOE List"))
 			{
 				OtherConfiguration.ResetHostileCastingArea();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingArea.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update Knockback List"))
+			if (ImGui.Button("Reset Knockback List"))
 			{
 				OtherConfiguration.ResetHostileCastingKnockback();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingKnockback.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Stop Casting List"))
+			if (ImGui.Button("Reset Stop Casting List"))
 			{
 				OtherConfiguration.ResetHostileCastingStop();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingStop.GetDescription());
 
 			ImGui.TableNextRow();
@@ -404,17 +414,16 @@ public partial class MainWindow
 			DrawActionsList(nameof(OtherConfiguration.HostileCastingTank), OtherConfiguration.HostileCastingTank);
 
 			_ = ImGui.TableNextColumn();
-			_allSearchable.DrawItems(Configs.List);
+			_allSearchable.DrawItems(Configs.ListCastingArea);
 			ImGui.TextWrapped(UiString.ConfigWindow_List_HostileCastingAreaDesc.GetDescription());
 			DrawActionsList(nameof(OtherConfiguration.HostileCastingArea), OtherConfiguration.HostileCastingArea);
 
 			_ = ImGui.TableNextColumn();
-			_allSearchable.DrawItems(Configs.List2);
+			_allSearchable.DrawItems(Configs.ListKnockback);
 			ImGui.TextWrapped(UiString.ConfigWindow_List_HostileCastingKnockbackDesc.GetDescription());
 			DrawActionsList(nameof(OtherConfiguration.HostileCastingKnockback), OtherConfiguration.HostileCastingKnockback);
 
 			_ = ImGui.TableNextColumn();
-			_allSearchable.DrawItems(Configs.List3);
 			ImGui.TextWrapped(UiString.ConfigWindow_List_HostileCastingStopDesc.GetDescription());
 			DrawActionsList(nameof(OtherConfiguration.HostileCastingStop), OtherConfiguration.HostileCastingStop);
 		}

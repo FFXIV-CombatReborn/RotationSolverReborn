@@ -317,7 +317,7 @@ namespace RotationSolver.Data
 		[Description("Setting Search")]
 		ConfigWindow_Searching,
 
-		[Description("Timer")]
+		[Description("Timing")]
 		ConfigWindow_Basic_Timer,
 
 		[Description("Auto Switch")]
@@ -326,8 +326,8 @@ namespace RotationSolver.Data
 		[Description("Named Conditions")]
 		ConfigWindow_Basic_NamedConditions,
 
-		[Description("Others")]
-		ConfigWindow_Basic_Others,
+		[Description("Commands")]
+		ConfigWindow_Basic_Commands,
 
 		[Description("The animation lock time for individual actions. For example, 0.6s.")]
 		ConfigWindow_Basic_AnimationLockTime,
@@ -356,11 +356,17 @@ namespace RotationSolver.Data
 		[Description("Information")]
 		ConfigWindow_UI_Information,
 
+		[Description("Customize UI")]
+		ConfigWindow_UI_Customize,
+
 		[Description("Overlay")]
 		ConfigWindow_UI_Overlay,
 
 		[Description("Windows")]
 		ConfigWindow_UI_Windows,
+
+		[Description("Hotbars")]
+		ConfigWindow_UI_Hotbars,
 
 		[Description("Change how RSR automatically uses actions")]
 		ConfigWindow_Auto_Description,
@@ -371,11 +377,23 @@ namespace RotationSolver.Data
 		[Description("Which actions RSR can use")]
 		ConfigWindow_Auto_ActionUsage_Description,
 
+		[Description("Action Interception")]
+		ConfigWindow_Auto_Intercept,
+
+		[Description("Let RSR take the actions you press and use them at the right moment")]
+		ConfigWindow_Auto_Intercept_Description,
+
 		[Description("Healing Usage and Control")]
 		ConfigWindow_Auto_HealingCondition,
 
 		[Description("How RSR should use healing abilities")]
 		ConfigWindow_Auto_HealingCondition_Description,
+
+		[Description("Raise Usage and Control")]
+		ConfigWindow_Auto_RaiseCondition,
+
+		[Description("When and how RSR should raise dead party members")]
+		ConfigWindow_Auto_RaiseCondition_Description,
 
 		[Description("Custom State Condition (Unsupported)")]
 		ConfigWindow_Auto_StateCondition,
@@ -446,8 +464,8 @@ namespace RotationSolver.Data
 		[Description("Internal")]
 		ConfigWindow_Internal,
 
-		[Description("Others")]
-		ConfigWindow_Extra_Others,
+		[Description("Tweaks")]
+		ConfigWindow_Extra_Tweaks,
 
 		[Description("Add Events")]
 		ConfigWindow_Events_AddEvent,
@@ -839,10 +857,10 @@ namespace RotationSolver.Data
 				UiString.InfoWindowNoMove => "不移动",
 				UiString.InfoWindowMove => "移动",
 				UiString.ConfigWindow_Searching => "搜索设置",
-				UiString.ConfigWindow_Basic_Timer => "计时器",
+				UiString.ConfigWindow_Basic_Timer => "时机",
 				UiString.ConfigWindow_Basic_AutoSwitch => "自动切换",
 				UiString.ConfigWindow_Basic_NamedConditions => "命名条件",
-				UiString.ConfigWindow_Basic_Others => "其他",
+				UiString.ConfigWindow_Basic_Commands => "命令",
 				UiString.ConfigWindow_Basic_AnimationLockTime => "单个动作的动画锁定时间。例如 0.6 秒。",
 				UiString.ConfigWindow_Basic_ClickingDuration => "点击持续时间 - RSR将尝试在此刻点击。",
 				UiString.ConfigWindow_Basic_IdealClickingTime => "理想点击时间",
@@ -852,13 +870,19 @@ namespace RotationSolver.Data
 				UiString.ConfigWindow_Basic_SwitchAutoConditionSet => "自动切换至自动模式的条件",
 				UiString.ConfigWindow_Condition_ConditionName => "条件名称",
 				UiString.ConfigWindow_UI_Information => "信息",
+				UiString.ConfigWindow_UI_Customize => "自定义界面",
 				UiString.ConfigWindow_UI_Overlay => "悬浮窗",
 				UiString.ConfigWindow_UI_Windows => "窗口",
+				UiString.ConfigWindow_UI_Hotbars => "热键栏",
 				UiString.ConfigWindow_Auto_Description => "更改RSR自动使用动作的方式",
 				UiString.ConfigWindow_Auto_ActionUsage => "动作使用与控制",
 				UiString.ConfigWindow_Auto_ActionUsage_Description => "RSR 可以使用哪些动作",
+				UiString.ConfigWindow_Auto_Intercept => "动作拦截",
+				UiString.ConfigWindow_Auto_Intercept_Description => "让 RSR 接管你按下的动作，并在合适的时机使用",
 				UiString.ConfigWindow_Auto_HealingCondition => "治疗使用与控制",
 				UiString.ConfigWindow_Auto_HealingCondition_Description => "RSR 应如何使用治疗能力",
+				UiString.ConfigWindow_Auto_RaiseCondition => "复活使用与控制",
+				UiString.ConfigWindow_Auto_RaiseCondition_Description => "RSR 应何时以及如何复活倒地的队友",
 				UiString.ConfigWindow_Auto_StateCondition => "自定义状态条件（不支持）",
 				UiString.ConfigWindow_Auto_HealAreaConditionSet => "范围治疗强制条件",
 				UiString.ConfigWindow_Auto_HealSingleConditionSet => "单体治疗强制条件",
@@ -882,7 +906,7 @@ namespace RotationSolver.Data
 				UiString.ConfigWindow_Extra_Description => "RSR 专注于循环本身。这些是附加功能，可能随时移除。",
 				UiString.ConfigWindow_EventItem => "事件",
 				UiString.ConfigWindow_Internal => "内部",
-				UiString.ConfigWindow_Extra_Others => "其他",
+				UiString.ConfigWindow_Extra_Tweaks => "调整",
 				UiString.ConfigWindow_Events_AddEvent => "添加事件",
 				UiString.ConfigWindow_Events_Description => "在此窗口中，你可以设置使用动作后触发哪个宏。",
 				UiString.ConfigWindow_Events_DutyStart => "任务开始：",

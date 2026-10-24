@@ -355,13 +355,21 @@ public struct ActionTargetInfo(IBaseAction action)
 
 		if (action.Setting.TargetStatusProvide != null && !skipStatusProvideCheck)
 		{
-			if (!battleChara.WillStatusEndGCD(action.Config.StatusRefreshGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusProvide) || (Service.Config.Statuscap2 && StatusHelper.IsStatusCapped(battleChara)))
+			if (!NeedsTargetStatus(battleChara) || (Service.Config.Statuscap2 && StatusHelper.IsStatusCapped(battleChara)))
 			{
 				return false;
 			}
 		}
 
 		return true;
+	}
+
+	private readonly bool NeedsTargetStatus(IBattleChara battleChara)
+	{
+		var setting = action.Setting;
+		return Service.Config.UseDotTickTiming && setting.Dot != null
+			? DotPlanner.ShouldApply(action, battleChara)
+			: battleChara.WillStatusEndGCD(action.Config.StatusRefreshGcdCount, 0, setting.StatusFromSelf, setting.TargetStatusProvide);
 	}
 
 	/// <summary>

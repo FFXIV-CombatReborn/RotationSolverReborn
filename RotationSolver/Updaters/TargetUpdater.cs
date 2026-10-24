@@ -22,8 +22,8 @@ internal static partial class TargetUpdater
 	// Other players outside duties, only gathered for RaiseType.AllOutOfDuty.
 	private static List<IBattleChara> _outOfDutyPlayers = [];
 
-	private static DateTime _lastUpdateTimeToKill = DateTime.MinValue;
-	private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(1);
+	private static long _lastUpdateTimeToKill;
+	private const long TimeToKillUpdateIntervalMs = 1000;
 
 	internal static void UpdateTargets()
 	{
@@ -473,40 +473,16 @@ internal static partial class TargetUpdater
 		}
 	}
 
-	// Recording new entries at 1/second and dequeuing old values to keep only the last DataCenter.HP_RECORD_TIME worth of combat time
-	// Has performance implications for keeping too much data for too many targets as they're also all evaluated multiple times a frame for expected TTK
 	private static void UpdateTimeToKill()
 	{
-		var now = DateTime.Now;
-		if (now - _lastUpdateTimeToKill < TimeToKillUpdateInterval)
+		var now = Environment.TickCount64;
+		if (now - _lastUpdateTimeToKill < TimeToKillUpdateIntervalMs)
 		{
 			return;
 		}
 
 		_lastUpdateTimeToKill = now;
-
-		var hostiles = DataCenter.AllHostileTargets;
-		if (hostiles == null || hostiles.Count == 0)
-		{
-			return;
-		}
-
-		if (DataCenter.RecordedHP.Count >= DataCenter.HP_RECORD_TIME)
-		{
-			_ = DataCenter.RecordedHP.Dequeue();
-		}
-
-		Dictionary<ulong, float> currentHPs = new(hostiles.Count);
-		for (var i = 0; i < hostiles.Count; i++)
-		{
-			var target = hostiles[i];
-			if (target != null && target.CurrentHp != 0)
-			{
-				currentHPs[target.GameObjectId] = target.GetHealthRatio();
-			}
-		}
-
-		DataCenter.RecordedHP.Enqueue((now, currentHPs));
+		TimeToKillTracker.Record(DataCenter.AllHostileTargets, now);
 	}
 
 	private static void UpdateOccultWeaknesses()

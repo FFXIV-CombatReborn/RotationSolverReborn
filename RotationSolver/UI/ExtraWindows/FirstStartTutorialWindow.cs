@@ -757,7 +757,7 @@ internal sealed class FirstStartTutorialWindow : Window
 		}
 
 		Gap(8f);
-		DrawNote("All of these are on the UI page too, next to the colours for teaching mode and the hotbar highlights.");
+		DrawNote("All of these are on the UI page too: the colour, sizes and descriptions under Customize UI, and the tips under Information.");
 	}
 
 	private static void DrawModes()
@@ -947,7 +947,7 @@ internal sealed class FirstStartTutorialWindow : Window
 
 		Gap(12f);
 		DrawInfoCard("tutorial_actions_more", "Also worth knowing", FontAwesomeIcon.InfoCircle,
-			"Intercept, on by default in PvE: press an action yourself and RSR queues it, then uses it at the next opportunity instead of fighting you for the GCD. It is set up on the Auto page.",
+			"Intercept, on by default in PvE: press an action yourself and RSR queues it, then uses it at the next opportunity instead of fighting you for the GCD. It is set up on the Auto page, under Action Interception.",
 			"Right-click an action for the command that enables or disables it, so a macro can toggle it.",
 			"The list follows your current job and rotation.");
 	}
@@ -1113,14 +1113,14 @@ internal sealed class FirstStartTutorialWindow : Window
 	private static void DrawAdvancedStep()
 	{
 		DrawInfoCard("tutorial_basic", "Basic", FontAwesomeIcon.Stopwatch,
-			"Action Ahead: how early in the GCD RSR queues the next action. The default suits almost everyone.",
-			"Minimum updating time: how often RSR re-evaluates the fight. Raise it a little if you see frame drops; lower is more responsive.",
-			"Other shared settings, such as making /rotation Auto a simple on/off toggle.");
+			"Action ahead: how early in the GCD RSR queues the next action. The default suits almost everyone.",
+			"Minimum update interval: how often RSR re-evaluates the fight. Raise it a little if you see frame drops; lower is more responsive.",
+			"Commands: how /rotation commands behave, such as making /rotation Auto a simple on/off toggle.");
 
 		DrawInfoCard("tutorial_extra", "Extra", FontAwesomeIcon.PuzzlePiece,
 			"Events: run your own macros when a duty starts or ends, or when a particular action is used.",
 			"Internal: back up and restore your RSR settings.",
-			"Other: animation-lock and cooldown-delay tweaks, for players not already using Boss Mod Reborn for them.");
+			"Tweaks: movement and channel locks, and animation-lock and cooldown-delay tweaks for players not already using Boss Mod Reborn for them.");
 
 		DrawInfoCard("tutorial_debug", "Debug", FontAwesomeIcon.Bug,
 			"Live data for rotation writers and bug reports. You will not need it day to day.");

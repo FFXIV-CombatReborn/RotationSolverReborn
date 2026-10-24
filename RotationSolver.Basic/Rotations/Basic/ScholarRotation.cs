@@ -91,6 +91,22 @@ public partial class ScholarRotation
 	}
 	#endregion
 
+	#region DoT Data
+	// Best single target filler at the current level, for DoT break-even checks.
+	private static float SingleTargetFiller()
+	{
+		return (Player?.Level ?? 0) switch
+		{
+			>= 94 => 320, // Broil IV
+			>= 82 => 295,
+			>= 72 => 255, // Broil III
+			>= 64 => 240, // Broil II
+			>= 54 => 220, // Broil
+			_ => 150, // Ruin
+		};
+	}
+	#endregion
+
 	#region PvE Actions
 	private protected sealed override IBaseAction Raise => ResurrectionPvE;
 
@@ -102,6 +118,12 @@ public partial class ScholarRotation
 	static partial void ModifyBioPvE(ref ActionSetting setting)
 	{
 		setting.TargetStatusProvide = [StatusID.Bio, StatusID.BioIi, StatusID.Biolysis];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			TickPotency = () => 20,
+			FillerPotency = SingleTargetFiller,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,
@@ -139,6 +161,12 @@ public partial class ScholarRotation
 	static partial void ModifyBioIiPvE(ref ActionSetting setting)
 	{
 		setting.TargetStatusProvide = [StatusID.Bio, StatusID.BioIi, StatusID.Biolysis];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			TickPotency = () => 40,
+			FillerPotency = SingleTargetFiller,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,
@@ -304,6 +332,12 @@ public partial class ScholarRotation
 	static partial void ModifyBiolysisPvE(ref ActionSetting setting)
 	{
 		setting.TargetStatusProvide = [StatusID.Bio, StatusID.BioIi, StatusID.Biolysis];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			TickPotency = () => Player?.Level >= 94 ? 85 : 70,
+			FillerPotency = SingleTargetFiller,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,

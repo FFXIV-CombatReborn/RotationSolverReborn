@@ -1,5 +1,3 @@
-using Dalamud.Hooking;
-using Dalamud.Utility.Signatures;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Hooks;
@@ -48,32 +46,14 @@ public class ActionTimelineManager : IDisposable
 	private uint _castActionId;
 	private float _castElapsed;
 
-	private delegate void OnActorControlDelegate(uint entityId, uint type, uint buffID, uint direct, uint actionId, uint sourceId, uint arg7, uint arg8, uint arg9, uint arg10, ulong targetId, byte arg12);
-	[Signature("E8 ?? ?? ?? ?? 0F B7 0B 83 E9 64", DetourName = nameof(OnActorControl))]
-#pragma warning disable CS0649
-	private readonly Hook<OnActorControlDelegate>? _onActorControlHook;
-#pragma warning restore CS0649
-
 	private ActionTimelineManager()
 	{
 		ActionEffect.ActionEffectEvent += ActionFromSelf;
-
-		try
-		{
-			Svc.Hook.InitializeFromAttributes(this);
-			_onActorControlHook?.Enable();
-		}
-		catch (Exception e)
-		{
-			Svc.Log.Error("Error initiating ActionTimeline hooks: " + e.Message);
-		}
 	}
 
 	public void Dispose()
 	{
 		ActionEffect.ActionEffectEvent -= ActionFromSelf;
-		_onActorControlHook?.Disable();
-		_onActorControlHook?.Dispose();
 		Array.Clear(_items);
 		_count = 0;
 		_head = 0;
@@ -298,27 +278,7 @@ public class ActionTimelineManager : IDisposable
 		cast.CastingTime = Math.Clamp((float)(at - cast.StartTime).TotalSeconds, 0f, cast.CastingTime);
 	}
 
-	private void OnActorControl(uint entityId, uint type, uint buffID, uint direct, uint actionId, uint sourceId, uint arg7, uint arg8, uint arg9, uint arg10, ulong targetId, byte arg12)
-	{
-		_onActorControlHook?.Original(entityId, type, buffID, direct, actionId, sourceId, arg7, arg8, arg9, arg10, targetId, arg12);
-
-		try
-		{
-			// CancelAbility ActorControlCategory value
-			if (type != 15 || Player.Object is not { } player || entityId != player.GameObjectId)
-			{
-				return;
-			}
-
-			CancelInterruptedCast(DateTime.Now);
-		}
-		catch (Exception ex)
-		{
-			Svc.Log.Error($"Error in OnActorControl: {ex.Message}");
-		}
-	}
-
-	private void CancelInterruptedCast(DateTime now)
+	internal void CancelInterruptedCast(DateTime now)
 	{
 		for (var i = _pendingCasts.Count - 1; i >= 0; i--)
 		{

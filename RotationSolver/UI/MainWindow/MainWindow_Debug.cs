@@ -748,6 +748,7 @@ public partial class MainWindow
 			}
 			ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
 			ImGui.Text($"TTK: {battleChara.GetTTK()}");
+			ImGui.Text($"Next DoT tick: {battleChara.TimeToNextDotTick():F2}s");
 			ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
 			ImGui.Text($"Is Boss Icon: {battleChara.IsBossFromIcon()}");
 			ImGui.Text($"Rank: {battleChara.GetObjectNPC()?.Rank.ToString() ?? string.Empty}");

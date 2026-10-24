@@ -20,13 +20,13 @@ public partial class MainWindow
 			{ () => UiString.ConfigWindow_EventItem.GetDescription(), DrawEventTab },
 			{ () => UiString.ConfigWindow_Internal.GetDescription(), DrawInternalTab },
 			{
-				() => UiString.ConfigWindow_Extra_Others.GetDescription(),
+				() => UiString.ConfigWindow_Extra_Tweaks.GetDescription(),
 				() => _allSearchable.DrawItems(Configs.Extra)
 			},
 		},
 		(UiString.ConfigWindow_EventItem, FontAwesomeIcon.CalendarCheck),
 		(UiString.ConfigWindow_Internal, FontAwesomeIcon.Database),
-		(UiString.ConfigWindow_Extra_Others, FontAwesomeIcon.PuzzlePiece));
+		(UiString.ConfigWindow_Extra_Tweaks, FontAwesomeIcon.PuzzlePiece));
 
 	private static void DrawInternalTab()
 	{

@@ -14,18 +14,18 @@ public partial class MainWindow
 		new Dictionary<Func<string>, Action>
 		{
 			{ () => UiString.ConfigWindow_Basic_Timer.GetDescription(), DrawBasicTimer },
-			{ () => UiString.ConfigWindow_Basic_Others.GetDescription(), DrawBasicOthers },
+			{ () => UiString.ConfigWindow_Basic_Commands.GetDescription(), DrawBasicCommands },
 		},
 		(UiString.ConfigWindow_Basic_Timer, FontAwesomeIcon.Stopwatch),
-		(UiString.ConfigWindow_Basic_Others, FontAwesomeIcon.EllipsisH));
+		(UiString.ConfigWindow_Basic_Commands, FontAwesomeIcon.Terminal));
 
 	private static void DrawBasicTimer()
 	{
 		_allSearchable.DrawItems(Configs.BasicTimer);
 	}
 
-	private static void DrawBasicOthers()
+	private static void DrawBasicCommands()
 	{
-		_allSearchable.DrawItems(Configs.BasicParams);
+		_allSearchable.DrawItems(Configs.BasicCommands);
 	}
 }

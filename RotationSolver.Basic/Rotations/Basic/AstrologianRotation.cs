@@ -134,6 +134,22 @@ public partial class AstrologianRotation
 	}
 	#endregion
 
+	#region DoT Data
+	// Best single target filler at the current level, for DoT break-even checks.
+	private static float SingleTargetFiller()
+	{
+		return (Player?.Level ?? 0) switch
+		{
+			>= 94 => 270, // Fall Malefic
+			>= 82 => 250,
+			>= 72 => 230, // Malefic IV
+			>= 64 => 190, // Malefic III
+			>= 54 => 160, // Malefic II
+			_ => 150, // Malefic
+		};
+	}
+	#endregion
+
 	#region PvE Actions
 	private protected sealed override IBaseAction? Raise => AscendPvE;
 
@@ -159,6 +175,12 @@ public partial class AstrologianRotation
 	static partial void ModifyCombustPvE(ref ActionSetting setting)
 	{
 		setting.TargetStatusProvide = CombustStatus;
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			TickPotency = () => 50,
+			FillerPotency = SingleTargetFiller,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,
@@ -332,6 +354,12 @@ public partial class AstrologianRotation
 	static partial void ModifyCombustIiPvE(ref ActionSetting setting)
 	{
 		setting.TargetStatusProvide = CombustStatus;
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			TickPotency = () => 60,
+			FillerPotency = SingleTargetFiller,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,
@@ -439,6 +467,12 @@ public partial class AstrologianRotation
 	static partial void ModifyCombustIiiPvE(ref ActionSetting setting)
 	{
 		setting.TargetStatusProvide = CombustStatus;
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			TickPotency = () => Player?.Level >= 94 ? 70 : 65,
+			FillerPotency = SingleTargetFiller,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,

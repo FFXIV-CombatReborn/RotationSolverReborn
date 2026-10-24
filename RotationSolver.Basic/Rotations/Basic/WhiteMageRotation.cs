@@ -96,6 +96,23 @@ public partial class WhiteMageRotation
 	public static bool HasPresenceOfMind => StatusHelper.PlayerHasStatus(true, StatusID.PresenceOfMind);
 	#endregion
 
+	#region DoT Data
+	// Best single target filler at the current level, for DoT break-even checks.
+	private static float SingleTargetFiller()
+	{
+		return (Player?.Level ?? 0) switch
+		{
+			>= 94 => 350, // Glare III
+			>= 82 => 310,
+			>= 72 => 290, // Glare
+			>= 64 => 260, // Stone IV
+			>= 54 => 220, // Stone III
+			>= 18 => 190, // Stone II
+			_ => 140, // Stone
+		};
+	}
+	#endregion
+
 	#region Debug
 	/// <inheritdoc/>
 	public override void DisplayBaseStatus()
@@ -125,6 +142,13 @@ public partial class WhiteMageRotation
 			StatusID.AeroIi,
 			StatusID.Dia,
 		];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			HitPotency = () => 50,
+			TickPotency = () => 30,
+			FillerPotency = SingleTargetFiller,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,
@@ -210,6 +234,13 @@ public partial class WhiteMageRotation
 			StatusID.AeroIi,
 			StatusID.Dia,
 		];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			HitPotency = () => 50,
+			TickPotency = () => 50,
+			FillerPotency = SingleTargetFiller,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,
@@ -298,6 +329,13 @@ public partial class WhiteMageRotation
 			StatusID.AeroIi,
 			StatusID.Dia,
 		];
+		setting.Dot = new DotEffect()
+		{
+			Duration = 30,
+			HitPotency = () => Player?.Level >= 94 ? 85 : 65,
+			TickPotency = () => Player?.Level >= 94 ? 85 : 65,
+			FillerPotency = SingleTargetFiller,
+		};
 		setting.CreateConfig = () => new ActionConfig()
 		{
 			IsRestrictedDOT = true,

@@ -2186,10 +2186,8 @@ public static class ObjectHelper
 		}
 	}
 
-	private static readonly TimeSpan CheckSpan = TimeSpan.FromSeconds(2.5);
-
 	/// <summary>
-	/// Calculates the estimated time to kill the specified battle character. Only applicable after the first 2.5 seconds, and uses a moving average of the last 15 seconds of health ratios
+	/// Calculates the estimated time to kill the specified battle character from its damage rate over the last 30 seconds. Known once it has taken damage for about 2 seconds.
 	/// </summary>
 	/// <param name="battleChara">The battle character to calculate the time to kill for.</param>
 	/// <param name="wholeTime">If set to <c>true</c>, calculates the total time to kill; otherwise, calculates the remaining time to kill.</param>
@@ -2208,92 +2206,45 @@ public static class ObjectHelper
 			return 999.99f;
 		}
 
-		// Every CanUse checks each target's TTK, so the history walk below runs once per target per frame.
-		var now = Environment.TickCount64;
-		var id = battleChara.GameObjectId;
-		if (_ttkCache.TryGetValue(id, out var cached) && now - cached.Tick < TtkCacheMs)
+		var rate = TimeToKillTracker.GetRate(battleChara.GameObjectId);
+		if (float.IsNaN(rate))
 		{
-			return wholeTime ? cached.Whole : cached.Remaining;
+			return float.NaN;
 		}
 
-		if (_ttkCache.Count > 512)
-		{
-			_ttkCache.Clear();
-		}
-
-		var whole = ComputeTTK(battleChara, out var remaining);
-		_ttkCache[id] = (now, whole, remaining);
-		return wholeTime ? whole : remaining;
+		return wholeTime ? 1f / rate : battleChara.GetHealthRatio() / rate;
 	}
 
-	private const long TtkCacheMs = 15;
-	private static readonly Dictionary<ulong, (long Tick, float Whole, float Remaining)> _ttkCache = [];
-
-	private static float ComputeTTK(IBattleChara battleChara, out float remaining)
+	/// <summary>
+	/// Seconds until the next DoT tick on the target, or <see cref="float.NaN"/> until one of its ticks has been seen.
+	/// </summary>
+	/// <param name="battleChara">The target.</param>
+	public static float TimeToNextDotTick(this IBattleChara battleChara)
 	{
-		remaining = float.NaN;
-		const int movingAverageWindow = 5;
-		var objId = battleChara.GameObjectId;
-
-		var startTime = DateTime.MinValue;
-		var initialHpRatio = 0f;
-
-		// Small fixed-size window for last ratios without copying the whole queue
-		Span<float> window = stackalloc float[movingAverageWindow];
-		var wCount = 0;
-
-		foreach ((var time, var hpRatiosDict) in DataCenter.RecordedHP)
-		{
-			if (hpRatiosDict != null && hpRatiosDict.TryGetValue(objId, out var ratio) && ratio != 1f)
-			{
-				if (startTime == DateTime.MinValue)
-				{
-					startTime = time;
-					initialHpRatio = ratio;
-				}
-
-				if (wCount < movingAverageWindow)
-				{
-					window[wCount++] = ratio;
-				}
-				else
-				{
-					// shift left by one; window is very small so this is cheap
-					window[1..].CopyTo(window);
-					window[movingAverageWindow - 1] = ratio;
-				}
-			}
-		}
-
-		if (startTime == DateTime.MinValue || (DateTime.Now - startTime) < CheckSpan)
+		if (battleChara == null)
 		{
 			return float.NaN;
 		}
 
-		var currentHealthRatio = battleChara.GetHealthRatio();
-		if (float.IsNaN(currentHealthRatio))
+		var now = Environment.TickCount64;
+		return DotTickTracker.TryGetNextTick(battleChara.GameObjectId, now, out var next) ? (next - now) / 1000f : float.NaN;
+	}
+
+	/// <summary>
+	/// DoT ticks on the target between two times in seconds from now. Exact once one of its ticks has been seen, otherwise one per 3 seconds on average.
+	/// </summary>
+	/// <param name="battleChara">The target.</param>
+	/// <param name="fromSeconds">Start of the window; a tick exactly at this time is not counted.</param>
+	/// <param name="toSeconds">End of the window; a tick exactly at this time is counted.</param>
+	public static float DotTicksBetween(this IBattleChara battleChara, float fromSeconds, float toSeconds)
+	{
+		if (battleChara == null || !float.IsFinite(fromSeconds) || !float.IsFinite(toSeconds))
 		{
 			return float.NaN;
 		}
 
-		var sum = 0f;
-		for (var i = 0; i < wCount; i++)
-		{
-			sum += window[i];
-		}
-
-		var avg = wCount > 0 ? sum / wCount : 0f;
-
-		var hpRatioDifference = initialHpRatio - avg;
-		if (hpRatioDifference <= 0)
-		{
-			return float.NaN;
-		}
-
-		var elapsedTime = (float)(DateTime.Now - startTime).TotalSeconds;
-		var whole = elapsedTime / hpRatioDifference;
-		remaining = whole * currentHealthRatio;
-		return whole;
+		var now = Environment.TickCount64;
+		return DotTickTracker.CountTicks(battleChara.GameObjectId, now + (long)(fromSeconds * 1000), now + (long)(toSeconds * 1000));
 	}
 
 	private static readonly ConcurrentDictionary<ulong, DateTime> _aliveStartTimes = [];
