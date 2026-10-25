@@ -236,12 +236,10 @@ internal class FullControlWindow : FullCtrlWindow
 			_openSize = ImGui.GetWindowSize();
 		}
 
-		var folded = _fold.Amount;
-		if (folded < 1f)
+		if (_fold.Amount < 1f)
 		{
-			using var alpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * (1f - MathF.Min(1f, folded * 1.4f)));
-			var (openPos, openSize) = _fold.OpenRect();
-			DrawContent(openPos, openSize);
+			using var alpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, _fold.ContentAlpha);
+			DrawContent();
 		}
 
 		DrawWindowBar();
@@ -283,17 +281,15 @@ internal class FullControlWindow : FullCtrlWindow
 		}
 	}
 
-	private void DrawContent(Vector2 openPos, Vector2 openSize)
+	private void DrawContent()
 	{
-		var padding = _fold.OpenPadding;
-		ImGui.SetCursorScreenPos(openPos + padding);
-		using var content = ImRaii.Child("##rsr_control_content", Vector2.Max(Vector2.One, openSize - (padding * 2f)), false,
-			ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground);
+		using var content = _fold.BeginContent("##rsr_control_content");
 		if (!content)
 		{
 			return;
 		}
 
+		var padding = _fold.OpenPadding;
 		var width = ImGui.GetContentRegionAvail().X;
 
 		var (headerMinimum, headerNatural) = DrawHeader(width);
@@ -430,11 +426,8 @@ internal class FullControlWindow : FullCtrlWindow
 		}
 		else
 		{
-			while (shown > 1 && barSize.X > width)
-			{
-				shown--;
-				barSize = M3Widgets.WindowActionsSize(shown, Brand, 0f);
-			}
+			shown = M3Widgets.WindowActionsThatFit(_actions.Length, Brand, width, 1);
+			barSize = M3Widgets.WindowActionsSize(shown, Brand, 0f);
 
 			icons = width >= labelledWidth;
 			labelFont = width >= compactWidth ? null : M3.LabelSmall;

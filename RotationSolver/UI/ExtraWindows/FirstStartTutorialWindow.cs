@@ -1297,28 +1297,8 @@ internal sealed class FirstStartTutorialWindow : Window
 		using var spacing = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(8f, 6f) * M3.Scale);
 		foreach (var item in items)
 		{
-			DrawBullet(item);
+			M3Text.Bullet(item);
 		}
-	}
-
-	private static void DrawBullet(string text)
-	{
-		var s = M3.Scheme;
-		var scale = M3.Scale;
-		var indent = 22f * scale;
-		var origin = ImGui.GetCursorScreenPos();
-
-		ImGui.GetWindowDrawList().AddCircleFilled(
-			new Vector2(origin.X + (9f * scale), origin.Y + (ImGui.GetTextLineHeight() * 0.5f)),
-			2.5f * scale, M3.U32(s.Primary, 0.9f), 12);
-
-		ImGui.Indent(indent);
-		using (ImRaii.PushColor(ImGuiCol.Text, M3.Alpha(s.OnSurface, 0.9f)))
-		{
-			ImGui.TextWrapped(text);
-		}
-
-		ImGui.Unindent(indent);
 	}
 
 	private static void DrawNote(string text)

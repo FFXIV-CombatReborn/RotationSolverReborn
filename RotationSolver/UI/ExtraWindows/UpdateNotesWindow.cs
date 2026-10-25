@@ -479,7 +479,7 @@ internal sealed class UpdateNotesWindow : Window
 		using var spacing = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(8f, 5f) * M3.Scale);
 		foreach (var item in section.Items)
 		{
-			DrawBullet(item);
+			M3Text.Bullet(item, wrap: false);
 		}
 	}
 
@@ -517,26 +517,6 @@ internal sealed class UpdateNotesWindow : Window
 			var labelSize = ImGui.CalcTextSize(label);
 			drawList.AddText(new Vector2(x, min.Y + ((height - labelSize.Y) * 0.5f)), M3.U32(s.OnSecondaryContainer), label);
 		}
-	}
-
-	private static void DrawBullet(string text)
-	{
-		var s = M3.Scheme;
-		var scale = M3.Scale;
-		var indent = 22f * scale;
-		var origin = ImGui.GetCursorScreenPos();
-
-		ImGui.GetWindowDrawList().AddCircleFilled(
-			new Vector2(origin.X + (10f * scale), origin.Y + (ImGui.GetTextLineHeight() * 0.5f)),
-			2.5f * scale, M3.U32(s.Primary, 0.9f), 12);
-
-		ImGui.Indent(indent);
-		using (ImRaii.PushColor(ImGuiCol.Text, M3.Alpha(s.OnSurface, 0.9f)))
-		{
-			ImGui.TextUnformatted(text);
-		}
-
-		ImGui.Unindent(indent);
 	}
 
 	#endregion
