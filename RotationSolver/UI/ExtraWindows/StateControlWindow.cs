@@ -200,12 +200,10 @@ internal class StateControlWindow : Window
 		_drawnBand = _band;
 		_placed = true;
 
-		var folded = _fold.Amount;
-		if (folded < 1f)
+		if (_fold.Amount < 1f)
 		{
-			using var alpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * (1f - MathF.Min(1f, folded * 1.4f)));
-			var (openPos, openSize) = _fold.OpenRect();
-			DrawContent(openPos, openSize);
+			using var alpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, _fold.ContentAlpha);
+			DrawContent();
 		}
 
 		var pressed = _fold.DrawBar("##state_actions", Actions, Brand, out var closed, M3.Scheme.SurfaceContainerHigh);
@@ -220,17 +218,15 @@ internal class StateControlWindow : Window
 		}
 	}
 
-	private void DrawContent(Vector2 openPos, Vector2 openSize)
+	private void DrawContent()
 	{
-		var padding = _fold.OpenPadding;
-		ImGui.SetCursorScreenPos(openPos + padding);
-		using var content = ImRaii.Child("##state_content", Vector2.Max(Vector2.One, openSize - (padding * 2f)), false,
-			ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground);
+		using var content = _fold.BeginContent("##state_content");
 		if (!content)
 		{
 			return;
 		}
 
+		var padding = _fold.OpenPadding;
 		var scale = M3.Scale;
 		var width = ImGui.GetContentRegionAvail().X;
 		var current = CurrentIndex();
