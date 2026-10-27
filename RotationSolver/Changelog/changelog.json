@@ -1,6 +1,22 @@
 {
-  "tagline": "Yet another attempt at improving time to kill accuracy",
+  "tagline": "Yet another UI fix thingy",
   "entries": [
+    {
+      "version": "7.5.7.9",
+      "title": "Settings window size fix",
+      "date": "October 27, 2026",
+      "sections": [
+        {
+          "title": "Settings window",
+          "icon": "Lock",
+          "items": [
+            "Fixed the settings window opening at its smallest size after RSR updated or reloaded while the window was minimized. It now opens at the size it had before you minimized it. The Control and State windows had the same problem and are fixed too.",
+            "A locked settings window now always shows its lock button, however small the window is, so you can always unlock it to move or resize it. If your settings window is already stuck small, click the lock at the top right, then resize the window.",
+            "The Control window also keeps its lock button while it's locked, however narrow it is."
+          ]
+        }
+      ]
+    },
     {
       "version": "7.5.7.7",
       "title": "Time to kill accuracy",

@@ -409,10 +409,12 @@ internal class FullControlWindow : FullCtrlWindow
 		var fullBar = M3Widgets.WindowActionsSize(_actions.Length, Brand, 0f);
 		var barSize = fullBar;
 		var shown = _actions.Length;
+		var kept = Service.Config.IsControlWindowLock ? 2 : 1;
 		var origin = ImGui.GetCursorScreenPos();
 
 		// As the window narrows the state icons go first. Then the pill gets the top row and the switches span the rows below it.
 		// Narrower still, the switch labels shrink and the pill drops Settings, then Lock, but always keeps the specials toggle.
+		// A locked window can't be resized, so it keeps Lock too.
 		bool icons;
 		ImFontPtr? labelFont = null;
 		float switchTop, switchWidth, rowHeight;
@@ -426,7 +428,7 @@ internal class FullControlWindow : FullCtrlWindow
 		}
 		else
 		{
-			shown = M3Widgets.WindowActionsThatFit(_actions.Length, Brand, width, 1);
+			shown = M3Widgets.WindowActionsThatFit(_actions.Length, Brand, width, kept);
 			barSize = M3Widgets.WindowActionsSize(shown, Brand, 0f);
 
 			icons = width >= labelledWidth;
@@ -461,7 +463,7 @@ internal class FullControlWindow : FullCtrlWindow
 		var height = MathF.Max(rowHeight, aoeTop + segmentHeight);
 		ImGui.SetCursorScreenPos(new Vector2(origin.X, origin.Y + height));
 		ImGui.Dummy(new Vector2(width, 0f));
-		return (MathF.Max(smallWidth, M3Widgets.WindowActionsSize(1, Brand, 0f).X), MathF.Max(labelledWidth, fullBar.X));
+		return (MathF.Max(smallWidth, M3Widgets.WindowActionsSize(kept, Brand, 0f).X), MathF.Max(labelledWidth, fullBar.X));
 	}
 
 	// The narrowest the switches go: small labels with a little room either side.

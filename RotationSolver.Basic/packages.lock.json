@@ -26,9 +26,9 @@
       },
       "RebornMaterial": {
         "type": "Direct",
-        "requested": "[7.5.7, )",
-        "resolved": "7.5.7",
-        "contentHash": "8oW0LYiLAUHzIeynXBGwP+KAxLmxE+z36dLpyc0M06nBCHZ3nTHTH22vi731ccjU3Kg70VCym3rH1dqfxV4DYw=="
+        "requested": "[7.5.7.1, )",
+        "resolved": "7.5.7.1",
+        "contentHash": "G1GcDrp1lJ5b34OLOMNkOs0YJTB6l97m58xy9IcViYGhnAJNlwfsivZ58E44Frid0LFBlTuyFvvjIsbObrfzyg=="
       },
       "Svg": {
         "type": "Direct",
@@ -42,11 +42,11 @@
       },
       "System.Drawing.Common": {
         "type": "Direct",
-        "requested": "[10.0.13, )",
-        "resolved": "10.0.13",
-        "contentHash": "s8JRuC+ec1djwT471SbZRXWCBFXCKkNNGILWD/OCmIcdL0KP0w4arMjyEZzNUuKxolperKtlxHhS+34rA4N3XA==",
+        "requested": "[10.0.14, )",
+        "resolved": "10.0.14",
+        "contentHash": "kBe75KgVcm8soY0BPd5vTSLfC5vjd0O1YN6ApsL4qWnQiLUsOQ2k+PjWwraOI7JEp36mksavW/qz/r0NoSzYuQ==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "10.0.13"
+          "Microsoft.Win32.SystemEvents": "10.0.14"
         }
       },
       "ExCSS": {
@@ -69,8 +69,8 @@
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "10.0.13",
-        "contentHash": "rtd1rRf5uiusn/r+hNsODiCjvA+nErw+1EQb2uCv0EedLi2GEYWgLK0V31SXzcZ2b0D7VeoOrHJ0WCQqfbO67Q=="
+        "resolved": "10.0.14",
+        "contentHash": "axfieK5mj+uS/wLYl0dhlRFWdNP1iKHhx/M6DZNXPCSve7q4TCogw//W6BWGsYhnWuSw55aqheHE0a8l8s1oTw=="
       },
       "rotationsolver.sourcegenerators": {
         "type": "Project",
