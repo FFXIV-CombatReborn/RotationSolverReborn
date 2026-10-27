@@ -262,7 +262,9 @@ public partial class MainWindow : Window
 			: _activeTab.GetDescription();
 		var clearWidth = searching ? M3Widgets.IconButtonSize + (4f * Scale) : 0f;
 
-		using var bar = M3TopAppBar.Begin(title, subtitle, _windowActions.Length, Brand, clearWidth, M3.Space1);
+		// A locked window can't be resized, so it never drops the lock, its last action.
+		var kept = Service.Config.IsMainWindowLock ? 1 : 0;
+		using var bar = M3TopAppBar.Begin(title, subtitle, _windowActions.Length, Brand, clearWidth, M3.Space1, kept);
 		_shownActions = bar.ShownActions;
 		_fold.BarTop = bar.BarTop;
 
