@@ -2,9 +2,6 @@ using Lumina.Excel.Sheets;
 
 namespace RotationSolver.GameData.Getters.Actions;
 
-/// <summary>
-/// Gets the single rotation actions for a specific job.
-/// </summary>
 internal class ActionSingleRotationGetter(Lumina.GameData gameData, ClassJob job)
 	: ActionRotationGetterBase(gameData)
 {
@@ -41,9 +38,6 @@ internal class ActionSingleRotationGetter(Lumina.GameData gameData, ClassJob job
 	}
 }
 
-/// <summary>
-/// Abstract base class for getting multi-rotation actions.
-/// </summary>
 internal abstract class ActionMultiRotationGetter(Lumina.GameData gameData)
 	: ActionRotationGetterBase(gameData)
 {
@@ -86,9 +80,6 @@ internal abstract class ActionMultiRotationGetter(Lumina.GameData gameData)
 	}
 }
 
-/// <summary>
-/// Gets the duty rotation actions.
-/// </summary>
 internal class ActionDutyRotationGetter(Lumina.GameData gameData)
 	: ActionMultiRotationGetter(gameData)
 {
@@ -113,9 +104,6 @@ internal class ActionDutyRotationGetter(Lumina.GameData gameData)
 	}
 }
 
-/// <summary>
-/// Gets the role rotation actions.
-/// </summary>
 internal class ActionRoleRotationGetter(Lumina.GameData gameData)
 	: ActionMultiRotationGetter(gameData)
 {

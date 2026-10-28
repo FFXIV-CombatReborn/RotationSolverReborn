@@ -20,10 +20,6 @@ internal static class ActionUpdater
 	[EzIPCEvent] public static Action<uint> NextGCDActionChanged = delegate { };
 	[EzIPCEvent] public static Action<uint> NextActionChanged = delegate { };
 
-	/// <summary>
-	/// Fired whenever the enemy positional that RSR is about to move into (or use an action from) changes.
-	/// The value is the underlying byte of <see cref="EnemyPositional"/>.
-	/// </summary>
 	[EzIPCEvent] public static Action<byte> DesiredPositionalChanged = delegate { };
 
 	private static IAction? _nextAction;
@@ -57,10 +53,6 @@ internal static class ActionUpdater
 
 	private static EnemyPositional _desiredPositional = EnemyPositional.None;
 
-	/// <summary>
-	/// The enemy positional RSR intends to use for the next GCD action, e.g. <see cref="EnemyPositional.Rear"/>
-	/// for a rear positional combo action. <see cref="EnemyPositional.None"/> if no positional is required.
-	/// </summary>
 	internal static EnemyPositional DesiredPositional
 	{
 		get => _desiredPositional;
@@ -218,8 +210,6 @@ internal static class ActionUpdater
 	private static DateTime _startAliveTime = DateTime.Now;
 	private static bool _isDead = true;
 	private static bool _changedArea;
-
-	// Updates are skipped during loading screens, so the transition is flagged here and applied on the next update.
 	internal static void MarkAreaChange()
 	{
 		_changedArea = true;
@@ -264,7 +254,6 @@ internal static class ActionUpdater
 
 	internal static bool CanDoAction()
 	{
-		// In Target-Only mode we never perform actions.
 		if (DataCenter.IsTargetOnly)
 		{
 			return false;
@@ -292,7 +281,6 @@ internal static class ActionUpdater
 			return false;
 		}
 
-		// Skip when casting
 		if (player.TotalCastTime - DataCenter.CalculatedActionAhead > 0)
 		{
 			return false;
@@ -303,7 +291,6 @@ internal static class ActionUpdater
 			return false;
 		}
 
-		// GCD
 		return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);
 	}
 
@@ -347,14 +334,12 @@ internal static class ActionUpdater
 			|| Svc.Condition[ConditionFlag.BetweenAreas51]
 			|| Svc.Condition[ConditionFlag.Mounted]
 			|| Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
-			// RolePlaying is set for the entire duration of Quest Battles (e.g. Hardboiled), where the
-			// player's NPC form is actively fighting, so it shouldn't be treated as an occupied state there.
 			|| (Svc.Condition[ConditionFlag.RolePlaying] && !DataCenter.IsInQuestBattle)
 			|| Svc.Condition[ConditionFlag.InFlight]
 			|| Svc.Condition[ConditionFlag.Diving]
 			|| Svc.Condition[ConditionFlag.Swimming]
 			|| Svc.Condition[ConditionFlag.Unconscious]
-			|| Svc.Condition[ConditionFlag.InThisState89] // frog state in Tower of Babil
+			|| Svc.Condition[ConditionFlag.InThisState89]
 			|| Svc.Condition[ConditionFlag.MeldingMateria])
 		{
 			return true;

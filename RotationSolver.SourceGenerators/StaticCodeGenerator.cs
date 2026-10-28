@@ -18,10 +18,6 @@ public class StaticCodeGenerator : IIncrementalGenerator
 		context.RegisterPostInitializationOutput(Execute);
 	}
 
-	/// <summary>
-	/// Executes the source generation process.
-	/// </summary>
-	/// <param name="context">The post-initialization context.</param>
 	private static void Execute(IncrementalGeneratorPostInitializationContext context)
 	{
 		try
@@ -37,15 +33,10 @@ public class StaticCodeGenerator : IIncrementalGenerator
 		}
 		catch (Exception ex)
 		{
-			// Post-initialization can't report diagnostics, so the failure surfaces as a compile error.
 			context.AddSource("SourceGenerationError.g.cs", $"#error Source generation failed: {ex.Message.Replace('\r', ' ').Replace('\n', ' ')}");
 		}
 	}
 
-	/// <summary>
-	/// Generates the OpCode enum source code.
-	/// </summary>
-	/// <param name="context">The source production context.</param>
 	private static void GenerateOpCode(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
@@ -67,10 +58,6 @@ public class StaticCodeGenerator : IIncrementalGenerator
 		context.AddSource("OpCode.g.cs", code);
 	}
 
-	/// <summary>
-	/// Generates the StatusID enum source code.
-	/// </summary>
-	/// <param name="context">The source production context.</param>
 	private static void GenerateStatus(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
@@ -92,10 +79,6 @@ public class StaticCodeGenerator : IIncrementalGenerator
 		context.AddSource("StatusID.g.cs", code);
 	}
 
-	/// <summary>
-	/// Generates the TerritoryContentType enum source code.
-	/// </summary>
-	/// <param name="context">The source production context.</param>
 	private static void GenerateContentType(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
@@ -117,10 +100,6 @@ public class StaticCodeGenerator : IIncrementalGenerator
 		context.AddSource("TerritoryContentType.g.cs", code);
 	}
 
-	/// <summary>
-	/// Generates the ActionCate enum source code.
-	/// </summary>
-	/// <param="context">The source production context.</param>
 	private static void GenerateActionCate(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
@@ -142,10 +121,6 @@ public class StaticCodeGenerator : IIncrementalGenerator
 		context.AddSource("ActionCate.g.cs", code);
 	}
 
-	/// <summary>
-	/// Generates the BNpcNameID enum source code.
-	/// </summary>
-	/// <param name="context">The source production context.</param>
 	private static void GenerateBNpcNameID(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
@@ -167,10 +142,6 @@ public class StaticCodeGenerator : IIncrementalGenerator
 		context.AddSource("BNpcNameID.g.cs", code);
 	}
 
-	/// <summary>
-	/// Generates the ActionID enum source code.
-	/// </summary>
-	/// <param="context">The source production context.</param>
 	private static void GenerateActionID(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
@@ -192,20 +163,12 @@ public class StaticCodeGenerator : IIncrementalGenerator
 		context.AddSource("ActionID.g.cs", code);
 	}
 
-	/// <summary>
-	/// Generates the base rotation source code.
-	/// </summary>
-	/// <param="context">The source production context.</param>
 	private static void GenerateBaseRotation(IncrementalGeneratorPostInitializationContext context)
 	{
 		context.AddSource("CustomRotation.g.cs", Properties.Action.Value);
 		context.AddSource("DutyRotation.g.cs", Properties.DutyAction.Value);
 	}
 
-	/// <summary>
-	/// Generates the rotations source code.
-	/// </summary>
-	/// <param="context">The source production context.</param>
 	private static void GenerateRotations(IncrementalGeneratorPostInitializationContext context)
 	{
 		context.AddSource("BaseRotations.g.cs", Properties.Rotation.Value);

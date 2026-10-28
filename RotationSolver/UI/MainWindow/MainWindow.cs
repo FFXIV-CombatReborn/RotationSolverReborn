@@ -25,7 +25,6 @@ public partial class MainWindow : Window
 	private bool _showResetPopup = false;
 	private M3Style.Scope _theme;
 
-	// Keep this in this file: the page files read it while setting up, and this file is set up first.
 	internal static SearchableCollection _allSearchable = new();
 
 	private static bool? _cnLanguageClient;
@@ -61,7 +60,6 @@ public partial class MainWindow : Window
 
 	public override void OnOpen()
 	{
-		// Clear any pin or click-through left over from when the window had a title bar.
 		IsPinned = false;
 		IsClickthrough = false;
 
@@ -107,7 +105,6 @@ public partial class MainWindow : Window
 		_searchResults = [];
 	}
 
-	// Push the theme before Begin, since Begin draws the window's background, padding and corners.
 	public override void PreDraw()
 	{
 		_theme = M3Style.Push(M3Density.Tight);
@@ -151,7 +148,6 @@ public partial class MainWindow : Window
 
 		try
 		{
-			// Not a table: ImGui saves table column widths and they can't be clamped later. Capped at half the window.
 			var available = MathF.Max(1f, ImGui.GetContentRegionAvail().X);
 			var spacing = ImGui.GetStyle().ItemSpacing.X;
 			var sidebarWidth = MathF.Min(NavigationColumnMinWidth(), available * 0.5f);
@@ -232,7 +228,6 @@ public partial class MainWindow : Window
 		var resetWidth = M3Widgets.ButtonWidth(FontAwesomeIcon.TrashAlt, resetLabel);
 		var cancelWidth = M3Widgets.ButtonWidth(FontAwesomeIcon.None, cancelLabel);
 
-		// Right-aligned against the dialog's own padding, whatever the theme sets it to.
 		ImGui.SetCursorPosX(MathF.Max(ImGui.GetCursorPosX(),
 			ImGui.GetWindowWidth() - ImGui.GetStyle().WindowPadding.X - resetWidth - M3.Space2 - cancelWidth));
 
@@ -262,7 +257,6 @@ public partial class MainWindow : Window
 			: _activeTab.GetDescription();
 		var clearWidth = searching ? M3Widgets.IconButtonSize + (4f * Scale) : 0f;
 
-		// A locked window can't be resized, so it never drops the lock, its last action.
 		var kept = Service.Config.IsMainWindowLock ? 1 : 0;
 		using var bar = M3TopAppBar.Begin(title, subtitle, _windowActions.Length, Brand, clearWidth, M3.Space1, kept);
 		_shownActions = bar.ShownActions;

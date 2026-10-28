@@ -19,9 +19,6 @@ internal static class RotationUpdater
 
 	public static IAction[] CurrentRotationActions { get; private set; } = [];
 
-	/// <summary>
-	/// The current duty rotation's actions that are on the duty action bar, refreshed with <see cref="CurrentRotationActions"/>.
-	/// </summary>
 	public static IAction[] CurrentDutyRotationActions { get; private set; } = [];
 
 	private static long _actionsRefreshTick = long.MinValue;
@@ -29,12 +26,8 @@ internal static class RotationUpdater
 
 	private static string _curDutyRotationName = string.Empty;
 
-	// The Reborn/Evolved state CustomRotationsLookup was built for.
 	private static RotationType _lookupRotationType = RotationType.Reborn;
 
-	/// <summary>
-	/// Loads custom rotation groups from the current assembly
-	/// </summary>
 	public static void LoadBuiltInRotations()
 	{
 		List<Assembly> assemblies = [typeof(RotationUpdater).Assembly];
@@ -140,7 +133,7 @@ internal static class RotationUpdater
 				rotations));
 		}
 
-		CustomRotationsLookup = []; // CustomRotations aren't disposed or we'd want to loop through and dispose them
+		CustomRotationsLookup = [];
 		return [.. result];
 	}
 
@@ -157,8 +150,6 @@ internal static class RotationUpdater
 		}
 	}
 
-	// The grouping is read by UI windows every frame; rebuild it when its inputs change or periodically
-	// (hotbar slot membership can change without any of the tracke inputs changing).
 	private static IEnumerable<IGrouping<string, IAction>>? _groupedActions;
 	private static (ICustomRotation? Rotation, DutyRotation? Duty, bool IsPvP, Job Job) _groupedActionsKey;
 	private static long _groupedActionsTick;
@@ -196,7 +187,6 @@ internal static class RotationUpdater
 			var key = string.Empty;
 			if (a is IBaseAction act)
 			{
-				// Filter out special actions, usually related to duty specifc mechanics but not duty actions
 				if (act.Info.IsSpecialAction)
 				{
 					continue;
@@ -205,12 +195,10 @@ internal static class RotationUpdater
 				{
 					continue;
 				}
-				// Filter out Mount actions
 				else if (act.Info.IsMountAction)
 				{
 					continue;
 				}
-				// Filter out anything but sprint for now
 				else if (act.Info.IsSystemAction && act.AdjustedID != 3)
 				{
 					continue;
@@ -264,7 +252,6 @@ internal static class RotationUpdater
 				key = "Item";
 			}
 
-			// Always add to groups since we now have meaningful keys for all cases
 			if (!groups.TryGetValue(key, out var list))
 			{
 				list = [];
@@ -273,7 +260,6 @@ internal static class RotationUpdater
 			list.Add(a);
 		}
 
-		// Sort groups by key
 		List<string> sortedKeys = [.. groups.Keys];
 		sortedKeys.Sort(StringComparer.Ordinal);
 
@@ -336,8 +322,6 @@ internal static class RotationUpdater
 		UpdateDutyRotation();
 		RefreshActions();
 	}
-
-	// Items only join a rotation's actions while owned, and duty actions follow the duty bar, so both lists are rebuilt now and then.
 	private static void RefreshActions()
 	{
 		var now = Environment.TickCount64;
@@ -355,7 +339,6 @@ internal static class RotationUpdater
 	{
 		if (!DutyRotations.TryGetValue(Svc.ClientState.TerritoryType, out var rotations))
 		{
-			// Unload the current duty rotation if leaving a duty
 			if (DataCenter.CurrentDutyRotation != null)
 			{
 				DataCenter.CurrentDutyRotation.Dispose();
@@ -370,7 +353,7 @@ internal static class RotationUpdater
 		var name = value ?? string.Empty;
 		if (name == _curDutyRotationName && DataCenter.CurrentDutyRotation != null)
 		{
-			return; // No change, so we don't need to update
+			return;
 		}
 
 		var type = GetChosenType(rotations, name);
@@ -381,7 +364,6 @@ internal static class RotationUpdater
 			_actionsRefreshTick = long.MinValue;
 		}
 
-		// Also when the saved name matched nothing, so the lookup isn't repeated every frame.
 		_curDutyRotationName = name;
 
 		static DutyRotation? GetRotation(Type? t)
@@ -406,7 +388,7 @@ internal static class RotationUpdater
 
 	private static void UpdateCustomRotation()
 	{
-		if (Player.Object == null || CustomRotations.Length == 0) // Not loaded yet; wait instead of clearing the current rotation
+		if (Player.Object == null || CustomRotations.Length == 0)
 		{
 			return;
 		}
@@ -422,7 +404,7 @@ internal static class RotationUpdater
 		}
 		else if (DataCenter.CurrentRotation?.Job == nowJob && DataCenter.CurrentRotation?.GetAttributes()?.Type == curCombatType)
 		{
-			return; // Nothing has changed, so we don't need to try and find a new rotation
+			return;
 		}
 
 		if (!CustomRotationsLookup.TryGetValue(nowJob, out _))
@@ -430,9 +412,9 @@ internal static class RotationUpdater
 			InitReferenceDict(nowJob);
 		}
 
-		if (CustomRotationsLookup.TryGetValue(nowJob, out var validCustomRotations)) // Because default rotations exist, this *should* always have something; if not, no rotations
+		if (CustomRotationsLookup.TryGetValue(nowJob, out var validCustomRotations))
 		{
-			if (validCustomRotations.Count == 0) // We successfully got something, but we'll still check if there are any valid rotations
+			if (validCustomRotations.Count == 0)
 			{
 				PluginLog.Warning($"No valid rotations found for {nowJob}");
 				return;
@@ -442,7 +424,6 @@ internal static class RotationUpdater
 			{
 				if (validCustomRotationsList.Count == 0)
 				{
-					// Clear below instead of keeping a rotation for another job or Reborn/Evolved state.
 					if (DataCenter.CurrentRotation != null)
 					{
 						PluginLog.Information($"No valid {curCombatType} rotations found for {nowJob}");
@@ -452,7 +433,6 @@ internal static class RotationUpdater
 				{
 					var desiredRotationName = DataCenter.IsPvP ? Service.Config.PvPRotationChoice : Service.Config.RotationChoice;
 
-					// Check if we have a matching rotation for the config, or use the first rotation which should be our default
 					var rotation = validCustomRotationsList[0];
 					foreach (var possibleRotation in validCustomRotationsList)
 					{
@@ -463,7 +443,6 @@ internal static class RotationUpdater
 						}
 					}
 
-					//If the rotation has changed, perform a clear
 					if (rotation != DataCenter.CurrentRotation)
 					{
 						ChangeRotation(rotation);
@@ -474,12 +453,12 @@ internal static class RotationUpdater
 			}
 			else
 			{
-				//PluginLog.Debug($"Combat type {curCombatType} not found in rotations for {nowJob}. Available types: {string.Join(", ", validCustomRotations.Keys)}");
+
 			}
 		}
 		else
 		{
-			//PluginLog.Debug($"No rotations found for job {nowJob} in CustomRotationsLookup");
+
 		}
 
 		DataCenter.CurrentRotation = null;
@@ -530,7 +509,6 @@ internal static class RotationUpdater
 				continue;
 			}
 
-			// Add this group for every job in ClassJobIds
 			foreach (var job in customRotationGroup.ClassJobIds)
 			{
 				if (!CustomRotationsLookup.TryGetValue(job, out var rotationsListByType))
@@ -551,7 +529,6 @@ internal static class RotationUpdater
 						continue;
 					}
 
-					// Skip rotations that are explicitly disabled
 					if (rotAttr.Disabled)
 					{
 						continue;

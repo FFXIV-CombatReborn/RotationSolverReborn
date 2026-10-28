@@ -3,9 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 namespace RotationSolver.GameData;
-/// <summary>
-/// Utility class for various helper methods.
-/// </summary>
+
 internal static partial class Util
 {
 	/// <summary>
@@ -216,43 +214,31 @@ internal static partial class Util
 			return description;
 		}
 
-		// Remove or replace problematic HTML-like tags that are not valid XML
-		// Handle colortype tags with parentheses and their remnants
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"<colortype\([^)]*\)>", "", RegexOptions.IgnoreCase);
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"</colortype>", "", RegexOptions.IgnoreCase);
 
-		// Handle edgecolortype tags with parentheses and their remnants
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"<edgecolortype\([^)]*\)>", "", RegexOptions.IgnoreCase);
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"</edgecolortype>", "", RegexOptions.IgnoreCase);
 
-		// Handle if tags with parentheses and their remnants
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"<if\([^)]*\)>", "", RegexOptions.IgnoreCase);
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"</if>", "", RegexOptions.IgnoreCase);
 
-		// Handle other problematic tags
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"</?br/?>", " ", RegexOptions.IgnoreCase);
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"</?indent/?>", "", RegexOptions.IgnoreCase);
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"</?sheet\([^)]*\)/?>", "", RegexOptions.IgnoreCase);
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"</?value\([^)]*\)/?>", "", RegexOptions.IgnoreCase);
 
-		// Remove any remaining tags with parentheses in them
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"<[^>]*\([^>]*\)[^>]*>", "", RegexOptions.IgnoreCase);
 
-		// Clean up tag remnants like ,)> or similar patterns that might be left behind
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"[,)]\s*>", "", RegexOptions.IgnoreCase);
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"<\s*[,)]", "", RegexOptions.IgnoreCase);
 
-		// Remove standalone parentheses and commas that might be remnants
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"(?<=^|\s)[,)]+(?=\s|$)", "", RegexOptions.IgnoreCase);
 
-		// Clean up multiple spaces
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"\s+", " ");
 
-		// Clean up any remaining invalid XML characters
 		description = System.Text.RegularExpressions.Regex.Replace(description, @"[\x00-\x08\x0B\x0C\x0E-\x1F]", "");
 
-		// Escape XML special characters, but preserve the structure for later XML processing
-		// Only escape & and quotes, let the XML processing handle < and > for valid XML tags
 		description = description.Replace("&", "&amp;");
 		description = description.Replace("\"", "&quot;");
 

@@ -332,7 +332,6 @@ internal sealed class UpdateNotesWindow : Window
 		}
 	}
 
-	// Fetched every frame on purpose; Dalamud caches the texture.
 	internal static IDalamudTextureWrap? GetBanner()
 	{
 		return Svc.Texture.GetFromManifestResource(typeof(UpdateNotesWindow).Assembly, BannerResource)

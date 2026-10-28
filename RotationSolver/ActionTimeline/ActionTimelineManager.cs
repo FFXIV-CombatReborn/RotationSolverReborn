@@ -232,12 +232,10 @@ public class ActionTimelineManager : IDisposable
 		var actionId = player.CastActionId;
 		var elapsed = player.CurrentCastTime;
 
-		// Also new if the same action restarted faster than an update could notice.
 		var isNew = actionId != _castActionId || elapsed < _castElapsed - CastRestartSeconds;
 		_castActionId = actionId;
 		_castElapsed = elapsed;
 
-		// Use the client's cast type, not the effect packet's header, to skip mount, item and interaction casts.
 		if (!isNew || player.CastActionType != (byte)ActionType.Action
 			|| !TryGetAction(actionId, out var action)
 			|| GetActionType(actionId, action) != TimelineItemType.GCD)
@@ -245,7 +243,6 @@ public class ActionTimelineManager : IDisposable
 			return;
 		}
 
-		// An older cast whose bar should still be running was interrupted without us seeing the cancel.
 		for (var i = _pendingCasts.Count - 1; i >= 0; i--)
 		{
 			if (SecondsPastCastEnd(_pendingCasts[i], now) < -CastEffectEarly)
@@ -359,7 +356,6 @@ public class ActionTimelineManager : IDisposable
 		}
 	}
 
-	// Includes anything still running when combat started, like a precast.
 	private TimelineExportSession CreateExportSession(DateTime combatStart)
 	{
 		var session = new TimelineExportSession();

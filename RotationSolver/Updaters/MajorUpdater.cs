@@ -27,12 +27,10 @@ internal static class MajorUpdater
 				return false;
 			}
 
-			// Consider the game valid when not transitioning or logging out.
 			return !Svc.Condition[ConditionFlag.BetweenAreas] && !Svc.Condition[ConditionFlag.BetweenAreas51] && !Svc.Condition[ConditionFlag.LoggingOut];
 		}
 	}
 
-	// Keys of errors already logged, so a failure repeating every frame is only reported once.
 	private static readonly HashSet<string> _loggedErrors = [];
 	private const int MaxLoggedErrors = 256;
 
@@ -59,7 +57,6 @@ internal static class MajorUpdater
 			return;
 		}
 
-		// Combat info and the job's rotation feed the decision below, so they are refreshed first.
 		Run("ActionUpdater.UpdateCombatInfo", ActionUpdater.UpdateCombatInfo);
 		Run("RotationUpdater.UpdateRotation", RotationUpdater.UpdateRotation);
 
@@ -127,7 +124,6 @@ internal static class MajorUpdater
 			|| Service.Config.StartOnFieldOpInCombat2
 			|| Service.Config.StartOnPartyIsInCombat2) && !DataCenter.IsInDutyReplay();
 
-		// Only call UpdateTargets once — cover both the auto-on check and the activated path
 		if (autoOnEnabled || isActivated)
 		{
 			Run("(RSRActivatedCore): TargetUpdater.UpdateTargets", TargetUpdater.UpdateTargets);
@@ -180,14 +176,11 @@ internal static class MajorUpdater
 			Run("(RSRActivatedCore): RSCommands.DoAction", RSCommands.DoAction);
 		}
 
-		// In Target-Only mode, update the player's target from the computed next action without executing it.
 		if (DataCenter.IsTargetOnly)
 		{
 			Run("(RSRActivatedCore): RSCommands.UpdateTargetFromNextAction (TargetOnly)", RSCommands.UpdateTargetFromNextAction);
 		}
 
-		// In Teaching Mode with auto-target enabled, also update the player's target so it matches
-		// the rotation's suggestion (important for tanks/healers where the optimal target varies).
 		if (!DataCenter.IsTargetOnly && Service.Config.TeachingMode && Service.Config.TeachingModeAutoTarget && DataCenter.InCombat)
 		{
 			Run("(RSRActivatedCore): RSCommands.UpdateTargetFromNextAction (TeachingMode)", RSCommands.UpdateTargetFromNextAction);
@@ -196,7 +189,6 @@ internal static class MajorUpdater
 		Run("(RSRActivatedCore): Wrath_IPCSubscriber.DisableAutoRotation", Wrath_IPCSubscriber.DisableAutoRotation);
 	}
 
-	// Stale BossMod values (moving, cancel cast, Pyretic) would otherwise block actions after BossMod unloads or RSR stops.
 	private static void ResetBmrDataIfLive()
 	{
 		if (!_bmrDataLive)
@@ -222,7 +214,6 @@ internal static class MajorUpdater
 			return;
 		}
 
-		// Handle Teaching Mode Highlighting
 		if (Service.Config.TeachingMode && ActionUpdater.NextAction is not null)
 		{
 			Run("Hotbar Highlighting", () =>
@@ -256,7 +247,6 @@ internal static class MajorUpdater
 
 	private static void CleanupUpdate()
 	{
-		// Handle system warnings
 		if (DataCenter.SystemWarnings.Count > 0)
 		{
 			var expiry = DateTime.Now - TimeSpan.FromMinutes(10);
@@ -274,19 +264,16 @@ internal static class MajorUpdater
 			}
 		}
 
-		// Clear old VFX data
 		if (DataCenter.VfxDataQueue.IsEmpty)
 		{
 			return;
 		}
 
-		// ConcurrentQueue can't remove from the middle, so drain it and re-enqueue the entries still active.
 		_vfxRemaining.Clear();
 		while (DataCenter.VfxDataQueue.TryDequeue(out var vfx))
 		{
 			try
 			{
-				// The hook stores the remaining cast time, which can be ~0; treat short values as unknown and keep them for 5s.
 				var keepFor = vfx.Duration >= 0.5f ? vfx.Duration : 5.0;
 				if (vfx.TimeDuration.TotalSeconds <= keepFor)
 				{
@@ -325,7 +312,6 @@ internal static class MajorUpdater
 			return;
 		}
 
-		// Nothing to do and no target: pick the closest enemy.
 		IBattleChara? closestEnemy = null;
 		var minDistance = float.MaxValue;
 
@@ -355,7 +341,6 @@ internal static class MajorUpdater
 		}
 		else
 		{
-			// Respect TargetDelay before auto-targeting the closest enemy
 			RSCommands.SetTargetWithDelay(closestEnemy);
 		}
 	}
@@ -374,7 +359,6 @@ internal static class MajorUpdater
 
 	private static void LogOnce(string context, Exception ex)
 	{
-		// Exceptions thrown every frame are new instances, so dedupe on what they say rather than reference.
 		var key = $"{context}|{ex.GetType().FullName}|{ex.Message}";
 		if (_loggedErrors.Count >= MaxLoggedErrors)
 		{

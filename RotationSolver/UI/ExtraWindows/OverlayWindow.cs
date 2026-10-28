@@ -40,14 +40,12 @@ internal class OverlayWindow : Window
 			return;
 		}
 
-		// Built on the framework thread; this only reads the latest snapshot.
 		var elements = HotbarHighlightManager.Elements2D;
 		if (elements.Length == 0)
 		{
 			return;
 		}
 
-		// Anti-aliased fill is slow on large overlays, so turn it off while drawing.
 		var prevAAFill = ImGui.GetStyle().AntiAliasedFill;
 		ImGui.GetStyle().AntiAliasedFill = false;
 

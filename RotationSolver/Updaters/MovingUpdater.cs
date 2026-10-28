@@ -15,26 +15,22 @@ internal static class MovingUpdater
 			return;
 		}
 
-		// Special state.
 		if (Svc.Condition?[ConditionFlag.OccupiedInEvent] == true)
 		{
 			Service.CanMove = true;
 			return;
 		}
 
-		// Casting the action in list.
 		if (Svc.Condition?[ConditionFlag.Casting] == true)
 		{
 			Service.CanMove = ActionBasicInfo.ActionsNoNeedCasting.Contains(Player.Object?.CastActionId ?? 0);
 			return;
 		}
 
-		// Config flags for special statuses/actions
 		var cfgFlame = Service.Config?.PosFlameThrower == true;
 		var cfgPassage = Service.Config?.PosPassageOfArms == true;
 		var cfgImpro = Service.Config?.PosImprovisation == true;
 
-		// Action
 		ActionID action;
 		if (DateTime.Now - RSCommands._lastUsedTime < TimeSpan.FromMilliseconds(100f))
 		{
@@ -49,13 +45,11 @@ internal static class MovingUpdater
 			action = 0;
 		}
 
-		// Special actions
 		var specialActions = ActionManager.GetAdjustedCastTime(ActionType.Action, (uint)action) > 0
 							  || (cfgFlame && Service.GetAdjustedActionId(ActionID.FlameThrowerPvE) == action)
 							  || (cfgPassage && Service.GetAdjustedActionId(ActionID.PassageOfArmsPvE) == action)
 							  || (cfgImpro && Service.GetAdjustedActionId(ActionID.ImprovisationPvE) == action);
 
-		// Special statuses
 		var specialStatus = (cfgFlame && StatusHelper.PlayerHasStatus(true, StatusID.Flamethrower))
 							 || (cfgPassage && StatusHelper.PlayerHasStatus(true, StatusID.PassageOfArms))
 							 || (cfgImpro && StatusHelper.PlayerHasStatus(true, StatusID.Improvisation));

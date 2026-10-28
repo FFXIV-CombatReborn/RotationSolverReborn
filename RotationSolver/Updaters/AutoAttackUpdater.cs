@@ -49,10 +49,6 @@ namespace RotationSolver.Updaters
 		private static readonly TimeSpan ToggleCooldown = TimeSpan.FromMilliseconds(500);
 		private static DateTime _lastToggle = DateTime.MinValue;
 
-		/// <summary>
-		/// Called every frame. If auto attacks are currently active but a NoCastingStatus is
-		/// present, sends the toggle-auto-attack general action to disable them.
-		/// </summary>
 		public static unsafe void Update()
 		{
 			if (!Player.Available)
@@ -74,7 +70,6 @@ namespace RotationSolver.Updaters
 					&& now - _lastToggle >= ToggleCooldown
 					&& PlayerHasNoCastingStatus())
 				{
-					// GeneralAction 1 is the auto-attack toggle — same method the game uses
 					actionManager->UseAction(ActionType.GeneralAction, 1);
 					_lastToggle = now;
 					PluginLog.Information("[AutoAttackUpdater] Disabled active auto attacks due to NoCastingStatus.");
@@ -90,7 +85,6 @@ namespace RotationSolver.Updaters
 		{
 			try
 			{
-				// Motion Tracker and BMR's Pyretic mode block attacks regardless of the configured status list.
 				if (DataCenter.BMRSpecialModeType == SpecialMode.Pyretic)
 				{
 					return true;
@@ -117,7 +111,6 @@ namespace RotationSolver.Updaters
 
 		private static unsafe bool SetAutoAttackStateDetour(AutoAttackState* self, bool value, bool sendPacket, bool isInstant)
 		{
-			// Block attempts to enable auto attacks while a NoCastingStatus is active, only while RSR is running
 			if (value && Player.Available && DataCenter.IsActivated() && PlayerHasNoCastingStatus())
 			{
 				PluginLog.Debug("[AutoAttackUpdater] Prevented auto attack activation due to NoCastingStatus.");

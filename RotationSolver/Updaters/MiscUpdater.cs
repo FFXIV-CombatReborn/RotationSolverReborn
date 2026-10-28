@@ -21,8 +21,6 @@ internal static class MiscUpdater
 	}
 
 	private static IDtrBarEntry? _dtrEntry;
-
-	// Last values pushed to the DTR entry; setting Text rebuilds the node, so only do it on change.
 	private static string? _dtrText;
 	private static BitmapFontIcon _dtrIcon;
 	private static DTRType? _dtrClickType;
@@ -158,7 +156,6 @@ internal static class MiscUpdater
 
 	private static bool IsActionSlotRight(ActionBarSlot slot, RaptureHotbarModule.HotbarSlot? hot, uint actionID)
 	{
-		// Only plain and crafting actions can match; macros and every other slot type are skipped.
 		if (hot.HasValue
 			&& (hot.Value.OriginalApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action
 				|| hot.Value.ApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action))
@@ -169,7 +166,6 @@ internal static class MiscUpdater
 		return Service.GetAdjustedActionId((uint)slot.ActionId) == actionID;
 	}
 
-	// Own buffer, framework thread only.
 	private static readonly List<nint> _pulseAddons = [];
 
 	private delegate bool ActionBarAction(ActionBarSlot bar, RaptureHotbarModule.HotbarSlot? hot, uint highLightID);
@@ -207,7 +203,6 @@ internal static class MiscUpdater
 					UIGlobals.PlaySoundEffect(12);
 				}
 
-				// Always advance, even for skipped slots, so later slots keep their correct indices.
 				slotIndex++;
 				index++;
 			}

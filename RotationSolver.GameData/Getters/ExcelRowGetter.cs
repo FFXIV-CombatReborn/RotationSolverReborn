@@ -2,10 +2,6 @@ using Lumina.Excel;
 
 namespace RotationSolver.GameData.Getters
 {
-	/// <summary>
-	/// Abstract base class for getting Excel rows.
-	/// </summary>
-	/// <typeparam name="T">Type of the Excel row.</typeparam>
 	internal abstract class ExcelRowGetter<T>(Lumina.GameData gameData) where T : struct, IExcelRow<T>
 	{
 		protected readonly Lumina.GameData _gameData = gameData ?? throw new ArgumentNullException(nameof(gameData));
