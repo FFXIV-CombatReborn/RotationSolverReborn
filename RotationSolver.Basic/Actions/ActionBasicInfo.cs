@@ -618,7 +618,7 @@ public readonly struct ActionBasicInfo
 			return false;
 		}
 
-		return Player.Object.StatusList != null && !skipStatusProvideCheck && _action.Setting.StatusProvide != null && !Player.Object.WillStatusEndGCD(_action.Config.StatusRefreshGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
+		return Player.Object.StatusList != null && !skipStatusProvideCheck && _action.Setting.StatusProvide != null && _action.Config.ShouldCheckStatus && !Player.Object.WillStatusEndGCD(_action.Config.StatusRefreshGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
 	}
 
 	private bool IsComboValid(bool skipComboCheck)

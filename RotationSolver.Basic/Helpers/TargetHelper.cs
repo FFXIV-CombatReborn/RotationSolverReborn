@@ -41,15 +41,13 @@ namespace RotationSolver.Basic.Helpers
 				return cachedTargets;
 			}
 
-			var blacklisted = new HashSet<uint>(DataCenter.BlacklistedNameIds);
-			var stopTargets = Service.Config.FilterStopMark2
-				? [.. MarkingHelper.GetStopTargets()]
-				: s_emptyStopTargets;
-
-			var targets = new List<IBattleChara>(source.Count);
-			foreach (var target in source.GetObjectInRadius(range))
+			var candidates = getFriendly.HasValue ? GetValidTargets(source, groupBias) : source;
+			var targets = new List<IBattleChara>(candidates.Count);
+			HashSet<uint>? blacklisted = null;
+			HashSet<long>? stopTargets = null;
+			foreach (var target in candidates.GetObjectInRadius(range))
 			{
-				if (ValidityCheck(target, blacklisted, stopTargets))
+				if (getFriendly.HasValue || ValidityCheck(target, blacklisted ??= GetBlacklisted(), stopTargets ??= GetStopTargets()))
 				{
 					targets.Add(target);
 				}
@@ -57,6 +55,39 @@ namespace RotationSolver.Basic.Helpers
 
 			DataCenter.TargetsByRange[cacheKey] = targets;
 			return targets;
+		}
+
+		private static List<IBattleChara> GetValidTargets(List<IBattleChara> source, float groupBias)
+		{
+			var validKey = -1f - groupBias;
+			if (DataCenter.TargetsByRange.TryGetValue(validKey, out var valid))
+			{
+				return valid;
+			}
+
+			var blacklisted = GetBlacklisted();
+			var stopTargets = GetStopTargets();
+			valid = new List<IBattleChara>(source.Count);
+			foreach (var target in source)
+			{
+				if (ValidityCheck(target, blacklisted, stopTargets))
+				{
+					valid.Add(target);
+				}
+			}
+
+			DataCenter.TargetsByRange[validKey] = valid;
+			return valid;
+		}
+
+		private static HashSet<uint> GetBlacklisted()
+		{
+			return [.. DataCenter.BlacklistedNameIds];
+		}
+
+		private static HashSet<long> GetStopTargets()
+		{
+			return Service.Config.FilterStopMark2 ? [.. MarkingHelper.GetStopTargets()] : s_emptyStopTargets;
 		}
 
 		/// <summary>

@@ -81,7 +81,7 @@ internal static class ImGuiHelper
 		ImGui.SetNextItemWidth(50);
 
 		// Saved when the edit ends, not on every drag frame.
-		_ = ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.GetDescription()}##MacroIndex{info.GetHashCode()}", ref info.MacroIndex, 1, -1, 99);
+		_ = ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.GetDescription()}##MacroIndex{info.GetHashCode()}", ref info.MacroIndex, 1, -1, 99, flags: ImGuiSliderFlags.AlwaysClamp);
 		if (ImGui.IsItemDeactivatedAfterEdit())
 		{
 			Service.Config.Save();

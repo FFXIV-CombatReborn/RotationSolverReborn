@@ -1966,6 +1966,24 @@ internal static class DataCenter
 	], StringComparer.OrdinalIgnoreCase);
 
 	private static readonly StringComparison PathCmp = StringComparison.OrdinalIgnoreCase;
+	internal static bool IsTrackedVfxPath(string path)
+	{
+		return path.StartsWith("vfx/lockon/", PathCmp) || StartsWithAny(path, SharedDamagePaths) || StartsWithAny(path, MultiHitSharedPaths)
+			|| StartsWithAny(path, SpreadDamagePaths) || StartsWithAny(path, TankbusterPaths);
+	}
+
+	private static bool StartsWithAny(string path, FrozenSet<string> prefixes)
+	{
+		foreach (var p in prefixes)
+		{
+			if (path.StartsWith(p, PathCmp))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	// Read by several updaters and rotations each frame, so each is computed once per frame.
 	private static readonly FrameCached<bool> _isHostileCastingAoe = new(() => InCombat && (IsCastingAreaVfx() || AnyHostile(IsHostileCastingArea)));

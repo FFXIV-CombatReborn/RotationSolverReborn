@@ -119,7 +119,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			return true;
 		}
 
-		if (UseMedicine && !PresenceOfMindPvE.Cooldown.IsCoolingDown && UseBurstMedicine(out act))
+		if (UseMedicine && InCombat && !PresenceOfMindPvE.Cooldown.IsCoolingDown && UseBurstMedicine(out act))
 		{
 			return true;
 		}

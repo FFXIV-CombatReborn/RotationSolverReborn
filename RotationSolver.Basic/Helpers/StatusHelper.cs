@@ -1099,17 +1099,17 @@ public static class StatusHelper
 				continue;
 			}
 
-			if (isFromSelf && status.SourceId != playerId && status.SourceObject?.OwnerId != playerId)
-			{
-				continue;
-			}
-
-			if (ContainsId(status.StatusId, statusIDs))
+			if (ContainsId(status.StatusId, statusIDs) && (!isFromSelf || IsFromPlayer(status, playerId)))
 			{
 				return true;
 			}
 		}
 		return false;
+	}
+
+	private static bool IsFromPlayer(IStatus status, ulong playerId)
+	{
+		return status.SourceId == playerId || status.SourceObject?.OwnerId == playerId;
 	}
 
 	/// <summary>
@@ -1134,12 +1134,7 @@ public static class StatusHelper
 				continue;
 			}
 
-			if (isFromSelf && status.SourceId != playerId && status.SourceObject?.OwnerId != playerId)
-			{
-				continue;
-			}
-
-			if (ContainsId(status.StatusId, statusIDs))
+			if (ContainsId(status.StatusId, statusIDs) && (!isFromSelf || IsFromPlayer(status, playerId)))
 			{
 				var t = status.RemainingTime == 0f ? float.MaxValue : status.RemainingTime;
 				if (t < min)
@@ -1174,12 +1169,7 @@ public static class StatusHelper
 				continue;
 			}
 
-			if (isFromSelf && status.SourceId != playerId && status.SourceObject?.OwnerId != playerId)
-			{
-				continue;
-			}
-
-			if (ContainsId(status.StatusId, statusIDs))
+			if (ContainsId(status.StatusId, statusIDs) && (!isFromSelf || IsFromPlayer(status, playerId)))
 			{
 				var s = (byte)(status.Param == 0 ? byte.MaxValue : status.Param);
 				if (s < min)
