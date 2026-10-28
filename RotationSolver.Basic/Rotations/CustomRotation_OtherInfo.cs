@@ -1117,7 +1117,7 @@ public partial class CustomRotation
 
 			// Check opener timing: if it's an opener potion and countdown is within configured time
 			var countDown = Service.CountDownTime;
-			if (IsOpenerPotion(timing) && countDown <= OpenerPotionTime && !InCombat)
+			if (IsOpenerPotion(timing) && countDown > 0 && countDown <= OpenerPotionTime && !InCombat)
 			{
 				return true;
 			}

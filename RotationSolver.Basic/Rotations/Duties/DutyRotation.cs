@@ -578,7 +578,7 @@ public partial class DutyRotation : IDisposable
 		_activePhantomJob = PhantomJob.None;
 
 		var player = Player;
-		if (player?.StatusList is not { } statusList)
+		if (!DataCenter.IsInOccultCrescentOp || player?.StatusList is not { } statusList)
 		{
 			return;
 		}

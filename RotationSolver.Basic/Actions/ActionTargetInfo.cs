@@ -329,12 +329,7 @@ public struct ActionTargetInfo(IBaseAction action)
 			return false;
 		}
 
-		if (!action.Config.ShouldCheckTargetStatus && !action.Config.ShouldCheckStatus)
-		{
-			return true;
-		}
-
-		if (action.Setting.TargetStatusNeed != null && !skipTargetStatusNeedCheck)
+		if (action.Setting.TargetStatusNeed != null && !skipTargetStatusNeedCheck && action.Config.ShouldCheckTargetStatus)
 		{
 			if (DataCenter.IsInOccultCrescentOp && battleChara.NameId != 0)
 			{
@@ -353,7 +348,7 @@ public struct ActionTargetInfo(IBaseAction action)
 			}
 		}
 
-		if (action.Setting.TargetStatusProvide != null && !skipStatusProvideCheck)
+		if (action.Setting.TargetStatusProvide != null && !skipStatusProvideCheck && action.Config.ShouldCheckStatus)
 		{
 			if (!NeedsTargetStatus(battleChara) || (Service.Config.Statuscap2 && StatusHelper.IsStatusCapped(battleChara)))
 			{
@@ -2454,7 +2449,8 @@ public struct ActionTargetInfo(IBaseAction action)
 
 		IBattleChara? FindHostileRaw()
 		{
-			return battleChara == null ? null : PickByTargeting(battleChara, ToTargetType(commandTargeting ?? DataCenter.TargetingType));
+			var sort = commandTargeting.HasValue || IsSortType(effectiveType) ? effectiveType : ToTargetType(DataCenter.TargetingType);
+			return battleChara == null ? null : PickByTargeting(battleChara, sort);
 		}
 
 		IBattleChara? FindBeAttackedTarget()
@@ -2772,6 +2768,10 @@ public struct ActionTargetInfo(IBaseAction action)
 			return Service.Config.SmallHp ? a.CurrentHp.CompareTo(b.CurrentHp) : b.CurrentHp.CompareTo(a.CurrentHp);
 		}
 	}
+
+	private static bool IsSortType(TargetType type) => type is TargetType.Small or TargetType.HighHP or TargetType.LowHP
+		or TargetType.HighHPPercent or TargetType.LowHPPercent or TargetType.HighMaxHP or TargetType.LowMaxHP
+		or TargetType.Nearest or TargetType.Farthest or TargetType.PvPHealers or TargetType.PvPTanks or TargetType.PvPDPS;
 
 	private static TargetType ToTargetType(TargetingType targetingType) => targetingType switch
 	{

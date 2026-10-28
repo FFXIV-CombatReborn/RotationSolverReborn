@@ -209,7 +209,7 @@ public static class TargetFilter
 			return false;
 		}
 
-		var jobId = (byte)ECommons.GameHelpers.Player.Object.ClassJob.Value.RowId;
+		var jobId = (byte)ECommons.GameHelpers.Player.Object.ClassJob.RowId;
 		for (var i = 0; i < validJobs.Length; i++)
 		{
 			if ((byte)(uint)validJobs[i] == jobId)
@@ -233,7 +233,7 @@ public static class TargetFilter
 			return false;
 		}
 
-		var jobId = (byte)battleChara.ClassJob.Value.RowId;
+		var jobId = (byte)battleChara.ClassJob.RowId;
 		for (var i = 0; i < validJobs.Length; i++)
 		{
 			if ((byte)(uint)validJobs[i] == jobId)
@@ -253,7 +253,7 @@ public static class TargetFilter
 
 		if (ECommons.GameHelpers.Player.Object is IBattleChara b && validJobs != null)
 		{
-			return validJobs.TryGetValue((byte)b.ClassJob.Value.RowId, out _);
+			return validJobs.TryGetValue((byte)b.ClassJob.RowId, out _);
 		}
 		return false;
 	}
@@ -262,7 +262,7 @@ public static class TargetFilter
 	{
 		if (battleChara is IBattleChara b && validJobs != null)
 		{
-			return validJobs.TryGetValue((byte)b.ClassJob.Value.RowId, out _);
+			return validJobs.TryGetValue((byte)b.ClassJob.RowId, out _);
 		}
 		return false;
 	}

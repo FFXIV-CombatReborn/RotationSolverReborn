@@ -38,9 +38,9 @@
       },
       "RebornMaterial": {
         "type": "Direct",
-        "requested": "[7.5.7.1, )",
-        "resolved": "7.5.7.1",
-        "contentHash": "G1GcDrp1lJ5b34OLOMNkOs0YJTB6l97m58xy9IcViYGhnAJNlwfsivZ58E44Frid0LFBlTuyFvvjIsbObrfzyg=="
+        "requested": "[7.5.7.2, )",
+        "resolved": "7.5.7.2",
+        "contentHash": "IqKS55vnAGqlSIRgKuVSBHvUooDCpEH5VPyKKcxyO+AgghpIn3JByQS3NsJV2OmNzN6S4Z9ur1kAKj/BwFmkiQ=="
       },
       "ExCSS": {
         "type": "Transitive",
@@ -87,7 +87,7 @@
         "dependencies": {
           "ECommons": "[3.2.1.26, )",
           "Microsoft.CodeAnalysis.CSharp": "[5.9.0, )",
-          "RebornMaterial": "[7.5.7.1, )",
+          "RebornMaterial": "[7.5.7.2, )",
           "RotationSolver.SourceGenerators": "[1.0.0, )",
           "Svg": "[3.4.8, )",
           "System.Drawing.Common": "[10.0.14, )"

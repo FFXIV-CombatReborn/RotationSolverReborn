@@ -41,7 +41,7 @@ public static class ObjectHelper
 
 	internal static BNpcBase? GetObjectNPC(this IBattleChara battleChara)
 	{
-		return battleChara == null ? null : Service.GetSheet<Lumina.Excel.Sheets.BNpcBase>().GetRow(battleChara.BaseId);
+		return battleChara == null ? null : Service.GetSheet<Lumina.Excel.Sheets.BNpcBase>().GetRowOrDefault(battleChara.BaseId);
 	}
 
 	/// <summary>
@@ -2031,7 +2031,7 @@ public static class ObjectHelper
 			return check;
 		}
 
-		var act = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(battleChara.CastActionId);
+		var act = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRowOrDefault(battleChara.CastActionId) ?? default;
 		return act.RowId == 0
 			? (_effectRangeCheck[battleChara.CastActionId] = false)
 			: (CastType)act.CastType == CastType.Cone || (CastType)act.CastType == CastType.Donut || (act.EffectRange > 0 && act.EffectRange < 8)
@@ -2103,7 +2103,7 @@ public static class ObjectHelper
 	public static uint GetObjectShield(this IBattleChara battleChara)
 	{
 		return battleChara is ICharacter character && character.MaxHp > 0 && character.ShieldPercentage > 0
-			? character.MaxHp * character.ShieldPercentage / 100
+			? (uint)((ulong)character.MaxHp * character.ShieldPercentage / 100)
 			: 0;
 	}
 

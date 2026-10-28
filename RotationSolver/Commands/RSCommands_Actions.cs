@@ -189,9 +189,8 @@ namespace RotationSolver.Commands
 				return;
 			}
 
-			var presses = Service.Config.KeyboardNoisePresses;
 			started = true;
-			PulseAction(id, random.Next(Math.Min(presses.X, presses.Y), Math.Max(presses.X, presses.Y) + 1));
+			PulseAction(id, random.Next(2, 4));
 		}
 
 		// started stays set until the chain ends, so a new action can't start a second chain.
@@ -300,12 +299,17 @@ namespace RotationSolver.Commands
 				return;
 			}
 
-			if (target.GameObjectId == Player.Object?.GameObjectId || !(Service.Config.SwitchTargetFriendly2 || target.IsEnemy()))
+			var isEnemy = target.IsEnemy();
+			if (target.GameObjectId == Player.Object?.GameObjectId || !(Service.Config.SwitchTargetFriendly2 || isEnemy))
 			{
 				return;
 			}
 
-			DataCenter.HostileTarget = target;
+			if (isEnemy)
+			{
+				DataCenter.HostileTarget = target;
+			}
+
 			if (!DataCenter.IsManual &&
 				(Service.Config.SwitchTargetFriendly2
 				|| (Svc.Targets.Target?.IsEnemy() ?? true)

@@ -1392,10 +1392,6 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 	[UI("Modifier key that unlocks movement", Description = "RB is for gamepad players.", Parent = nameof(PoslockCasting))]
 	public ConsoleModifiers PoslockModifier { get; set; }
 
-	[Range(0, 5, ConfigUnitType.None, 1)]
-	[UI("Presses per action", Description = "RSR plays a random number of presses in this range.", Parent = nameof(KeyboardNoise))]
-	public Vector2Int KeyboardNoisePresses { get; set; } = new(2, 3);
-
 	[Range(0, 10, ConfigUnitType.None)]
 	public int TargetingIndex { get; set; }
 
@@ -1503,8 +1499,10 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 #if DEBUG
 		PluginLog.Information("Saved configurations.");
 #endif
-		File.WriteAllText(Svc.PluginInterface.ConfigFile.FullName,
-			JsonConvert.SerializeObject(this, Formatting.Indented));
+		var path = Svc.PluginInterface.ConfigFile.FullName;
+		var tempPath = path + ".tmp";
+		File.WriteAllText(tempPath, JsonConvert.SerializeObject(this, Formatting.Indented));
+		File.Move(tempPath, path, true);
 	}
 
 	public static Configs Migrate(Configs oldConfigs)

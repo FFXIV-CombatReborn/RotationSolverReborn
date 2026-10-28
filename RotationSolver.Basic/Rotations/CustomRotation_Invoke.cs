@@ -264,6 +264,8 @@ public partial class CustomRotation
 			IBaseAction.TargetOverride = null;
 			IBaseAction.ShouldEndSpecial = false;
 
+			IBaseAction.AutoHealCheck = false;
+
 			// If a GCD action is available, determine if it can be used or if an ability should be used instead
 			if (gcdAction != null)
 			{
