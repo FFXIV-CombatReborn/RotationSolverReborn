@@ -1,50 +1,28 @@
 ﻿<Project Sdk="Dalamud.NET.Sdk/15.0.0">
 	<PropertyGroup>
 		<Description>Based on the pve combat information in one frame, find the best action.</Description>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<Platforms>x64</Platforms>
 		<TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
 		<SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
 		<EnableWindowsTargeting>true</EnableWindowsTargeting>
-		<!-- Allow package runtime assets to be copied; we'll prune unwanted ones -->
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	</PropertyGroup>
-
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
-		<NoWarn>1591</NoWarn>
-	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-		<OutputPath>$(SolutionDir)\bin\$(Configuration)</OutputPath>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<NoWarn>1591</NoWarn>
+		<OutputPath>$(SolutionDir)bin\$(Configuration)\</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- Keep ECommons runtime so its DLL is included -->
 		<PackageReference Include="ECommons" Version="3.2.1.26" />
 		<PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="5.6.0">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<AdditionalFiles Include="$(SolutionDir)BannedSymbols.txt" />
-		<!-- Do not copy Roslyn runtime to output -->
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0">
-		  <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="RebornMaterial" Version="7.5.7.2" />
+		<PackageReference Update="DotNet.ReproducibleBuilds" Version="2.0.5" />
+		<Reference Include="Dalamud.Common" Private="false" />
+		<ProjectReference Include="..\RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<AdditionalFiles Include="..\BannedSymbols.txt" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="Dalamud.Common">
-			<HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
-			<!-- Do not copy this reference to output -->
-			<Private>False</Private>
-		</Reference>
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\RotationSolver.Basic\RotationSolver.Basic.csproj" />
+		<Using Include="System.ComponentModel" />
+		<Using Include="Dalamud.Game.ClientState.JobGauge.Types" />
 		<Using Include="Dalamud.Game.ClientState.Objects.Types" />
 		<Using Include="RotationSolver.Basic" />
 		<Using Include="RotationSolver.Basic.Actions" />
@@ -68,20 +46,9 @@
 		<EmbeddedResource Include="..\Images\Logo.png" Link="Images\Logo.png" LogicalName="RotationSolver.Images.Logo.png" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Update="DalamudPackager" Version="15.0.0" />
-		<PackageReference Update="DotNet.ReproducibleBuilds" Version="2.0.5" />
-	</ItemGroup>
-
-	<!-- Prune unwanted DLLs from output -->
 	<Target Name="PruneOutputDlls" AfterTargets="ResolveReferences">
 		<ItemGroup>
-			<!-- Keep only these DLLs in the copy-local list -->
-			<_KeepDlls Include="@(ReferenceCopyLocalPaths)" Condition="&#xD;&#xA;					'%(Filename)' == 'RotationSolver' or&#xD;&#xA;					'%(Filename)' == 'RotationSolver.Basic' or&#xD;&#xA;					'%(Filename)' == 'ECommons' or&#xD;&#xA;					'%(Filename)' == 'RebornMaterial'&#xD;&#xA;				" />
-			<!-- Remove everything else -->
-			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="!('%(Filename)' == 'RotationSolver' or '%(Filename)' == 'RotationSolver.Basic' or '%(Filename)' == 'ECommons' or '%(Filename)' == 'RebornMaterial')" />
-			<!-- Re-add only the kept set -->
-			<ReferenceCopyLocalPaths Include="@(_KeepDlls)" />
+			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' != 'ECommons' and '%(Filename)' != 'RebornMaterial'" />
 		</ItemGroup>
 	</Target>
 </Project>

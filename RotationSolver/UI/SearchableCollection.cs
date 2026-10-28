@@ -42,7 +42,6 @@ internal class SearchableCollection
 			}
 		}
 
-		// Stable insertion sort by Attribute.Order, so equal orders keep declaration order. Children are sorted too.
 		for (var i = 1; i < pairs.Count; i++)
 		{
 			var temp = pairs[i];

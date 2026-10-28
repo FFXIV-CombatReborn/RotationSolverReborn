@@ -100,7 +100,6 @@ public static partial class RSCommands
 
 	private static void DoSettingCommand(string str)
 	{
-		// The value is optional: "/rotation Settings <Name>" toggles a ConditionBoolean setting.
 		var strs = str.Trim().Split(' ', 2, StringSplitOptions.TrimEntries);
 		var settingName = strs[0];
 		var command = strs.Length > 1 ? strs[1] : null;
@@ -288,11 +287,6 @@ public static partial class RSCommands
 		}
 	}
 
-	/// <summary>
-	/// Gets the distinct rotation and duty actions for the current content. PvE/PvP variants that don't
-	/// match are skipped so actions sharing an in-game name (e.g. "Guardian" for GuardianPvE and
-	/// GuardianPvP) aren't ambiguous when matching by name.
-	/// </summary>
 	private static IAction[] GetCommandableActions()
 	{
 		var rotationActions = RotationUpdater.CurrentRotationActions;
@@ -325,7 +319,6 @@ public static partial class RSCommands
 		var trimStr = str.Trim();
 		var allActions = GetCommandableActions();
 
-		// Longest names first so e.g. "Fire II" wins over "Fire". Stable, so equal lengths keep list order.
 		var n = allActions.Length;
 		var sortedActions = new IAction[n];
 		Array.Copy(allActions, sortedActions, n);
@@ -367,7 +360,6 @@ public static partial class RSCommands
 
 	public static void DoActionCommand(string str)
 	{
-		// Optional trailing target, e.g. "Cure II-5 <f>".
 		str = str.Trim();
 		CommandTarget? target = null;
 		var tagStart = str.EndsWith('>') ? str.LastIndexOf('<') : -1;
@@ -465,9 +457,6 @@ public static partial class RSCommands
 				return;
 			}
 		}
-
-		// Only log if all commands failed
-		//PluginLog.Debug(UiString.CommandsInsertActionFailure.GetDescription());
 	}
 
 	private static void DoDutyRotationCommand(DutyRotation dutyRotation, string str)
@@ -484,8 +473,5 @@ public static partial class RSCommands
 				return;
 			}
 		}
-
-		// Only log if all commands failed
-		//PluginLog.Debug(UiString.CommandsInsertActionFailure.GetDescription());
 	}
 }

@@ -10,7 +10,6 @@ namespace RotationSolver.Commands
 		{
 			DataCenter.OnSpecialTypeChanged = specialType => _specialString = specialType.ToSpecialString();
 
-			// A command name can't contain a space, so Auto and Off are listed in the help text instead of registered.
 			var helpMessage = $"{UiString.Commands_Rotation.GetDescription()}\n"
 				+ $"{Service.COMMAND} Auto → {UiString.Commands_Start.GetDescription()}\n"
 				+ $"{Service.COMMAND} Off → {UiString.Commands_Off.GetDescription()}";
@@ -42,7 +41,6 @@ namespace RotationSolver.Commands
 		{
 			command = (command ?? string.Empty).Trim();
 
-			// No args => open config
 			if (command.Length == 0)
 			{
 				RotationSolverPlugin.OpenConfigWindow();
@@ -56,11 +54,9 @@ namespace RotationSolver.Commands
 
 			if (TryGetOneEnum<StateCommandType>(command, out var stateType))
 			{
-				// Split command into parts
 				var parts = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 				var index = -1;
 
-				// Try to parse the second argument as TargetingType if present
 				if (parts.Length > 1)
 				{
 					var value = parts[1];
@@ -115,11 +111,9 @@ namespace RotationSolver.Commands
 				return false;
 			}
 
-			// Parse only the first token (case-insensitive).
 			var spaceIdx = command.IndexOf(' ');
 			var token = spaceIdx >= 0 ? command[..spaceIdx] : command;
 
-			// Enum.TryParse also accepts numbers and comma lists, which aren't command names.
 			return token.Length > 0 && char.IsLetter(token[0]) && !token.Contains(',')
 				&& Enum.TryParse(token, ignoreCase: true, out type) && Enum.IsDefined(type);
 		}

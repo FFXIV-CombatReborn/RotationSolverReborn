@@ -3,13 +3,6 @@ using Action = Lumina.Excel.Sheets.Action;
 
 namespace RotationSolver.GameData.Getters.Actions;
 
-/// <summary>
-/// Abstract base class for getting action rows from the Excel sheet.
-/// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="ActionGetterBase"/> class.
-/// </remarks>
-/// <param name="gameData">The game data.</param>
 internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGetter<Action>(gameData)
 {
 
@@ -48,7 +41,7 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGet
 	{
 		if (item.RowId is 3 or 120)
 		{
-			return true; // Sprint and cure.
+			return true;
 		}
 
 		if (item.RowId is 16538 or 16537)
@@ -132,8 +125,6 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGet
 	/// <returns>True if compatible; otherwise, false.</returns>
 	protected static bool IsJobCompatible(ClassJobCategory category, string jobAbbreviation)
 	{
-		// Use a reliable method to check job compatibility
-		// This handles special cases like BST (Beastmaster) which maps to Unknown0
 		return jobAbbreviation switch
 		{
 			"PLD" => category.PLD,
@@ -193,7 +184,6 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGet
 		var transient = _gameData.GetExcelSheet<ActionTransient>()?.GetRow(item.RowId);
 		var desc = transient?.Description.ToString() ?? string.Empty;
 
-		// Sanitize the description to remove invalid XML tags
 		desc = Util.SanitizeXmlDescription(desc);
 
 		return $"<para>{desc.Replace("\n", "</para>\n/// <para>")}</para>";

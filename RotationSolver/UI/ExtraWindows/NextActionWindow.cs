@@ -67,7 +67,6 @@ internal class NextActionWindow : Window
 		var keybind = config.ShowNextActionKeybind ? HotbarKeybindHelper.GetKeybind(action) : string.Empty;
 		var hint = config.TeachingMode && config.TeachingModeShowTargetHint ? GetTargetHint(action) : null;
 
-		// Measure the widest element first. Centering on the window's last width would stop it from ever shrinking.
 		var width = size;
 		if (keybind.Length > 0)
 		{

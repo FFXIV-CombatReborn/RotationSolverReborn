@@ -8,15 +8,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
-		.config\dotnet-tools.json = .config\dotnet-tools.json
 		manifest.json = manifest.json
 		.github\workflows\publish.yaml = .github\workflows\publish.yaml
-		UpdateDownloads.ts = UpdateDownloads.ts
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RotationSolver", "RotationSolver\RotationSolver.csproj", "{99EA3D95-33DC-424F-A9E6-FE6064F11592}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RotationSolver.Basic", "RotationSolver.Basic\RotationSolver.Basic.csproj", "{E4895C89-77DB-48CE-81DD-22B7B524EFFA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RotationSolver.SourceGenerators", "RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj", "{9DC5B596-ED7C-4FF7-AC3C-B3DB79BC3B86}"
 EndProject
@@ -32,10 +28,6 @@ Global
 		{99EA3D95-33DC-424F-A9E6-FE6064F11592}.Debug|x64.Build.0 = Debug|x64
 		{99EA3D95-33DC-424F-A9E6-FE6064F11592}.Release|x64.ActiveCfg = Release|x64
 		{99EA3D95-33DC-424F-A9E6-FE6064F11592}.Release|x64.Build.0 = Release|x64
-		{E4895C89-77DB-48CE-81DD-22B7B524EFFA}.Debug|x64.ActiveCfg = Debug|x64
-		{E4895C89-77DB-48CE-81DD-22B7B524EFFA}.Debug|x64.Build.0 = Debug|x64
-		{E4895C89-77DB-48CE-81DD-22B7B524EFFA}.Release|x64.ActiveCfg = Release|x64
-		{E4895C89-77DB-48CE-81DD-22B7B524EFFA}.Release|x64.Build.0 = Release|x64
 		{9DC5B596-ED7C-4FF7-AC3C-B3DB79BC3B86}.Debug|x64.ActiveCfg = Debug|x64
 		{9DC5B596-ED7C-4FF7-AC3C-B3DB79BC3B86}.Debug|x64.Build.0 = Debug|x64
 		{9DC5B596-ED7C-4FF7-AC3C-B3DB79BC3B86}.Release|x64.ActiveCfg = Release|x64

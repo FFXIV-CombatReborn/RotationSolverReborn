@@ -2,13 +2,6 @@ using Action = Lumina.Excel.Sheets.Action;
 
 namespace RotationSolver.GameData.Getters.Actions;
 
-/// <summary>
-/// Class for getting action IDs from the Excel sheet.
-/// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="ActionIdGetter"/> class.
-/// </remarks>
-/// <param name="gameData">The game data.</param>
 internal class ActionIdGetter(Lumina.GameData gameData) : ActionGetterBase(gameData)
 {
 

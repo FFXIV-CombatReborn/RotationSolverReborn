@@ -550,7 +550,6 @@ public partial class MainWindow
 		List<Job> working = [.. priority];
 		var orderChanged = false;
 
-		// EndChild must run whatever BeginChild returns.
 		if (ImGui.BeginChild($"{id}PriorityList", new Vector2(0, 200 * Scale), true))
 		{
 			for (var i = 0; i < working.Count; i++)

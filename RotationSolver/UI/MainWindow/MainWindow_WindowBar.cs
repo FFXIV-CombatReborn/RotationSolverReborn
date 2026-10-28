@@ -75,7 +75,6 @@ public partial class MainWindow
 		}
 	}
 
-	// A locked window can't be dragged back, so keep it on screen. Null when it already fits.
 	private Vector2? OnScreenPosition()
 	{
 		if (_windowSize == Vector2.Zero)
@@ -87,11 +86,9 @@ public partial class MainWindow
 		var min = viewport.WorkPos;
 		var max = viewport.WorkPos + viewport.WorkSize;
 
-		// The action pill with the lock is top-right, so the top and right edges win on a window bigger than the screen.
 		var x = MathF.Min(MathF.Max(_windowPos.X, min.X), max.X - _windowSize.X);
 		var y = MathF.Max(MathF.Min(_windowPos.Y, max.Y - _windowSize.Y), min.Y);
 
-		// Whole pixels, since ImGui truncates window positions.
 		var pos = new Vector2(MathF.Floor(x), MathF.Floor(y));
 		return pos == _windowPos ? null : pos;
 	}

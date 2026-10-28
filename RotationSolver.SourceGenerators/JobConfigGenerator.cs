@@ -27,11 +27,6 @@ public class JobConfigGenerator : IIncrementalGenerator
 		context.RegisterSourceOutput(provider.Collect(), Execute);
 	}
 
-	/// <summary>
-	/// Executes the source generation.
-	/// </summary>
-	/// <param name="context">The source production context.</param>
-	/// <param name="array">The collected syntax nodes and semantic models.</param>
 	private void Execute(SourceProductionContext context, ImmutableArray<(VariableDeclaratorSyntax, SemanticModel SemanticModel)> array)
 	{
 		var dict = new Dictionary<SyntaxNode, List<(VariableDeclaratorSyntax, SemanticModel)>>();

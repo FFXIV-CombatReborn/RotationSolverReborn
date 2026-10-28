@@ -49,10 +49,6 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 
 	public HashSet<HotbarID> HotbarIDs { get; } = [];
 
-	/// <summary>
-	/// The ids the drawings are currently built from. <see cref="HotbarHighlightManager"/> sets this from
-	/// the decision being shown, which can lag <see cref="HotbarIDs"/> so a short-lived choice stays visible.
-	/// </summary>
 	private readonly HashSet<HotbarID> _displayIds = [];
 
 	internal void SetDisplayIds(IEnumerable<HotbarID> ids)
@@ -98,7 +94,6 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 
 			var s = actionBar->AtkUnitBase.Scale;
 
-			// Resolve the RaptureHotbarModule index separately so the addon counter stays intact.
 			var isCrossBar = hotBarIndex >= HotbarAddonHelper.StandardHotbarCount;
 			if (!HotbarAddonHelper.TryGetRaptureHotbarIndex(intPtr, hotBarIndex, raptureModule, out var resolvedHotbarIndex))
 			{
@@ -177,7 +172,6 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 		return node;
 	}
 
-	/// <inheritdoc />
 	protected override void UpdateOnFrame()
 	{
 		return;
@@ -188,12 +182,8 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 
 	private static IDalamudTextureWrap? _texture = null;
 
-	// Own buffer, only used from the framework thread via HotbarHighlightManager.UpdateElements.
 	private readonly List<nint> _addons = [];
 
-	/// <summary>
-	/// Releases the shared highlight texture. Call on plugin shutdown.
-	/// </summary>
 	internal static void DisposeTexture()
 	{
 		_texture?.Dispose();
@@ -218,7 +208,6 @@ public readonly record struct HotbarID(HotbarSlotType SlotType, uint Id)
 {
 }
 
-/// <summary> Polyline drawing draws the actual border lines on the overlay window. </summary>
 public readonly struct PolylineDrawing(Vector2[] pts, uint color, float thickness) : IDrawing2D
 {
 	public void Draw()
@@ -257,7 +246,6 @@ public interface IDrawing2D
 	void Draw();
 }
 
-/// <summary> Drawing the image. </summary>
 public readonly struct ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2, uint col = uint.MaxValue) : IDrawing2D
 {
 	public ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2,

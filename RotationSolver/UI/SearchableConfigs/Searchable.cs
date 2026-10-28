@@ -100,7 +100,6 @@ internal readonly struct JobFilter
 				return true;
 			}
 
-			// With no rotation loaded there's no role to check, so the role filter can't hide anything.
 			var role = DataCenter.CurrentRotation?.Role;
 			return (hasRoles && (!role.HasValue || JobRoles!.Contains(role.Value)))
 				|| (hasJobs && Jobs!.Contains(DataCenter.Job));
@@ -172,9 +171,6 @@ internal readonly struct JobFilter
 internal abstract class Searchable(PropertyInfo property) : ISearchable
 {
 	protected readonly PropertyInfo _property = property;
-
-	// GetCustomAttribute builds a new attribute instance on every call, and these are read several
-	// times per frame for every visible setting, so look them up once.
 	private readonly UIAttribute? _ui = property.GetCustomAttribute<UIAttribute>();
 	private readonly bool _isJob = property.GetCustomAttribute<JobConfigAttribute>() != null
 		|| property.GetCustomAttribute<JobChoiceConfigAttribute>() != null;
@@ -320,7 +316,6 @@ internal abstract class UnitSearchable(PropertyInfo property) : Searchable(prope
 		}
 	}
 
-	// Percentages are stored as fractions but dragged and typed as whole percents.
 	protected float SliderScale => Unit == ConfigUnitType.Percent ? 100f : 1f;
 
 	protected string Format(float value)

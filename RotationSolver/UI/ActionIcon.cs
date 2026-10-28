@@ -3,7 +3,6 @@ using RebornMaterial;
 
 namespace RotationSolver.UI;
 
-// Feeds an RSR action into RebornMaterial's action icon, which only knows textures and recast times.
 internal static class ActionIcon
 {
 	public static bool Draw(string id, IAction? action, float size, bool showCooldown, string? tooltip = null)

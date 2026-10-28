@@ -216,7 +216,6 @@ public partial class MainWindow
 						config.ShouldCheckStatus = shouldStatus;
 					}
 
-					// DoT tick timing replaces the GCD count for actions with a DoT effect.
 					if (shouldStatus && !(Service.Config.UseDotTickTiming && a.Setting.Dot != null))
 					{
 						int StatusRefreshGcdCount = config.StatusRefreshGcdCount;

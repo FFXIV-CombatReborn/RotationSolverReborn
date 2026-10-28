@@ -4,9 +4,6 @@ using System.Text.RegularExpressions;
 
 namespace RotationSolver.SourceGenerators
 {
-	/// <summary>
-	/// Utility class for various helper methods.
-	/// </summary>
 	internal static class Util
 	{
 		/// <summary>
@@ -77,20 +74,15 @@ namespace RotationSolver.SourceGenerators
 			}
 		}
 
-		/// <summary>
-		/// Gets the type symbol name of the specified symbol.
-		/// </summary>
-		/// <param name="symbol">The symbol.</param>
-		/// <returns>The type symbol name.</returns>
 		private static string GetTypeSymbolName(this ISymbol symbol)
 		{
-			if (symbol is IArrayTypeSymbol arrayTypeSymbol) // Array
+			if (symbol is IArrayTypeSymbol arrayTypeSymbol)
 			{
 				return arrayTypeSymbol.ElementType.GetFullMetadataName() + "[]";
 			}
 
 			var str = symbol.MetadataName;
-			if (symbol is INamedTypeSymbol symbolType) // Generic
+			if (symbol is INamedTypeSymbol symbolType)
 			{
 				var strs = str.Split('`');
 				if (strs.Length < 2)
@@ -146,7 +138,7 @@ namespace RotationSolver.SourceGenerators
 				Regex upperCaseInside = new("(?<=[A-Z])[A-Z]+?((?=[A-Z][a-z])|(?=[0-9]))");
 
 				var cleaned = invalidCharsRgx.Replace(whiteSpace.Replace(input, "_"), string.Empty);
-				var parts = cleaned.Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries);
+				var parts = cleaned.Split(['_'], StringSplitOptions.RemoveEmptyEntries);
 				var sb = new StringBuilder();
 				foreach (var w0 in parts)
 				{

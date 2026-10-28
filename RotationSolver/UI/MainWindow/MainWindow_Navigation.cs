@@ -24,8 +24,6 @@ public partial class MainWindow
 	private ICustomRotation? _currentRotation;
 
 	private const string LogoResource = "RotationSolver.Images.Logo.png";
-
-	// Easter egg: holding the RSR icon opens tic-tac-toe.
 	private double _rsrIconPressStart = -1;
 	private bool _rsrIconTriggered = false;
 	private const double RsrIconHoldSeconds = 1.2;
@@ -419,7 +417,6 @@ public partial class MainWindow
 		}
 	}
 
-	// Fetched every frame on purpose; Dalamud caches the texture.
 	internal static IDalamudTextureWrap? GetLogoTexture()
 	{
 		return Svc.Texture.GetFromManifestResource(typeof(MainWindow).Assembly, LogoResource)

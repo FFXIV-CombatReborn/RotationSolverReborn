@@ -102,7 +102,6 @@ public partial class MainWindow
 				}
 			}
 
-			// Installing from inside the plugin isn't supported on CN clients.
 			if (isEnabled || CNLanguageClient)
 			{
 				continue;

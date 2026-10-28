@@ -5,34 +5,19 @@ using RotationSolver.Updaters;
 
 namespace RotationSolver.IPC
 {
-	/// <summary>
-	/// Provides IPC methods for external plugins or tools to interact with RotationSolver.
-	/// All public methods marked with <see cref="EzIPCAttribute"/> are exposed for IPC calls.
-	/// </summary>
 	internal class IPCProvider
 	{
-		/// <summary>
-		/// Initializes the IPC provider and registers IPC methods with the specified prefix.
-		/// </summary>
 		internal IPCProvider()
 		{
 			_ = EzIPC.Init(this, prefix: "RotationSolverReborn");
 		}
 
-		/// <summary>
-		/// IPC method for testing connectivity and logging a debug message.
-		/// </summary>
-		/// <param name="param">A string parameter to include in the debug log for verification.</param>
 		[EzIPC]
 		public void Test(string param)
 		{
 			PluginLog.Debug($"IPC Test! Param:{param}");
 		}
 
-		/// <summary>
-		/// Adds a name ID to the prioritized list via IPC.
-		/// </summary>
-		/// <param name="nameId">The unique identifier to add to the prioritized name IDs collection.</param>
 		[EzIPC]
 		public void AddPriorityNameID(uint nameId)
 		{
@@ -47,10 +32,6 @@ namespace RotationSolver.IPC
 			}
 		}
 
-		/// <summary>
-		/// Removes a name ID from the prioritized list via IPC.
-		/// </summary>
-		/// <param name="nameId">The unique identifier to remove from the prioritized name IDs collection.</param>
 		[EzIPC]
 		public void RemovePriorityNameID(uint nameId)
 		{
@@ -72,10 +53,6 @@ namespace RotationSolver.IPC
 			}
 		}
 
-		/// <summary>
-		/// Adds a name ID to the blacklist via IPC, preventing actions for this identifier.
-		/// </summary>
-		/// <param name="nameId">The unique identifier to add to the blacklist collection.</param>
 		[EzIPC]
 		public void AddBlacklistNameID(uint nameId)
 		{
@@ -90,10 +67,6 @@ namespace RotationSolver.IPC
 			}
 		}
 
-		/// <summary>
-		/// Removes a name ID from the blacklist via IPC, allowing actions for this identifier.
-		/// </summary>
-		/// <param name="nameId">The unique identifier to remove from the blacklist collection.</param>
 		[EzIPC]
 		public void RemoveBlacklistNameID(uint nameId)
 		{
@@ -115,12 +88,6 @@ namespace RotationSolver.IPC
 			}
 		}
 
-		/// <summary>
-		/// Changes the operating mode of the plugin via IPC.
-		/// </summary>
-		/// <param name="stateCommand">
-		/// The <see cref="StateCommandType"/> value specifying the desired operating mode, such as Off, Auto, or Manual.
-		/// </param>
 		[EzIPC]
 		public void ChangeOperatingMode(StateCommandType stateCommand)
 		{
@@ -131,22 +98,6 @@ namespace RotationSolver.IPC
 			PluginLog.Debug($"IPC ChangeOperatingMode was called. StateCommand:{stateCommand}");
 		}
 
-		/// <summary>
-		/// Changes the operating mode of the plugin via IPC and temporarily overrides some settings without changing the
-		/// user's config. The overrides are cleared by any later state change, including RSR turning Off (manually, from a
-		/// timeout, or via IPC).
-		/// </summary>
-		/// <param name="stateCommand">
-		/// The <see cref="StateCommandType"/> value specifying the desired operating mode, such as Off, Auto, or Manual.
-		/// </param>
-		/// <param name="targetHostileType">
-		/// The <see cref="TargetHostileType"/> engage setting to use while this operating mode is active.
-		/// </param>
-		/// <param name="targetFreely">Override for the TargetFreely setting.</param>
-		/// <param name="autoOffAfterCombat">
-		/// Override for the AutoOffAfterCombat setting. AutoDuty and Henched modes never turn off after combat, so it has no effect there.
-		/// </param>
-		/// <param name="friendlyPartyNpcHealRaise">Override for the FriendlyPartyNpcHealRaise3 setting (heal and raise party NPCs).</param>
 		[EzIPC]
 		public void ChangeOperatingModeWithOverrides(StateCommandType stateCommand, TargetHostileType targetHostileType, SettingOverride targetFreely, SettingOverride autoOffAfterCombat, SettingOverride friendlyPartyNpcHealRaise)
 		{
@@ -157,15 +108,6 @@ namespace RotationSolver.IPC
 			PluginLog.Debug($"IPC ChangeOperatingModeWithOverrides was called. StateCommand:{stateCommand} TargetHostileType:{targetHostileType} TargetFreely:{targetFreely} AutoOffAfterCombat:{autoOffAfterCombat} FriendlyPartyNpcHealRaise:{friendlyPartyNpcHealRaise}");
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="stateCommand">
-		/// The <see cref="StateCommandType"/> value specifying the desired operating mode, such as Off, Auto, or Manual.
-		/// </param>
-		/// <param name="targetingType">
-		/// The <see cref="TargetingType"/> value specifying the desired operating mode, such as Big, LowHP, or Nearest.
-		/// </param>
 		[EzIPC]
 		public void AutodutyChangeOperatingMode(StateCommandType stateCommand, TargetingType targetingType)
 		{
@@ -176,25 +118,6 @@ namespace RotationSolver.IPC
 			PluginLog.Debug($"IPC AutodutyChangeOperatingMode was called. StateCommand:{stateCommand} TargetingType:{targetingType}");
 		}
 
-		/// <summary>
-		/// Same as <see cref="AutodutyChangeOperatingMode"/>, but also temporarily overrides some settings without changing
-		/// the user's config. The overrides are cleared by any later state change, including RSR turning Off (manually, from
-		/// a timeout, or via IPC).
-		/// </summary>
-		/// <param name="stateCommand">
-		/// The <see cref="StateCommandType"/> value specifying the desired operating mode, such as Off, Auto, or Manual.
-		/// </param>
-		/// <param name="targetingType">
-		/// The <see cref="TargetingType"/> value specifying the desired operating mode, such as Big, LowHP, or Nearest.
-		/// </param>
-		/// <param name="targetHostileType">
-		/// The <see cref="TargetHostileType"/> engage setting to use while this operating mode is active.
-		/// </param>
-		/// <param name="targetFreely">Override for the TargetFreely setting.</param>
-		/// <param name="autoOffAfterCombat">
-		/// Override for the AutoOffAfterCombat setting. AutoDuty and Henched modes never turn off after combat, so it has no effect there.
-		/// </param>
-		/// <param name="friendlyPartyNpcHealRaise">Override for the FriendlyPartyNpcHealRaise3 setting (heal and raise party NPCs).</param>
 		[EzIPC]
 		public void AutodutyChangeOperatingModeWithOverrides(StateCommandType stateCommand, TargetingType targetingType, TargetHostileType targetHostileType, SettingOverride targetFreely, SettingOverride autoOffAfterCombat, SettingOverride friendlyPartyNpcHealRaise)
 		{
@@ -220,12 +143,6 @@ namespace RotationSolver.IPC
 			};
 		}
 
-		/// <summary>
-		/// Triggers a special state in the plugin via IPC, such as healing, defense, or movement.
-		/// </summary>
-		/// <param name="specialCommand">
-		/// The <see cref="SpecialCommandType"/> value representing the special state to activate (e.g., HealArea, DefenseSingle, Burst).
-		/// </param>
 		[EzIPC]
 		public void TriggerSpecialState(SpecialCommandType specialCommand)
 		{
@@ -236,15 +153,6 @@ namespace RotationSolver.IPC
 			PluginLog.Debug($"IPC TriggerSpecialState was called. SpecialCommand:{specialCommand}");
 		}
 
-		/// <summary>
-		/// Triggers a special state in the plugin via IPC with a specific duration, overriding the configured default.
-		/// </summary>
-		/// <param name="specialCommand">
-		/// The <see cref="SpecialCommandType"/> value representing the special state to activate (e.g., HealArea, DefenseSingle, Burst).
-		/// </param>
-		/// <param name="duration">
-		/// The duration in seconds (as a float) for which the special state window remains open.
-		/// </param>
 		[EzIPC]
 		public void TriggerSpecialStateWithDuration(SpecialCommandType specialCommand, float duration)
 		{
@@ -256,15 +164,6 @@ namespace RotationSolver.IPC
 			PluginLog.Debug($"IPC TriggerSpecialStateWithDuration was called. SpecialCommand:{specialCommand}, Duration:{duration}");
 		}
 
-		/// <summary>
-		/// Changes a plugin setting or triggers an auxiliary command via IPC.
-		/// </summary>
-		/// <param name="otherType">
-		/// The <see cref="OtherCommandType"/> category of command to execute, such as DoActions, ToggleActions, Settings, NextAction, Rotations, or DutyRotations.
-		/// </param>
-		/// <param name="str">
-		/// The string value representing the modification or parameter for the command.
-		/// </param>
 		[EzIPC]
 		public void OtherCommand(OtherCommandType otherType, string str)
 		{
@@ -275,15 +174,6 @@ namespace RotationSolver.IPC
 			PluginLog.Debug($"IPC DoOtherCommand was called. OtherCommandType:{otherType}, String:{str},");
 		}
 
-		/// <summary>
-		/// Executes an action command via IPC, allowing external plugins or tools to trigger a specific action with a timing parameter.
-		/// </summary>
-		/// <param name="action">
-		/// The name of the action to execute. This needs to be the exact name of the action.
-		/// </param>
-		/// <param name="time">
-		/// The time value that the window to use the action is open (typcially 5 seconds).
-		/// </param>
 		[EzIPC]
 		public void ActionCommand(string action, float time)
 		{
@@ -296,10 +186,6 @@ namespace RotationSolver.IPC
 			PluginLog.Debug($"IPC ActionCommand was called. Action Name:{action}, Time:{time}");
 		}
 
-		/// <summary>
-		/// Temporarily enables the TargetFreely behaviour via IPC without changing the user's config.
-		/// Call <see cref="DisableTargetFreelyOverride"/> to revert.
-		/// </summary>
 		[EzIPC]
 		public void EnableTargetFreelyOverride()
 		{
@@ -307,9 +193,6 @@ namespace RotationSolver.IPC
 			PluginLog.Debug("IPC EnableTargetFreelyOverride was called.");
 		}
 
-		/// <summary>
-		/// Disables the IPC-driven TargetFreely override, restoring normal config-based behaviour.
-		/// </summary>
 		[EzIPC]
 		public void DisableTargetFreelyOverride()
 		{
@@ -317,29 +200,12 @@ namespace RotationSolver.IPC
 			PluginLog.Debug("IPC DisableTargetFreelyOverride was called.");
 		}
 
-		/// <summary>
-		/// Gets the enemy positional that RSR currently intends to use for its next GCD action via IPC.
-		/// This allows other plugins to know ahead of time whether RSR is about to move to the rear, flank,
-		/// front, or has no positional requirement for its next action.
-		/// </summary>
-		/// <returns>
-		/// The underlying byte value of the <see cref="EnemyPositional"/> enum:
-		/// 0 = None, 1 = Rear, 2 = Flank, 3 = Front.
-		/// </returns>
 		[EzIPC]
 		public byte GetDesiredPositional()
 		{
 			return (byte)ActionUpdater.DesiredPositional;
 		}
 
-		/// <summary>
-		/// IPC method allowing other plugins to subscribe to and query whether RotationSolver's
-		/// autorotation is currently active.
-		/// </summary>
-		/// <returns>
-		/// <see langword="true"/> if <see cref="DataCenter.IsActivated"/> reports the autorotation
-		/// as active; otherwise, <see langword="false"/>.
-		/// </returns>
 		[EzIPC]
 		public bool AutorotationActive()
 		{

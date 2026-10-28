@@ -3,9 +3,6 @@ using System.Text;
 
 namespace RotationSolver.GameData.Getters;
 
-/// <summary>
-/// Class for getting and processing Status Excel rows.
-/// </summary>
 internal class StatusGetter(Lumina.GameData gameData)
 	: ExcelRowGetter<Status>(gameData)
 {
@@ -30,11 +27,9 @@ internal class StatusGetter(Lumina.GameData gameData)
 		var name = item.Name.ToString();
 		if (string.IsNullOrEmpty(name))
 		{
-			// Allow statuses without a name
 			return true;
 		}
 
-		// Perform usual checks for statuses with a name
 		var allAscii = true;
 		foreach (var c in name)
 		{
@@ -66,7 +61,6 @@ internal class StatusGetter(Lumina.GameData gameData)
 			name += "_" + item.RowId.ToString();
 		}
 
-		// Ensure the name does not start with an underscore
 		if (name.StartsWith("_"))
 		{
 			name = "Status" + name;
@@ -74,7 +68,6 @@ internal class StatusGetter(Lumina.GameData gameData)
 
 		var desc = item.Description.ToString();
 
-		// Sanitize the description to remove invalid XML tags
 		desc = Util.SanitizeXmlDescription(desc);
 
 		var jobs = item.ClassJobCategory.IsValid ? item.ClassJobCategory.Value.Name.ToString() : string.Empty;

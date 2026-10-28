@@ -299,7 +299,7 @@ public partial class MainWindow
 			}
 			catch
 			{
-				// Clipboard can fail while the game is losing focus.
+
 			}
 		}
 

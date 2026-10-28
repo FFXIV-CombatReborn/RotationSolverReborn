@@ -80,7 +80,6 @@ internal static class ImGuiHelper
 	{
 		ImGui.SetNextItemWidth(50);
 
-		// Saved when the edit ends, not on every drag frame.
 		_ = ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.GetDescription()}##MacroIndex{info.GetHashCode()}", ref info.MacroIndex, 1, -1, 99, flags: ImGuiSliderFlags.AlwaysClamp);
 		if (ImGui.IsItemDeactivatedAfterEdit())
 		{
@@ -164,7 +163,6 @@ internal static class ImGuiHelper
 
 	public static unsafe bool SelectableButton(string name, ImFontPtr? font = null, Vector4? color = null)
 	{
-		// Called for many buttons every frame, so push/pop directly instead of allocating disposables.
 		if (font != null)
 		{
 			ImGui.PushFont(font.Value);
@@ -247,7 +245,6 @@ internal static class ImGuiHelper
 		}
 		catch
 		{
-			// The texture can be disposed between the null check and the draw.
 			buttonClicked = false;
 			drawn = false;
 		}
@@ -278,9 +275,6 @@ internal static class ImGuiHelper
 		drawList.AddText(pos + new Vector2(width, 0), Black, text);
 		drawList.AddText(pos, White, text);
 	}
-
-	// Resolve overlay cover textures per draw to avoid using disposed wraps.
-	// Do not cache IDalamudTextureWrap instances long-term; the provider may dispose them.
 
 	internal static void DrawActionOverlay(Vector2 cursor, float width, float percent)
 	{
@@ -339,7 +333,7 @@ internal static class ImGuiHelper
 		}
 		catch
 		{
-			// The texture can be disposed between fetch and draw; skip this frame.
+
 		}
 	}
 	#endregion

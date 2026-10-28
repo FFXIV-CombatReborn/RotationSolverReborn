@@ -64,7 +64,6 @@ internal class StateControlWindow : Window
 	private float _tabShown;
 	private float _band;
 
-	// Last frame's window position and tab height. The window grows upward as the tab rises, so the switch stays still.
 	private Vector2 _windowPos;
 	private float _drawnBand;
 	private bool _placed;
@@ -119,7 +118,6 @@ internal class StateControlWindow : Window
 
 	public override void OnOpen()
 	{
-		// Clear any pin or click-through left over from when the window had a title bar.
 		IsPinned = false;
 		IsClickthrough = false;
 
@@ -152,7 +150,6 @@ internal class StateControlWindow : Window
 			_tabTime = target > _tabTime ? MathF.Min(target, _tabTime + step) : MathF.Max(target, _tabTime - step);
 		}
 
-		// ImGui rounds window positions to whole pixels, so keep this whole too or the switch slowly creeps up.
 		_tabShown = Ease(_tabTime);
 		_band = MathF.Round(TabHeight * _tabShown);
 
@@ -253,7 +250,6 @@ internal class StateControlWindow : Window
 		return t < 0.5f ? 4f * t * t * t : 1f - (MathF.Pow((-2f * t) + 2f, 3f) * 0.5f);
 	}
 
-	// The AoE type only changes if the state did. Duty replays refuse every state but Off.
 	private static void SetState(int index, int previous)
 	{
 		RSCommands.SetStateCommandType(Segments[index].State);
@@ -333,7 +329,6 @@ internal class StateControlWindow : Window
 		drawList.AddText(new Vector2(textX, textY + titleSize.Y + lineGap), M3.U32(Segments[current].Accent(s)),
 			M3Navigation.Truncate(status, textWidth));
 
-		// Draw draws the pill here, after the content, so it can stay on screen while the window minimizes.
 		_fold.BarTop = (height - pillSize.Y) * 0.5f;
 
 		ImGui.SetCursorScreenPos(origin);
@@ -521,7 +516,6 @@ internal class StateControlWindow : Window
 		draw.AddRectFilled(min, max, fill, corner, ImDrawFlags.RoundCornersTop);
 		draw.AddRectFilled(new Vector2(min.X - fillet, trackTop), new Vector2(max.X + fillet, trackTop + scale + 1.5f), fill);
 
-		// Both fillets wind clockwise, which ImGui's anti-aliased fill needs.
 		draw.PathLineTo(new Vector2(min.X, trackTop));
 		draw.PathArcTo(new Vector2(min.X - fillet, trackTop - fillet), fillet, MathF.PI * 0.5f, 0f, 0);
 		draw.PathFillConvex(fill);

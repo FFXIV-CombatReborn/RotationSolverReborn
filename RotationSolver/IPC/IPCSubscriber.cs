@@ -9,41 +9,6 @@ namespace RotationSolver.IPC
 {
 	using System.ComponentModel;
 
-	//internal static class BossModReborn_IPCSubscriber
-	//{
-	//	private static readonly EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(BossModReborn_IPCSubscriber), "BossMod", SafeWrapper.AnyException);
-
-	//	internal static bool IsEnabled => IPCSubscriber_Common.IsReady("BossModReborn");
-
-	//	[EzIPC("AI.GetPreset", true)] internal static readonly Func<string> Presets_GetActive;
-
-	//	[EzIPC("AI.SetPreset", true)] internal static readonly Action<string> Presets_SetActive;
-
-	//	internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
-	//}
-
-	//internal static class BossMod_IPCSubscriber
-	//{
-	//	private static readonly EzIPCDisposalToken[] _disposalTokens = EzIPC.Init(typeof(BossMod_IPCSubscriber), "BossMod", SafeWrapper.AnyException);
-
-	//	internal static bool IsEnabled => IPCSubscriber_Common.IsReady("BossMod") || IPCSubscriber_Common.IsReady("BossModReborn");
-
-	//	[EzIPC] internal static readonly Func<uint, bool> HasModuleByDataId;
-	//	[EzIPC] internal static readonly Func<IReadOnlyList<string>, bool, List<string>> Configuration;
-	//	[EzIPC("Presets.Get", true)] internal static readonly Func<string, string> Presets_Get;
-	//	[EzIPC("Presets.Create", true)] internal static readonly Func<string, bool, bool> Presets_Create;
-	//	[EzIPC("Presets.Delete", true)] internal static readonly Func<string, bool> Presets_Delete;
-	//	[EzIPC("Presets.GetActive", true)] internal static readonly Func<string> Presets_GetActive;
-	//	[EzIPC("Presets.SetActive", true)] internal static readonly Func<string, bool> Presets_SetActive;
-	//	[EzIPC("Presets.ClearActive", true)] internal static readonly Func<bool> Presets_ClearActive;
-	//	[EzIPC("Presets.GetForceDisabled", true)] internal static readonly Func<bool> Presets_GetForceDisabled;
-	//	[EzIPC("Presets.SetForceDisabled", true)] internal static readonly Func<bool> Presets_SetForceDisabled;
-	//	/** string presetName, string moduleTypeName, string trackName, string value*/
-	//	[EzIPC("Presets.AddTransientStrategy")] internal static readonly Func<string, string, string, string, bool> Presets_AddTransientStrategy;
-
-	//	internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
-	//}
-
 	public static class Wrath_IPCSubscriber
 	{
 		public enum CancellationReason
@@ -172,7 +137,6 @@ namespace RotationSolver.IPC
 			}
 		}
 
-		// Minimal API: only disabling Auto-Rotation
 		internal static void DisableAutoRotation()
 		{
 			if (Register())
@@ -196,11 +160,8 @@ namespace RotationSolver.IPC
 			IPCSubscriber_Common.DisposeAll(_disposalTokens);
 		}
 
-		// Callback name must be resolvable by Wrath; provide a no-op handler.
-		// The callback signature is reflected by Wrath; keep it stable.
 		public static void LeaseCancelled(CancellationReason reason, string info)
 		{
-			// Intentionally minimal: just clear our lease so subsequent calls re-register.
 			_curLease = null;
 		}
 
@@ -226,7 +187,6 @@ namespace RotationSolver.IPC
 				return false;
 			}
 
-			// Use Dalamud plugin info for internal and display names where available.
 			var internalName = Svc.PluginInterface.InternalName ?? "RotationSolver";
 			var displayName = Svc.PluginInterface.Manifest?.Name ?? "Rotation Solver";
 			var callbackName = $"{typeof(Wrath_IPCSubscriber).FullName}.LeaseCancelled";

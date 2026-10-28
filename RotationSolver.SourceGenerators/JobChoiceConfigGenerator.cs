@@ -40,7 +40,6 @@ public class JobChoiceConfigGenerator : IIncrementalGenerator
 
 					if (variableName == propertyName)
 					{
-						// Skip fields with PascalCase names
 						continue;
 					}
 
