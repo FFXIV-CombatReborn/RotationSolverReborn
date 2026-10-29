@@ -14,7 +14,6 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 using RotationSolver.IPC;
-//using KamiToolKit;
 using RotationSolver.UI;
 using RotationSolver.UI.ExtraWindows;
 using RotationSolver.UI.HighlightTeachingMode;
@@ -34,7 +33,6 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 	private static InterceptedActionWindow? _interceptedActionWindow;
 	private static ActionTimelineWindow? _actionTimelineWindow;
 	private static OverlayWindow? _overlayWindow;
-	//private static NativeControlWindow? _nativeControlWindow;
 	private static StateControlWindow? _stateControlWindow;
 	private static EasterEggWindow? _easterEggWindow;
 	private static FirstStartTutorialWindow? _firstStartTutorialWindow;
@@ -48,22 +46,15 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 	public static DalamudLinkPayload? HideWarningLinkPayload { get; private set; }
 	private static readonly Random _random = new();
 
-	/// <summary>
-	/// The registered IPC provider. Only one instance may exist, since creating one registers the IPC endpoints.
-	/// </summary>
 	internal static IPCProvider IPCProvider { get; private set; } = null!;
 
 	public RotationSolverPlugin(IDalamudPluginInterface pluginInterface)
 	{
 		ECommonsMain.Init(pluginInterface, this, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
-		//KamiToolKitLibrary.Initialize(pluginInterface);
 
-		// RSR's 100% element size is a quarter smaller than the Material spec.
 		M3.ElementBaseline = 0.75f;
 		M3.Initialize(pluginInterface, Service.Config);
 		M3Tooltip.Handler = ImguiTooltips.ShowTooltip;
-
-		IconSet.Init();
 
 		_dis.Add(new Service());
 
@@ -77,25 +68,10 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		_interceptedActionWindow = new();
 		_actionTimelineWindow = new();
 		_overlayWindow = new();
-		//_nativeControlWindow = new();
 		_stateControlWindow = new();
 		_easterEggWindow = new();
 		_firstStartTutorialWindow = new();
 		_updateNotesWindow = new();
-
-		// Start cactbot bridge if enabled
-		//try
-		//{
-		//    if (Service.Config.EnableCactbotTimeline)
-		//    {
-		//        var cactbotBridge = new Helpers.CactbotTimelineBridge();
-		//        _dis.Add(cactbotBridge);
-		//    }
-		//}
-		//catch (Exception ex)
-		//{
-		//    PluginLog.Warning($"Failed to start CactbotTimelineBridge: {ex.Message}");
-		//}
 
 		windowSystem = new WindowSystem(Name);
 		windowSystem.AddWindow(_mainWindow);
@@ -109,8 +85,6 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		windowSystem.AddWindow(_firstStartTutorialWindow);
 		windowSystem.AddWindow(_updateNotesWindow);
 
-		//Notify.Success("Overlay Window was added!");
-
 		Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
 		Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;
 		Svc.PluginInterface.UiBuilder.Draw += OnDraw;
@@ -118,15 +92,11 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 	public async Task LoadAsync(CancellationToken cancellationToken)
 	{
-		// Warm up texture cache on framework thread. This is not critical to plugin
-		// functionality, so it should not be allowed to block/consume the load-timeout
-		// budget that Dalamud provides for LoadAsync via cancellationToken.
 		var textureWarmupTask = Svc.Framework.Run(() =>
 		{
 			_ = ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
 		}, cancellationToken);
 
-		// Load main config asynchronously (off main thread)
 		try
 		{
 			if (File.Exists(Svc.PluginInterface.ConfigFile.FullName))
@@ -152,7 +122,6 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 			Service.Config = new Configs();
 		}
 
-		// Load OtherConfiguration files
 		await OtherConfiguration.InitAsync(cancellationToken);
 
 		try
@@ -164,18 +133,14 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 			PluginLog.Warning("Texture warmup was canceled; continuing plugin load.");
 		}
 
-		// The following registers hooks/events required for the plugin to function and
-		// must complete even if Dalamud's load-timeout token fires (e.g. due to slow
-		// disk I/O or the framework being busy during a loading screen), otherwise the
-		// plugin ends up in a partially-initialized state with hooks leaking.
 		await Svc.Framework.Run(() =>
 		{
-			//HotbarHighlightDrawerManager.Init();
 
 			MajorUpdater.Enable();
 			AutoAttackUpdater.Enable();
 			Watcher.Enable();
 			ActionQueueManager.Enable();
+			ActionManagerEx.Enable();
 			BMRPlanUpdater.Enable();
 			ActionContextMenu.Init();
 			HotbarHighlightManager.Init();
@@ -384,15 +349,6 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 				|| AnyHostileTargetWithinDistance(25);
 
 		_fullControlWindow!.IsOpen = isValid && Service.Config.ShowControlWindow;
-		//if (isValid && Service.Config.ShowControlWindow)
-		//{
-		//	if (!(_nativeControlWindow?.IsOpen ?? false))
-		//		_nativeControlWindow?.Open();
-		//}
-		//else
-		//{
-		//	_nativeControlWindow?.Close();
-		//}
 		_nextActionWindow!.IsOpen = isValid && Service.Config.ShowNextActionWindow;
 		_interceptedActionWindow!.IsOpen = isValid && Service.Config.ShowInterceptedActionWindow;
 		UpdateActionTimeline(isValid);
@@ -430,15 +386,18 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 	public async ValueTask DisposeAsync()
 	{
+		MajorUpdater.Dispose();
+
 		ActionTracer.Shutdown();
 
 		Service.Config.Save();
-		await OtherConfiguration.Save();
 
-		AutoAttackUpdater.Disable();
+		var saveLists = OtherConfiguration.Save();
+
 		RSCommands.Disable();
 		Watcher.Disable();
 		ActionQueueManager.Disable();
+		ActionManagerEx.DisposeInstance();
 		BMRPlanUpdater.Disable();
 		ActionContextMenu.Dispose();
 		Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
@@ -460,9 +419,6 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		}
 		_dis.Clear();
 
-		//_nativeControlWindow?.Close();
-		//KamiToolKitLibrary.Dispose();
-		MajorUpdater.Dispose();
 		HotbarDisabledColor.ResetOnUnload();
 		HotbarHighlightManager.Dispose();
 		ActionTimelineManager.DisposeInstance();
@@ -472,6 +428,8 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		BMRTimeline_IPCSubscriber.Dispose();
 		BMRPlan_IPCSubscriber.Dispose();
 		Wrath_IPCSubscriber.Dispose();
+
+		await saveLists;
 
 		ECommonsMain.Dispose();
 	}

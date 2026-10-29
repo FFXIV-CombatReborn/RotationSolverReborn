@@ -572,7 +572,7 @@ public partial class MainWindow
 		ImGui.Text($"IsCastingMultiHit: {DataCenter.IsCastingMultiHit()}");
 		ImGui.Text($"IsCastingAreaVfx: {DataCenter.IsCastingAreaVfx()}");
 		ImGui.Text($"IsCastingTankVfx: {DataCenter.IsCastingTankVfx()}");
-		ImGui.Text($"TankbusterTargets: {DataCenter.TankbusterTargets.Count}");
+		ImGui.Text($"TankbusterTargets: {DataCenter.TankbusterTargetIds.Count}");
 		ImGui.Spacing();
 		ImGui.Text($"IsInM11S: {DataCenter.IsInM11S}");
 		ImGui.Text($"IsTyrantCastingSpecialIndicator2: {DataCenter.IsTyrantCastingSpecialIndicator2()}");
@@ -748,6 +748,7 @@ public partial class MainWindow
 			}
 			ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
 			ImGui.Text($"TTK: {battleChara.GetTTK()}");
+			ImGui.Text($"Next DoT tick: {battleChara.TimeToNextDotTick():F2}s");
 			ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
 			ImGui.Text($"Is Boss Icon: {battleChara.IsBossFromIcon()}");
 			ImGui.Text($"Rank: {battleChara.GetObjectNPC()?.Rank.ToString() ?? string.Empty}");

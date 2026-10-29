@@ -13,26 +13,26 @@ internal static partial class TargetUpdater
 		_raisePartyTargets = new(() => Service.Config.RaiseDelay2),
 		_raiseAllTargets = new(() => Service.Config.RaiseDelay2),
 		_dispelPartyTargets = new(() => Service.Config.EsunaDelay);
-
-
-	// Scratch lists reused every update; ObjectListDelay copies what it needs.
 	private static readonly List<IBattleChara> _raiseCandidates = [];
 	private static readonly List<IBattleChara> _dispelCandidates = [];
 
-	private static DateTime _lastUpdateTimeToKill = DateTime.MinValue;
-	private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(1);
+	private static List<IBattleChara> _outOfDutyPlayers = [];
+
+	private static long _lastUpdateTimeToKill;
+	private const long TimeToKillUpdateIntervalMs = 1000;
 
 	internal static void UpdateTargets()
 	{
 		DataCenter.TargetsByRange.Clear();
 		DataCenter.AllTargets = GetAllTargets();
 
-		// Early-out: avoid downstream work and stale data when there are no potential targets
 		if (DataCenter.AllTargets == null || DataCenter.AllTargets.Count == 0)
 		{
 			DataCenter.PartyMembers.Clear();
 			DataCenter.AllianceMembers.Clear();
 			DataCenter.AllHostileTargets.Clear();
+			DataCenter.AllHostileTargetIds.Clear();
+			_outOfDutyPlayers.Clear();
 			DataCenter.DeathTarget = null;
 			DataCenter.DispelTarget = null;
 			DataCenter.ProvokeTarget = null;
@@ -45,9 +45,8 @@ internal static partial class TargetUpdater
 		DataCenter.DeathTarget = GetDeathTarget();
 		DataCenter.DispelTarget = GetDispelTarget();
 		DataCenter.ProvokeTarget = (DataCenter.Role == JobRole.Tank || StatusHelper.PlayerHasStatus(true, StatusID.VariantUltimatumSet))
-			? GetFirstHostileTarget(ObjectHelper.CanProvoke)
-			: null; // Calculating this per frame rather than on-demand is actually a fair amount worse
-		DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt); // Tanks, Melee, RDM, and various phantom and duty actions can interrupt so just deal with it
+			? GetFirstHostileTarget(ObjectHelper.CanProvoke) : null;
+		DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt);
 
 		if (DataCenter.IsInOccultCrescentOp && Service.Config.ElementalWeaknessTracking)
 		{
@@ -60,38 +59,27 @@ internal static partial class TargetUpdater
 	private static unsafe void UpdateLists()
 	{
 		var allTargets = DataCenter.AllTargets;
-		if (allTargets == null || allTargets.Count == 0)
-		{
-			// Defensive: ensure lists are empty if no targets
-			DataCenter.PartyMembers.Clear();
-			DataCenter.AllianceMembers.Clear();
-			DataCenter.AllHostileTargets.Clear();
-			return;
-		}
 
-		// Pre-size lists to reduce reallocations
 		List<IBattleChara> partyMembers = new(capacity: allTargets.Count);
 		List<IBattleChara> allianceMembers = new(capacity: allTargets.Count);
 		List<IBattleChara> hostileTargets = new(capacity: allTargets.Count);
+		List<IBattleChara> outOfDutyPlayers = [];
 
 		var raisetype = Service.Config.RaiseType;
 		var ignoreInvincibility = DataCenter.IsPvP && Service.Config.IgnorePvPInvincibility;
 
-		// Compute player eye position once
 		var playerEye = Player.Object?.Position;
 		if (playerEye != null)
 		{
 			playerEye = new Vector3(playerEye.Value.X, playerEye.Value.Y + 2.0f, playerEye.Value.Z);
 		}
 
-		// GetAllTargets already filtered out untargetable objects and pets.
 		foreach (var member in allTargets)
 		{
 			try
 			{
 				if (member.IsEnemy())
 				{
-					// Only proceed if playerEye is available
 					if (playerEye == null)
 					{
 						continue;
@@ -99,7 +87,6 @@ internal static partial class TargetUpdater
 
 					if (member.DistanceToPlayer() < 48 && member.CanSeeFrom(playerEye.Value))
 					{
-						// Valid hostile target
 						if (!ignoreInvincibility)
 						{
 							var hasInvincible = false;
@@ -121,7 +108,7 @@ internal static partial class TargetUpdater
 
 							if (hasInvincible)
 							{
-								continue; // Invincible enemy doesn't get added to any lists
+								continue;
 							}
 						}
 						hostileTargets.Add(member);
@@ -129,33 +116,20 @@ internal static partial class TargetUpdater
 				}
 				else if (member.IsParty())
 				{
-					// Party members are only added to the party list
 					if (member.Character() != null)
 					{
 						partyMembers.Add(member);
 					}
 				}
-				else // Not a party member or hostile, so check alliance status
+				else if (member.Character() != null)
 				{
-					// Alliance members are based on the raise settings
-					if (raisetype == RaiseType.PartyOnly)
+					if (member.IsAllianceMember())
 					{
-						// No alliance member checks
+						allianceMembers.Add(member);
 					}
-					else if (raisetype == RaiseType.AllOutOfDuty)
+					else if (raisetype == RaiseType.AllOutOfDuty && member.IsOtherPlayerOutOfDuty())
 					{
-						if (member.IsOtherPlayerOutOfDuty() && member.Character() != null)
-						{
-							allianceMembers.Add(member);
-						}
-					}
-					else if (member.IsAllianceMember())
-					{
-						var character = member.Character();
-						if (character != null)
-						{
-							allianceMembers.Add(member);
-						}
+						outOfDutyPlayers.Add(member);
 					}
 				}
 			}
@@ -168,6 +142,13 @@ internal static partial class TargetUpdater
 		DataCenter.PartyMembers = partyMembers;
 		DataCenter.AllianceMembers = allianceMembers;
 		DataCenter.AllHostileTargets = hostileTargets;
+		_outOfDutyPlayers = outOfDutyPlayers;
+
+		DataCenter.AllHostileTargetIds.Clear();
+		foreach (var hostile in hostileTargets)
+		{
+			_ = DataCenter.AllHostileTargetIds.Add(hostile.GameObjectId);
+		}
 	}
 
 	private static List<IBattleChara> GetAllTargets()
@@ -247,7 +228,6 @@ internal static partial class TargetUpdater
 				}
 			}
 
-			// Alliance members never include party members (UpdateLists keeps them disjoint).
 			if (DataCenter.AllianceMembers != null)
 			{
 				if (raisetype == RaiseType.PartyAndAllianceSupports || raisetype == RaiseType.PartyAndAllianceHealers)
@@ -261,7 +241,7 @@ internal static partial class TargetUpdater
 								validRaiseTargets.Add(member);
 							}
 						}
-						else // PartyAndAllianceSupports
+						else
 						{
 							if (member.IsJobCategory(JobRole.Healer) || member.IsJobCategory(JobRole.Tank))
 							{
@@ -279,7 +259,14 @@ internal static partial class TargetUpdater
 				}
 			}
 
-			// Apply raise delay without allocating a new list per frame
+			if (raisetype == RaiseType.AllOutOfDuty)
+			{
+				foreach (var target in _outOfDutyPlayers.GetDeath())
+				{
+					validRaiseTargets.Add(target);
+				}
+			}
+
 			if (raisetype == RaiseType.PartyOnly)
 			{
 				_raisePartyTargets.Delay(validRaiseTargets);
@@ -379,7 +366,6 @@ internal static partial class TargetUpdater
 			weakenPeople.Clear();
 			AddDispelTargets(DataCenter.PartyMembers, weakenPeople);
 
-			// Apply dispel delay to the candidate list
 			_dispelPartyTargets.Delay(weakenPeople);
 
 			const AutoStatus busyStatus = AutoStatus.HealAreaAbility | AutoStatus.HealAreaSpell
@@ -387,7 +373,6 @@ internal static partial class TargetUpdater
 				| AutoStatus.DefenseArea | AutoStatus.DefenseSingle;
 			var canDispelNonDangerous = (DataCenter.MergedStatus & busyStatus) == 0;
 
-			// Single-pass selection over the delayed set to avoid extra list allocations
 			IBattleChara? closestDangerous = null;
 			var closestDangerousDist = float.MaxValue;
 			IBattleChara? closestNonDangerous = null;
@@ -460,7 +445,7 @@ internal static partial class TargetUpdater
 						if (status != null && status.CanDispel())
 						{
 							targetList.Add(member);
-							break; // Add only once per member if any status can be dispelled
+							break;
 						}
 					}
 				}
@@ -472,40 +457,16 @@ internal static partial class TargetUpdater
 		}
 	}
 
-	// Recording new entries at 1/second and dequeuing old values to keep only the last DataCenter.HP_RECORD_TIME worth of combat time
-	// Has performance implications for keeping too much data for too many targets as they're also all evaluated multiple times a frame for expected TTK
 	private static void UpdateTimeToKill()
 	{
-		var now = DateTime.Now;
-		if (now - _lastUpdateTimeToKill < TimeToKillUpdateInterval)
+		var now = Environment.TickCount64;
+		if (now - _lastUpdateTimeToKill < TimeToKillUpdateIntervalMs)
 		{
 			return;
 		}
 
 		_lastUpdateTimeToKill = now;
-
-		var hostiles = DataCenter.AllHostileTargets;
-		if (hostiles == null || hostiles.Count == 0)
-		{
-			return;
-		}
-
-		if (DataCenter.RecordedHP.Count >= DataCenter.HP_RECORD_TIME)
-		{
-			_ = DataCenter.RecordedHP.Dequeue();
-		}
-
-		Dictionary<ulong, float> currentHPs = new(hostiles.Count);
-		for (var i = 0; i < hostiles.Count; i++)
-		{
-			var target = hostiles[i];
-			if (target != null && target.CurrentHp != 0)
-			{
-				currentHPs[target.GameObjectId] = target.GetHealthRatio();
-			}
-		}
-
-		DataCenter.RecordedHP.Enqueue((now, currentHPs));
+		TimeToKillTracker.Record(DataCenter.AllHostileTargets, now);
 	}
 
 	private static void UpdateOccultWeaknesses()
@@ -526,7 +487,6 @@ internal static partial class TargetUpdater
 				continue;
 			}
 
-			// Skip mobs whose weakness is already manually curated in StatusHelper.
 			if (StatusHelper.HasKnownOccultWeakness(hostile.NameId))
 			{
 				continue;

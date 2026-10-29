@@ -8,7 +8,9 @@ namespace RotationSolver.Updaters;
 
 internal static class CancelCastUpdater
 {
-	private static readonly RandomDelay _tarStopCastDelay = new(() => Service.Config.StopCastingDelay);
+#pragma warning disable IDE0044
+	private static RandomDelay _tarStopCastDelay = new(() => Service.Config.StopCastingDelay);
+#pragma warning restore IDE0044
 
 	internal static unsafe void UpdateCancelCast()
 	{
@@ -30,18 +32,14 @@ internal static class CancelCastUpdater
 			&& castTarget.IsEnemy()
 			&& castTarget.CurrentHp == 0;
 
-		// Evaluate the delay every frame so its timer tracks the target's state.
 		var stopForDeadTarget = _tarStopCastDelay.Delay(tarDead);
 
-		// Cancel raise cast if target already has Raise status
 		var tarHasRaise = castTarget != null && castTarget.HasStatus(false, StatusID.Raise);
 
-		// Cancel if a NoCastingStatus is about to resolve - same window and PvP exemption as DoAction, which still starts casts outside of it
 		var hasNoCastingStatus = !DataCenter.IsPvP
 			&& NoCastingStatusHelper.PlayerHasNoCastingStatus(out var noCastingRemaining)
 			&& noCastingRemaining < NoCastingStatusHelper.ResolveWindow;
 
-		// Cancel cast in PvP if an enemy target gains Guard and the action does not ignore Guard
 		var tarHasGuard = DataCenter.IsPvP && Service.Config.PvpGuardCancel
 			&& castTarget != null
 			&& castTarget.IsEnemy()
@@ -49,8 +47,6 @@ internal static class CancelCastUpdater
 			&& ((ActionID)player.CastActionId).GetActionFromID(true, RotationUpdater.CurrentRotationActions)
 				is IBaseAction { Setting.IgnoreGuard: false };
 
-		// Cancel the cast if BossMod's own AI hints (module or AI controller) are requesting a cancel,
-		// e.g. because the boss module determined the cast is no longer safe/useful.
 		var bmrForceCancelCast = Service.Config.UseBmrTimeline
 			&& (DataCenter.BMRForceCancelCast || DataCenter.BMRForceCancelCastAI);
 

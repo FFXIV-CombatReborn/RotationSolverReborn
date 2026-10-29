@@ -25,7 +25,6 @@ internal static class ActionContextMenu
 		contextMenu = Svc.ContextMenu;
 		contextMenu?.OnMenuOpened += AddActionMenu;
 
-		// Subscribe to hover events once
 		Svc.GameGui.HoveredActionChanged += OnHoveredActionChanged;
 		Svc.GameGui.HoveredItemChanged += OnHoveredItemChanged;
 	}
@@ -41,7 +40,6 @@ internal static class ActionContextMenu
 
 		contextMenu?.OnMenuOpened -= AddActionMenu;
 
-		// Unsubscribe from events
 		Svc.GameGui.HoveredActionChanged -= OnHoveredActionChanged;
 		Svc.GameGui.HoveredItemChanged -= OnHoveredItemChanged;
 
@@ -57,8 +55,6 @@ internal static class ActionContextMenu
 			currentContextAction = null;
 			return;
 		}
-
-		//Svc.Log.Verbose($"HoveredAction changed: {hoveredAction.DetailKind}");
 
 		if (!Player.Available)
 		{
@@ -108,7 +104,6 @@ internal static class ActionContextMenu
 			return;
 		}
 
-		// Use cached action instead of creating new ones
 		var contextAction = currentContextAction;
 
 		if (contextAction == null || currentHoveredActionId == 0)

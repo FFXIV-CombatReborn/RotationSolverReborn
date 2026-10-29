@@ -2,16 +2,13 @@ using Lumina.Excel.Sheets;
 
 namespace RotationSolver.GameData.Getters;
 
-/// <summary>
-/// Class responsible for getting and processing items from the game data.
-/// </summary>
 internal class ItemGetter(Lumina.GameData gameData)
 	: ExcelRowGetter<Item>(gameData)
 {
 	/// <summary>
 	/// Gets the list of added item names.
 	/// </summary>
-	public List<string> AddedNames { get; } = new List<string>();
+	public List<string> AddedNames { get; } = [];
 
 	/// <summary>
 	/// Clears the list of added item names before creating the list of items.
@@ -61,12 +58,11 @@ internal class ItemGetter(Lumina.GameData gameData)
 
 		var desc = item.Description.ToString() ?? string.Empty;
 
-		// Sanitize the description to remove invalid XML tags
 		desc = Util.SanitizeXmlDescription(desc);
 
 		desc = $"<para>{desc.Replace("\n", "</para>\n/// <para>")}</para>";
 
-		var descName = $"<see href=\"https://garlandtools.org/db/#item/{item.RowId}\"><strong>{item.Name.ToString()}</strong></see> [{item.RowId}]";
+		var descName = $"<see href=\"https://garlandtools.org/db/#item/{item.RowId}\"><strong>{item.Name}</strong></see> [{item.RowId}]";
 
 		return $$"""
         private readonly Lazy<IBaseItem> _{{name}}Creator = new(() => new BaseItem({{item.RowId}}));

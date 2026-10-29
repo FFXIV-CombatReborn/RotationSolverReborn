@@ -7,10 +7,6 @@ using ECommons.Logging;
 
 namespace RotationSolver.IPC;
 
-/// <summary>
-/// Subscribes to BossMod's Cooldown Planner IPC endpoints so RSR can consume planned actions from
-/// BMR's Cooldown Planner and feed them into the action interception system.
-/// </summary>
 internal static class BMRPlan_IPCSubscriber
 {
 	private static readonly EzIPCDisposalToken[] _disposalTokens =
@@ -18,19 +14,12 @@ internal static class BMRPlan_IPCSubscriber
 
 	internal static bool IsEnabled => IPCSubscriber_Common.IsReady("BossModReborn");
 
-	/// <summary>
-	/// Returns a JSON-serialized array of <see cref="BMRPlannedAction"/>
-	/// </summary>
 	[EzIPC("Plan.GetUpcomingActions", true)]
 	internal static readonly Func<float, string>? GetUpcomingActions;
 
 	private static ICallGateSubscriber<object>? _actionsChangedSubscriber;
 	private static Action? _actionsChangedCallback;
 
-	/// <summary>
-	/// Subscribes to the BossMod.Plan.ActionsChanged push notification, fired whenever the active
-	/// plan changes so consumers know to re-poll <see cref="GetUpcomingActions"/>.
-	/// </summary>
 	internal static void SubscribeActionsChanged(Action callback)
 	{
 		UnsubscribeActionsChanged();
@@ -72,10 +61,6 @@ internal static class BMRPlan_IPCSubscriber
 
 	private static void OnActionsChanged() => _actionsChangedCallback?.Invoke();
 
-	/// <summary>
-	/// Polls BMR for the upcoming planned actions within the given lookahead window.
-	/// Returns an empty list if BMR is unavailable, no plan is active, or the call fails.
-	/// </summary>
 	internal static List<BMRPlannedAction> GetUpcomingPlannedActions(float lookAheadSeconds)
 	{
 		var func = GetUpcomingActions;

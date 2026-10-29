@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/Melee/VPR_Reborn.cs")]
 
 public sealed class VPR_Reborn : ViperRotation
@@ -199,7 +199,7 @@ public sealed class VPR_Reborn : ViperRotation
 		}
 
 		// Use burst medicine if cooldown for Serpents Ire has elapsed sufficiently
-		if (NoAbilityReady && BurstMed && SerpentsIrePvE.EnoughLevel && SerpentsIrePvE.Cooldown.ElapsedAfter(115)
+		if (InCombat && NoAbilityReady && BurstMed && SerpentsIrePvE.EnoughLevel && SerpentsIrePvE.Cooldown.ElapsedAfter(115)
 			&& UseBurstMedicine(out act))
 		{
 			return true;

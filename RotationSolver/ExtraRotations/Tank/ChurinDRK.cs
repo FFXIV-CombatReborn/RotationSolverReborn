@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Tank;
 
-[Rotation("ChurinDRK", CombatType.PvE, GameVersion = "7.4", Description = "Find it in your heart. You'll need to break past the ribs and then scoop it out, but it's in there, and you need to find it. Quickly.")]
+[Rotation("ChurinDRK", CombatType.PvE, GameVersion = "7.4", RotationType = RotationType.Reborn, Description = "Find it in your heart. You'll need to break past the ribs and then scoop it out, but it's in there, and you need to find it. Quickly.")]
 [SourceCode(Path = "main/ExtraRotations/Tank/ChurinDRK.cs")]
 [ExtraRotation]
 public sealed class ChurinDRK : DarkKnightRotation
@@ -262,7 +262,10 @@ public sealed class ChurinDRK : DarkKnightRotation
 	private bool TryUseDisesteem(out IAction? act)
 	{
 		act = null;
-		if (!HasDisesteem) return false;
+		if (!HasDisesteem)
+		{
+			return false;
+		}
 
 		if (InBurstWindow)
 		{
@@ -277,7 +280,10 @@ public sealed class ChurinDRK : DarkKnightRotation
 	private bool TryUseBlood(out IAction? act)
 	{
 		act = null;
-		if (HasDelirium || Blood < 50) return false;
+		if (HasDelirium || Blood < 50)
+		{
+			return false;
+		}
 
 		if (ShouldUseBlood(BloodSpendingStrategy, CurrentTarget))
 		{
@@ -296,7 +302,10 @@ public sealed class ChurinDRK : DarkKnightRotation
 	private bool TryUseDeliriumCombo(out IAction? act)
 	{
 		act = null;
-		if ((CurrentMp >= 9600 || !HasDelirium) && DeliriumPvE.EnoughLevel) return false;
+		if ((CurrentMp >= 9600 || !HasDelirium) && DeliriumPvE.EnoughLevel)
+		{
+			return false;
+		}
 
 		if (!DeliriumPvE.EnoughLevel && BloodWeaponPvE.EnoughLevel)
 		{
@@ -329,7 +338,10 @@ public sealed class ChurinDRK : DarkKnightRotation
 	private bool TryUseFiller(out IAction? act)
 	{
 		act = null;
-		if (HasDelirium && CurrentMp < 9600 && !CombatElapsedLessGCD(3)) return false;
+		if (HasDelirium && CurrentMp < 9600 && !CombatElapsedLessGCD(3))
+		{
+			return false;
+		}
 
 		return StalwartSoulPvE.CanUse(out act) ||
 			   UnleashPvE.CanUse(out act) ||
@@ -355,7 +367,10 @@ public sealed class ChurinDRK : DarkKnightRotation
 	private bool TryUseLivingShadow(out IAction? act)
 	{
 		act = null;
-		if (!CanBurst) return false;
+		if (!CanBurst)
+		{
+			return false;
+		}
 
 		if (InCombat && DarkSideTime > 0 && !CombatElapsedLessGCD(1))
 		{
@@ -389,15 +404,27 @@ public sealed class ChurinDRK : DarkKnightRotation
 	{
 		act = null;
 		if (!SaltedEarthPvE.EnoughLevel || !SaltedEarthPvE.IsEnabled)
+		{
 			return false;
+		}
 
-		bool hasSaltedEarth = StatusHelper.PlayerHasStatus(true, StatusID.SaltedEarth);
-		bool canUseSaltAndDarkness = SaltAndDarknessPvE.EnoughLevel && hasSaltedEarth;
+		var hasSaltedEarth = StatusHelper.PlayerHasStatus(true, StatusID.SaltedEarth);
+		var canUseSaltAndDarkness = SaltAndDarknessPvE.EnoughLevel && hasSaltedEarth;
 
-		if (InBurstWindow && canUseSaltAndDarkness && CurrentMp < 6000) return SaltAndDarknessPvE.CanUse(out act);
-		if (!InBurstWindow && canUseSaltAndDarkness) return SaltAndDarknessPvE.CanUse(out act);
+		if (InBurstWindow && canUseSaltAndDarkness && CurrentMp < 6000)
+		{
+			return SaltAndDarknessPvE.CanUse(out act);
+		}
 
-		if (InBurstWindow) return (IsInHighEndDuty || !IsMoving) && SaltedEarthPvE.CanUse(out act);
+		if (!InBurstWindow && canUseSaltAndDarkness)
+		{
+			return SaltAndDarknessPvE.CanUse(out act);
+		}
+
+		if (InBurstWindow)
+		{
+			return (IsInHighEndDuty || !IsMoving) && SaltedEarthPvE.CanUse(out act);
+		}
 #if DEBUG
 		if (CurrentTarget != null && ObjectHelper.IsDummy(CurrentTarget))
 		{
@@ -485,12 +512,15 @@ public sealed class ChurinDRK : DarkKnightRotation
 		{
 			get
 			{
-				if (!Enabled) return 0;
+				if (!Enabled)
+				{
+					return 0;
+				}
 
-				float[] timings = GetTimingsArray();
+				var timings = GetTimingsArray();
 				float difference;
 
-				for (int i = 0; i < timings.Length; i++)
+				for (var i = 0; i < timings.Length; i++)
 				{
 					if (timings[i] > 0)
 					{
@@ -507,9 +537,9 @@ public sealed class ChurinDRK : DarkKnightRotation
 
 		public override bool IsConditionMet()
 		{
-			float[] timings = GetTimingsArray();
+			var timings = GetTimingsArray();
 
-			foreach (float timing in timings)
+			foreach (var timing in timings)
 			{
 				if (IsOpenerPotion(timing) && ChurinDRK.OpenerPotionTime == 0)
 				{
@@ -538,7 +568,7 @@ public sealed class ChurinDRK : DarkKnightRotation
 			}
 
 			// Check opener timing: if it's an opener potion and countdown is within configured time
-			float countDown = Service.CountDownTime;
+			var countDown = Service.CountDownTime;
 			if (IsOpenerPotion(timing) && countDown > 0 && countDown <= ChurinDRK.OpenerPotionTime && ChurinDRK.OpenerPotionTime > 0)
 			{
 				return true;
@@ -567,12 +597,16 @@ public sealed class ChurinDRK : DarkKnightRotation
 		var riskingMp = CurrentMp >= 8500;
 
 		if (!FloodOfShadowPvE.EnoughLevel)
+		{
 			return false;
+		}
 
 		if (strategy == MpStrategy.Optimal)
 		{
 			if (riskingMp)
+			{
 				return CurrentMp >= 3000 || HasDarkArts;
+			}
 
 			if (DeliriumPvE.EnoughLevel)
 			{
@@ -580,21 +614,29 @@ public sealed class ChurinDRK : DarkKnightRotation
 				if (TheBlackestNightPvE.EnoughLevel && HasDarkArts)
 				{
 					if (HasDelirium || !DeliriumPvE.Cooldown.WillHaveOneCharge(DarkSideTime + WeaponTotal))
+					{
 						return CurrentMp >= 3000;
+					}
 				}
 
 				// 1m window - 2 uses expected
 				if (!DeliriumPvE.Cooldown.WillHaveOneCharge(40f) && InOddWindow(LivingShadowPvE))
+				{
 					return CurrentMp >= 6000;
+				}
 
 				// 2m window - 4 uses expected; 5 with Dark Arts
 				if (InBurstWindow || !DeliriumPvE.Cooldown.WillHaveOneCharge(40f) && !InOddWindow(LivingShadowPvE))
+				{
 					return CurrentMp >= 3000 || HasDarkArts;
+				}
 			}
 
 			// If no Delirium, just use it whenever we have more than 3000 MP
 			if (!DeliriumPvE.EnoughLevel)
+			{
 				return CurrentMp >= 3000;
+			}
 		}
 
 		return strategy switch
@@ -641,19 +683,24 @@ public sealed class ChurinDRK : DarkKnightRotation
 			_currentParty = value;
 			var newParty = PartyMembers ?? [Player!];
 			IEnumerable<IBattleChara> battleCharas = [.. newParty];
-			bool hasChanged = false;
-			int newCount = 0;
+			var hasChanged = false;
+			var newCount = 0;
 			foreach (var c in battleCharas)
 			{
 				newCount++;
-				bool found = false;
+				var found = false;
 				foreach (var p in _currentParty)
 				{
-					if (ReferenceEquals(p, c)) { found = true; break; }
+					if (ReferenceEquals(p, c))
+					{ found = true; break; }
 				}
-				if (!found) { hasChanged = true; break; }
+				if (!found)
+				{ hasChanged = true; break; }
 			}
-			if (!hasChanged && newCount != _currentParty.Count) hasChanged = true;
+			if (!hasChanged && newCount != _currentParty.Count)
+			{
+				hasChanged = true;
+			}
 
 			if (hasChanged)
 			{

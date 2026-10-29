@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Magical;
 
-[Rotation("RebornPowerdox(TESTING)", CombatType.PvE, GameVersion = "7.57")]
+[Rotation("RebornPowerdox(TESTING)", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/Magical/BLM_RP.cs")]
 
 public class BLM_RP : BlackMageRotation

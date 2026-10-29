@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Ranged;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/Ranged/MCH_Reborn.cs")]
 
 public sealed class MCH_Reborn : MachinistRotation

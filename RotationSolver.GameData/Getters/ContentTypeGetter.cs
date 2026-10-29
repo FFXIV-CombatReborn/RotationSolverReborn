@@ -2,9 +2,6 @@ using Lumina.Excel.Sheets;
 
 namespace RotationSolver.GameData.Getters;
 
-/// <summary>
-/// A class to get content types from the game data.
-/// </summary>
 internal class ContentTypeGetter(Lumina.GameData gameData)
 	: ExcelRowGetter<ContentType>(gameData)
 {

@@ -2,9 +2,6 @@ using Lumina.Excel.Sheets;
 
 namespace RotationSolver.GameData.Getters;
 
-/// <summary>
-/// Class responsible for getting trait rotations.
-/// </summary>
 internal class TraitRotationGetter : ExcelRowGetter<Trait>
 {
 	private readonly ClassJob _job;
@@ -100,11 +97,6 @@ internal class TraitRotationGetter : ExcelRowGetter<Trait>
         """;
 	}
 
-	/// <summary>
-	/// Gets the description name for the specified item.
-	/// </summary>
-	/// <param name="item">The item.</param>
-	/// <returns>The description name.</returns>
 	private static string GetDescName(Trait item)
 	{
 		var jobs = item.ClassJobCategory.IsValid ? item.ClassJobCategory.Value.Name.ToString() : string.Empty;
@@ -113,17 +105,11 @@ internal class TraitRotationGetter : ExcelRowGetter<Trait>
 		return $"<see href=\"https://garlandtools.org/db/#action/{50000 + item.RowId}\"><strong>{item.Name.ToString()}</strong></see>{jobs} [{item.RowId}]";
 	}
 
-	/// <summary>
-	/// Gets the description for the specified item.
-	/// </summary>
-	/// <param name="item">The item.</param>
-	/// <returns>The description.</returns>
 	private string GetDesc(Trait item)
 	{
 		var transient = _gameData.GetExcelSheet<TraitTransient>()?.GetRow(item.RowId);
 		var desc = transient?.Description.ToString() ?? string.Empty;
 
-		// Sanitize the description to remove invalid XML tags
 		desc = Util.SanitizeXmlDescription(desc);
 
 		return $"<para>{desc.Replace("\n", "</para>\n/// <para>")}</para>";

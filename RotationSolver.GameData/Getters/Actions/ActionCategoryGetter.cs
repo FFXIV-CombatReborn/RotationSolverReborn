@@ -2,9 +2,6 @@ using Lumina.Excel.Sheets;
 
 namespace RotationSolver.GameData.Getters.Actions;
 
-/// <summary>
-/// Class for getting ActionCategory rows from the game data.
-/// </summary>
 internal class ActionCategoryGetter(Lumina.GameData gameData)
 	: ExcelRowGetter<ActionCategory>(gameData)
 {

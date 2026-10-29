@@ -1,5 +1,3 @@
-using Dalamud.Hooking;
-using Dalamud.Utility.Signatures;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Hooks;
@@ -48,32 +46,14 @@ public class ActionTimelineManager : IDisposable
 	private uint _castActionId;
 	private float _castElapsed;
 
-	private delegate void OnActorControlDelegate(uint entityId, uint type, uint buffID, uint direct, uint actionId, uint sourceId, uint arg7, uint arg8, uint arg9, uint arg10, ulong targetId, byte arg12);
-	[Signature("E8 ?? ?? ?? ?? 0F B7 0B 83 E9 64", DetourName = nameof(OnActorControl))]
-#pragma warning disable CS0649
-	private readonly Hook<OnActorControlDelegate>? _onActorControlHook;
-#pragma warning restore CS0649
-
 	private ActionTimelineManager()
 	{
 		ActionEffect.ActionEffectEvent += ActionFromSelf;
-
-		try
-		{
-			Svc.Hook.InitializeFromAttributes(this);
-			_onActorControlHook?.Enable();
-		}
-		catch (Exception e)
-		{
-			Svc.Log.Error("Error initiating ActionTimeline hooks: " + e.Message);
-		}
 	}
 
 	public void Dispose()
 	{
 		ActionEffect.ActionEffectEvent -= ActionFromSelf;
-		_onActorControlHook?.Disable();
-		_onActorControlHook?.Dispose();
 		Array.Clear(_items);
 		_count = 0;
 		_head = 0;
@@ -252,12 +232,10 @@ public class ActionTimelineManager : IDisposable
 		var actionId = player.CastActionId;
 		var elapsed = player.CurrentCastTime;
 
-		// Also new if the same action restarted faster than an update could notice.
 		var isNew = actionId != _castActionId || elapsed < _castElapsed - CastRestartSeconds;
 		_castActionId = actionId;
 		_castElapsed = elapsed;
 
-		// Use the client's cast type, not the effect packet's header, to skip mount, item and interaction casts.
 		if (!isNew || player.CastActionType != (byte)ActionType.Action
 			|| !TryGetAction(actionId, out var action)
 			|| GetActionType(actionId, action) != TimelineItemType.GCD)
@@ -265,7 +243,6 @@ public class ActionTimelineManager : IDisposable
 			return;
 		}
 
-		// An older cast whose bar should still be running was interrupted without us seeing the cancel.
 		for (var i = _pendingCasts.Count - 1; i >= 0; i--)
 		{
 			if (SecondsPastCastEnd(_pendingCasts[i], now) < -CastEffectEarly)
@@ -298,27 +275,7 @@ public class ActionTimelineManager : IDisposable
 		cast.CastingTime = Math.Clamp((float)(at - cast.StartTime).TotalSeconds, 0f, cast.CastingTime);
 	}
 
-	private void OnActorControl(uint entityId, uint type, uint buffID, uint direct, uint actionId, uint sourceId, uint arg7, uint arg8, uint arg9, uint arg10, ulong targetId, byte arg12)
-	{
-		_onActorControlHook?.Original(entityId, type, buffID, direct, actionId, sourceId, arg7, arg8, arg9, arg10, targetId, arg12);
-
-		try
-		{
-			// CancelAbility ActorControlCategory value
-			if (type != 15 || Player.Object is not { } player || entityId != player.GameObjectId)
-			{
-				return;
-			}
-
-			CancelInterruptedCast(DateTime.Now);
-		}
-		catch (Exception ex)
-		{
-			Svc.Log.Error($"Error in OnActorControl: {ex.Message}");
-		}
-	}
-
-	private void CancelInterruptedCast(DateTime now)
+	internal void CancelInterruptedCast(DateTime now)
 	{
 		for (var i = _pendingCasts.Count - 1; i >= 0; i--)
 		{
@@ -399,7 +356,6 @@ public class ActionTimelineManager : IDisposable
 		}
 	}
 
-	// Includes anything still running when combat started, like a precast.
 	private TimelineExportSession CreateExportSession(DateTime combatStart)
 	{
 		var session = new TimelineExportSession();

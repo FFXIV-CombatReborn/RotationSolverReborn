@@ -9,38 +9,32 @@ namespace RotationSolver.Updaters
 {
 	public static class ActionQueueManager
 	{
-		// Action Manager Hook for intercepting user input
 		private static Hook<UseActionDelegate>? _useActionHook;
 
-		// Delegate for ActionManager UseAction
 		private unsafe delegate bool UseActionDelegate(ActionManager* actionManager, uint actionType, uint actionID, ulong targetObjectID, uint param, uint useType, int pvp, bool* isGroundTarget);
 
 		private const ulong InvalidGameObjectId = 0xE0000000;
 
 		public static void Enable()
 		{
-			// Initialize hooks
 			InitializeActionHooks();
 		}
 
 		public static void Disable()
 		{
-			// Dispose hooks
 			DisposeActionHooks();
 		}
 
 		public static ActionID[] BlackListedInterceptActions { get; } =
 		[
-            // Ninja mudra actions
-            ActionID.TenPvE,
+			ActionID.TenPvE,
 			ActionID.TenPvE_18805,
 			ActionID.ChiPvE,
 			ActionID.ChiPvE_18806,
 			ActionID.JinPvE,
 			ActionID.JinPvE_18807,
 
-            // Dancer dance steps
-            ActionID.StandardStepPvE,
+			ActionID.StandardStepPvE,
 			ActionID.TechnicalStepPvE,
 			ActionID.EmboitePvE,
 			ActionID.EntrechatPvE,
@@ -49,8 +43,7 @@ namespace RotationSolver.Updaters
 			ActionID.StandardFinishPvE,
 			ActionID.TechnicalFinishPvE,
 
-            // Sage Eukrasian actions
-            ActionID.EukrasiaPvE,
+			ActionID.EukrasiaPvE,
 			ActionID.EukrasianDosisPvE,
 			ActionID.EukrasianDosisIiPvE,
 			ActionID.EukrasianDosisIiiPvE,
@@ -112,7 +105,6 @@ namespace RotationSolver.Updaters
 				{
 					if (actionType == 1 && (useType != 2 || Service.Config.InterceptMacro) && !StatusHelper.PlayerHasStatus(false, StatusHelper.RotationLockoutStatus)) // ActionType.Action == 1
 					{
-						// Always compute adjusted ID first to keep logic consistent
 						var adjustedActionId = Service.GetAdjustedActionId(actionID);
 
 						if (_useActionHook?.Original != null && RSCommands.CurrentAction != null)
@@ -130,28 +122,22 @@ namespace RotationSolver.Updaters
 
 						if (ShouldInterceptAction(adjustedActionId))
 						{
-							// More efficient action lookup - avoid creating new collections
-							var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
-							var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
+							var rotationActions = RotationUpdater.CurrentRotationActions;
+							var dutyActions = RotationUpdater.CurrentDutyRotationActions;
 
-							//PluginLog.Debug($"[ActionQueueManager] Detected player input: ID={actionID}, AdjustedID={adjustedActionId}");
 
 							var matchingAction = ((ActionID)adjustedActionId).GetActionFromID(false, rotationActions, dutyActions);
 
 							if (matchingAction != null && !BlackListedInterceptActionsContains((ActionID)matchingAction.ID))
 							{
-								// Keep the target the macro resolved, e.g. <mo>.
 								CommandTarget? macroTarget = useType == (uint)ActionManager.UseActionMode.Macro && targetObjectID != 0 && targetObjectID != InvalidGameObjectId
 									? CommandTarget.FromObject(targetObjectID)
 									: null;
-
-								//PluginLog.Debug($"[ActionQueueManager] Matching action decided: {matchingAction.Name} (ID: {matchingAction.ID}, AdjustedID: {matchingAction.AdjustedID})");
 
 								if (_useActionHook?.Original != null && matchingAction.IsIntercepted && ((ActionUpdater.NextAction != null && matchingAction != ActionUpdater.NextAction) || ActionUpdater.NextAction == null))
 								{
 									if (!matchingAction.EnoughLevel)
 									{
-										//PluginLog.Debug($"[ActionQueueManager] Not intercepting: insufficient level for {matchingAction.Name}.");
 										if (Service.Config.InterceptPassing)
 										{
 											return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
@@ -159,7 +145,6 @@ namespace RotationSolver.Updaters
 									}
 									else if (!CanInterceptAction(matchingAction))
 									{
-										//PluginLog.Debug($"[ActionQueueManager] Not intercepting: cooldown/window check failed for {matchingAction.Name}.");
 										if (Service.Config.InterceptPassing)
 										{
 											return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
@@ -167,35 +152,11 @@ namespace RotationSolver.Updaters
 									}
 									else if (matchingAction is IBaseAction baseMovAction && baseMovAction.Setting.SpecialType == SpecialActionType.ObjectBasedMovement && Service.Config.BmrSafetyCheckIntercept)
 									{
-										if (baseMovAction.TargetInfo.ShouldCheckMoveSafety() && baseMovAction.Setting.ObjectBasedMovementObjectOID != 0 && Player.Object != null)
+										if (baseMovAction.TargetInfo.ShouldCheckMoveSafety() && baseMovAction.Setting.ObjectBasedMovementObjectOID != 0
+											&& (!ObjectHelper.TryGetOwnedObjectPosition(baseMovAction.Setting.ObjectBasedMovementObjectOID, out var position)
+												|| !DataCenter.IsMovementDestinationSafe(position)))
 										{
-											var position = default(Vector3);
-											IGameObject? movementobj = null;
-											var playerId = Player.Object.GameObjectId;
-											foreach (var obj in Svc.Objects)
-											{
-												if (obj != null && obj.BaseId == baseMovAction.Setting.ObjectBasedMovementObjectOID && obj.OwnerId == playerId)
-												{
-													position = obj.Position;
-													movementobj = obj;
-													if (Service.Config.InDebug)
-													{
-														PluginLog.Debug($"[AQM.ObjectBasedMovement] Found object with OID {baseMovAction.Setting.ObjectBasedMovementObjectOID} at position {position} for player {playerId}.");
-													}
-
-													break;
-												}
-											}
-
-											if (movementobj == null)
-											{
-												return false;
-											}
-
-											if (!DataCenter.IsMovementDestinationSafe(position))
-											{
-												return false;
-											}
+											return false;
 										}
 
 										HandleInterceptedAction(matchingAction, actionID, macroTarget);
@@ -213,7 +174,6 @@ namespace RotationSolver.Updaters
 								}
 								else
 								{
-									//PluginLog.Debug($"[ActionQueueManager] Not intercepting: {matchingAction.Name} is not marked for interception.");
 									if (_useActionHook?.Original != null)
 									{
 										return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
@@ -229,19 +189,16 @@ namespace RotationSolver.Updaters
 				}
 			}
 
-			// Call original function if available, otherwise return true (allow action)
 			if (_useActionHook?.Original != null)
 			{
 				return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
 			}
 
-			// Return true to allow the action to proceed if hook is unavailable
 			return true;
 		}
 
 		private static bool ShouldInterceptAction(uint actionId)
 		{
-			// Note: actionId is expected to be the adjusted ID
 			if (ActionUpdater.NextAction != null && actionId == ActionUpdater.NextAction.AdjustedID)
 			{
 				return false;
@@ -291,36 +248,14 @@ namespace RotationSolver.Updaters
 				return true;
 			}
 
-			// Guard against invalid GCD totals to avoid division by zero
-			var gcdTotal = DataCenter.DefaultGCDTotal;
-			if (gcdTotal <= 0)
-			{
-				return false;
-			}
-
-			// We check if the skill will fit inside the intercept action time window
-			var gcdCount = (byte)Math.Floor(Service.Config.InterceptActionTime / gcdTotal);
-			if (gcdCount < 1)
-			{
-				gcdCount = 1;
-			}
-
-			return action is IBaseAction baseAction && baseAction.Cooldown.CooldownCheck(false, gcdCount);
+			return action is IBaseAction baseAction
+				&& (baseAction.Cooldown.HasOneCharge || baseAction.Cooldown.RecastTimeRemainOneChargeRaw <= Service.Config.InterceptActionTime);
 		}
 
 		private static void HandleInterceptedAction(IAction matchingAction, uint actionID, CommandTarget? target)
 		{
 			try
 			{
-				// Abandoned idea
-				//if (matchingAction is IBaseAction baseAction && baseAction.Setting.SpecialType == SpecialActionType.HostileMovingForward)
-				//{
-				//    RSCommands.DoSpecialCommandType(SpecialCommandType.Intercepting);
-				//    DataCenter.AddCommandAction(matchingAction, Service.Config.InterceptActionTime);
-				//    return; // Do not queue the original action; open the special window instead
-				//}
-
-				// Track intercepted actions so UI can display current & previous intercepted actions
 				try
 				{
 					// Move current to previous before updating current

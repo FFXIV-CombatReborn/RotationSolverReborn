@@ -26,11 +26,6 @@ public class ConditionBoolGenerator : IIncrementalGenerator
 		context.RegisterSourceOutput(provider.Collect(), Execute);
 	}
 
-	/// <summary>
-	/// Executes the source generation.
-	/// </summary>
-	/// <param name="context">The source production context.</param>
-	/// <param name="array">The array of variable declarators and semantic models.</param>
 	private void Execute(SourceProductionContext context, ImmutableArray<(VariableDeclaratorSyntax, SemanticModel SemanticModel)> array)
 	{
 		var dict = new Dictionary<SyntaxNode, List<(VariableDeclaratorSyntax, SemanticModel)>>();
@@ -39,7 +34,7 @@ public class ConditionBoolGenerator : IIncrementalGenerator
 			var key = entry.Item1.Parent!.Parent!.Parent!;
 			if (!dict.TryGetValue(key, out var list))
 			{
-				list = new List<(VariableDeclaratorSyntax, SemanticModel)>();
+				list = [];
 				dict[key] = list;
 			}
 			list.Add((entry.Item1, entry.SemanticModel));
@@ -64,14 +59,6 @@ public class ConditionBoolGenerator : IIncrementalGenerator
 		}
 	}
 
-	/// <summary>
-	/// Generates the property codes for the given group of variables.
-	/// </summary>
-	/// <param name="group">The group of variables.</param>
-	/// <param name="context">The source production context.</param>
-	/// <param name="nameSpace">The namespace of the class.</param>
-	/// <param name="className">The name of the class.</param>
-	/// <returns>A list of property code strings.</returns>
 	private List<string> GeneratePropertyCodes(IEnumerable<(VariableDeclaratorSyntax, SemanticModel)> group, SourceProductionContext context, string nameSpace, string className)
 	{
 		var propertyCodes = new List<string>();
@@ -107,14 +94,6 @@ public class ConditionBoolGenerator : IIncrementalGenerator
 		return propertyCodes;
 	}
 
-	/// <summary>
-	/// Generates the class code with the given properties.
-	/// </summary>
-	/// <param name="nameSpace">The namespace of the class.</param>
-	/// <param name="classType">The type of the class (class or struct).</param>
-	/// <param name="className">The name of the class.</param>
-	/// <param name="propertyCodes">The list of property code strings.</param>
-	/// <returns>The generated class code.</returns>
 	private string GenerateClassCode(string nameSpace, string classType, string className, List<string> propertyCodes)
 	{
 		var sb = new StringBuilder();
@@ -137,12 +116,6 @@ public class ConditionBoolGenerator : IIncrementalGenerator
 		return sb.ToString();
 	}
 
-	/// <summary>
-	/// Gets the attributes of the field as a string.
-	/// </summary>
-	/// <param name="field">The field declaration syntax.</param>
-	/// <param name="model">The semantic model.</param>
-	/// <returns>The attributes as a string.</returns>
 	private string GetFieldAttributes(FieldDeclarationSyntax field, SemanticModel model)
 	{
 		var names = new List<string>();

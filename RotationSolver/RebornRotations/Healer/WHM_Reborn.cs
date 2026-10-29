@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Healer;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/Healer/WHM_Reborn.cs")]
 
 public sealed class WHM_Reborn : WhiteMageRotation
@@ -119,7 +119,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			return true;
 		}
 
-		if (UseMedicine && !PresenceOfMindPvE.Cooldown.IsCoolingDown && UseBurstMedicine(out act))
+		if (UseMedicine && InCombat && !PresenceOfMindPvE.Cooldown.IsCoolingDown && UseBurstMedicine(out act))
 		{
 			return true;
 		}

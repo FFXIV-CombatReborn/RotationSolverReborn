@@ -73,7 +73,6 @@ internal class ActionTimelineWindow : Window
 		Position = new Vector2(200f, 200f);
 		PositionCondition = ImGuiCond.FirstUseEver;
 
-		// Opens and closes with combat, so Escape shouldn't close it.
 		RespectCloseHotkey = false;
 
 		AllowPinning = false;

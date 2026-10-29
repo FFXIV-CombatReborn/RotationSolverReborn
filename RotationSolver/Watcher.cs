@@ -1,10 +1,11 @@
-﻿using ECommons.DalamudServices;
+﻿using Dalamud.Hooking;
+using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Hooks;
 using ECommons.Hooks.ActionEffectTypes;
 using ECommons.Logging;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
+using RotationSolver.ActionTimeline;
 using RotationSolver.Basic.Configuration;
 using System.Text.RegularExpressions;
 
@@ -12,16 +13,56 @@ namespace RotationSolver;
 
 public static class Watcher
 {
+	private const uint CancelAbilityCategory = 15;
+	private const uint EnemyDotTickCategory = 0x605;
+
+	private delegate void ActorControlDelegate(uint entityId, uint category, uint p1, uint p2, uint p3, uint p4, uint p5, uint p6, uint p7, uint p8, ulong targetId, byte replaying);
+	private static Hook<ActorControlDelegate>? _actorControlHook;
+
 	public static void Enable()
 	{
 		ActionEffect.ActionEffectEvent += ActionFromEnemy;
 		ActionEffect.ActionEffectEvent += ActionFromSelf;
+
+		try
+		{
+			_actorControlHook = Svc.Hook.HookFromSignature<ActorControlDelegate>("E8 ?? ?? ?? ?? 0F B7 0B 83 E9 64", ActorControlDetour);
+			_actorControlHook.Enable();
+		}
+		catch (Exception ex)
+		{
+			PluginLog.Error($"[Watcher] Failed to hook ActorControl: {ex}");
+		}
 	}
 
 	public static void Disable()
 	{
 		ActionEffect.ActionEffectEvent -= ActionFromEnemy;
 		ActionEffect.ActionEffectEvent -= ActionFromSelf;
+
+		_actorControlHook?.Dispose();
+		_actorControlHook = null;
+	}
+
+	private static void ActorControlDetour(uint entityId, uint category, uint p1, uint p2, uint p3, uint p4, uint p5, uint p6, uint p7, uint p8, ulong targetId, byte replaying)
+	{
+		_actorControlHook!.Original(entityId, category, p1, p2, p3, p4, p5, p6, p7, p8, targetId, replaying);
+
+		try
+		{
+			if (category == EnemyDotTickCategory)
+			{
+				DotTickTracker.RecordTick(entityId, Environment.TickCount64);
+			}
+			else if (category == CancelAbilityCategory && entityId == Player.Object?.EntityId)
+			{
+				ActionTimelineManager.Current?.CancelInterruptedCast(DateTime.Now);
+			}
+		}
+		catch (Exception ex)
+		{
+			PluginLog.Error($"Error in ActorControlDetour: {ex.Message}");
+		}
 	}
 
 	public static string ShowStrSelf { get; private set; } = string.Empty;
@@ -44,7 +85,7 @@ public static class Watcher
 			float damageRatio = 0;
 			var playerId = playerObject.GameObjectId;
 			var maxHp = playerObject.MaxHp;
-			var denom = Math.Max(1u, maxHp); // avoid division by zero
+			var denom = Math.Max(1u, maxHp);
 
 			foreach (var effect in set.TargetEffects)
 			{
@@ -83,7 +124,7 @@ public static class Watcher
 						if (set.Action.HasValue && Service.Config.RecordKnockbackies
 							&& OtherConfiguration.HostileCastingKnockback.Add(set.Action.Value.RowId))
 						{
-							_ = OtherConfiguration.Save();
+							_ = OtherConfiguration.SaveHostileCastingKnockback();
 						}
 					}
 					break;
@@ -93,7 +134,7 @@ public static class Watcher
 			var partyMembers = DataCenter.PartyMembers;
 			var partyMemberCount = partyMembers.Count;
 
-			if (Service.Config.RecordCastingArea && set.Header.ActionType == ActionType.Action && partyMemberCount >= 4 && set.Action?.Cast100ms > 0)
+			if (Service.Config.RecordCastingArea && partyMemberCount >= 4 && set.Action?.Cast100ms > 0)
 			{
 				var type = set.Action?.GetActionCate();
 				if (type is ActionCate.Spell or ActionCate.Weaponskill or ActionCate.Ability)
@@ -120,7 +161,6 @@ public static class Watcher
 						}
 					}
 
-					// Only write the file when this is a newly recorded action, not on every raidwide cast.
 					if (damageEffectCount == partyMemberCount
 						&& OtherConfiguration.HostileCastingArea.Add(set.Action!.Value.RowId))
 					{
@@ -139,55 +179,37 @@ public static class Watcher
 	{
 		try
 		{
-			//PluginLog.Debug($"ActionFromSelf invoked. Source: {set.Source?.GameObjectId}, Action: {set.Action?.Name.ExtractText() ?? "null"}");
-
 			var playerObject = Player.Object;
 			if (set.Source == null || playerObject == null)
 			{
-				//PluginLog.Debug("ActionFromSelf: Source or playerObject is null. Exiting.");
 				return;
 			}
 
 			if (set.Source.GameObjectId != playerObject.GameObjectId)
 			{
-				//PluginLog.Debug($"ActionFromSelf: Source.GameObjectId ({set.Source.GameObjectId}) does not match playerObject.GameObjectId ({playerObject.GameObjectId}). Exiting.");
 				return;
 			}
 
-			// Only process real actions/items. Mounts and other non-action types (e.g. ActionType.Mount)
-			// reuse the Action sheet's row IDs, which can collide with unrelated GCDs/abilities and
-			// corrupt LastAction/LastComboAction tracking if not filtered out here.
-			//if (set.Header.ActionType is not ActionType.Action and not ActionType.Item)
-			//{
-			//	return;
-			//}
-
 			if (set.Action == null)
 			{
-				//PluginLog.Debug("ActionFromSelf: set.Action is null. Exiting.");
 				return;
 			}
 
 			if (set.Action.Value.ActionCategory.RowId == (uint)ActionCate.Autoattack)
 			{
-				//PluginLog.Debug("ActionFromSelf: ActionCategory is Autoattack. Exiting.");
 				return;
 			}
 
 			if (set.TargetEffects.Length == 0)
 			{
-				//PluginLog.Debug("ActionFromSelf: No TargetEffects. Exiting.");
 				return;
 			}
 
 			var action = set.Action;
 			var tar = set.Target;
 
-			// Record
-			//PluginLog.Debug($"ActionFromSelf: ActionType is {set.Header.ActionType}.");
 			DataCenter.AddActionRec(action!.Value);
 
-			// Only shown on the Debug tab; formatting the whole effect set for every action is wasted otherwise.
 			if (Service.Config.InDebug)
 			{
 				ShowStrSelf = set.ToString();
@@ -195,7 +217,6 @@ public static class Watcher
 
 			DataCenter.HealHP = set.GetSpecificTypeEffect(ActionEffectType.Heal);
 
-			// Ensure ApplyStatus dictionary is non-null, then merge source-applied effects
 			DataCenter.ApplyStatus = set.GetSpecificTypeEffect(ActionEffectType.ApplyStatusEffectTarget) ?? [];
 			var sourceApply = set.GetSpecificTypeEffect(ActionEffectType.ApplyStatusEffectSource);
 			if (sourceApply is { Count: > 0 })
@@ -235,7 +256,6 @@ public static class Watcher
 						continue;
 					}
 
-					// Check if the target is already in the attacked targets list
 					var targetExists = false;
 					foreach ((var id, var time) in attackedTargets)
 					{
@@ -250,26 +270,20 @@ public static class Watcher
 						continue;
 					}
 
-					// Ensure the current target is not dequeued
 					while (attackedTargets.Count >= attackedTargetsCount && attackedTargets.Count > 0)
 					{
 						(var id, var time) = attackedTargets.Peek();
 						if (id == effect.TargetID)
 						{
-							// If the oldest target is the current target, break the loop to avoid dequeuing it
 							break;
 						}
 						_ = attackedTargets.Dequeue();
 					}
 
-					// Enqueue the new target
 					attackedTargets.Enqueue((effect.TargetID, DateTime.Now));
 				}
 			}
 
-			// Macro
-			// Not Compiled: the static Regex cache holds only a few entries, so compiled patterns would be
-			// recompiled (slowly, on the game thread) whenever more events than that are configured.
 			var regexOptions = RegexOptions.IgnoreCase;
 			var eventsList = Service.Config.Events ?? [];
 			var actionName = action.Value.Name.ExtractText() ?? string.Empty;

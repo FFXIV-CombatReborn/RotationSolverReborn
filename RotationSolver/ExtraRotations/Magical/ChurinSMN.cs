@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Magical;
 
-[Rotation("Churin SMN", CombatType.PvE, GameVersion = "7.4")]
+[Rotation("Churin SMN", CombatType.PvE, GameVersion = "7.4", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/ExtraRotations/Magical/ChurinSMN.cs")]
 [ExtraRotation]
 
@@ -149,12 +149,20 @@ public sealed class ChurinSMN : SummonerRotation
 		{
 			var sortedKeys = new int[_m4SOrderMap.Count];
 			var ski = 0;
-			foreach (var k in _m4SOrderMap.Keys) sortedKeys[ski++] = k;
+			foreach (var k in _m4SOrderMap.Keys)
+			{
+				sortedKeys[ski++] = k;
+			}
+
 			Array.Sort(sortedKeys);
 			foreach (var key in sortedKeys)
 			{
 				var kv = new KeyValuePair<int, SummonOrderType>(key, _m4SOrderMap[key]);
-				if (kv.Key < InBigSummonCount) continue;
+				if (kv.Key < InBigSummonCount)
+				{
+					continue;
+				}
+
 				ImGui.SameLine();
 				ImGui.Text($"#{kv.Key}:");
 				ImGui.SameLine();
@@ -166,13 +174,19 @@ public sealed class ChurinSMN : SummonerRotation
 					if (act.GetTexture(out var tex) && tex.Handle != IntPtr.Zero)
 					{
 						ImGui.Image(tex.Handle, new Vector2(iconSize, iconSize));
-						if (ImGui.IsItemHovered()) ImGui.SetTooltip(act?.Name ?? kv.Value.ToString());
+						if (ImGui.IsItemHovered())
+						{
+							ImGui.SetTooltip(act?.Name ?? kv.Value.ToString());
+						}
 					}
 					else
 					{
 						ImGui.Text(act?.Name ?? "?");
 					}
-					if (i < primals.Length - 1) ImGui.SameLine();
+					if (i < primals.Length - 1)
+					{
+						ImGui.SameLine();
+					}
 				}
 				ImGui.NewLine();
 			}
@@ -1070,7 +1084,9 @@ public sealed class ChurinSMN : SummonerRotation
 			foreach (var h in healers)
 			{
 				if (!h.IsDead)
+				{
 					aliveHealerCount++;
+				}
 			}
 
 			return base.CanHealSingleSpell && aliveHealerCount == 0;
@@ -1117,7 +1133,7 @@ public sealed class ChurinSMN : SummonerRotation
 			}
 
 			// Check opener timing: if it's an opener potion and countdown is within configured time
-			float countDown = Service.CountDownTime;
+			var countDown = Service.CountDownTime;
 			if (IsOpenerPotion(timing) && countDown > 0 && ChurinSMN.OpenerPotionTime > 0)
 			{
 				return countDown <= ChurinSMN.OpenerPotionTime;
@@ -1243,7 +1259,10 @@ public sealed class ChurinSMN : SummonerRotation
 			var keysToRemove = new System.Collections.Generic.List<int>();
 			foreach (var k in _m4SOrderMap.Keys)
 			{
-				if (k < InBigSummonCount) keysToRemove.Add(k);
+				if (k < InBigSummonCount)
+				{
+					keysToRemove.Add(k);
+				}
 			}
 			foreach (var k in keysToRemove)
 			{
@@ -1328,7 +1347,10 @@ public sealed class ChurinSMN : SummonerRotation
 
 	private void M4SPrimalsOrder()
 	{
-		if (InBigSummonCount < 0) return;
+		if (InBigSummonCount < 0)
+		{
+			return;
+		}
 
 		for (var c = InBigSummonCount; c <= M4SMaxOrderCount; c++)
 		{

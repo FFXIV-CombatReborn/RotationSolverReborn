@@ -3,9 +3,6 @@ using System.Text;
 
 namespace RotationSolver.GameData.Getters;
 
-/// <summary>
-/// Class for getting and processing BNpcName Excel rows.
-/// </summary>
 internal class BNpcNameGetter(Lumina.GameData gameData)
 	: ExcelRowGetter<BNpcName>(gameData)
 {
@@ -30,11 +27,9 @@ internal class BNpcNameGetter(Lumina.GameData gameData)
 		var name = item.Singular.ToString();
 		if (string.IsNullOrEmpty(name))
 		{
-			// Skip NPCs without a name
 			return false;
 		}
 
-		// Check that the name is all ASCII characters
 		var allAscii = true;
 		foreach (var c in name)
 		{
@@ -65,7 +60,6 @@ internal class BNpcNameGetter(Lumina.GameData gameData)
 			name = name.ToPascalCase();
 		}
 
-		// Skip entries that result in empty or invalid names
 		if (string.IsNullOrWhiteSpace(name) || name == "_" || name.All(c => c == '_'))
 		{
 			return string.Empty;
@@ -76,7 +70,6 @@ internal class BNpcNameGetter(Lumina.GameData gameData)
 			name += "_" + item.RowId.ToString();
 		}
 
-		// Ensure the name does not start with an underscore
 		if (name.StartsWith('_'))
 		{
 			name = "Npc" + name;

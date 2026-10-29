@@ -33,9 +33,6 @@ namespace RotationSolver.GameData
 				var assemblyLocation = typeof(Program).Assembly.Location;
 				Console.WriteLine($"Assembly location: {assemblyLocation}");
 
-				// Navigate up to the solution root (RotationSolverReborn directory)
-				// Path is: .../RotationSolverReborn/RotationSolver.GameData/bin/Debug/net10.0-windows10.0.26100.0/RotationSolver.GameData.dll
-				// We need to go up 5 levels from the assembly file
 				var solutionRoot = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(assemblyLocation)!, "..", "..", "..", "..", ".."));
 				Console.WriteLine($"Solution root: {solutionRoot}");
 

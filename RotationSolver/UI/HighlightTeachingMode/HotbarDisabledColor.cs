@@ -9,19 +9,11 @@ using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
 namespace RotationSolver.UI.HighlightTeachingMode;
 
-/// <summary>
-/// Tints hotbar slots whose actions are disabled in RSR (IsEnabled == false).
-/// Only applies to slots whose RaptureHotbarModule.HotbarSlotType == Action (byte 1).
-/// </summary>
 internal static class HotbarDisabledColor
 {
-	// Reused every frame to avoid allocating a new set per update. Framework thread only.
 	private static readonly HashSet<uint> _disabledActionIds = [];
 	private static readonly List<nint> _addons = [];
 
-	/// <summary>
-	/// True while hotbar icon colors have been modified and still need restoring.
-	/// </summary>
 	internal static bool HasTint { get; private set; }
 
 	public static unsafe void ApplyFrame()
@@ -105,9 +97,6 @@ internal static class HotbarDisabledColor
 		}
 	}
 
-	/// <summary>
-	/// Restores every hotbar icon to its untinted color if a tint was applied.
-	/// </summary>
 	internal static void Reset()
 	{
 		if (!HasTint)
@@ -119,9 +108,6 @@ internal static class HotbarDisabledColor
 		HasTint = false;
 	}
 
-	/// <summary>
-	/// Restores icon colors when the plugin unloads, marshalling to the framework thread if needed.
-	/// </summary>
 	internal static void ResetOnUnload()
 	{
 		if (!HasTint)
@@ -137,7 +123,6 @@ internal static class HotbarDisabledColor
 			}
 			else
 			{
-				// Bounded wait so unloading can never hang on the framework thread.
 				_ = Svc.Framework.RunOnFrameworkThread(Reset).Wait(TimeSpan.FromSeconds(1));
 			}
 		}
@@ -176,11 +161,6 @@ internal static class HotbarDisabledColor
 		foreach (var intPtr in _addons)
 		{
 			var actionBar = (AddonActionBarBase*)intPtr;
-			if (!HotbarAddonHelper.IsVisible(&actionBar->AtkUnitBase))
-			{
-				continue;
-			}
-
 			foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
 			{
 				if (slot.Icon == null)
@@ -196,16 +176,11 @@ internal static class HotbarDisabledColor
 	private static void CollectDisabledActionIds()
 	{
 		_disabledActionIds.Clear();
-		Collect(DataCenter.CurrentRotation?.AllActions);
-		Collect(DataCenter.CurrentDutyRotation?.AllActions);
+		Collect(RotationUpdater.CurrentRotationActions);
+		Collect(RotationUpdater.CurrentDutyRotationActions);
 
-		static void Collect(IAction[]? actions)
+		static void Collect(IAction[] actions)
 		{
-			if (actions == null)
-			{
-				return;
-			}
-
 			foreach (var a in actions)
 			{
 				if (a is IBaseAction ba && !ba.IsEnabled)

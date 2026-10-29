@@ -64,7 +64,6 @@ internal class FullControlWindow : FullCtrlWindow
 		]),
 	];
 
-	// Full, Cleave, Off sits under Auto, Manual, Off, so each link joins a state to the AoE type below it.
 	private static readonly M3Segment[] AoeSegments =
 	[
 		new("Full", Tooltip: "Use all available AoE actions."),
@@ -121,7 +120,6 @@ internal class FullControlWindow : FullCtrlWindow
 	private readonly M3WindowAction[] _actions = new M3WindowAction[3];
 	private readonly M3WindowFold _fold = new();
 
-	// How many of _actions fit in the pill, from the front. Set by the header and used next frame by the fold.
 	private int _shownActions = 3;
 
 	private M3Style.Scope _theme;
@@ -210,7 +208,6 @@ internal class FullControlWindow : FullCtrlWindow
 	private void TrackSpecials()
 	{
 		bool shown = Service.Config.ShowControlWindowSpecials;
-		// Each layout keeps its own width, so hiding and showing the specials goes back to the width you left each at.
 		if (_specialsShown is { } was && was != shown)
 		{
 			if (shown)
@@ -236,12 +233,10 @@ internal class FullControlWindow : FullCtrlWindow
 			_openSize = ImGui.GetWindowSize();
 		}
 
-		var folded = _fold.Amount;
-		if (folded < 1f)
+		if (_fold.Amount < 1f)
 		{
-			using var alpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, ImGui.GetStyle().Alpha * (1f - MathF.Min(1f, folded * 1.4f)));
-			var (openPos, openSize) = _fold.OpenRect();
-			DrawContent(openPos, openSize);
+			using var alpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, _fold.ContentAlpha);
+			DrawContent();
 		}
 
 		DrawWindowBar();
@@ -283,17 +278,15 @@ internal class FullControlWindow : FullCtrlWindow
 		}
 	}
 
-	private void DrawContent(Vector2 openPos, Vector2 openSize)
+	private void DrawContent()
 	{
-		var padding = _fold.OpenPadding;
-		ImGui.SetCursorScreenPos(openPos + padding);
-		using var content = ImRaii.Child("##rsr_control_content", Vector2.Max(Vector2.One, openSize - (padding * 2f)), false,
-			ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground);
+		using var content = _fold.BeginContent("##rsr_control_content");
 		if (!content)
 		{
 			return;
 		}
 
+		var padding = _fold.OpenPadding;
 		var width = ImGui.GetContentRegionAvail().X;
 
 		var (headerMinimum, headerNatural) = DrawHeader(width);
@@ -345,11 +338,9 @@ internal class FullControlWindow : FullCtrlWindow
 		ImGui.SetCursorScreenPos(origin);
 		ImGui.Dummy(new Vector2(width, height));
 
-		// The panes can go narrower than they like to be, since their text truncates and their chips wrap.
 		var minimumContent = MathF.Max(headerMinimum, StatusPaneMinimumWidth());
 		if (Service.Config.ShowControlWindowSpecials)
 		{
-			// A large special button scale can make one tile wider than the status pane, so keep a single column in view.
 			minimumContent = MathF.Max(minimumContent, SpecialsWidth(1));
 		}
 
@@ -387,7 +378,6 @@ internal class FullControlWindow : FullCtrlWindow
 
 	#region Header
 
-	// Returns the narrowest width the header fits in, and the width it fits in with every icon shown.
 	private (float Minimum, float Natural) DrawHeader(float width)
 	{
 		ReadOnlySpan<M3Segment> labelled =
@@ -404,7 +394,6 @@ internal class FullControlWindow : FullCtrlWindow
 			labelled[2] with { Icon = FontAwesomeIcon.None },
 		];
 
-		// Both switches share a width so their columns line up under each other.
 		var aoeWidth = M3Widgets.SegmentedWidth(AoeSegments);
 		var labelledWidth = MathF.Max(M3Widgets.SegmentedWidth(labelled), aoeWidth);
 		var compactWidth = MathF.Max(M3Widgets.SegmentedWidth(compact), aoeWidth);
@@ -413,10 +402,9 @@ internal class FullControlWindow : FullCtrlWindow
 		var fullBar = M3Widgets.WindowActionsSize(_actions.Length, Brand, 0f);
 		var barSize = fullBar;
 		var shown = _actions.Length;
+		var kept = Service.Config.IsControlWindowLock ? 2 : 1;
 		var origin = ImGui.GetCursorScreenPos();
 
-		// As the window narrows the state icons go first. Then the pill gets the top row and the switches span the rows below it.
-		// Narrower still, the switch labels shrink and the pill drops Settings, then Lock, but always keeps the specials toggle.
 		bool icons;
 		ImFontPtr? labelFont = null;
 		float switchTop, switchWidth, rowHeight;
@@ -430,11 +418,8 @@ internal class FullControlWindow : FullCtrlWindow
 		}
 		else
 		{
-			while (shown > 1 && barSize.X > width)
-			{
-				shown--;
-				barSize = M3Widgets.WindowActionsSize(shown, Brand, 0f);
-			}
+			shown = M3Widgets.WindowActionsThatFit(_actions.Length, Brand, width, kept);
+			barSize = M3Widgets.WindowActionsSize(shown, Brand, 0f);
 
 			icons = width >= labelledWidth;
 			labelFont = width >= compactWidth ? null : M3.LabelSmall;
@@ -468,10 +453,9 @@ internal class FullControlWindow : FullCtrlWindow
 		var height = MathF.Max(rowHeight, aoeTop + segmentHeight);
 		ImGui.SetCursorScreenPos(new Vector2(origin.X, origin.Y + height));
 		ImGui.Dummy(new Vector2(width, 0f));
-		return (MathF.Max(smallWidth, M3Widgets.WindowActionsSize(1, Brand, 0f).X), MathF.Max(labelledWidth, fullBar.X));
+		return (MathF.Max(smallWidth, M3Widgets.WindowActionsSize(kept, Brand, 0f).X), MathF.Max(labelledWidth, fullBar.X));
 	}
 
-	// The narrowest the switches go: small labels with a little room either side.
 	private static float SmallSwitchWidth(ReadOnlySpan<M3Segment> state)
 	{
 		var widest = 0f;
@@ -501,7 +485,6 @@ internal class FullControlWindow : FullCtrlWindow
 		var rounding = size.Y * 0.5f;
 		var drawList = ImGui.GetWindowDrawList();
 
-		// Names the AoE switch below, when there is room left of the first link.
 		using (ImRaii.PushFont(M3.LabelSmall))
 		{
 			var caption = ImGui.CalcTextSize("AOE");
@@ -554,7 +537,6 @@ internal class FullControlWindow : FullCtrlWindow
 
 	private static void SetState(int index)
 	{
-		// Set, not toggled, so pressing Auto never turns it off.
 		RSCommands.SetStateCommandType(index switch
 		{
 			0 => StateCommandType.Auto,
@@ -562,7 +544,6 @@ internal class FullControlWindow : FullCtrlWindow
 			_ => StateCommandType.Off,
 		});
 
-		// Duty replays refuse every state but Off, so only follow a link if the state really changed.
 		if (CurrentStateIndex() == index && IsLinked(index))
 		{
 			Service.Config.AoEType = AoeTypes[index];
@@ -594,7 +575,6 @@ internal class FullControlWindow : FullCtrlWindow
 
 		config.Save();
 
-		// Linking the state you are already in applies its AoE type straight away.
 		if (linked && CurrentStateIndex() == index)
 		{
 			config.AoEType = AoeTypes[index];
@@ -620,8 +600,6 @@ internal class FullControlWindow : FullCtrlWindow
 		return MathF.Max(NextIconsWidth, 232f * M3.Scale) + (PanePadding * 2f);
 	}
 
-	// Measured over the whole targeting list, so cycling targets doesn't push the window wider.
-	// A narrow pane drops the targeting chip's crosshair, so that chip is measured without it.
 	private static float StatusPaneMinimumWidth()
 	{
 		var chips = MathF.Max(M3Widgets.ChipWidth("Burst", FontAwesomeIcon.FireAlt), M3Widgets.ChipWidth("Burst", FontAwesomeIcon.Check));
@@ -722,7 +700,6 @@ internal class FullControlWindow : FullCtrlWindow
 			labelWidth = MathF.Max(ImGui.CalcTextSize(HostileLabel).X, ImGui.CalcTextSize(TriggerLabel).X);
 		}
 
-		// Too narrow for a readable value beside its label, so each value goes under its label instead.
 		var stacked = labelWidth + M3.Space2 + (64f * M3.Scale) > width;
 
 		var hostile = DataCenter.CurrentTargetToHostileType.GetDescription();
@@ -845,7 +822,6 @@ internal class FullControlWindow : FullCtrlWindow
 		var gcd = rotation == null ? null : tile.Gcd?.Invoke(rotation);
 		var ability = rotation == null ? null : tile.Ability?.Invoke(rotation);
 
-		// SpecialType reads EndSpecial when nothing is running, so End is never shown as selected.
 		var running = DataCenter.SpecialType;
 		var isEnd = tile.Command == SpecialCommandType.EndSpecial;
 		var active = !isEnd && running == tile.Command;
@@ -973,15 +949,9 @@ internal class FullControlWindow : FullCtrlWindow
 			var canDoIt = false;
 			if (action is IBaseAction act)
 			{
-				// ForceEnable is global, so always turn it back off, even if CanUse throws.
-				IBaseAction.ForceEnable = true;
-				try
+				using (new ForceEnableScope())
 				{
 					canDoIt = act.CanUse(out _, usedUp: true, skipAoeCheck: true);
-				}
-				finally
-				{
-					IBaseAction.ForceEnable = false;
 				}
 			}
 			else if (action is IBaseItem item)

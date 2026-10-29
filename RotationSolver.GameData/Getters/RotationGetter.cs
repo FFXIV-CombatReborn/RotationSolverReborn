@@ -3,14 +3,6 @@ using RotationSolver.GameData.Getters.Actions;
 
 namespace RotationSolver.GameData.Getters;
 
-/// <summary>
-/// Provides methods to generate rotation code for a specific job.
-/// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="RotationGetter"/> class.
-/// </remarks>
-/// <param name="gameData">The game data.</param>
-/// <param name="job">The job.</param>
 internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 {
 	private readonly Lumina.GameData gameData = gameData;
@@ -72,10 +64,6 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
      """;
 	}
 
-	/// <summary>
-	/// Finds the PvP Limit Break action for the current job.
-	/// </summary>
-	/// <returns>The PvP Limit Break action if found; otherwise, null.</returns>
 	private Lumina.Excel.Sheets.Action? FindPvPLimitBreak()
 	{
 		try
@@ -86,11 +74,8 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 				return null;
 			}
 
-			// Get the job's class job category
 			var jobCategory = job.ClassJobCategory.Value;
 
-			// Find PvP Limit Break actions (ActionCategory.RowId == 15)
-			// Check each PvP LB to see if it matches this job
 			foreach (var action in actionSheet)
 			{
 				if (action.ActionCategory.RowId == 15 && action.ClassJobCategory.IsValid && action.IsPvP)
@@ -106,21 +91,12 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 		}
 		catch (Exception)
 		{
-			// If any error occurs during lookup, return null
 			return null;
 		}
 	}
 
-	/// <summary>
-	/// Checks if a job is compatible with a class job category.
-	/// </summary>
-	/// <param name="category">The class job category.</param>
-	/// <param name="targetJob">The job to check.</param>
-	/// <returns>True if compatible; otherwise, false.</returns>
 	private static bool IsJobCompatible(ClassJobCategory category, ClassJob targetJob)
 	{
-		// Use a more reliable method to check job compatibility
-		// This replaces the fragile reflection-based approach
 		return targetJob.Abbreviation.ToString() switch
 		{
 			"PLD" => category.PLD,
@@ -150,10 +126,6 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 		};
 	}
 
-	/// <summary>
-	/// Gets the jobs associated with the current job.
-	/// </summary>
-	/// <returns>A string representing the jobs.</returns>
 	private string GetJobs()
 	{
 		var jobs = $"Job.{job.Abbreviation}";
@@ -164,19 +136,9 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 		return jobs;
 	}
 
-	/// <summary>
-	/// Gets the job gauge code.
-	/// </summary>
-	/// <returns>The job gauge code.</returns>
 	private string GetJobGauge() => (job.Abbreviation == "BLU" || job.Abbreviation == "BST") ? string.Empty : $"static {job.Abbreviation}Gauge JobGauge => Svc.Gauges.Get<{job.Abbreviation}Gauge>();";
 	//TODO: Remove BST exception when the class releases to allow BST gauge data to be generated
 
-	/// <summary>
-	/// Gets the limit break code for a specific action.
-	/// </summary>
-	/// <param name="action">The action.</param>
-	/// <param name="index">The index of the limit break.</param>
-	/// <returns>The limit break code.</returns>
 	private string GetLBInRotation(Lumina.Excel.Sheets.Action action, int index)
 	{
 		if (action.RowId == 0)
@@ -195,12 +157,6 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
             """;
 	}
 
-	/// <summary>
-	/// Gets the PvE limit break code for a specific action.
-	/// </summary>
-	/// <param name="action">The action.</param>
-	/// <param name="name">The name of the limit break.</param>
-	/// <returns>The PvE limit break code.</returns>
 	private string GetLBPvE(Lumina.Excel.Sheets.Action action, out string name)
 	{
 		name = $"{action.Name.ToString().ToPascalCase()}PvE";
@@ -209,11 +165,6 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 		return action.ToCode(name, descName, GetDesc(action), false);
 	}
 
-	/// <summary>
-	/// Gets the PvP limit break code for a specific action.
-	/// </summary>
-	/// <param name="action">The action.</param>
-	/// <returns>The PvP limit break code.</returns>
 	private string GetLBInRotationPvP(Lumina.Excel.Sheets.Action? action)
 	{
 		if (action == null || action.Value.RowId == 0)
@@ -232,12 +183,6 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
             """;
 	}
 
-	/// <summary>
-	/// Gets the PvP limit break code for a specific action.
-	/// </summary>
-	/// <param name="action">The action.</param>
-	/// <param name="name">The name of the limit break.</param>
-	/// <returns>The PvP limit break code.</returns>
 	private string GetLBPvP(Lumina.Excel.Sheets.Action action, out string name)
 	{
 		name = $"{action.Name.ToString().ToPascalCase()}PvP";
@@ -246,17 +191,11 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 		return action.ToCode(name, descName, GetDesc(action), false);
 	}
 
-	/// <summary>
-	/// Gets the description of a specific action.
-	/// </summary>
-	/// <param name="item">The action.</param>
-	/// <returns>The description of the action.</returns>
 	private string GetDesc(Lumina.Excel.Sheets.Action item)
 	{
 		var transient = gameData.GetExcelSheet<ActionTransient>()?.GetRow(item.RowId);
 		var desc = transient?.Description.ToString() ?? string.Empty;
 
-		// Sanitize the description to remove invalid XML tags
 		desc = Util.SanitizeXmlDescription(desc);
 
 		return $"<para>{desc.Replace("\n", "</para>\n/// <para>")}</para>";

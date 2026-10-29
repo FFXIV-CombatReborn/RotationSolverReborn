@@ -63,29 +63,32 @@ public partial class MainWindow
 		"Actions tab: click an action icon to configure, enable/disable, or set hotkeys.",
 		"Actions: toggle 'Show on CD Window' to include an action in the cooldown overlay.",
 		"Actions: enable 'Intercepted' to let RSR fire an action you queue (PvE only).",
-		"UI > Information: enable DTR status, toasts, original cooldowns, and these hints.",
-		"UI > Windows: enable Next Action, Control, Cooldown, and Timeline windows.",
-		"Next Action: 'No Inputs' and 'No Move' options change overlay behavior.",
-		"Only show windows in duty or with enemies: UI > Windows > Only show with hostile or in duty.",
+		"UI > Information: enable the server info bar status, toasts, the changelog popup, and these hints.",
+		"UI > Customize UI: change the accent colour, text size, element size, and padding.",
+		"UI > Windows: enable the State, Control, Next Action, Intercepted Action, and Action Timeline windows.",
+		"UI > Windows: make the Next Action and Intercepted Action windows click-through or lock them in place.",
+		"Only show windows in duty or with enemies: UI > Windows > Only show RSR windows in duties or near enemies.",
 		"List tab: manage dispels, priority statuses, knockbacks, invincibility, and no-casting lists.",
 		"List tab: use 'Reset and Update' to restore curated lists quickly.",
 		"Status lists: press '+' to search by name or ID; fuzzy search is supported.",
 		"Status lists: right-click an icon to remove; Delete key works in the popup too.",
 		"Target tab: tweak target selection, vision cone, engage behavior, and dummy/boss handling.",
-		"Target tab: set /rotation Cycle behaviour and targeting delays.",
+		"Target tab: set auto-targeting delays and movement action targeting.",
 		"Manage TargetingTypes via chat: /rotation Settings TargetingTypes add|remove <Type>.",
 		"Auto > Action Usage: allow/deny oGCDs, set AoE style, tinctures, interrupts, and True North.",
+		"Auto > Action Interception: choose which of your own presses RSR queues for you.",
 		"Auto > Healing: adjust thresholds and non-healer healing behavior.",
-		"Healer: customize Raise/Swiftcast and prioritization in Auto > Healing.",
+		"Healer: customize Raise/Swiftcast and prioritization in Auto > Raise.",
 		"Ground AoEs: Auto > Healing has options to place beneficial ground actions smartly.",
-		"Basic > Timer: tune Action Ahead and Min Updating Time to balance performance vs weaving.",
-		"Basic > Auto Switch: auto on/off for countdowns, deaths, area transitions, and more.",
-		"Teaching Mode highlights targets; color is in UI > Information.",
+		"Basic > Timing: tune Action ahead and Minimum update interval to balance performance vs weaving.",
+		"Basic > Commands: make /rotation Auto and Manual toggles, and set /rotation Cycle behavior.",
+		"Auto > Auto Switch: auto on/off for countdowns, deaths, area transitions, and more.",
+		"Teaching mode highlights the next action; its color is in UI > Hotbars.",
 		"Job tab: edit DNC partner, SGE Kardia tank, and AST card priorities when on those jobs.",
 		"About > Macros lists available chat/macro commands and helpful syntax.",
 		"About > Links: open config folder, GitHub, Ko-fi, and Discord.",
 		"Extra > Internal: Backup/Restore configs safely.",
-		"Extra: optional tweaks like removing animation/cooldown delay.",
+		"Extra > Tweaks: optional tweaks like removing animation/cooldown delay.",
 		"Click the cube icon at the bottom-left of the sidebar to copy diagnostic info to clipboard.",
 		"Timeline window can visualize recent actions (UI > Windows).",
 		"Do damage, don't die",
@@ -296,7 +299,7 @@ public partial class MainWindow
 			}
 			catch
 			{
-				// Clipboard can fail while the game is losing focus.
+
 			}
 		}
 

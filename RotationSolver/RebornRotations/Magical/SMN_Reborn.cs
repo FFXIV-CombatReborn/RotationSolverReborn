@@ -2,7 +2,7 @@
 
 namespace RotationSolver.RebornRotations.Magical;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/Magical/SMN_Reborn.cs")]
 
 public sealed class SMN_Reborn : SummonerRotation

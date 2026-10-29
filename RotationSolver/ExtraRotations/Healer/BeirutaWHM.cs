@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Healer;
 
-[Rotation("BeirutaWHM", CombatType.PvE, GameVersion = "7.45", Description = "Semi-Automatic Savage/Ultimate rotation, need to used with CD planner or manual inputs")]
+[Rotation("BeirutaWHM", CombatType.PvE, GameVersion = "7.45", RotationType = RotationType.Reborn, Description = "Semi-Automatic Savage/Ultimate rotation, need to used with CD planner or manual inputs")]
 [SourceCode(Path = "main/ExtraRotations/Healer/BeirutaWHM.cs")]
 [ExtraRotation]
 
@@ -202,13 +202,17 @@ public sealed class WHM_Reborn : WhiteMageRotation
 	private bool IsTank(IBattleChara? target)
 	{
 		if (target == null)
+		{
 			return false;
+		}
 
-		IEnumerable<IBattleChara> tanks = PartyMembers.GetJobCategory(JobRole.Tank);
-		foreach (IBattleChara tank in tanks)
+		var tanks = PartyMembers.GetJobCategory(JobRole.Tank);
+		foreach (var tank in tanks)
 		{
 			if (tank == target)
+			{
 				return true;
+			}
 		}
 
 		return false;
@@ -217,10 +221,14 @@ public sealed class WHM_Reborn : WhiteMageRotation
 	private bool BenedictionTargetAllowed(IBattleChara? target)
 	{
 		if (target == null)
+		{
 			return false;
+		}
 
 		if (!BenedictionTankOnly)
+		{
 			return true;
+		}
 
 		return IsTank(target);
 	}
@@ -228,7 +236,9 @@ public sealed class WHM_Reborn : WhiteMageRotation
 	private static bool HasSingleHealLockoutStatus(IBattleChara? target)
 	{
 		if (target == null)
+		{
 			return true;
+		}
 
 		try
 		{
@@ -292,7 +302,9 @@ public sealed class WHM_Reborn : WhiteMageRotation
 	private bool CurrentTargetDiaMissingOrEnding(float remainingSeconds)
 	{
 		if (CurrentTarget == null)
+		{
 			return false;
+		}
 
 		return
 			(DiaPvE.EnoughLevel &&
@@ -340,7 +352,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			return true;
 		}
 
-		if (CanUseCurrentDia(out IAction? diaAct) &&
+		if (CanUseCurrentDia(out var diaAct) &&
 			nextGCD == diaAct)
 		{
 			return true;
@@ -375,7 +387,9 @@ public sealed class WHM_Reborn : WhiteMageRotation
 		IAction? act;
 
 		if (remainTime < 3 && UseBurstMedicine(out act))
+		{
 			return act;
+		}
 
 		if (remainTime < StonePvE.Info.CastTime + CountDownAhead &&
 			StonePvE.CanUse(out act))
@@ -394,7 +408,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 	{
 		UpdateActionTracking();
 
-		bool useLastThinAirCharge =
+		var useLastThinAirCharge =
 			ThinAirLastChargeUsage == ThinAirUsageStrategy.UseAllCharges ||
 			(ThinAirLastChargeUsage == ThinAirUsageStrategy.ReserveLastChargeForRaise && nextGCD == RaisePvE);
 
@@ -504,9 +518,11 @@ public sealed class WHM_Reborn : WhiteMageRotation
 		act = null;
 
 		if (HasHealingLockout)
+		{
 			return false;
+		}
 
-		IBattleChara? benisonTarget = DivineBenisonPvE.Target.Target;
+		var benisonTarget = DivineBenisonPvE.Target.Target;
 
 		if (benisonTarget != null &&
 			IsTank(benisonTarget) &&
@@ -517,7 +533,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			return true;
 		}
 
-		IBattleChara? benedictionTarget = BenedictionPvE.Target.Target;
+		var benedictionTarget = BenedictionPvE.Target.Target;
 
 		if (benedictionTarget != null &&
 			!HasSingleHealLockoutStatus(benedictionTarget) &&
@@ -534,7 +550,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			return base.HealSingleAbility(nextGCD, out act);
 		}
 
-		IBattleChara? tetraTarget = TetragrammatonPvE.Target.Target;
+		var tetraTarget = TetragrammatonPvE.Target.Target;
 
 		if (tetraTarget != null &&
 			!HasSingleHealLockoutStatus(tetraTarget) &&
@@ -595,10 +611,14 @@ public sealed class WHM_Reborn : WhiteMageRotation
 		act = null;
 
 		if (HasHealingLockout)
+		{
 			return false;
+		}
 
 		if (ShouldHoldRaiseSwift)
+		{
 			return base.HealAreaGCD(out act);
+		}
 
 		if (!IsPresenceOfMindHealLockActive &&
 			BloodLily != 3 &&
@@ -610,15 +630,15 @@ public sealed class WHM_Reborn : WhiteMageRotation
 		}
 
 		if (!IsPresenceOfMindHealLockActive &&
-			CanUseRaptureByBloodLily(out float raptureThreshold) &&
+			CanUseRaptureByBloodLily(out var raptureThreshold) &&
 			PartyMembersAverHP < raptureThreshold &&
 			AfflatusRapturePvE.CanUse(out act))
 		{
 			return true;
 		}
 
-		int hasMedica2 = 0;
-		foreach (IBattleChara n in PartyMembers)
+		var hasMedica2 = 0;
+		foreach (var n in PartyMembers)
 		{
 			if (n.HasStatus(true, StatusID.MedicaIi))
 			{
@@ -626,8 +646,8 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			}
 		}
 
-		int partyCount = 0;
-		foreach (IBattleChara _ in PartyMembers)
+		var partyCount = 0;
+		foreach (var _ in PartyMembers)
 		{
 			partyCount++;
 		}
@@ -672,12 +692,16 @@ public sealed class WHM_Reborn : WhiteMageRotation
 		act = null;
 
 		if (HasHealingLockout)
+		{
 			return false;
+		}
 
 		if (ShouldHoldRaiseSwift)
+		{
 			return base.HealSingleGCD(out act);
+		}
 
-		IBattleChara? solaceTarget = AfflatusSolacePvE.Target.Target;
+		var solaceTarget = AfflatusSolacePvE.Target.Target;
 
 		if (!IsPresenceOfMindHealLockActive &&
 			!HasSingleHealLockoutStatus(solaceTarget) &&
@@ -692,7 +716,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 		}
 
 		if (!IsPresenceOfMindHealLockActive &&
-			CanUseSolaceByBloodLily(out float solaceThreshold) &&
+			CanUseSolaceByBloodLily(out var solaceThreshold) &&
 			!HasSingleHealLockoutStatus(solaceTarget) &&
 			PartyMembersAverHP > 0.8f &&
 			solaceTarget != null &&
@@ -702,7 +726,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			return true;
 		}
 
-		IBattleChara? regenTarget = RegenPvE.Target.Target;
+		var regenTarget = RegenPvE.Target.Target;
 
 		if (!IsPresenceOfMindHealLockActive &&
 			!HasSingleHealLockoutStatus(regenTarget) &&
@@ -745,7 +769,9 @@ public sealed class WHM_Reborn : WhiteMageRotation
 		}
 
 		if (ShouldHoldRaiseSwift)
+		{
 			return base.GeneralGCD(out act);
+		}
 
 		if (!HasHealingLockout &&
 			!IsPresenceOfMindHealLockActive &&
@@ -775,7 +801,7 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			BloodLily != 3 &&
 			StatusHelper.PlayerHasStatus(true, StatusID.Confession) &&
 			StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.Confession) &&
-			CanUseRaptureByBloodLily(out float raptureThreshold) &&
+			CanUseRaptureByBloodLily(out var raptureThreshold) &&
 			PartyMembersAverHP < raptureThreshold &&
 			AfflatusRapturePvE.CanUse(out act))
 		{

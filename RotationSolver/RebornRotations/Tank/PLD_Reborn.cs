@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Tank;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/Tank/PLD_Reborn.cs")]
 
 public sealed class PLD_Reborn : PaladinRotation

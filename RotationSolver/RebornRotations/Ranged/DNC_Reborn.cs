@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Ranged;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/Ranged/DNC_Reborn.cs")]
 
 public sealed class DNC_Reborn : DancerRotation
@@ -87,7 +87,7 @@ public sealed class DNC_Reborn : DancerRotation
 		}
 
 		// Use burst medicine if cooldown for Technical Step has elapsed sufficiently
-		if (TechnicalStepPvE.Cooldown.ElapsedAfter(115)
+		if (InCombat && TechnicalStepPvE.Cooldown.ElapsedAfter(115)
 			&& UseBurstMedicine(out act))
 		{
 			return true;

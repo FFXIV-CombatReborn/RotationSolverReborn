@@ -1,434 +1,46 @@
 {
-  "tagline": "Double neagives >.>",
+  "tagline": "Minor fixes and improvements",
   "entries": [
     {
-      "version": "7.5.7.3",
-      "title": "Rotation fixes",
-      "date": "October 14, 2026",
+      "version": "7.5.7.10",
+      "title": "Targeting and status check fixes",
+      "date": "October 27, 2026",
       "sections": [
         {
-          "title": "Tanks",
-          "icon": "ShieldAlt",
-          "items": [
-            "Paladin's emergency Intervention now also works while Guardian is up.",
-            "Dark Knight only uses The Blackest Night on party members when that option is on.",
-            "Dark Knight's \"Keep at least 3000 MP\" option now keeps MP back when dumping Edge of Shadow in burst."
-          ]
-        },
-        {
-          "title": "Healers",
-          "icon": "Heartbeat",
-          "items": [
-            "White Mage no longer lets Divine Caress expire after Temperance.",
-            "White Mage only uses Thin Air right after a spell, and counts Medica III's regen when deciding whether to recast it.",
-            "Scholar uses Baneful Impaction before it expires, and removes Aetherpact through Dissolve Union.",
-            "Astrologian uses Sun Sign before Suntouched runs out, and its single-target shield no longer waits on Macrocosmos or Collective Unconscious.",
-            "Sage uses Rhizomata based on Addersgall instead of Addersting."
-          ]
-        },
-        {
-          "title": "Melee",
-          "icon": "FistRaised",
-          "items": [
-            "Auto True North now waits until the last weave before the positional, giving you time to get into position first.",
-            "Auto True North is no longer used on enemies that are about to die, or when you're actually in position but standing at a different height or right on top of the enemy.",
-            "Monk lines up Brotherhood with Riddle of Fire and holds The Forbidden Chakra when Brotherhood is about to come up.",
-            "Monk uses Earth's, Fire's and Wind's Reply before they expire, and the \"Use Form Shift\" option now controls the pre-pull Form Shift.",
-            "Dragoon only uses Stardiver right after a weaponskill so it doesn't clip.",
-            "Dragoon saves Life Surge and Wyrmwind Thrust for Battle Litany or Life of the Dragon, and no longer holds Lance Charge for a full minute when it drifts.",
-            "Removed Dragoon's Doom Spike option, which had no effect.",
-            "Ninja uses Goka Mekkyaku with Kassatsu on groups of enemies instead of letting Kassatsu expire.",
-            "Ninja's \"Use Mudras outside of combat\" option now works. It is off by default.",
-            "Samurai's Higanbana target option no longer skips Higanbana's other checks when turned off.",
-            "Samurai uses Mangetsu correctly under Meikyo Shisui, and the Meikyo countdown slider now goes up to 20 seconds.",
-            "Reaper uses Enshroud based on the Shroud gauge or Ideal Host instead of the Soul gauge."
-          ]
-        },
-        {
-          "title": "Physical ranged",
+          "title": "Targeting",
           "icon": "Crosshairs",
           "items": [
-            "Bard no longer stops using weaponskills in some burst windows.",
-            "Bard no longer reapplies Caustic Bite or Venomous Bite early, and the Apex Arrow Soul Voice setting works below 100.",
-            "Removed Bard's unused oGCD slot option.",
-            "Machinist's Automaton Queen schedule now resets between pulls and runs to the end.",
-            "Machinist below level 90 uses Hypercharge at 100 Heat while Wildfire is on cooldown."
+            "Actions with unique target behaviour now work correctly.",
+            "Fixed issue with \"switch target to friendly\" setting."
           ]
         },
         {
-          "title": "Casters",
-          "icon": "Magic",
-          "items": [
-            "Red Mage uses Impact in AoE with Dualcast or Acceleration, and uses Prefulgence before it expires.",
-            "Summoner's \"Use Radiant Aegis on cooldown\" option now works. When it's off, Radiant Aegis is kept for incoming damage.",
-            "Summoner uses Lux Solaris before Refulgent Lux runs out.",
-            "Pictomancer uses Tempera Grassa before Tempera Coat runs out.",
-            "Black Mage no longer spends Thunderhead while High Thunder is still ticking, and uses Triplecast before Occult Comet.",
-            "Removed unused Summoner and Black Mage options."
-          ]
-        },
-        {
-          "title": "Blue Mage and duties",
-          "icon": "Dungeon",
-          "items": [
-            "Blue Mage's Devour and Missile HP thresholds now work, and its Mighty Guard and Basic Instinct options are respected.",
-            "Occult Crescent: Occult Ether and Occult Potion on other players now use the right action.",
-            "Occult Crescent: the Drain Touch and Occult Chakra HP thresholds now work.",
-            "Occult Crescent: Cannoneer no longer keeps targeting by HP after an immune enemy.",
-          ]
-        },
-        {
-          "title": "PvP",
-          "icon": "Skull",
-          "items": [
-            "Paladin's Guardian follows its HP threshold settings.",
-            "White Mage and Bard now use Guard, Recuperate and the Elixir like other jobs.",
-            "Reaper uses Fate Sealed before Death Warrant ends."
-          ]
-        },
-        {
-          "title": "General",
-          "icon": "Wrench",
-          "items": [
-            "Fixed the early-weave check, which always thought an oGCD had already been woven.",
-            "Fixed the source code links for several rotations."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.7.2",
-      "title": "Settings window fix",
-      "date": "October 14, 2026",
-      "sections": [
-        {
-          "title": "Settings window",
-          "icon": "Lock",
-          "items": [
-            "A locked settings window now moves itself back on screen if it ends up partly off the edge, for example after a plugin update or a resolution change."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.7.1",
-      "title": "Warrior and Scholar fixes",
-      "date": "October 13, 2026",
-      "sections": [
-        {
-          "title": "Fixed invulnerability check caused by a double negative lol",
-          "icon": "Wrench",
-          "items": [
-            "Warrior now uses Nascent Flash on party members again. It was skipping every target that wasn't under an invulnerability.",
-            "Scholar now uses Recitation for Excogitation when a tank is low, instead of only when the tank is under an invulnerability.",
-            "Scholar now follows up Recitation with Excogitation when a tankbuster is coming. Before, Recitation was pressed but the Excogitation was held back.",
-            "Scholar can now use Excogitation and Indomitability with Recitation when out of Aetherflow, like the game allows."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.24",
-      "title": "Beastmaster and UI fixes",
-      "date": "October 11, 2026",
-      "sections": [
-        {
-          "title": "Beastmaster Fixes",
-          "icon": "User",
-          "items": [
-            "Fixed some bugs with the Beastmaster rotation and added special handling for Ymir in 3rd board of the Crucible."
-          ]
-        },
-        {
-          "title": "Settings window",
-          "icon": "Lock",
-          "items": [
-            "The settings window has a new lock button at the top right, next to minimize. While locked, the window can't be moved or resized, and it stays locked the next time you open it."
-          ]
-        },
-        {
-          "title": "Fixes",
-          "icon": "Wrench",
-          "items": [
-            "The settings, control and state windows no longer creep up and to the left by a pixel or two each time they are minimized and restored. I thought I was going crazy but it looks it was bug and is now fixed lol."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.23",
-      "title": "Crash fix",
-      "date": "October 10, 2026",
-      "sections": [
-        {
-          "title": "Fixes",
-          "icon": "Wrench",
-          "items": [
-            "Fixed a game crash when the control window was open, most often on tanks using healing or party mitigation on someone who had left or despawned."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.22",
-      "title": "Targets for DoActions and intercepted macros",
-      "date": "October 10, 2026",
-      "sections": [
-        {
-          "title": "DoActions targets",
-          "icon": "Crosshairs",
-          "items": [
-            "DoActions can now end with a target, like a game macro: \"/rotation DoActions Cure II-5 <f>\".",
-            "Any placeholder the game's macros accept works, such as <t>, <f>, <tt>, <mo>, <me> and <2> to <8>.",
-            "Targeting types work too, such as <LowHP>, <Big>, <Nearest> or <HighHPPercent>. The target is picked when the action is used.",
-            "If the target can't be hit when the action fires (out of range, out of sight, or the placeholder found nothing), RSR picks the target like before."
-          ]
-        },
-        {
-          "title": "Intercepted macros",
-          "icon": "HandPointer",
-          "items": [
-            "When an intercepted action comes from a macro, RSR now uses it on the target the macro picked, e.g. /ac \"Cure II\" <mo>."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.21",
-      "title": "BMR IPC fixes",
-      "date": "October 9, 2026",
-      "sections": [
-        {
-          "title": "Stutter casting fixed (I hope)",
-          "icon": "Wrench",
-          "items": [
-            "Issue with BMR Movement causing movement/casting stuttering issues.",
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.19",
-      "title": "Control window rework + Padding option",
-      "date": "October 6, 2026",
-      "sections": [
-        {
-          "title": "Full Control Window",
+          "title": "Settings",
           "icon": "SlidersH",
           "items": [
-            "The AoE switch now sits directly under the Auto / Manual / Off switch, and its buttons are ordered Full, Cleave, Off so each one lines up under Auto, Manual and Off.",
-            "New link toggles between Auto and Full, and between Manual and Cleave. While linked, choosing that state in the Control window also sets the matching AoE type, like the State Window does.",
-            "The window remembers one width for when the special buttons are shown and another for when they're hidden."
+            "Fixed a rare bug where an unrelated game crash could cause settings to be wiped.",
+            "Removed the \"Presses per action\" setting. Button presses on hotbars now always play two or three times per action."
           ]
         },
         {
-          "title": "Padding",
-          "icon": "CompressAlt",
+          "title": "Healing",
+          "icon": "Heartbeat",
           "items": [
-            "New \"Padding\" option in UI > Information scales the space around and between things in every RSR window, from 25% to 200%. Buttons, icons and text keep their size.",
-            "The settings window, State Window and Control window now use a tighter layout: thinner window edges, and less padding in cards, setting rows and the sidebar."
+            "oGCD heals triggered by commands execute properly."
           ]
         },
-        {
-          "title": "Settings window",
-          "icon": "Search",
-          "items": [
-            "The search icon turns into a spinner while search results are showing. I just think its neat :)"
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.16",
-      "title": "Various Minor Fixes + Autoduty IPC update",
-      "date": "October 4, 2026",
-      "sections": [
-        {
-          "title": "Fixes to a bunch of little bits of the UI following feedback",
-          "icon": "PaintBrush",
-          "items": [
-            "Window fold labels have been updated.",
-            "Added setting to the Full Control Window to allow removing the state buttons for a more compact layout.",
-            "Added the ability to fold (minimize) the Full Control Window and State Window.",
-            "Fixed an issue with certain windows being permanently pinned if you had them pinned before 7.5.6.14."
-          ]
-        },
-        {
-          "title": "Autoduty IPC update",
-          "icon": "Robot",
-          "items": [
-            "Autoduty IPC updated with new functionality.",
-            "Previously Autoduty would change your settings when controlling RSR and be unable to tell what they were so it would not change them back.",
-            "Now with the new Autoduty IPC settings no longer need to be changed by Autoduty, it will temporarily override them without changing them."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.14",
-      "title": "Reborn Material redesign",
-      "date": "October 3, 2026",
-      "sections": [
-        {
-          "title": "Material Design 3 inspired interface redesign aka Reborn Material",
-          "icon": "PaintBrush",
-          "items": [
-            "The settings window, overlays and info windows have been rebuilt on a new Reborn Material design system.",
-            "New \"Interface accent colour\" option: pick one colour and every surface, button and highlight in RSR is derived from it.",
-            "New \"Text size\" option scales the text in every Rotation Solver window, on top of Dalamud's own font settings.",
-            "New \"Element size\" option scales the padding, spacing and controls in every Rotation Solver window. Turn it down for a more compact layout that needs less scrolling.",
-            "Setting descriptions can now be shown inline beneath each setting. Turn off \"Show setting descriptions inline\" for a denser list."
-          ]
-        },
-        {
-          "title": "Autorotation control window",
-          "icon": "ToggleOn",
-          "items": [
-            "/rotation Control opens a small window with Auto, Manual and Off buttons for switching the autorotation state."
-          ]
-        },
-        {
-          "title": "Next Action window",
-          "icon": "Keyboard",
-          "items": [
-            "New \"Show Keybind\" option shows the keybind of the hotbar slot that holds the next action. Only visible hotbars are checked.",
-            "New \"Window Size\" option scales the whole Next Action window: the action icon, the GCD bar, the keybind and the target hint."
-          ]
-        },
-        {
-          "title": "Action Timeline window",
-          "icon": "History",
-          "items": [
-            "Rebuilt in the Material 3 style. GCDs run along the top lane with their cast and recast, oGCDs sit beneath them, each action's animation lock is underlined, and auto-attacks tick along above the time axis.",
-            "Hard casts now appear the moment they start and fill in as they cast, and cancelled casts are marked in red.",
-            "Hover over an action for its name, timings and how long ago it was used. Hover over the window for buttons to lock it, open its settings or hide it.",
-            "New \"Lock timeline\" and \"Timeline size\" options. The timeline no longer shares the Control window's lock and background; it uses the Info window background.",
-            "Fixed \"Save timeline to JSON file after combat\" never saving while \"Only show timeline in combat\" was on. Each file now holds only the fight that ended, and records each action's ID."
-          ]
-        },
-        {
-          "title": "Removed",
-          "icon": "TrashAlt",
-          "items": [
-            "The Cooldown window has been removed, along with its settings and the per-action \"Show on CD window\" option. No one ever used this and I didn't want to have to go through updating it to Reborn Material standards.'"
-          ]
-        },
-        {
-          "title": "First start tutorial",
-          "icon": "GraduationCap",
-          "items": [
-            "The first start tutorial has been rebuilt as a step-by-step tour with a step list to jump around in.",
-            "It now covers modes and how to switch between them, the settings window layout, your rotation, targeting, overlays and teaching mode, and more.",
-            "Change the settings that matter on day one right in the tour: accent colour, text size, AoE usage, auto on/off, hostile targeting and the overlay windows.",
-            "Reopen it any time from the About page."
-          ]
-        },
-        {
-          "title": "Update notes",
-          "icon": "Newspaper",
-          "items": [
-            "This window! Update notes now appear after each update, along with credits for everyone who makes RSR possible.",
-            "Reopen them any time from the About page or with /rotation Changelog. The popup can be turned off in UI > Information."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.13",
-      "title": "Snarl & Challenge",
-      "date": "September 30, 2026",
-      "sections": [
         {
           "title": "Rotations",
-          "icon": "Crosshairs",
+          "icon": "Wrench",
           "items": [
-            "Added Snarl and Challenge logic."
+            "WHM, VPR, and DNC tincures are now only used in combat."
           ]
         },
-        {
-          "title": "Fixes",
-          "icon": "Wrench",
-          "items": [
-            "Fixed job gauge data after a Dalamud update.",
-            "Updated the invincible and no-casting status lists."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.12",
-      "title": "Warrior and healing fixes",
-      "date": "September 28, 2026",
-      "sections": [
-        {
-          "title": "Fixes",
-          "icon": "Wrench",
-          "items": [
-            "Fixed Warrior's Nascent Flash logic.",
-            "Fixed heal action selection when the target is yourself."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.11",
-      "title": "Pixel art job icons",
-      "date": "September 21, 2026",
-      "sections": [
-        {
-          "title": "Interface",
-          "icon": "Image",
-          "items": [
-            "Job icons in the UI now use the pixel art icons from deep dungeons."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.10",
-      "title": "Optimisation pass",
-      "date": "September 19, 2026",
-      "sections": [
         {
           "title": "Performance",
           "icon": "TachometerAlt",
           "items": [
-            "A refactor pass across the plugin for performance."
-          ]
-        },
-        {
-          "title": "Fixes",
-          "icon": "Wrench",
-          "items": [
-            "Various fixes to core logic, Beastmaster, healing logic and PvP Guard status logic."
-          ]
-        },
-        {
-          "title": "Translations",
-          "icon": "Language",
-          "items": [
-            "More of the interface is translated into Chinese."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.6.9",
-      "title": "Maintenance",
-      "date": "September 16, 2026",
-      "message": "Removed a stray debug line."
-    },
-    {
-      "version": "7.5.6.8",
-      "title": "Beastmaster fixes",
-      "date": "September 13, 2026",
-      "sections": [
-        {
-          "title": "Rotations",
-          "icon": "Crosshairs",
-          "items": [
-            "Fixed Tempered Release.",
-            "Quelling Wave is now used more intelligently."
+            "Minor optimizations to performance in high object environments. Target checks are more efficient."
           ]
         }
       ]

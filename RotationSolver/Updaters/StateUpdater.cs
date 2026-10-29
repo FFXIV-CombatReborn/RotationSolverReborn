@@ -6,9 +6,7 @@ namespace RotationSolver.Updaters;
 internal static class StateUpdater
 {
 	private static bool CanUseHealAction =>
-		// PvP
 		DataCenter.IsPvP
-		// Job
 		|| ((DataCenter.Role == JobRole.Healer || Service.Config.UseHealWhenNotAHealer)
 		&& Service.Config.AutoHeal
 		&& ((DataCenter.InCombat && CustomRotation.IsLongerThan(Service.Config.AutoHealTimeToKill))
@@ -88,8 +86,6 @@ internal static class StateUpdater
 		return status;
 	}
 
-	// Condition methods for each AutoStatus flag
-
 	private static bool ShouldAddNoCasting()
 	{
 		return DataCenter.IsHostileCastingStop;
@@ -125,9 +121,6 @@ internal static class StateUpdater
 				return false;
 			}
 
-			// Validate liveness before the native reads inside HasPositional()/
-			// FindEnemyPositional() below; a try/catch can't cover an
-			// AccessViolationException from a freed native object.
 			if (!target.IsValid())
 			{
 				return false;
@@ -143,7 +136,6 @@ internal static class StateUpdater
 				if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out var positional)
 					&& target.HasPositional())
 				{
-					// None means the position couldn't be read, which is not a miss.
 					var current = target.FindEnemyPositional();
 					return current != EnemyPositional.None && current != positional && !target.IsDying();
 				}
@@ -228,7 +220,7 @@ internal static class StateUpdater
 					if (hostile.TargetObjectId == playerId && hostile.DistanceToPlayer() <= 3)
 					{
 						tarOnMeCount++;
-						if (!attacked && ObjectHelper.IsAttacked(hostile))
+						if (!attacked && hostile.IsEngagedByPlayer())
 						{
 							attacked = true;
 						}
@@ -260,7 +252,6 @@ internal static class StateUpdater
 		return false;
 	}
 
-	// Helper: Returns true if there are any healers in the party with HP > 0
 	private static bool AnyLivingHealerInParty()
 	{
 		foreach (var member in DataCenter.PartyMembers)
@@ -282,27 +273,13 @@ internal static class StateUpdater
 		return true;
 	}
 
-	private static readonly StatusID[] HellInACellStatuses =
-	[
-		StatusID.HellInACell,
-		StatusID.HellInACell_4732,
-		StatusID.HellInACell_4733,
-		StatusID.HellInACell_4734,
-		StatusID.HellInACell_4735,
-		StatusID.HellInACell_4736,
-		StatusID.HellInACell_4737,
-		StatusID.HellInACell_4738,
-	];
-
 	private static AutoStatus StatusFromHealing()
 	{
-		// Preconditions shared by every heal flag, evaluated once per update instead of once per flag.
 		if (!DataCenter.HPNotFull || !CanUseHealAction || DataCenter.IsTyrantCastingSpecialIndicator())
 		{
 			return AutoStatus.None;
 		}
 
-		// Only allow non-healers to heal if there are no living healers in the party
 		if (!NonHealerHealLogic())
 		{
 			return AutoStatus.None;
@@ -319,8 +296,7 @@ internal static class StateUpdater
 			}
 		}
 
-		// Heal spells are held while the player is inside a Hell in a Cell in M9S.
-		var canUseHealSpell = !DataCenter.IsInM9S || !StatusHelper.PlayerHasStatus(false, HellInACellStatuses);
+		var canUseHealSpell = !DataCenter.IsInM9S || !StatusHelper.PlayerHasStatus(false, StatusHelper.HellInACellStatus);
 
 		var singleAbilityCount = ShouldHealSingle(StatusHelper.SingleHots,
 			Service.Config.HealthSingleAbility,
@@ -335,7 +311,6 @@ internal static class StateUpdater
 		var partyCount = DataCenter.PartyMembers.Count;
 		var areaHotRatio = partyCount > 2 ? SelfHealingOfTimeRatio(StatusHelper.AreaHots) : 0f;
 
-		// Prioritize area healing if multiple members have DoomNeedHealing
 		if (doomNeedHealingCount > 1 || singleAbilityCount > 2
 			|| ShouldHealArea(partyCount, Service.Config.HealthAreaAbility, Service.Config.HealthAreaAbilityHot, areaHotRatio))
 		{
@@ -353,7 +328,6 @@ internal static class StateUpdater
 
 		if (onlyHealSelf)
 		{
-			// Prioritize healing self if DoomNeedHealing is true
 			var selfDoomed = StatusHelper.PlayerDoomNeedHealing();
 
 			if (selfDoomed || ShouldHealSelf(StatusHelper.SingleHots, Service.Config.HealthSingleAbility, Service.Config.HealthSingleAbilityHot))
@@ -368,7 +342,6 @@ internal static class StateUpdater
 		}
 		else
 		{
-			// Prioritize healing any party member with DoomNeedHealing
 			if (doomNeedHealingCount > 0 || singleAbilityCount > 0)
 			{
 				status |= AutoStatus.HealSingleAbility;
@@ -390,8 +363,6 @@ internal static class StateUpdater
 			return false;
 		}
 
-		// If party is larger than 4 people, we select the 4 lowest HP players
-		// in the party, and then calculate the thresholds on them instead.
 		return partyCount > 4
 			? DataCenter.LowestPartyMembersDifferHP < Service.Config.HealthDifference
 				&& DataCenter.LowestPartyMembersAverHP < Lerp(healArea, healAreaHot, ratio)
@@ -416,7 +387,6 @@ internal static class StateUpdater
 			return true;
 		}
 
-		// Proactive knockback prevention via BossModReborn timeline
 		if (DataCenter.InCombat && Service.Config.UseBmrTimeline
 			&& DataCenter.BMRNextKnockbackIn > 0.6f
 			&& DataCenter.BMRNextKnockbackIn <= Service.Config.BMRKnockbackWindow)
@@ -429,11 +399,10 @@ internal static class StateUpdater
 
 	private static bool ShouldAddProvoke()
 	{
-		// Cheapest checks first; the alliance tank count walks every alliance member.
 		return DataCenter.ProvokeTarget != null
 			&& (DataCenter.InCombat || Service.Config.ProvokeAnything)
 			&& (DataCenter.Role == JobRole.Tank || StatusHelper.PlayerHasStatus(true, StatusID.VariantUltimatumSet))
-			&& (Service.Config.AutoProvokeForTank || CountAllianceTanks() < 2);
+			&& (Service.Config.AutoProvokeForTank || CountPartyTanks() < 2);
 	}
 
 	private static bool ShouldAddInterrupt()
@@ -443,7 +412,7 @@ internal static class StateUpdater
 
 	private static bool ShouldAddTankStance()
 	{
-		return Service.Config.AutoTankStance && DataCenter.Role == JobRole.Tank && !CustomRotation.HasTankStance && !AnyAllianceTankWithStance();
+		return Service.Config.AutoTankStance && DataCenter.Role == JobRole.Tank && !CustomRotation.HasTankStance && !AnyOtherPartyTankWithStance();
 	}
 
 	private static bool ShouldAddSpeed()
@@ -468,8 +437,6 @@ internal static class StateUpdater
 
 		return false;
 	}
-
-	// Helper methods used in condition methods
 
 	private static float SelfHealingOfTimeRatio(params StatusID[] statusIds)
 	{
@@ -530,19 +497,15 @@ internal static class StateUpdater
 
 		var doomed = StatusHelper.PlayerDoomNeedHealing();
 
-		// Calculate the ratio of remaining healing-over-time effects on the target. If they have a "Doom" status, treat dot healing as non-existent.
 		var ratio = doomed ? 0f : GetHealingOfTimeRatio(Player.Object, hotStatus);
 
-		// Determine the target's health ratio. If they have a "Doom" status, treat their health as critically low (0.2).
 		var h = doomed ? 0.2f : ObjectHelper.GetPlayerHealthRatio();
 
-		// If the target's health is zero or they are invulnerable to healing, return false.
 		if (h == 0 || !StatusHelper.PlayerCanBeHealed())
 		{
 			return false;
 		}
 
-		// Compare the target's health ratio to a threshold determined by linear interpolation (Lerp) between `healSingle` and `healSingleHot`.
 		return h < Lerp(healSingle, healSingleHot, ratio);
 	}
 
@@ -568,19 +531,15 @@ internal static class StateUpdater
 			return false;
 		}
 
-		// Calculate the ratio of remaining healing-over-time effects on the target. If they have a "Doom" status, treat dot healing as non-existent.
 		var ratio = target.DoomNeedHealing() ? 0f : GetHealingOfTimeRatio(target, hotStatus);
 
-		// Determine the target's health ratio. GetHealthRatio already treats "Doom" status targets as critically low (1%).
 		var h = target.GetHealthRatio();
 
-		// If the target's health is zero or they are invulnerable to healing, return false.
 		if (h == 0 || !target.CanBeHealed())
 		{
 			return false;
 		}
 
-		// Compare the target's health ratio to a threshold determined by linear interpolation (Lerp) between `healSingle` and `healSingleHot`.
 		return h < Lerp(healSingle, healSingleHot, ratio);
 	}
 
@@ -623,10 +582,10 @@ internal static class StateUpdater
 		return status;
 	}
 
-	private static int CountAllianceTanks()
+	private static int CountPartyTanks()
 	{
 		var count = 0;
-		foreach (var member in DataCenter.AllianceMembers)
+		foreach (var member in DataCenter.PartyMembers)
 		{
 			if (member.IsJobCategory(JobRole.Tank))
 			{
@@ -636,11 +595,13 @@ internal static class StateUpdater
 		return count;
 	}
 
-	private static bool AnyAllianceTankWithStance()
+	private static bool AnyOtherPartyTankWithStance()
 	{
-		foreach (var member in DataCenter.AllianceMembers)
+		var playerId = Player.Object?.GameObjectId ?? 0;
+		foreach (var member in DataCenter.PartyMembers)
 		{
-			if (member.IsJobCategory(JobRole.Tank) && member.CurrentHp != 0 && member.HasStatus(false, StatusHelper.TankStanceStatus))
+			if (member.GameObjectId != playerId && member.IsJobCategory(JobRole.Tank) && member.CurrentHp != 0
+				&& member.HasStatus(false, StatusHelper.TankStanceStatus))
 			{
 				return true;
 			}

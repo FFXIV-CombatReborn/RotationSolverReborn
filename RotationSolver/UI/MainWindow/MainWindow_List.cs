@@ -59,18 +59,12 @@ public partial class MainWindow
 		var list = new List<GAction>();
 		foreach (var a in sheet)
 		{
-			if (!string.IsNullOrEmpty(a.ToString()) && !a.IsPvP && !a.IsPlayerAction
-				&& a.Cast100ms > 0)
+			if (!a.Name.IsEmpty && !a.IsPvP && !a.IsPlayerAction && a.Cast100ms > 0)
 			{
 				list.Add(a);
 			}
 		}
-		var result = new GAction[list.Count];
-		for (var i = 0; i < list.Count; i++)
-		{
-			result[i] = list[i];
-		}
-		return result;
+		return [.. list];
 	});
 
 	internal static GAction[] AllActions => _allActions.Value;
@@ -91,6 +85,8 @@ public partial class MainWindow
 	});
 
 	internal static Status[] BadStatus => _badStatus.Value;
+
+	private const string ResetListTooltip = "Clears your additions and removals. The built-in list updates with RSR on its own.";
 
 	private static void DrawList()
 	{
@@ -121,31 +117,35 @@ public partial class MainWindow
 			ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update Invuln Status List"))
+			if (ImGui.Button("Reset Invuln Status List"))
 			{
 				OtherConfiguration.ResetInvincibleStatus();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_Invincibility.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update Priority Status List"))
+			if (ImGui.Button("Reset Priority Status List"))
 			{
 				OtherConfiguration.ResetPriorityStatus();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_Priority.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update Dispell Debuff List"))
+			if (ImGui.Button("Reset Dispel Debuff List"))
 			{
 				OtherConfiguration.ResetDangerousStatus();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_DangerousStatus.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update No Casting Status List"))
+			if (ImGui.Button("Reset No Casting Status List"))
 			{
 				OtherConfiguration.ResetNoCastingStatus();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_NoCastingStatus.GetDescription());
 
 			ImGui.TableNextRow();
@@ -168,7 +168,7 @@ public partial class MainWindow
 		}
 	}
 
-	private static void FromClipBoardButton(HashSet<uint> items)
+	private static void FromClipBoardButton(string name, HashSet<uint> items)
 	{
 		const string CopyErrorMessage = "Failed to copy the values to the clipboard.";
 		const string PasteErrorMessage = "Failed to copy the values from the clipboard.";
@@ -206,7 +206,7 @@ public partial class MainWindow
 			}
 			finally
 			{
-				_ = OtherConfiguration.Save();
+				_ = OtherConfiguration.SaveList(name);
 				ImGui.CloseCurrentPopup();
 			}
 		}
@@ -220,7 +220,7 @@ public partial class MainWindow
 		const uint DefaultNotLoadId = 0;
 
 		ImGui.PushID(name);
-		FromClipBoardButton(statuses);
+		FromClipBoardButton(name, statuses);
 
 		uint removeStatusId = 0;
 		var notLoadId = DefaultNotLoadId;
@@ -230,7 +230,7 @@ public partial class MainWindow
 		StatusPopUp(popupId, allStatus, ref _statusSearching, status =>
 		{
 			_ = statuses.Add(status.RowId);
-			_ = OtherConfiguration.Save();
+			_ = OtherConfiguration.SaveList(name);
 		}, notLoadId);
 
 		var count = Math.Max(1, (int)MathF.Floor(ImGui.GetColumnWidth() / ((IconWidth * Scale) + ImGui.GetStyle().ItemSpacing.X)));
@@ -282,7 +282,7 @@ public partial class MainWindow
 		if (removeStatusId != 0)
 		{
 			_ = statuses.Remove(removeStatusId);
-			_ = OtherConfiguration.Save();
+			_ = OtherConfiguration.SaveList(name);
 		}
 		ImGui.PopID();
 	}
@@ -376,31 +376,35 @@ public partial class MainWindow
 			ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update Tankbuster List"))
+			if (ImGui.Button("Reset Tankbuster List"))
 			{
 				OtherConfiguration.ResetHostileCastingTank();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingTank.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update AOE List"))
+			if (ImGui.Button("Reset AOE List"))
 			{
 				OtherConfiguration.ResetHostileCastingArea();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingArea.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Update Knockback List"))
+			if (ImGui.Button("Reset Knockback List"))
 			{
 				OtherConfiguration.ResetHostileCastingKnockback();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingKnockback.GetDescription());
 
 			_ = ImGui.TableNextColumn();
-			if (ImGui.Button("Reset and Stop Casting List"))
+			if (ImGui.Button("Reset Stop Casting List"))
 			{
 				OtherConfiguration.ResetHostileCastingStop();
 			}
+			ImguiTooltips.HoveredTooltip(ResetListTooltip);
 			ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingStop.GetDescription());
 
 			ImGui.TableNextRow();
@@ -410,17 +414,16 @@ public partial class MainWindow
 			DrawActionsList(nameof(OtherConfiguration.HostileCastingTank), OtherConfiguration.HostileCastingTank);
 
 			_ = ImGui.TableNextColumn();
-			_allSearchable.DrawItems(Configs.List);
+			_allSearchable.DrawItems(Configs.ListCastingArea);
 			ImGui.TextWrapped(UiString.ConfigWindow_List_HostileCastingAreaDesc.GetDescription());
 			DrawActionsList(nameof(OtherConfiguration.HostileCastingArea), OtherConfiguration.HostileCastingArea);
 
 			_ = ImGui.TableNextColumn();
-			_allSearchable.DrawItems(Configs.List2);
+			_allSearchable.DrawItems(Configs.ListKnockback);
 			ImGui.TextWrapped(UiString.ConfigWindow_List_HostileCastingKnockbackDesc.GetDescription());
 			DrawActionsList(nameof(OtherConfiguration.HostileCastingKnockback), OtherConfiguration.HostileCastingKnockback);
 
 			_ = ImGui.TableNextColumn();
-			_allSearchable.DrawItems(Configs.List3);
 			ImGui.TextWrapped(UiString.ConfigWindow_List_HostileCastingStopDesc.GetDescription());
 			DrawActionsList(nameof(OtherConfiguration.HostileCastingStop), OtherConfiguration.HostileCastingStop);
 		}
@@ -451,7 +454,7 @@ public partial class MainWindow
 		}
 
 		ImGui.SameLine();
-		FromClipBoardButton(actions);
+		FromClipBoardButton(name, actions);
 
 		ImGui.Spacing();
 
@@ -498,15 +501,15 @@ public partial class MainWindow
 		if (removeId != 0)
 		{
 			_ = actions.Remove(removeId);
-			_ = OtherConfiguration.Save();
+			_ = OtherConfiguration.SaveList(name);
 		}
 
-		ActionPopup(popupId, actions);
+		ActionPopup(popupId, name, actions);
 
 		ImGui.PopID();
 	}
 
-	private static void ActionPopup(string popupId, HashSet<uint> actions)
+	private static void ActionPopup(string popupId, string name, HashSet<uint> actions)
 	{
 		const float InputWidth = 200f;
 		const float ChildHeight = 400f;
@@ -586,7 +589,7 @@ public partial class MainWindow
 							if (selected)
 							{
 								_ = actions.Add(action.RowId);
-								_ = OtherConfiguration.Save();
+								_ = OtherConfiguration.SaveList(name);
 								ImGui.CloseCurrentPopup();
 							}
 						}
@@ -665,6 +668,10 @@ public partial class MainWindow
 					UiString.ConfigWindow_List_NoHostilesName.GetDescription(), ref libs[i], 1024))
 				{
 					OtherConfiguration.NoHostileNames[territoryId] = libs;
+				}
+
+				if (ImGui.IsItemDeactivatedAfterEdit())
+				{
 					_ = OtherConfiguration.SaveNoHostileNames();
 				}
 				ImGui.SameLine();
@@ -726,6 +733,10 @@ public partial class MainWindow
 					UiString.ConfigWindow_List_NoProvokeName.GetDescription(), ref libs[i], 1024))
 				{
 					OtherConfiguration.NoProvokeNames[territoryId] = libs;
+				}
+
+				if (ImGui.IsItemDeactivatedAfterEdit())
+				{
 					_ = OtherConfiguration.SaveNoProvokeNames();
 				}
 				ImGui.SameLine();

@@ -83,7 +83,7 @@ internal class CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
 				var wasExpanded = expanded;
 				_ = _icons.TryGetValue(name, out var icon);
 
-				using (var card = M3ExpandableCard.Begin($"section_{_groupId}_{index}", name, ref expanded, icon, AccentFor(index)))
+				using (var card = M3ExpandableCard.Begin($"section_{_groupId}_{index}", name, ref expanded, icon, M3.AccentFor(index)))
 				{
 					if (card.Expanded)
 					{
@@ -101,16 +101,5 @@ internal class CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
 				PluginLog.Warning($"An error occurred while drawing the header: {ex.Message}");
 			}
 		}
-	}
-
-	private static Vector4 AccentFor(int index)
-	{
-		var scheme = M3.Scheme;
-		return (index % 3) switch
-		{
-			0 => scheme.Primary,
-			1 => scheme.Tertiary,
-			_ => scheme.Secondary,
-		};
 	}
 }

@@ -12,8 +12,6 @@ namespace RotationSolver.UI.HighlightTeachingMode;
 internal static class HotbarKeybindHelper
 {
 	private sealed record KeybindEntry(IAction Action, string Text);
-
-	// Keybind names call slots 10-12 "0", "A" and "B".
 	private static readonly string[] _slotNames = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A", "B"];
 	private static readonly InputId?[,] _slotInputIds = BuildSlotInputIds();
 
@@ -123,7 +121,6 @@ internal static class HotbarKeybindHelper
 		return string.Empty;
 	}
 
-	// Turns " [Ctrl-3]" into "Ctrl-3". Empty for controller buttons ImGui can't draw.
 	private static string CleanHint(string hint)
 	{
 		var text = hint.Trim().TrimStart('[').TrimEnd(']').Trim();
@@ -175,7 +172,6 @@ internal static class HotbarKeybindHelper
 
 	private static string GetKeyName(SeVirtualKey key)
 	{
-		// Below 128, and for keys the game leaves unnamed, these are Windows virtual-key codes.
 		var code = (byte)key;
 		if (code < 128 || !Enum.IsDefined(key))
 		{
