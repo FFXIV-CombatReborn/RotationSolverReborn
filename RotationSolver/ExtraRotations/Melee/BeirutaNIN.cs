@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Melee;
 
-[Rotation("BeirutaNIN", CombatType.PvE, GameVersion = "7.5", RotationType = RotationType.Reborn)]
+[Rotation("BeirutaNIN", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/ExtraRotations/Melee/BeirutaNIN.cs")]
 [ExtraRotation]
 

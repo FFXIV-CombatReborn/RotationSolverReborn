@@ -1,7 +1,8 @@
 using System.ComponentModel;
+
 namespace RotationSolver.ExtraRotations.Magical;
 
-[Rotation("BeirutaPCT", CombatType.PvE, GameVersion = "7.45", RotationType = RotationType.Reborn)]
+[Rotation("BeirutaPCT", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/ExtraRotations/Magical/BeirutaPCT.cs")]
 [ExtraRotation]
 
@@ -35,13 +36,13 @@ public sealed class BeirutaPCT : PictomancerRotation
 	public bool HolyCometMoving { get; set; } = true;
 
 	public enum OpenWindowMode : byte
-{
-	[Description("Balance")] Balance,
-	[Description("0 GCD")] ZeroGcd,
-}
+	{
+		[Description("Balance")] Balance,
+		[Description("0 GCD")] ZeroGcd,
+	}
 
-    [RotationConfig(CombatType.PvE, Name = "Opener/Burst open window")]
-    public OpenWindowMode OpenWindow { get; set; } = OpenWindowMode.Balance;
+	[RotationConfig(CombatType.PvE, Name = "Opener/Burst open window")]
+	public OpenWindowMode OpenWindow { get; set; } = OpenWindowMode.Balance;
 
 	[RotationConfig(CombatType.PvE, Name = "Paint overcap protection.")]
 	public bool UseCapCometHoly { get; set; } = true;
@@ -70,8 +71,8 @@ public sealed class BeirutaPCT : PictomancerRotation
 
 	#endregion
 
-    private int OpenerAdjustTime =>
-	OpenWindow == OpenWindowMode.ZeroGcd ? 0 : (DataCenter.PlayerSyncedLevel() < 92 ? 2 : 5);
+	private int OpenerAdjustTime =>
+		OpenWindow == OpenWindowMode.ZeroGcd ? 0 : (DataCenter.PlayerSyncedLevel() < 92 ? 2 : 5);
 
 	private bool NextIsMovementSafeGcd(IAction nextGCD) =>
 		nextGCD.IsTheSameTo(false, HolyInWhitePvE, CometInBlackPvE);
@@ -187,7 +188,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 		act = null;
 
 		// Apply the opener timing adjustment based on synced level.
-		int adjustCombatTimeForOpener = OpenerAdjustTime;
+		var adjustCombatTimeForOpener = OpenerAdjustTime;
 
 		if (CombatTime < adjustCombatTimeForOpener
 			&& StrikingMusePvE.CanUse(out act, skipCastingCheck: true))
