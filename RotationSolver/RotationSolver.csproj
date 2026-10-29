@@ -13,7 +13,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="RebornMaterial" Version="7.5.7.3" />
+		<PackageReference Include="RebornMaterial" Version="7.5.7.5" />
 		<PackageReference Update="DotNet.ReproducibleBuilds" Version="2.0.5" />
 		<Reference Include="Dalamud.Common" Private="false" />
 		<ProjectReference Include="..\RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
