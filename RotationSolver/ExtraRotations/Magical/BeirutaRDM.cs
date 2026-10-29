@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Magical;
 
-[Rotation("BeirutaRDM", CombatType.PvE, GameVersion = "7.45", RotationType = RotationType.Reborn)]
+[Rotation("BeirutaRDM", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/ExtraRotations/Magical/BeirutaRDM.cs")]
 [ExtraRotation]
 public sealed class BeirutaRDM : RedMageRotation
@@ -49,6 +49,9 @@ public sealed class BeirutaRDM : RedMageRotation
 
 	[RotationConfig(CombatType.PvE, Name = "Hold melee combo up to 2s if out of range")]
 	public bool HoldMeleeComboIfOutOfRange { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Do not start melee combo when moving (does not affect Manafication version)")]
+	public bool NoComboStartWhileMoving { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "Delay Prefulgence/Vice of Thorns for buff alignment (about 3 gcd after Embolden)")]
 	public bool DelayBuffOGCDs { get; set; } = true;
@@ -166,8 +169,10 @@ public sealed class BeirutaRDM : RedMageRotation
 	};
 
 	private bool IsOpen => InCombat && CombatTime < OpenWindowSeconds;
+    private bool IsZeroGcdFirst5s => OpenWindow == OpenWindowGcd.ZeroGcd && InCombat && CombatTime < 5f;
+    private bool IsZeroGcdManaficationLock => OpenWindow == OpenWindowGcd.ZeroGcd && InCombat && CombatTime < 5f;
 	private bool IsOpenForGrandImpact => InCombat && CombatTime < (OpenWindowSeconds + GrandImpactExtraDelaySeconds);
-	private bool HasInstantBuffToSpend => HasDualcast || HasSwift || (IsOpen && HasAccelerate);
+	private bool HasInstantBuffToSpend => HasDualcast || HasSwift || ((IsOpen || IsZeroGcdFirst5s) && HasAccelerate);
 	private bool HasAnyInstantTool => HasSwift || HasDualcast || HasAccelerate || (!IsOpenForGrandImpact && CanGrandImpact);
 	private bool IsBurstLocked => IsAnyMeleeComboInProgress() || InFinisherChain() || ManaStacks == 3;
 
@@ -486,7 +491,9 @@ public sealed class BeirutaRDM : RedMageRotation
 			return false;
 		}
 
-		if (!HasSwift && !HasDualcast && EnchantedRipostePvE.CanUse(out act))
+		if (!HasSwift && !HasDualcast &&
+			!(NoComboStartWhileMoving && IsMoving) &&
+			EnchantedRipostePvE.CanUse(out act))
 		{
 			RegisterMeleeStarter(MeleeComboTrack.SingleTarget, embRem);
 			return true;
@@ -633,9 +640,14 @@ public sealed class BeirutaRDM : RedMageRotation
 			ScorchPvE.CanUse(out _) ||
 			ResolutionPvE.CanUse(out _);
 	}
-	private bool CanUseManaficationNow(bool gateMelee)
+		private bool CanUseManaficationNow(bool gateMelee)
 	{
 		if (gateMelee)
+		{
+			return false;
+		}
+
+		if (OpenWindow == OpenWindowGcd.ZeroGcd && InCombat && CombatTime < 5f)
 		{
 			return false;
 		}
@@ -825,15 +837,15 @@ public sealed class BeirutaRDM : RedMageRotation
 			}
 		}
 
-		if (CanUseManaficationNow(gateMelee) && ManaficationPvE.CanUse(out act))
-		{
-			return true;
-		}
-
 		var emboldenAllowed = !IsOpen && IsBurst && InCombat && (AnyonesMeleeRule ? InMeleeRange3 : HasHostilesInRange);
 		if (emboldenAllowed && EmboldenPvE.CanUse(out act))
 		{
 			_emboldenUsedAtMs = Environment.TickCount64;
+			return true;
+		}
+
+		if (CanUseManaficationNow(gateMelee) && ManaficationPvE.CanUse(out act))
+		{
 			return true;
 		}
 
@@ -871,7 +883,8 @@ public sealed class BeirutaRDM : RedMageRotation
 			_emboldenUsedAtMs != 0 &&
 			(now - _emboldenUsedAtMs) < AccelLockAfterEmboldenMs;
 
-		var blockAccel = meleeOrFinisherLocked || burstPrepHoldAccel || inFirst5sAfterEmbolden;
+		var zeroGcdOpenerWindow = OpenWindow == OpenWindowGcd.ZeroGcd && InCombat && CombatTime < 5f;
+        var blockAccel = meleeOrFinisherLocked || burstPrepHoldAccel || (inFirst5sAfterEmbolden && !zeroGcdOpenerWindow);
 
 		var nextIsInstant =
 			HasDualcast ||
@@ -1224,12 +1237,12 @@ public sealed class BeirutaRDM : RedMageRotation
 	{
 		act = null;
 
-		if (!IsOpen || IsAnyMeleeComboInProgress() || ManaStacks == 3 || !InCombat || !HasHostilesInMaxRange)
+		if (!IsOpen || IsAnyMeleeComboInProgress() || ManaStacks != 0 || !InCombat || !HasHostilesInMaxRange)
 		{
 			return false;
 		}
 
-		if (!(HasDualcast || HasSwift || HasAccelerate))
+		if (!(HasDualcast || HasSwift || HasAccelerate || HasEmbolden || HasManafication))
 		{
 			return false;
 		}

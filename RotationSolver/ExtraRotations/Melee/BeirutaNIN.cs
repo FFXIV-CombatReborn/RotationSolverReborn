@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Melee;
 
-[Rotation("BeirutaNIN", CombatType.PvE, GameVersion = "7.5", RotationType = RotationType.Reborn)]
+[Rotation("BeirutaNIN", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/ExtraRotations/Melee/BeirutaNIN.cs")]
 [ExtraRotation]
 
@@ -57,6 +57,7 @@ public sealed class BeirutaNIN : NinjaRotation
 		[Description("Standard 4th GCD")] StandardFourthGcd,
 		[Description("Standard 3rd GCD")] StandardThirdGcd,
 		[Description("Alignment 4th GCD")] AlignmentFourthGcd,
+		[Description("UMAD")] Umad,
 	}
 
 	private int RaidBuffOpenTiming => BurstTiming switch
@@ -64,6 +65,7 @@ public sealed class BeirutaNIN : NinjaRotation
 		BurstTimingOption.StandardFourthGcd => 4,
 		BurstTimingOption.StandardThirdGcd => 4,
 		BurstTimingOption.AlignmentFourthGcd => 6,
+		BurstTimingOption.Umad => 0,
 		_ => 4,
 	};
 
@@ -72,6 +74,7 @@ public sealed class BeirutaNIN : NinjaRotation
 		BurstTimingOption.StandardFourthGcd => 8,
 		BurstTimingOption.StandardThirdGcd => 5,
 		BurstTimingOption.AlignmentFourthGcd => 8,
+		BurstTimingOption.Umad => 3,
 		_ => 9,
 	};
 
