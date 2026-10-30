@@ -3,7 +3,7 @@
 /// <summary>
 /// The bozja action.
 /// </summary>
-[DutyTerritory(920, 975)]
+[DutyTerritory(920, 936, 975)]
 public abstract class BozjaRotation : DutyRotation
 {
 }
