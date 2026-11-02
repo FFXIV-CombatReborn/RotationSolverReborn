@@ -1,5 +1,4 @@
 using RebornMaterial;
-using RotationSolver.Data;
 
 namespace RotationSolver.UI.SearchableConfigs;
 
@@ -24,35 +23,19 @@ internal class DragIntRangeSearch : UnitSearchable
 	protected override void DrawMain()
 	{
 		var bounds = Value;
-		var minValue = bounds.X;
-		var maxValue = bounds.Y;
+		var low = bounds.X;
+		var high = bounds.Y;
 		var trackWidth = Scale * DRAG_WIDTH;
-		var controlSize = new Vector2(trackWidth + M3Widgets.SliderValueGutter(Max.ToString()), M3Widgets.ButtonHeight);
+		var controlSize = new Vector2(trackWidth + M3Widgets.SliderValueGutter($"{Max} - {Max}"), M3Widgets.ButtonHeight);
 
-		var row = M3SettingRow.Begin(Name, SupportingText, Vector2.Zero, leadingIcon: RowIcon);
+		var row = M3SettingRow.Begin(Name, SupportingText, controlSize, leadingIcon: RowIcon);
+		ImGui.SetCursorScreenPos(row.ControlPosition);
+		if (M3Widgets.RangeSliderInt($"##Config_{ID}{GetHashCode()}", ref low, ref high, Min, Max, trackWidth))
+		{
+			Value = new Vector2Int(low, high);
+		}
+
 		RowInteractions(row);
 		M3SettingRow.End(row);
-
-		using var group = M3SubGroup.Begin();
-
-		var lowRow = M3SettingRow.Begin(UiString.ConfigWindow_RangeLower.GetDescription(), null, controlSize);
-		ImGui.SetCursorScreenPos(lowRow.ControlPosition);
-		if (M3Widgets.SliderInt($"##Config_{ID}_low{GetHashCode()}", ref minValue, Min, Max, minValue.ToString(), trackWidth))
-		{
-			Value = bounds.WithX(Math.Min(minValue, maxValue));
-		}
-
-		RowInteractions(lowRow);
-		M3SettingRow.End(lowRow);
-
-		var highRow = M3SettingRow.Begin(UiString.ConfigWindow_RangeUpper.GetDescription(), null, controlSize);
-		ImGui.SetCursorScreenPos(highRow.ControlPosition);
-		if (M3Widgets.SliderInt($"##Config_{ID}_high{GetHashCode()}", ref maxValue, Min, Max, maxValue.ToString(), trackWidth))
-		{
-			Value = bounds.WithY(Math.Max(maxValue, minValue));
-		}
-
-		RowInteractions(highRow);
-		M3SettingRow.End(highRow);
 	}
 }

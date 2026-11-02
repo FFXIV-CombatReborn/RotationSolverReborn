@@ -21,11 +21,10 @@ public partial class SageRotation
 	/// </summary>
 	public static byte Addersting => AdderstingTrait.EnoughLevel ? JobGauge.Addersting : (byte)0;
 
-	private static float AddersgallTimerRaw => JobGauge.AddersgallTimer / 1000f;
+	private static float AddersgallTimerRaw => (20000f - JobGauge.AddersgallTimer) / 1000f;
 
 	/// <summary>
-	/// Gets the amount of milliseconds elapsed until the next Addersgall is available.
-	/// This counts from 0 to 20_000.
+	/// Gets the seconds until the next Addersgall, after the current GCD.
 	/// </summary>
 	public static float AddersgallTime => AddersgallTrait.EnoughLevel ? AddersgallTimerRaw - DataCenter.DefaultGCDRemain : 0;
 

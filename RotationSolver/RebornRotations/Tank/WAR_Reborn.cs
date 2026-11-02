@@ -303,6 +303,11 @@ public sealed class WAR_Reborn : WarriorRotation
 			return true;
 		}
 
+		if (ReprisalPvE.CanUse(out act, skipAoeCheck: true))
+		{
+			return true;
+		}
+
 		return base.DefenseAreaAbility(nextGCD, out act);
 	}
 	#endregion

@@ -83,7 +83,7 @@ public partial class ScholarRotation
 		ImGui.Text("FairyDismissed: " + FairyDismissed.ToString());
 		ImGui.Text("ManifestationReady: " + ManifestationReady.ToString());
 		ImGui.Text("AccessionReady: " + AccessionReady.ToString());
-		ImGui.Text($"Excog Target: {ExcogitationPvE.Target.Target.Name}");
+		ImGui.Text($"Excog Target: {ExcogitationPvE.Target.Target?.Name}");
 		ImGui.Text($"Recitation on Cooldown: {RecitationPvE.Cooldown.IsCoolingDown}");
 		ImGui.Text($"Excog on cooldown: {ExcogitationPvE.Cooldown.IsCoolingDown}");
 		ImGui.Text($"Whispering Dawn On Cooldown: {WhisperingDawnPvE.Cooldown.IsCoolingDown}");

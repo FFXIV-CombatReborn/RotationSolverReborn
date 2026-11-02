@@ -35,11 +35,6 @@ internal class CheckBoxSearchNoCondition(PropertyInfo property, params ISearchab
 		get => (bool)_property.GetValue(Service.Config)!;
 		set => _property.SetValue(Service.Config, value);
 	}
-
-	public override void ResetToDefault()
-	{
-		_property.SetValue(Service.Config, false);
-	}
 }
 
 internal abstract class CheckBoxSearch : Searchable

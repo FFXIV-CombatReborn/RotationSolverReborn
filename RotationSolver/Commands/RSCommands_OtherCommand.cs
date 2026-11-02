@@ -1,10 +1,12 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
+using RebornMaterial;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
 using RotationSolver.Updaters;
+using System.Globalization;
 
 namespace RotationSolver.Commands;
 
@@ -167,7 +169,7 @@ public static partial class RSCommands
 			}
 
 			property.SetValue(Service.Config, convertedValue);
-			command = convertedValue?.ToString();
+			command = FormatSettingValue(convertedValue);
 
 			if (Service.Config.ShowToggledSettingInChat)
 			{
@@ -188,6 +190,24 @@ public static partial class RSCommands
 			return Enum.TryParse(type, command, ignoreCase: true, out convertedValue);
 		}
 
+		if (type == typeof(Vector2) || type == typeof(Vector2Int) || type == typeof(Vector4))
+		{
+			return TryParseVector(type, command, out convertedValue);
+		}
+
+		if (type == typeof(float))
+		{
+			Span<float> number = stackalloc float[1];
+			if (!TryParseNumbers(command ?? string.Empty, [' '], CultureInfo.InvariantCulture, number)
+				&& !TryParseNumbers(command ?? string.Empty, [' '], CultureInfo.CurrentCulture, number))
+			{
+				return false;
+			}
+
+			convertedValue = number[0];
+			return true;
+		}
+
 		try
 		{
 			convertedValue = Convert.ChangeType(command, type);
@@ -197,6 +217,66 @@ public static partial class RSCommands
 		{
 			return false;
 		}
+	}
+
+	internal static string? FormatSettingValue(object? value)
+	{
+		return value switch
+		{
+			Vector2 v => v.ToString(null, CultureInfo.InvariantCulture),
+			Vector4 v => v.ToString(null, CultureInfo.InvariantCulture),
+			Vector2Int v => $"<{v.X}, {v.Y}>",
+			float f => f.ToString(CultureInfo.InvariantCulture),
+			_ => value?.ToString(),
+		};
+	}
+
+	private static bool TryParseVector(Type type, string? command, out object? convertedValue)
+	{
+		convertedValue = null;
+		if (string.IsNullOrWhiteSpace(command))
+		{
+			return false;
+		}
+
+		if (type == typeof(Vector4) && M3ColorMath.TryParseHex(command, out var color))
+		{
+			convertedValue = color;
+			return true;
+		}
+
+		var text = command.Trim().Trim('<', '>', '(', ')', '[', ']');
+		Span<float> values = stackalloc float[type == typeof(Vector4) ? 4 : 2];
+
+		if (!TryParseNumbers(text, [',', ';', ' ', '\t'], CultureInfo.InvariantCulture, values)
+			&& !TryParseNumbers(text, [';', ' ', '\t'], CultureInfo.CurrentCulture, values))
+		{
+			return false;
+		}
+
+		convertedValue = values.Length == 4 ? new Vector4(values[0], values[1], values[2], values[3])
+			: type == typeof(Vector2Int) ? new Vector2Int((int)MathF.Round(values[0]), (int)MathF.Round(values[1]))
+			: new Vector2(values[0], values[1]);
+		return true;
+	}
+
+	private static bool TryParseNumbers(string text, char[] separators, CultureInfo culture, Span<float> values)
+	{
+		var parts = text.Split(separators, StringSplitOptions.RemoveEmptyEntries);
+		if (parts.Length != values.Length)
+		{
+			return false;
+		}
+
+		for (var i = 0; i < parts.Length; i++)
+		{
+			if (!float.TryParse(parts[i], NumberStyles.Float, culture, out values[i]) || !float.IsFinite(values[i]))
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private static void HandleTargetingTypesCommand(string? command)

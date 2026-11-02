@@ -286,6 +286,7 @@ public partial class PaladinRotation
 	static partial void ModifyInterventionPvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => OathGauge >= 50;
+		setting.StatusFromSelf = false;
 		setting.TargetStatusNeed = [StatusID.Grit, StatusID.RoyalGuard_1833, StatusID.IronWill, StatusID.Defiance];
 		setting.TargetStatusProvide = [StatusID.KnightsResolve, StatusID.KnightsBenediction, StatusID.Intervention];
 	}

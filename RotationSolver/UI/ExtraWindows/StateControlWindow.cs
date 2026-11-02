@@ -146,7 +146,8 @@ internal class StateControlWindow : Window
 		var target = CurrentIndex() == ManualIndex ? 1f : 0f;
 		if (_tabTime != target)
 		{
-			var step = ImGui.GetIO().DeltaTime / M3Motion.EmphasisedDuration;
+			var duration = M3Motion.Scaled(M3Motion.EmphasisedDuration);
+			var step = duration <= 0f ? 1f : ImGui.GetIO().DeltaTime / duration;
 			_tabTime = target > _tabTime ? MathF.Min(target, _tabTime + step) : MathF.Max(target, _tabTime - step);
 		}
 
@@ -437,9 +438,8 @@ internal class StateControlWindow : Window
 		}
 		else
 		{
-			var t = Math.Clamp(1f - MathF.Exp(-ImGui.GetIO().DeltaTime * 18f), 0f, 1f);
-			_indicatorPos += (target - _indicatorPos) * t;
-			_indicatorWidth += (segWidth - _indicatorWidth) * t;
+			_indicatorPos = M3Motion.Step(_indicatorPos, target, M3Motion.FastDuration);
+			_indicatorWidth = M3Motion.Step(_indicatorWidth, segWidth, M3Motion.FastDuration);
 		}
 
 		var pillMin = origin + new Vector2(_indicatorPos, pad);
@@ -549,8 +549,7 @@ internal class StateControlWindow : Window
 		}
 		else
 		{
-			var t = Math.Clamp(1f - MathF.Exp(-ImGui.GetIO().DeltaTime * 18f), 0f, 1f);
-			_aoeIndicatorPos += (target - _aoeIndicatorPos) * t;
+			_aoeIndicatorPos = M3Motion.Step(_aoeIndicatorPos, target, M3Motion.FastDuration);
 		}
 
 		using var alpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha,

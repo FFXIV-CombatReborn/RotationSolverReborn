@@ -88,6 +88,17 @@ public sealed class GNB_Reborn : GunbreakerRotation
 		return base.EmergencyAbility(nextGCD, out act);
 	}
 
+	[RotationDesc(ActionID.TrajectoryPvE)]
+	protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+	{
+		if (TrajectoryPvE.CanUse(out act, usedUp: true))
+		{
+			return true;
+		}
+
+		return base.MoveForwardAbility(nextGCD, out act);
+	}
+
 	[RotationDesc(ActionID.HeartOfLightPvE, ActionID.ReprisalPvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
@@ -236,7 +247,7 @@ public sealed class GNB_Reborn : GunbreakerRotation
 
 				case AuroraUsageStrategy.Fullusage:
 				default:
-					if (AuroraPvE.CanUse(out act, targetOverride: TargetType.LowHP))
+					if (AuroraPvE.CanUse(out act, targetOverride: TargetType.Heal))
 					{
 						return true;
 					}

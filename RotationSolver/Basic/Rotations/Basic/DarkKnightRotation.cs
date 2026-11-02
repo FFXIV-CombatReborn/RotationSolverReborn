@@ -540,4 +540,13 @@ public partial class DarkKnightRotation
 	}
 
 	#endregion
+
+	public override bool IsBursting()
+	{
+		if (StatusHelper.PlayerHasStatus(true, StatusID.Darkside))
+		{
+			return true;
+		}
+		return false;
+	}
 }

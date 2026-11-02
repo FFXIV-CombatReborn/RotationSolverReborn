@@ -89,10 +89,6 @@ public sealed class SAM_Reborn : SamuraiRotation
 	{
 		if (!HasZanshinReady && Player?.GetHealthRatio() <= TengentsuHealth)
 		{
-			if (FeintPvE.CanUse(out act))
-			{
-				return true;
-			}
 			if (TengentsuPvE.CanUse(out act))
 			{
 				return true;

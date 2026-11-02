@@ -463,6 +463,7 @@ public partial class NinjaRotation
 	static partial void ModifyForkedRaijuPvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => HasRaijuReady;
+		setting.SpecialType = SpecialActionType.HostileMovingAttack;
 	}
 
 	static partial void ModifyFleetingRaijuPvE(ref ActionSetting setting)
@@ -729,5 +730,14 @@ public partial class NinjaRotation
 	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
 	{
 		return ShadeShiftPvE.CanUse(out act) || base.DefenseSingleAbility(nextGCD, out act);
+	}
+
+	public override bool IsBursting()
+	{
+		if (InTrickAttack)
+		{
+			return true;
+		}
+		return false;
 	}
 }

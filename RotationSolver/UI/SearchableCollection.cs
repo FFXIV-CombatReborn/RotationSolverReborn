@@ -162,6 +162,11 @@ internal class SearchableCollection
 			return new AutoHealCheckBox(property);
 		}
 
+		if (property.Name == nameof(Configs.UiAccentColor))
+		{
+			return new AccentColorSearch(property);
+		}
+
 		if (property.PropertyType.IsEnum)
 		{
 			return new EnumSearch(property);

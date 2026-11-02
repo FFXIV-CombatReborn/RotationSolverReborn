@@ -9,6 +9,7 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
+using RotationSolver.UI.SearchableConfigs;
 
 namespace RotationSolver.UI.ExtraWindows;
 
@@ -47,22 +48,9 @@ internal sealed class FirstStartTutorialWindow : Window
 
 	private readonly record struct Tile(FontAwesomeIcon Icon, string Title, string Text, Vector4 Accent);
 
-	private readonly record struct AccentPreset(string Name, uint Rgb);
-
 	private readonly record struct StarterMacro(string Title, string Description, FontAwesomeIcon Icon, string Text);
 
 	private readonly record struct CommandHelp(string Command, string Description);
-
-	private static readonly AccentPreset[] AccentPresets =
-	[
-		new("Crimson (default)", 0xB0201F),
-		new("Amber", 0xC7881C),
-		new("Emerald", 0x2E9E63),
-		new("Teal", 0x1F8F99),
-		new("Azure", 0x2F6FD6),
-		new("Violet", 0x7A4FD0),
-		new("Rose", 0xC8427F),
-	];
 
 	private static readonly StarterMacro[] StarterMacros =
 	[
@@ -520,7 +508,8 @@ internal sealed class FirstStartTutorialWindow : Window
 			_scrollToTop = false;
 		}
 
-		var progress = Math.Clamp((float)(ImGui.GetTime() - _stepShownAt) / PageTransitionDuration, 0f, 1f);
+		var duration = M3Motion.Scaled(PageTransitionDuration);
+		var progress = duration <= 0f ? 1f : Math.Clamp((float)(ImGui.GetTime() - _stepShownAt) / duration, 0f, 1f);
 		progress = progress * progress * (3f - (2f * progress));
 		using var fade = ImRaii.PushStyle(ImGuiStyleVar.Alpha, 0.2f + (0.8f * progress));
 		ImGui.Dummy(new Vector2(0f, M3.Space1 + ((1f - progress) * 10f * scale)));
@@ -1318,82 +1307,18 @@ internal sealed class FirstStartTutorialWindow : Window
 
 	private static void DrawAccentPicker()
 	{
-		var s = M3.Scheme;
 		var scale = M3.Scale;
 		var seed = Service.Config.UiAccentColor;
-		var diameter = 28f * scale;
-		var gap = 12f * scale;
-		var right = ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X - M3Card.RightInset;
-		var drawList = ImGui.GetWindowDrawList();
-		var matched = false;
 
 		ImGui.Dummy(new Vector2(0f, 4f * scale));
 		ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (6f * scale));
-
-		for (var i = 0; i < AccentPresets.Length; i++)
+		if (M3Widgets.ColorChoices("##tutorial_accent", ref seed, AccentColorSearch.Presets, custom: true,
+			maxWidth: ImGui.GetContentRegionAvail().X - M3Card.RightInset))
 		{
-			var preset = AccentPresets[i];
-			var color = M3ColorMath.FromRgb(preset.Rgb);
-			var selected = SameColor(seed, color);
-			matched |= selected;
-
-			if (i > 0)
-			{
-				FlowSameLine(diameter, gap, right);
-			}
-
-			if (ImGui.InvisibleButton($"##tutorial_accent_{i}", new Vector2(diameter, diameter)))
-			{
-				Service.Config.UiAccentColor = color;
-			}
-
-			var hovered = ImGui.IsItemHovered();
-			var center = (ImGui.GetItemRectMin() + ImGui.GetItemRectMax()) * 0.5f;
-			if (hovered)
-			{
-				drawList.AddCircleFilled(center, (diameter * 0.5f) + (6f * scale), M3.U32(s.OnSurface, M3.StateHover), 32);
-				ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-				ImGui.SetTooltip(preset.Name);
-			}
-
-			drawList.AddCircleFilled(center, diameter * 0.5f, M3.U32(color), 32);
-			if (selected)
-			{
-				DrawSelectionRing(drawList, center, diameter);
-				M3Draw.IconCentered(drawList, FontAwesomeIcon.Check, center - new Vector2(diameter * 0.5f), center + new Vector2(diameter * 0.5f), M3.ContentOn(color));
-			}
-		}
-
-		FlowSameLine(diameter, gap * 2f, right);
-		var custom = seed;
-		if (M3Widgets.ColorSwatch("##tutorial_accent_custom", ref custom))
-		{
-			Service.Config.UiAccentColor = custom with { W = 1f };
-		}
-
-		if (ImGui.IsItemHovered())
-		{
-			ImGui.SetTooltip(matched ? "Pick any colour" : "Your own colour. Click to change it.");
-		}
-
-		if (!matched)
-		{
-			DrawSelectionRing(drawList, (ImGui.GetItemRectMin() + ImGui.GetItemRectMax()) * 0.5f, diameter);
+			Service.Config.UiAccentColor = seed;
 		}
 
 		ImGui.Dummy(new Vector2(0f, 4f * scale));
-	}
-
-	private static void DrawSelectionRing(ImDrawListPtr drawList, Vector2 center, float diameter)
-	{
-		var scale = M3.Scale;
-		drawList.AddCircle(center, (diameter * 0.5f) + (3.5f * scale), M3.U32(M3.Scheme.OnSurface), 32, 2f * scale);
-	}
-
-	private static bool SameColor(Vector4 a, Vector4 b)
-	{
-		const float tolerance = 0.003f;
-		return MathF.Abs(a.X - b.X) < tolerance && MathF.Abs(a.Y - b.Y) < tolerance && MathF.Abs(a.Z - b.Z) < tolerance;
 	}
 
 	private static void DrawTextScaleRow()
@@ -1468,9 +1393,8 @@ internal sealed class FirstStartTutorialWindow : Window
 
 		using var card = M3Card.Begin($"tutorial_macro_{index}", macro.Title, macro.Icon, style: M3CardStyle.Outlined, subtitle: macro.Description);
 
-		const string copyLabel = "Copy";
 		var width = MathF.Max(64f * scale, ImGui.GetContentRegionAvail().X - M3Card.RightInset);
-		var copyWidth = M3Widgets.ButtonWidth(FontAwesomeIcon.Copy, copyLabel);
+		var copyWidth = M3Widgets.CopyButtonWidth();
 		var padding = new Vector2(12f, 10f) * scale;
 		var lines = macro.Text.Split("\r\n");
 		var lineHeight = ImGui.GetTextLineHeight();
@@ -1494,10 +1418,8 @@ internal sealed class FirstStartTutorialWindow : Window
 		}
 
 		ImGui.SetCursorScreenPos(new Vector2(max.X - padding.X - copyWidth, origin.Y + ((height - M3Widgets.ButtonHeight) * 0.5f)));
-		if (M3Widgets.Button($"##tutorial_copy_macro_{index}", copyLabel, M3ButtonStyle.Tonal, FontAwesomeIcon.Copy))
-		{
-			CopyToClipboard(macro.Text, "Macro copied. Paste it into a new macro in User Macros (/macros).");
-		}
+		_ = M3Widgets.CopyButton($"##tutorial_copy_macro_{index}", macro.Text, width: copyWidth,
+			snackbar: "Macro copied. Paste it into a new macro in User Macros (/macros).");
 
 		ImGui.SetCursorScreenPos(new Vector2(origin.X, max.Y));
 		ImGui.Dummy(new Vector2(width, 0f));

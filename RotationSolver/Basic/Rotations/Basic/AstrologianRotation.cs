@@ -372,6 +372,7 @@ public partial class AstrologianRotation
 		setting.StatusProvide = [StatusID.Synastry];
 		setting.UnlockedByQuestID = 67554;
 		setting.IsFriendly = true;
+		setting.TargetType = TargetType.Heal;
 	}
 
 	static partial void ModifyDivinationPvE(ref ActionSetting setting)

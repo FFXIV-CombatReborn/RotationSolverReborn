@@ -195,10 +195,15 @@ public sealed class PLD_Reborn : PaladinRotation
 		return base.MoveForwardAbility(nextGCD, out act);
 	}
 
-	[RotationDesc(ActionID.DivineVeilPvE, ActionID.PassageOfArmsPvE)]
+	[RotationDesc(ActionID.DivineVeilPvE, ActionID.ReprisalPvE, ActionID.PassageOfArmsPvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
 		if (DivineVeilPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (ReprisalPvE.CanUse(out act, skipAoeCheck: true))
 		{
 			return true;
 		}

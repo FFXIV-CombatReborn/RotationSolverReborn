@@ -573,7 +573,7 @@ public partial class CustomRotation
 			return true;
 		}
 
-		if (nextGCD is BaseAction action)
+		if (nextGCD is BaseAction action && (Service.Config.RaisePlayerBySwift || Raise == null || !nextGCD.IsTheSameTo(true, Raise)))
 		{
 			if (Role is JobRole.RangedMagical && action.Info.CastTime >= 5 && IActionHelper.IsLastActionGCD() && SwiftcastPvE.CanUse(out act))
 			{

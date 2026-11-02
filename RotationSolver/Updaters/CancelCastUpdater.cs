@@ -34,7 +34,7 @@ internal static class CancelCastUpdater
 
 		var stopForDeadTarget = _tarStopCastDelay.Delay(tarDead);
 
-		var tarHasRaise = castTarget != null && castTarget.HasStatus(false, StatusID.Raise);
+		var tarHasRaise = castTarget != null && castTarget.HasStatus(false, StatusID.Raise, StatusID.Raise_1140);
 
 		var hasNoCastingStatus = !DataCenter.IsPvP
 			&& NoCastingStatusHelper.PlayerHasNoCastingStatus(out var noCastingRemaining)
