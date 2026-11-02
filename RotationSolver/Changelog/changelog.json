@@ -10,10 +10,9 @@
           "title": "Healing and raising",
           "icon": "Heartbeat",
           "items": [
-            "Healers raise again when \"Raise with Swiftcast\" is off or Swiftcast isn't learned yet. The hard-cast raise modes no longer wait for a Swiftcast that won't be used.",
-            "Turning off \"Raise with Swiftcast or Dualcast\" now also stops Swiftcast on long-cast raises.",
+            "Misc fixes to raise/swiftcast logic, relevant rotation-specific settings have been adjusted a bit",
             "White Mage: Thin Air no longer forces a hard-cast Raise. Raising follows your raise settings, and GCDs continue while moving.",
-            "Astrologian Synastry goes to the party member who needs healing again.",
+            "Minor fix for Astrologian Synastry.",
             "Gunbreaker Aurora on \"Full target usage\" goes to the member who needs healing, not the one with the smallest HP pool.",
             "Paladins under Hallowed Ground no longer count as needing heals.",
             "Dancer finishes Improvisation with Improvised Finish, so the party gets its barrier."
@@ -42,7 +41,7 @@
           ]
         },
         {
-          "title": "Rotations",
+          "title": "Misc Rotations",
           "icon": "Wrench",
           "items": [
             "Viper no longer spends Uncoiled Fury beside a ready Serpent's Ire, and Monk's odd-minute Perfect Balance is no longer blocked at full charges.",
