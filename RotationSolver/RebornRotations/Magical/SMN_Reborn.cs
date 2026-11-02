@@ -33,9 +33,6 @@ public sealed class SMN_Reborn : SummonerRotation
 	[RotationConfig(CombatType.PvE, Name = "Use Crimson Cyclone when moving")]
 	public bool AddCrimsonCycloneMoving { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "Use Swiftcast on ressurection")]
-	public bool AddSwiftcastOnRaise { get; set; } = true;
-
 	[RotationConfig(CombatType.PvE, Name = "Raise while in solar bahamut")]
 	public bool SBRaise { get; set; } = true;
 
@@ -368,58 +365,58 @@ public sealed class SMN_Reborn : SummonerRotation
 	}
 
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
-{   
-    var potInBigSummon = !SummonBahamutPvE.EnoughLevel || InBahamut || InPhoenix || InSolarBahamut;
+	{   
+		var potInBigSummon = !SummonBahamutPvE.EnoughLevel || InBahamut || InPhoenix || InSolarBahamut;
 
-    if (UsePotion && HasSearingLight && InCombat
-	    && (PotionTiming == PotTiming.FirstSearingLight || CombatTime > 30f)
-	    && (!LimitPotToBigSummon || potInBigSummon)
-	    && UseBurstMedicine(out act))
-    {
-	    return true;
-    }
+		if (UsePotion && HasSearingLight && InCombat
+			&& (PotionTiming == PotTiming.FirstSearingLight || CombatTime > 30f)
+			&& (!LimitPotToBigSummon || potInBigSummon)
+			&& UseBurstMedicine(out act))
+		{
+			return true;
+		}
 
-	if (SwiftcastPvE.CanUse(out act))
-	{
-		if (SwiftcastMovementUptime && !HasSwift)
+		if (SwiftcastPvE.CanUse(out act))
 		{
-			if (IsMoving && AttunementCount == 0 && SlipstreamPvE.CanUse(out _, skipCastingCheck: true))
+			if (Service.Config.RaisePlayerBySwift && nextGCD.IsTheSameTo(false, ResurrectionPvE))
 			{
 				return true;
 			}
-			if (IsMoving && RubyRitePvE.CanUse(out _, skipCastingCheck: true))
+			if (SwiftcastMovementUptime && !HasSwift)
+			{
+				if (IsMoving && AttunementCount == 0 && SlipstreamPvE.CanUse(out _, skipCastingCheck: true))
+				{
+					return true;
+				}
+				if (IsMoving && RubyRitePvE.CanUse(out _, skipCastingCheck: true))
+				{
+					return true;
+				}
+				if (nextGCD.IsTheSameTo(false, RubyRitePvE, SlipstreamPvE) && !IsGarudaReady && !IsIfritReady)
+				{
+					return true;
+				}
+			}
+			if (AddSwiftcastOnLowST && !RubyRitePvE.EnoughLevel && nextGCD.IsTheSameTo(false, RubyRuinPvE, RubyRuinIiPvE, RubyRuinIiiPvE))
 			{
 				return true;
 			}
-			if (nextGCD.IsTheSameTo(false, RubyRitePvE, SlipstreamPvE) && !IsGarudaReady && !IsIfritReady)
+			if (AddSwiftcastOnLowAOE && !RubyRitePvE.EnoughLevel && nextGCD.IsTheSameTo(false, RubyOutburstPvE))
+			{
+				return true;
+			}
+			if (!SwiftcastMovementUptime && AddSwiftcastOnRuby && nextGCD.IsTheSameTo(false, RubyRitePvE) && !ElementalMasteryTrait.EnoughLevel)
+			{
+				return true;
+			}
+			if (!SwiftcastMovementUptime && AddSwiftcastOnGaruda && nextGCD.IsTheSameTo(false, SlipstreamPvE) && ElementalMasteryTrait.EnoughLevel && !InBahamut && !InPhoenix && !InSolarBahamut)
 			{
 				return true;
 			}
 		}
-		if (AddSwiftcastOnRaise && nextGCD.IsTheSameTo(false, ResurrectionPvE))
-		{
-			return true;
-		}
-		if (AddSwiftcastOnLowST && !RubyRitePvE.EnoughLevel && nextGCD.IsTheSameTo(false, RubyRuinPvE, RubyRuinIiPvE, RubyRuinIiiPvE))
-		{
-			return true;
-		}
-		if (AddSwiftcastOnLowAOE && !RubyRitePvE.EnoughLevel && nextGCD.IsTheSameTo(false, RubyOutburstPvE))
-		{
-			return true;
-		}
-		if (!SwiftcastMovementUptime && AddSwiftcastOnRuby && nextGCD.IsTheSameTo(false, RubyRitePvE) && !ElementalMasteryTrait.EnoughLevel)
-		{
-			return true;
-		}
-		if (!SwiftcastMovementUptime && AddSwiftcastOnGaruda && nextGCD.IsTheSameTo(false, SlipstreamPvE) && ElementalMasteryTrait.EnoughLevel && !InBahamut && !InPhoenix && !InSolarBahamut)
-		{
-			return true;
-		}
+
+		return base.EmergencyAbility(nextGCD, out act);
 	}
-
-	return base.EmergencyAbility(nextGCD, out act);
-}
 
 	#endregion
 
