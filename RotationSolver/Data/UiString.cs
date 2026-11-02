@@ -56,12 +56,6 @@ namespace RotationSolver.Data
 		[Description("Health thresholds")]
 		ConfigWindow_HealingThresholds,
 
-		[Description("Minimum")]
-		ConfigWindow_RangeLower,
-
-		[Description("Maximum")]
-		ConfigWindow_RangeUpper,
-
 		[Description("This includes almost all information available in one combat frame, including the status of all party members, hostile target statuses, skill cooldowns, MP and HP of characters, character locations, hostile target casting status, combo state, combat duration, player level, etc.\n\nIt will then highlight the best action on the hotbar, or help you click it.")]
 		ConfigWindow_About_Description,
 
@@ -770,8 +764,6 @@ namespace RotationSolver.Data
 				UiString.ConfigWindow_Search_Result => "搜索结果",
 				UiString.ConfigWindow_Target_AddPriority => "添加目标优先级",
 				UiString.ConfigWindow_HealingThresholds => "血量阈值",
-				UiString.ConfigWindow_RangeLower => "最小值",
-				UiString.ConfigWindow_RangeUpper => "最大值",
 				UiString.ConfigWindow_About_Description => "这包括单个战斗帧中几乎所有的可用信息，包括所有队员的状态、敌对目标状态、技能冷却、角色MP和HP、角色位置、敌对目标咏唱状态、连击状态、战斗时长、玩家等级等。\n\n随后它会在热键栏上高亮最佳动作，或帮助你点击它。",
 				UiString.ConfigWindow_About_Warning => "这是为一般战斗设计的，而不是为零式或绝境战内容设计的。\n\n请谨慎使用！虽然RSR并非专门为零式或绝境战内容设计，但在其中也能正常工作，但它不会替你处理机制。请注意并配合使用宏。",
 				UiString.ConfigWindow_About_ClickingCount => "RSR 已通过点击动作帮助了你 {0:N0} 次。",

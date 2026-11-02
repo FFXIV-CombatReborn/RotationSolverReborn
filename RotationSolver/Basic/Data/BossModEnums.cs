@@ -25,12 +25,12 @@ public enum SpecialMode
 	/// <summary>
 	/// A freezing effect is active. The player is expected to be moving at activation time.
 	/// </summary>
-	Freezing = 4,
+	Freezing = 3,
 
 	/// <summary>
 	/// A temporary misdirection effect is active, altering the player's movement direction.
 	/// </summary>
-	Misdirection = 5,
+	Misdirection = 4,
 }
 
 /// <summary>

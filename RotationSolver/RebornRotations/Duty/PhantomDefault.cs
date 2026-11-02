@@ -54,9 +54,6 @@ public sealed class PhantomDefault : PhantomRotation
 		EitherDrainTouch,
 	}
 
-	[RotationConfig(CombatType.PvE, Name = "Use Pray as a Heal", PhantomJob = PhantomJob.Knight)]
-	public bool PrayHeal { get; set; } = false;
-
 	[RotationConfig(CombatType.PvE, Name = "Use Pledge on self", PhantomJob = PhantomJob.Knight)]
 	public bool PledgeSelf { get; set; } = false;
 

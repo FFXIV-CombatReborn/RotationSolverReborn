@@ -455,7 +455,7 @@ public partial class MainWindow
 		Vector4 accent;
 		if (_diagInfoAnyCrash)
 		{
-			var pulse = (MathF.Sin((float)ImGui.GetTime() * 4f) + 1f) * 0.5f;
+			var pulse = M3.ReducedMotion ? 0f : (MathF.Sin((float)ImGui.GetTime() * 4f) + 1f) * 0.5f;
 			accent = M3ColorMath.Mix(scheme.Error, scheme.OnErrorContainer, pulse * 0.5f);
 		}
 		else

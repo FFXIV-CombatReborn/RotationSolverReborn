@@ -109,6 +109,11 @@ public partial class CustomRotation
 	{
 		act = null;
 
+		if (!DataCenter.InCombat && Service.CountDownTime <= 0)
+		{
+			return false;
+		}
+
 		var isHostileTargetDummy = HostileTarget?.IsDummy() ?? false;
 		var isInHighEndDuty = DataCenter.Territory?.IsHighEndDuty ?? false;
 

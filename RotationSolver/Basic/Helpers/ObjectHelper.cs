@@ -71,6 +71,17 @@ public static class ObjectHelper
 			return false;
 		}
 
+		if (OtherConfiguration.NoProvokeNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
+		{
+			foreach (var n in ns1)
+			{
+				if (!string.IsNullOrEmpty(n) && GetCachedRegex(n).IsMatch(target.Name?.GetText() ?? string.Empty))
+				{
+					return false;
+				}
+			}
+		}
+
 		if (Service.Config.ProvokeAnything)
 		{
 			return true;
@@ -84,17 +95,6 @@ public static class ObjectHelper
 		if (DataCenter.PlayerFateId != 0 && target.FateId() == DataCenter.PlayerFateId)
 		{
 			return false;
-		}
-
-		if (OtherConfiguration.NoProvokeNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
-		{
-			foreach (var n in ns1)
-			{
-				if (!string.IsNullOrEmpty(n) && GetCachedRegex(n).IsMatch(target.Name?.GetText() ?? string.Empty))
-				{
-					return false;
-				}
-			}
 		}
 
 		if (!Service.Config.ProvokeAnything)

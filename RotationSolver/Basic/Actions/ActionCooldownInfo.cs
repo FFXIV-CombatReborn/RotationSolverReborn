@@ -196,6 +196,11 @@ public readonly struct ActionCooldownInfo : ICooldown
 	/// <returns>True if the action was just used; otherwise, false.</returns>
 	public bool JustUsedAfter(float time)
 	{
+		if (!ActionIdHelper.IsCoolingDownGroup(CoolDownGroup))
+		{
+			return false;
+		}
+
 		var elapsed = RecastTimeElapsedRaw % RecastTimeOneChargeRaw;
 		return elapsed + DataCenter.DefaultGCDRemain < time;
 	}

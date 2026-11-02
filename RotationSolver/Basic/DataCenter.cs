@@ -1537,11 +1537,11 @@ internal static class DataCenter
 	}
 
 	/// <summary>
-	/// Determines whether any hostile is casting an action whose attack type is physical (<c>AttackType.RowId == 7</c>).
+	/// Determines whether any hostile is casting a physical action (slashing, piercing, blunt or shot).
 	/// </summary>
 	public static bool IsPhysicalDamageIncoming()
 	{
-		return AnyHostileCasting(static action => action.AttackType.RowId == 7);
+		return AnyHostileCasting(static action => action.AttackType.RowId is >= 1 and <= 4);
 	}
 
 	private static bool AnyHostileCasting(Func<Action, bool> check)

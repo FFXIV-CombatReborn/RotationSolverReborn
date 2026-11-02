@@ -745,6 +745,12 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 	[Range(0.25f, 2f, ConfigUnitType.Percent, 0.01f)]
 	public float UiPaddingScale { get; set; } = 1.5f;
 
+	[UI("Animation length",
+		Description = "Scales how long animations take in every RSR window, such as menus, folding windows and moving selections. Set it to 0% to turn animations off.",
+		Filter = UiCustomize)]
+	[Range(0f, 2f, ConfigUnitType.Percent, 0.01f)]
+	public float UiMotionScale { get; set; } = 1f;
+
 	[ConditionBool, UI("Show a toast when a command queues an action",
 		Description = "Confirms each action that a /rotation DoAction command adds to the queue.",
 		Filter = BasicCommands, Section = 2)]
@@ -993,12 +999,6 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 		Filter = RaiseActionCondition)]
 	private static readonly bool _offRaiserRaise = false;
 
-	[JobConfig, UI("Swiftcast raise lead time",
-		Description = "How long before your next GCD RSR uses Swiftcast to raise. Waiting gives a co-healer time to raise first, so your Swiftcast isn't wasted.",
-		Filter = RaiseActionCondition, Section = 1)]
-	[Range(0, 1.0f, ConfigUnitType.Seconds, 0.01f)]
-	public float SwiftcastBuffer { get; set; } = 0.6f;
-
 	[UI("Raise delay range",
 		Description = "RSR waits a random time in this range before raising.",
 		Filter = RaiseActionCondition, Section = 1)]
@@ -1053,15 +1053,6 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 	[UI("Stop casting delay range", Parent = nameof(UseStopCasting))]
 	[Range(0, 3, ConfigUnitType.Seconds, 0.002f)]
 	public Vector2 StopCastingDelay { get; set; } = new(0.5f, 1);
-
-	[UI("Interrupt delay range", Parent = nameof(InterruptibleMoreCheck),
-		PvEFilter = JobFilterType.Interrupt, PvPFilter = JobFilterType.NoJob)]
-	[Range(0, 3, ConfigUnitType.Seconds, 0.002f)]
-	public Vector2 InterruptDelay { get; set; } = new(0.5f, 1);
-
-	[UI("Provoke delay range", Parent = nameof(AutoProvokeForTank))]
-	[Range(0, 10, ConfigUnitType.Seconds, 0.05f)]
-	public Vector2 ProvokeDelay { get; set; } = new(0.5f, 1);
 
 	[UI("Downtime healing delay range", Parent = nameof(HealWhenNothingTodo))]
 	[Range(0, 5, ConfigUnitType.Seconds, 0.05f)]

@@ -383,6 +383,7 @@ public static class StatusHelper
 		StatusID.LivingDead,
 		//StatusID.WalkingDead,
 		StatusID.Superbolide,
+		StatusID.HallowedGround,
 		StatusID.Invulnerability,
 		StatusID.HpRecoveryDown,
 		StatusID.Mounted,
@@ -418,6 +419,9 @@ public static class StatusHelper
 	public static StatusID[] RampartStatus { get; } =
 	[
 		StatusID.Rampart,
+		StatusID.Rampart_1191,
+		StatusID.Rampart_1978,
+		StatusID.Rampart_4168,
 		StatusID.Bulwark,
 		StatusID.Bloodwhetting,
 

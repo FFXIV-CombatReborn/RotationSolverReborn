@@ -102,7 +102,7 @@ public static class TargetFilter
 				continue;
 			}
 
-			if (item.HasStatus(false, StatusID.Raise))
+			if (item.HasStatus(false, StatusID.Raise, StatusID.Raise_1140))
 			{
 				continue;
 			}

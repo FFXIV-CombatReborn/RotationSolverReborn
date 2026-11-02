@@ -203,6 +203,7 @@ public partial class DragoonRotation
 	static partial void ModifyDragonfireDivePvE(ref ActionSetting setting)
 	{
 		setting.UnlockedByQuestID = 66608;
+		setting.SpecialType = SpecialActionType.HostileMovingAttack;
 		setting.StatusProvide = [StatusID.DragonsFlight];
 		setting.CreateConfig = () => new ActionConfig()
 		{
@@ -301,6 +302,7 @@ public partial class DragoonRotation
 	static partial void ModifyStardiverPvE(ref ActionSetting setting)
 	{
 		setting.ActionCheck = () => JobGauge.IsLOTDActive;
+		setting.SpecialType = SpecialActionType.HostileMovingAttack;
 		setting.StatusProvide = [StatusID.StarcrossReady];
 		setting.CreateConfig = () => new ActionConfig()
 		{

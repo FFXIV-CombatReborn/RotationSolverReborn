@@ -338,11 +338,12 @@ public partial class CustomRotation
 			return true;
 		}
 
+		var swiftUnused = !Service.Config.RaisePlayerBySwift || !SwiftcastPvE.EnoughLevel;
 		var swiftOnCooldown = SwiftcastPvE.Cooldown.IsCoolingDown;
-		var castsBeforeSwift = swiftOnCooldown && Raise != null && Raise.Info.CastTime < SwiftcastPvE.Cooldown.RecastTimeRemainOneCharge;
+		var castsBeforeSwift = swiftUnused || (swiftOnCooldown && Raise != null && Raise.Info.CastTime < SwiftcastPvE.Cooldown.RecastTimeRemainOneCharge);
 		var mayHardCast = Service.Config.HardCastRaiseType switch
 		{
-			HardCastRaiseType.HardCastNormal => swiftOnCooldown,
+			HardCastRaiseType.HardCastNormal => swiftUnused || swiftOnCooldown,
 			HardCastRaiseType.HardCastSwiftCooldown => castsBeforeSwift,
 			HardCastRaiseType.HardCastOnlyHealer => AllOtherHealersDead(),
 			HardCastRaiseType.HardCastOnlyHealerSwiftCooldown => castsBeforeSwift && AllOtherHealersDead(),

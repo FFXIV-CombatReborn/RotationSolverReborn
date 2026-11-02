@@ -99,7 +99,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
 			if (!DataCenter.IsManual || IsTargetFriendly || target.GameObjectId == Svc.Targets.Target?.GameObjectId || target.GameObjectId == Player.Object.GameObjectId)
 			{
-				if (TargetOnScreen(target) && CanUseTo(target) && action.Setting.CanTarget(target)
+				if ((IsTargetFriendly || TargetOnScreen(target)) && CanUseTo(target) && action.Setting.CanTarget(target)
 					&& (!action.MinHPFeature || target.GetHealthRatio() > action.MinHPPercent))
 				{
 					validTargets.Add(target);
@@ -887,6 +887,11 @@ public struct ActionTargetInfo(IBaseAction action)
 			case SpecialActionType.HostileMovingAttack:
 				if (target != null)
 				{
+					if (target.DistanceToPlayer() <= 0)
+					{
+						return true;
+					}
+
 					var toTarget = target.Position - playerPos;
 					var distance = toTarget.Length();
 					if (distance > target.HitboxRadius)
@@ -1278,7 +1283,7 @@ public struct ActionTargetInfo(IBaseAction action)
 			yield break;
 		}
 
-		if (aoeCount > 1 && (Service.Config.AoEType == AoEType.Cleave || (DataCenter.IsInM9S && Service.Config.M9SCleaveOnly)))
+		if (!action.Setting.IsFriendly && aoeCount > 1 && (Service.Config.AoEType == AoEType.Cleave || (DataCenter.IsInM9S && Service.Config.M9SCleaveOnly)))
 		{
 			yield break;
 		}
@@ -1426,9 +1431,10 @@ public struct ActionTargetInfo(IBaseAction action)
 						return false;
 					}
 
-					var lineDir = Player.Object != null
-						? Vector3.Normalize(new Vector3(Player.Object.GetFaceVector().X, 0, Player.Object.GetFaceVector().Z))
-						: dir / dirLen;
+					var flatDir = new Vector3(dir.X, 0, dir.Z);
+					var lineDir = flatDir.LengthSquared() > 1e-6f
+						? Vector3.Normalize(flatDir)
+						: Vector3.Normalize(new Vector3(Player.Object.GetFaceVector().X, 0, Player.Object.GetFaceVector().Z));
 
 					Vector3 tdirXZ = new(tdir.X, 0, tdir.Z);
 					var perp = Vector3.Cross(lineDir, tdirXZ).Length();
@@ -2321,9 +2327,11 @@ public struct ActionTargetInfo(IBaseAction action)
 				return null;
 			}
 
+			var self = Player.Object?.GameObjectId;
+
 			foreach (var m in DataCenter.PartyMembers)
 			{
-				if (m.IsJobCategory(JobRole.Tank) && !m.IsDead)
+				if (m.IsJobCategory(JobRole.Tank) && !m.IsDead && m.GameObjectId != self)
 				{
 					if (m.HasStatus(false, StatusHelper.TankStanceStatus))
 					{
@@ -2343,7 +2351,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
 			foreach (var m in DataCenter.PartyMembers)
 			{
-				if (m.IsJobCategory(JobRole.Tank) && !m.IsDead)
+				if (m.IsJobCategory(JobRole.Tank) && !m.IsDead && m.GameObjectId != self)
 				{
 					if (m.IsConditionCannotTarget())
 					{
@@ -2358,7 +2366,21 @@ public struct ActionTargetInfo(IBaseAction action)
 				}
 			}
 
-			return battleChara == null ? null : RandomPickByJobs(battleChara, JobRole.Tank);
+			if (battleChara == null)
+			{
+				return null;
+			}
+
+			List<IBattleChara> others = [];
+			foreach (var b in battleChara)
+			{
+				if (b.GameObjectId != self)
+				{
+					others.Add(b);
+				}
+			}
+
+			return RandomPickByJobs(others, JobRole.Tank);
 		}
 
 		IBattleChara? FindTankbusterTarget()
@@ -2453,7 +2475,7 @@ public struct ActionTargetInfo(IBaseAction action)
 	{
 		return type switch
 		{
-			TargetType.Small => (a, b) => CompareHitboxThenHp(a, b, ascendingHitbox: true),
+			TargetType.Small => (a, b) => CompareHitboxThenHp(a, b, ascendingHitbox: true, Service.Config.SmallHp),
 			TargetType.HighHP => static (a, b) => b.CurrentHp.CompareTo(a.CurrentHp),
 			TargetType.LowHP => static (a, b) => a.CurrentHp.CompareTo(b.CurrentHp),
 			TargetType.HighHPPercent => static (a, b) => HpPercent(b).CompareTo(HpPercent(a)),
@@ -2462,7 +2484,7 @@ public struct ActionTargetInfo(IBaseAction action)
 			TargetType.LowMaxHP => static (a, b) => a.MaxHp.CompareTo(b.MaxHp),
 			TargetType.Nearest => NearestFirst,
 			TargetType.Farthest => static (a, b) => b.DistanceToPlayer().CompareTo(a.DistanceToPlayer()),
-			_ => (a, b) => CompareHitboxThenHp(a, b, ascendingHitbox: false),
+			_ => (a, b) => CompareHitboxThenHp(a, b, ascendingHitbox: false, Service.Config.BigHp),
 		};
 
 		static float HpPercent(IBattleChara c)
@@ -2470,7 +2492,7 @@ public struct ActionTargetInfo(IBaseAction action)
 			return c.MaxHp == 0 ? 0 : (float)c.CurrentHp / c.MaxHp;
 		}
 
-		static int CompareHitboxThenHp(IBattleChara a, IBattleChara b, bool ascendingHitbox)
+		static int CompareHitboxThenHp(IBattleChara a, IBattleChara b, bool ascendingHitbox, bool lowerHpFirst)
 		{
 			var cmp = ascendingHitbox ? a.HitboxRadius.CompareTo(b.HitboxRadius) : b.HitboxRadius.CompareTo(a.HitboxRadius);
 			if (cmp != 0)
@@ -2478,7 +2500,7 @@ public struct ActionTargetInfo(IBaseAction action)
 				return cmp;
 			}
 
-			return Service.Config.SmallHp ? a.CurrentHp.CompareTo(b.CurrentHp) : b.CurrentHp.CompareTo(a.CurrentHp);
+			return lowerHpFirst ? a.CurrentHp.CompareTo(b.CurrentHp) : b.CurrentHp.CompareTo(a.CurrentHp);
 		}
 	}
 

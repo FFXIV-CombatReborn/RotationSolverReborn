@@ -66,6 +66,11 @@ public sealed class DNC_Reborn : DancerRotation
 			return true;
 		}
 
+		if (ImprovisedFinishPvEReady && ImprovisedFinishPvE.CanUse(out act))
+		{
+			return true;
+		}
+
 		if (IsBurst && DevilmentPvE.CanUse(out act))
 		{
 			if (HasTechnicalFinish)
