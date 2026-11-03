@@ -543,7 +543,7 @@ public partial class DarkKnightRotation
 
 	public override bool IsBursting()
 	{
-		if (StatusHelper.PlayerHasStatus(true, StatusID.Darkside))
+		if (DarkSideTimeRemainingRaw > 0f)
 		{
 			return true;
 		}

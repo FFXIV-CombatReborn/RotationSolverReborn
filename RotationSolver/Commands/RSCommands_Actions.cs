@@ -20,6 +20,7 @@ namespace RotationSolver.Commands
 		private static float _lastCountdownTime = 0;
 		private static Job _previousJob = Job.ADV;
 		private static readonly Random random = Random.Shared;
+		private static readonly List<MiscUpdater.ActionBarSlotRef> _pulseSlots = [];
 
 		internal static IBaseAction? CurrentAction { get; set; } = null;
 
@@ -130,6 +131,8 @@ namespace RotationSolver.Commands
 
 			CurrentAction = nextAction as IBaseAction;
 
+			var pulse = CapturePulseSlots(nextAction);
+
 			if (nextAction.Use())
 			{
 
@@ -156,9 +159,9 @@ namespace RotationSolver.Commands
 						OtherConfiguration.RotationSolverRecord.ClickingCount++;
 					}
 
-					if (Service.Config.KeyboardNoise)
+					if (pulse)
 					{
-						PulseSimulation(nextAction.AdjustedID);
+						PulseSimulation();
 					}
 
 					if (finalAct.Setting.EndSpecial)
@@ -178,18 +181,32 @@ namespace RotationSolver.Commands
 			return TimeSpan.FromSeconds(Math.Min(min, max) + (random.NextDouble() * Math.Abs(max - min)));
 		}
 
-		private static void PulseSimulation(uint id)
+		private static bool CapturePulseSlots(IAction action)
 		{
-			if (started)
+			if (!Service.Config.KeyboardNoise || started || action is not BaseAction)
 			{
-				return;
+				return false;
 			}
 
-			started = true;
-			PulseAction(id, random.Next(2, 4));
+			try
+			{
+				MiscUpdater.FindActionBarSlots(action.AdjustedID, _pulseSlots);
+				return _pulseSlots.Count > 0;
+			}
+			catch (Exception ex)
+			{
+				PluginLog.Warning($"Pulse Failed!: {ex.Message}");
+				return false;
+			}
 		}
 
-		private static void PulseAction(uint id, int remainingPulses)
+		private static void PulseSimulation()
+		{
+			started = true;
+			PulseAction(random.Next(2, 4));
+		}
+
+		private static void PulseAction(int remainingPulses)
 		{
 			if (remainingPulses <= 0)
 			{
@@ -199,8 +216,8 @@ namespace RotationSolver.Commands
 
 			try
 			{
-				MiscUpdater.PulseActionBar(id);
-				_ = Svc.Framework.RunOnTick(() => PulseAction(id, remainingPulses - 1),
+				MiscUpdater.PulseActionBarSlots(_pulseSlots);
+				_ = Svc.Framework.RunOnTick(() => PulseAction(remainingPulses - 1),
 					RandomSeconds(Service.Config.ClickingDelay.X, Service.Config.ClickingDelay.Y));
 			}
 			catch (Exception ex)

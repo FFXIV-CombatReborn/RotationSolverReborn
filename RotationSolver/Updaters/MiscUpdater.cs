@@ -146,31 +146,12 @@ internal static class MiscUpdater
 		};
 	}
 
-	internal static void PulseActionBar(uint actionID)
+	internal readonly record struct ActionBarSlotRef(int AddonIndex, int SlotIndex);
+
+	internal static unsafe void FindActionBarSlots(uint actionID, List<ActionBarSlotRef> slots)
 	{
-		LoopAllSlotBar((bar, hot, index) =>
-		{
-			return IsActionSlotRight(bar, hot, actionID);
-		});
-	}
+		slots.Clear();
 
-	private static bool IsActionSlotRight(ActionBarSlot slot, RaptureHotbarModule.HotbarSlot? hot, uint actionID)
-	{
-		if (hot.HasValue
-			&& (hot.Value.OriginalApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action
-				|| hot.Value.ApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action))
-		{
-			return false;
-		}
-
-		return Service.GetAdjustedActionId((uint)slot.ActionId) == actionID;
-	}
-
-	private static readonly List<nint> _pulseAddons = [];
-
-	private delegate bool ActionBarAction(ActionBarSlot bar, RaptureHotbarModule.HotbarSlot? hot, uint highLightID);
-	private static unsafe void LoopAllSlotBar(ActionBarAction doingSomething)
-	{
 		var framework = Framework.Instance();
 		var uiModule = framework == null ? null : framework->GetUIModule();
 		var raptureModule = uiModule == null ? null : uiModule->GetRaptureHotbarModule();
@@ -179,35 +160,72 @@ internal static class MiscUpdater
 			return;
 		}
 
-		var index = 0;
-		var hotBarIndex = 0;
-
-		HotbarAddonHelper.GetHotbarAddons(_pulseAddons);
-
-		foreach (var intPtr in _pulseAddons)
+		for (var addonIndex = 0; addonIndex < HotbarAddonHelper.AddonCount; addonIndex++)
 		{
-			var actionBar = (AddonActionBarBase*)intPtr;
-			var hotBar = raptureModule->Hotbars[Math.Min(hotBarIndex, raptureModule->Hotbars.Length - 1)];
-
-			var slotIndex = 0;
-			foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
+			var addon = HotbarAddonHelper.GetHotbarAddon(addonIndex);
+			if (addon == nint.Zero)
 			{
-				var highLightId = 0x53550000 + index;
-				RaptureHotbarModule.HotbarSlot? hotSlot = hotBarIndex > 9 || slotIndex >= hotBar.Slots.Length ? null : hotBar.Slots[slotIndex];
-
-				var iconAddon = slot.Icon;
-				if (doingSomething(slot, hotSlot, (uint)highLightId)
-					&& iconAddon != null && iconAddon->AtkResNode.IsVisible())
-				{
-					actionBar->PulseActionBarSlot(slotIndex);
-					UIGlobals.PlaySoundEffect(12);
-				}
-
-				slotIndex++;
-				index++;
+				continue;
 			}
-			hotBarIndex++;
+
+			var hotSlots = HotbarAddonHelper.TryGetRaptureHotbarIndex(addon, addonIndex, raptureModule, out var hotBarIndex)
+				? raptureModule->Hotbars[hotBarIndex].Slots
+				: default;
+
+			var slotIndex = -1;
+			foreach (var slot in ((AddonActionBarBase*)addon)->ActionBarSlotVector.AsSpan())
+			{
+				slotIndex++;
+
+				RaptureHotbarModule.HotbarSlot? hotSlot = slotIndex < hotSlots.Length ? hotSlots[slotIndex] : null;
+				if (slot.Icon != null && IsActionSlotRight(slot, hotSlot, actionID))
+				{
+					slots.Add(new ActionBarSlotRef(addonIndex, slotIndex));
+				}
+			}
 		}
+	}
+
+	internal static unsafe void PulseActionBarSlots(List<ActionBarSlotRef> slots)
+	{
+		foreach (var (addonIndex, slotIndex) in slots)
+		{
+			var actionBar = (AddonActionBarBase*)HotbarAddonHelper.GetHotbarAddon(addonIndex);
+			if (actionBar == null)
+			{
+				continue;
+			}
+
+			var barSlots = actionBar->ActionBarSlotVector.AsSpan();
+			if (slotIndex >= barSlots.Length)
+			{
+				continue;
+			}
+
+			var iconAddon = barSlots[slotIndex].Icon;
+			if (iconAddon != null && iconAddon->AtkResNode.IsVisible())
+			{
+				actionBar->PulseActionBarSlot(slotIndex);
+				UIGlobals.PlaySoundEffect(12);
+			}
+		}
+	}
+
+	private static bool IsActionSlotRight(ActionBarSlot slot, RaptureHotbarModule.HotbarSlot? hot, uint actionID)
+	{
+		if (hot.HasValue && HotbarAddonHelper.TryMatchPvPCombo(hot.Value, actionID, out var comboMatch))
+		{
+			return comboMatch;
+		}
+
+		if (hot.HasValue
+			&& (hot.Value.OriginalApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action
+				|| hot.Value.ApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action))
+		{
+			return false;
+		}
+
+		return Service.GetAdjustedActionId((uint)slot.ActionId) == actionID;
 	}
 
 	public static void Dispose()

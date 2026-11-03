@@ -66,8 +66,19 @@ internal static class HotbarAddonHelper
 		return raptureIndex >= 0 && raptureIndex < raptureModule->Hotbars.Length;
 	}
 
+	internal static bool TryMatchPvPCombo(in HotbarSlot hot, uint adjustedActionId, out bool isMatch)
+	{
+		isMatch = hot.ApparentSlotType == HotbarSlotType.Action && hot.ApparentActionId == adjustedActionId;
+		return hot.CommandType == HotbarSlotType.PvPCombo;
+	}
+
 	internal static bool IsSlotMatch(uint adjustedActionId, in HotbarSlot hot, HotbarID hotbarId)
 	{
+		if (TryMatchPvPCombo(hot, hotbarId.Id, out var comboMatch))
+		{
+			return comboMatch && hotbarId.SlotType == HotbarSlotType.Action;
+		}
+
 		return hot.OriginalApparentSlotType == hotbarId.SlotType
 			&& hot.ApparentSlotType == hotbarId.SlotType
 			&& adjustedActionId == hotbarId.Id;
