@@ -2,6 +2,21 @@
   "tagline": "The List is halfway finished",
   "entries": [
     {
+      "version": "7.5.7.15",
+      "title": "Bug fixes",
+      "date": "November 2, 2026",
+      "sections": [
+        {
+          "title": "Hotbars",
+          "icon": "Keyboard",
+          "items": [
+            "Simulated key presses now show on PvP combo buttons that switch between actions as you use them.",
+            "Teaching mode now highlights PvP combo buttons, and the Next Action window's keybind hint finds them too."
+          ]
+        }
+      ]
+    },
+    {
       "version": "7.5.7.14",
       "title": "Misc rotation fixes",
       "date": "October 31, 2026",
