@@ -287,7 +287,7 @@ public sealed class RPR_Reborn : ReaperRotation
 
 		if (!HasExecutioner && !HasSoulReaver)
 		{
-			if (PerfectioPvE.CanUse(out act, skipAoeCheck: true))
+			if (PerfectioPvE.CanUse(out act, skipAoeCheck: true, skipComboCheck: true))
 			{
 				return true;
 			}
