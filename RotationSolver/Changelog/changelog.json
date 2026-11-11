@@ -1,132 +1,16 @@
 {
-  "tagline": "The List is halfway finished",
+  "tagline": "First 7.58 update",
   "entries": [
     {
-      "version": "7.5.7.15",
-      "title": "Bug fixes",
+      "version": "7.5.8.1",
+      "title": "Update for patch",
       "date": "November 2, 2026",
       "sections": [
         {
-          "title": "Hotbars",
-          "icon": "Keyboard",
-          "items": [
-            "Simulated key presses now show on PvP combo buttons that switch between actions as you use them.",
-            "Teaching mode now highlights PvP combo buttons, and the Next Action window's keybind hint finds them too."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.7.14",
-      "title": "Misc rotation fixes",
-      "date": "October 31, 2026",
-      "sections": [
-        {
-          "title": "Healing and raising",
-          "icon": "Heartbeat",
-          "items": [
-            "Misc fixes to raise/swiftcast logic, relevant rotation-specific settings have been adjusted a bit",
-            "White Mage: Thin Air no longer forces a hard-cast Raise. Raising follows your raise settings, and GCDs continue while moving.",
-            "Minor fix for Astrologian Synastry.",
-            "Gunbreaker Aurora on \"Full target usage\" goes to the member who needs healing, not the one with the smallest HP pool.",
-            "Paladins under Hallowed Ground no longer count as needing heals.",
-            "Dancer finishes Improvisation with Improvised Finish, so the party gets its barrier."
-          ]
-        },
-        {
-          "title": "Targeting",
-          "icon": "Crosshairs",
-          "items": [
-            "Line attacks such as Doom Spike, Chain Saw and Shadowbringer count the enemies toward the target, not along your facing.",
-            "The \"Cleave\" AoE type no longer blocks group heals and party mitigation.",
-            "\"Only attack targets on screen\" and the vision cone option no longer block heals and buffs on party members behind the camera.",
-            "\"Prefer lower-HP targets with the Big targeting type\" now takes effect.",
-            "The Shirk command no longer targets yourself.",
-            "\"Provoke any enemy\" now respects the Don't provoke list."
-          ]
-        },
-        {
-          "title": "Tanks",
-          "icon": "ShieldAlt",
-          "items": [
-            "Paladin Intervention can target a co-tank, so its co-tank options work.",
-            "Paladin and Warrior use Reprisal on raidwides, like Dark Knight and Gunbreaker.",
-            "Rampart now counts when tanks stagger their big mitigations.",
-            "Gunbreaker uses Trajectory for Move Forward."
-          ]
-        },
-        {
-          "title": "Misc Rotations",
+          "title": "Misc core things",
           "icon": "Wrench",
           "items": [
-            "Viper no longer spends Uncoiled Fury beside a ready Serpent's Ire, and Monk's odd-minute Perfect Balance is no longer blocked at full charges.",
-            "Samurai keeps Feint for AOE damage instead of using it on its own low health.",
-            "Tinctures are only used in combat or during a countdown, in every rotation.",
-            "The BossMod movement safety option now also checks Dragonfire Dive, Stardiver and Forked Raiju, and no longer holds back a gap closer when you already within melee range.",
-            "Misc fixes for physical-damage detection, the Sage Addersgall timer and the BossMod special modes."
-          ]
-        },
-        {
-          "title": "Settings",
-          "icon": "SlidersH",
-          "items": [
-            "\"Reset to Default Value.\" restores the default for switches instead of turning them off.",
-            "Chat commands can now set delay ranges and colours, e.g. /rotation Settings HealWhenNothingTodoDelay <0.5, 1>. Colours also accept hex, like #FF000066.",
-            "Number settings set by chat command accept a decimal point on every system language, so 0.5 no longer becomes 5 where a decimal comma is used."
-          ]
-        },
-        {
-          "title": "Interface",
-          "icon": "Palette",
-          "items": [
-            "New \"Animation length\" setting under UI > Customize. Set it to 0% to turn animations off.",
-            "Delay ranges, such as \"Delay between clicks\", are now a single slider with two handles instead of separate Minimum and Maximum rows.",
-            "The interface accent colour setting now offers the same preset colours as the tutorial.",
-            "The tutorial's macro Copy buttons show a check once copied."
-          ]
-        }
-      ]
-    },
-    {
-      "version": "7.5.7.10",
-      "title": "Targeting and status check fixes",
-      "date": "October 27, 2026",
-      "sections": [
-        {
-          "title": "Targeting",
-          "icon": "Crosshairs",
-          "items": [
-            "Actions with unique target behaviour now work correctly.",
-            "Fixed issue with \"switch target to friendly\" setting."
-          ]
-        },
-        {
-          "title": "Settings",
-          "icon": "SlidersH",
-          "items": [
-            "Fixed a rare bug where an unrelated game crash could cause settings to be wiped.",
-            "Removed the \"Presses per action\" setting. Button presses on hotbars now always play two or three times per action."
-          ]
-        },
-        {
-          "title": "Healing",
-          "icon": "Heartbeat",
-          "items": [
-            "oGCD heals triggered by commands execute properly."
-          ]
-        },
-        {
-          "title": "Rotations",
-          "icon": "Wrench",
-          "items": [
-            "WHM, VPR, and DNC tincures are now only used in combat."
-          ]
-        },
-        {
-          "title": "Performance",
-          "icon": "TachometerAlt",
-          "items": [
-            "Minor optimizations to performance in high object environments. Target checks are more efficient."
+            "Built against the latest dalamud version, updated sourcegen, and updated UI to fix a few bugs."
           ]
         }
       ]
