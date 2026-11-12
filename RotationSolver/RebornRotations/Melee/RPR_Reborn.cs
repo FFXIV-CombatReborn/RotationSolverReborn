@@ -362,7 +362,7 @@ public sealed class RPR_Reborn : ReaperRotation
 			}
 		}
 
-		if (!HasExecutioner && !HasSoulReaver && ShouldUsePerfectio() && PerfectioPvE.CanUse(out act, skipAoeCheck: true))
+		if (!HasExecutioner && !HasSoulReaver && ShouldUsePerfectio() && PerfectioPvE.CanUse(out act, skipAoeCheck: true, skipComboCheck: true))
         {
 	        return true;
         } 
