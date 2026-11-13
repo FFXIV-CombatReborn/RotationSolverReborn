@@ -427,7 +427,7 @@ public partial class ReaperRotation
 	static partial void ModifySoulsowPvE(ref ActionSetting setting)
 	{
 		setting.StatusProvide = [StatusID.Soulsow];
-		setting.ActionCheck = () => !InCombat;
+		setting.ActionCheck = () => !InCombat || !HasHostilesInMaxRange;
 		setting.IsFriendly = true;
 	}
 

@@ -196,8 +196,11 @@ public sealed class SMN_Reborn : SummonerRotation
 		var inBigInvocation = !SummonBahamutPvE.EnoughLevel || InBahamut || InPhoenix || InSolarBahamut;
 		var inSolarUnique = DataCenter.PlayerSyncedLevel() == 100 ? !InBahamut && !InPhoenix && InSolarBahamut : InBahamut && !InPhoenix;
 		var burstInSolar = (SummonSolarBahamutPvE.EnoughLevel && InSolarBahamut) || (!SummonSolarBahamutPvE.EnoughLevel && InBahamut) || !SummonBahamutPvE.EnoughLevel;
+		var bigSummonCd = SummonSolarBahamutPvE.EnoughLevel ? SummonSolarBahamutPvE.Cooldown : SummonBahamutPvE.Cooldown;
+        var bigSummonSoon = SummonBahamutPvE.EnoughLevel && bigSummonCd.WillHaveOneCharge(1f);
+        var restrictSearingLight = RestrictSearingLightToBahamut || bigSummonSoon;
 
-		if ((!RestrictSearingLightToBahamut || burstInSolar) && !openerBlock)
+		if ((!restrictSearingLight || burstInSolar) && !openerBlock)
 		{
 			if (SearingLightPvE.CanUse(out act))
 			{
