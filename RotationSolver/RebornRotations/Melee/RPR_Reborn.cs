@@ -1,13 +1,13 @@
 ﻿namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/RebornRotations/Melee/RPR_Reborn.cs")]
 
 public sealed class RPR_Reborn : ReaperRotation
 {
 	#region Config Options
 	public enum PoolingType
-	{
+    {
 	[Description("None")]
 	None,
 
@@ -16,10 +16,10 @@ public sealed class RPR_Reborn : ReaperRotation
 
 	[Description("Only when another Enshroud stays possible for double enshroud burst")]
 	Invasive,
-	}
+    }
 
-	[RotationConfig(CombatType.PvE, Name = "Pool Shroud for Arcane Circle")]
-	public PoolingType Pooling { get; set; } = PoolingType.Invasive;
+    [RotationConfig(CombatType.PvE, Name = "Pool Shroud for Arcane Circle")]
+    public PoolingType Pooling { get; set; } = PoolingType.Invasive;
 
 	[RotationConfig(CombatType.PvE, Name = "Use custom timing to refresh Death's Design")]
 	public bool UseCustomDDTiming { get; set; } = false;
@@ -28,47 +28,59 @@ public sealed class RPR_Reborn : ReaperRotation
 	public int RefreshDDSecondsRemaining { get; set; } = 10;
 
 	[Range(1, 8, ConfigUnitType.Seconds, 0.5f)]
-	[RotationConfig(CombatType.PvE, Name = "Enshroud when Arcane Circle is ready within this many seconds")]
-	public float EnshroudArcaneCircleWindow { get; set; } = 1f;
+    [RotationConfig(CombatType.PvE, Name = "Enshroud when Arcane Circle is ready within this many seconds")]
+    public float EnshroudArcaneCircleWindow { get; set; } = 1f;
 
 	[RotationConfig(CombatType.PvE, Name = "If Perfectio can't fit in Arcane Circle, use as ranged uptime or before it expires)")]
-	public bool HoldPerfectio { get; set; } = false;
+    public bool HoldPerfectio { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "    > Release Perfectio under other raid buffs", Parent = nameof(HoldPerfectio))]
-	public bool PerfectioOnRaidBuffs { get; set; } = true;
+    public bool PerfectioOnRaidBuffs { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Release Perfectio while medicated", Parent = nameof(HoldPerfectio))]
-	public bool PerfectioOnMedicated { get; set; } = true;
+    [RotationConfig(CombatType.PvE, Name = "    > Release Perfectio while medicated", Parent = nameof(HoldPerfectio))]
+    public bool PerfectioOnMedicated { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Release Perfectio when the target is about to die", Parent = nameof(HoldPerfectio))]
-	public bool PerfectioOnDying { get; set; } = true;
+    [RotationConfig(CombatType.PvE, Name = "    > Release Perfectio when the target is about to die", Parent = nameof(HoldPerfectio))]
+    public bool PerfectioOnDying { get; set; } = true;
 
 	[RotationConfig(CombatType.PvE, Name = "Refresh Death's Design shortly before Arcane Circle")]
-	public bool RefreshDDBeforeArcaneCircle { get; set; } = true;
+    public bool RefreshDDBeforeArcaneCircle { get; set; } = true;
 
 	[RotationConfig(CombatType.PvE, Name = "Prepare Harvest Moon (Soulsow) when out of combat or with no target")]
-	public bool PrepareHarvestMoon { get; set; } = true;
+    public bool PrepareHarvestMoon { get; set; } = true;
 
 	[RotationConfig(CombatType.PvE, Name = "Use Enshroud when the boss is about to die")]
-	public bool EnshroudOnBossDying { get; set; } = false;
+    public bool EnshroudOnBossDying { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "Only use Harvest Moon on a target with Death's Design")]
-	public bool HarvestMoonNeedsDD { get; set; } = true;
+    public bool HarvestMoonNeedsDD { get; set; } = true;
 
 	[RotationConfig(CombatType.PvE, Name = "Wait up to 2 gcd for the ideal positional before Blood Stalk")]
-	public bool WaitForPositional { get; set; } = false;
+    public bool WaitForPositional { get; set; } = false;
+
+	public enum PotTiming : byte
+    {
+	[Description("Opener")] FirstArcaneCircle,
+	[Description("2 Minutes")] FromSecondArcaneCircle,
+    }
+
+    [RotationConfig(CombatType.PvE, Name = "Use potion")]
+    public bool UsePotion { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "First Potion timing", Parent = nameof(UsePotion))]
+    public PotTiming PotionTiming { get; set; } = PotTiming.FromSecondArcaneCircle;
 
 	public enum ArcaneCircleOpener
-	{
+    {
 	[Description("Balance")]
 	Balance,
 
 	[Description("0GCD")]
 	ZeroGCD,
-	}
+    }
 
-	[RotationConfig(CombatType.PvE, Name = "Arcane Circle opener timing")]
-	public ArcaneCircleOpener OpenerTiming { get; set; } = ArcaneCircleOpener.Balance;
+    [RotationConfig(CombatType.PvE, Name = "Arcane Circle opener timing")]
+    public ArcaneCircleOpener OpenerTiming { get; set; } = ArcaneCircleOpener.Balance;
 
 	#endregion
 
@@ -169,30 +181,30 @@ public sealed class RPR_Reborn : ReaperRotation
 	}
 
 	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
-	{
+	{   
 		var GluttonySoon = GluttonyPvE.EnoughLevel && GluttonyPvE.Cooldown.WillHaveOneCharge(9);
 		var SoulSoon = Soul >= 40 || SoulSlicePvE.Cooldown.WillHaveOneCharge(9);
 		var IsTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
 		var IsTargetDying = CurrentTarget?.IsDying() ?? false;
 		var InBurstWindow = IsBurst && (HasArcaneCircle || ArcaneCirclePvE.Cooldown.WillHaveOneCharge(EnshroudArcaneCircleWindow + 9f));
 		var PoolingOn = Pooling != PoolingType.None;
-		var BurstEnshroud = !ArcaneCirclePvE.EnoughLevel || HasArcaneCircle
-		|| (IsBurst && (ArcaneCirclePvE.Cooldown.WillHaveOneCharge(EnshroudArcaneCircleWindow) || !ArcaneCirclePvE.Cooldown.IsCoolingDown));
-		var OffBurstEnshroud = !HasArcaneCircle && (Pooling == PoolingType.Standard
-		? (ArcaneCirclePvE.Cooldown.WillHaveOneCharge(65) && !ArcaneCirclePvE.Cooldown.WillHaveOneCharge(50) && !GluttonySoon) || (Shroud >= 90 && !ArcaneCirclePvE.Cooldown.WillHaveOneCharge(22))
-		: (Shroud == 100 && !ArcaneCirclePvE.Cooldown.WillHaveOneCharge(EnshroudArcaneCircleWindow + 9f)) || (!ArcaneCirclePvE.Cooldown.WillHaveOneCharge(EnshroudArcaneCircleWindow + 15f) && ((Shroud >= 80 && GluttonySoon) || (Shroud >= 90 && SoulSoon))));
-		var NoEnshroudPooling = !PoolingOn && Shroud >= 50 && (InBurstWindow || !GluttonySoon || Shroud >= 90);
-		var YesEnshroudPooling = PoolingOn && Shroud >= 50 && (BurstEnshroud || OffBurstEnshroud);
+        var BurstEnshroud = !ArcaneCirclePvE.EnoughLevel || HasArcaneCircle
+        || (IsBurst && (ArcaneCirclePvE.Cooldown.WillHaveOneCharge(EnshroudArcaneCircleWindow) || !ArcaneCirclePvE.Cooldown.IsCoolingDown));
+        var OffBurstEnshroud = !HasArcaneCircle && (Pooling == PoolingType.Standard
+	    ? (ArcaneCirclePvE.Cooldown.WillHaveOneCharge(65) && !ArcaneCirclePvE.Cooldown.WillHaveOneCharge(50) && !GluttonySoon) || (Shroud >= 90 && !ArcaneCirclePvE.Cooldown.WillHaveOneCharge(22))
+	    : (Shroud == 100 && !ArcaneCirclePvE.Cooldown.WillHaveOneCharge(EnshroudArcaneCircleWindow + 9f)) || (!ArcaneCirclePvE.Cooldown.WillHaveOneCharge(EnshroudArcaneCircleWindow + 15f) && ((Shroud >= 80 && GluttonySoon) || (Shroud >= 90 && SoulSoon))));
+        var NoEnshroudPooling = !PoolingOn && Shroud >= 50 && (InBurstWindow || !GluttonySoon || Shroud >= 90);
+        var YesEnshroudPooling = PoolingOn && Shroud >= 50 && (BurstEnshroud || OffBurstEnshroud);
 		var HasIdealHostBool = HasIdealHost;
 		var ArcaneGate = !PoolingOn || HasEnshrouded || Shroud < 50
-		|| HasExecutioner || HasSoulReaver;
-
-
+	    || HasExecutioner || HasSoulReaver;
+		
+		
 
 		if (IsBurst && ArcaneGate)
 		{
 			if (((CurrentTarget?.HasStatus(true, StatusID.DeathsDesign) ?? false) || OpenerTiming == ArcaneCircleOpener.ZeroGCD)
-			&& !CombatElapsedLess(OpenerTiming == ArcaneCircleOpener.Balance ? 3.5f : 0f) && ArcaneCirclePvE.CanUse(out act, skipAoeCheck: true))
+		    && !CombatElapsedLess(OpenerTiming == ArcaneCircleOpener.Balance ? 3.5f : 0f) && ArcaneCirclePvE.CanUse(out act, skipAoeCheck: true))
 			{
 				return true;
 			}
@@ -206,7 +218,7 @@ public sealed class RPR_Reborn : ReaperRotation
 			}
 		}
 
-		var holdSacrificium = PoolingOn && LemureShroud > 4 && ArcaneCirclePvE.Cooldown.WillHaveOneCharge(2.5f);
+        var holdSacrificium = PoolingOn && LemureShroud > 4 && ArcaneCirclePvE.Cooldown.WillHaveOneCharge(2.5f);
 		if (!holdSacrificium && SacrificiumPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
 		{
 			return true;
@@ -250,35 +262,29 @@ public sealed class RPR_Reborn : ReaperRotation
 	}
 
 	protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
-	{
+    {
 	var prePot = Pooling == PoolingType.Invasive && RefreshDDBeforeArcaneCircle;
+    var potDue = UsePotion && (PotionTiming == PotTiming.FirstArcaneCircle || CombatTime > 30f);
+    var potWindow = HasArcaneCircle
+	    || (prePot && IsBurst && CurrentTarget != null && ArcaneCirclePvE.Cooldown.WillHaveOneCharge(3));
 
-	if (prePot)
-		{
-			if (IsBurst && InCombat && CurrentTarget != null
-			&& ArcaneCirclePvE.Cooldown.WillHaveOneCharge(3)
-			&& UseBurstMedicine(out act))
-			{
-			return true;
-			}
-		}
-		else if (HasArcaneCircle && InCombat && UseBurstMedicine(out act))
-		{
-			return true;
-		}
+	if (potDue && InCombat && potWindow && UseBurstMedicine(out act))
+        {
+	    return true;
+        }
 
-			return base.GeneralAbility(nextGCD, out act);
-	}
+	        return base.GeneralAbility(nextGCD, out act);
+    }
 	#endregion
 
 	#region GCD Logic
 	protected override bool GeneralGCD(out IAction? act)
 	{
 		if ((!InCombat || (PrepareHarvestMoon && !HasHostilesInMaxRange)) && SoulsowPvE.CanUse(out act))
-		{
-		return true;
-		}
-
+        {
+	    return true;
+        }
+		
 		if ((IsLastComboAction(true, SlicePvE) || IsLastComboAction(true, WaxingSlicePvE)) && LiveComboTime < GCDTime(2) && NotInActiveCombo)
 		{
 			if (InfernalSlicePvE.CanUse(out act))
@@ -366,9 +372,9 @@ public sealed class RPR_Reborn : ReaperRotation
 		}
 
 		if (!HasExecutioner && !HasSoulReaver && ShouldUsePerfectio() && PerfectioPvE.CanUse(out act, skipAoeCheck: true, skipComboCheck: true))
-	{
+    {
 	return true;
-	}
+    } 
 
 		// If at least 2 targets in a best Whorl of Death AoE lack Death's Design, allow refreshing via AoE
 		var ddNeeds = 0;
@@ -388,14 +394,14 @@ public sealed class RPR_Reborn : ReaperRotation
 		{
 			return true;
 		}
-
-		if (RefreshDDBeforeArcaneCircle
-		&& ArcaneCirclePvE.Cooldown.WillHaveOneCharge(4)
-		&& (CurrentTarget?.WillStatusEnd(27, true, StatusID.DeathsDesign) ?? false)
-		&& ShadowOfDeathPvE.CanUse(out act, skipStatusProvideCheck: true))
-		{
-		return true;
-		}
+        
+        if (RefreshDDBeforeArcaneCircle
+	    && ArcaneCirclePvE.Cooldown.WillHaveOneCharge(4)
+	    && (CurrentTarget?.WillStatusEnd(27, true, StatusID.DeathsDesign) ?? false)
+	    && ShadowOfDeathPvE.CanUse(out act, skipStatusProvideCheck: true))
+        {
+	    return true;
+        }
 
 		if (UseCustomDDTiming && ((!CurrentTarget?.HasStatus(true, StatusID.DeathsDesign) ?? false) || (CurrentTarget?.WillStatusEnd(RefreshDDSecondsRemaining, true, StatusID.DeathsDesign) ?? false)))
 		{
@@ -635,9 +641,9 @@ public sealed class RPR_Reborn : ReaperRotation
 		}
 
 		if (InCombat && !HasSoulReaver && HarvestMoonPvE.CanUse(out act, skipAoeCheck: true) && (!HarvestMoonNeedsDD || (HarvestMoonPvE.Target.Target?.HasStatus(true, StatusID.DeathsDesign) ?? false)))
-		{
-			return true;
-		}
+        {
+	        return true;
+        }
 
 		if (HarpePvE.CanUse(out act))
 		{
@@ -648,10 +654,10 @@ public sealed class RPR_Reborn : ReaperRotation
 	}
 	#endregion
 
-	#region Helpers
+    #region Helpers
 
 	private static readonly HashSet<uint> burstStatusIds =
-	[
+    [
 	(uint)StatusID.Divination,
 	(uint)StatusID.Brotherhood,
 	(uint)StatusID.BattleLitany,
@@ -661,71 +667,71 @@ public sealed class RPR_Reborn : ReaperRotation
 	(uint)StatusID.BattleVoice,
 	(uint)StatusID.TechnicalFinish,
 	(uint)StatusID.RadiantFinale
-	];
+    ];
 
-	private static bool PartyHasStatus(Func<uint, bool> match)
-	{
+    private static bool PartyHasStatus(Func<uint, bool> match)
+    {
 	if (PartyMembers == null)
-		{
+	    {
 		return false;
-		}
+	    }
 
 	foreach (var member in PartyMembers)
-		{
+	    {
 		if (member?.StatusList == null)
-			{
+		    {
 			continue;
-			}
+		    }
 
 		foreach (var status in member.StatusList)
-			{
+		    {
 			if (match(status.StatusId))
-				{
+			    {
 				return true;
-				}
-			}
-		}
+			    }
+		    }
+	    }
 	return false;
-	}
+    }
 
 	private bool AtIdealPositional
-	{
-		get
-		{
+    {
+	    get
+	    {
 		var t = CurrentTarget;
 		if (t == null)
-			{
+		    {
 			return true;
-			}
+	    	}
 
 		if (HasEnhancedGallows)
-			{
+		    {
 			return CanHitPositional(EnemyPositional.Rear, t);
-			}
+		    }
 
 		if (HasEnhancedGibbet)
-			{
+		    {
 			return CanHitPositional(EnemyPositional.Flank, t);
-			}
+		    }
 
 		return CanHitPositional(EnemyPositional.Rear, t) || CanHitPositional(EnemyPositional.Flank, t);
-		}
-	}
+	    }
+    }
 
-	private static bool IsPartyBurst => PartyHasStatus(id => burstStatusIds.Contains(id));
+    private static bool IsPartyBurst => PartyHasStatus(id => burstStatusIds.Contains(id));
 
-	private static bool IsPartyMedicated => PartyHasStatus(id => id == (uint)StatusID.Medicated);
-
+    private static bool IsPartyMedicated => PartyHasStatus(id => id == (uint)StatusID.Medicated);
+	
 	private bool ArcaneCircleSoon =>
 	!HasArcaneCircle
 	&& ArcaneCirclePvE.Cooldown.WillHaveOneCharge(EnshroudArcaneCircleWindow + 9f);
 
 	private bool ShouldUsePerfectio()
-	{
+    {
 	if (!HoldPerfectio)
-		{
+	    {
 		return true;
-		}
+	    }
 
 	var target = CurrentTarget;
 
@@ -734,12 +740,12 @@ public sealed class RPR_Reborn : ReaperRotation
 		|| (PerfectioOnRaidBuffs && IsPartyBurst)
 		|| (PerfectioOnMedicated && IsPartyMedicated)
 		|| (PerfectioOnDying && (target?.IsDying() ?? false)))
-		{
+	    {
 		return true;
-		}
+	    }
 
 	return target != null && target.DistanceToPlayer() > 3;
-	}
+    }
 
 	#endregion
 
