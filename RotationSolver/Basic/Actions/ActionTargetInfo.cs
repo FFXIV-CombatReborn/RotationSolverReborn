@@ -2021,7 +2021,7 @@ public struct ActionTargetInfo(IBaseAction action)
 			List<IBattleChara> filteredGameObjects = [];
 			foreach (var o in battleChara)
 			{
-				if (!IBaseAction.AutoHealCheck || o.GetHealthRatio() < healRatio)
+				if (!IBaseAction.AutoHealCheck || o.DoomNeedHealing() || o.GetHealthRatio() < healRatio)
 				{
 					filteredGameObjects.Add(o);
 				}
@@ -2081,11 +2081,25 @@ public struct ActionTargetInfo(IBaseAction action)
 				var player = Player.Object;
 				IBattleChara? self = null, lowest = null, lowestHealer = null, lowestTank = null;
 				float lowestHp = float.MaxValue, healerHp = float.MaxValue, tankHp = float.MaxValue;
+				IBattleChara? doomed = null;
+				float doomTime = float.MaxValue, doomHp = float.MaxValue;
 				foreach (var o in objs)
 				{
 					if (!o.CanBeHealed())
 					{
 						continue;
+					}
+
+					if (o.DoomNeedHealing())
+					{
+						var remaining = o.StatusTime(false, StatusHelper.DoomHealStatus);
+						var actualHp = (float)o.CurrentHp / o.MaxHp;
+						if (remaining < doomTime || (remaining == doomTime && actualHp < doomHp))
+						{
+							doomed = o;
+							doomTime = remaining;
+							doomHp = actualHp;
+						}
 					}
 
 					if (player != null && o.GameObjectId == player.GameObjectId)
@@ -2110,6 +2124,11 @@ public struct ActionTargetInfo(IBaseAction action)
 						lowestTank = o;
 						tankHp = hp;
 					}
+				}
+
+				if (doomed != null)
+				{
+					return doomed;
 				}
 
 				if (self != null && ObjectHelper.GetPlayerHealthRatio() <= Service.Config.HealthSelfRatio)

@@ -455,7 +455,7 @@ public static class StatusHelper
 	];
 
 	/// <summary>
-	/// 
+	/// Doom variants that are removed by restoring the target to full HP.
 	/// </summary>
 	public static StatusID[] DoomHealStatus { get; } =
 	[
@@ -609,44 +609,40 @@ public static class StatusHelper
 	}
 
 	/// <summary>
-	/// Check if the Player needs to be healed because of Doomed To Heal status.
+	/// Check if the player is alive, below full HP, and has a heal-to-full Doom status.
 	/// </summary>
 	/// <returns></returns>
 	public static bool PlayerDoomNeedHealing()
 	{
-		if (Player.Object == null)
-		{
-			return false;
-		}
-
-		return PlayerHasStatus(false, DoomHealStatus);
+		return Player.Object?.DoomNeedHealing() == true;
 	}
 
 	/// <summary>
-	/// Check if the target needs to be healed because of Doomed To Heal status.
+	/// Check actual HP rather than predicted healing so Doom is monitored until full HP is reached.
 	/// </summary>
-	/// <param name="Doomp"></param>
+	/// <param name="target">The character to check.</param>
 	/// <returns></returns>
-	public static bool DoomNeedHealing(this IBattleChara Doomp)
+	public static bool DoomNeedHealing(this IBattleChara target)
 	{
-		if (Doomp == null)
+		if (target == null)
 		{
 			return false;
 		}
 
-		if (!Doomp.IsValid())
+		if (!target.IsValid())
 		{
 			return false;
 		}
 
-		if (Doomp.Address == nint.Zero || Doomp.EntityId == 0)
+		if (target.Address == nint.Zero || target.EntityId == 0)
 		{
 			return false;
 		}
 
 		try
 		{
-			if (Svc.Objects.SearchById(Doomp.GameObjectId) is not IBattleChara fresh || !fresh.IsValid())
+			if (Svc.Objects.SearchById(target.GameObjectId) is not IBattleChara fresh || !fresh.IsValid()
+				|| fresh.IsDead || fresh.CurrentHp == 0 || fresh.CurrentHp >= fresh.MaxHp)
 			{
 				return false;
 			}

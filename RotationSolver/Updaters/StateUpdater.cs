@@ -5,11 +5,12 @@ namespace RotationSolver.Updaters;
 
 internal static class StateUpdater
 {
-	private static bool CanUseHealAction =>
+	private static bool CanUseHealAction(bool doomNeedHealing) =>
 		DataCenter.IsPvP
 		|| ((DataCenter.Role == JobRole.Healer || Service.Config.UseHealWhenNotAHealer)
 		&& Service.Config.AutoHeal
-		&& ((DataCenter.InCombat && CustomRotation.IsLongerThan(Service.Config.AutoHealTimeToKill))
+		&& (doomNeedHealing
+			|| (DataCenter.InCombat && CustomRotation.IsLongerThan(Service.Config.AutoHealTimeToKill))
 			|| Service.Config.HealOutOfCombat));
 
 	public static void UpdateState()
@@ -275,26 +276,25 @@ internal static class StateUpdater
 
 	private static AutoStatus StatusFromHealing()
 	{
-		if (!DataCenter.HPNotFull || !CanUseHealAction || DataCenter.IsTyrantCastingSpecialIndicator())
+		var doomNeedHealingCount = 0;
+		foreach (var member in DataCenter.PartyMembers)
 		{
-			return AutoStatus.None;
+			if (member.DoomNeedHealing() && member.CanBeHealed())
+			{
+				doomNeedHealingCount++;
+			}
 		}
 
-		if (!NonHealerHealLogic())
+		// Doom remains urgent even between combat phases or when predicted party HP is full.
+		if ((doomNeedHealingCount == 0 && !DataCenter.HPNotFull)
+			|| !CanUseHealAction(doomNeedHealingCount > 0)
+			|| DataCenter.IsTyrantCastingSpecialIndicator()
+			|| !NonHealerHealLogic())
 		{
 			return AutoStatus.None;
 		}
 
 		var status = AutoStatus.None;
-
-		var doomNeedHealingCount = 0;
-		foreach (var member in DataCenter.PartyMembers)
-		{
-			if (member.DoomNeedHealing())
-			{
-				doomNeedHealingCount++;
-			}
-		}
 
 		var canUseHealSpell = !DataCenter.IsInM9S || !StatusHelper.PlayerHasStatus(false, StatusHelper.HellInACellStatus);
 
@@ -494,14 +494,14 @@ internal static class StateUpdater
 
 		var ratio = doomed ? 0f : GetHealingOfTimeRatio(Player.Object, hotStatus);
 
-		var h = doomed ? 0.2f : ObjectHelper.GetPlayerHealthRatio();
+		var h = ObjectHelper.GetPlayerHealthRatio();
 
 		if (h == 0 || !StatusHelper.PlayerCanBeHealed())
 		{
 			return false;
 		}
 
-		return h < Lerp(healSingle, healSingleHot, ratio);
+		return doomed || h < Lerp(healSingle, healSingleHot, ratio);
 	}
 
 	private static bool ShouldHealSingle(IBattleChara target, StatusID[] hotStatus, float healSingle, float healSingleHot)
@@ -521,7 +521,8 @@ internal static class StateUpdater
 			return false;
 		}
 
-		var ratio = target.DoomNeedHealing() ? 0f : GetHealingOfTimeRatio(target, hotStatus);
+		var doomed = target.DoomNeedHealing();
+		var ratio = doomed ? 0f : GetHealingOfTimeRatio(target, hotStatus);
 
 		var h = target.GetHealthRatio();
 
@@ -530,7 +531,7 @@ internal static class StateUpdater
 			return false;
 		}
 
-		return h < Lerp(healSingle, healSingleHot, ratio);
+		return doomed || h < Lerp(healSingle, healSingleHot, ratio);
 	}
 
 	private static float Lerp(float a, float b, float ratio)

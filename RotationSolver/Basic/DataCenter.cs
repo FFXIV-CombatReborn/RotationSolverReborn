@@ -1147,6 +1147,12 @@ internal static class DataCenter
 
 		var id = member.GameObjectId;
 
+		// Predicted healing cannot satisfy a heal-to-full Doom mechanic.
+		if (member.DoomNeedHealing())
+		{
+			return (float)member.CurrentHp / member.MaxHp;
+		}
+
 		if (!InEffectTime || !HealHP.TryGetValue(id, out var healedHp))
 		{
 			_lastHp[id] = member.CurrentHp;
