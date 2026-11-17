@@ -310,14 +310,17 @@ internal static class StateUpdater
 
 		var partyCount = DataCenter.PartyMembers.Count;
 		var areaHotRatio = partyCount > 2 ? SelfHealingOfTimeRatio(StatusHelper.AreaHots) : 0f;
+		// Single-heal counts already include Doom targets once. With Doom active,
+		// two different targets needing healing are enough to try an area heal first.
+		var minimumAreaHealCount = doomNeedHealingCount > 0 ? 2 : 3;
 
-		if (doomNeedHealingCount > 1 || singleAbilityCount > 2
+		if (doomNeedHealingCount > 1 || singleAbilityCount >= minimumAreaHealCount
 			|| ShouldHealArea(partyCount, Service.Config.HealthAreaAbility, Service.Config.HealthAreaAbilityHot, areaHotRatio))
 		{
 			status |= AutoStatus.HealAreaAbility;
 		}
 
-		if (canUseHealSpell && (doomNeedHealingCount > 1 || singleSpellCount > 2
+		if (canUseHealSpell && (doomNeedHealingCount > 1 || singleSpellCount >= minimumAreaHealCount
 			|| ShouldHealArea(partyCount, Service.Config.HealthAreaSpell, Service.Config.HealthAreaSpellHot, areaHotRatio)))
 		{
 			status |= AutoStatus.HealAreaSpell;

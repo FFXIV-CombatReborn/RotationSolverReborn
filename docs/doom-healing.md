@@ -17,6 +17,7 @@ Existing healing support included single/area healing requests in `StateUpdater`
 | Combat state and time-to-kill could suppress healing while Doom remained active. | Doom healing can continue between combat phases and near the end of a fight, while respecting the automatic healing setting and permitted role. |
 | Per-action healing thresholds could exclude urgent targets, and always prioritizing Doom could delay saving a dying tank. | Emergency targets take priority by actual HP ratio, followed by Doom targets ordered by remaining countdown and actual HP ratio. Both bypass ordinary action healing thresholds. |
 | Full-HP Doom targets inflated the number requiring area healing. | Only injured, healable Doom targets count toward the existing single/area requests. |
+| One Doom target plus one other injured target could miss the area-healing trigger. | With heal-to-full Doom active, two distinct targets meeting the single-heal conditions request area healing before single healing. Ability and spell thresholds are evaluated separately. |
 
 The fix uses the existing job rotations and available healing actions. Action availability, range, MP, casting restrictions, healing blocks, and existing encounter safety checks still apply. Monitoring a status cannot guarantee survival when healing cannot be performed.
 
@@ -26,10 +27,14 @@ All living, healable targets at or below 30% actual HP qualify for emergency hea
 
 Automatic area healing must cover the most critical eligible party member within the normal 30-yalm single-heal range and line of sight. Targeted area heals prefer anchors covering that member before maximizing the number affected. If a self-centered or ground-targeted group heal misses that member, the action is rejected so the rotation can try another area heal or fall back to single-target healing. A critical target outside the single-heal range or behind an obstruction does not block otherwise useful group healing. Explicit targeting overrides are respected. This checks coverage, not whether a particular heal's potency or cast time guarantees survival; job-specific action selection remains in the existing rotation.
 
+## Area healing requests
+
+When heal-to-full Doom is active, the existing single-heal count includes each party member once, whether that member qualifies through Doom, emergency HP, or ordinary HP/HoT thresholds. At least two qualifying members request area healing; otherwise the ordinary three-target and average-HP triggers remain. Both single-heal flags remain available for fallback. Recovering to full HP removes a target from the mixed count on the next update. The shared ability and GCD healing dispatchers already try area healing before single healing within their respective paths. Individual actions still respect their configured minimum target count, resource/cooldown requirements, and the emergency coverage checks above; this change does not bypass those settings.
+
 ## Validation
 
 - Release plugin build succeeded with zero warnings and zero errors, using Dalamud API 15 and Roslyn 5.9. The installed .NET 10.0.100 compiler was too old for the upstream source generator, so the matching compiler toolset was imported for this local build without changing project dependencies.
-- `tests/doom-healing/verify.py` extracts the production Doom detection, HP prediction, healing-state, healing-target, area-coverage, and area-anchor methods. Native game interfaces and geometry are stubbed. All 64 scenarios pass. The original 31-scenario harness had 17 failures against upstream commit `866988a7` before the first fix.
+- `tests/doom-healing/verify.py` extracts the production Doom detection, HP prediction, healing-state, healing-target, area-coverage, and area-anchor methods. Native game interfaces and geometry are stubbed. All 80 scenarios pass. Eight of the 16 mixed-count regression scenarios fail against the previous commit `20acc7db`. The original 31-scenario harness had 17 failures against upstream commit `866988a7` before the first fix.
 - Scenarios covered both supported Doom statuses, one HP missing with an active HoT, pending healing predicting full HP, full/dead/invalid targets, repeated damage while the status remains, multiple countdowns, target handoff after healing, action thresholds, automatic healing disabled, non-healer restrictions, and the M9S spell restriction.
 - `git diff --check` passed.
 

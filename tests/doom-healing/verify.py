@@ -110,6 +110,9 @@ def verify(root, out):
       DataCenter.InCombat=true; CustomRotation.TTK=100; IBaseAction.AutoHealCheck=true;id=0;Player.Object=Add(role:JobRole.Healer);
      }
      static bool Single()=>StateUpdater.StatusFromHealing().HasFlag(AutoStatus.HealSingleSpell);
+     static void FillParty() { while(DataCenter.PartyMembers.Count<8)Add(); }
+     static bool AreaAbility()=>StateUpdater.StatusFromHealing().HasFlag(AutoStatus.HealAreaAbility);
+     static bool AreaSpell()=>StateUpdater.StatusFromHealing().HasFlag(AutoStatus.HealAreaSpell);
      static void Test(string name,Action test) { Reset();try { test();count++;Console.WriteLine("PASS "+name); } catch(Exception e) { failed++;Console.WriteLine("FAIL "+name+": "+e.Message); } }
      public static void Main() {
       foreach(var status in StatusHelper.DoomHealStatus)Test("recognized "+status,()=>{var t=Add(999,status);Check(t.DoomNeedHealing());Check(Single());});
@@ -177,6 +180,22 @@ def verify(root, out):
       Test("occluded critical tank does not block area anchors",()=>{var tank=Add(100,role:JobRole.Tank);tank.Visible=false;var doomed=Add(990,StatusID.Doom_1769);var anchor=Add();anchor.Covers=[doomed.GameObjectId];Check(new AreaSelection().GetMostCanTargetObjects([anchor],[tank,doomed],1).Single()==anchor);});
       Test("anchor selection respects explicit non heal override",()=>{var tank=Add(100,role:JobRole.Tank);var doomed=Add(990,StatusID.Doom_1769);var anchor=Add();anchor.Covers=[doomed.GameObjectId];Check(new AreaSelection().GetMostCanTargetObjects([anchor],[tank,doomed],1,TargetType.Tank).Single()==anchor);});
       Test("anchor selection respects explicit heal override",()=>{var tank=Add(100,role:JobRole.Tank);var doomed=Add(990,StatusID.Doom_1769);var anchor=Add();anchor.Covers=[doomed.GameObjectId];var area=new AreaSelection();area.action.Setting.TargetType=TargetType.Tank;Check(!area.GetMostCanTargetObjects([anchor],[tank,doomed],1,TargetType.Heal).Any());});
+      Test("one Doom and one critical tank request area and retain single fallback",()=>{Add(990,StatusID.Doom_1769);Add(100,role:JobRole.Tank);FillParty();var s=StateUpdater.StatusFromHealing();Check(s.HasFlag(AutoStatus.HealAreaAbility|AutoStatus.HealAreaSpell|AutoStatus.HealSingleAbility|AutoStatus.HealSingleSpell));});
+      Test("one Doom and one ordinary injured DPS request area healing",()=>{Add(990,StatusID.Doom_5473);Add(600);FillParty();Check(AreaAbility() && AreaSpell());});
+      Test("one Doom target qualifying for ordinary and emergency healing counts once",()=>{Add(100,StatusID.Doom_1769,role:JobRole.Tank);FillParty();Check(Single());Check(!AreaAbility() && !AreaSpell());});
+      Test("full Doom and one critical tank do not force area healing",()=>{Add(1000,StatusID.Doom_1769);Add(100,role:JobRole.Tank);FillParty();Check(!AreaAbility() && !AreaSpell());});
+      Test("blocked second target does not trigger mixed area healing",()=>{Add(990,StatusID.Doom_1769);Add(100,role:JobRole.Tank).Healable=false;FillParty();Check(!AreaAbility() && !AreaSpell());});
+      Test("dead second target does not trigger mixed area healing",()=>{Add(990,StatusID.Doom_1769);var tank=Add(0,role:JobRole.Tank);tank.IsDead=true;FillParty();Check(!AreaAbility() && !AreaSpell());});
+      Test("mixed count respects ordinary target HoT threshold",()=>{Add(990,StatusID.Doom_1769);var dps=Add(600);dps.Statuses[StatusID.Hot]=30;FillParty();Check(!AreaAbility() && !AreaSpell());dps.CurrentHp=490;Check(AreaAbility() && AreaSpell());});
+      Test("mixed ability count uses ability thresholds independently",()=>{Service.Config.HealthSingleAbility=.8f;Service.Config.HealthSingleSpell=.5f;Add(990,StatusID.Doom_1769);Add(600);FillParty();Check(AreaAbility());Check(!AreaSpell());});
+      Test("mixed spell count uses spell thresholds independently",()=>{Service.Config.HealthSingleAbility=.5f;Service.Config.HealthSingleSpell=.8f;Add(990,StatusID.Doom_1769);Add(600);FillParty();Check(!AreaAbility());Check(AreaSpell());});
+      Test("mixed emergency bypasses low action thresholds and HoT",()=>{Service.Config.HealthSingleAbility=Service.Config.HealthSingleSpell=.01f;var tank=Add(100,role:JobRole.Tank);tank.Statuses[StatusID.Hot]=30;Add(990,StatusID.Doom_1769);FillParty();Check(AreaAbility() && AreaSpell());});
+      Test("mixed count retains M9 spell prohibition",()=>{Add(990,StatusID.Doom_1769);Add(100,role:JobRole.Tank);FillParty();DataCenter.IsInM9S=true;Player.Object!.Statuses[StatusID.Hell]=10;Check(AreaAbility());Check(!AreaSpell());});
+      Test("mixed area request stops after second target recovers",()=>{Add(990,StatusID.Doom_1769);var tank=Add(100,role:JobRole.Tank);FillParty();Check(AreaAbility() && AreaSpell());tank.CurrentHp=1000;Check(!AreaAbility() && !AreaSpell());Check(Single());});
+      Test("two ordinary injured targets retain normal group trigger",()=>{Add(100,role:JobRole.Tank);Add(200);FillParty();Check(!AreaAbility() && !AreaSpell());});
+      Test("three ordinary injured targets still trigger group healing",()=>{Add(100,role:JobRole.Tank);Add(200);Add(600);FillParty();Check(AreaAbility() && AreaSpell());});
+      Test("mixed group request respects auto healing disabled",()=>{Add(990,StatusID.Doom_1769);Add(100,role:JobRole.Tank);FillParty();Service.Config.AutoHeal=false;Check(StateUpdater.StatusFromHealing()==AutoStatus.None);});
+      Test("mixed group request respects non healer restrictions",()=>{Add(990,StatusID.Doom_1769);Add(100,role:JobRole.Tank);FillParty();DataCenter.Role=JobRole.Melee;Check(StateUpdater.StatusFromHealing()==AutoStatus.None);});
       Console.WriteLine($"{count} scenarios passed, {failed} failed; native game APIs are stubbed."); Environment.ExitCode=failed==0?0:1;
      }
     }
