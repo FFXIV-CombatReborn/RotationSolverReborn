@@ -1147,8 +1147,8 @@ internal static class DataCenter
 
 		var id = member.GameObjectId;
 
-		// Predicted healing cannot satisfy a heal-to-full Doom mechanic.
-		if (member.DoomNeedHealing())
+		// Predicted healing cannot satisfy Doom or replace emergency healing that has not landed.
+		if (member.DoomNeedHealing() || member.NeedsEmergencyHealing())
 		{
 			return (float)member.CurrentHp / member.MaxHp;
 		}

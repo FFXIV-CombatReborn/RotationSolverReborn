@@ -501,7 +501,7 @@ internal static class StateUpdater
 			return false;
 		}
 
-		return doomed || h < Lerp(healSingle, healSingleHot, ratio);
+		return doomed || Player.Object.NeedsEmergencyHealing() || h < Lerp(healSingle, healSingleHot, ratio);
 	}
 
 	private static bool ShouldHealSingle(IBattleChara target, StatusID[] hotStatus, float healSingle, float healSingleHot)
@@ -531,7 +531,7 @@ internal static class StateUpdater
 			return false;
 		}
 
-		return doomed || h < Lerp(healSingle, healSingleHot, ratio);
+		return doomed || target.NeedsEmergencyHealing() || h < Lerp(healSingle, healSingleHot, ratio);
 	}
 
 	private static float Lerp(float a, float b, float ratio)

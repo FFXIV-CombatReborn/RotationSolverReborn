@@ -82,7 +82,7 @@ public struct ActionTargetInfo(IBaseAction action)
 		List<IBattleChara> validTargets = [];
 		foreach (var target in TargetHelper.GetTargetsByRange(range, action.Setting.IsFriendly))
 		{
-			if (type == TargetType.Heal && target.GetHealthRatio() >= 1)
+			if (type == TargetType.Heal && target.GetHealthRatio() >= 1 && !target.NeedsEmergencyHealing())
 			{
 				continue;
 			}
@@ -158,7 +158,7 @@ public struct ActionTargetInfo(IBaseAction action)
 		List<IBattleChara> validTargets = [];
 		foreach (var tar in items)
 		{
-			if (type == TargetType.Heal && tar.GetHealthRatio() >= 1)
+			if (type == TargetType.Heal && tar.GetHealthRatio() >= 1 && !tar.NeedsEmergencyHealing())
 			{
 				continue;
 			}
@@ -560,6 +560,20 @@ public struct ActionTargetInfo(IBaseAction action)
 
 	internal readonly TargetResult? FindTarget(bool skipAoeCheck, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck, TargetType targetOverride)
 	{
+		var result = FindTargetCore(skipAoeCheck, skipStatusProvideCheck, skipTargetStatusNeedCheck, targetOverride);
+		if (result == null || !IBaseAction.AutoHealCheck || !IsTargetFriendly || IsSingleTarget || EffectRange <= 0
+			|| (targetOverride == default ? action.Setting.TargetType : targetOverride) != TargetType.Heal)
+		{
+			return result;
+		}
+
+		// Do not spend the healing action on a group that excludes a reachable emergency target.
+		var emergency = HealingHelper.FindEmergencyHealingTarget(TargetHelper.GetTargetsByRange(HealingHelper.SingleHealRange, true), requireLineOfSight: true);
+		return HealingHelper.CoversEmergencyHealingTarget(result.Value.AffectedTargets, emergency) ? result : null;
+	}
+
+	private readonly TargetResult? FindTargetCore(bool skipAoeCheck, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck, TargetType targetOverride)
+	{
 		if (action == null || action.Setting == null || action.Config == null)
 		{
 			return null;
@@ -644,7 +658,7 @@ public struct ActionTargetInfo(IBaseAction action)
 			return FindTargetArea(canTargets, canAffects, Range, Player.Object, targetOverride);
 		}
 
-		List<IBattleChara> targetsList = [.. GetMostCanTargetObjects(canTargets, canAffects, skipAoeCheck ? 0 : action.Config.AoeCount)];
+		List<IBattleChara> targetsList = [.. GetMostCanTargetObjects(canTargets, canAffects, skipAoeCheck ? 0 : action.Config.AoeCount, targetOverride)];
 
 		var target = FindTargetByType(targetsList, type, action.Config.AutoHealRatio, action.Setting.SpecialType, targetOverride, action.Setting.IsFriendly, commandTarget?.TargetingType);
 		if (target == null)
@@ -1266,7 +1280,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
 	#region Get Most Target
 
-	private readonly IEnumerable<IBattleChara> GetMostCanTargetObjects(IEnumerable<IBattleChara> canTargets, IEnumerable<IBattleChara> canAffects, int aoeCount)
+	private readonly IEnumerable<IBattleChara> GetMostCanTargetObjects(IEnumerable<IBattleChara> canTargets, IEnumerable<IBattleChara> canAffects, int aoeCount, TargetType targetOverride = default)
 	{
 		if (canTargets == null || canAffects == null)
 		{
@@ -1294,12 +1308,21 @@ public struct ActionTargetInfo(IBaseAction action)
 		}
 
 		var targets = canTargets as List<IBattleChara> ?? [.. canTargets];
+		var emergency = IsTargetFriendly && IBaseAction.AutoHealCheck
+			&& (targetOverride == default ? action.Setting.TargetType : targetOverride) == TargetType.Heal
+			? HealingHelper.FindEmergencyHealingTarget(TargetHelper.GetTargetsByRange(HealingHelper.SingleHealRange, true), requireLineOfSight: true)
+			: null;
 
 		List<IBattleChara> best = [];
 		var bestCount = Math.Max(0, aoeCount);
 
 		foreach (var t in targets)
 		{
+			if (emergency != null && !GetCanTarget(t, emergency))
+			{
+				continue;
+			}
+
 			var count = GetCanTargetCount(t, canAffects);
 			if (count < bestCount)
 			{
@@ -2021,7 +2044,7 @@ public struct ActionTargetInfo(IBaseAction action)
 			List<IBattleChara> filteredGameObjects = [];
 			foreach (var o in battleChara)
 			{
-				if (!IBaseAction.AutoHealCheck || o.DoomNeedHealing() || o.GetHealthRatio() < healRatio)
+				if (!IBaseAction.AutoHealCheck || o.NeedsEmergencyHealing() || o.DoomNeedHealing() || o.GetHealthRatio() < healRatio)
 				{
 					filteredGameObjects.Add(o);
 				}
@@ -2078,6 +2101,13 @@ public struct ActionTargetInfo(IBaseAction action)
 
 			static IBattleChara? GeneralHealTarget(List<IBattleChara> objs)
 			{
+				// Use actual HP: Doom's synthetic 1% HP must not displace a dying party member.
+				var emergency = HealingHelper.FindEmergencyHealingTarget(objs);
+				if (emergency != null)
+				{
+					return emergency;
+				}
+
 				var player = Player.Object;
 				IBattleChara? self = null, lowest = null, lowestHealer = null, lowestTank = null;
 				float lowestHp = float.MaxValue, healerHp = float.MaxValue, tankHp = float.MaxValue;
