@@ -1,5 +1,11 @@
 # Heal-to-full Doom investigation
 
+## Reported discovery and scope
+
+The report that prompted this investigation came from **The Sunken Temple of Qarn (古代遗迹喀恩埋没圣堂)**: a Machinist received Doom three times and died on all three occasions. No combat log or status ID was supplied with that report.
+
+In the level-35 dungeon, Teratotaur's Mortal Ray applies a Doom that must be removed by stepping onto the currently glowing floor plate ([encounter reference](https://ffxiv.consolegameswiki.com/wiki/The_Sunken_Temple_of_Qarn#Teratotaur)). Restoring full HP does not resolve that mechanic. The reported Qarn incident is discovery context, not a reproduced heal-to-full defect or an encounter fixed by this patch. This patch covers the existing heal-to-full Doom statuses 1769 and 5473; it does not automate floor-plate mechanics.
+
 ## Existing encounter handling
 
 The project already handles individual boss mechanics. `Basic/DataCenter.cs` combines territory IDs with cast action IDs, for example M11S Charybdistopia (46117), Orbonne Agrias's Judgment Blade (14423), and Lakshmi's raid-wide attacks. `Updaters/StateUpdater.cs` uses these checks to decide when to heal or mitigate. The shared rotation also prevents healing spells during M9S Hell in a Cell.
