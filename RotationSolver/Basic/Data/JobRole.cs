@@ -97,13 +97,20 @@ public static class JobRoleExtension
 	{
 		return role switch
 		{
-			JobRole.Tank => [Job.WAR, Job.PLD, Job.DRK, Job.GNB, Job.GLA, Job.MRD],
-			JobRole.Healer => [Job.WHM, Job.SCH, Job.AST, Job.SGE, Job.CNJ],
-			JobRole.Melee => [Job.MNK, Job.DRG, Job.NIN, Job.SAM, Job.RPR, Job.VPR, Job.PGL, Job.LNC, Job.ROG],
-			JobRole.RangedPhysical => [Job.BRD, Job.MCH, Job.DNC, Job.ARC],
-			JobRole.RangedMagical => [Job.BLM, Job.SMN, Job.RDM, Job.BLU, Job.PCT, Job.ACN, Job.THM],
-			JobRole.AllDPS => [.. JobRole.Melee.ToJobs(), .. JobRole.RangedPhysical.ToJobs(), .. JobRole.RangedMagical.ToJobs()],
+			JobRole.Tank => TankJobs,
+			JobRole.Healer => HealerJobs,
+			JobRole.Melee => MeleeJobs,
+			JobRole.RangedPhysical => RangedPhysicalJobs,
+			JobRole.RangedMagical => RangedMagicalJobs,
+			JobRole.AllDPS => AllDpsJobs,
 			_ => [],
 		};
 	}
+
+	private static readonly Job[] TankJobs = [Job.WAR, Job.PLD, Job.DRK, Job.GNB, Job.GLA, Job.MRD];
+	private static readonly Job[] HealerJobs = [Job.WHM, Job.SCH, Job.AST, Job.SGE, Job.CNJ];
+	private static readonly Job[] MeleeJobs = [Job.MNK, Job.DRG, Job.NIN, Job.SAM, Job.RPR, Job.VPR, Job.PGL, Job.LNC, Job.ROG];
+	private static readonly Job[] RangedPhysicalJobs = [Job.BRD, Job.MCH, Job.DNC, Job.ARC];
+	private static readonly Job[] RangedMagicalJobs = [Job.BLM, Job.SMN, Job.RDM, Job.BLU, Job.PCT, Job.ACN, Job.THM];
+	private static readonly Job[] AllDpsJobs = [.. MeleeJobs, .. RangedPhysicalJobs, .. RangedMagicalJobs];
 }

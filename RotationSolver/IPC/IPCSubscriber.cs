@@ -137,8 +137,18 @@ namespace RotationSolver.IPC
 			}
 		}
 
+		private const long DisableIntervalMs = 1000;
+		private static long _lastDisableTick = long.MinValue;
+
 		internal static void DisableAutoRotation()
 		{
+			var now = Environment.TickCount64;
+			if (_lastDisableTick != long.MinValue && now - _lastDisableTick < DisableIntervalMs)
+			{
+				return;
+			}
+
+			_lastDisableTick = now;
 			if (Register())
 			{
 				DoThing(() => _curLease.HasValue ? SetAutoRotationState(_curLease.Value, false) : SetResult.InvalidLease);
@@ -147,6 +157,7 @@ namespace RotationSolver.IPC
 
 		internal static void Release()
 		{
+			_lastDisableTick = long.MinValue;
 			if (_curLease.HasValue)
 			{
 				ReleaseControl(_curLease.Value);

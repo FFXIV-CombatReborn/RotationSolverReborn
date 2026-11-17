@@ -210,33 +210,7 @@ public sealed class BeirutaSCH : ScholarRotation
 			   !ShouldDeferToRaise() &&
 			   ShouldUseDeploymentAdloquium();
 	}
-	private static bool IsPartyMedicated
-	{
-		get
-		{
-			if (PartyMembers == null)
-			{
-				return false;
-			}
-
-			foreach (var member in PartyMembers)
-			{
-				if (member?.StatusList == null)
-				{
-					continue;
-				}
-
-				foreach (var status in member.StatusList)
-				{
-					if (status.StatusId == (uint)StatusID.Medicated)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-	}
+	private static bool IsPartyMedicated => StatusHelper.AnyPartyMemberHasStatus(false, StatusID.Medicated);
 	private bool CanUseCountdownShieldGCD(out IAction? act)
 	{
 		if (ConcitationPvE.CanUse(out act))

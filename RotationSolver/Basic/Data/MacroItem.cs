@@ -14,13 +14,14 @@ namespace RotationSolver.Basic.Data;
 /// <param name="macro"></param>
 public unsafe class MacroItem(IGameObject? target, RaptureMacroModule.Macro* macro)
 {
-	private IGameObject? _lastTarget;
+	private ulong _lastTargetId;
+	private readonly ulong _targetId = target?.GameObjectId ?? 0;
 	private readonly RaptureMacroModule.Macro* _macro = macro;
 
 	/// <summary>
 	/// The target of this macro.
 	/// </summary>
-	public IGameObject? Target { get; } = target;
+	public IGameObject? Target => _targetId == 0 ? null : Svc.Objects.SearchById(_targetId);
 
 	/// <summary>
 	/// Is macro running.
@@ -38,7 +39,7 @@ public unsafe class MacroItem(IGameObject? target, RaptureMacroModule.Macro* mac
 			return false;
 		}
 
-		_lastTarget = Svc.Targets.Target;
+		_lastTargetId = Svc.Targets.Target?.GameObjectId ?? 0;
 		Svc.Targets.Target = Target;
 		RaptureShellModule.Instance()->ExecuteMacro(_macro);
 
@@ -57,7 +58,7 @@ public unsafe class MacroItem(IGameObject? target, RaptureMacroModule.Macro* mac
 			return false;
 		}
 
-		Svc.Targets.Target = _lastTarget;
+		Svc.Targets.Target = _lastTargetId == 0 ? null : Svc.Objects.SearchById(_lastTargetId);
 
 		IsRunning = false;
 		return true;

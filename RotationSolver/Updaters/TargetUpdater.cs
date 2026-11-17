@@ -85,32 +85,9 @@ internal static partial class TargetUpdater
 						continue;
 					}
 
-					if (member.DistanceToPlayer() < 48 && member.CanSeeFrom(playerEye.Value))
+					if (member.DistanceToPlayer() < 48 && member.CanSeeFrom(playerEye.Value)
+						&& (ignoreInvincibility || !member.HasInvincibleStatus()))
 					{
-						if (!ignoreInvincibility)
-						{
-							var hasInvincible = false;
-							var statusList = member.StatusList;
-
-							if (statusList != null)
-							{
-								var statusCount = statusList.Length;
-								for (var i = 0; i < statusCount; i++)
-								{
-									var status = statusList[i];
-									if (status != null && status.StatusId != 0 && status.IsInvincible())
-									{
-										hasInvincible = true;
-										break;
-									}
-								}
-							}
-
-							if (hasInvincible)
-							{
-								continue;
-							}
-						}
 						hostileTargets.Add(member);
 					}
 				}
@@ -167,7 +144,6 @@ internal static partial class TargetUpdater
 				{
 					if ((skipDummyCheck || !battleChara.IsDummy())
 						&& battleChara.IsTargetable
-						&& battleChara.StatusList != null
 						&& !battleChara.IsPet())
 					{
 						allTargets.Add(battleChara);
@@ -377,21 +353,17 @@ internal static partial class TargetUpdater
 			var closestDangerousDist = float.MaxValue;
 			IBattleChara? closestNonDangerous = null;
 			var closestNonDangerousDist = float.MaxValue;
+			var minRemaining = 1 + DataCenter.DefaultGCDRemain;
 
 			foreach (var person in _dispelPartyTargets)
 			{
 				var hasDangerous = false;
-				var statusList = person.StatusList;
-				if (statusList != null)
+				foreach (ref readonly var status in person.GetStatuses())
 				{
-					for (int i = 0, n = statusList.Length; i < n; i++)
+					if (StatusHelper.IsDangerous(status, minRemaining))
 					{
-						var status = statusList[i];
-						if (status != null && status.IsDangerous())
-						{
-							hasDangerous = true;
-							break;
-						}
+						hasDangerous = true;
+						break;
 					}
 				}
 
@@ -433,26 +405,16 @@ internal static partial class TargetUpdater
 			return;
 		}
 
+		var minRemaining = 1 + DataCenter.DefaultGCDRemain;
 		foreach (var member in members)
 		{
-			try
+			foreach (ref readonly var status in member.GetStatuses())
 			{
-				if (member.StatusList != null)
+				if (StatusHelper.CanDispel(status, minRemaining))
 				{
-					for (var i = 0; i < member.StatusList.Length; i++)
-					{
-						var status = member.StatusList[i];
-						if (status != null && status.CanDispel())
-						{
-							targetList.Add(member);
-							break;
-						}
-					}
+					targetList.Add(member);
+					break;
 				}
-			}
-			catch (NullReferenceException ex)
-			{
-				PluginLog.Error($"NullReferenceException in AddDispelTargets for member {member?.ToString()}: {ex.Message}");
 			}
 		}
 	}

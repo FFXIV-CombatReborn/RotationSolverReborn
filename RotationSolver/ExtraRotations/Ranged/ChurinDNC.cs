@@ -294,6 +294,11 @@ public sealed class ChurinDNC : DancerRotation
 	/// </returns>
 	private bool HasAvailableDancePartner(bool restrictToDps)
 	{
+		if (!ClosedPositionPvE.CanUse(out _))
+		{
+			return false;
+		}
+
 		var targetPartner = ClosedPositionPvE.Target.Target;
 		if (targetPartner == null)
 		{
@@ -356,7 +361,7 @@ public sealed class ChurinDNC : DancerRotation
 			return false;
 		}
 
-		return !p.HasApplyStatus(HasWeaknessOrDamageDown);
+		return !p.HasStatus(false, HasWeaknessOrDamageDown);
 	}
 
 	#endregion

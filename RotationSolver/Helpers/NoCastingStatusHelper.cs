@@ -17,16 +17,10 @@ internal static class NoCastingStatusHelper
 			return false;
 		}
 
-		var statusList = Player.Object?.StatusList;
-		if (statusList == null)
-		{
-			return false;
-		}
-
 		var found = false;
-		foreach (var status in statusList)
+		foreach (ref readonly var status in Player.Object.GetStatuses())
 		{
-			if (status == null || status.StatusId == 0 || !noCastingStatus.Contains(status.StatusId))
+			if (status.StatusId == 0 || !noCastingStatus.Contains(status.StatusId))
 			{
 				continue;
 			}

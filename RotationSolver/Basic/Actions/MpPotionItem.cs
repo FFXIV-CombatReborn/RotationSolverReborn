@@ -23,6 +23,6 @@ internal class MpPotionItem : BaseItem
 		{
 			return false;
 		}
-		return Player.Available && ObjectHelper.GetPlayerMPRatio() <= Service.Config.UseMpPotionsPercent && Player.Object.MaxMp - DataCenter.CurrentMp >= MaxMp && base.CanUse(out item);
+		return Player.Available && ObjectHelper.GetPlayerMPRatio() <= Service.Config.UseMpPotionsPercent && Player.Object.MaxMp - DataCenter.CurrentMp >= MaxMp && base.CanUse(out item, clippingCheck);
 	}
 }

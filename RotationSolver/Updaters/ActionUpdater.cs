@@ -301,16 +301,10 @@ internal static class ActionUpdater
 			return false;
 		}
 
-		var statusList = Player.Object?.StatusList;
-		if (statusList == null)
-		{
-			return false;
-		}
-
 		var minRemaining = 1 + DataCenter.DefaultGCDRemain;
-		foreach (var status in statusList)
+		foreach (ref readonly var status in Player.Object.GetStatuses())
 		{
-			if (status != null && StatusHelper.LockActions(status) == true && status.RemainingTime > minRemaining)
+			if (StatusHelper.LocksActions(status, minRemaining))
 			{
 				return true;
 			}

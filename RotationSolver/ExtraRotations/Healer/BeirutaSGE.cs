@@ -111,33 +111,7 @@ public sealed class BeirutaSGE : SageRotation
 	private const float EarlyDotRefreshSeconds = 12f;
 	private const float SwiftcastPostActionLockSeconds = 2f;
 	private const float MovementLeadSeconds = 0.5f;
-	private static bool IsPartyMedicated
-	{
-		get
-		{
-			if (PartyMembers == null)
-			{
-				return false;
-			}
-
-			foreach (var member in PartyMembers)
-			{
-				if (member?.StatusList == null)
-				{
-					continue;
-				}
-
-				foreach (var status in member.StatusList)
-				{
-					if (status.StatusId == (uint)StatusID.Medicated)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-	}
+	private static bool IsPartyMedicated => StatusHelper.AnyPartyMemberHasStatus(false, StatusID.Medicated);
 
 	private long _psycheUsedAtMs;
 	private float _lastSwiftcastLockingActionCombatTime = float.MinValue;
@@ -524,10 +498,6 @@ public sealed class BeirutaSGE : SageRotation
 			return false;
 		}
 
-		var taurocholeTarget = TaurocholePvE.Target.Target;
-		var druocholeTarget = DruocholePvE.Target.Target;
-		var kardiaTarget = KardiaPvE.Target.Target;
-
 		// Krasis always first
 		if (KrasisPvE.CanUse(out act))
 		{
@@ -574,27 +544,27 @@ public sealed class BeirutaSGE : SageRotation
 		if (Addersgall == 2 && PartyMembersAverHP > 0.85f)
 		{
 			if (!HasKerachole &&
-				taurocholeTarget != null &&
-				taurocholeTarget.GetHealthRatio() < HealSingleTaurocholeHeal &&
-				TaurocholePvE.CanUse(out act))
+				TaurocholePvE.CanUse(out act) &&
+				TaurocholePvE.Target.Target is { } taurocholeTarget &&
+				taurocholeTarget.GetHealthRatio() < HealSingleTaurocholeHeal)
 			{
 				return true;
 			}
 
-			if (druocholeTarget != null &&
+			if (DruocholePvE.CanUse(out act) &&
+				DruocholePvE.Target.Target is { } druocholeTarget &&
 				!HasSingleHealLockoutStatus(druocholeTarget) &&
-				druocholeTarget.GetHealthRatio() < HealSingleDruocholeHeal &&
-				DruocholePvE.CanUse(out act))
+				druocholeTarget.GetHealthRatio() < HealSingleDruocholeHeal)
 			{
 				return true;
 			}
 		}
 
 		if (PartyMembersAverHP > 0.85f &&
-			kardiaTarget != null &&
+			KardiaPvE.CanUse(out act) &&
+			KardiaPvE.Target.Target is { } kardiaTarget &&
 			!HasSingleHealLockoutStatus(kardiaTarget) &&
-			kardiaTarget.GetHealthRatio() < 0.8f &&
-			KardiaPvE.CanUse(out act))
+			kardiaTarget.GetHealthRatio() < 0.8f)
 		{
 			return true;
 		}

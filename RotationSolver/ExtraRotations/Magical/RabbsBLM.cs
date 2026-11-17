@@ -94,76 +94,24 @@ public sealed class Rabbs_BLM : BlackMageRotation
 		return new BaseAction(ActionID.FlarePvE);
 	});
 
-	private static readonly HashSet<uint> burstStatusIds =
+	private static readonly StatusID[] burstStatusIds =
 	[
-		(uint)StatusID.Divination,
-		(uint)StatusID.Brotherhood,
-		(uint)StatusID.BattleLitany,
-		(uint)StatusID.ArcaneCircle,
-		(uint)StatusID.StarryMuse,
-		(uint)StatusID.Embolden,
-		(uint)StatusID.SearingLight,
-		(uint)StatusID.BattleVoice,
-		(uint)StatusID.TechnicalFinish,
-		(uint)StatusID.RadiantFinale
+		StatusID.Divination,
+		StatusID.Brotherhood,
+		StatusID.BattleLitany,
+		StatusID.ArcaneCircle,
+		StatusID.StarryMuse,
+		StatusID.Embolden,
+		StatusID.SearingLight,
+		StatusID.BattleVoice,
+		StatusID.TechnicalFinish,
+		StatusID.RadiantFinale
 
 	];
 
-	public static bool IsPartyBurst
-	{
-		get
-		{
-			if (PartyMembers == null)
-			{
-				return false;
-			}
+	public static bool IsPartyBurst => StatusHelper.AnyPartyMemberHasStatus(false, burstStatusIds);
 
-			foreach (var member in PartyMembers)
-			{
-				if (member?.StatusList == null)
-				{
-					continue;
-				}
-
-				foreach (var status in member.StatusList)
-				{
-					if (burstStatusIds.Contains(status.StatusId))
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-	}
-
-	public static bool IsPartyMedicated
-	{
-		get
-		{
-			if (PartyMembers == null)
-			{
-				return false;
-			}
-
-			foreach (var member in PartyMembers)
-			{
-				if (member?.StatusList == null)
-				{
-					continue;
-				}
-
-				foreach (var status in member.StatusList)
-				{
-					if (status.StatusId == (uint)StatusID.Medicated)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-	}
+	public static bool IsPartyMedicated => StatusHelper.AnyPartyMemberHasStatus(false, StatusID.Medicated);
 
 	public static bool IsAnyBossinRange
 	{

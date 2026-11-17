@@ -508,7 +508,7 @@ public sealed class SMN_Reborn : SummonerRotation
 			return true;
 		}
 
-		var attunedOrFavor = AttunementCount != 0 || HasIfritsFavor || HasGarudasFavor || HasCrimsonStrikeReady;
+		var attunedOrFavor = AttunementCount != 0 || HasIfritFavor || HasGarudaFavor || HasCrimsonStrike;
 
 		if (!InBahamut && !InPhoenix && !InSolarBahamut && !(BlockSummonWhileAttunedOrFavor && attunedOrFavor))
 		{   
@@ -814,8 +814,6 @@ public sealed class SMN_Reborn : SummonerRotation
 		}
 	}
 
-	private bool SwiftcastForMovement => SwiftcastMovementUptime && HasSwift;
-
 	private bool DynamicSummonTime(out IAction? act)
     {
 	        act = null;
@@ -837,9 +835,6 @@ public sealed class SMN_Reborn : SummonerRotation
 
 	return GarudaTime(out act);
     }
-	private bool HasIfritsFavor => StatusHelper.PlayerHasStatus(true, (StatusID)2724);
-    private bool HasGarudasFavor => StatusHelper.PlayerHasStatus(true, (StatusID)2725);
-    private bool HasCrimsonStrikeReady => StatusHelper.PlayerHasStatus(true, (StatusID)4403);
 
 	#endregion
 }

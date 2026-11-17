@@ -90,7 +90,7 @@ namespace RotationSolver.Updaters
 					return true;
 				}
 
-				if (Player.Object?.StatusList == null)
+				if (Player.Object == null)
 				{
 					return false;
 				}
