@@ -201,6 +201,12 @@ internal abstract class RotationConfigBase : IRotationConfig
 		{
 			return bool.Parse(value);
 		}
+		else if (type == typeof(float))
+		{
+			return RotationConfigFloat.TryParseValue(value, out var number)
+				? number
+				: throw new FormatException($"'{value}' is not a valid number.");
+		}
 
 		return Convert.ChangeType(value, type) ?? throw new InvalidOperationException($"Failed to convert value '{value}' to type '{type.Name}'.");
 	}

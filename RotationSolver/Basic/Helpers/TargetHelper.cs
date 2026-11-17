@@ -1,5 +1,4 @@
 ﻿using ECommons.GameFunctions;
-using ECommons.Logging;
 
 namespace RotationSolver.Basic.Helpers
 {
@@ -112,19 +111,6 @@ namespace RotationSolver.Basic.Helpers
 			var isEnemy = battleChara.IsEnemy();
 			if (!isEnemy && battleChara.IsConditionCannotTarget())
 			{
-				return false;
-			}
-
-			try
-			{
-				if (battleChara.StatusList == null)
-				{
-					return false;
-				}
-			}
-			catch (Exception ex)
-			{
-				PluginLog.Error($"Exception accessing StatusList for {battleChara?.NameId}: {ex.Message}");
 				return false;
 			}
 

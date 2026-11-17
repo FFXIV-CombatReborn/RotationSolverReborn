@@ -61,7 +61,7 @@ internal static class HotbarDisabledColor
 				hotBarIndex++;
 				continue;
 			}
-			var raptureHotbar = raptureModule->Hotbars[resolvedHotbarIndex];
+			ref var raptureHotbar = ref raptureModule->Hotbars[resolvedHotbarIndex];
 
 			var slotIndex = -1;
 			foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
@@ -79,7 +79,7 @@ internal static class HotbarDisabledColor
 					continue;
 				}
 
-				var hotbarSlot = raptureHotbar.Slots[slotIndex];
+				ref var hotbarSlot = ref raptureHotbar.Slots[slotIndex];
 				if (hotbarSlot.ApparentSlotType != HotbarSlotType.Action || hotbarSlot.OriginalApparentSlotType != HotbarSlotType.Action)
 				{
 					continue;

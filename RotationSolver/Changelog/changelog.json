@@ -1,6 +1,31 @@
 {
-  "tagline": "First 7.58 update",
+  "tagline": "Just minor updates til Evercold",
   "entries": [
+    {
+      "version": "7.5.8.4",
+      "title": "Core tune up",
+      "date": "November 16, 2026",
+      "sections": [
+        {
+          "title": "Performance",
+          "icon": "Bolt",
+          "items": [
+            "Pretty drastically improved performance with status and target checks, should help on larger pulls and weaker hardware."
+          ]
+        },
+        {
+          "title": "Fixes",
+          "icon": "Bug",
+          "items": [
+            "\"/rotation Auto 1\" now selects the targeting type by its position in your list.",
+            "DoActions and rotation setting commands read decimal times correctly on systems that use a decimal comma.",
+            "The random target delay is no longer always the shortest value.",
+            "\"Hide all warnings\" setting actually works now lol.",
+            "Corrupted settings files are now backed up before defaults replace them."
+          ]
+        }
+      ]
+    },
     {
       "version": "7.5.8.1",
       "title": "Update for patch",

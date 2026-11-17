@@ -480,11 +480,6 @@ internal static class StateUpdater
 			return false;
 		}
 
-		if (Player.Object.StatusList == null)
-		{
-			return false;
-		}
-
 		if (DataCenter.IsPvP && StatusHelper.PlayerHasStatus(false, StatusID.Mounted))
 		{
 			return false;
@@ -512,11 +507,6 @@ internal static class StateUpdater
 	private static bool ShouldHealSingle(IBattleChara target, StatusID[] hotStatus, float healSingle, float healSingleHot)
 	{
 		if (target == null)
-		{
-			return false;
-		}
-
-		if (target.StatusList == null)
 		{
 			return false;
 		}

@@ -372,7 +372,7 @@ public partial class MainWindow
 
 			case RotationConfigFloat f:
 				{
-					if (!float.TryParse(config.Value, out var value))
+					if (!RotationConfigFloat.TryParseValue(config.Value, out var value))
 					{
 						break;
 					}

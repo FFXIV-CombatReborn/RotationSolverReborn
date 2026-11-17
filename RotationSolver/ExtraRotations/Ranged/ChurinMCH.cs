@@ -582,42 +582,37 @@ public sealed class ChurinMCH : MachinistRotation
 	{
 		act = null;
 
-		// Check if we want to limit Wildfire to boss targets only
-		if (WildfireBoss)
-		{
-			var isTargetBoss = WildfirePvE.Target.Target?.IsBossFromIcon() ?? false;
-			if (!isTargetBoss)
-			{
-				return false;
-			}
-		}
-
 		// Level 100+ rotation: Use after tools are spent
 		if (FullMetalFieldPvE.EnoughLevel)
 		{
 			if (IsLastGCD(ActionID.FullMetalFieldPvE) || !HasFullMetalMachinist && BarrelStabilizerPvE.Cooldown.IsCoolingDown ||
 				IsLastGCD(ActionID.DrillPvE) && DrillPvE.Cooldown.CurrentCharges == 0 && HasFullMetalMachinist)
 			{
-				return WildfirePvE.CanUse(out act) && CanLateWeave;
+				return WildfirePvE.CanUse(out act) && CanLateWeave && IsWildfireTargetAllowed();
 			}
 		}
 		// Pre-100 rotation
 		else
 		{
 			// Use during Hypercharge
-			if (IsOverheated && WildfirePvE.CanUse(out act))
+			if (IsOverheated && WildfirePvE.CanUse(out act) && IsWildfireTargetAllowed())
 			{
 				return true;
 			}
 
 			// Use when about to Hypercharge
-			if (Heat >= 45 && HyperchargePvE.CanUse(out _) && CanLateWeave && WildfirePvE.CanUse(out act))
+			if (Heat >= 45 && HyperchargePvE.CanUse(out _) && CanLateWeave && WildfirePvE.CanUse(out act) && IsWildfireTargetAllowed())
 			{
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	private bool IsWildfireTargetAllowed()
+	{
+		return !WildfireBoss || (WildfirePvE.Target.Target?.IsBossFromIcon() ?? false);
 	}
 	private bool TryUseReassemble(IAction nextGCD, out IAction? act)
 	{

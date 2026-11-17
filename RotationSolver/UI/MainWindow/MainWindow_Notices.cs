@@ -152,7 +152,7 @@ public partial class MainWindow
 			return true;
 		}
 
-		if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Count > 0)
+		if (!Service.Config.HideWarning && DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Count > 0)
 		{
 			return true;
 		}
@@ -219,7 +219,7 @@ public partial class MainWindow
 				drewAnything = true;
 			}
 
-			if (DataCenter.SystemWarnings is { Count: > 0 })
+			if (!Service.Config.HideWarning && DataCenter.SystemWarnings is { Count: > 0 })
 			{
 				List<string> warningsToRemove = [];
 				var index = 0;

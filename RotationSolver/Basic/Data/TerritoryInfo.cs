@@ -90,7 +90,7 @@ public class TerritoryInfo
 		var contentFinder = sheetType.ContentFinderCondition.Value;
 		ContentFinderName = contentFinder.Name.ExtractText();
 		IsHighEndDuty = contentFinder.HighEndDuty;
-		ContentType = (TerritoryContentType)contentFinder.ContentType.Value.RowId;
+		ContentType = (TerritoryContentType)contentFinder.ContentType.RowId;
 		ContentFinderIcon = contentFinder.Icon;
 	}
 }

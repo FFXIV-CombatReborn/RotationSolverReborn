@@ -125,7 +125,7 @@ internal sealed class FirstStartTutorialWindow : Window
 				[new("Open the UI page", MainWindowTab.UI)]),
 
 			new("Turning RSR on", FontAwesomeIcon.PowerOff, Chapter.GettingStarted,
-				"RSR is always in one of a few modes. It does nothing until autorotation is activaed, and it can switch itself off again after combat.",
+				"RSR is always in one of a few modes. It does nothing until autorotation is activated, and it can switch itself off again after combat.",
 				DrawModes),
 
 			new("Settings Window", FontAwesomeIcon.Cog, Chapter.GettingStarted,
@@ -134,7 +134,7 @@ internal sealed class FirstStartTutorialWindow : Window
 				[new("Open the settings", MainWindowTab.Main)]),
 
 			new("Job Rotation", FontAwesomeIcon.UserShield, Chapter.Configure,
-				"Each combat job has one or more rotations to choose from. Rotations called 'Reborn' or 'Evolved' (Starting with Evercold) are the default rotations, other rotations are designed by not-me and are not tested, your milage may vary.",
+				"Each combat job has one or more rotations to choose from. Rotations called 'Reborn' or 'Evolved' (Starting with Evercold) are the default rotations, other rotations are designed by not-me and are not tested, your mileage may vary.",
 				DrawRotationStep,
 				[new("Open the rotation page", MainWindowTab.Rotation)]),
 
@@ -144,7 +144,7 @@ internal sealed class FirstStartTutorialWindow : Window
 				[new("Open the Actions page", MainWindowTab.Actions)]),
 
 			new("Auto", FontAwesomeIcon.Robot, Chapter.Configure,
-				"Behaviour shared by every job: how freely to use AoE, when RSR switches itself on and off, healing thresholds and more.",
+				"Settings shared by every job, such as how freely to use AoE, when RSR switches itself on and off, and the healing thresholds.",
 				DrawAutoStep,
 				[new("Open the Auto page", MainWindowTab.Auto)]),
 
@@ -159,7 +159,7 @@ internal sealed class FirstStartTutorialWindow : Window
 				[new("Open the UI page", MainWindowTab.UI)]),
 
 			new("Lists and duties", FontAwesomeIcon.ListUl, Chapter.Configure,
-				"Curated lists that tell every job how to react to particular statuses and actions, plus switches for particular kinds of content.",
+				"Lists that tell every job how to react to certain statuses and actions, plus switches for specific kinds of content.",
 				DrawListsStep,
 				[new("Open the List page", MainWindowTab.List), new("Open the Duty page", MainWindowTab.Duty)]),
 
@@ -169,7 +169,7 @@ internal sealed class FirstStartTutorialWindow : Window
 				[new("Open the Basic page", MainWindowTab.Basic), new("Open the Extra page", MainWindowTab.Extra)]),
 
 			new("Macros", FontAwesomeIcon.Terminal, Chapter.WrapUp,
-				"Everything in RSR can be driven from chat, which means it can live on your hotbar. Here are three macros to start with.",
+				"RSR's modes and settings all have chat commands, so you can put them on your hotbar as macros. Here are three to start with.",
 				DrawMacrosStep,
 				[new("Open the full command list", MainWindowTab.Main, MainWindow.OpenMacroList)]),
 
@@ -762,9 +762,9 @@ internal sealed class FirstStartTutorialWindow : Window
 			new(FontAwesomeIcon.Robot, "Auto",
 				"Auto activates the autorotation algorithm and allows RSR to set targets for you based on the next calculated action. Run /rotation Auto again to step to the next targeting rule.", s.Primary),
 			new(FontAwesomeIcon.HandPointer, "Manual",
-				"Manual activate the autorotation algorithm but does not allow RSR to set targets and locks the hostile target list to only the selected target. Party healing is still possible on Manual mode as RSR uses soft targeting for that.", s.Tertiary),
+				"Manual activates the autorotation algorithm but does not allow RSR to set targets and locks the hostile target list to only the selected target. Party healing is still possible on Manual mode as RSR uses soft targeting for that.", s.Tertiary),
 			new(FontAwesomeIcon.Crosshairs, "Target Only",
-				"RSR chooses targets as in Auto but never uses an action. Every button press is yours.", s.Secondary),
+				"RSR chooses targets as in Auto but never uses an action. You press every button yourself.", s.Secondary),
 			new(FontAwesomeIcon.PowerOff, "Off",
 				"Nothing is targeted or used. Turn RSR off whenever you are not using it.", s.OnSurfaceVariant),
 		], 170f);
@@ -810,7 +810,7 @@ internal sealed class FirstStartTutorialWindow : Window
 
 		Gap(12f);
 		DrawInfoCard("tutorial_setting_shortcuts", "Shortcuts on any setting", FontAwesomeIcon.MousePointer,
-			"Right-click a setting for its chat command, which you can run on the spot or copy into a macro. For example, right-clicking \"Auto turn off RSR when combat is over for more than\" on the Auto page gives /rotation Settings AutoOffAfterCombat True.",
+			"Right-click a setting for its chat command, which you can run on the spot or copy into a macro. For example, right-clicking \"Turn off after combat ends\" on the Auto page gives /rotation Settings AutoOffAfterCombat True.",
 			"Ctrl+click a slider to type an exact value instead of dragging, then press Enter. For example, Ctrl+click the slider under that same setting and type 45 to have RSR switch off 45 seconds after combat ends.");
 
 		DrawPracticeSettings();
@@ -955,7 +955,7 @@ internal sealed class FirstStartTutorialWindow : Window
 				$"Switches off once you have been out of combat for {Service.Config.AutoOffAfterCombatTime:0} seconds. The delay is on the Auto page.",
 				Service.Config.AutoOffAfterCombat);
 			DrawSwitch("tutorial_off_when_dead", "Turn off when you die",
-				"Stops RSR the moment you are knocked out.",
+				"Stops RSR when you are knocked out.",
 				Service.Config.AutoOffWhenDead);
 			DrawSwitch("tutorial_off_when_duty_completed", "Turn off when a duty is completed",
 				"Stops RSR as the duty's completion screen comes up.",
@@ -1006,7 +1006,7 @@ internal sealed class FirstStartTutorialWindow : Window
 		ImGui.TextWrapped(current switch
 		{
 			0 => "Off: single-target actions only. The safest choice near enemies you must not pull.",
-			1 => "Cleave: AoE actions are used only when they need no more than your one target, such as cleaves. Nothing that relies on hitting a pack.",
+			1 => "Cleave: AoE actions are used only if hitting your one target is enough, such as cleaves. Actions that need a pack are skipped.",
 			_ => "Full: every AoE action, whenever enough enemies are in range. The usual choice for dungeons and trash packs.",
 		});
 	}
@@ -1088,13 +1088,13 @@ internal sealed class FirstStartTutorialWindow : Window
 	private static void DrawListsStep()
 	{
 		DrawInfoCard("tutorial_lists", "List", FontAwesomeIcon.ListUl,
-			"Statuses: which debuffs to cleanse, which buffs make an enemy invincible or a priority, when not to start a cast, and more.",
+			"Statuses, such as which debuffs to cleanse, which buffs make an enemy invincible or a priority, and when not to start a cast.",
 			"Actions: known raidwides, tankbusters and knockbacks that RSR prepares mitigation for.",
 			"Territories: settings for particular areas.",
-			"The lists come curated and are updated with the plugin. Add your own entries with the + buttons.");
+			"The lists come filled in and are updated with the plugin. Add your own entries with the + buttons.");
 
 		DrawInfoCard("tutorial_duty", "Duty", FontAwesomeIcon.Shield,
-			"One section per kind of content, from Ultimate and Savage to deep dungeons, PvP and the Masked Carnivale, each with fight-specific switches. Most can stay as they are.",
+			"One section per kind of content, including Ultimate, Savage, deep dungeons, PvP and the Masked Carnivale, each with fight-specific switches. Most can stay as they are.",
 			"In Occult Crescent, Variant dungeons, Bozja and a few other duties, a page for that content's own actions appears in the page list.",
 			"The AutoDuty page has the settings and status for running RSR alongside AutoDuty.");
 	}
@@ -1147,7 +1147,7 @@ internal sealed class FirstStartTutorialWindow : Window
 		M3Widgets.SectionLabel("Where next");
 
 		if (M3SettingRow.NavigationRow("##tutorial_finish_settings", "Open the settings",
-			"Everything in this tour, and the rest.", FontAwesomeIcon.Cog, FontAwesomeIcon.ChevronRight))
+			"All the settings, including the ones this tour skipped.", FontAwesomeIcon.Cog, FontAwesomeIcon.ChevronRight))
 		{
 			RotationSolverPlugin.ShowConfigWindow(MainWindowTab.Main);
 		}

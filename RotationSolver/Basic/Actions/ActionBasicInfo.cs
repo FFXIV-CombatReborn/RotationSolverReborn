@@ -411,11 +411,6 @@ public readonly struct ActionBasicInfo
 			return false;
 		}
 
-		if (Player.Object.StatusList == null)
-		{
-			return false;
-		}
-
 		if (DataCenter.Orbonne && (_action.ID == 14415 || _action.ID == 14414) && IsActionCheckValid() && ActionManagerStatusValid())
 		{
 			return true;
@@ -576,7 +571,7 @@ public readonly struct ActionBasicInfo
 			return false;
 		}
 
-		return Player.Object.StatusList != null && !skipStatusNeed && _action.Setting.StatusNeed != null && Player.Object.WillStatusEndGCD(0, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
+		return !skipStatusNeed && _action.Setting.StatusNeed != null && Player.Object.WillStatusEndGCD(0, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
 	}
 
 	private bool IsStatusProvided(bool skipStatusProvideCheck)
@@ -586,7 +581,7 @@ public readonly struct ActionBasicInfo
 			return false;
 		}
 
-		return Player.Object.StatusList != null && !skipStatusProvideCheck && _action.Setting.StatusProvide != null && _action.Config.ShouldCheckStatus && !Player.Object.WillStatusEndGCD(_action.Config.StatusRefreshGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
+		return !skipStatusProvideCheck && _action.Setting.StatusProvide != null && _action.Config.ShouldCheckStatus && !Player.Object.WillStatusEndGCD(_action.Config.StatusRefreshGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
 	}
 
 	private bool IsComboValid(bool skipComboCheck)

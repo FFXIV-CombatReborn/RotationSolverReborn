@@ -820,7 +820,8 @@ public sealed class ChurinSMN : SummonerRotation
 	private bool IfritStrategy(bool isMoving, out IAction? act)
 	{
 		act = null;
-		var canUseCrimsonCyclone = AddCrimsonCyclone || CrimsonCyclonePvE.Target.Target.DistanceToPlayer() <= CrimsonCycloneDistance;
+		var canUseCrimsonCyclone = AddCrimsonCyclone
+			|| (CrimsonCyclonePvE.CanUse(out _) && CrimsonCyclonePvE.Target.Target.DistanceToPlayer() <= CrimsonCycloneDistance);
 		var cycloneAvailable = canUseCrimsonCyclone && HasIfritFavor;
 		var cycloneMoveAllowed = AddCrimsonCycloneMoving;
 		var cycloneBaseCondition = (UseCycloneFirst && AttunementCount > 1)

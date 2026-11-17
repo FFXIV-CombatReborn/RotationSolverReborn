@@ -13,6 +13,7 @@ public partial class CustomRotation : ICustomRotation
 	private JobRole? _role = null;
 	private string? _name = null;
 	private string? _description = null;
+	private string? _displayName;
 	private readonly IRotationConfigSet _configs;
 
 	private protected CustomRotation()
@@ -45,18 +46,7 @@ public partial class CustomRotation : ICustomRotation
 	/// <inheritdoc/>
 	public bool IsEnabled
 	{
-		get
-		{
-			var disabled = Service.Config.DisabledJobs;
-			foreach (var j in disabled)
-			{
-				if (j == Job)
-				{
-					return false;
-				}
-			}
-			return true;
-		}
+		get => !Service.Config.DisabledJobs.Contains(Job);
 		set
 		{
 			var disabled = Service.Config.DisabledJobs;
@@ -66,19 +56,7 @@ public partial class CustomRotation : ICustomRotation
 			}
 			else
 			{
-				var exists = false;
-				foreach (var j in disabled)
-				{
-					if (j == Job)
-					{
-						exists = true;
-						break;
-					}
-				}
-				if (!exists)
-				{
-					disabled.Add(Job);
-				}
+				_ = disabled.Add(Job);
 			}
 		}
 	}
@@ -172,7 +150,7 @@ public partial class CustomRotation : ICustomRotation
 	/// <inheritdoc/>
 	public override string ToString()
 	{
-		return GetType().GetCustomAttribute<RotationAttribute>()?.Name ?? GetType().Name;
+		return _displayName ??= GetType().GetCustomAttribute<RotationAttribute>()?.Name ?? GetType().Name;
 	}
 
 	/// <summary>

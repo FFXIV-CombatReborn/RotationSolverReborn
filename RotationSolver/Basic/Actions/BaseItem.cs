@@ -54,7 +54,7 @@ public class BaseItem : IBaseItem
 	/// <summary>
 	/// Item name.
 	/// </summary>
-	public string Name => _item.Name.ExtractText();
+	public string Name { get; }
 
 	/// <summary>
 	/// The item configs.
@@ -174,6 +174,7 @@ public class BaseItem : IBaseItem
 	public unsafe BaseItem(Item item)
 	{
 		_item = item;
+		Name = _item.Name.ExtractText();
 		IconID = _item.Icon;
 		A4 = item.RowId switch
 		{

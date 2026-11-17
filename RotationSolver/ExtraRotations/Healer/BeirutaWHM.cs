@@ -412,8 +412,8 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			ThinAirLastChargeUsage == ThinAirUsageStrategy.UseAllCharges ||
 			(ThinAirLastChargeUsage == ThinAirUsageStrategy.ReserveLastChargeForRaise && nextGCD == RaisePvE);
 
-		if (((nextGCD is IBaseAction action && action.Info.MPNeed >= ThinAirNeed && IsLastAction() == IsLastGCD()) ||
-			 ((MergedStatus.HasFlag(AutoStatus.Raise) || nextGCD == RaisePvE) && IsLastAction() == IsLastGCD())) &&
+		if (((nextGCD is IBaseAction action && action.Info.MPNeed >= ThinAirNeed && IActionHelper.IsLastActionGCD()) ||
+			 ((MergedStatus.HasFlag(AutoStatus.Raise) || nextGCD == RaisePvE) && IActionHelper.IsLastActionGCD())) &&
 			ThinAirPvE.CanUse(out act, usedUp: useLastThinAirCharge))
 		{
 			return true;
@@ -522,24 +522,20 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			return false;
 		}
 
-		var benisonTarget = DivineBenisonPvE.Target.Target;
-
-		if (benisonTarget != null &&
+		if (DivineBenisonPvE.Cooldown.CurrentCharges == 2 &&
+			DivineBenisonPvE.CanUse(out act) &&
+			DivineBenisonPvE.Target.Target is { } benisonTarget &&
 			IsTank(benisonTarget) &&
-			benisonTarget.GetHealthRatio() < 0.9f &&
-			DivineBenisonPvE.Cooldown.CurrentCharges == 2 &&
-			DivineBenisonPvE.CanUse(out act))
+			benisonTarget.GetHealthRatio() < 0.9f)
 		{
 			return true;
 		}
 
-		var benedictionTarget = BenedictionPvE.Target.Target;
-
-		if (benedictionTarget != null &&
+		if (PartyMembersAverHP > 0.8f &&
+			BenedictionPvE.CanUse(out act) &&
+			BenedictionPvE.Target.Target is { } benedictionTarget &&
 			!HasSingleHealLockoutStatus(benedictionTarget) &&
 			BenedictionTargetAllowed(benedictionTarget) &&
-			PartyMembersAverHP > 0.8f &&
-			BenedictionPvE.CanUse(out act) &&
 			benedictionTarget.GetHealthRatio() < BenedictionHeal)
 		{
 			return true;
@@ -550,12 +546,10 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			return base.HealSingleAbility(nextGCD, out act);
 		}
 
-		var tetraTarget = TetragrammatonPvE.Target.Target;
-
-		if (tetraTarget != null &&
-			!HasSingleHealLockoutStatus(tetraTarget) &&
-			PartyMembersAverHP > 0.8f &&
+		if (PartyMembersAverHP > 0.8f &&
 			TetragrammatonPvE.CanUse(out act, usedUp: true) &&
+			TetragrammatonPvE.Target.Target is { } tetraTarget &&
+			!HasSingleHealLockoutStatus(tetraTarget) &&
 			tetraTarget.GetHealthRatio() < CurrentTetragrammatonThreshold)
 		{
 			return true;
@@ -701,42 +695,26 @@ public sealed class WHM_Reborn : WhiteMageRotation
 			return base.HealSingleGCD(out act);
 		}
 
-		var solaceTarget = AfflatusSolacePvE.Target.Target;
-
 		if (!IsPresenceOfMindHealLockActive &&
-			!HasSingleHealLockoutStatus(solaceTarget) &&
-			solaceTarget != null &&
 			PartyMembersAverHP > 0.8f &&
-			HasSufficientMovement &&
-			BloodLily <= 1 &&
-			solaceTarget.GetHealthRatio() < 0.75f &&
-			AfflatusSolacePvE.CanUse(out act))
+			AfflatusSolacePvE.CanUse(out act) &&
+			AfflatusSolacePvE.Target.Target is { } solaceTarget &&
+			!HasSingleHealLockoutStatus(solaceTarget) &&
+			((HasSufficientMovement && BloodLily <= 1 && solaceTarget.GetHealthRatio() < 0.75f) ||
+			 (CanUseSolaceByBloodLily(out var solaceThreshold) && solaceTarget.GetHealthRatio() < solaceThreshold)))
 		{
 			return true;
 		}
 
 		if (!IsPresenceOfMindHealLockActive &&
-			CanUseSolaceByBloodLily(out var solaceThreshold) &&
-			!HasSingleHealLockoutStatus(solaceTarget) &&
-			PartyMembersAverHP > 0.8f &&
-			solaceTarget != null &&
-			solaceTarget.GetHealthRatio() < solaceThreshold &&
-			AfflatusSolacePvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		var regenTarget = RegenPvE.Target.Target;
-
-		if (!IsPresenceOfMindHealLockActive &&
-			!HasSingleHealLockoutStatus(regenTarget) &&
-			regenTarget != null &&
-			IsTank(regenTarget) &&
-			!regenTarget.HasStatus(true, StatusID.Regen) &&
 			HasSufficientMovement &&
 			BloodLily == 3 &&
-			regenTarget.GetHealthRatio() < 0.8f &&
-			RegenPvE.CanUse(out act))
+			RegenPvE.CanUse(out act) &&
+			RegenPvE.Target.Target is { } regenTarget &&
+			!HasSingleHealLockoutStatus(regenTarget) &&
+			IsTank(regenTarget) &&
+			!regenTarget.HasStatus(true, StatusID.Regen) &&
+			regenTarget.GetHealthRatio() < 0.8f)
 		{
 			return true;
 		}

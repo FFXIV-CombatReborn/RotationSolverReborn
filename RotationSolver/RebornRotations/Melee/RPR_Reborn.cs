@@ -656,43 +656,18 @@ public sealed class RPR_Reborn : ReaperRotation
 
     #region Helpers
 
-	private static readonly HashSet<uint> burstStatusIds =
+	private static readonly StatusID[] burstStatusIds =
     [
-	(uint)StatusID.Divination,
-	(uint)StatusID.Brotherhood,
-	(uint)StatusID.BattleLitany,
-	(uint)StatusID.StarryMuse,
-	(uint)StatusID.Embolden,
-	(uint)StatusID.SearingLight,
-	(uint)StatusID.BattleVoice,
-	(uint)StatusID.TechnicalFinish,
-	(uint)StatusID.RadiantFinale
+	StatusID.Divination,
+	StatusID.Brotherhood,
+	StatusID.BattleLitany,
+	StatusID.StarryMuse,
+	StatusID.Embolden,
+	StatusID.SearingLight,
+	StatusID.BattleVoice,
+	StatusID.TechnicalFinish,
+	StatusID.RadiantFinale
     ];
-
-    private static bool PartyHasStatus(Func<uint, bool> match)
-    {
-	if (PartyMembers == null)
-	    {
-		return false;
-	    }
-
-	foreach (var member in PartyMembers)
-	    {
-		if (member?.StatusList == null)
-		    {
-			continue;
-		    }
-
-		foreach (var status in member.StatusList)
-		    {
-			if (match(status.StatusId))
-			    {
-				return true;
-			    }
-		    }
-	    }
-	return false;
-    }
 
 	private bool AtIdealPositional
     {
@@ -718,9 +693,9 @@ public sealed class RPR_Reborn : ReaperRotation
 	    }
     }
 
-    private static bool IsPartyBurst => PartyHasStatus(id => burstStatusIds.Contains(id));
+    private static bool IsPartyBurst => StatusHelper.AnyPartyMemberHasStatus(false, burstStatusIds);
 
-    private static bool IsPartyMedicated => PartyHasStatus(id => id == (uint)StatusID.Medicated);
+    private static bool IsPartyMedicated => StatusHelper.AnyPartyMemberHasStatus(false, StatusID.Medicated);
 	
 	private bool ArcaneCircleSoon =>
 	!HasArcaneCircle

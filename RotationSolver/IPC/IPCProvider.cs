@@ -177,11 +177,9 @@ namespace RotationSolver.IPC
 		[EzIPC]
 		public void ActionCommand(string action, float time)
 		{
-			var combinedString = $"{action}-{time}";
-
 			if (!DataCenter.IsPvP)
 			{
-				RSCommands.DoActionCommand($"{combinedString}");
+				RSCommands.DoActionCommand((action ?? string.Empty).Trim(), Math.Round(time, 3));
 			}
 			PluginLog.Debug($"IPC ActionCommand was called. Action Name:{action}, Time:{time}");
 		}
