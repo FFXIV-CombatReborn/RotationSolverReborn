@@ -1,4 +1,4 @@
-﻿using RotationSolver.IPC;
+﻿using RotationSolver.Integrations.IPC;
 
 namespace RotationSolver.Updaters;
 

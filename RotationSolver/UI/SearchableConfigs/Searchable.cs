@@ -3,7 +3,6 @@ using ECommons.ExcelServices;
 using Lumina.Excel.Sheets;
 using RebornMaterial;
 using RotationSolver.Commands;
-using RotationSolver.Data;
 
 namespace RotationSolver.UI.SearchableConfigs;
 

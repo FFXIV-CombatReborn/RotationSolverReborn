@@ -15,6 +15,38 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 	public string GetName() => $"{job.Name} Rotation".ToPascalCase();
 
 	/// <summary>
+	/// Gets the namespace for this job rotation.
+	/// </summary>
+	/// <returns>The namespace name.</returns>
+	public string GetNamespace() => job.Abbreviation.ToString() switch
+	{
+		"PLD" => "RotationSolver.Rotations.Tank.Paladin",
+		"WAR" => "RotationSolver.Rotations.Tank.Warrior",
+		"DRK" => "RotationSolver.Rotations.Tank.DarkKnight",
+		"GNB" => "RotationSolver.Rotations.Tank.Gunbreaker",
+		"WHM" => "RotationSolver.Rotations.Healer.WhiteMage",
+		"SCH" => "RotationSolver.Rotations.Healer.Scholar",
+		"AST" => "RotationSolver.Rotations.Healer.Astrologian",
+		"SGE" => "RotationSolver.Rotations.Healer.Sage",
+		"MNK" => "RotationSolver.Rotations.Melee.Monk",
+		"DRG" => "RotationSolver.Rotations.Melee.Dragoon",
+		"NIN" => "RotationSolver.Rotations.Melee.Ninja",
+		"SAM" => "RotationSolver.Rotations.Melee.Samurai",
+		"RPR" => "RotationSolver.Rotations.Melee.Reaper",
+		"VPR" => "RotationSolver.Rotations.Melee.Viper",
+		"BRD" => "RotationSolver.Rotations.Ranged.Bard",
+		"MCH" => "RotationSolver.Rotations.Ranged.Machinist",
+		"DNC" => "RotationSolver.Rotations.Ranged.Dancer",
+		"BLM" => "RotationSolver.Rotations.Magical.BlackMage",
+		"SMN" => "RotationSolver.Rotations.Magical.Summoner",
+		"RDM" => "RotationSolver.Rotations.Magical.RedMage",
+		"PCT" => "RotationSolver.Rotations.Magical.Pictomancer",
+		"BLU" => "RotationSolver.Rotations.Limited.BlueMage",
+		"BST" => "RotationSolver.Rotations.Limited.Beastmaster",
+		_ => "RotationSolver.Rotations",
+	};
+
+	/// <summary>
 	/// Generates the rotation code.
 	/// </summary>
 	/// <returns>The generated rotation code.</returns>
@@ -30,6 +62,8 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 		var traitsCode = traitsGetter.GetCode();
 
 		return $$"""
+     namespace {{GetNamespace()}}
+     {
      /// <summary>
      /// <see href="https://na.finalfantasyxiv.com/jobguide/{{jobName?.Replace(" ", "").ToLower()}}"><strong>{{jobName}}</strong></see>
      /// <br>Number of Actions: {{rotationsGetter.Count}}</br>
@@ -60,6 +94,7 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
      {{Util.ArrayNames("AllTraits", "IBaseTrait",
 		 "public override", [.. traitsGetter.AddedNames]).Table()}}
      #endregion
+     }
      }
      """;
 	}

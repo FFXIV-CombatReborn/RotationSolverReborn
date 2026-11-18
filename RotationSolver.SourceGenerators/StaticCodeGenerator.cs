@@ -40,7 +40,7 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	private static void GenerateOpCode(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
-			namespace RotationSolver.Basic.Data;
+			namespace RotationSolver.Engine.Data;
 
 			/// <summary>
 			/// The opcode
@@ -61,7 +61,7 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	private static void GenerateStatus(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
-			namespace RotationSolver.Basic.Data;
+			namespace RotationSolver.Engine.Data;
 			
 			/// <summary>
 			/// The id of the status.
@@ -82,7 +82,7 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	private static void GenerateContentType(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
-			namespace RotationSolver.Basic.Data;
+			namespace RotationSolver.Engine.Data;
 
 			/// <summary>
 			/// 
@@ -103,7 +103,7 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	private static void GenerateActionCate(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
-			namespace RotationSolver.Basic.Data;
+			namespace RotationSolver.Engine.Data;
 
 			/// <summary>
 			/// 
@@ -124,7 +124,7 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	private static void GenerateBNpcNameID(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
-			namespace RotationSolver.Basic.Data;
+			namespace RotationSolver.Engine.Data;
 
 			/// <summary>
 			/// The id of the BNpc name.
@@ -145,7 +145,7 @@ public class StaticCodeGenerator : IIncrementalGenerator
 	private static void GenerateActionID(IncrementalGeneratorPostInitializationContext context)
 	{
 		var code = $$"""
-			namespace RotationSolver.Basic.Data;
+			namespace RotationSolver.Engine.Data;
 
 			/// <summary>
 			/// The id of the status.

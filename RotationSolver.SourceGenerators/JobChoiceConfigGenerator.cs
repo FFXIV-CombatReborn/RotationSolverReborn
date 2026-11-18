@@ -10,7 +10,7 @@ public class JobChoiceConfigGenerator : IIncrementalGenerator
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
 		var provider = context.SyntaxProvider.ForAttributeWithMetadataName(
-			"RotationSolver.Basic.Attributes.JobChoiceConfigAttribute",
+			"RotationSolver.Engine.Attributes.JobChoiceConfigAttribute",
 			static (node, _) => node is VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: FieldDeclarationSyntax { Parent: ClassDeclarationSyntax or StructDeclarationSyntax } } },
 			static (n, ct) => ((VariableDeclaratorSyntax)n.TargetNode, n.SemanticModel))
 			.Where(m => m.Item1 != null);
@@ -20,14 +20,18 @@ public class JobChoiceConfigGenerator : IIncrementalGenerator
 
 	private void Execute(SourceProductionContext context, ImmutableArray<(VariableDeclaratorSyntax, SemanticModel SemanticModel)> array)
 	{
-		var typeGroups = array.GroupBy(variable => variable.Item1.Parent!.Parent!.Parent!);
-
-		foreach (var group in typeGroups)
+		var typeGroups = array.GroupBy(variable =>
 		{
-			var type = (TypeDeclarationSyntax)group.Key;
+			var type = (TypeDeclarationSyntax)variable.Item1.Parent!.Parent!.Parent!;
 			var namespaceName = type.GetParent<BaseNamespaceDeclarationSyntax>()?.Name.ToString() ?? "Null";
 			var classType = type is ClassDeclarationSyntax ? "class" : "struct";
 			var className = type.Identifier.Text;
+			return (namespaceName, classType, className);
+		});
+
+		foreach (var group in typeGroups)
+		{
+			var (namespaceName, classType, className) = group.Key;
 
 			var propertyCodes = new List<string>();
 			foreach ((var variableInfo, var model) in group)
@@ -58,11 +62,11 @@ public class JobChoiceConfigGenerator : IIncrementalGenerator
 						foreach (var attr in attrSet.Attributes)
 						{
 							var name = model.GetSymbolInfo(attr).Symbol?.GetFullMetadataName();
-							if (name is "RotationSolver.Basic.Attributes.UIAttribute"
-								or "RotationSolver.Basic.Attributes.UnitAttribute"
-								or "RotationSolver.Basic.Attributes.RangeAttribute"
-								or "RotationSolver.Basic.Attributes.JobChoiceConfigAttribute"
-								or "RotationSolver.Basic.Attributes.LinkDescriptionAttribute")
+							if (name is "RotationSolver.Engine.Attributes.UIAttribute"
+								or "RotationSolver.Engine.Attributes.UnitAttribute"
+								or "RotationSolver.Engine.Attributes.RangeAttribute"
+								or "RotationSolver.Engine.Attributes.JobChoiceConfigAttribute"
+								or "RotationSolver.Engine.Attributes.LinkDescriptionAttribute")
 							{
 								attributeNames.Add(attr.ToString());
 							}

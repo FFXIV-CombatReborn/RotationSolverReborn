@@ -1,6 +1,4 @@
 using RebornMaterial;
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Data;
 using RotationSolver.UI.SearchableConfigs;
 
 namespace RotationSolver.UI;

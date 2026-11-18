@@ -8,8 +8,6 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using ECommons.Reflection;
 using RebornMaterial;
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Data;
 
 namespace RotationSolver.UI;
 

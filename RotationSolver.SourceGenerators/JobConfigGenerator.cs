@@ -19,7 +19,7 @@ public class JobConfigGenerator : IIncrementalGenerator
 	{
 		var provider = context.SyntaxProvider
 			.ForAttributeWithMetadataName(
-				"RotationSolver.Basic.Attributes.JobConfigAttribute",
+				"RotationSolver.Engine.Attributes.JobConfigAttribute",
 				static (node, _) => node is VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: FieldDeclarationSyntax { Parent: ClassDeclarationSyntax or StructDeclarationSyntax } } },
 				static (n, ct) => ((VariableDeclaratorSyntax)n.TargetNode, n.SemanticModel))
 			.Where(m => m.Item1 != null);
@@ -29,10 +29,14 @@ public class JobConfigGenerator : IIncrementalGenerator
 
 	private void Execute(SourceProductionContext context, ImmutableArray<(VariableDeclaratorSyntax, SemanticModel SemanticModel)> array)
 	{
-		var dict = new Dictionary<SyntaxNode, List<(VariableDeclaratorSyntax, SemanticModel)>>();
+		var dict = new Dictionary<(string NameSpace, string ClassType, string ClassName), List<(VariableDeclaratorSyntax, SemanticModel)>>();
 		foreach (var entry in array)
 		{
-			var key = entry.Item1.Parent!.Parent!.Parent!;
+			var type = (TypeDeclarationSyntax)entry.Item1.Parent!.Parent!.Parent!;
+			var namespaceName = type.GetParent<BaseNamespaceDeclarationSyntax>()?.Name.ToString() ?? "Null";
+			var classType = type is ClassDeclarationSyntax ? "class" : "struct";
+			var className = type.Identifier.Text;
+			var key = (namespaceName, classType, className);
 			if (!dict.TryGetValue(key, out var list))
 			{
 				list = [];
@@ -43,15 +47,11 @@ public class JobConfigGenerator : IIncrementalGenerator
 
 		foreach (var kv in dict)
 		{
-			var type = (TypeDeclarationSyntax)kv.Key;
-			var namespaceName = type.GetParent<BaseNamespaceDeclarationSyntax>()?.Name.ToString() ?? "Null";
-			var classType = type is ClassDeclarationSyntax ? "class" : "struct";
-			var className = type.Identifier.Text;
+			var (namespaceName, classType, className) = kv.Key;
 
 			var propertyCodes = new List<string>();
 			foreach ((var variableInfo, var model) in kv.Value)
 			{
-				var typeSymbol = model.GetDeclaredSymbol(type) as ITypeSymbol;
 				var field = (FieldDeclarationSyntax)variableInfo.Parent!.Parent!;
 				var variableName = variableInfo.Identifier.ToString();
 				var propertyName = variableName.ToPascalCase();
@@ -84,11 +84,11 @@ public class JobConfigGenerator : IIncrementalGenerator
 					foreach (var attr in attrSet.Attributes)
 					{
 						var attrSymbol = model.GetSymbolInfo(attr).Symbol?.GetFullMetadataName();
-						if (attrSymbol is "RotationSolver.Basic.Attributes.UIAttribute"
-							or "RotationSolver.Basic.Attributes.UnitAttribute"
-							or "RotationSolver.Basic.Attributes.RangeAttribute"
-							or "RotationSolver.Basic.Attributes.JobConfigAttribute"
-							or "RotationSolver.Basic.Attributes.LinkDescriptionAttribute")
+						if (attrSymbol is "RotationSolver.Engine.Attributes.UIAttribute"
+							or "RotationSolver.Engine.Attributes.UnitAttribute"
+							or "RotationSolver.Engine.Attributes.RangeAttribute"
+							or "RotationSolver.Engine.Attributes.JobConfigAttribute"
+							or "RotationSolver.Engine.Attributes.LinkDescriptionAttribute")
 						{
 							attributeNames.Add(attr.ToString());
 						}
