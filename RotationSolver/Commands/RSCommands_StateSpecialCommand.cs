@@ -1,7 +1,7 @@
 ﻿using Dalamud.Game.Config;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
-using RotationSolver.IPC;
+using RotationSolver.Integrations.IPC;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.Commands

@@ -28,9 +28,9 @@
       },
       "RebornMaterial": {
         "type": "Direct",
-        "requested": "[7.5.8.1, )",
-        "resolved": "7.5.8.1",
-        "contentHash": "lLFc0gHAKw8Br4IMIf+0C4D+W1QMO7J59cC0URMbzBqSpdT/qPSi+ogIwerFybmfunAs8+N8FQgXevStBSEkOA=="
+        "requested": "[7.5.8.2, )",
+        "resolved": "7.5.8.2",
+        "contentHash": "2AK+TzWYvcMKFbrJVCZhN8X5ISHvGzACQtWEcLusjpmjbSiNefkCkNt5Uw+sYjcyrjUlBt1Rzt3/7HjgpLZWVQ=="
       }
     }
   }

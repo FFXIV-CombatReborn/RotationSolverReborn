@@ -13,7 +13,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="RebornMaterial" Version="7.5.8.1" />
+		<PackageReference Include="RebornMaterial" Version="7.5.8.2" />
 		<PackageReference Update="DotNet.ReproducibleBuilds" Version="2.0.5" />
 		<Reference Include="Dalamud.Common" Private="false" />
 		<ProjectReference Include="..\RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
@@ -24,14 +24,19 @@
 		<Using Include="System.ComponentModel" />
 		<Using Include="Dalamud.Game.ClientState.JobGauge.Types" />
 		<Using Include="Dalamud.Game.ClientState.Objects.Types" />
-		<Using Include="RotationSolver.Basic" />
-		<Using Include="RotationSolver.Basic.Actions" />
-		<Using Include="RotationSolver.Basic.Attributes" />
-		<Using Include="RotationSolver.Basic.Configuration.RotationConfig" />
-		<Using Include="RotationSolver.Basic.Data" />
-		<Using Include="RotationSolver.Basic.Helpers" />
-		<Using Include="RotationSolver.Basic.Rotations" />
-		<Using Include="RotationSolver.Basic.Rotations.Basic" />
+		<Using Include="RotationSolver.Engine" />
+		<Using Include="RotationSolver.Engine.Actions" />
+		<Using Include="RotationSolver.Engine.Attributes" />
+		<Using Include="RotationSolver.Engine.Data" />
+		<Using Include="RotationSolver.Engine.Data.Resources" />
+		<Using Include="RotationSolver.Engine.Helpers" />
+		<Using Include="RotationSolver.Engine.State" />
+		<Using Include="RotationSolver.Engine.Traits" />
+		<Using Include="RotationSolver.Engine.Tweaks" />
+		<Using Include="RotationSolver.Configuration" />
+		<Using Include="RotationSolver.Configuration.RotationConfig" />
+		<Using Include="RotationSolver.Rotations" />
+		<Using Include="RotationSolver.Rotations.Duties" />
 		<Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
 		<Using Include="Dalamud.Interface" />
 		<Using Include="Dalamud.Bindings.ImGui" />

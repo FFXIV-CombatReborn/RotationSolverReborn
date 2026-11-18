@@ -61,9 +61,9 @@ namespace RotationSolver.GameData
 				var rotationItemCodes = rotationItems.GetCode();
 
 				WriteResource("Action", $$"""
-                using RotationSolver.Basic.Actions;
+                using RotationSolver.Engine.Actions;
 
-                namespace RotationSolver.Basic.Rotations;
+                namespace RotationSolver.Rotations;
                 
                 /// <summary>
                 /// The Custom Rotation.
@@ -91,9 +91,9 @@ namespace RotationSolver.GameData
 				rotationCodes = dutyRotationBase.GetCode();
 
 				WriteResource("DutyAction", $$"""
-                using RotationSolver.Basic.Actions;
+                using RotationSolver.Engine.Actions;
 
-                namespace RotationSolver.Basic.Rotations.Duties;
+                namespace RotationSolver.Rotations.Duties;
                 
                 /// <summary>
                 /// The Custom Rotation.
@@ -108,10 +108,8 @@ namespace RotationSolver.GameData
 				var header = """
             using ECommons.DalamudServices;
             using ECommons.ExcelServices;
-            using RotationSolver.Basic.Actions;
-            using RotationSolver.Basic.Traits;
-
-            namespace RotationSolver.Basic.Rotations.Basic;
+            using RotationSolver.Engine.Actions;
+            using RotationSolver.Engine.Traits;
 
             """;
 

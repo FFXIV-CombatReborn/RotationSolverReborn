@@ -4,7 +4,6 @@ using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using RebornMaterial;
-using RotationSolver.Data;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.UI;

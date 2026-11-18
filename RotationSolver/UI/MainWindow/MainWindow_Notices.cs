@@ -1,7 +1,6 @@
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using RebornMaterial;
-using RotationSolver.Data;
 
 namespace RotationSolver.UI;
 
@@ -10,10 +9,9 @@ public partial class MainWindow
 	private static readonly string[] _supporters =
 	[
 	"????",
-	"Juju",
 	"3Some",
-	"ABA",
 	"Akurosuki",
+	"Alkeid",
 	"Armerun",
 	"catfourteen",
 	"Chaos_co",
@@ -21,11 +19,12 @@ public partial class MainWindow
 	"Drama",
 	"Endings",
 	"Enyo",
+	"everybodysdeath",
 	"ExiledxSnake",
 	"fishsticks",
 	"Frozyn",
+	"Gambit79",
 	"Headrushed",
-	"Hex",
 	"Jayhow",
 	"kaen",
 	"Kaspil",
@@ -41,8 +40,6 @@ public partial class MainWindow
 	"Plogons",
 	"Preset",
 	"prismagreen",
-	"Radium226",
-	"sinbad",
 	"smf26",
 	"Twoshoes",
 	"Utterly Hopeless!",

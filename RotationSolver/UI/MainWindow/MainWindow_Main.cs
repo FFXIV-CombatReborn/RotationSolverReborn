@@ -2,8 +2,6 @@ using Dalamud.Interface.Utility.Raii;
 using ECommons.DalamudServices;
 using ECommons.Logging;
 using RebornMaterial;
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Data;
 using System.Diagnostics;
 
 namespace RotationSolver.UI;
@@ -194,7 +192,7 @@ public partial class MainWindow
 
 	private static void DisplayCommandHelp<T>(T commandType) where T : Enum
 	{
-		commandType.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+		commandType.DisplayCommandHelp(getHelp: Engine.Data.EnumExtensions.GetDescription);
 	}
 
 	private static void DrawAboutCompatibility()

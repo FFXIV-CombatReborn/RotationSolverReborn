@@ -61,10 +61,10 @@
   <data name="Value" xml:space="preserve">
     <value>using ECommons.DalamudServices;
 using ECommons.ExcelServices;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Traits;
-
-namespace RotationSolver.Basic.Rotations.Basic;
+using RotationSolver.Engine.Actions;
+using RotationSolver.Engine.Traits;
+namespace RotationSolver.Rotations.Tank.Paladin
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/paladin"&gt;&lt;strong&gt;paladin&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 55&lt;/br&gt;
@@ -1572,7 +1572,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; PhalanxPvP;
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Melee.Monk
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/monk"&gt;&lt;strong&gt;monk&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 54&lt;/br&gt;
@@ -3047,7 +3050,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; MeteodrivePvP;
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Tank.Warrior
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/warrior"&gt;&lt;strong&gt;warrior&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 46&lt;/br&gt;
@@ -4343,7 +4349,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; PrimalScreamPv
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Melee.Dragoon
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/dragoon"&gt;&lt;strong&gt;dragoon&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 46&lt;/br&gt;
@@ -5614,7 +5623,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; SkyHighPvP;
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Ranged.Bard
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/bard"&gt;&lt;strong&gt;bard&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 46&lt;/br&gt;
@@ -6910,7 +6922,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; FinalFantasiaP
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Healer.WhiteMage
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/whitemage"&gt;&lt;strong&gt;white mage&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 45&lt;/br&gt;
@@ -8173,7 +8188,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; AfflatusPurgat
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Magical.BlackMage
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/blackmage"&gt;&lt;strong&gt;black mage&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 54&lt;/br&gt;
@@ -9648,7 +9666,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; SoulResonanceP
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Magical.Summoner
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/summoner"&gt;&lt;strong&gt;summoner&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 96&lt;/br&gt;
@@ -12104,7 +12125,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; SummonBahamutP
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Healer.Scholar
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/scholar"&gt;&lt;strong&gt;scholar&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 54&lt;/br&gt;
@@ -13564,7 +13588,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; SeraphismPvP;
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Melee.Ninja
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/ninja"&gt;&lt;strong&gt;ninja&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 73&lt;/br&gt;
@@ -15476,7 +15503,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; SeitonTenchuPv
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Ranged.Machinist
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/machinist"&gt;&lt;strong&gt;machinist&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 52&lt;/br&gt;
@@ -16925,7 +16955,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; MarksmansSpite
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Tank.DarkKnight
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/darkknight"&gt;&lt;strong&gt;dark knight&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 49&lt;/br&gt;
@@ -18265,7 +18298,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; EventidePvP;
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Healer.Astrologian
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/astrologian"&gt;&lt;strong&gt;astrologian&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 63&lt;/br&gt;
@@ -19962,7 +19998,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; CelestialRiver
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Melee.Samurai
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/samurai"&gt;&lt;strong&gt;samurai&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 54&lt;/br&gt;
@@ -21427,7 +21466,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; ZantetsukenPvP
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Magical.RedMage
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/redmage"&gt;&lt;strong&gt;red mage&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 59&lt;/br&gt;
@@ -23007,7 +23049,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; SouthernCrossP
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Limited.BlueMage
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/bluemage"&gt;&lt;strong&gt;blue mage&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 131&lt;/br&gt;
@@ -26090,7 +26135,10 @@ public abstract partial class BlueMageRotation : CustomRotation
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Tank.Gunbreaker
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/gunbreaker"&gt;&lt;strong&gt;gunbreaker&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 55&lt;/br&gt;
@@ -27573,7 +27621,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; RelentlessRush
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Ranged.Dancer
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/dancer"&gt;&lt;strong&gt;dancer&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 59&lt;/br&gt;
@@ -29158,7 +29209,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; ContradancePvP
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Melee.Reaper
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/reaper"&gt;&lt;strong&gt;reaper&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 55&lt;/br&gt;
@@ -30641,7 +30695,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; TenebraeLemuru
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Healer.Sage
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/sage"&gt;&lt;strong&gt;sage&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 50&lt;/br&gt;
@@ -32019,7 +32076,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; MesotesPvP;
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Melee.Viper
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/viper"&gt;&lt;strong&gt;viper&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 75&lt;/br&gt;
@@ -33957,7 +34017,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; Worldswallower
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Magical.Pictomancer
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/pictomancer"&gt;&lt;strong&gt;pictomancer&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 69&lt;/br&gt;
@@ -35772,7 +35835,10 @@ private sealed protected override IBaseAction LimitBreakPvP =&gt; AdventOfChocob
     ];
 #endregion
 }
+}
 
+namespace RotationSolver.Rotations.Limited.Beastmaster
+{
 /// &lt;summary&gt;
 /// &lt;see href="https://na.finalfantasyxiv.com/jobguide/beastmaster"&gt;&lt;strong&gt;beastmaster&lt;/strong&gt;&lt;/see&gt;
 /// &lt;br&gt;Number of Actions: 47&lt;/br&gt;
@@ -36962,6 +37028,7 @@ public abstract partial class BeastmasterRotation : CustomRotation
     	..base.AllTraits,
     ];
 #endregion
+}
 }</value>
   </data>
 </root>

@@ -18,7 +18,7 @@ public class ConditionBoolGenerator : IIncrementalGenerator
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
 		var provider = context.SyntaxProvider.ForAttributeWithMetadataName(
-			"RotationSolver.Basic.Attributes.ConditionBoolAttribute",
+			"RotationSolver.Engine.Attributes.ConditionBoolAttribute",
 			static (node, _) => node is VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: FieldDeclarationSyntax { Parent: ClassDeclarationSyntax or StructDeclarationSyntax } } },
 			static (n, ct) => ((VariableDeclaratorSyntax)n.TargetNode, n.SemanticModel))
 			.Where(m => m.Item1 != null);
@@ -28,10 +28,14 @@ public class ConditionBoolGenerator : IIncrementalGenerator
 
 	private void Execute(SourceProductionContext context, ImmutableArray<(VariableDeclaratorSyntax, SemanticModel SemanticModel)> array)
 	{
-		var dict = new Dictionary<SyntaxNode, List<(VariableDeclaratorSyntax, SemanticModel)>>();
+		var dict = new Dictionary<(string NameSpace, string ClassType, string ClassName), List<(VariableDeclaratorSyntax, SemanticModel)>>();
 		foreach (var entry in array)
 		{
-			var key = entry.Item1.Parent!.Parent!.Parent!;
+			var type = (TypeDeclarationSyntax)entry.Item1.Parent!.Parent!.Parent!;
+			var nameSpace = type.GetParent<BaseNamespaceDeclarationSyntax>()?.Name.ToString() ?? "Null";
+			var classType = type is ClassDeclarationSyntax ? "class" : "struct";
+			var className = type.Identifier.Text;
+			var key = (nameSpace, classType, className);
 			if (!dict.TryGetValue(key, out var list))
 			{
 				list = [];
@@ -42,11 +46,7 @@ public class ConditionBoolGenerator : IIncrementalGenerator
 
 		foreach (var kv in dict)
 		{
-			var type = (TypeDeclarationSyntax)kv.Key;
-			var nameSpace = type.GetParent<BaseNamespaceDeclarationSyntax>()?.Name.ToString() ?? "Null";
-			var classType = type is ClassDeclarationSyntax ? "class" : "struct";
-			var className = type.Identifier.Text;
-
+			var (nameSpace, classType, className) = kv.Key;
 			var propertyCodes = GeneratePropertyCodes(kv.Value, context, nameSpace, className);
 
 			if (propertyCodes.Count == 0)
@@ -97,7 +97,7 @@ public class ConditionBoolGenerator : IIncrementalGenerator
 	private string GenerateClassCode(string nameSpace, string classType, string className, List<string> propertyCodes)
 	{
 		var sb = new StringBuilder();
-		sb.AppendLine("using RotationSolver.Basic.Data;");
+		sb.AppendLine("using RotationSolver.Engine.Data;");
 		sb.AppendLine();
 		sb.AppendLine($"namespace {nameSpace}");
 		sb.AppendLine("{");
@@ -130,10 +130,10 @@ public class ConditionBoolGenerator : IIncrementalGenerator
 			foreach (var attr in attrSet.Attributes)
 			{
 				if (model.GetSymbolInfo(attr).Symbol?.GetFullMetadataName()
-					is "RotationSolver.Basic.Attributes.UIAttribute"
-					or "RotationSolver.Basic.Attributes.UnitAttribute"
-					or "RotationSolver.Basic.Attributes.RangeAttribute"
-					or "RotationSolver.Basic.Attributes.LinkDescriptionAttribute")
+					is "RotationSolver.Engine.Attributes.UIAttribute"
+					or "RotationSolver.Engine.Attributes.UnitAttribute"
+					or "RotationSolver.Engine.Attributes.RangeAttribute"
+					or "RotationSolver.Engine.Attributes.LinkDescriptionAttribute")
 				{
 					names.Add(attr.ToString());
 				}

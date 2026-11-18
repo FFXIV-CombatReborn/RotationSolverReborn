@@ -2,9 +2,6 @@
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using RebornMaterial;
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Basic.Rotations.Duties;
-using RotationSolver.Data;
 using RotationSolver.Updaters;
 using System.Globalization;
 

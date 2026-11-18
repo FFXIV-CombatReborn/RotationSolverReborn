@@ -8,7 +8,7 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using RotationSolver.Commands;
-using RotationSolver.UI.HighlightTeachingMode;
+using RotationSolver.UI.TeachingMode;
 
 namespace RotationSolver.Updaters;
 

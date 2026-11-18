@@ -8,11 +8,7 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using ECommons.Reflection;
 using RebornMaterial;
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Basic.Rotations.Duties;
-using RotationSolver.Data;
-using RotationSolver.Helpers;
-using RotationSolver.IPC;
+using RotationSolver.Integrations.IPC;
 using RotationSolver.Updaters;
 using System.Text;
 

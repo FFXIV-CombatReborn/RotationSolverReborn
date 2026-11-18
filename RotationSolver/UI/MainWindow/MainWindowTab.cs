@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace RotationSolver.UI;
+﻿namespace RotationSolver.UI;
 
 [AttributeUsage(AttributeTargets.Field)]
 internal class TabSkipAttribute : Attribute

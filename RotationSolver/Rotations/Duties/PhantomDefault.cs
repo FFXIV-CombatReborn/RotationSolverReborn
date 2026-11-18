@@ -1,0 +1,1430 @@
+﻿namespace RotationSolver.Rotations.Duties;
+
+[Rotation("Phantom Jobs Loaded", CombatType.PvE)]
+
+public sealed class PhantomDefault : PhantomRotation
+{
+	#region Configs
+	[RotationConfig(CombatType.PvE, Name = "Save Phantom Attacks for class specific damage bonus?")]
+	public bool SaveForBurstWindow { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Prioritize Viper buff application and refresh over Phantom GCDs")]
+	public bool ViperTime { get; set; } = true;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "Player HP percent needed to use Occult Resuscitation", PhantomJob = PhantomJob.Freelancer)]
+	public float OccultResuscitationThreshold { get; set; } = 0.7f;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Occult Toad for AOE mitigation", PhantomJob = PhantomJob.BlackMage)]
+	public bool OccultToadUsage { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Drain Touch for DPS", PhantomJob = PhantomJob.Necromancer)]
+	public bool DrainTouchDPS { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Drain Touch for Heal", PhantomJob = PhantomJob.Necromancer)]
+	public bool DrainTouchHeal { get; set; } = false;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "HP threshold for using Drain Touch for Heal only", PhantomJob = PhantomJob.Necromancer)]
+	public float DrainTouchHealyOnlyThreshold { get; set; } = 0.5f;
+
+
+	[RotationConfig(CombatType.PvE, Name = "Use Drain Touch only in when low HP", PhantomJob = PhantomJob.Necromancer)]
+	public bool DrainTouchEmergencyOnly { get; set; } = false;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "HP threshold for using Drain Touch in emergency", PhantomJob = PhantomJob.Necromancer)]
+	public float DrainTouchEmergencyOnlyThreshold { get; set; } = 0.25f;
+
+	[RotationConfig(CombatType.PvE, Name = "How to handle Necromancer spells", PhantomJob = PhantomJob.Necromancer)]
+	public DrainTouchStatusStrategy DrainTouchStatusStrategyUsage { get; set; } = DrainTouchStatusStrategy.NoDrainTouch;
+
+	public enum DrainTouchStatusStrategy : byte
+	{
+		[Description("Only use while Drain Touch is active")]
+		DrainTouchOnly,
+
+		[Description("Do not use while Drain Touch is active ")]
+		NoDrainTouch,
+
+		[Description("Use spells regardless of Drain Touch status")]
+		EitherDrainTouch,
+	}
+
+	[RotationConfig(CombatType.PvE, Name = "Use Pledge on self", PhantomJob = PhantomJob.Knight)]
+	public bool PledgeSelf { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Phantom Judgement", PhantomJob = PhantomJob.Oracle)]
+	public bool PhantomJudgementUseage { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Cleansing", PhantomJob = PhantomJob.Oracle)]
+	public bool CleansingUseage { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Blessing", PhantomJob = PhantomJob.Oracle)]
+	public bool BlessingUseage { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Starfall", PhantomJob = PhantomJob.Oracle)]
+	public bool StarfallUseage { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Keep Defend on cooldown if you are at full stacks of Finishing Fervor", PhantomJob = PhantomJob.Gladiator)]
+	public bool KeepDefendOnCooldown { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Invulnerability for Starfall", PhantomJob = PhantomJob.Oracle)]
+	public bool SaveInvulnForStarfall { get; set; } = true;
+
+	[Range(1, 15, ConfigUnitType.Yalms)]
+	[RotationConfig(CombatType.PvE, Name = "Max distance you can be from target for Phantom Kick use (Danger, you will die)", PhantomJob = PhantomJob.Monk)]
+	public float PhantomKickDistance { get; set; } = 5f;
+
+	[Range(0, 10000, ConfigUnitType.None, 1)]
+	[RotationConfig(CombatType.PvE, Name = "Your MP needed to use Occult Chakra", PhantomJob = PhantomJob.Monk)]
+	public int OccultChakraMPThreshold { get; set; } = 3000;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "Your HP percentage needed to use Occult Chakra", PhantomJob = PhantomJob.Monk)]
+	public float OccultChakraHPThreshold { get; set; } = 0.3f;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Dark Cannon or Shock Cannon in cases where the mob is immune to both blind and paralysis", PhantomJob = PhantomJob.Cannoneer)]
+	public DarkShockCannonImmuneStrategy DarkShockCannonImmuneUsage { get; set; } = DarkShockCannonImmuneStrategy.DarkCannon;
+
+	public enum DarkShockCannonImmuneStrategy : byte
+	{
+		[Description("Dark Cannon")]
+		DarkCannon,
+
+		[Description("Shock Cannon")]
+		ShockCannon,
+	}
+
+	[RotationConfig(CombatType.PvE, Name = "Use Dark Cannon or Shock Cannon in cases where the mob is susceptible to both blind and paralysis", PhantomJob = PhantomJob.Cannoneer)]
+	public DarkShockCannonStrategy DarkShockCannonUsage { get; set; } = DarkShockCannonStrategy.DarkCannon;
+
+	public enum DarkShockCannonStrategy : byte
+	{
+		[Description("Dark Cannon")]
+		DarkCannon,
+
+		[Description("Shock Cannon")]
+		ShockCannon,
+	}
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "Average party HP percent to predict to heal with judgement instead of damage things", PhantomJob = PhantomJob.Oracle)]
+	public float PredictJudgementThreshold { get; set; } = 0.7f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "Average party HP percent to predict to heal instead of damage things", PhantomJob = PhantomJob.Oracle)]
+	public float PredictBlessingThreshold { get; set; } = 0.5f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "Average party HP percent needed to use Occult Elixir", PhantomJob = PhantomJob.Chemist)]
+	public float OccultElixirThreshold { get; set; } = 0.3f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "Target HP percent needed to use Occult Potion", PhantomJob = PhantomJob.Chemist)]
+	public float OccultPotionThreshold { get; set; } = 0.5f;
+
+	[RotationConfig(CombatType.PvE, Name = "Only use Occult Potion on self", PhantomJob = PhantomJob.Chemist)]
+	public bool OccultPotionSelf { get; set; } = true;
+
+	[Range(0, 10000, ConfigUnitType.None, 1)]
+	[RotationConfig(CombatType.PvE, Name = "Target MP needed to use Occult Ether", PhantomJob = PhantomJob.Chemist)]
+	public int OccultEtherThreshold { get; set; } = 2000;
+
+	[RotationConfig(CombatType.PvE, Name = "Only use Occult Ether on self", PhantomJob = PhantomJob.Chemist)]
+	public bool OccultEtherSelf { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Suspend out of combat", PhantomJob = PhantomJob.Geomancer)]
+	public bool SuspendOut { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "Use Suspend in combat", PhantomJob = PhantomJob.Geomancer)]
+	public bool SuspendIn { get; set; } = false;
+
+	#endregion
+
+	readonly HashSet<IBaseAction> _remainingCards = new(4);
+	private IBaseAction? _currentCard = null;
+
+	public override void DisplayDutyStatus()
+	{
+		base.DisplayDutyStatus();
+		if (string.Equals(ActivePhantomJob, "Oracle", StringComparison.OrdinalIgnoreCase))
+		{
+			ImGui.Text($"Remaining Cards: {_remainingCards.Count}");
+		}
+	}
+
+	public override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+	{
+		if (VigilancePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (HandleOraclePrediction(nextGCD, out act))
+		{
+			return true;
+		}
+
+		return base.EmergencyAbility(nextGCD, out act);
+	}
+
+	public override bool EmergencyGCD(IAction? nextGCD, out IAction? act)
+	{
+		if (HandleOraclePrediction(nextGCD, out act))
+		{
+			return true;
+		}
+
+		return base.EmergencyGCD(nextGCD, out act);
+	}
+
+	public override bool InterruptAbility(IAction nextGCD, out IAction? act)
+	{
+		if (HasLockoutStatus)
+		{
+			return base.InterruptAbility(nextGCD, out act);
+		}
+
+		if (OccultFalconPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (CleansingPvE.CanUse(out act)) // Technically this is an interrupt but it probably won't come up often
+		{
+			return true;
+		}
+
+		if (RomeosBalladPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.InterruptAbility(nextGCD, out act);
+	}
+
+	public override bool DispelAbility(IAction nextGCD, out IAction? act)
+	{
+		if (HasLockoutStatus)
+		{
+			return base.DispelAbility(nextGCD, out act);
+		}
+
+		if (RecuperationPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.DispelAbility(nextGCD, out act);
+	}
+
+	public override bool GeneralAbility(IAction nextGCD, out IAction? act)
+	{
+		if (HasLockoutStatus)
+		{
+			return base.GeneralAbility(nextGCD, out act);
+		}
+
+		if (InCombat && SmokePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (InCombat && MagicShellPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (InCombat && KeepDefendOnCooldown && StatusHelper.PlayerHasStatus(true, StatusID.FinishingFervor) && StatusHelper.PlayerStatusStack(true, StatusID.FinishingFervor) == 4 && DefendPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (BattleBellPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (RingingRespitePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (InCombat && HerosRimePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (InCombat && OffensiveAriaPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (InCombat && PhantomAimPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (InCombat && DancePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (!IsMoving && OccultSprintPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (SuspendPvE.CanUse(out act))
+		{
+			if (!InCombat && SuspendOut)
+			{
+				return true;
+			}
+			if (InCombat && SuspendIn)
+			{
+				return true;
+			}
+		}
+
+		if (OccultEtherPvE.CanUse(out act) && InCombat)
+		{
+			if (!OccultEtherSelf)
+			{
+				if (OccultEtherPvE.Target.Target.CurrentMp < OccultEtherThreshold)
+				{
+					return true;
+				}
+			}
+			else
+			{
+				if (OccultEtherPvE.CanUse(out act, targetOverride: TargetType.Self) && (Player?.CurrentMp < OccultEtherThreshold))
+				{
+					return true;
+				}
+			}
+		}
+
+		if (OccultChakraPvE.CanUse(out act) && InCombat)
+		{
+			if (Player?.CurrentMp < OccultChakraMPThreshold)
+			{
+				return true;
+			}
+		}
+
+		return base.GeneralAbility(nextGCD, out act);
+	}
+
+	public override bool AttackAbility(IAction nextGCD, out IAction? act)
+	{
+		if (HasLockoutStatus)
+		{
+			return base.AttackAbility(nextGCD, out act);
+		}
+		#region Utility/Non-scaling abilities that don't care about burst
+		if (PhantomDoomPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (StealPvE.CanUse(out act))
+		{
+			return true;
+		}
+		#endregion Utility/Non-scaling abilities that don't care about burst
+
+		#region Burst abilities
+		if (ShouldHoldBurst())
+		{
+			return base.AttackAbility(nextGCD, out act);
+		}
+
+		if (DrainTouchDPS && DrainTouchPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (DrainTouchEmergencyOnly && DrainTouchPvE.CanUse(out act))
+		{
+			if (Player?.GetHealthRatio() <= DrainTouchEmergencyOnlyThreshold)
+			{
+				return true;
+			}
+		}
+
+		if (DrainTouchHeal && DrainTouchPvE.CanUse(out act))
+		{
+			if (Player?.GetHealthRatio() <= DrainTouchHealyOnlyThreshold)
+			{
+				return true;
+			}
+		}
+
+		if (OccultLibraPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (LancePvE.CanUse(out act, skipStatusProvideCheck: true))
+		{
+			return true;
+		}
+
+		if (NinjaLevel > 0)
+		{
+			if (FumaShurikenPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (LightningScrollPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (FlameScrollPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (FlameScrollPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+
+			if (LightningScrollPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+		}
+
+		if (PhantomKickPvE.CanUse(out act))
+		{
+			if (PhantomKickPvE.Target.Target.DistanceToPlayer() <= PhantomKickDistance)
+			{
+				return true;
+			}
+		}
+
+		if (MesmerizePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (PilferWeaponPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (OccultCounterPvE.CanUse(out act, checkActionManager: true))
+		{
+			return true;
+		}
+		#endregion Burst abilities
+
+		return base.AttackAbility(nextGCD, out act);
+	}
+
+	public override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
+	{
+		if (HasLockoutStatus)
+		{
+			return base.DefenseSingleAbility(nextGCD, out act);
+		}
+
+		if (InCombat && StatusHelper.PlayerHasStatus(true, StatusHelper.TankStanceStatus) && DefendPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (OccultBlinkPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (KnightLevel >= 6)
+		{
+			if (!PledgeSelf)
+			{
+				if (PledgePvE.CanUse(out act, targetOverride: TargetType.BeAttacked))
+				{
+					return true;
+				}
+			}
+			if (PledgeSelf)
+			{
+				if (PledgePvE.CanUse(out act))
+				{
+					return true;
+				}
+			}
+		}
+
+		if (PhantomGuardPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (InvulnerabilityPvE.CanUse(out act) && !SaveInvulnForStarfall)
+		{
+			return true;
+		}
+
+		if (ShirahadoriPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.DefenseSingleAbility(nextGCD, out act);
+	}
+
+	public override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
+	{
+		if (HasLockoutStatus)
+		{
+			return base.DefenseAreaAbility(nextGCD, out act);
+		}
+
+		if (ImagePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (QuickstepPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (SteadfastStancePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (DefendPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (MightyMarchPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (OccultUnicornPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (PhantomRejuvenationPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (OccultMageMasherPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (TrapDetectionPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (ShirahadoriPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.DefenseAreaAbility(nextGCD, out act);
+	}
+
+	public override bool HealSingleAbility(IAction nextGCD, out IAction? act)
+	{
+		if (HasLockoutStatus)
+		{
+			return base.HealSingleAbility(nextGCD, out act);
+		}
+
+		if (OccultHealPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (BlessingUseage && BlessingPvE.CanUse(out act) && (PartyMembersAverHP < PredictBlessingThreshold || Player?.GetHealthRatio() < PredictBlessingThreshold)) // Phantom heal gets a larger threshold than normal healing
+		{
+			return true;
+		}
+
+		if (PhantomJudgementUseage && (PartyMembersAverHP < PredictJudgementThreshold || Player?.GetHealthRatio() < PredictJudgementThreshold) && PhantomJudgmentPvE.CanUse(out act)) // Heal the party or self if we're below the heal + damage threshold
+		{
+			return true;
+		}
+
+		if (OccultPotionPvE.CanUse(out act) && InCombat)
+		{
+			if (!OccultPotionSelf)
+			{
+				if (OccultPotionPvE.Target.Target.GetHealthRatio() < OccultPotionThreshold)
+				{
+					return true;
+				}
+			}
+			else
+			{
+				if (OccultPotionPvE.CanUse(out act, targetOverride: TargetType.Self) && Player?.GetHealthRatio() < OccultPotionThreshold)
+				{
+					return true;
+				}
+			}
+		}
+
+		if (OccultChakraPvE.CanUse(out act) && InCombat)
+		{
+			if (Player?.GetHealthRatio() < OccultChakraHPThreshold)
+			{
+				return true;
+			}
+		}
+
+		return base.HealSingleAbility(nextGCD, out act);
+	}
+
+	public override bool HealAreaAbility(IAction nextGCD, out IAction? act)
+	{
+		if (HasLockoutStatus)
+		{
+			return base.HealAreaAbility(nextGCD, out act);
+		}
+
+		if (BlessingUseage && BlessingPvE.CanUse(out act) && (PartyMembersAverHP < PredictBlessingThreshold || Player?.GetHealthRatio() < PredictBlessingThreshold)) // Phantom heal gets a larger threshold than normal healing
+		{
+			return true;
+		}
+
+		if (PhantomJudgementUseage && (PartyMembersAverHP < PredictJudgementThreshold || Player?.GetHealthRatio() < PredictJudgementThreshold) && PhantomJudgmentPvE.CanUse(out act)) // Heal the party or self if we're below the heal + damage threshold
+		{
+			return true;
+		}
+
+		if (OccultElixirPvE.CanUse(out act))
+		{
+			if (InCombat && (PartyMembersAverHP < OccultElixirThreshold))
+			{
+				return true;
+			}
+		}
+
+		return base.HealAreaAbility(nextGCD, out act);
+	}
+
+	public override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+	{
+		if (HasLockoutStatus)
+		{
+			return base.MoveForwardAbility(nextGCD, out act);
+		}
+
+		if (OccultFeatherfootPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		//if (StepForthPvE.CanUse(out act))
+		//{
+		//	return true;
+		//}
+
+		//if (StepForthPvE_50473.CanUse(out act))
+		//{
+		//	return true;
+		//}
+
+		//if (StepForthPvE_50474.CanUse(out act))
+		//{
+		//	return true;
+		//}
+
+		//if (StepForthPvE_50475.CanUse(out act))
+		//{
+		//	return true;
+		//}
+
+		//if (StepForthPvE_50476.CanUse(out act))
+		//{
+		//	return true;
+		//}
+
+		if (OccultFeatherfootPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.MoveForwardAbility(nextGCD, out act);
+	}
+
+	public override bool MyInterruptGCD(out IAction? act)
+	{
+		if (HasLockoutStatus || (ViperTime && NeedsViperBuffs))
+		{
+			return base.MyInterruptGCD(out act);
+		}
+
+		if (MineuchiPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.MyInterruptGCD(out act);
+	}
+
+	public override bool RaiseGCD(out IAction? act)
+	{
+		if (HasLockoutStatus || (ViperTime && NeedsViperBuffs))
+		{
+			return base.RaiseGCD(out act);
+		}
+
+		if (OccultRaisePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (RevivePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.RaiseGCD(out act);
+	}
+
+	public override bool HealSingleGCD(out IAction? act)
+	{
+		if (HasLockoutStatus || (ViperTime && NeedsViperBuffs))
+		{
+			return base.HealSingleGCD(out act);
+		}
+
+		if (OccultResuscitationPvE.CanUse(out act))
+		{
+			if (Player?.GetHealthRatio() < OccultResuscitationThreshold)
+			{
+				return true;
+			}
+		}
+
+		if (OccultCureIiPvE_49093.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (OccultCureIiPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (PrayPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.HealSingleGCD(out act);
+	}
+
+	public override bool HealAreaGCD(out IAction? act)
+	{
+		if (HasLockoutStatus || (ViperTime && NeedsViperBuffs))
+		{
+			return base.HealAreaGCD(out act);
+		}
+
+		if (OccultWhiteWindPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (OccultCureIiiPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (SunbathPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (CloudyCaressPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.HealAreaGCD(out act);
+	}
+
+	public override bool DefenseSingleGCD(out IAction? act)
+	{
+		if (HasLockoutStatus || (ViperTime && NeedsViperBuffs))
+		{
+			return base.DefenseSingleGCD(out act);
+		}
+
+		if (PrayPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.DefenseSingleGCD(out act);
+	}
+
+	public override bool DefenseAreaGCD(out IAction? act)
+	{
+		if (HasLockoutStatus || (ViperTime && NeedsViperBuffs))
+		{
+			return base.DefenseAreaGCD(out act);
+		}
+
+		if (OccultMightyGuardPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (OccultToadUsage && OccultToadPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (EarthenWallPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (CloudyCaressPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (BlessedRainPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return base.DefenseAreaGCD(out act);
+	}
+
+	public override bool GeneralGCD(out IAction? act)
+	{
+		if (HasLockoutStatus || StatusHelper.PlayerHasStatus(true, StatusID.Reassembled) || (ViperTime && NeedsViperBuffs))
+		{
+			return base.GeneralGCD(out act);
+		}
+
+		if (ShouldHoldBurst())
+		{
+			return base.GeneralGCD(out act);
+		}
+
+		if (InCombat && AetherialGainPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (!InCombat && HastyMiragePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (InCombat && OccultDispelPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (NecromancerLevel > 0)
+		{
+			if ((DrainTouchStatusStrategyUsage == DrainTouchStatusStrategy.EitherDrainTouch) || (DrainTouchStatusStrategyUsage == DrainTouchStatusStrategy.DrainTouchOnly && HasDrainTouch) || (DrainTouchStatusStrategyUsage == DrainTouchStatusStrategy.NoDrainTouch && !HasDrainTouch))
+			{
+				if (ChaosDrivePvE.CanUse(out act))
+				{
+					return true;
+				}
+
+				if (HellWindPvE.CanUse(out act))
+				{
+					return true;
+				}
+
+				if (DeepFreezePvE.CanUse(out act))
+				{
+					return true;
+				}
+
+				if (DoomsdayPvE.CanUse(out act))
+				{
+					return true;
+				}
+
+				if (NecromancerLevel < 3)
+				{
+					if (DeepFreezePvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+					{
+						return true;
+					}
+				}
+
+				if (NecromancerLevel < 4)
+				{
+					if (DeepFreezePvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+					{
+						if (StatusHelper.HasStatus(DeepFreezePvE.Target.Target, false, StatusID.LightningWeakness))
+						{
+							return true;
+						}
+					}
+				}
+
+				if (DeepFreezePvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+				{
+					if (StatusHelper.HasStatus(DeepFreezePvE.Target.Target, false, StatusID.FireWeakness))
+					{
+						return true;
+					}
+				}
+			}
+		}
+
+		if (RedMageLevel > 0)
+		{
+			if (OccultBlizzardIiPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (OccultThunderIiPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (OccultFireIiPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (RedMageLevel <= 3)
+			{
+				if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+				{
+					return true;
+				}
+			}
+
+			if (RedMageLevel < 4)
+			{
+				if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+				{
+					if (StatusHelper.HasStatus(OccultFireIiPvE.Target.Target, false, StatusID.IceWeakness))
+					{
+						return true;
+					}
+				}
+			}
+
+			if (RedMageLevel < 5)
+			{
+				if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+				{
+					if (StatusHelper.HasStatus(OccultFireIiPvE.Target.Target, false, StatusID.LightningWeakness))
+					{
+						return true;
+					}
+				}
+			}
+
+			if (OccultFireIiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				if (StatusHelper.HasStatus(OccultFireIiPvE.Target.Target, false, StatusID.WindWeakness))
+				{
+					return true;
+				}
+			}
+		}
+
+		if (BlueMageLevel > 0)
+		{
+			if (OccultMissilePvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (OccultAquaBreathPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (OccultAeroIiiPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (OccultAeroIiPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (OccultAeroPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		if (SummonerLevel > 0)
+		{
+			if (MegaflarePvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (ThunderstormPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (JudgmentBoltPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (HellfirePvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (ThunderstormPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+
+			if (JudgmentBoltPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+
+			if (HellfirePvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+		}
+
+		if (BlackMageLevel > 0)
+		{
+			if (OccultFlarePvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (OccultFireIiiPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (OccultBlizzardIiiPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (OccultThunderIiiPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (OccultThunderIiiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+
+			if (OccultBlizzardIiiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+
+			if (OccultFireIiiPvE.CanUse(out act, skipTargetStatusNeedCheck: true))
+			{
+				return true;
+			}
+		}
+
+		if (OccultJumpPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (OccultHolyPvE.CanUse(out act, skipAoeCheck: true))
+		{
+			return true;
+		}
+
+		if (DeadlyBlowPvE.CanUse(out act, skipComboCheck: true)) // Ideally we want to use this in burst windows, but 30 second cooldown means we can use it outside of burst windows too
+		{
+			if (BerserkerLevel == 2)
+			{
+				return true;
+			}
+			if (BerserkerLevel >= 3 && (!RagePvE.IsEnabled || StatusHelper.PlayerWillStatusEndGCD(1, 0, true, StatusID.PentupRage) || (RagePvE.Cooldown.IsCoolingDown && !StatusHelper.PlayerHasStatus(true, StatusID.PentupRage))))
+			{
+				return true;
+			}
+		}
+
+		if (InCombat && OccultQuickPvE.CanUse(out act) && !StatusHelper.PlayerHasStatus(true, StatusID.Manafication) && !StatusHelper.PlayerHasStatus(true, StatusID.Embolden) && !StatusHelper.PlayerHasStatus(true, StatusID.MagickedSwordplay) && !StatusHelper.PlayerHasStatus(true, StatusID.GrandImpactReady))
+		{
+			return true;
+		}
+
+		if (BlazingSpellbladePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (HolySpellbladePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (SunderingSpellbladePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (PhantomSwordDancePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (TemptingTangoPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (JitterbugPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (MysteryWaltzPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (FinisherPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (LongReachPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (BladeblitzPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (ZeninagePvE.CanUse(out act, skipComboCheck: true))
+		{
+			return true;
+		}
+
+		if (InCombat && PredictPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (SilverCannonPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (HolyCannonPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (InCombat)
+		{
+			// logic if both cannons effects can be used on target
+			if (ShockCannonPvE.CanUse(out _) && DarkCannonPvE.CanUse(out _))
+			{
+				if (DarkShockCannonUsage == DarkShockCannonStrategy.DarkCannon && DarkCannonPvE.CanUse(out act))
+				{
+					return true;
+				}
+				if (DarkShockCannonUsage == DarkShockCannonStrategy.ShockCannon && ShockCannonPvE.CanUse(out act))
+				{
+					return true;
+				}
+			}
+
+			// logic for each cannon effect seperately
+			if (DarkCannonPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (ShockCannonPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			// logic if neither cannons effects can be used on target
+			if ((CannoneerLevel < 4 || DarkShockCannonImmuneUsage == DarkShockCannonImmuneStrategy.DarkCannon) && CanUseOnHighHP(DarkCannonPvE, out act))
+			{
+				return true;
+			}
+			if (DarkShockCannonImmuneUsage == DarkShockCannonImmuneStrategy.ShockCannon && CanUseOnHighHP(ShockCannonPvE, out act))
+			{
+				return true;
+			}
+		}
+
+		if (PhantomFirePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (OccultCometPvE.CanUse(out act)) // Adding this to general swiftcast check is slightly more expensive for the many operations it will never be valid in
+		{
+			if (IsBLM && HasSwift)
+			{
+				return true;
+			}
+			if (IsRDM && HasSwift)
+			{
+				return true;
+			}
+			if (IsPLD && (StatusHelper.PlayerHasStatus(true, StatusID.Requiescat) || HasSwift))
+			{
+				return true;
+			}
+			if (!IsRDM && !IsPLD && !IsBLM)
+			{
+				return true;
+			}
+		}
+
+		if (IainukiPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (InCombat && CounterstancePvE.CanUse(out act))
+		{
+			return true; // Even if you're not directly being attacked this second, it's 1 GCD / minute for 15% less damage taken
+		}
+
+		return base.GeneralGCD(out act);
+	}
+
+	private bool HandleOraclePrediction(IAction? nextGCD, out IAction? act)
+	{
+		act = null;
+
+		if (OracleLevel == 0)
+		{
+			return false; // Not an oracle, don't bother doing all of this
+		}
+
+		if (nextGCD == PredictPvE)
+		{
+			// New prediction used by RSR, clear the deck
+			ResetDeck();
+			return false;
+		}
+
+		_currentCard ??= PredictPvE;
+
+		// Track the current card we're seeing and discard the previous card if it's changed
+		if (HasBlessing)
+		{
+			if (_currentCard != BlessingPvE) //card expired, remove the old card
+			{
+				_remainingCards.Remove(_currentCard);
+			}
+			_currentCard = BlessingPvE;
+		}
+		else if (HasCleansing)
+		{
+			if (_currentCard != CleansingPvE) //card expired, remove the old card
+			{
+				_remainingCards.Remove(_currentCard);
+			}
+			_currentCard = CleansingPvE;
+		}
+		else if (HasPhantomJudgment)
+		{
+			if (_currentCard != PhantomJudgmentPvE) //card expired, remove the old card
+			{
+				_remainingCards.Remove(_currentCard);
+			}
+			_currentCard = PhantomJudgmentPvE;
+		}
+		else if (HasStarfall)
+		{
+			if (_currentCard != StarfallPvE) //card expired, remove the old card
+			{
+				_remainingCards.Remove(_currentCard);
+			}
+			_currentCard = StarfallPvE;
+		}
+		else
+		{
+			return false; // We have no active cards, so we don't need to do anything
+		}
+
+		// Desired Card Actions before we get into forced actions
+		// Check starfall-invuln combo
+		if (StarfallUseage && StarfallPvE.CanUse(out act))
+		{
+			if (ShouldHoldBurst() && !StatusHelper.PlayerWillStatusEnd(3, false, StatusID.PredictionOfStarfall)) // If we're holding burst, we don't want to use starfall yet, but only to a point
+			{
+				return false;
+			}
+
+			if (HasTankInvuln) // already invuln'd
+			{
+				return true;
+			}
+
+			if (Player?.GetEffectiveHpPercent() > 90 && (!HasTankStance || Player?.GetEffectiveHpPercent() > 120) && (!SaveInvulnForStarfall || OracleLevel < 6)// Not the tank or won't kill ourselves (directly) and either can't or won't be invuln'ing self for this
+				&& !MergedStatus.HasFlag(AutoStatus.DefenseArea)) // And not getting hit with a raidwide
+			{
+				return true;
+			}
+		}
+
+		// Do the invuln part of the combo
+		if (StarfallUseage && InCombat && HasStarfall && SaveInvulnForStarfall && InvulnerabilityPvE.CanUse(out _))
+		{
+			// If we have starfall and can use Invulnerability and we've opted to save invuln for this we're going to make sure we use it on ourselves
+			if (InvulnerabilityPvE.CanUse(out act, targetOverride: TargetType.Self))
+			{
+				return true;
+			}
+		}
+
+		if (HasTankStance && (!SaveInvulnForStarfall || OracleLevel < 6)) // Tanking and either can't or won't invuln self
+		{
+			if (CleansingUseage && CleansingPvE.CanUse(out act)) // Cleansing is our highest potency option that doesn't rely on invulns
+			{
+				if (!ShouldHoldBurst() || StatusHelper.PlayerWillStatusEnd(3, true, StatusID.PredictionOfCleansing) || StatusHelper.PlayerWillStatusEnd(3, false, StatusID.PredictionOfCleansing))
+				{
+					return true;
+				}
+			}
+		}
+
+		// Otherwise we need to go through our cards
+		if (_remainingCards.Count == 1) // Last card! Play literally anything; if we screwed up starfall at least we go out with a bang
+		{
+			foreach (var card in _remainingCards)
+			{
+				return card.CanUse(out act); // If we can't use this for some reason, we're probably dead anyway
+			}
+		}
+
+		if (_remainingCards.Count == 2) // We have a little time but need to think it through
+		{
+			var hasStarfall = false;
+			foreach (var card in _remainingCards)
+			{
+				if (card == StarfallPvE)
+				{
+					hasStarfall = true;
+					break;
+				}
+			}
+
+			if (hasStarfall) // We still have a starfall in the deck
+			{
+				if (_currentCard == StarfallPvE) // We've opted not to use it above, so either we're below health threshold, or are tanking and not invuln
+				{
+					// Let's just wait it out, maybe we'll get enough health to use it. We've got a card left in case.
+					return false;
+				}
+
+				// Otherwise it must be the last card
+				if (OracleLevel >= 6 && !InvulnerabilityPvE.Cooldown.IsCoolingDown && SaveInvulnForStarfall) // We can use invuln, so this is fine
+				{
+					return false;
+				}
+
+				if (!InCombat //If we're not in combat and don't have starfall, use the current card
+					|| (HasTankStance && Player?.GetEffectiveHpPercent() < 120) // If we're tanking and got here we can't invuln and we don't seem safe enough to try this gimmick
+					|| (StatusHelper.PlayerStatusTime(false, GetStatusForAction(_currentCard)) < 3f && Player?.GetEffectiveHpPercent() <= 90)) // Or we don't have a lot of time and probably can't survive starfall
+				{
+					// We must need to use our current card
+					if (_currentCard.CanUse(out act))
+					{
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private void ResetDeck()
+	{
+		_remainingCards.Add(BlessingPvE);
+		_remainingCards.Add(CleansingPvE);
+		_remainingCards.Add(PhantomJudgmentPvE);
+		_remainingCards.Add(StarfallPvE);
+	}
+
+	private StatusID GetStatusForAction(IBaseAction card)
+	{
+		if (card == BlessingPvE)
+		{
+			return StatusID.PredictionOfBlessing;
+		}
+		else if (card == CleansingPvE)
+		{
+			return StatusID.PredictionOfCleansing;
+		}
+		else if (card == PhantomJudgmentPvE)
+		{
+			return StatusID.PredictionOfJudgment;
+		}
+		else if (card == StarfallPvE)
+		{
+			return StatusID.PredictionOfStarfall;
+		}
+
+		return StatusID.None;
+	}
+
+	private bool ShouldHoldBurst()
+	{
+		if (!SaveForBurstWindow)
+		{
+			return false;
+		}
+
+		return !InBurstWindow();
+	}
+
+	// For targets immune to the cannon's blind/paralysis: target by HP for this call only.
+	private static bool CanUseOnHighHP(IBaseAction action, out IAction? act)
+	{
+		var targetType = action.Setting.TargetType;
+		action.Setting.TargetType = TargetType.HighHP;
+		try
+		{
+			return action.CanUse(out act);
+		}
+		finally
+		{
+			action.Setting.TargetType = targetType;
+		}
+	}
+}
