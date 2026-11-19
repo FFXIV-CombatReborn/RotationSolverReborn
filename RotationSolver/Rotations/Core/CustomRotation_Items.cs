@@ -36,7 +36,11 @@ public partial class CustomRotation
 					mpPotions.Add(new MpPotionItem(i));
 				}
 
-				if ((isMedicineCategory && i.FilterGroup == 8) || i.RowId is 22306 or 47102 or 20309)
+				if (i.RowId is 22306 or 47102 or 20309)
+				{
+					hpPotions.Add(new HpPotionItem(i, true));
+				}
+				else if (isMedicineCategory && i.FilterGroup == 8)
 				{
 					hpPotions.Add(new HpPotionItem(i));
 				}
@@ -151,7 +155,12 @@ public partial class CustomRotation
 	private static bool UseMpPotion(IAction nextGCD, out IAction? act)
 	{
 		act = null;
-		if (!Service.Config.UseMpPotions)
+		if (DataCenter.IsPvP || !Service.Config.UseMpPotions)
+		{
+			return false;
+		}
+
+		if (!DataCenter.InCombat && !Service.Config.UseMpPotionsOutOfCombat)
 		{
 			return false;
 		}
@@ -176,50 +185,73 @@ public partial class CustomRotation
 
 	internal static HpPotionItem[] HpPotions => Consumables.HpPotions;
 
+	private static bool AnyLivingHealerInParty()
+	{
+		foreach (var member in DataCenter.PartyMembers)
+		{
+			if (member.IsJobCategory(JobRole.Healer) && !member.IsDead)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static bool CanUseRegenHpPotion(HpPotionItem potion)
+	{
+		return potion.ID switch
+		{
+			47102 => (DataCenter.IsInPilgrimsTraverse || DataCenter.IsInTheFinalVerse) && !StatusHelper.PlayerHasStatus(false, StatusID.Rehabilitation_4191),
+			22306 => DataCenter.IsInEurekaFieldOp && !StatusHelper.PlayerHasStatus(false, StatusID.Rehabilitation_648),
+			20309 => DataCenter.IsInPalaceOfTheDead && !StatusHelper.PlayerHasStatus(false, StatusID.Rehabilitation_648),
+			_ => false,
+		};
+	}
+
 	private static bool UseHpPotion(IAction nextGCD, out IAction? act)
 	{
 		act = null;
-		if (!Service.Config.UseHpPotions)
+		if (DataCenter.IsPvP || !Service.Config.UseHpPotions || DataCenter.IsTyrantCastingSpecialIndicator())
 		{
 			return false;
 		}
 
-		HpPotionItem? best = null;
-		foreach (var a in HpPotions)
+		if (DataCenter.InCombat)
 		{
-			if (a.ID != 47102 && a.ID != 22306 && a.ID != 20309 && a.CanUse(out _, true))
+			if (Service.Config.UseHpPotionsTimeToKill > 0f && !IsLongerThan(Service.Config.UseHpPotionsTimeToKill))
 			{
-				if (best == null || a.MaxHp >= best.MaxHp)
-				{
-					best = a;
-				}
-			}
-
-			if ((DataCenter.IsInPilgrimsTraverse || DataCenter.IsInTheFinalVerse) && a.ID == 47102 && a.CanUse(out _, true) && !StatusHelper.PlayerHasStatus(false, StatusID.Rehabilitation_4191))
-			{
-				if (best == null || a.MaxHp >= best.MaxHp)
-				{
-					best = a;
-				}
-			}
-
-			if (DataCenter.IsInEurekaFieldOp && a.ID == 22306 && !StatusHelper.PlayerHasStatus(false, StatusID.Rehabilitation_648) && a.CanUse(out _, true))
-			{
-				if (best == null || a.MaxHp >= best.MaxHp)
-				{
-					best = a;
-				}
-			}
-
-			if (DataCenter.IsInPalaceOfTheDead && a.ID == 20309 && !StatusHelper.PlayerHasStatus(false, StatusID.Rehabilitation_648) && a.CanUse(out _, true))
-			{
-				if (best == null || a.MaxHp >= best.MaxHp)
-				{
-					best = a;
-				}
+				return false;
 			}
 		}
-		act = best;
+		else if (!Service.Config.UseHpPotionsOutOfCombat)
+		{
+			return false;
+		}
+
+		if (Service.Config.UseHpPotionsOnlyWhenNoHealer && DataCenter.Role != JobRole.Healer && AnyLivingHealerInParty())
+		{
+			return false;
+		}
+
+		HpPotionItem? bestRegular = null;
+		foreach (var a in HpPotions)
+		{
+			if (a.IsRegenPotion)
+			{
+				if (CanUseRegenHpPotion(a) && a.CanUse(out _, true))
+				{
+					act = a;
+					return true;
+				}
+				continue;
+			}
+
+			if (a.CanUse(out _, true) && (bestRegular == null || a.MaxHp >= bestRegular.MaxHp))
+			{
+				bestRegular = a;
+			}
+		}
+		act = bestRegular;
 		return act != null;
 	}
 	#endregion

@@ -191,7 +191,7 @@ internal static class PluginCompatibility
 			Name = "Auto PVP Series Grind",
 			Icon = "https://raw.githubusercontent.com/XeldarAlz/FFXIV-AutoPVPSeriesGrind/master/AutoPvpSeriesGrind/Images/Icon.png",
 			Url = "https://github.com/XeldarAlz/FFXIV-AutoPVPSeriesGrind",
-			Features = "AI slop plugin that bot-farms PvP matches by driving RSR through its own chat commands; RSR blocks autorotation in PvP while this is enabled",
+			Features = "AI slop plugin that bot-farms PvP matches, it used to use RSR and break installs, now the author ripped off RSR code with his chatbot and is now a AI slop RSR clone; RSR blocks autorotation in PvP while this is enabled",
 			Type = CompatibleType.Broken | CompatibleType.Crash
 		}
 	];
