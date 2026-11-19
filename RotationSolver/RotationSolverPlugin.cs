@@ -1,6 +1,5 @@
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.DutyState;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using ECommons;
@@ -9,15 +8,13 @@ using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using Lumina.Excel.Sheets;
 using RebornMaterial;
-using RotationSolver.ActionTimeline;
-using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
-using RotationSolver.Data;
-using RotationSolver.IPC;
+using RotationSolver.Integrations.ActionTimeline;
+using RotationSolver.Integrations.IPC;
 using RotationSolver.UI;
-using RotationSolver.UI.ExtraWindows;
-using RotationSolver.UI.HighlightTeachingMode;
-using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
+using RotationSolver.UI.TeachingMode;
+using RotationSolver.UI.TeachingMode.ElementSpecial;
+using RotationSolver.UI.Windows;
 using RotationSolver.Updaters;
 using Player = ECommons.GameHelpers.Player;
 
@@ -42,8 +39,6 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 	public static string Name => "Rotation Solver Reborn";
 	internal static readonly List<DrawingHighlightHotbarBase> _drawingElements = [];
 
-	public static DalamudLinkPayload OpenLinkPayload { get; private set; } = null!;
-	public static DalamudLinkPayload? HideWarningLinkPayload { get; private set; }
 	private static readonly Random _random = new();
 
 	internal static IPCProvider IPCProvider { get; private set; } = null!;
@@ -119,6 +114,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		catch (Exception ex)
 		{
 			PluginLog.Warning($"Failed to load config: {ex.Message}");
+			BackupUnreadableConfig();
 			Service.Config = new Configs();
 		}
 
@@ -152,23 +148,23 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 			ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
 
 			ChangeUITranslation();
-
-			OpenLinkPayload = Svc.Chat.AddChatLinkHandler(0, (guid, seString) =>
-			{
-				if (guid == 0)
-				{
-					OpenConfigWindow();
-				}
-			});
-			HideWarningLinkPayload = Svc.Chat.AddChatLinkHandler(1, (guid, seString) =>
-			{
-				if (guid == 0)
-				{
-					Service.Config.HideWarning.Value = true;
-					Svc.Chat.Print("Warning has been hidden.");
-				}
-			});
 		}, CancellationToken.None);
+	}
+
+	private static void BackupUnreadableConfig()
+	{
+		try
+		{
+			var file = Svc.PluginInterface.ConfigFile;
+			if (File.Exists(file.FullName) && file.DirectoryName != null)
+			{
+				File.Copy(file.FullName, Path.Combine(file.DirectoryName, "RotationSolver_LoadFailed.json"), true);
+			}
+		}
+		catch (Exception ex)
+		{
+			PluginLog.Warning($"Failed to back up the unreadable config: {ex.Message}");
+		}
 	}
 
 	private static void DutyState_DutyCompleted(IDutyStateEventArgs e)
@@ -408,10 +404,6 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		Svc.DutyState.DutyWiped -= DutyState_DutyWiped;
 		Svc.DutyState.DutyCompleted -= DutyState_DutyCompleted;
 		Svc.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
-
-		Svc.Chat.RemoveChatLinkHandler();
-		OpenLinkPayload = null!;
-		HideWarningLinkPayload = null;
 
 		foreach (var item in _dis)
 		{

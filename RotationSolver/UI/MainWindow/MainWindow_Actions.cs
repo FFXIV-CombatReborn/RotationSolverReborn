@@ -4,14 +4,13 @@ using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using RebornMaterial;
-using RotationSolver.Data;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.UI;
 
 public partial class MainWindow
 {
-	private static unsafe void DrawActions()
+	private unsafe void DrawActions()
 	{
 		DrawPageIntro(UiString.ConfigWindow_Actions_Description.GetDescription());
 
@@ -124,7 +123,7 @@ public partial class MainWindow
 			DrawActionDebug();
 		}
 
-		static void DrawConfigsOfAction()
+		void DrawConfigsOfAction()
 		{
 			if (_activeAction == null)
 			{
@@ -142,54 +141,75 @@ public partial class MainWindow
 			ImGuiHelper.DrawHotKeysPopup(key, cmd);
 			ImGuiHelper.ReactPopupAt(enableHovered, key, false);
 
-			var isIntercepted = _activeAction.IsIntercepted;
-			if (M3Widgets.RowSwitch($"{UiString.ConfigWindow_Actions_IsIntercepted.GetDescription()}##{_activeAction.Name}", ref isIntercepted))
-			{
-				_activeAction.IsIntercepted = isIntercepted;
-			}
-
-			var minHPFeatureSet = _activeAction.MinHPFeature;
-			if (M3Widgets.RowSwitch($"{UiString.ConfigWindow_Actions_MinHPFeature.GetDescription()}##{_activeAction.Name}", ref minHPFeatureSet))
-			{
-				_activeAction.MinHPFeature = minHPFeatureSet;
-			}
-
-			if (_activeAction is IBaseAction movesAction &&
-			(movesAction.Setting.SpecialType == SpecialActionType.FixedDistanceMoveForward
-			|| movesAction.Setting.SpecialType == SpecialActionType.FixedDistanceMoveBackward
-			|| movesAction.Setting.SpecialType == SpecialActionType.HostileMovingForward
-			|| movesAction.Setting.SpecialType == SpecialActionType.FriendlyMovingForward
-			|| movesAction.Setting.SpecialType == SpecialActionType.HostileFriendlyMovingForward
-			|| movesAction.Setting.SpecialType == SpecialActionType.HostileMovingAttack
-			|| movesAction.Setting.SpecialType == SpecialActionType.ObjectBasedMovement))
-			{
-				var skipPosSafety = _activeAction.SkipPositionSafetyCheck;
-				if (M3Widgets.RowSwitch($"{UiString.ConfigWindow_Actions_SkipPositionSafetyCheck.GetDescription()}##{_activeAction.Name}", ref skipPosSafety))
-				{
-					_activeAction.SkipPositionSafetyCheck = skipPosSafety;
-				}
-			}
-
-			var isRestrictedDOT = _activeAction.IsRestrictedDOT;
-			if (M3Widgets.RowSwitch($"{UiString.ConfigWindow_Actions_IsRestrictedDOT.GetDescription()}##{_activeAction.Name}", ref isRestrictedDOT))
-			{
-				_activeAction.IsRestrictedDOT = isRestrictedDOT;
-			}
-
-			var minHPPercentSet = _activeAction.MinHPPercent;
-			if (_activeAction.MinHPFeature == true)
-			{
-				var minHPPercentUi = Math.Clamp(_activeAction.MinHPPercent * 100f, 0f, 100f);
-				if (M3Widgets.RowDragFloat($"{UiString.ConfigWindow_Actions_MinHPPercent.GetDescription()}##{_activeAction.Name}",
-					ref minHPPercentUi, 0f, 100f, $"{minHPPercentUi:F1}{ConfigUnitType.Percent.ToSymbol()}"))
-				{
-					_activeAction.MinHPPercent = Math.Clamp(minHPPercentUi / 100f, 0f, 1f);
-				}
-			}
-
 			if (_activeAction is IBaseAction a)
 			{
+				var isIntercepted = a.IsIntercepted;
+				if (M3Widgets.RowSwitch($"{UiString.ConfigWindow_Actions_IsIntercepted.GetDescription()}##{a.Name}", ref isIntercepted))
+				{
+					a.IsIntercepted = isIntercepted;
+				}
+
+				var minHPFeatureSet = a.MinHPFeature;
+				if (M3Widgets.RowSwitch($"{UiString.ConfigWindow_Actions_MinHPFeature.GetDescription()}##{a.Name}", ref minHPFeatureSet))
+				{
+					a.MinHPFeature = minHPFeatureSet;
+				}
+
+				if (a.Setting.SpecialType == SpecialActionType.FixedDistanceMoveForward
+				|| a.Setting.SpecialType == SpecialActionType.FixedDistanceMoveBackward
+				|| a.Setting.SpecialType == SpecialActionType.HostileMovingForward
+				|| a.Setting.SpecialType == SpecialActionType.FriendlyMovingForward
+				|| a.Setting.SpecialType == SpecialActionType.HostileFriendlyMovingForward
+				|| a.Setting.SpecialType == SpecialActionType.HostileMovingAttack
+				|| a.Setting.SpecialType == SpecialActionType.ObjectBasedMovement)
+				{
+					var skipPosSafety = a.SkipPositionSafetyCheck;
+					if (M3Widgets.RowSwitch($"{UiString.ConfigWindow_Actions_SkipPositionSafetyCheck.GetDescription()}##{a.Name}", ref skipPosSafety))
+					{
+						a.SkipPositionSafetyCheck = skipPosSafety;
+					}
+				}
+
+				var isRestrictedDOT = a.IsRestrictedDOT;
+				if (M3Widgets.RowSwitch($"{UiString.ConfigWindow_Actions_IsRestrictedDOT.GetDescription()}##{a.Name}", ref isRestrictedDOT))
+				{
+					a.IsRestrictedDOT = isRestrictedDOT;
+				}
+
+				if (a.MinHPFeature == true)
+				{
+					var minHPPercentUi = Math.Clamp(a.MinHPPercent * 100f, 0f, 100f);
+					if (M3Widgets.RowDragFloat($"{UiString.ConfigWindow_Actions_MinHPPercent.GetDescription()}##{a.Name}",
+						ref minHPPercentUi, 0f, 100f, $"{minHPPercentUi:F1}{ConfigUnitType.Percent.ToSymbol()}"))
+					{
+						a.MinHPPercent = Math.Clamp(minHPPercentUi / 100f, 0f, 1f);
+					}
+				}
+
 				DrawConfigsOfBaseAction(a);
+			}
+			else if (_activeAction is IBaseItem selectedItem)
+			{
+				var disabledMessage = selectedItem switch
+				{
+					HpPotionItem when !Service.Config.UseHpPotions => "HP potions are disabled in Auto > Item Usage and Control.",
+					MpPotionItem when !Service.Config.UseMpPotions => "MP potions are disabled in Auto > Item Usage and Control.",
+					PhoenixDownItem when !Service.Config.UsePhoenixDown => "Phoenix Down is disabled in Auto > Item Usage and Control.",
+					MedicineItem when DataCenter.CurrentTinctureUseType == TinctureUseType.Nowhere => "Tincture usage is disabled in Auto > Item Usage and Control.",
+					_ => null,
+				};
+
+				if (disabledMessage != null)
+				{
+					_ = M3Widgets.Banner($"##item_disabled_{selectedItem.ID}", disabledMessage, M3Severity.Warning, FontAwesomeIcon.Flask);
+				}
+
+				if (M3SettingRow.NavigationRow($"##open_item_usage_{selectedItem.ID}",
+					$"Open {GetFilterMenuPath(Configs.AutoItemUsage)}", null, FontAwesomeIcon.Flask, FontAwesomeIcon.ChevronRight,
+					M3.Scheme.Tertiary))
+				{
+					NavigateToFilter(Configs.AutoItemUsage);
+				}
 			}
 
 			ImGui.Separator();
@@ -360,6 +380,7 @@ public partial class MainWindow
 
 					if (item is HpPotionItem healPotionItem)
 					{
+						ImGui.Text("IsRegenPotion: " + healPotionItem.IsRegenPotion.ToString());
 						ImGui.Text("MaxHP:" + healPotionItem.MaxHp.ToString());
 					}
 				}

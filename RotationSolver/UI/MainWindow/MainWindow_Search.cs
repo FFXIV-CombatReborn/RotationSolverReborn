@@ -1,6 +1,4 @@
 using RebornMaterial;
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Data;
 using RotationSolver.UI.SearchableConfigs;
 
 namespace RotationSolver.UI;
@@ -68,6 +66,7 @@ public partial class MainWindow
 
 		[Configs.BasicAutoSwitch] = new(MainWindowTab.Auto, _autoHeader, UiString.ConfigWindow_Basic_AutoSwitch),
 		[Configs.AutoActionUsage] = new(MainWindowTab.Auto, _autoHeader, UiString.ConfigWindow_Auto_ActionUsage),
+		[Configs.AutoItemUsage] = new(MainWindowTab.Auto, _autoHeader, UiString.ConfigWindow_Auto_ItemUsage),
 		[Configs.AutoIntercept] = new(MainWindowTab.Auto, _autoHeader, UiString.ConfigWindow_Auto_Intercept),
 		[Configs.HealingActionCondition] = new(MainWindowTab.Auto, _autoHeader, UiString.ConfigWindow_Auto_HealingCondition),
 		[Configs.RaiseActionCondition] = new(MainWindowTab.Auto, _autoHeader, UiString.ConfigWindow_Auto_RaiseCondition),

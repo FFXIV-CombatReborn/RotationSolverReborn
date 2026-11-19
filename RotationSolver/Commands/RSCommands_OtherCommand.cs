@@ -2,9 +2,6 @@
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using RebornMaterial;
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Basic.Rotations.Duties;
-using RotationSolver.Data;
 using RotationSolver.Updaters;
 using System.Globalization;
 
@@ -459,7 +456,19 @@ public static partial class RSCommands
 		var actName = str[..lastHyphenIndex].Trim();
 		var timeStr = str[(lastHyphenIndex + 1)..].Trim();
 
-		if (double.TryParse(timeStr, out var time))
+		if (double.TryParse(timeStr, NumberStyles.Float, CultureInfo.InvariantCulture, out var time)
+			|| double.TryParse(timeStr, NumberStyles.Float, CultureInfo.CurrentCulture, out time))
+		{
+			DoActionCommand(actName, time, target);
+			return;
+		}
+
+		Svc.Chat.PrintError(UiString.CommandsInsertActionFailure.GetDescription());
+	}
+
+	internal static void DoActionCommand(string actName, double time, CommandTarget? target = null)
+	{
+		if (double.IsFinite(time))
 		{
 			var allActions = GetCommandableActions();
 			for (var i = 0; i < allActions.Length; i++)

@@ -1,6 +1,3 @@
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Data;
-
 namespace RotationSolver.UI;
 
 public partial class MainWindow

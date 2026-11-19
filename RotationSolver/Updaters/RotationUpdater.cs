@@ -2,8 +2,6 @@
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
-using RotationSolver.Basic.Rotations.Duties;
-using RotationSolver.Helpers;
 
 
 namespace RotationSolver.Updaters;
@@ -128,6 +126,13 @@ internal static class RotationUpdater
 		{
 			var jobId = kvp.Key;
 			Type[] rotations = [.. kvp.Value];
+			Array.Sort(rotations, static (a, b) =>
+			{
+				var aExtra = a.GetCustomAttribute<ExtraRotationAttribute>() != null;
+				var bExtra = b.GetCustomAttribute<ExtraRotationAttribute>() != null;
+				var extraCmp = aExtra.CompareTo(bExtra);
+				return extraCmp != 0 ? extraCmp : string.Compare(a.Name, b.Name, StringComparison.Ordinal);
+			});
 
 			result.Add(new CustomRotationGroup(jobId, rotations[0].GetCustomAttribute<JobsAttribute>(inherit: true)!.Jobs,
 				rotations));
@@ -436,7 +441,16 @@ internal static class RotationUpdater
 					var rotation = validCustomRotationsList[0];
 					foreach (var possibleRotation in validCustomRotationsList)
 					{
-						if (possibleRotation.GetType().FullName == desiredRotationName)
+						if (!possibleRotation.IsExtra())
+						{
+							rotation = possibleRotation;
+							break;
+						}
+					}
+
+					foreach (var possibleRotation in validCustomRotationsList)
+					{
+						if (MatchesRotationName(possibleRotation.GetType(), desiredRotationName))
 						{
 							rotation = possibleRotation;
 							break;
@@ -561,12 +575,24 @@ internal static class RotationUpdater
 	{
 		foreach (var r in types)
 		{
-			if (r.FullName == name)
+			if (MatchesRotationName(r, name))
 			{
 				return r;
 			}
 		}
 
 		return types.Length > 0 ? types[0] : null;
+	}
+
+	private static bool MatchesRotationName(Type type, string? name)
+	{
+		if (string.IsNullOrEmpty(name))
+		{
+			return false;
+		}
+
+		return type.FullName == name
+			|| type.Name == name
+			|| name.EndsWith("." + type.Name, StringComparison.Ordinal);
 	}
 }

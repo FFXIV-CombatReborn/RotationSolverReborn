@@ -4,9 +4,6 @@ using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using RebornMaterial;
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Data;
-using RotationSolver.Helpers;
 using RotationSolver.UI.SearchableConfigs;
 
 namespace RotationSolver.UI;
@@ -372,7 +369,7 @@ public partial class MainWindow
 
 			case RotationConfigFloat f:
 				{
-					if (!float.TryParse(config.Value, out var value))
+					if (!RotationConfigFloat.TryParseValue(config.Value, out var value))
 					{
 						break;
 					}

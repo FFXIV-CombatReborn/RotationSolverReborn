@@ -4,8 +4,8 @@ using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using RotationSolver.Commands;
-using RotationSolver.IPC;
-using RotationSolver.UI.HighlightTeachingMode;
+using RotationSolver.Integrations.IPC;
+using RotationSolver.UI.TeachingMode;
 
 namespace RotationSolver.Updaters;
 

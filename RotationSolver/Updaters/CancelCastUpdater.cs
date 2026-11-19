@@ -2,7 +2,6 @@
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using RotationSolver.Helpers;
 
 namespace RotationSolver.Updaters;
 

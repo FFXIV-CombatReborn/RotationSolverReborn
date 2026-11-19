@@ -1,6 +1,3 @@
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Data;
-
 namespace RotationSolver.UI;
 
 public partial class MainWindow
@@ -16,12 +13,14 @@ public partial class MainWindow
 		{
 			{ () => UiString.ConfigWindow_Basic_AutoSwitch.GetDescription(), DrawBasicAutoSwitch },
 			{ () => UiString.ConfigWindow_Auto_ActionUsage.GetDescription(), DrawActionUsageControl },
+			{ () => UiString.ConfigWindow_Auto_ItemUsage.GetDescription(), DrawItemUsageControl },
 			{ () => UiString.ConfigWindow_Auto_Intercept.GetDescription(), DrawIntercept },
 			{ () => UiString.ConfigWindow_Auto_HealingCondition.GetDescription(), DrawHealingActionCondition },
 			{ () => UiString.ConfigWindow_Auto_RaiseCondition.GetDescription(), DrawRaiseActionCondition },
 		},
 		(UiString.ConfigWindow_Basic_AutoSwitch, FontAwesomeIcon.ToggleOn),
 		(UiString.ConfigWindow_Auto_ActionUsage, FontAwesomeIcon.Bolt),
+		(UiString.ConfigWindow_Auto_ItemUsage, FontAwesomeIcon.Flask),
 		(UiString.ConfigWindow_Auto_Intercept, FontAwesomeIcon.HandPaper),
 		(UiString.ConfigWindow_Auto_HealingCondition, FontAwesomeIcon.Heartbeat),
 		(UiString.ConfigWindow_Auto_RaiseCondition, FontAwesomeIcon.Ankh));
@@ -35,6 +34,12 @@ public partial class MainWindow
 	{
 		DrawPageIntro(UiString.ConfigWindow_Auto_ActionUsage_Description.GetDescription());
 		_allSearchable.DrawItems(Configs.AutoActionUsage);
+	}
+
+	private static void DrawItemUsageControl()
+	{
+		DrawPageIntro(UiString.ConfigWindow_Auto_ItemUsage_Description.GetDescription());
+		_allSearchable.DrawItems(Configs.AutoItemUsage);
 	}
 
 	private static void DrawIntercept()

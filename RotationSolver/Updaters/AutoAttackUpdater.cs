@@ -4,7 +4,6 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using RotationSolver.Helpers;
 
 namespace RotationSolver.Updaters
 {
@@ -90,7 +89,7 @@ namespace RotationSolver.Updaters
 					return true;
 				}
 
-				if (Player.Object?.StatusList == null)
+				if (Player.Object == null)
 				{
 					return false;
 				}

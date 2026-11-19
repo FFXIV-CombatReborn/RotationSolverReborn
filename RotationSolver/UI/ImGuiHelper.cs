@@ -4,9 +4,7 @@ using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
-using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
-using RotationSolver.Data;
 
 namespace RotationSolver.UI;
 

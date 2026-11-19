@@ -2,7 +2,6 @@ using Dalamud.Interface.Utility.Raii;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
 using RebornMaterial;
-using RotationSolver.Data;
 
 namespace RotationSolver.UI.SearchableConfigs;
 

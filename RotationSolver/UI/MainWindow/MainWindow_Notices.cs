@@ -1,7 +1,6 @@
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using RebornMaterial;
-using RotationSolver.Data;
 
 namespace RotationSolver.UI;
 
@@ -10,10 +9,9 @@ public partial class MainWindow
 	private static readonly string[] _supporters =
 	[
 	"????",
-	"Juju",
 	"3Some",
-	"ABA",
 	"Akurosuki",
+	"Alkeid",
 	"Armerun",
 	"catfourteen",
 	"Chaos_co",
@@ -21,11 +19,12 @@ public partial class MainWindow
 	"Drama",
 	"Endings",
 	"Enyo",
+	"everybodysdeath",
 	"ExiledxSnake",
 	"fishsticks",
 	"Frozyn",
+	"Gambit79",
 	"Headrushed",
-	"Hex",
 	"Jayhow",
 	"kaen",
 	"Kaspil",
@@ -41,8 +40,6 @@ public partial class MainWindow
 	"Plogons",
 	"Preset",
 	"prismagreen",
-	"Radium226",
-	"sinbad",
 	"smf26",
 	"Twoshoes",
 	"Utterly Hopeless!",
@@ -75,7 +72,8 @@ public partial class MainWindow
 		"Target tab: tweak target selection, vision cone, engage behavior, and dummy/boss handling.",
 		"Target tab: set auto-targeting delays and movement action targeting.",
 		"Manage TargetingTypes via chat: /rotation Settings TargetingTypes add|remove <Type>.",
-		"Auto > Action Usage: allow/deny oGCDs, set AoE style, tinctures, interrupts, and True North.",
+		"Auto > Action Usage: allow/deny oGCDs, set AoE style, interrupts, and True North.",
+		"Auto > Item Usage: configure tinctures, HP/MP potions, and Phoenix Down.",
 		"Auto > Action Interception: choose which of your own presses RSR queues for you.",
 		"Auto > Healing: adjust thresholds and non-healer healing behavior.",
 		"Healer: customize Raise/Swiftcast and prioritization in Auto > Raise.",
@@ -119,7 +117,8 @@ public partial class MainWindow
 		"目标 标签页：调整目标选择、视野锥、接敌行为以及木桩/Boss 处理。",
 		"目标 标签页：设置 /rotation Cycle 行为和目标选择延迟。",
 		"通过聊天管理 TargetingTypes：/rotation Settings TargetingTypes add|remove <Type>。",
-		"自动 > 动作使用与控制：允许/禁止 oGCD，设置 AoE 风格、爆发药、打断和 True North。",
+		"自动 > 动作使用与控制：允许/禁止 oGCD，设置 AoE 风格、打断和 True North。",
+		"自动 > 物品使用与控制：配置爆发药、HP/MP 药水和凤凰尾。",
 		"自动 > 治疗用与控制：调整阈值和非治疗职业的治疗行为。",
 		"治疗职业：在 自动 > 治疗用与控制 中自定义 复活/即刻咏唱 和优先级。",
 		"地面 AoE：自动 > 治疗用与控制 中有选项可智能放置有益地面技能。",
@@ -152,7 +151,7 @@ public partial class MainWindow
 			return true;
 		}
 
-		if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Count > 0)
+		if (!Service.Config.HideWarning && DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Count > 0)
 		{
 			return true;
 		}
@@ -219,7 +218,7 @@ public partial class MainWindow
 				drewAnything = true;
 			}
 
-			if (DataCenter.SystemWarnings is { Count: > 0 })
+			if (!Service.Config.HideWarning && DataCenter.SystemWarnings is { Count: > 0 })
 			{
 				List<string> warningsToRemove = [];
 				var index = 0;

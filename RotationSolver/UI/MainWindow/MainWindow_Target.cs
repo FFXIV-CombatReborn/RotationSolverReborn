@@ -1,7 +1,5 @@
 using Dalamud.Game.ClientState.Keys;
 using RebornMaterial;
-using RotationSolver.Basic.Configuration;
-using RotationSolver.Data;
 
 namespace RotationSolver.UI;
 
