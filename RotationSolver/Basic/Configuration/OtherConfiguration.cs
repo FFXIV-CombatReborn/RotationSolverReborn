@@ -89,6 +89,8 @@ internal class OtherConfiguration
 	public static List<Job> TheBalancePriority = [];
 	public static List<Job> KardiaTankPriority = [];
 
+	public static List<Job> AdloquiumTankPriority = [];
+
 	public static RotationSolverRecord RotationSolverRecord = new();
 
 	private abstract class ListFile(string name)
@@ -379,6 +381,7 @@ internal class OtherConfiguration
 		new OrderList(nameof(TheSpearPriority), JobPriorityLists.TheSpearPriority, () => TheSpearPriority, v => TheSpearPriority = v),
 		new OrderList(nameof(TheBalancePriority), JobPriorityLists.TheBalancePriority, () => TheBalancePriority, v => TheBalancePriority = v),
 		new OrderList(nameof(KardiaTankPriority), JobPriorityLists.KardiaTankPriority, () => KardiaTankPriority, v => KardiaTankPriority = v),
+		new OrderList(nameof(AdloquiumTankPriority), JobPriorityLists.AdloquiumTankPriority, () => AdloquiumTankPriority, v => AdloquiumTankPriority = v),
 		new MapList<string>(nameof(NoHostileNames), TerritoryLists.NoHostileNames, () => NoHostileNames, v => NoHostileNames = v),
 		new MapList<string>(nameof(NoProvokeNames), TerritoryLists.NoProvokeNames, () => NoProvokeNames, v => NoProvokeNames = v),
 		new SetList(nameof(HostileCastingArea), ActionLists.HostileCastingArea, () => HostileCastingArea, v => HostileCastingArea = v, 41147, 41763),
@@ -498,6 +501,10 @@ internal class OtherConfiguration
 	public static Task SaveTheBalancePriority() => SaveList(nameof(TheBalancePriority));
 
 	public static Task SaveKardiaTankPriority() => SaveList(nameof(KardiaTankPriority));
+
+	public static void ResetAdloquiumTankPriority() => ResetFile(nameof(AdloquiumTankPriority));
+
+	public static Task SaveAdloquiumTankPriority() => SaveList(nameof(AdloquiumTankPriority));
 
 	public static Task SaveNoHostileNames() => SaveList(nameof(NoHostileNames));
 

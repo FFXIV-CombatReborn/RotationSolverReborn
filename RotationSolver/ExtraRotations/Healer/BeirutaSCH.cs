@@ -2,7 +2,8 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Healer;
 
-[Rotation("BeirutaSCH", CombatType.PvE, GameVersion = "7.45", RotationType = RotationType.Reborn, Description = "Semi-Automatic Savage/Ultimate rotation, need to used with CD planner or manual inputs")]
+[Rotation("BeirutaSCH", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn, Description =
+	"Savage/Ultimate Scholar. Damage and healing are automatic; mitigation comes from your CD planner or your own presses. AutoBurst off is enough to hold burst. Set Intercept to GCD only and leave ability intercept unticked, so your planner's oGCDs go straight through and any extra heal or shield GCD you press is queued. Questions? Ask @Beiruta on the RSR Discord. Hover each setting for details.")]
 [SourceCode(Path = "main/ExtraRotations/Healer/BeirutaSCH.cs")]
 [ExtraRotation]
 
@@ -10,126 +11,288 @@ public sealed class BeirutaSCH : ScholarRotation
 {
 	#region Config Options
 
-	[RotationConfig(CombatType.PvE, Name =
-		"Please note that this rotation is optimised for high-end encounters.\n" +
-		"• Only the actions listed in the description will be automatically used and everything else should be used manually or through CD planner\n" +
-		"• Please set Intercept to GCD usage only, and use Concitation manually where required\n" +
-		"• Disabling AutoBurst is sufficient if you need to delay burst timing in this rotation\n" +
-		"• Applying Protraction to yourself will be treated as a signal to prepare Deployment Tactics\n" +
-		"• Dissipation is used to make Energy Drain dump window aligned with bursts\n" +
-		"• Single-target GCD healing is not used in this rotation\n" +
-		"• When using the CD planner, please note that after using Dissipation, no fairy abilities or Seraphism can be used for 30 seconds\n" +
-		"• Without burst delay, this restriction will occur during the 30-second window at 0s and 180s then every multiple of 180s thereafter\n")]
-	public bool RotationNotes { get; set; } = true;
+	#region Utility
 
-	[RotationConfig(CombatType.PvE, Name = "Use all Energy Drain During Burst")]
-	public bool EnableEnergyDrainGatlingMode { get; set; } = true;
+	[RotationConfig(CombatType.PvE, Name = "[Utility] Ward Mode (right-click for the macro)", Tooltip =
+		"Turn it on for high-pressure phases: keeps the party shielded and heals sooner.\n" +
+		"- Succor / Concitation (Accession under Seraphism) whenever 4+ are unshielded.\n" +
+		"- AoE thresholds use real HP and ignore the co-healer and HoTs.\n" +
+		"- Fairy order: Fey Blessing > Whispering Dawn > Indomitability.\n" +
+		"Auto turns off on death, zone change and countdown.")]
+	public bool WardMode { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "Use first stack of Consolation ASAP when Seraph is out")]
-	public bool UseFirstConsolationAsapWhenSeraphIsOut { get; set; } = true;
+	#endregion
 
-	[RotationConfig(CombatType.PvE, Name = "Use Swiftcast for movement")]
-	public bool UseSwiftcastForMovement { get; set; } = true;
+	#region Prepull
 
-	[RotationConfig(CombatType.PvE, Name = "Use Swiftcast on Adloquium")]
-	public bool UseSwiftcastOnAdloquium { get; set; } = true;
+	[RotationConfig(CombatType.PvE, Name = "[Prepull] Countdown shield", Tooltip =
+		"What SCH puts up during the countdown. Deployment options spread the Adloquium shield to the party; Recitation makes it critical.")]
+	public CountdownOpenerStrategy CountdownOpener { get; set; } = CountdownOpenerStrategy.RecitationAdloquiumDeploymentTactics;
 
-	[Range(0, 5, ConfigUnitType.Seconds, 0.1f)]
-	[RotationConfig(CombatType.PvE, Name = "Minimum movement time before allowing movement-based actions")]
-	public float MovementTimeThreshold { get; set; } = 0.9f;
-
-	[RotationConfig(CombatType.PvE, Name = "Lock healing actions while Macrocosmos is active")]
-	public bool LockHealingActionsDuringMacrocosmos { get; set; } = true;
-
-	[RotationConfig(CombatType.PvE, Name = "Prioritise Aetherflow before Dissipation")]
-	public bool PrioritizeAetherflowOverDissipation { get; set; } = false;
-
-	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "Party HP percent threshold to use Emergency Tactics with Succor")]
-	public float EmergencyTacticsHeal { get; set; } = 0.4f;
-
-	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "Average party HP percent to use Consolation")]
-	public float ConsolationHeal { get; set; } = 0.8f;
-
-	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "Average party HP percent to prioritize Indomitability and instant heals over heal-over-time effects")]
-	public float EmergencyHealPercent { get; set; } = 0.1f;
-
-	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "Average party HP percent to use Whispering Dawn or Angel's Whisper")]
-	public float WhisperingDawnHeal { get; set; } = 0.6f;
-
-	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "Average party HP percent to use Fey Blessing when Whispering Dawn or Angel's Whisper is missing")]
-	public float FeyBlessingHeal { get; set; } = 0.7f;
-
-	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "Average party HP percent to use Indomitability")]
-	public float IndomitabilityHeal { get; set; } = 0.3f;
-
-	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "Minimum average party HP required before using single-target oGCDs on non-tanks")]
-	public float SingleAbilityNonTankPartyAverageGate { get; set; } = 0.8f;
-
-	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "Average party HP percent to use Emergency Tactics Succor in HealAreaGCD")]
-	public float HealAreaGcdEmergencyTacticsHeal { get; set; } = 0.3f;
-
-	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "Average party HP percent to use Accession in HealAreaGCD")]
-	public float HealAreaGcdAccessionHeal { get; set; } = 0.6f;
-
-	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "Average party HP percent to use Accession in HealAreaGCD while moving and not under Emergency Tactics")]
-	public float HealAreaGcdMovingAccessionHeal { get; set; } = 0.8f;
-
-	[Range(0, 10000, ConfigUnitType.None)]
-	[RotationConfig(CombatType.PvE, Name = "Minimum MP before prioritizing emergency healing and rezzing (willing to use Seraphism sooner)")]
-	public int EmergencyHealingMPThreshold { get; set; } = 2000;
-
-	[RotationConfig(CombatType.PvE, Name = "Enable Swiftcast restriction: only allow Raise while Swiftcast is active")]
-	public bool SwiftLogic { get; set; } = true;
-
-	[RotationConfig(CombatType.PvE, Name = "Countdown opener configuration")]
-	public CountdownOpenerStrategy CountdownOpener { get; set; } =
-	CountdownOpenerStrategy.RecitationAdloquiumDeploymentTactics;
+	[RotationConfig(CombatType.PvE, Name = "    > Adloquium tank pick", Tooltip =
+		"Which tank gets the countdown Adloquium. The priority list is Adloquium Tank Priority, below these settings.")]
+	public CountdownTankPickStrategy CountdownTankPick { get; set; } = CountdownTankPickStrategy.Stance;
 
 	public enum CountdownOpenerStrategy : byte
 	{
-		[Description("Recitation - Adloquium - Deployment Tactics")]
-		RecitationAdloquiumDeploymentTactics = 0,
+		[Description("None")]
+		None = 0,
+
+		[Description("Adloquium on main tank")]
+		AdloquiumMainTank = 1,
+
+		[Description("Adloquium on both tanks")]
+		AdloquiumBothTanks = 2,
 
 		[Description("Adloquium - Deployment Tactics")]
-		AdloquiumDeploymentTactics = 1,
+		AdloquiumDeploymentTactics = 3,
+
+		[Description("Recitation - Adloquium - Deployment Tactics")]
+		RecitationAdloquiumDeploymentTactics = 4,
 
 		[Description("Concitation/Succor")]
-		ConcitationOrSuccor = 2,
+		ConcitationOrSuccor = 5,
 
 		[Description("Recitation - Concitation/Succor")]
-		RecitationConcitationOrSuccor = 3,
-
-		[Description("None (no defensive countdown actions)")]
-		None = 4,
+		RecitationConcitationOrSuccor = 6,
 	}
 
-	[RotationConfig(CombatType.PvE, Name = "How to control Deployment Tactics usage")]
-	public DeploymentTacticsUsageStrategy DeploymentTacticsUsage { get; set; } = DeploymentTacticsUsageStrategy.ProtractionControl;
+	public enum CountdownTankPickStrategy : byte
+	{
+		[Description("Stance first, then priority list")]
+		Stance,
 
-	[RotationConfig(CombatType.PvE, Name = "Only use Deployment Tactics on Critical Shields?")]
+		[Description("Priority list only")]
+		PriorityList,
+	}
+
+	#endregion
+
+	#region Opener
+
+	[RotationConfig(CombatType.PvE, Name = "[Opener] First Chain Stratagem", Tooltip =
+		"When the first Chain Stratagem goes out (needs AutoBurst).\n" +
+		"0s: sent just before the countdown ends, then Biolysis, then Dissipation / Aetherflow in its two weave windows.")]
+	public ChainStratagemOpenerTiming ChainStratagemOpener { get; set; } = ChainStratagemOpenerTiming.FiveSeconds;
+
+	public enum ChainStratagemOpenerTiming : byte
+	{
+		[Description("0s")]
+		ZeroSeconds,
+
+		[Description("3s")]
+		ThreeSeconds,
+
+		[Description("5s")]
+		FiveSeconds,
+	}
+
+	#endregion
+
+	#region Damage
+
+	[RotationConfig(CombatType.PvE, Name = "[Damage] Use potion")]
+	public bool UsePotion { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > First potion", Parent = nameof(UsePotion), Tooltip =
+		"Opener: during the countdown. 2 minutes: the first potion waits for the 2-minute burst.")]
+	public PotTiming PotionTiming { get; set; } = PotTiming.Opener;
+
+	public enum PotTiming : byte
+	{
+		[Description("Opener (countdown)")]
+		Opener,
+
+		[Description("2 minutes")]
+		TwoMinutes,
+	}
+
+	[RotationConfig(CombatType.PvE, Name = "[Damage] Energy Drain in burst", Tooltip =
+		"How many Aetherflow stacks are spent on Energy Drain during burst. Leftovers are always dumped before Aetherflow / Dissipation comes back.")]
+	public EnergyDrainStrategy EnergyDrainUsage { get; set; } = EnergyDrainStrategy.AllInBurst;
+
+	[RotationConfig(CombatType.PvE, Name = "[Damage] Delay Baneful Impaction 5s after Chain Stratagem")]
+	public bool DelayBanefulImpaction { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "[Damage] Aetherflow before Dissipation", Tooltip =
+		"When both are available, Aetherflow goes first and Dissipation is kept for later.")]
+	public bool PrioritizeAetherflowOverDissipation { get; set; } = false;
+
+	public enum EnergyDrainStrategy : byte
+	{
+		[Description("Use all")]
+		AllInBurst,
+
+		[Description("Leave 1")]
+		LeaveOne,
+
+		[Description("Leave 2")]
+		LeaveTwo,
+
+		[Description("Only before capping")]
+		CappingOnly,
+	}
+
+	#endregion
+
+	#region Deployment Tactics
+
+	[RotationConfig(CombatType.PvE, Name = "[Deployment Tactics] Restrict Recitation", Tooltip =
+		"Deployment Tactics only: Recitation is kept for preparing Deployment Tactics.\n" +
+		"Deployment Tactics, or heals: when Deployment Tactics is not being prepared, Recitation also goes on Indomitability, Excogitation or Succor.")]
+	public RecitationUsageStrategy RecitationUsage { get; set; } = RecitationUsageStrategy.Flexible;
+
+	[RotationConfig(CombatType.PvE, Name = "[Deployment Tactics] Recitation before Adloquium", Tooltip =
+		"Preparing Deployment Tactics becomes Recitation - Adloquium - Deployment Tactics, spreading a critical shield.\n" +
+		"With Restrict Recitation = Deployment Tactics only, preparation waits for Recitation.")]
 	public bool OnlyUseDeploymentTacticsOnCriticalShields { get; set; } = true;
 
-	public enum DeploymentTacticsUsageStrategy : byte
+	[RotationConfig(CombatType.PvE, Name = "[Deployment Tactics] Custom triggers (off = your Protraction on yourself)", Tooltip =
+		"A trigger is something you do that tells the rotation to prepare Deployment Tactics: Adloquium on the right target, then Deployment Tactics, within 15s.\n" +
+		"A toast shows Preparing Deployment Tactics, or the cooldown left if it is not ready.")]
+	public bool UseCustomDeploymentSignals { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Your Protraction on yourself", Parent = nameof(UseCustomDeploymentSignals))]
+	public bool DeploymentSignalProtraction { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > RSR raidwide warning (DefenseArea)", Parent = nameof(UseCustomDeploymentSignals), Tooltip =
+		"When RSR's DefenseArea state is on (its raidwide warning or your DefenseArea macro), Deployment Tactics is prepared instead of a Succor shield.")]
+	public bool DeploymentSignalDefenseArea { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Your Recitation", Parent = nameof(UseCustomDeploymentSignals), Tooltip =
+		"Pressing Recitation yourself prepares Deployment Tactics; the rotation then never spends it on heals.")]
+	public bool DeploymentSignalRecitation { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Your Fey Illumination", Parent = nameof(UseCustomDeploymentSignals))]
+	public bool DeploymentSignalFeyIllumination { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Your Surecast", Parent = nameof(UseCustomDeploymentSignals))]
+	public bool DeploymentSignalSurecast { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Your Sprint", Parent = nameof(UseCustomDeploymentSignals))]
+	public bool DeploymentSignalSprint { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Your Swiftcast (not while raising)", Parent = nameof(UseCustomDeploymentSignals), Tooltip =
+		"Your own Swiftcast prepares Deployment Tactics. The rotation then stops using Swiftcast for movement or Succor.")]
+	public bool DeploymentSignalSwiftcast { get; set; } = false;
+
+	public enum RecitationUsageStrategy : byte
 	{
-		[Description("Controlled by having Protraction on self (configured by below option)")]
-		ProtractionControl,
+		[Description("Deployment Tactics only")]
+		DeploymentOnly,
 
-		[Description("Controlled by having Recitation (always crit)")]
-		RecitationControl,
-
-		[Description("Controlled by both (allow non-crit)")]
-		BothControl,
+		[Description("Deployment Tactics, or heals")]
+		Flexible,
 	}
+
+	private bool SignalProtraction => (!UseCustomDeploymentSignals || DeploymentSignalProtraction) && ProtractionUsageValue != ProtractionUsageStrategy.HelpOnly;
+	private bool SignalDefenseArea => UseCustomDeploymentSignals && DeploymentSignalDefenseArea;
+	private bool SignalRecitation => UseCustomDeploymentSignals && DeploymentSignalRecitation;
+	private bool SignalFeyIllumination => UseCustomDeploymentSignals && DeploymentSignalFeyIllumination;
+	private bool SignalSurecast => UseCustomDeploymentSignals && DeploymentSignalSurecast;
+	private bool SignalSprint => UseCustomDeploymentSignals && DeploymentSignalSprint;
+	private bool SignalSwiftcast => UseCustomDeploymentSignals && DeploymentSignalSwiftcast;
+
+	#endregion
+
+	#region Movement
+
+	[RotationConfig(CombatType.PvE, Name = "[Movement] Early Biolysis refresh", Tooltip =
+		"While moving, refreshes Biolysis early instead of using Ruin II.")]
+	public bool EarlyDotRefreshWhenMoving { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "[Movement] Custom Swiftcast usage (off = default)", Tooltip =
+		"Default: kept for raise while someone is dead, and used while moving for Deployment Adloquium and Succor shields (Ward, Accretion, raidwide).\n" +
+		"It is only used to keep casting damage when Damage casts while moving is on.")]
+	public bool UseCustomSwiftcast { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Keep for raise while someone is dead", Parent = nameof(UseCustomSwiftcast))]
+	public bool SwiftcastKeepForRaise { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Deployment Adloquium while moving", Parent = nameof(UseCustomSwiftcast))]
+	public bool SwiftcastForDeployment { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Succor while moving (Ward, Accretion, raidwide shield)", Parent = nameof(UseCustomSwiftcast))]
+	public bool SwiftcastForSuccor { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Damage casts while moving", Parent = nameof(UseCustomSwiftcast), Tooltip =
+		"Also uses Swiftcast for damage while moving when nothing free is available (Art of War, early Biolysis).")]
+	public bool SwiftcastForMovement { get; set; } = false;
+
+	private bool SwiftKeepForRaiseValue => !UseCustomSwiftcast || SwiftcastKeepForRaise;
+	private bool SwiftForDeploymentValue => !UseCustomSwiftcast || SwiftcastForDeployment;
+	private bool SwiftForSuccorValue => !UseCustomSwiftcast || SwiftcastForSuccor;
+	private bool SwiftForMovementValue => UseCustomSwiftcast && SwiftcastForMovement;
+
+	#endregion
+
+	#region Healing
+
+	[RotationConfig(CombatType.PvE, Name = "[Healing] Custom healing settings (off = defaults)", Tooltip =
+		"Off: AoE thresholds come from each heal's potency, the co-healer's smallest GCD heal and incoming HoT ticks, so heals are not wasted; Protraction is used to help.\n" +
+		"On: the values below replace the Ward-off thresholds. Heal area = 3+ players below that HP, like RSR's own heal-area settings. Ward Mode always uses its own.")]
+	public bool UseCustomHPThreshold { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Automatic Protraction", Parent = nameof(UseCustomHPThreshold), Tooltip =
+		"Automatic: Protraction on mitigating tanks, critical players and the lowest non-tank before raidwides.\n" +
+		"Your own Protraction on yourself can also be a Deployment trigger (Deployment Tactics settings).")]
+	public ProtractionUsageStrategy ProtractionUsage { get; set; } = ProtractionUsageStrategy.Both;
+
+	public enum ProtractionUsageStrategy : byte
+	{
+		[Description("Off (yours is only a trigger)")]
+		SignalOnly,
+
+		[Description("On, yours is not a trigger")]
+		HelpOnly,
+
+		[Description("On, yours is also a trigger")]
+		Both,
+	}
+
+	[RotationConfig(CombatType.PvE, Name = "    > First Consolation as soon as Seraph is out", Parent = nameof(UseCustomHPThreshold))]
+	public bool UseFirstConsolationAsapWhenSeraphIsOut { get; set; } = true;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "    > Whispering Dawn: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	public float WhisperingDawnHeal { get; set; } = 0.85f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "    > Fey Blessing: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	public float FeyBlessingHeal { get; set; } = 0.8f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "    > Indomitability: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	public float IndomitabilityHeal { get; set; } = 0.75f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "    > Consolation: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	public float ConsolationHeal { get; set; } = 0.8f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "    > Accession: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	public float AccessionHeal { get; set; } = 0.7f;
+
+	[Range(0, 1, ConfigUnitType.Percent)]
+	[RotationConfig(CombatType.PvE, Name = "    > Excogitation: tank below", Parent = nameof(UseCustomHPThreshold))]
+	public float ExcogitationTankHeal { get; set; } = 0.5f;
+
+	private bool FirstConsolationAsapValue => !UseCustomHPThreshold || UseFirstConsolationAsapWhenSeraphIsOut;
+	private ProtractionUsageStrategy ProtractionUsageValue => UseCustomHPThreshold ? ProtractionUsage : ProtractionUsageStrategy.Both;
+	private float ExcogitationTankHealValue => UseCustomHPThreshold ? ExcogitationTankHeal : 0.5f;
+
+	#endregion
+
+	#region DMU
+
+	[RotationConfig(CombatType.PvE, Name = "[DMU] Experimental Accretion top-up", Tooltip =
+		"Fills Accretion players in order: the healer first, then the DPS once Earth Resistance Down II is gone.\n" +
+		"Waits until 3+ non-tanks other than the target are above 30%, and 3s after Accretion changes.\n" +
+		"SCH: Excogitation (target below 50%) > Lustrate > Emergency Tactics, then Adloquium under Emergency Tactics.\n" +
+		"Always active in DMU, even with this off: group heals stop once an Accretion player is above 50%, the party is kept shielded as in Ward Mode, and no Aetherpact goes on Accretion players.")]
+	public bool AccretionTopUp { get; set; } = false;
+
+	#endregion
 
 	#endregion
 
@@ -142,18 +305,22 @@ public sealed class BeirutaSCH : ScholarRotation
 	private const float ChainStratagemDotRefreshSeconds = 11f;
 	private const float AetherpactRemoveHpThreshold = 0.9f;
 	private const float AetherpactStartHpThreshold = 0.8f;
-	private const float ExcogHealHpThreshold = 0.4f;
 	private const float BallparkDamagePercent = 0.08f;
 
 	private const int DotOffsetMobs = 1;
-	private const int MinimumFairyGaugeForLinkPriority = 70;
 
-	private const bool UseDissipationDuringBurst = true;
 	private const bool EnableBallparkTtkEstimator = true;
 
 	private long _chainStratagemUsedAtMs;
 	private long _adloquiumUsedAtMs;
-	private float _lastSwiftcastLockingActionCombatTime = float.MinValue;
+
+	private const long DeploymentChainWindowMs = 15_000;
+	private long _deploymentChainStartedAtMs;
+	private DateTime _deploymentChainStartedAt;
+	private IBattleChara? _deploymentTarget;
+	private const double DeploymentAdloLandSeconds = 3d;
+
+	private readonly BeirutaRaidwide _raidwide = new();
 
 	#endregion
 
@@ -161,19 +328,85 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	private bool HasGalvanize => StatusHelper.PlayerHasStatus(true, StatusID.Galvanize);
 	private bool HasProtraction => StatusHelper.PlayerHasStatus(true, StatusID.Protraction);
-	private bool HasMacrocosmos => StatusHelper.PlayerHasStatus(true, StatusID.Macrocosmos);
 	private bool HasSeraphism => StatusHelper.PlayerHasStatus(true, StatusID.Seraphism);
 
 	private bool HasWhisperingDawn => HasPartyMemberWithOwnStatus(StatusID.WhisperingDawn);
 	private bool HasAngelsWhisper => HasPartyMemberWithOwnStatus(StatusID.AngelsWhisper);
 
+	private const float MovementGraceSeconds = 0.3f;
+	private const float MovementTimeThreshold = 1.0f;
+	private const float MovementShieldHealHp = 0.95f;
+	private const float BiolysisWorthRefreshSeconds = 17f;
+
+	private bool MovingPastGrace =>
+		InCombat &&
+		IsMoving &&
+		MovingTime > MovementGraceSeconds;
+
 	private bool HasSufficientMovement =>
+		InCombat &&
 		IsMoving &&
 		MovingTime > MovementTimeThreshold;
 
-	private bool HasHealingLockout =>
-		LockHealingActionsDuringMacrocosmos &&
-		HasMacrocosmos;
+	private static readonly HashSet<uint> PartyRaidBuffStatusIds =
+	[
+		(uint)StatusID.Divination,
+		(uint)StatusID.Brotherhood,
+		(uint)StatusID.BattleLitany,
+		(uint)StatusID.StarryMuse,
+		(uint)StatusID.Embolden,
+		(uint)StatusID.SearingLight,
+		(uint)StatusID.BattleVoice,
+		(uint)StatusID.TechnicalFinish,
+		(uint)StatusID.ArcaneCircle
+	];
+
+	private static bool PartyHasStatus(Func<uint, bool> match)
+	{
+		if (PartyMembers == null)
+		{
+			return false;
+		}
+
+		foreach (var member in PartyMembers)
+		{
+			if (member?.StatusList == null)
+			{
+				continue;
+			}
+
+			foreach (var status in member.StatusList)
+			{
+				if (match(status.StatusId))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static bool IsPartyBurst => PartyHasStatus(static id => PartyRaidBuffStatusIds.Contains(id));
+
+	private bool InDamageBurst => InChainStratagemBurstWindow || IsPartyBurst;
+
+	private static int AttackableHostilesInRangeOf(float range)
+	{
+		if (AllHostileTargets == null)
+		{
+			return 0;
+		}
+
+		var count = 0;
+		foreach (var enemy in AllHostileTargets)
+		{
+			if (enemy != null && enemy.IsAttackable() && enemy.DistanceToPlayer() < range)
+			{
+				count++;
+			}
+		}
+		return count;
+	}
 
 	private bool InFirst5sAfterChainStratagem =>
 		_chainStratagemUsedAtMs != 0 &&
@@ -186,57 +419,66 @@ public sealed class BeirutaSCH : ScholarRotation
 	private bool InFirst5sAfterAdloquium =>
 		_adloquiumUsedAtMs != 0 &&
 		Environment.TickCount64 - _adloquiumUsedAtMs < DeploymentTacticsAfterAdloquiumWindowMs;
-	private bool CountdownUsesRecitation =>
-	CountdownOpener is
-		CountdownOpenerStrategy.RecitationAdloquiumDeploymentTactics or
-		CountdownOpenerStrategy.RecitationConcitationOrSuccor;
 
-	private bool CountdownUsesDeploymentAdlo =>
-		CountdownOpener is
-			CountdownOpenerStrategy.RecitationAdloquiumDeploymentTactics or
-			CountdownOpenerStrategy.AdloquiumDeploymentTactics;
-
-	private bool CountdownUsesConcitationSuccor =>
-		CountdownOpener is
-			CountdownOpenerStrategy.ConcitationOrSuccor or
-			CountdownOpenerStrategy.RecitationConcitationOrSuccor;
-	private bool ShouldSwiftcastForAdloquium()
-	{
-		return UseSwiftcastOnAdloquium &&
-			   !HasSeraphism &&
-			   HasSufficientMovement &&
-			   !HasSwift &&
-			   !IsLastAction(ActionID.SwiftcastPvE) &&
-			   !ShouldDeferToRaise() &&
-			   ShouldUseDeploymentAdloquium();
-	}
-	private static bool IsPartyMedicated
+	private static bool AnyPartyMemberDead
 	{
 		get
 		{
-			if (PartyMembers == null)
-			{
-				return false;
-			}
-
 			foreach (var member in PartyMembers)
 			{
-				if (member?.StatusList == null)
+				if (member != null && member.IsDead)
 				{
-					continue;
-				}
-
-				foreach (var status in member.StatusList)
-				{
-					if (status.StatusId == (uint)StatusID.Medicated)
-					{
-						return true;
-					}
+					return true;
 				}
 			}
 			return false;
 		}
 	}
+
+	private bool SwiftcastAvailable =>
+		SwiftcastPvE.EnoughLevel &&
+		SwiftcastPvE.IsEnabled &&
+		!SwiftcastPvE.Cooldown.IsCoolingDown &&
+		!HasSwift &&
+		!IsLastAction(ActionID.SwiftcastPvE) &&
+		!ShouldDeferToRaise() &&
+		!(SwiftKeepForRaiseValue && AnyPartyMemberDead);
+
+	private bool ShouldSwiftcastForAdloquium() =>
+		SwiftForDeploymentValue &&
+		!HasSeraphism &&
+		HasSufficientMovement &&
+		SwiftcastAvailable &&
+		ShouldUseDeploymentAdloquium();
+
+	private bool SuccorShieldWanted =>
+		!HasSeraphism &&
+		!HasEmergencyTactics &&
+		!DeploymentChainActive &&
+		!ProtectRecitationForDeployment &&
+		CountUnshielded(SuccorRange) >= BeirutaWard.UnshieldedPartyCount &&
+		(WardMode ||
+		 BeirutaAccretion.GuardActive(PartyMembers) ||
+		 (!SignalDefenseArea && MergedStatus.HasFlag(AutoStatus.DefenseArea)));
+
+	private bool ShouldSwiftcastForSuccor() =>
+		SwiftForSuccorValue &&
+		!SignalSwiftcast &&
+		HasSufficientMovement &&
+		SwiftcastAvailable &&
+		SuccorShieldWanted;
+
+	private static bool IsPartyMedicated => PartyHasStatus(static id => id == (uint)StatusID.Medicated);
+
+	private static bool AccretionGroupHealBlocked => BeirutaAccretion.GroupHealBlocked(PartyMembers);
+
+	private bool ShouldUsePotionInCombat =>
+		UsePotion &&
+		IsBurst &&
+		!OpenerWeaveHold &&
+		!(PotionTiming == PotTiming.TwoMinutes && CombatElapsedLess(30f)) &&
+		(IsPartyMedicated || ChainStratagemPvE.Cooldown.WillHaveOneCharge(5));
+
 	private bool CanUseCountdownShieldGCD(out IAction? act)
 	{
 		if (ConcitationPvE.CanUse(out act))
@@ -252,47 +494,30 @@ public sealed class BeirutaSCH : ScholarRotation
 		act = null;
 		return false;
 	}
+
 	#endregion
 
 	#region Helper Methods
 
-	private static float EstimateRemainingSeconds(dynamic cooldown, float maxProbeSeconds, float stepSeconds = 0.5f)
+	private float ChainStratagemOpenerSeconds => ChainStratagemOpener switch
 	{
-		if (cooldown.HasOneCharge)
-		{
-			return 0f;
-		}
+		ChainStratagemOpenerTiming.ZeroSeconds => 0f,
+		ChainStratagemOpenerTiming.ThreeSeconds => 3f,
+		_ => 5f,
+	};
 
-		for (var t = 0f; t <= maxProbeSeconds; t += stepSeconds)
-		{
-			if (cooldown.WillHaveOneCharge(t))
-			{
-				return t;
-			}
-		}
+	private bool InChainStratagemBurstWindow =>
+		ChainStratagemPvE.EnoughLevel &&
+		ChainStratagemPvE.Cooldown.IsCoolingDown &&
+		!ChainStratagemPvE.Cooldown.WillHaveOneCharge(100f);
 
-		return -1f;
-	}
-
-	private float SummonSeraphRem()
+	private int EnergyDrainStacksToKeep => EnergyDrainUsage switch
 	{
-		if (!SummonSeraphPvE.EnoughLevel)
-		{
-			return -1f;
-		}
-
-		return EstimateRemainingSeconds(SummonSeraphPvE.Cooldown, 180f, 0.5f);
-	}
-
-	private float DissipationRem()
-	{
-		if (!DissipationPvE.EnoughLevel)
-		{
-			return -1f;
-		}
-
-		return EstimateRemainingSeconds(DissipationPvE.Cooldown, 180f, 0.5f);
-	}
+		EnergyDrainStrategy.AllInBurst => 0,
+		EnergyDrainStrategy.LeaveOne => 1,
+		EnergyDrainStrategy.LeaveTwo => 2,
+		_ => 3,
+	};
 
 	private bool CurrentTargetInLast5sOfChainStratagem
 	{
@@ -308,72 +533,217 @@ public sealed class BeirutaSCH : ScholarRotation
 		}
 	}
 
-	private bool ShouldUseSummonEos()
-	{
-		var summonSeraphRem = SummonSeraphRem();
-		var dissipationRem = DissipationRem();
-
-		return summonSeraphRem < 90f && dissipationRem < 140f;
-	}
-
 	private void UpdateActionTracking()
 	{
-		if (!InCombat)
-		{
-			_lastSwiftcastLockingActionCombatTime = float.MinValue;
-			return;
-		}
-
-		if (IsLastAction(ActionID.BiolysisPvE) ||
-			IsLastAction(ActionID.ArtOfWarPvE) ||
-			IsLastAction(ActionID.ManifestationPvE) ||
-			IsLastAction(ActionID.AccessionPvE) ||
-			IsLastAction(ActionID.RuinIiPvE))
-		{
-			_lastSwiftcastLockingActionCombatTime = CombatTime;
-		}
+		UpdateDeploymentChain();
 	}
 
 	private bool IsMovementPreferredNextGCD(IAction nextGCD)
 	{
-		if (nextGCD == ArtOfWarPvE ||
-			nextGCD == ManifestationPvE ||
-			nextGCD == AccessionPvE ||
-			nextGCD == RuinIiPvE)
-		{
-			return true;
-		}
-
-		if (CanUseCurrentBio(out var bioAct) &&
-			nextGCD == bioAct)
-		{
-			return true;
-		}
-
-		return false;
-	}
-
-	private bool ShouldSwiftcastForMovement(IAction nextGCD)
-	{
-		if (!UseSwiftcastForMovement ||
-			!InCombat ||
-			!HasSufficientMovement ||
-			HasSwift ||
-			IsLastAction(ActionID.SwiftcastPvE) ||
-			ShouldDeferToRaise())
+		if (nextGCD == null)
 		{
 			return false;
 		}
 
-		return !IsMovementPreferredNextGCD(nextGCD);
+		return nextGCD.IsTheSameTo(false,
+			ArtOfWarPvE,
+			ArtOfWarIiPvE,
+			ManifestationPvE,
+			AccessionPvE,
+			BioPvE,
+			BioIiPvE,
+			BiolysisPvE);
 	}
+
+	private bool SwiftcastPlannedForMovement =>
+		SwiftForMovementValue &&
+		!SignalSwiftcast &&
+		SwiftcastAvailable;
+
+	private bool FreeMovementInstantAvailable(int nearbyHostiles, float expectedHPToLive12Seconds) =>
+		(nearbyHostiles > 1 && ArtOfWarPvE.CanUse(out _, skipAoeCheck: true)) ||
+		(!InDamageBurst && !AccretionGroupHealBlocked && MovementAccessionUseful) ||
+		MovementBiolysisDue(expectedHPToLive12Seconds, nearbyHostiles);
+
+	private bool ShouldSwiftcastForMovement(IAction nextGCD)
+	{
+		if (!SwiftcastPlannedForMovement ||
+			!HasSufficientMovement ||
+			IsMovementPreferredNextGCD(nextGCD))
+		{
+			return false;
+		}
+
+		return !FreeMovementInstantAvailable(AttackableHostilesInRangeOf(5), CalculateExpectedHpToLive12Seconds());
+	}
+
+	private bool MovementAccessionUseful =>
+		HasSeraphism &&
+		!HasGalvanize &&
+		CountInjured(SuccorRange, MovementShieldHealHp) >= AoeInjuredCount;
+
+	private bool MovementBiolysisDue(float expectedHPToLive12Seconds, int nearbyHostiles) =>
+		EarlyDotRefreshWhenMoving &&
+		HasSufficientMovement &&
+		CurrentTarget != null &&
+		CurrentTarget.CurrentHp >= expectedHPToLive12Seconds &&
+		nearbyHostiles < GetAoWBreakevenTargets() &&
+		CurrentTargetBioMissingOrEnding(BiolysisWorthRefreshSeconds);
+
+	private bool TryMovementGCD(int nearbyHostiles, float expectedHPToLive12Seconds, out IAction? act)
+	{
+		act = null;
+
+		if (!MovingPastGrace || HasSwift || ShouldDeferToRaise())
+		{
+			return false;
+		}
+
+		if (nearbyHostiles > 1 && ArtOfWarPvE.CanUse(out act, skipAoeCheck: true))
+		{
+			return true;
+		}
+
+		if (!InDamageBurst && !AccretionGroupHealBlocked && MovementAccessionUseful && AccessionPvE.CanUse(out act, skipCastingCheck: true))
+		{
+			return true;
+		}
+
+		if (MovementBiolysisDue(expectedHPToLive12Seconds, nearbyHostiles) && CanUseCurrentBio(out act, skipStatusProvideCheck: true))
+		{
+			return true;
+		}
+
+		if (SwiftcastPlannedForMovement)
+		{
+			act = null;
+			return false;
+		}
+
+		if (RuinIiPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		act = null;
+		return false;
+	}
+
+	#endregion
+
+	#region Fairy Tracking
+
+	private const float DissipationDuration = 30f;
+	private const float SeraphDuration = 22f;
+	private const float FairyReturnGraceSeconds = 5f;
+
+	private long _lastDeathMs;
+
+	private void TrackDeath()
+	{
+		if (ECommons.GameHelpers.Player.Object is { IsDead: true })
+		{
+			_lastDeathMs = Environment.TickCount64;
+		}
+	}
+
+	private bool FairyAwayWindow(IBaseAction action, float duration)
+	{
+		if (!action.EnoughLevel || !action.Cooldown.IsCoolingDown)
+		{
+			return false;
+		}
+
+		var elapsed = action.Cooldown.RecastTimeElapsed;
+		if (elapsed > duration + FairyReturnGraceSeconds)
+		{
+			return false;
+		}
+
+		var usedAtMs = Environment.TickCount64 - (long)(elapsed * 1000f);
+		return _lastDeathMs < usedAtMs;
+	}
+
+	private bool FairyReturning =>
+		FairyAwayWindow(DissipationPvE, DissipationDuration) ||
+		FairyAwayWindow(SummonSeraphPvE, SeraphDuration);
+
+	private bool ShouldUseSummonEos() => !FairyReturning;
 
 	#endregion
 
 	#region Countdown Logic
 
+	private const long CountdownResponseDelayMs = 1_000;
+	private long _countdownStartedAtMs;
+	private long _countdownLastSeenMs;
+	private float _countdownLastRemain;
+
+	private bool CountdownDelayPassed(float remainTime)
+	{
+		var now = Environment.TickCount64;
+
+		if (_countdownStartedAtMs == 0 ||
+			now - _countdownLastSeenMs > 500 ||
+			remainTime > _countdownLastRemain + 0.5f)
+		{
+			_countdownStartedAtMs = now;
+		}
+
+		_countdownLastSeenMs = now;
+		_countdownLastRemain = remainTime;
+
+		return now - _countdownStartedAtMs >= CountdownResponseDelayMs;
+	}
+
+	private const float OpenerBuffCountdownSeconds = 0.35f;
+	private const long OpenerWeaveHoldMs = 3_500;
+	private const float ChainStratagemRange = 25f;
+
+	private long _openerBuffSentMs;
+
+	private bool OpenerWeaveHold =>
+		_openerBuffSentMs != 0 &&
+		Environment.TickCount64 - _openerBuffSentMs < OpenerWeaveHoldMs &&
+		!IsLastGCD(true, BiolysisPvE, BioIiPvE, BioPvE);
+
+	private bool TryOpenerChainStratagem(float remainTime, out IAction? act)
+	{
+		act = null;
+
+		if (ChainStratagemOpener != ChainStratagemOpenerTiming.ZeroSeconds ||
+			!IsBurst ||
+			remainTime >= OpenerBuffCountdownSeconds ||
+			ECommons.GameHelpers.Player.Object is not { IsCasting: false } ||
+			!ChainStratagemPvE.EnoughLevel ||
+			!ChainStratagemPvE.IsEnabled ||
+			ChainStratagemPvE.Cooldown.IsCoolingDown ||
+			CurrentTarget is not { } target ||
+			!target.IsAttackable() ||
+			target.DistanceToPlayer() > ChainStratagemRange)
+		{
+			return false;
+		}
+
+		ChainStratagemPvE.Target = new TargetResult(target, [target], target.Position);
+		act = ChainStratagemPvE;
+		_openerBuffSentMs = Environment.TickCount64;
+		StampChainStratagemUse();
+		return true;
+	}
+
 	protected override IAction? CountDownAction(float remainTime)
 	{
+		if (WardMode)
+		{
+			BeirutaWard.SetWardMode(this, false);
+		}
+
+		if (!CountdownDelayPassed(remainTime))
+		{
+			return null;
+		}
+
 		if ((remainTime is < 14f and > 7f || remainTime is < 4f and > 3f) && SummonEosPvE.CanUse(out var act))
 		{
 			return act;
@@ -384,7 +754,15 @@ public sealed class BeirutaSCH : ScholarRotation
 			return act;
 		}
 
-		if (remainTime < 3f && UseBurstMedicine(out act))
+		if (TryOpenerChainStratagem(remainTime, out act))
+		{
+			return act;
+		}
+
+		if (remainTime < 3f &&
+			UsePotion &&
+			PotionTiming == PotTiming.Opener &&
+			UseBurstMedicine(out act))
 		{
 			return act;
 		}
@@ -425,6 +803,25 @@ public sealed class BeirutaSCH : ScholarRotation
 				}
 				break;
 
+			case CountdownOpenerStrategy.AdloquiumMainTank:
+				if (remainTime is < 7f and > 5f && TryCountdownTankAdloquium(0, out act))
+				{
+					return act;
+				}
+				break;
+
+			case CountdownOpenerStrategy.AdloquiumBothTanks:
+				if (remainTime is < 10f and > 7.5f && TryCountdownTankAdloquium(0, out act))
+				{
+					return act;
+				}
+
+				if (remainTime is < 7f and > 5f && TryCountdownTankAdloquium(1, out act))
+				{
+					return act;
+				}
+				break;
+
 			case CountdownOpenerStrategy.ConcitationOrSuccor:
 				if (remainTime is < 7f and > 6f && CanUseCountdownShieldGCD(out act))
 				{
@@ -456,33 +853,651 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	#endregion
 
+	#region Healing Engine
+
+	private const float SingleHealRange = 30f;
+	private const float FairyHealRange = 20f;
+	private const float IndomitabilityRange = 15f;
+	private const float SuccorRange = 15f;
+	private const int AoeInjuredCount = 3;
+	private const float WhisperingDawnCountedPotency = BeirutaHealModel.WhisperingDawnTickPotency * BeirutaHealModel.HotCreditTicks;
+	private const float FeyBlessingPotency = 288f;
+	private const float ConsolationPotency = 225f;
+	private const float IndomitabilityPotency = 400f;
+	private const float AccessionPotency = 240f;
+	private const float AccessionWardOffCap = 0.7f;
+	private const float DissipationBoost = 1.2f;
+	private const float CriticalHp = 0.3f;
+	private const float ExtremeLowTankHp = 0.3f;
+	private const float UndeadReleaseSeconds = 1f;
+	private const float EarthlyDominanceGateSeconds = 3f;
+	private const float FreshMitigationSeconds = 6f;
+	private const float RampartDuration = 20f;
+	private const float BigMitigationDuration = 15f;
+	private const float RecitationSalvageSeconds = 4f;
+
+	private static readonly StatusID[] FullInvulnStatus =
+	[
+		StatusID.HallowedGround,
+		StatusID.HallowedGround_1302,
+		StatusID.Superbolide,
+	];
+
+	private static readonly StatusID[] UndeadStatus =
+	[
+		StatusID.Holmgang_409,
+		StatusID.WalkingDead,
+	];
+
+	private static readonly StatusID[] TankBigMitigationStatus =
+	[
+		StatusID.Rampart,
+		StatusID.Rampart_1191,
+		StatusID.Sentinel,
+		StatusID.Guardian,
+		StatusID.Vengeance,
+		StatusID.Damnation,
+		StatusID.ShadowWall,
+		StatusID.ShadowedVigil,
+		StatusID.Nebula,
+		StatusID.GreatNebula,
+	];
+
+	private static readonly StatusID[] CoHealerMacrocosmosStatus =
+	[
+		StatusID.Macrocosmos,
+		StatusID.Macrocosmos_3104,
+		StatusID.Macrocosmos_3989,
+	];
+
+	private bool CanRunHealEngine =>
+		Service.Config.AutoHeal &&
+		InCombat;
+
+	private static bool IsTankMember(IBattleChara member) => member.IsJobCategory(JobRole.Tank);
+
+	private static bool WhmInParty
+	{
+		get
+		{
+			foreach (var member in PartyMembers)
+			{
+				if (member != null && !member.IsDead && member.IsJobs(ECommons.ExcelServices.Job.WHM))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	private static bool IsHealBlocked(IBattleChara member)
+	{
+		if (member.HasStatus(false, FullInvulnStatus) || member.HasStatus(false, StatusID.LivingDead))
+		{
+			return true;
+		}
+
+		if (member.HasStatus(false, UndeadStatus))
+		{
+			return WhmInParty || member.StatusTime(false, UndeadStatus) > UndeadReleaseSeconds;
+		}
+
+		return false;
+	}
+
+	private static bool IsJustOffUndead(IBattleChara member) =>
+		!WhmInParty &&
+		member.HasStatus(false, UndeadStatus) &&
+		member.StatusTime(false, UndeadStatus) <= UndeadReleaseSeconds;
+
+	private static bool SkipSingleHeal(IBattleChara member) =>
+		IsHealBlocked(member) ||
+		(WhmInParty && IsTankMember(member) && member.GetHealthRatio() < ExtremeLowTankHp);
+
+	private static bool HasFreshBigMitigation(IBattleChara member)
+	{
+		foreach (var status in TankBigMitigationStatus)
+		{
+			if (!member.HasStatus(false, status))
+			{
+				continue;
+			}
+
+			var duration = status is StatusID.Rampart or StatusID.Rampart_1191 ? RampartDuration : BigMitigationDuration;
+			if (duration - member.StatusTime(false, status) <= FreshMitigationSeconds)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private static bool IsFreshMitigatingTank(IBattleChara member) =>
+		IsTankMember(member) &&
+		!IsHealBlocked(member) &&
+		HasFreshBigMitigation(member);
+
+	private float LandingHotPotency(IBattleChara member) =>
+		IsHealableInRange(member, FairyHealRange) &&
+		!member.HasStatus(false, StatusID.WhisperingDawn, StatusID.AngelsWhisper) &&
+		BeirutaHealWindow.OgcdJustUsed(WhisperingDawnPvE)
+			? WhisperingDawnCountedPotency
+			: 0f;
+
+	private float EffectiveHpRatio(IBattleChara member) =>
+		BeirutaHealModel.EffectiveHpRatio(member, WardMode, LandingHotPotency(member));
+
+	private bool CountsAsInjured(IBattleChara member, float threshold) =>
+		member.GetHealthRatio() < BeirutaHealModel.AlwaysInjuredHp ||
+		EffectiveHpRatio(member) < threshold;
+
+	private static bool IsHealableInRange(IBattleChara? member, float range) =>
+		member != null &&
+		!member.IsDead &&
+		member.DistanceToPlayer() <= range;
+
+	private int CountInjured(float range, float threshold)
+	{
+		var count = 0;
+		foreach (var member in PartyMembers)
+		{
+			if (IsHealableInRange(member, range) && !IsHealBlocked(member) && CountsAsInjured(member, threshold))
+			{
+				count++;
+			}
+		}
+		return count;
+	}
+
+	private int CountInjuredAroundPet(float radius, float threshold)
+	{
+		var pet = DataCenter.GetPet();
+		if (pet == null)
+		{
+			return 0;
+		}
+
+		var count = 0;
+		foreach (var member in PartyMembers)
+		{
+			if (member != null &&
+				!member.IsDead &&
+				!IsHealBlocked(member) &&
+				System.Numerics.Vector3.Distance(pet.Position, member.Position) <= radius &&
+				CountsAsInjured(member, threshold))
+			{
+				count++;
+			}
+		}
+		return count;
+	}
+
+	private static bool AnyCritical(float range)
+	{
+		foreach (var member in PartyMembers)
+		{
+			if (IsHealableInRange(member, range) && !IsHealBlocked(member) && member.GetHealthRatio() < CriticalHp)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private bool AoeNeeded(float range, float threshold) => CountInjured(range, threshold) >= AoeInjuredCount;
+
+	private static bool CoHealerBigHealSoon
+	{
+		get
+		{
+			foreach (var member in PartyMembers)
+			{
+				if (member == null || member.IsDead)
+				{
+					continue;
+				}
+
+				if (member.HasStatus(false, StatusID.GiantDominance) ||
+					member.HasStatus(false, CoHealerMacrocosmosStatus) ||
+					(member.HasStatus(false, StatusID.EarthlyDominance) &&
+					 member.StatusTime(false, StatusID.EarthlyDominance) < EarthlyDominanceGateSeconds))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	private static bool HoldAoe => AccretionGroupHealBlocked || (CoHealerBigHealSoon && !AnyCritical(SingleHealRange));
+
+	private static IBattleChara? FindLowest(float range, Func<IBattleChara, bool> filter)
+	{
+		IBattleChara? best = null;
+		foreach (var member in PartyMembers)
+		{
+			if (!IsHealableInRange(member, range) || SkipSingleHeal(member) || !filter(member))
+			{
+				continue;
+			}
+
+			if (best == null || member.GetHealthRatio() < best.GetHealthRatio())
+			{
+				best = member;
+			}
+		}
+		return best;
+	}
+
+	private IBattleChara? EnemyAggroTank
+	{
+		get
+		{
+			var aggroId = CurrentTarget?.TargetObject?.GameObjectId;
+			if (aggroId == null)
+			{
+				return null;
+			}
+
+			foreach (var member in PartyMembers)
+			{
+				if (member.GameObjectId == aggroId && IsTankMember(member))
+				{
+					return member;
+				}
+			}
+			return null;
+		}
+	}
+
+	#endregion
+
+	#region Aetherflow
+
+	private const float AetherpactDissipationLeadSeconds = 10f;
+
+	private bool DissipationUsable =>
+		IsBurst &&
+		DissipationPvE.EnoughLevel &&
+		DissipationPvE.IsEnabled;
+
+	private static uint AetherflowSpendGcds => (uint)SCHAetherFlowStacks + 1;
+
+	private bool FreshAetherflowSoon =>
+		AetherflowPvE.Cooldown.WillHaveOneChargeGCD(AetherflowSpendGcds) ||
+		(DissipationUsable && DissipationPvE.Cooldown.WillHaveOneChargeGCD(AetherflowSpendGcds));
+
+	private bool DissipationSoonForAetherpact =>
+		DissipationUsable &&
+		DissipationPvE.Cooldown.WillHaveOneCharge(AetherpactDissipationLeadSeconds);
+
+	private bool SacredSoilReserve =>
+		SacredSoilPvE.EnoughLevel &&
+		!FreshAetherflowSoon &&
+		SacredSoilPvE.Cooldown.WillHaveOneCharge(Math.Max(5f, AetherflowPvE.Cooldown.RecastTimeRemainOneCharge));
+
+	private bool CanSpendAetherflow =>
+		SCHAetherFlowStacks >= 2 ||
+		(SCHAetherFlowStacks == 1 && !SacredSoilReserve);
+
+	#endregion
+
+	#region Recitation / Protraction
+
+	private bool RecitationForHealingAllowed =>
+		RecitationUsage == RecitationUsageStrategy.Flexible &&
+		!SignalRecitation &&
+		!DeploymentChainActive;
+
+	private bool CanPressRecitation =>
+		RecitationForHealingAllowed &&
+		!HasRecitation &&
+		RecitationPvE.EnoughLevel &&
+		RecitationPvE.IsEnabled &&
+		!RecitationPvE.Cooldown.IsCoolingDown;
+
+	private bool RecitationAvailableForHealing => HasRecitation && RecitationForHealingAllowed;
+
+	private bool ProtractionHelpAllowed => ProtractionUsageValue != ProtractionUsageStrategy.SignalOnly;
+
+	private bool TryProtractionOn(IBattleChara target, out IAction? act)
+	{
+		act = null;
+		return ProtractionHelpAllowed &&
+			target.GameObjectId != Player?.GameObjectId &&
+			!target.HasStatus(false, StatusID.Protraction) &&
+			BeirutaAccretion.TryUseOn(ProtractionPvE, target, out act);
+	}
+
+	private bool TryExcogitationOn(IBattleChara target, out IAction? act)
+	{
+		act = null;
+
+		if (target.HasStatus(false, StatusID.Excogitation, StatusID.Excogitation_2182) ||
+			!ExcogitationPvE.EnoughLevel ||
+			!ExcogitationPvE.IsEnabled ||
+			ExcogitationPvE.Cooldown.IsCoolingDown)
+		{
+			return false;
+		}
+
+		if (!RecitationAvailableForHealing && !CanSpendAetherflow)
+		{
+			if (CanPressRecitation && RecitationPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			return false;
+		}
+
+		return BeirutaAccretion.TryUseOn(ExcogitationPvE, target, out act);
+	}
+
+	private bool TryIndomitability(out IAction? act)
+	{
+		act = null;
+
+		if (!IndomitabilityPvE.EnoughLevel || !IndomitabilityPvE.IsEnabled || IndomitabilityPvE.Cooldown.IsCoolingDown)
+		{
+			return false;
+		}
+
+		if (!RecitationAvailableForHealing && CanPressRecitation && RecitationPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (!RecitationAvailableForHealing && !CanSpendAetherflow)
+		{
+			return false;
+		}
+
+		return IndomitabilityPvE.CanUse(out act);
+	}
+
+	#endregion
+
+	#region Healing Abilities
+
+	private IBattleChara? NonTankTopUp =>
+		BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m), AoeInjuredCount);
+	private bool TryHealAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+
+		if (!CanRunHealEngine)
+		{
+			return false;
+		}
+
+		var undeadTank = FindLowest(SingleHealRange, static m => IsTankMember(m) && IsJustOffUndead(m));
+		if (undeadTank != null && TryExcogitationOn(undeadTank, out act))
+		{
+			return true;
+		}
+
+		var critical = FindLowest(SingleHealRange, static m => m.GetHealthRatio() < CriticalHp);
+		if (critical != null &&
+			(TryExcogitationOn(critical, out act) || TryProtractionOn(critical, out act)))
+		{
+			return true;
+		}
+
+		var lowTank = FindLowest(SingleHealRange, m => IsTankMember(m) && m.GetHealthRatio() < ExcogitationTankHealValue);
+		if (lowTank != null && TryExcogitationOn(lowTank, out act))
+		{
+			return true;
+		}
+
+		foreach (var member in PartyMembers)
+		{
+			if (IsFreshMitigatingTank(member) &&
+				IsHealableInRange(member, SingleHealRange) &&
+				(TryExcogitationOn(member, out act) || TryProtractionOn(member, out act)))
+			{
+				return true;
+			}
+		}
+
+		if (_raidwide.Coming &&
+			FindLowest(SingleHealRange, static m => !IsTankMember(m) && !m.HasStatus(false, StatusID.Protraction)) is { } raidwideTarget &&
+			TryProtractionOn(raidwideTarget, out act))
+		{
+			return true;
+		}
+
+		if (!HoldAoe && TryAoeHealAbility(out act))
+		{
+			return true;
+		}
+
+		if (CanPressRecitation &&
+			nextGCD != null &&
+			nextGCD.IsTheSameTo(false, SuccorPvE, ConcitationPvE) &&
+			RecitationPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (RecitationAvailableForHealing &&
+			StatusHelper.PlayerStatusTime(true, StatusID.Recitation) <= RecitationSalvageSeconds)
+		{
+			var tank = EnemyAggroTank ?? FindLowest(SingleHealRange, static m => IsTankMember(m));
+			if (tank != null && TryExcogitationOn(tank, out act))
+			{
+				return true;
+			}
+		}
+
+		var hasLink = HasPartyMemberWithOwnStatus(StatusID.FeyUnion_1223);
+		var aoeCalm = !AoeNeeded(SingleHealRange, 0.8f) && !DissipationSoonForAetherpact;
+
+		if (!hasLink && aoeCalm && !InDamageBurst && FairyGauge > AetherpactMinimumGauge)
+		{
+			var linkTarget =
+				FindLowest(SingleHealRange, static m => IsTankMember(m) && m.GetHealthRatio() < AetherpactRemoveHpThreshold && !AccretionLinkBlocked(m)) ??
+				FindLowest(SingleHealRange, static m => m.GetHealthRatio() <= AetherpactStartHpThreshold && !AccretionLinkBlocked(m));
+
+			if (linkTarget != null && BeirutaAccretion.TryUseOn(AetherpactPvE, linkTarget, out act))
+			{
+				return true;
+			}
+		}
+
+		if (HasAetherflow &&
+			!DeploymentChainActive &&
+			NonTankTopUp is { } topUp &&
+			BeirutaAccretion.TryUseOn(LustratePvE, topUp, out act))
+		{
+			return true;
+		}
+
+		act = null;
+		return false;
+	}
+
+	private const int AetherpactMinimumGauge = 20;
+
+	private static bool AccretionLinkBlocked(IBattleChara member) =>
+		DataCenter.IsInDMU && member.HasStatus(false, StatusID.Accretion);
+
+	private static bool MostPartyVeiled()
+	{
+		var total = 0;
+		var veiled = 0;
+		foreach (var member in PartyMembers)
+		{
+			if (!IsHealableInRange(member, FairyHealRange))
+			{
+				continue;
+			}
+
+			total++;
+			if (member.HasStatus(false, StatusID.SeraphicVeil))
+			{
+				veiled++;
+			}
+		}
+		return total > 0 && veiled * 2 >= total;
+	}
+
+	private static float HealBoost => HasDissipation ? DissipationBoost : 1f;
+
+	private float AoeThreshold(float potency, float customWardOff, float wardOffCap = 1f) =>
+		BeirutaHealModel.Threshold(potency, HealBoost, WardMode, UseCustomHPThreshold, customWardOff, PartyMembers, wardOffCap);
+
+	private float IndomitabilityHp =>
+		!WardMode && RecitationAvailableForHealing
+			? BeirutaHealModel.RoundToFive(BeirutaHealModel.FullUseHp(IndomitabilityPotency, HealBoost))
+			: AoeThreshold(IndomitabilityPotency, IndomitabilityHeal);
+
+	private bool AoeEmergency =>
+		AoeNeeded(IndomitabilityRange, 0f) ||
+		(AnyCritical(IndomitabilityRange) && AoeNeeded(IndomitabilityRange, IndomitabilityHp));
+
+	private bool TryConsolationHeal(out IAction? act)
+	{
+		act = null;
+		return SeraphTime > 0 &&
+			!MostPartyVeiled() &&
+			CountInjuredAroundPet(FairyHealRange, AoeThreshold(ConsolationPotency, ConsolationHeal)) >= AoeInjuredCount &&
+			ConsolationPvE.CanUse(out act, usedUp: true);
+	}
+
+	private bool TryWhisperingDawnHeal(out IAction? act)
+	{
+		act = null;
+		return !HasWhisperingDawn &&
+			!HasAngelsWhisper &&
+			CountInjuredAroundPet(FairyHealRange, AoeThreshold(WhisperingDawnCountedPotency, WhisperingDawnHeal)) >= AoeInjuredCount &&
+			WhisperingDawnPvE.CanUse(out act);
+	}
+
+	private bool TryFeyBlessingHeal(out IAction? act)
+	{
+		act = null;
+		return CountInjuredAroundPet(FairyHealRange, AoeThreshold(FeyBlessingPotency, FeyBlessingHeal)) >= AoeInjuredCount &&
+			FeyBlessingPvE.CanUse(out act);
+	}
+
+	private bool TryIndomitabilityHeal(out IAction? act)
+	{
+		act = null;
+		return AoeNeeded(IndomitabilityRange, IndomitabilityHp) && TryIndomitability(out act);
+	}
+
+	private bool TryAoeHealAbility(out IAction? act)
+	{
+		if (TryConsolationHeal(out act))
+		{
+			return true;
+		}
+
+		if (AoeEmergency)
+		{
+			return TryFeyBlessingHeal(out act) || TryIndomitabilityHeal(out act) || TryWhisperingDawnHeal(out act);
+		}
+
+		if (WardMode)
+		{
+			return TryFeyBlessingHeal(out act) || TryWhisperingDawnHeal(out act) || TryIndomitabilityHeal(out act);
+		}
+
+		if (RecitationAvailableForHealing && TryIndomitabilityHeal(out act))
+		{
+			return true;
+		}
+
+		return TryWhisperingDawnHeal(out act) || TryFeyBlessingHeal(out act) || TryIndomitabilityHeal(out act);
+	}
+
+	private bool SeraphismAoeHealNeeded =>
+		HasSeraphism &&
+		!HoldAoe &&
+		CountInjured(SuccorRange, AoeThreshold(AccessionPotency, AccessionHeal, AccessionWardOffCap)) >= AoeInjuredCount;
+
+	private static bool HasPartyShield(IBattleChara member) =>
+		member.HasStatus(false, StatusID.Galvanize, StatusID.EukrasianPrognosis);
+
+	private static int CountUnshielded(float range)
+	{
+		var count = 0;
+		foreach (var member in PartyMembers)
+		{
+			if (IsHealableInRange(member, range) && !HasPartyShield(member))
+			{
+				count++;
+			}
+		}
+		return count;
+	}
+
+	#endregion
+
+	#region Emergency Tactics (pressed outside)
+
+	private const float EmergencyTacticsAoeHp = 0.9f;
+	private const float EmergencyTacticsSingleHp = 0.9f;
+	private const float EmergencyTacticsLastCallSeconds = 3f;
+
+	private bool TryEmergencyTacticsGCD(out IAction? act)
+	{
+		act = null;
+
+		if (!HasEmergencyTactics || DeploymentChainActive)
+		{
+			return false;
+		}
+
+		var lastCall = StatusHelper.PlayerWillStatusEnd(EmergencyTacticsLastCallSeconds, true, StatusID.EmergencyTactics);
+		var aoeHp = lastCall ? 1f : EmergencyTacticsAoeHp;
+		var singleHp = lastCall ? 1f : EmergencyTacticsSingleHp;
+
+		if (!AccretionGroupHealBlocked && CountInjured(SuccorRange, aoeHp) >= AoeInjuredCount)
+		{
+			if (HasSeraphism && AccessionPvE.CanUse(out act, skipStatusProvideCheck: true, skipCastingCheck: true, skipAoeCheck: true))
+			{
+				return true;
+			}
+
+			if (!HasSeraphism &&
+				(ConcitationPvE.EnoughLevel
+					? ConcitationPvE.CanUse(out act, skipStatusProvideCheck: true, skipAoeCheck: true)
+					: SuccorPvE.CanUse(out act, skipStatusProvideCheck: true, skipAoeCheck: true)))
+			{
+				return true;
+			}
+		}
+
+		var lowest = FindLowest(SingleHealRange, m => EffectiveHpRatio(m) < singleHp);
+		if (lowest != null && BeirutaAccretion.TryUseOn(HasSeraphism ? ManifestationPvE : AdloquiumPvE, lowest, out act))
+		{
+			return true;
+		}
+
+		act = null;
+		return false;
+	}
+
+	#endregion
+
 	#region oGCD Logic
 
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
 	{
 		UpdateActionTracking();
 
-		var closeTargetCount = NumberOfHostilesInRangeOf(5);
-
-		if (HasHealingLockout)
+		if (TryPriorityWeaves(out act))
 		{
-			if (TryUseBurstSupportActions(out act))
-			{
-				return true;
-			}
+			return true;
+		}
 
-			if (!HasAetherflow && AetherflowPvE.CanUse(out act))
-			{
-				return true;
-			}
-
-			if (ShouldUseBanefulImpaction(closeTargetCount, out act))
-			{
-				return true;
-			}
-
-			act = null;
-			return false;
+		if (TryAccretionAbility(out act))
+		{
+			return true;
 		}
 
 		if (ShouldUseRecitationForDeploymentTactics() && RecitationPvE.CanUse(out act))
@@ -490,25 +1505,21 @@ public sealed class BeirutaSCH : ScholarRotation
 			return true;
 		}
 
-		if (ShouldSwiftcastForAdloquium() &&
+		if ((ShouldSwiftcastForAdloquium() || ShouldSwiftcastForSuccor()) &&
 			SwiftcastPvE.CanUse(out act))
 		{
 			return true;
 		}
 
-		if (PartyMembersAverHP < HealAreaGcdEmergencyTacticsHeal &&
-			EmergencyTacticsPvE.CanUse(out act) &&
-			CountEmergencyTacticsTargets() > 1)
+		if (ShouldUseDeploymentTactics() &&
+			DeploymentGalvanizeTarget is { } deployTarget &&
+			BeirutaAccretion.TryUseOn(DeploymentTacticsPvE, deployTarget, out act))
 		{
 			return true;
 		}
 
-		if (InFirst5sAfterAdloquium && DeploymentTacticsPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (UseFirstConsolationAsapWhenSeraphIsOut &&
+		if (!AccretionGroupHealBlocked &&
+			FirstConsolationAsapValue &&
 			ConsolationPvE.Cooldown.CurrentCharges == 2 &&
 			ConsolationPvE.CanUse(out act))
 		{
@@ -521,22 +1532,12 @@ public sealed class BeirutaSCH : ScholarRotation
 			return true;
 		}
 
-		if (TryUseBurstSupportActions(out act))
+		if (TryHealAbility(nextGCD, out act))
 		{
 			return true;
 		}
 
-		if (!HasAetherflow && AetherflowPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (SeraphTime < 3 && ConsolationPvE.CanUse(out act, usedUp: true))
-		{
-			return true;
-		}
-
-		if (ShouldUseBanefulImpaction(closeTargetCount, out act))
+		if (!AccretionGroupHealBlocked && SeraphTime > 0 && SeraphTime < 3 && ConsolationPvE.CanUse(out act, usedUp: true))
 		{
 			return true;
 		}
@@ -544,147 +1545,19 @@ public sealed class BeirutaSCH : ScholarRotation
 		return base.EmergencyAbility(nextGCD, out act);
 	}
 
-	[RotationDesc(
-		ActionID.ConsolationPvE,
-		ActionID.IndomitabilityPvE,
-		ActionID.WhisperingDawnPvE,
-		ActionID.FeyBlessingPvE)]
-	protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
-	{
-		UpdateActionTracking();
 
-		act = null;
-
-		if (HasHealingLockout)
-		{
-			return false;
-		}
-
-		if (PartyMembersAverHP < ConsolationHeal &&
-			ConsolationPvE.CanUse(out act, usedUp: true))
-		{
-			return true;
-		}
-
-		if (PartyMembersAverHP < EmergencyHealPercent)
-		{
-			if (FeyBlessingPvE.CanUse(out act))
-			{
-				return true;
-			}
-
-			if (IndomitabilityPvE.CanUse(out act))
-			{
-				return true;
-			}
-		}
-
-		if (PartyMembersAverHP < WhisperingDawnHeal &&
-			WhisperingDawnPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if ((!HasWhisperingDawn || !HasAngelsWhisper) &&
-			PartyMembersAverHP < FeyBlessingHeal &&
-			FeyBlessingPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if ((!HasWhisperingDawn || !HasAngelsWhisper) &&
-			PartyMembersAverHP < IndomitabilityHeal &&
-			IndomitabilityPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		return base.HealAreaAbility(nextGCD, out act);
-	}
-
-	[RotationDesc(
-		ActionID.AetherpactPvE,
-		ActionID.ExcogitationPvE)]
-	protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
-	{
-		UpdateActionTracking();
-
-		act = null;
-
-		if (HasHealingLockout)
-		{
-			return false;
-		}
-
-		var hasLink = HasPartyMemberWithOwnStatus(StatusID.FeyUnion_1223);
-
-		if (AetherpactPvE.CanUse(out act) &&
-			FairyGauge >= MinimumFairyGaugeForLinkPriority &&
-			!hasLink &&
-			PartyMembersAverHP > 0.8f &&
-			CanUseSingleAbilityTarget(AetherpactPvE.Target.Target) &&
-			AetherpactPvE.Target.Target.GetHealthRatio() <= AetherpactStartHpThreshold)
-		{
-			return true;
-		}
-
-		if (!HasRecitation &&
-			!IsLastAbility(false, RecitationPvE) &&
-			ExcogitationPvE.CanUse(out act) &&
-			PartyMembersAverHP > 0.8f &&
-			CanUseSingleAbilityTarget(ExcogitationPvE.Target.Target) &&
-			ExcogitationPvE.Target.Target.GetHealthRatio() < ExcogHealHpThreshold)
-		{
-			return true;
-		}
-
-		if (!hasLink &&
-			FairyGauge > 20 &&
-			AetherpactPvE.CanUse(out act) &&
-			PartyMembersAverHP > 0.8f &&
-			CanUseSingleAbilityTarget(AetherpactPvE.Target.Target))
-		{
-			return true;
-		}
-
-		return base.HealSingleAbility(nextGCD, out act);
-	}
-
-	[RotationDesc(ActionID.ConsolationPvE)]
-	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
-	{
-		UpdateActionTracking();
-
-		if (HasHealingLockout)
-		{
-			act = null;
-			return false;
-		}
-
-		if (ConsolationPvE.CanUse(out act, usedUp: true))
-		{
-			return true;
-		}
-
-		return base.DefenseAreaAbility(nextGCD, out act);
-	}
-
-	[RotationDesc(ActionID.ExcogitationPvE)]
+	[RotationDesc(ActionID.ExcogitationPvE, ActionID.ProtractionPvE)]
 	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
 	{
 		UpdateActionTracking();
 
-		act = null;
+		var tank =
+			FindLowest(SingleHealRange, static m => IsFreshMitigatingTank(m)) ??
+			EnemyAggroTank ??
+			FindLowest(SingleHealRange, static m => IsTankMember(m));
 
-		if (HasHealingLockout)
-		{
-			return false;
-		}
-
-		if (!HasRecitation &&
-			!IsLastAbility(false, RecitationPvE) &&
-			ExcogitationPvE.CanUse(out act) &&
-			!HasDefenseSingleLockoutStatus(ExcogitationPvE.Target.Target))
+		if (tank != null &&
+			(TryExcogitationOn(tank, out act) || TryProtractionOn(tank, out act)))
 		{
 			return true;
 		}
@@ -692,76 +1565,35 @@ public sealed class BeirutaSCH : ScholarRotation
 		return base.DefenseSingleAbility(nextGCD, out act);
 	}
 
-	[RotationDesc(ActionID.ExpedientPvE)]
-	protected override bool SpeedAbility(IAction nextGCD, out IAction? act)
-	{
-		UpdateActionTracking();
-
-		if (InCombat && ExpedientPvE.CanUse(out act, usedUp: true))
-		{
-			return true;
-		}
-
-		return base.SpeedAbility(nextGCD, out act);
-	}
-
 	[RotationDesc(
 		ActionID.ChainStratagemPvE,
 		ActionID.EnergyDrainPvE,
 		ActionID.BanefulImpactionPvE,
 		ActionID.AetherflowPvE,
-		ActionID.DissipationPvE,
-		ActionID.SwiftcastPvE)]
+		ActionID.DissipationPvE)]
 	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
 	{
 		UpdateActionTracking();
 
-		var closeTargetCount = NumberOfHostilesInRangeOf(5);
-
 		if (ShouldSwiftcastForMovement(nextGCD) &&
-			MovingTime > MovementTimeThreshold + 0.5f &&
 			SwiftcastPvE.CanUse(out act))
 		{
 			return true;
 		}
 
-		if (TryUseBurstSupportActions(out act))
+		if (TryPriorityWeaves(out act))
 		{
 			return true;
 		}
 
-		var shouldDumpAether =
-			(UseDissipationDuringBurst &&
-			 DissipationPvE.EnoughLevel &&
-			 DissipationPvE.Cooldown.WillHaveOneChargeGCD(3) &&
-			 DissipationPvE.IsEnabled) ||
-			AetherflowPvE.Cooldown.WillHaveOneChargeGCD(3);
-
-		if (EnableEnergyDrainGatlingMode &&
-			InFirst20sAfterChainStratagem &&
+		if (InChainStratagemBurstWindow &&
+			SCHAetherFlowStacks > EnergyDrainStacksToKeep &&
 			EnergyDrainPvE.CanUse(out act, usedUp: true))
 		{
 			return true;
 		}
 
-		if (CombatTime > 5 && shouldDumpAether && EnergyDrainPvE.CanUse(out act, usedUp: true))
-		{
-			return true;
-		}
-
-		if (!HasAetherflow && AetherflowPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (IsBurst &&
-	 (IsPartyMedicated || ChainStratagemPvE.Cooldown.WillHaveOneCharge(5)) &&
-	 UseBurstMedicine(out act))
-		{
-			return true;
-		}
-
-		if (ShouldUseBanefulImpaction(closeTargetCount, out act))
+		if (ShouldUsePotionInCombat && UseBurstMedicine(out act))
 		{
 			return true;
 		}
@@ -771,108 +1603,125 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	#endregion
 
+	#region Accretion Top Up
+
+	private const float AccretionExcogHpThreshold = 0.5f;
+
+	private bool TryAccretionAbility(out IAction? act)
+	{
+		act = null;
+
+		var target = AccretionTopUp ? BeirutaAccretion.FindTarget(PartyMembers) : null;
+		if (target == null)
+		{
+			return false;
+		}
+
+		if (target.GetHealthRatio() < AccretionExcogHpThreshold &&
+			!ProtectRecitationForDeployment &&
+			BeirutaAccretion.TryUseOn(ExcogitationPvE, target, out act))
+		{
+			return true;
+		}
+
+		if (BeirutaAccretion.TryUseOn(LustratePvE, target, out act))
+		{
+			return true;
+		}
+
+		if (!HasEmergencyTactics && !DeploymentChainActive && EmergencyTacticsPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		act = null;
+		return false;
+	}
+
+	protected override bool EmergencyGCD(IAction? nextGCD, out IAction? act)
+	{
+		act = null;
+
+		var target = AccretionTopUp ? BeirutaAccretion.FindTarget(PartyMembers) : null;
+		if (target != null &&
+			HasEmergencyTactics &&
+			!HasSwift &&
+			!ProtectRecitationForDeployment &&
+			BeirutaAccretion.TryUseOn(AdloquiumPvE, target, out act))
+		{
+			return true;
+		}
+
+		return base.EmergencyGCD(nextGCD, out act);
+	}
+
+	#endregion
+
 	#region GCD Logic
 
-	[RotationDesc(ActionID.ConcitationPvE, ActionID.AccessionPvE)]
-	protected override bool HealAreaGCD(out IAction? act)
+	private bool TryHealGCD(out IAction? act)
 	{
-		UpdateActionTracking();
+		act = null;
 
-		if (HasHealingLockout)
+		if (!CanRunHealEngine || DeploymentChainActive)
 		{
-			act = null;
 			return false;
 		}
 
-		if (ShouldDeferToRaise())
+		var critical = FindLowest(SingleHealRange, static m => m.GetHealthRatio() < CriticalHp);
+
+		if (HasSeraphism)
 		{
-			return base.HealAreaGCD(out act);
+			if (critical != null && BeirutaAccretion.TryUseOn(ManifestationPvE, critical, out act))
+			{
+				return true;
+			}
+
+			if (SeraphismAoeHealNeeded && AccessionPvE.CanUse(out act, skipStatusProvideCheck: true, skipCastingCheck: true))
+			{
+				return true;
+			}
+
+			return TryTopUpGCD(out act);
 		}
 
-		if (HasEmergencyTactics &&
-			!HasRecitation &&
-			PartyMembersAverHP < HealAreaGcdEmergencyTacticsHeal &&
-			SuccorPvE.CanUse(out act, skipStatusProvideCheck: true))
-		{
-			return true;
-		}
-
-		if (!HasEmergencyTactics &&
-			!HasRecitation &&
-			PartyMembersAverHP < HealAreaGcdAccessionHeal &&
-			AccessionPvE.CanUse(out act, skipCastingCheck: true))
-		{
-			return true;
-		}
-
-		if (!HasEmergencyTactics &&
-			HasSufficientMovement &&
-			PartyMembersAverHP < HealAreaGcdMovingAccessionHeal &&
-			AccessionPvE.CanUse(out act, skipCastingCheck: true))
+		var criticalTank = FindLowest(SingleHealRange, static m => IsTankMember(m) && m.GetHealthRatio() < CriticalHp);
+		if (criticalTank != null &&
+			(!ExcogitationPvE.EnoughLevel || ExcogitationPvE.Cooldown.IsCoolingDown) &&
+			!criticalTank.HasStatus(false, StatusID.Galvanize) &&
+			BeirutaAccretion.TryUseOn(AdloquiumPvE, criticalTank, out act))
 		{
 			return true;
 		}
 
-		if (HasEmergencyTactics &&
-			PartyMembersAverHP < HealAreaGcdMovingAccessionHeal &&
-			ConcitationPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (HasEmergencyTactics &&
-			PartyMembersAverHP < HealAreaGcdMovingAccessionHeal &&
-			SuccorPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		return base.HealAreaGCD(out act);
+		return TryTopUpGCD(out act);
 	}
 
-	[RotationDesc(ActionID.ManifestationPvE)]
-	protected override bool HealSingleGCD(out IAction? act)
+	private bool TryTopUpGCD(out IAction? act)
 	{
-		UpdateActionTracking();
-
-		if (HasHealingLockout)
-		{
-			act = null;
-			return false;
-		}
-
-		if (ShouldDeferToRaise())
-		{
-			return base.HealSingleGCD(out act);
-		}
-
-		if (HasEmergencyTactics &&
-			PartyMembersAverHP > 0.8f &&
-			ManifestationPvE.CanUse(out act, skipCastingCheck: true))
-		{
-			return true;
-		}
-
-		return base.HealSingleGCD(out act);
+		act = null;
+		return !HasAetherflow &&
+			!ProtectRecitationForDeployment &&
+			NonTankTopUp is { } topUp &&
+			BeirutaAccretion.TryUseOn(HasSeraphism ? ManifestationPvE : AdloquiumPvE, topUp, out act);
 	}
 
-	[RotationDesc(ActionID.AccessionPvE)]
+	[RotationDesc(ActionID.ConcitationPvE)]
 	protected override bool DefenseAreaGCD(out IAction? act)
 	{
 		UpdateActionTracking();
-
-		if (HasHealingLockout)
-		{
-			act = null;
-			return false;
-		}
 
 		if (ShouldDeferToRaise())
 		{
 			return base.DefenseAreaGCD(out act);
 		}
 
-		if (AccessionPvE.CanUse(out act, skipCastingCheck: true))
+		if (!SignalDefenseArea &&
+			!DeploymentChainActive &&
+			CountUnshielded(SuccorRange) >= BeirutaWard.UnshieldedPartyCount &&
+			(ConcitationPvE.EnoughLevel
+				? ConcitationPvE.CanUse(out act, skipStatusProvideCheck: true, skipAoeCheck: true)
+				: SuccorPvE.CanUse(out act, skipStatusProvideCheck: true, skipAoeCheck: true)))
 		{
 			return true;
 		}
@@ -893,6 +1742,58 @@ public sealed class BeirutaSCH : ScholarRotation
 		return base.RaiseGCD(out act);
 	}
 
+	private bool _lastWardMode;
+
+	protected override void UpdateInfo()
+	{
+		BeirutaWard.Track(this, WardMode, ref _lastWardMode);
+		_raidwide.Track(InCombat, PartyMembers);
+		TrackDeath();
+		base.UpdateInfo();
+	}
+
+	public override void OnTerritoryChanged()
+	{
+		if (WardMode)
+		{
+			BeirutaWard.SetWardMode(this, false);
+		}
+
+		base.OnTerritoryChanged();
+	}
+
+	private bool TryWardModeGCD(out IAction? act)
+	{
+		act = null;
+
+		if (!(WardMode || BeirutaAccretion.GuardActive(PartyMembers)) ||
+			HasEmergencyTactics ||
+			ProtectRecitationForDeployment ||
+			DeploymentChainActive ||
+			CountUnshielded(SuccorRange) < BeirutaWard.UnshieldedPartyCount)
+		{
+			return false;
+		}
+
+		if (HasSeraphism && AccessionPvE.CanUse(out act, skipStatusProvideCheck: true, skipCastingCheck: true, skipAoeCheck: true))
+		{
+			return true;
+		}
+
+		if (ConcitationPvE.EnoughLevel && ConcitationPvE.CanUse(out act, skipStatusProvideCheck: true, skipAoeCheck: true))
+		{
+			return true;
+		}
+
+		if (!ConcitationPvE.EnoughLevel && SuccorPvE.CanUse(out act, skipStatusProvideCheck: true, skipAoeCheck: true))
+		{
+			return true;
+		}
+
+		act = null;
+		return false;
+	}
+
 	protected override bool GeneralGCD(out IAction? act)
 	{
 		UpdateActionTracking();
@@ -902,9 +1803,25 @@ public sealed class BeirutaSCH : ScholarRotation
 			return base.GeneralGCD(out act);
 		}
 
-		if (CurrentMp < EmergencyHealingMPThreshold)
+		if (TryUseDeploymentAdloquium(out act))
 		{
-			return base.GeneralGCD(out act);
+			return true;
+		}
+
+
+		if (TryEmergencyTacticsGCD(out act))
+		{
+			return true;
+		}
+
+		if (TryWardModeGCD(out act))
+		{
+			return true;
+		}
+
+		if (TryHealGCD(out act))
+		{
+			return true;
 		}
 
 		if (ShouldUseSummonEos() &&
@@ -913,14 +1830,7 @@ public sealed class BeirutaSCH : ScholarRotation
 			return true;
 		}
 
-		if (ShouldUseDeploymentAdloquium() &&
-			AdloquiumPvE.CanUse(out act, targetOverride: TargetType.Self))
-		{
-			StampAdloquiumUse();
-			return true;
-		}
-
-		var nearbyHostiles = NumberOfHostilesInRangeOf(5);
+		var nearbyHostiles = AttackableHostilesInRangeOf(5);
 		var expectedHPToLive12Seconds = CalculateExpectedHpToLive12Seconds();
 
 		if (InCombat &&
@@ -1065,9 +1975,7 @@ public sealed class BeirutaSCH : ScholarRotation
 			}
 		}
 
-		if (HasSufficientMovement &&
-	!HasSwift &&
-	RuinIiPvE.CanUse(out act))
+		if (TryMovementGCD(nearbyHostiles, expectedHPToLive12Seconds, out act))
 		{
 			return true;
 		}
@@ -1079,65 +1987,213 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	#region Decision Helpers
 
-	private bool ShouldUseRecitationForDeploymentTactics()
+	#region Deployment Tactics Chain
+
+	private bool DeploymentChainActive =>
+		_deploymentChainStartedAtMs != 0 &&
+		Environment.TickCount64 - _deploymentChainStartedAtMs < DeploymentChainWindowMs;
+
+	private static bool HasDefenseAreaSignal => MergedStatus.HasFlag(AutoStatus.DefenseArea);
+
+	private bool DeploymentSignalActive =>
+		(SignalProtraction && HasProtraction) ||
+		(SignalDefenseArea && HasDefenseAreaSignal) ||
+		(SignalRecitation && HasRecitation) ||
+		(SignalFeyIllumination && StatusHelper.PlayerHasStatus(false, StatusID.FeyIllumination)) ||
+		(SignalSurecast && StatusHelper.PlayerHasStatus(true, StatusID.Surecast)) ||
+		(SignalSprint && StatusHelper.PlayerHasStatus(true, StatusID.Sprint)) ||
+		(SignalSwiftcast && HasSwift && !MergedStatus.HasFlag(AutoStatus.Raise));
+
+	private bool _deploymentChainUsesRecitation;
+
+	private bool DeploymentChainWantsRecitation =>
+		OnlyUseDeploymentTacticsOnCriticalShields && RecitationPvE.EnoughLevel;
+
+	private bool RecitationReadyForChain =>
+		HasRecitation || RecitationPvE.Cooldown.WillHaveOneChargeGCD(1);
+
+	private bool DeploymentChainNeedsRecitation => _deploymentChainUsesRecitation;
+
+	private bool DeploymentTacticsReadySoon =>
+		DeploymentTacticsPvE.EnoughLevel &&
+		DeploymentTacticsPvE.Cooldown.WillHaveOneChargeGCD(2);
+
+	private bool CanStartDeploymentChain()
 	{
-		if (!OnlyUseDeploymentTacticsOnCriticalShields ||
-			!RecitationPvE.EnoughLevel ||
-			HasRecitation ||
-			HasGalvanize ||
-			!DeploymentTacticsPvE.Cooldown.WillHaveOneChargeGCD(2))
+		if (!DeploymentTacticsReadySoon || DeploymentAdloTarget() == null)
 		{
 			return false;
 		}
 
-		return DeploymentTacticsUsage switch
-		{
-			DeploymentTacticsUsageStrategy.ProtractionControl => HasProtraction,
-			DeploymentTacticsUsageStrategy.RecitationControl => false,
-			DeploymentTacticsUsageStrategy.BothControl => false,
-			_ => false,
-		};
-	}
-	private bool ShouldUseDeploymentAdloquium()
-	{
-		if (!DeploymentTacticsPvE.Cooldown.WillHaveOneChargeGCD(2) || HasGalvanize)
+		if (DeploymentChainWantsRecitation &&
+			!RecitationReadyForChain &&
+			RecitationUsage == RecitationUsageStrategy.DeploymentOnly)
 		{
 			return false;
 		}
 
-		return DeploymentTacticsUsage switch
-		{
-			DeploymentTacticsUsageStrategy.ProtractionControl =>
-				HasProtraction &&
-				(!OnlyUseDeploymentTacticsOnCriticalShields || HasRecitation),
-
-			DeploymentTacticsUsageStrategy.RecitationControl =>
-				HasRecitation,
-
-			DeploymentTacticsUsageStrategy.BothControl =>
-				HasRecitation || HasProtraction,
-
-			_ => false,
-		};
+		return true;
 	}
 
-	private bool ShouldDeferToRaise() =>
-		(HasSwift || IsLastAction(ActionID.SwiftcastPvE)) &&
-		SwiftLogic &&
-		MergedStatus.HasFlag(AutoStatus.Raise);
+	private bool _deploymentSignalSeen;
 
-	private bool TryUseBurstSupportActions(out IAction? act)
+	private void UpdateDeploymentChain()
+	{
+		var signal = DeploymentSignalActive;
+		var newSignal = signal && !_deploymentSignalSeen;
+		_deploymentSignalSeen = signal;
+
+		if (DeploymentChainActive)
+		{
+			if (IsLastAbility(true, DeploymentTacticsPvE) || !DeploymentTacticsReadySoon)
+			{
+				_deploymentChainStartedAtMs = 0;
+				_deploymentTarget = null;
+			}
+			return;
+		}
+
+		_deploymentChainStartedAtMs = 0;
+
+		if (signal && CanStartDeploymentChain())
+		{
+			_deploymentChainStartedAtMs = Environment.TickCount64;
+			_deploymentChainStartedAt = DateTime.Now;
+			_deploymentTarget = null;
+			_deploymentChainUsesRecitation = DeploymentChainWantsRecitation && RecitationReadyForChain;
+			ECommons.DalamudServices.Svc.Toasts.ShowQuest("Preparing Deployment Tactics");
+		}
+		else if (newSignal && DeploymentTacticsPvE.EnoughLevel && !DeploymentTacticsReadySoon)
+		{
+			var remain = MathF.Ceiling(DeploymentTacticsPvE.Cooldown.RecastTimeRemainOneCharge);
+			ECommons.DalamudServices.Svc.Toasts.ShowQuest($"Deployment Tactics on cooldown ({remain:0}s)");
+		}
+	}
+
+	private IBattleChara? DeploymentAdloTarget()
+	{
+		var protraction = FindLowest(SingleHealRange, static m =>
+			!IsTankMember(m) &&
+			m.HasStatus(true, StatusID.Protraction) &&
+			!m.HasStatus(false, StatusID.Galvanize));
+		if (protraction != null)
+		{
+			return protraction;
+		}
+
+		var injured = FindLowest(SingleHealRange, static m =>
+			!IsTankMember(m) &&
+			m.GetHealthRatio() < 1f &&
+			!m.HasStatus(false, StatusID.Galvanize));
+		if (injured != null)
+		{
+			return injured;
+		}
+
+		var player = ECommons.GameHelpers.Player.Object;
+		return player != null && !player.HasStatus(false, StatusID.Galvanize) ? player : null;
+	}
+
+	private IBattleChara? DeploymentGalvanizeTarget =>
+		_deploymentTarget != null &&
+		!_deploymentTarget.IsDead &&
+		_deploymentTarget.HasStatus(true, StatusID.Galvanize)
+			? _deploymentTarget
+			: null;
+
+	private bool ShouldUseRecitationForDeploymentTactics() =>
+		DeploymentChainActive &&
+		DeploymentChainNeedsRecitation &&
+		!HasRecitation &&
+		DeploymentGalvanizeTarget == null;
+
+	private bool DeploymentAdloPending
+	{
+		get
+		{
+			if (ECommons.GameHelpers.Player.Object is { IsCasting: true } player &&
+				(player.CastActionId == (uint)ActionID.AdloquiumPvE || player.CastActionId == (uint)ActionID.ManifestationPvE))
+			{
+				return true;
+			}
+
+			foreach (var rec in RecordActions)
+			{
+				if (rec.UsedTime < _deploymentChainStartedAt)
+				{
+					break;
+				}
+
+				var id = rec.Action.RowId;
+				if (id == (uint)ActionID.AdloquiumPvE || id == (uint)ActionID.ManifestationPvE)
+				{
+					return (DateTime.Now - rec.UsedTime).TotalSeconds < DeploymentAdloLandSeconds;
+				}
+			}
+
+			return false;
+		}
+	}
+
+	private bool ShouldUseDeploymentAdloquium() =>
+		DeploymentChainActive &&
+		DeploymentGalvanizeTarget == null &&
+		!DeploymentAdloPending &&
+		(HasRecitation || !DeploymentChainNeedsRecitation);
+
+	private bool TryUseDeploymentAdloquium(out IAction? act)
 	{
 		act = null;
 
-		if (!IsBurst)
+		if (!ShouldUseDeploymentAdloquium() || DeploymentAdloTarget() is not { } target)
 		{
 			return false;
 		}
 
-		if (CombatTime > 5 && ChainStratagemPvE.CanUse(out act))
+		var adlo = HasSeraphism ? ManifestationPvE : AdloquiumPvE;
+		if (BeirutaAccretion.TryUseOn(adlo, target, out act))
+		{
+			_deploymentTarget = target;
+			StampAdloquiumUse();
+			return true;
+		}
+
+		act = null;
+		return false;
+	}
+
+	private bool ShouldUseDeploymentTactics() =>
+		DeploymentGalvanizeTarget != null &&
+		(DeploymentChainActive || InFirst5sAfterAdloquium);
+
+	private bool ProtectRecitationForDeployment => HasRecitation && DeploymentChainActive;
+
+	#endregion
+
+	private bool ShouldDeferToRaise() =>
+		(HasSwift || IsLastAction(ActionID.SwiftcastPvE)) &&
+		MergedStatus.HasFlag(AutoStatus.Raise);
+
+	private bool TryPriorityWeaves(out IAction? act)
+	{
+		act = null;
+
+		if (IsBurst && !CombatElapsedLess(ChainStratagemOpenerSeconds) && ChainStratagemPvE.CanUse(out act))
 		{
 			StampChainStratagemUse();
+			return true;
+		}
+
+		if (OpenerWeaveHold)
+		{
+			return false;
+		}
+
+		if (CombatTime > 5 &&
+			HasAetherflow &&
+			FreshAetherflowSoon &&
+			EnergyDrainPvE.CanUse(out act, usedUp: true))
+		{
 			return true;
 		}
 
@@ -1150,14 +2206,14 @@ public sealed class BeirutaSCH : ScholarRotation
 					return true;
 				}
 
-				if (DissipationPvE.CanUse(out act))
+				if (IsBurst && DissipationPvE.CanUse(out act))
 				{
 					return true;
 				}
 			}
 			else
 			{
-				if (DissipationPvE.CanUse(out act))
+				if (IsBurst && DissipationPvE.CanUse(out act))
 				{
 					return true;
 				}
@@ -1169,6 +2225,12 @@ public sealed class BeirutaSCH : ScholarRotation
 			}
 		}
 
+		if (ShouldUseBanefulImpaction(NumberOfHostilesInRangeOf(5), out act))
+		{
+			return true;
+		}
+
+		act = null;
 		return false;
 	}
 
@@ -1176,7 +2238,7 @@ public sealed class BeirutaSCH : ScholarRotation
 	{
 		act = null;
 
-		if (InFirst5sAfterChainStratagem)
+		if (DelayBanefulImpaction && InFirst5sAfterChainStratagem)
 		{
 			return false;
 		}
@@ -1191,38 +2253,17 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	#region Party / Target Helpers
 
-	private int CountEmergencyTacticsTargets()
-	{
-		var count = 0;
-
-		foreach (var member in PartyMembers)
-		{
-			if (member.DistanceToPlayer() > 15)
-			{
-				continue;
-			}
-
-			if (!member.DoomNeedHealing() && member.GetHealthRatio() >= EmergencyTacticsHeal)
-			{
-				continue;
-			}
-
-			count++;
-			if (count > 1)
-			{
-				break;
-			}
-		}
-
-		return count;
-	}
-
 	private bool ShouldRemoveAetherpact()
 	{
+		if (InDamageBurst)
+		{
+			return false;
+		}
+
 		foreach (var member in PartyMembers)
 		{
 			if (member.HasStatus(true, StatusID.FeyUnion_1223) &&
-				member.GetHealthRatio() >= AetherpactRemoveHpThreshold)
+				(member.IsDead || IsHealBlocked(member) || member.GetHealthRatio() >= AetherpactRemoveHpThreshold))
 			{
 				return true;
 			}
@@ -1244,71 +2285,6 @@ public sealed class BeirutaSCH : ScholarRotation
 		return false;
 	}
 
-	private bool HasSingleAbilityLockoutStatus(IBattleChara? target)
-	{
-		if (target == null)
-		{
-			return true;
-		}
-
-		try
-		{
-			return target.HasStatus(false, StatusID.LivingDead) ||
-				   target.HasStatus(false, StatusID.Holmgang);
-		}
-		catch
-		{
-			return true;
-		}
-	}
-
-	private bool HasDefenseSingleLockoutStatus(IBattleChara? target)
-	{
-		if (target == null)
-		{
-			return true;
-		}
-
-		try
-		{
-			return target.HasStatus(false, StatusID.LivingDead) ||
-				   target.HasStatus(false, StatusID.Holmgang) ||
-				   target.HasStatus(false, StatusID.HallowedGround) ||
-				   target.HasStatus(false, StatusID.Superbolide);
-		}
-		catch
-		{
-			return true;
-		}
-	}
-
-	private bool CanUseSingleAbilityTarget(IBattleChara? target)
-	{
-		if (target == null || HasSingleAbilityLockoutStatus(target))
-		{
-			return false;
-		}
-
-		return ExcogTargetIsTank(target) || PartyMembersAverHP > SingleAbilityNonTankPartyAverageGate;
-	}
-
-	private bool ExcogTargetIsTank(IBattleChara? target)
-	{
-		if (target == null)
-		{
-			return false;
-		}
-
-		foreach (var tank in PartyMembers.GetJobCategory(JobRole.Tank))
-		{
-			if (tank == target)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
 
 	#endregion
 
@@ -1401,13 +2377,74 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	private void StampAdloquiumUse() => _adloquiumUsedAtMs = Environment.TickCount64;
 
+	private List<IBattleChara> CountdownTanksInOrder()
+	{
+		List<IBattleChara> ordered = [];
+		var priority = RotationSolver.Basic.Configuration.OtherConfiguration.AdloquiumTankPriority;
+
+		void AddByPriority(Func<IBattleChara, bool> match)
+		{
+			foreach (var job in priority)
+			{
+				foreach (var member in PartyMembers)
+				{
+					if (member != null &&
+						!member.IsDead &&
+						member.IsJobCategory(JobRole.Tank) &&
+						member.IsJobs(job) &&
+						match(member) &&
+						!ordered.Contains(member))
+					{
+						ordered.Add(member);
+					}
+				}
+			}
+
+			foreach (var member in PartyMembers)
+			{
+				if (member != null &&
+					!member.IsDead &&
+					member.IsJobCategory(JobRole.Tank) &&
+					match(member) &&
+					!ordered.Contains(member))
+				{
+					ordered.Add(member);
+				}
+			}
+		}
+
+		if (CountdownTankPick == CountdownTankPickStrategy.Stance)
+		{
+			AddByPriority(static m => m.HasStatus(false, StatusHelper.TankStanceStatus));
+		}
+
+		AddByPriority(static _ => true);
+		return ordered;
+	}
+
+	private bool TryCountdownTankAdloquium(int tankIndex, out IAction? act)
+	{
+		act = null;
+
+		var tanks = CountdownTanksInOrder();
+		if (tankIndex >= tanks.Count)
+		{
+			return false;
+		}
+
+		var tank = tanks[tankIndex];
+		if (tank.HasStatus(false, StatusID.Galvanize) ||
+			tank.DistanceToPlayer() > 30f ||
+			!BeirutaAccretion.TryUseOn(AdloquiumPvE, tank, out act))
+		{
+			act = null;
+			return false;
+		}
+
+		StampAdloquiumUse();
+		return true;
+	}
+
 	#endregion
 
-	#region Overrides
-
-	public override bool CanHealSingleSpell => base.CanHealSingleSpell;
-
-	public override bool CanHealAreaSpell => base.CanHealAreaSpell;
-
-	#endregion
 }

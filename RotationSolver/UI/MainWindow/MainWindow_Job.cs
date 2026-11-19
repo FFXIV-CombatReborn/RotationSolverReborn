@@ -502,6 +502,18 @@ public partial class MainWindow
 				});
 		}
 
+		if (Player.Object.IsJobs(Job.SCH))
+		{
+			DrawJobPriorityList("Adloquium Tank Priority", "AdloquiumTank",
+				OtherConfiguration.AdloquiumTankPriority,
+				OtherConfiguration.ResetAdloquiumTankPriority,
+				list =>
+				{
+					OtherConfiguration.AdloquiumTankPriority = list;
+					_ = OtherConfiguration.SaveAdloquiumTankPriority();
+				});
+		}
+
 		if (!Player.Object.IsJobs(Job.AST))
 		{
 			return;

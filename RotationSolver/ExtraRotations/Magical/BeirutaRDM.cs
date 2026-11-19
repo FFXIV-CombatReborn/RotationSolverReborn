@@ -2,65 +2,18 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Magical;
 
-[Rotation("BeirutaRDM", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
+[Rotation("BeirutaRDM", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn, Description =
+	"Automatic Red Mage for level 100 high-end fights; Variant / Occult Crescent GCDs may break combos. Recommended GCD is 2.48 or slower. AutoBurst off is enough to hold burst, but you then press Enchanted Riposte yourself to start a combo, and Enchanted Reprise if a combo can't start before the fight ends. Set Impact to 2 targets (Actions > GCD > Attack): it is then used on 2 with Acceleration, 3 without. Hover each setting for details.")]
 [SourceCode(Path = "main/ExtraRotations/Magical/BeirutaRDM.cs")]
 [ExtraRotation]
 public sealed class BeirutaRDM : RedMageRotation
 {
 	#region Config Options
-	[RotationConfig(CombatType.PvE, Name =
-		"Please note that this rotation is optimised for Lv100 high-end encounters. V&C/OC GCDs may break combo.\n" +
-		"• Recommend GCD for this rotation is 2.48 and above\n" +
-		"• Try to stay close to the target when Embolden will be ready in ~20s if you selected triple combo before embolden\n" +
-		"• Attempts to pool 73|73 mana for triple melee combo\n" +
-		"• Ideally do not intercept defence ability during first 5s of the fights or burst\n" +
-		"• Intentionally maintains an 11 mana gap to get Verholy/Verflare procs\n" +
-		"• Disabling AutoBurst is sufficient if you need to delay burst timing in this rotation. However, you will need to mannually intercept enchanted riposte if you want to start a combo when burst off\n" +
-		"• Manually use Enchanted Reprise if you cannot start a combo at the end of combat\n" +
-		"• Go to Actions - GCD - Attack - Impact, change number of targets needed to use this action to 2. It will be using on 2 when has accelation, on 3 when not\n")]
-	public bool RotationNotes { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if there are no healers alive in party)")]
-	public bool GCDHeal { get; set; } = false;
+	#region Opener
 
-	[RotationConfig(CombatType.PvE, Name = "Pool Black and White Mana for burst Embolden")]
-	public bool Pooling { get; set; } = true;
-
-	[RotationConfig(CombatType.PvE, Name = "Try triple combo before embolden (You will need to get in melee range 17s before embolden is ready)")]
-	public bool TryTripleCombo { get; set; } = false;
-
-	[RotationConfig(CombatType.PvE, Name = "Prevent healing during burst combos")]
-	public bool PreventHeal { get; set; } = true;
-
-	[RotationConfig(CombatType.PvE, Name = "Prevent raising during burst combos")]
-	public bool PreventRaising { get; set; } = true;
-
-	[RotationConfig(CombatType.PvE, Name = "Use Vercure for Dualcast when out of combat.")]
-	public bool UseVercure { get; set; } = false;
-
-	[RotationConfig(CombatType.PvE, Name = "Cast Reprise when moving with no instacast.")]
-	public bool RangedSwordplay { get; set; } = false;
-
-	[RotationConfig(CombatType.PvE, Name = "Only use Embolden if in Melee range.")]
-	public bool AnyonesMeleeRule { get; set; } = false;
-
-	[RotationConfig(CombatType.PvE, Name = "Use Swift/Acceleration for oGCD window alignment (Fleche/Contre drift fix)")]
-	public bool UseWindowAlignment { get; set; } = true;
-
-	[RotationConfig(CombatType.PvE, Name = "Hold melee combo up to 2s if out of range")]
-	public bool HoldMeleeComboIfOutOfRange { get; set; } = true;
-
-	[RotationConfig(CombatType.PvE, Name = "Do not start melee combo when moving (does not affect Manafication version)")]
-	public bool NoComboStartWhileMoving { get; set; } = false;
-
-	[RotationConfig(CombatType.PvE, Name = "Delay Prefulgence/Vice of Thorns for buff alignment (about 3 gcd after Embolden)")]
-	public bool DelayBuffOGCDs { get; set; } = true;
-
-	[Range(0, 4, ConfigUnitType.Seconds, 0.1f)]
-	[RotationConfig(CombatType.PvE, Name = "Minimum movement time before allowing movement-based actions")]
-	public float MovementTimeThreshold { get; set; } = 3f;
-
-	[RotationConfig(CombatType.PvE, Name = "Opener/Burst open window (GCDs)")]
+	[RotationConfig(CombatType.PvE, Name = "[Opener] First Embolden / Manafication", Tooltip =
+		"How many GCDs into the pull (and into each burst) Embolden and Manafication open.")]
 	[Range(1, 3, ConfigUnitType.None, 1)]
 	public OpenWindowGcd OpenWindow { get; set; } = OpenWindowGcd.TwoGcd;
 
@@ -70,6 +23,72 @@ public sealed class BeirutaRDM : RedMageRotation
 		[Description("1 GCD (2.5s)")] OneGcd,
 		[Description("2 GCD (5.0s)")] TwoGcd,
 	}
+
+	#endregion
+
+	#region Burst
+
+	[RotationConfig(CombatType.PvE, Name = "[Burst] Pool Black and White Mana for Embolden", Tooltip =
+		"Saves mana (aiming for 73|73) so a triple melee combo lands in Embolden. An 11-mana gap is kept for Verholy / Verflare procs.")]
+	public bool Pooling { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "[Burst] Triple melee combo before Embolden", Tooltip =
+		"Needs you in melee range about 17s before Embolden is ready.")]
+	public bool TryTripleCombo { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "[Burst] Delay Prefulgence / Vice of Thorns about 3 GCDs after Embolden", Tooltip =
+		"Lines them up with party buffs.")]
+	public bool DelayBuffOGCDs { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "[Burst] Swiftcast / Acceleration to keep Fleche / Contre Sixte aligned", Tooltip =
+		"Uses Swiftcast or Acceleration so Fleche and Contre Sixte don't drift out of their windows.")]
+	public bool UseWindowAlignment { get; set; } = true;
+
+	#endregion
+
+	#region Melee Combo
+
+	[RotationConfig(CombatType.PvE, Name = "[Melee combo] Wait up to 2s when out of range", Tooltip =
+		"Gives you 2s to get back in melee range instead of dropping the combo.")]
+	public bool HoldMeleeComboIfOutOfRange { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "[Melee combo] Don't start it while moving", Tooltip =
+		"Doesn't affect the Manafication combo.")]
+	public bool NoComboStartWhileMoving { get; set; } = false;
+
+	#endregion
+
+	#region Movement
+
+	[Range(0, 4, ConfigUnitType.Seconds, 0.1f)]
+	[RotationConfig(CombatType.PvE, Name = "[Movement] Moving time before movement actions", Tooltip =
+		"How long you must be moving before movement-only actions are used.")]
+	public float MovementTimeThreshold { get; set; } = 3f;
+
+	[RotationConfig(CombatType.PvE, Name = "[Movement] Enchanted Reprise while moving", Tooltip =
+		"Only when nothing instant is available, with no mana stacks and under 50 Black or White Mana.")]
+	public bool RangedSwordplay { get; set; } = false;
+
+	#endregion
+
+	#region Utility
+
+	[RotationConfig(CombatType.PvE, Name = "[Utility] Heal with GCDs", Tooltip =
+		"Vercure on injured party members. Always on when no healer is alive.")]
+	public bool GCDHeal { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "[Utility] No GCD heals during burst combos")]
+	public bool PreventHeal { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "[Utility] No raises during burst combos")]
+	public bool PreventRaising { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "[Utility] Vercure out of combat for Dualcast", Tooltip =
+		"Casts Vercure out of combat so you start the pull with Dualcast.")]
+	public bool UseVercure { get; set; } = false;
+
+	#endregion
+
 	#endregion
 
 	#region Display
@@ -837,7 +856,7 @@ public sealed class BeirutaRDM : RedMageRotation
 			}
 		}
 
-		var emboldenAllowed = !IsOpen && IsBurst && InCombat && (AnyonesMeleeRule ? InMeleeRange3 : HasHostilesInRange);
+		var emboldenAllowed = !IsOpen && IsBurst && InCombat && HasHostilesInRange;
 		if (emboldenAllowed && EmboldenPvE.CanUse(out act))
 		{
 			_emboldenUsedAtMs = Environment.TickCount64;

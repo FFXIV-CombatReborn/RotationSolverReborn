@@ -665,8 +665,7 @@ public sealed class RPR_Reborn : ReaperRotation
 	(uint)StatusID.Embolden,
 	(uint)StatusID.SearingLight,
 	(uint)StatusID.BattleVoice,
-	(uint)StatusID.TechnicalFinish,
-	(uint)StatusID.RadiantFinale
+	(uint)StatusID.TechnicalFinish
     ];
 
     private static bool PartyHasStatus(Func<uint, bool> match)

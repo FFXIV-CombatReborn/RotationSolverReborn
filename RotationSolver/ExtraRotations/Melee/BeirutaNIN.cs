@@ -2,7 +2,8 @@ using System.ComponentModel;
 
 namespace RotationSolver.ExtraRotations.Melee;
 
-[Rotation("BeirutaNIN", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn)]
+[Rotation("BeirutaNIN", CombatType.PvE, GameVersion = "7.57", RotationType = RotationType.Reborn, Description =
+	"Automatic Ninja for most fights; Variant / Occult Crescent GCDs may break mudras. Start from the flank, or True North may disrupt weaving. To delay burst, turn AutoBurst off at least 5s before Kassatsu is ready; while delayed it only uses fillers and avoids capping mudras. Forked Raiju is yours to press, and Shukuchi needs a macro: /ac Shukuchi <gtoff>. Hover each setting for details.")]
 [SourceCode(Path = "main/ExtraRotations/Melee/BeirutaNIN.cs")]
 [ExtraRotation]
 
@@ -10,47 +11,21 @@ public sealed class BeirutaNIN : NinjaRotation
 {
 	#region Config
 
-	[RotationConfig(CombatType.PvE, Name =
-	"Please note that this rotation is optimised for most fights. However, V&C/OC GCDs may break mudra.\n" +
-	"• Standard 4th GCD is the highest adps damage opener; other options trade personal damage for rdps\n" +
-	"• Please start fights from flank, or True North may disrupt weaving\n" +
-	"• Use rotation Settings AutoBurst False AT LEAST 5 seconds BEFORE Kassatsu ready to delay burst\n" +
-	"• Use rotation Settings AutoBurst True to resume burst or toggle via macro\n" +
-	"• You must stay close for Kunai's Bane before suiton buff expires\n" +
-	"• Intercept Forked Raiju manually if desired\n" +
-	"• Use ac Shukuchi gtoff macro for movement\n\n" +
-
-	"Rotation behaviour (compared to Reborn):\n" +
-	"• Uses layered ninjutsu priority (burst prep → disengage → damage)\n" +
-	"• Adds early burst preparation (Suiton/Huton) based on burst action cooldown timing\n" +
-	"• Includes distance-based disengage uptime (Raiton/Katon)\n" +
-	"• Reserving mudra only for burst or uptime\n" +
-	"• Customizable Opener and Potion Usage\n" +
-	"• Burst delay optimization: only do fillers and prevent mudra cap when delaying. when renable burst (Huton/Suiton - Kassatsu - Dokumori - Kunai's Bane - TCJ)\n" +
-	"• Uses explicit AoE target counting for actions around targets/self\n")]
-	public bool RotationNotes { get; set; } = true;
+	#region Prepull
 
 	[Range(3f, 5f, ConfigUnitType.Seconds, 0.1f)]
-	[RotationConfig(CombatType.PvE, Name = "Countdown Suiton queue time (change this to 5 if you can trust your teamm. Or it should be 4 or 3 to prevent 5s countdown bait)")]
+	[RotationConfig(CombatType.PvE, Name = "[Prepull] Countdown Suiton at", Tooltip =
+		"Seconds left on the countdown when Suiton is queued. Use 5 if you trust your team's countdowns; 3-4 protects against 5s bait countdowns.")]
 	public float CountdownSuitonQueueTime { get; set; } = 4f;
 
-	[RotationConfig(CombatType.PvE, Name = "Use Raiton/Katon for uptime while disengaged (Moving one raiton/katon from 60s for uptime)")]
-	public bool UseRaitonDisengageFallback { get; set; } = true;
+	#endregion
 
-	[Range(0, 20, ConfigUnitType.Yalms, 1)]
-	[RotationConfig(CombatType.PvE, Name = "Minimum target distance for disengage fallback")]
-	public float RaitonFallbackMinDistance { get; set; } = 3.0f;
+	#region Opener
 
-	[RotationConfig(CombatType.PvE, Name = "Attempt to weave Kunai's Bane/Trick attack second half of GCD (Disable if you miss weaving)")]
-	public bool RequireLateWeaveForBurstBuff { get; set; } = true;
-
-	[RotationConfig(CombatType.PvE, Name = "Which Opener to Use")]
+	[RotationConfig(CombatType.PvE, Name = "[Opener] Opener", Tooltip =
+		"Standard 4th GCD is the highest personal damage. The others trade personal damage for raid damage.")]
 	[Range(0, 2, ConfigUnitType.None, 1)]
 	public BurstTimingOption BurstTiming { get; set; } = BurstTimingOption.StandardFourthGcd;
-
-	[Range(15f, 21f, ConfigUnitType.Seconds, 1f)]
-	[RotationConfig(CombatType.PvE, Name = "Suiton/Huton Prep Window (seconds before Trick Attack / Kunai's Bane)")]
-	public float BurstPrepThreshold { get; set; } = 21f;
 
 	public enum BurstTimingOption : byte
 	{
@@ -78,11 +53,39 @@ public sealed class BeirutaNIN : NinjaRotation
 		_ => 9,
 	};
 
-	[RotationConfig(CombatType.PvE, Name = "Enable Potion Usage")]
+	#endregion
+
+	#region Burst
+
+	[Range(15f, 21f, ConfigUnitType.Seconds, 1f)]
+	[RotationConfig(CombatType.PvE, Name = "[Burst] Prepare Suiton / Huton this early", Tooltip =
+		"Seconds before Kunai's Bane / Trick Attack that Suiton or Huton is prepared. Stay close for Kunai's Bane before Suiton runs out.")]
+	public float BurstPrepThreshold { get; set; } = 21f;
+
+	[RotationConfig(CombatType.PvE, Name = "[Burst] Late-weave Kunai's Bane / Trick Attack", Tooltip =
+		"Weaves them in the second half of the GCD. Turn this off if they keep getting missed.")]
+	public bool RequireLateWeaveForBurstBuff { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "[Burst] Use potion")]
 	private static bool PotionUsageEnabled { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "Potion Usage Preset", Parent = nameof(PotionUsageEnabled))]
+	[RotationConfig(CombatType.PvE, Name = "    > Potion timing (minutes)", Parent = nameof(PotionUsageEnabled), Tooltip =
+		"0-6-11 lines potions up with Dokumori; 0-5-10 with Kunai's Bane.")]
 	private static NINPotionPreset PotionUsagePreset { get; set; } = NINPotionPreset.Standard0611;
+
+	#endregion
+
+	#region Movement
+
+	[RotationConfig(CombatType.PvE, Name = "[Movement] Raiton / Katon while away from the target", Tooltip =
+		"Moves one Raiton / Katon from the 60s window to keep damage going while you can't reach the target.")]
+	public bool UseRaitonDisengageFallback { get; set; } = true;
+
+	[Range(0, 20, ConfigUnitType.Yalms, 1)]
+	[RotationConfig(CombatType.PvE, Name = "    > Only beyond this distance", Parent = nameof(UseRaitonDisengageFallback))]
+	public float RaitonFallbackMinDistance { get; set; } = 3.0f;
+
+	#endregion
 
 	#endregion
 
