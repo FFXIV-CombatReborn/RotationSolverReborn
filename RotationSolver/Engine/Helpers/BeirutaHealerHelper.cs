@@ -327,6 +327,32 @@ internal static class BeirutaWard
 		return count;
 	}
 
+	public static bool NonTanksShielded(IEnumerable<IBattleChara>? party, float range)
+	{
+		if (party == null)
+		{
+			return false;
+		}
+
+		var counted = 0;
+		foreach (var member in party)
+		{
+			if (member == null || member.IsDead || member.IsJobCategory(JobRole.Tank) || member.DistanceToPlayer() > range)
+			{
+				continue;
+			}
+
+			if (!member.HasStatus(false, StatusID.Galvanize, StatusID.EukrasianPrognosis))
+			{
+				return false;
+			}
+
+			counted++;
+		}
+
+		return counted > 0;
+	}
+
 	public static IBattleChara? StanceTank(IEnumerable<IBattleChara>? party, float range)
 	{
 		if (party == null)
@@ -703,6 +729,41 @@ internal static class BeirutaAccretion
 
 		action.Target = new TargetResult(target, [target], target.Position);
 		return true;
+	}
+}
+
+#endregion
+
+#region Critical Delay
+
+internal static class BeirutaCritical
+{
+	public const float NonTankDelaySeconds = 1.5f;
+
+	private const long StaleMs = 500;
+	private static readonly Dictionary<ulong, (long Since, long Seen)> _low = [];
+
+	public static bool ForGcd(IBattleChara member, float criticalHp) =>
+		member.GetHealthRatio() < criticalHp &&
+		(member.IsJobCategory(JobRole.Tank) || HeldBelow(member, criticalHp, NonTankDelaySeconds));
+
+	private static bool HeldBelow(IBattleChara member, float hpRatio, float seconds)
+	{
+		var id = member.GameObjectId;
+		if (member.GetHealthRatio() >= hpRatio)
+		{
+			_low.Remove(id);
+			return false;
+		}
+
+		var now = Environment.TickCount64;
+		if (!_low.TryGetValue(id, out var entry) || now - entry.Seen > StaleMs)
+		{
+			entry = (now, now);
+		}
+
+		_low[id] = (entry.Since, now);
+		return now - entry.Since >= seconds * 1000f;
 	}
 }
 

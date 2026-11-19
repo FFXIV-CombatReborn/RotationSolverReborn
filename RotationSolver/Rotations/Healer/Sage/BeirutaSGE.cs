@@ -1422,7 +1422,9 @@ public sealed class BeirutaSGE : SageRotation
 	}
 
 	private IBattleChara? NonTankTopUp =>
-		BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m) || HasSingleHealLockoutStatus(m), AoeInjuredCount);
+		WardMode && BeirutaWard.NonTanksShielded(PartyMembers, SingleHealRange)
+			? BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m) || HasSingleHealLockoutStatus(m), AoeInjuredCount)
+			: null;
 
 
 	private bool CanSpendAddersgall(bool ignoreReserve = false)

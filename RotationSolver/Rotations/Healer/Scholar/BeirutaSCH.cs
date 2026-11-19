@@ -136,14 +136,10 @@ public sealed class BeirutaSCH : ScholarRotation
 	#region Deployment Tactics
 
 	[RotationConfig(CombatType.PvE, Name = "[Deployment Tactics] Restrict Recitation", Tooltip =
-		"Deployment Tactics only: Recitation is kept for preparing Deployment Tactics.\n" +
-		"Deployment Tactics, or heals: when Deployment Tactics is not being prepared, Recitation also goes on Indomitability, Excogitation or Succor.")]
-	public RecitationUsageStrategy RecitationUsage { get; set; } = RecitationUsageStrategy.Flexible;
-
-	[RotationConfig(CombatType.PvE, Name = "[Deployment Tactics] Recitation before Adloquium", Tooltip =
-		"Preparing Deployment Tactics becomes Recitation - Adloquium - Deployment Tactics, spreading a critical shield.\n" +
-		"With Restrict Recitation = Deployment Tactics only, preparation waits for Recitation.")]
-	public bool OnlyUseDeploymentTacticsOnCriticalShields { get; set; } = true;
+		"On: the rotation only uses Recitation for Deployment Tactics, and pressing Recitation yourself is a trigger.\n" +
+		"Off: Recitation also goes on Indomitability, Excogitation or Succor whenever possible.\n" +
+		"Either way, preparing Deployment Tactics uses Recitation if it is ready, otherwise goes straight to Adloquium - Deployment Tactics.")]
+	public bool RestrictRecitation { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "[Deployment Tactics] Custom triggers (off = your Protraction on yourself)", Tooltip =
 		"A trigger is something you do that tells the rotation to prepare Deployment Tactics: Adloquium on the right target, then Deployment Tactics, within 15s.\n" +
@@ -158,7 +154,7 @@ public sealed class BeirutaSCH : ScholarRotation
 	public bool DeploymentSignalDefenseArea { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "    > Your Recitation", Parent = nameof(UseCustomDeploymentSignals), Tooltip =
-		"Pressing Recitation yourself prepares Deployment Tactics; the rotation then never spends it on heals.")]
+		"Pressing Recitation yourself prepares Deployment Tactics; the rotation then never spends it on heals. Always on while Restrict Recitation is on.")]
 	public bool DeploymentSignalRecitation { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "    > Your Fey Illumination", Parent = nameof(UseCustomDeploymentSignals))]
@@ -174,18 +170,10 @@ public sealed class BeirutaSCH : ScholarRotation
 		"Your own Swiftcast prepares Deployment Tactics. The rotation then stops using Swiftcast for movement or Succor.")]
 	public bool DeploymentSignalSwiftcast { get; set; } = false;
 
-	public enum RecitationUsageStrategy : byte
-	{
-		[Description("Deployment Tactics only")]
-		DeploymentOnly,
-
-		[Description("Deployment Tactics, or heals")]
-		Flexible,
-	}
 
 	private bool SignalProtraction => (!UseCustomDeploymentSignals || DeploymentSignalProtraction) && ProtractionUsageValue != ProtractionUsageStrategy.HelpOnly;
 	private bool SignalDefenseArea => UseCustomDeploymentSignals && DeploymentSignalDefenseArea;
-	private bool SignalRecitation => UseCustomDeploymentSignals && DeploymentSignalRecitation;
+	private bool SignalRecitation => RestrictRecitation || (UseCustomDeploymentSignals && DeploymentSignalRecitation);
 	private bool SignalFeyIllumination => UseCustomDeploymentSignals && DeploymentSignalFeyIllumination;
 	private bool SignalSurecast => UseCustomDeploymentSignals && DeploymentSignalSurecast;
 	private bool SignalSprint => UseCustomDeploymentSignals && DeploymentSignalSprint;
@@ -316,7 +304,6 @@ public sealed class BeirutaSCH : ScholarRotation
 	private long _deploymentChainStartedAtMs;
 	private DateTime _deploymentChainStartedAt;
 	private IBattleChara? _deploymentTarget;
-	private const double DeploymentAdloLandSeconds = 3d;
 
 	private readonly BeirutaRaidwide _raidwide = new();
 
@@ -1145,7 +1132,7 @@ public sealed class BeirutaSCH : ScholarRotation
 	#region Recitation / Protraction
 
 	private bool RecitationForHealingAllowed =>
-		RecitationUsage == RecitationUsageStrategy.Flexible &&
+		!RestrictRecitation &&
 		!SignalRecitation &&
 		!DeploymentChainActive;
 
@@ -1221,7 +1208,9 @@ public sealed class BeirutaSCH : ScholarRotation
 	#region Healing Abilities
 
 	private IBattleChara? NonTankTopUp =>
-		BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m), AoeInjuredCount);
+		WardMode && BeirutaWard.NonTanksShielded(PartyMembers, SingleHealRange)
+			? BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m), AoeInjuredCount)
+			: null;
 	private bool TryHealAbility(IAction nextGCD, out IAction? act)
 	{
 		act = null;
@@ -1666,7 +1655,7 @@ public sealed class BeirutaSCH : ScholarRotation
 			return false;
 		}
 
-		var critical = FindLowest(SingleHealRange, static m => m.GetHealthRatio() < CriticalHp);
+		var critical = FindLowest(SingleHealRange, static m => BeirutaCritical.ForGcd(m, CriticalHp));
 
 		if (HasSeraphism)
 		{
@@ -1991,6 +1980,7 @@ public sealed class BeirutaSCH : ScholarRotation
 		_deploymentChainStartedAtMs != 0 &&
 		Environment.TickCount64 - _deploymentChainStartedAtMs < DeploymentChainWindowMs;
 
+
 	private static bool HasDefenseAreaSignal => MergedStatus.HasFlag(AutoStatus.DefenseArea);
 
 	private bool DeploymentSignalActive =>
@@ -2004,8 +1994,7 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	private bool _deploymentChainUsesRecitation;
 
-	private bool DeploymentChainWantsRecitation =>
-		OnlyUseDeploymentTacticsOnCriticalShields && RecitationPvE.EnoughLevel;
+	private bool DeploymentChainWantsRecitation => RecitationPvE.EnoughLevel;
 
 	private bool RecitationReadyForChain =>
 		HasRecitation || RecitationPvE.Cooldown.WillHaveOneChargeGCD(1);
@@ -2018,19 +2007,7 @@ public sealed class BeirutaSCH : ScholarRotation
 
 	private bool CanStartDeploymentChain()
 	{
-		if (!DeploymentTacticsReadySoon || DeploymentAdloTarget() == null)
-		{
-			return false;
-		}
-
-		if (DeploymentChainWantsRecitation &&
-			!RecitationReadyForChain &&
-			RecitationUsage == RecitationUsageStrategy.DeploymentOnly)
-		{
-			return false;
-		}
-
-		return true;
+		return DeploymentTacticsReadySoon && DeploymentAdloTarget() != null;
 	}
 
 	private bool _deploymentSignalSeen;
@@ -2066,14 +2043,14 @@ public sealed class BeirutaSCH : ScholarRotation
 			var remain = MathF.Ceiling(DeploymentTacticsPvE.Cooldown.RecastTimeRemainOneCharge);
 			ECommons.DalamudServices.Svc.Toasts.ShowQuest($"Deployment Tactics on cooldown ({remain:0}s)");
 		}
+
 	}
 
 	private IBattleChara? DeploymentAdloTarget()
 	{
 		var protraction = FindLowest(SingleHealRange, static m =>
 			!IsTankMember(m) &&
-			m.HasStatus(true, StatusID.Protraction) &&
-			!m.HasStatus(false, StatusID.Galvanize));
+			m.HasStatus(true, StatusID.Protraction));
 		if (protraction != null)
 		{
 			return protraction;
@@ -2081,38 +2058,29 @@ public sealed class BeirutaSCH : ScholarRotation
 
 		var injured = FindLowest(SingleHealRange, static m =>
 			!IsTankMember(m) &&
-			m.GetHealthRatio() < 1f &&
-			!m.HasStatus(false, StatusID.Galvanize));
+			m.GetHealthRatio() < 1f);
 		if (injured != null)
 		{
 			return injured;
 		}
 
-		var player = ECommons.GameHelpers.Player.Object;
-		return player != null && !player.HasStatus(false, StatusID.Galvanize) ? player : null;
+		return ECommons.GameHelpers.Player.Object;
 	}
 
-	private IBattleChara? DeploymentGalvanizeTarget =>
-		_deploymentTarget != null &&
-		!_deploymentTarget.IsDead &&
-		_deploymentTarget.HasStatus(true, StatusID.Galvanize)
-			? _deploymentTarget
-			: null;
+	private const float GalvanizeDuration = 30f;
+	private const float GalvanizeFreshSlackSeconds = 1.5f;
 
-	private bool ShouldUseRecitationForDeploymentTactics() =>
-		DeploymentChainActive &&
-		DeploymentChainNeedsRecitation &&
-		!HasRecitation &&
-		DeploymentGalvanizeTarget == null;
+	private static bool IsCastingDeploymentAdlo =>
+		ECommons.GameHelpers.Player.Object is { IsCasting: true } player &&
+		(player.CastActionId == (uint)ActionID.AdloquiumPvE || player.CastActionId == (uint)ActionID.ManifestationPvE);
 
-	private bool DeploymentAdloPending
+	private DateTime? DeploymentAdloUsedAt
 	{
 		get
 		{
-			if (ECommons.GameHelpers.Player.Object is { IsCasting: true } player &&
-				(player.CastActionId == (uint)ActionID.AdloquiumPvE || player.CastActionId == (uint)ActionID.ManifestationPvE))
+			if (_deploymentChainStartedAt == default)
 			{
-				return true;
+				return null;
 			}
 
 			foreach (var rec in RecordActions)
@@ -2125,18 +2093,59 @@ public sealed class BeirutaSCH : ScholarRotation
 				var id = rec.Action.RowId;
 				if (id == (uint)ActionID.AdloquiumPvE || id == (uint)ActionID.ManifestationPvE)
 				{
-					return (DateTime.Now - rec.UsedTime).TotalSeconds < DeploymentAdloLandSeconds;
+					return rec.UsedTime;
 				}
 			}
 
-			return false;
+			return null;
 		}
 	}
 
+	private bool DeploymentAdloDone => IsCastingDeploymentAdlo || DeploymentAdloUsedAt != null;
+
+	private IBattleChara? DeploymentGalvanizeTarget
+	{
+		get
+		{
+			if (DeploymentAdloUsedAt is not { } usedAt)
+			{
+				return null;
+			}
+
+			var minRemain = GalvanizeDuration - (float)(DateTime.Now - usedAt).TotalSeconds - GalvanizeFreshSlackSeconds;
+
+			bool Fresh(IBattleChara? m) =>
+				m != null &&
+				!m.IsDead &&
+				m.HasStatus(true, StatusID.Galvanize) &&
+				m.StatusTime(true, StatusID.Galvanize) >= minRemain;
+
+			if (Fresh(_deploymentTarget))
+			{
+				return _deploymentTarget;
+			}
+
+			foreach (var member in PartyMembers)
+			{
+				if (Fresh(member))
+				{
+					return member;
+				}
+			}
+
+			return null;
+		}
+	}
+
+	private bool ShouldUseRecitationForDeploymentTactics() =>
+		DeploymentChainActive &&
+		DeploymentChainNeedsRecitation &&
+		!HasRecitation &&
+		!DeploymentAdloDone;
+
 	private bool ShouldUseDeploymentAdloquium() =>
 		DeploymentChainActive &&
-		DeploymentGalvanizeTarget == null &&
-		!DeploymentAdloPending &&
+		!DeploymentAdloDone &&
 		(HasRecitation || !DeploymentChainNeedsRecitation);
 
 	private bool TryUseDeploymentAdloquium(out IAction? act)
@@ -2163,7 +2172,6 @@ public sealed class BeirutaSCH : ScholarRotation
 	private bool ShouldUseDeploymentTactics() =>
 		DeploymentGalvanizeTarget != null &&
 		(DeploymentChainActive || InFirst5sAfterAdloquium);
-
 	private bool ProtectRecitationForDeployment => HasRecitation && DeploymentChainActive;
 
 	#endregion

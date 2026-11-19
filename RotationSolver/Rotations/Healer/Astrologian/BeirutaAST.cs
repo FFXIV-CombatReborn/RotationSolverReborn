@@ -359,7 +359,7 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	private bool ShouldUseLord =>
 		HasLord &&
-		(HasDivination || !DivinationPvE.EnoughLevel || DrawReadySoon(1));
+		(HasDivination || !DivinationPvE.EnoughLevel);
 
 	private bool TryPriorityWeaves(out IAction? act)
 	{
@@ -1721,7 +1721,9 @@ public sealed class BeirutaAST : AstrologianRotation
 	#region GCD Logic
 
 	private IBattleChara? NonTankTopUp =>
-		BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m), AoeInjuredCount);
+		WardMode && BeirutaWard.NonTanksShielded(PartyMembers, SingleHealRange)
+			? BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m), AoeInjuredCount)
+			: null;
 	private bool TryHealGCD(out IAction? act)
 	{
 		act = null;
@@ -1732,7 +1734,7 @@ public sealed class BeirutaAST : AstrologianRotation
 		}
 
 		if (!EssentialDignityReady &&
-			FindLowest(SingleHealRange, static m => m.GetHealthRatio() < CriticalHp) is { } critical &&
+			FindLowest(SingleHealRange, static m => BeirutaCritical.ForGcd(m, CriticalHp)) is { } critical &&
 			BeirutaAccretion.TryUseOn(BeneficIiPvE.EnoughLevel ? BeneficIiPvE : BeneficPvE, critical, out act))
 		{
 			return true;

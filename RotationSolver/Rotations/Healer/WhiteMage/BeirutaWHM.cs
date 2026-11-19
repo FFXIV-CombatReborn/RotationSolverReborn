@@ -76,7 +76,8 @@ public sealed class BeirutaWHM : WhiteMageRotation
 	}
 
 	[RotationConfig(CombatType.PvE, Name = "[Damage] Hold Afflatus Misery for raid buffs (if a raid-buff job is present)", Tooltip =
-		"Glare IV is also held until the shortest raid buff is about to end.")]
+		"Glare IV is also held until the shortest raid buff is about to end.\n" +
+		"Misery is still dumped early when there is enough time and lilies to rebuild 3 Blood Lilies before the next burst, so it doesn't block lilies.")]
 	public bool HoldMiseryForBurst { get; set; } = true;
 
 	#endregion
@@ -412,6 +413,36 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 	private bool MiseryHoldActive => HoldMiseryForBurst && RaidBuffJobInParty;
 
+	private const uint MiseryRebuildGcds = 3;
+	private const float LilyIntervalSeconds = 20f;
+
+	private float SecondsToNextBurst =>
+		PresenceOfMindPvE.EnoughLevel && PresenceOfMindPvE.Cooldown.IsCoolingDown
+			? PresenceOfMindPvE.Cooldown.RecastTimeRemainOneCharge
+			: 0f;
+
+	private bool MiseryDumpSafe
+	{
+		get
+		{
+			if (!MiseryHoldActive || BloodLily < 3 || !IsBurst)
+			{
+				return false;
+			}
+
+			var spendWindow = SecondsToNextBurst - GCDTime(MiseryRebuildGcds);
+			if (spendWindow <= 0f)
+			{
+				return false;
+			}
+
+			var lilyIn = MathF.Max(0f, LilyTime);
+			var gained = lilyIn <= spendWindow ? 1 + (int)((spendWindow - lilyIn) / LilyIntervalSeconds) : 0;
+			var needed = KeepEmergencyLilyValue ? 4 : 3;
+			return Lily + gained >= needed;
+		}
+	}
+
 	private bool TargetDying => CurrentTarget != null && CurrentTarget.IsDying();
 
 	private bool ShouldUseMisery()
@@ -427,7 +458,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		}
 
 		return MiseryHoldActive
-			? IsPartyBurst
+			? IsPartyBurst || MiseryDumpSafe
 			: MovingPastGrace || InDamageBurst;
 	}
 
@@ -922,7 +953,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		RegenPvE.IsEnabled &&
 		MovementRegenTarget() != null;
 
-	private bool MovementMiseryUseful => !MiseryHoldActive && OpenerTimingPassed && BloodLily >= 3 && AfflatusMiseryPvE.CanUse(out _, skipAoeCheck: true);
+	private bool MovementMiseryUseful => (!MiseryHoldActive || MiseryDumpSafe) && OpenerTimingPassed && BloodLily >= 3 && AfflatusMiseryPvE.CanUse(out _, skipAoeCheck: true);
 
 	private bool MovementDiaDue =>
 		HasSufficientMovement &&
@@ -1509,7 +1540,9 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		 (CureIiiPvE.EnoughLevel && FindCureIiiCenter(CureIiiHp) != null));
 
 	private IBattleChara? NonTankTopUp =>
-		BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m) || HasSingleHealLockoutStatus(m), AoeInjuredCount);
+		WardMode && BeirutaWard.NonTanksShielded(PartyMembers, SingleHealRange)
+			? BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m) || HasSingleHealLockoutStatus(m), AoeInjuredCount)
+			: null;
 	private bool TryHealGCD(out IAction? act)
 	{
 		act = null;
@@ -1520,7 +1553,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		}
 
 		var rescue =
-			FindLowest(SingleHealRange, static m => m.GetHealthRatio() < CriticalHp && AccretionTargetSafe(m, SolaceHealHp)) ??
+			FindLowest(SingleHealRange, static m => BeirutaCritical.ForGcd(m, CriticalHp) && AccretionTargetSafe(m, SolaceHealHp)) ??
 			(TetragrammatonReady
 				? null
 				: FindLowest(SingleHealRange, m => IsTankMember(m) && m.GetHealthRatio() < SolaceTankHealValue));
