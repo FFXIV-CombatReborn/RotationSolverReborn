@@ -11,4 +11,6 @@ internal static class JobPriorityLists
 	public static readonly Job[] TheBalancePriority = [Job.SAM, Job.NIN, Job.DRG, Job.MNK, Job.VPR, Job.RPR, Job.DRK, Job.PCT, Job.SMN, Job.RDM, Job.MCH, Job.BLM, Job.DNC, Job.BRD];
 
 	public static readonly Job[] KardiaTankPriority = [Job.PLD, Job.WAR, Job.GNB, Job.DRK, Job.GLA, Job.MRD];
+
+	public static readonly Job[] AdloquiumTankPriority = [Job.PLD, Job.WAR, Job.GNB, Job.DRK, Job.GLA, Job.MRD];
 }

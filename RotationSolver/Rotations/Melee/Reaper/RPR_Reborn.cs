@@ -1,4 +1,4 @@
-﻿namespace RotationSolver.Rotations.Melee.Reaper;
+namespace RotationSolver.Rotations.Melee.Reaper;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/Rotations/Melee/Reaper/RPR_Reborn.cs")]
@@ -665,8 +665,7 @@ public sealed class RPR_Reborn : ReaperRotation
 	StatusID.Embolden,
 	StatusID.SearingLight,
 	StatusID.BattleVoice,
-	StatusID.TechnicalFinish,
-	StatusID.RadiantFinale
+	StatusID.TechnicalFinish
 	];
 
 	private bool AtIdealPositional

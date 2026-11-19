@@ -87,7 +87,9 @@ public partial class MainWindow
 		var type = rotation.GetType();
 		var key = $"{type.FullName ?? type.Name}.{config.Name}";
 		var id = $"##{config.GetHashCode()}_{key}";
-		var command = ToCommandStr(commandType, config.Name, config.DefaultValue);
+		var command = config is RotationConfigBoolean
+			? ToCommandStr(commandType, config.Name)
+			: ToCommandStr(commandType, config.Name, config.DefaultValue);
 		void Reset() => config.Value = config.DefaultValue;
 
 		ImGuiHelper.PrepareGroup(key, command, Reset);

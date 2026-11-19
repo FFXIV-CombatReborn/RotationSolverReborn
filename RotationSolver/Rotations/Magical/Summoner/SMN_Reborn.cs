@@ -1,4 +1,4 @@
-﻿namespace RotationSolver.Rotations.Magical.Summoner;
+namespace RotationSolver.Rotations.Magical.Summoner;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/Rotations/Magical/Summoner/SMN_Reborn.cs")]
@@ -72,6 +72,18 @@ public sealed class SMN_Reborn : SummonerRotation
 
 	[RotationConfig(CombatType.PvE, Name = "Swiftcast for movement uptime: only use it on Ruby Rite/Slipstream while moving")]
 	public bool SwiftcastMovementUptime { get; set; } = false;
+
+	public enum SwiftcastMovementPriority : byte
+	{
+		[Description("Last resort (spend Ruin IV / instant attunements first)")]
+		LastResort = 0,
+
+		[Description("Highest priority (Swiftcast as soon as movement is sustained)")]
+		First = 2,
+	}
+
+	[RotationConfig(CombatType.PvE, Name = "    > Swiftcast movement priority", Parent = nameof(SwiftcastMovementUptime))]
+	public SwiftcastMovementPriority SwiftcastMovement { get; set; } = SwiftcastMovementPriority.LastResort;
 
 	[RotationConfig(CombatType.PvE, Name = "Dynamic primal order: Ifrit if still and close, Garuda if still and far, Titan if moving (falls back to Order)")]
 	public bool DynamicSummonOrder { get; set; } = false;
@@ -383,17 +395,13 @@ public sealed class SMN_Reborn : SummonerRotation
 			{
 				return true;
 			}
-			if (SwiftcastMovementUptime && !HasSwift)
+			if (SwiftcastMovementUptime && !HasSwift && !ShouldHoldRaiseSwift)
 			{
-				if (IsMoving && AttunementCount == 0 && SlipstreamPvE.CanUse(out _, skipCastingCheck: true))
+				if (ShouldSwiftcastForMovement())
 				{
 					return true;
 				}
-				if (IsMoving && RubyRitePvE.CanUse(out _, skipCastingCheck: true))
-				{
-					return true;
-				}
-				if (nextGCD.IsTheSameTo(false, RubyRitePvE, SlipstreamPvE) && !IsGarudaReady && !IsIfritReady)
+				if (!MovingPastGrace && nextGCD.IsTheSameTo(false, RubyRitePvE, SlipstreamPvE) && !IsGarudaReady && !IsIfritReady)
 				{
 					return true;
 				}
@@ -471,12 +479,12 @@ public sealed class SMN_Reborn : SummonerRotation
 			return true;
 		}
 
-		if (SlipstreamPvE.CanUse(out act, skipCastingCheck: !SwiftcastMovementUptime && AddSwiftcastOnGaruda && ((!SwiftcastPvE.Cooldown.IsCoolingDown && IsMoving) || HasSwift)))
+		if (SlipstreamPvE.CanUse(out act, skipCastingCheck: !SwiftcastMovementUptime && AddSwiftcastOnGaruda && ((!SwiftcastPvE.Cooldown.IsCoolingDown && MovingPastGrace) || HasSwift)))
 		{
 			return true;
 		}
 
-		if ((!IsMoving || AddCrimsonCycloneMoving) && CrimsonCyclonePvE.CanUse(out act) && (AddCrimsonCyclone || CrimsonCyclonePvE.Target.Target.DistanceToPlayer() <= CrimsonCycloneDistance))
+		if ((!MovingPastGrace || AddCrimsonCycloneMoving) && CrimsonCyclonePvE.CanUse(out act) && (AddCrimsonCyclone || CrimsonCyclonePvE.Target.Target.DistanceToPlayer() <= CrimsonCycloneDistance))
 		{
 			return true;
 		}
@@ -812,6 +820,65 @@ public sealed class SMN_Reborn : SummonerRotation
 		}
 	}
 
+	#region Movement
+
+	private const float MovementGraceSeconds = 0.3f;
+	private const float MovementTimeThreshold = 1.0f;
+	private const float MovementLeadSeconds = 0.5f;
+
+	// Ignore stutter-steps / slidecast adjustments.
+	private bool MovingPastGrace =>
+		InCombat &&
+		IsMoving &&
+		MovingTime > MovementGraceSeconds;
+
+	// Movement long enough to justify spending a resource.
+	private bool HasSufficientMovement =>
+		InCombat &&
+		IsMoving &&
+		MovingTime > MovementTimeThreshold;
+
+	private bool ShouldHoldRaiseSwift =>
+		(HasSwift || IsLastAction(ActionID.SwiftcastPvE)) &&
+		MergedStatus.HasFlag(AutoStatus.Raise);
+
+	private bool SwiftcastReadyForMovement =>
+		SwiftcastMovementUptime &&
+		HasSufficientMovement &&
+		MovingTime > MovementTimeThreshold + MovementLeadSeconds &&
+		!HasSwift &&
+		SwiftcastPvE.EnoughLevel &&
+		SwiftcastPvE.IsEnabled &&
+		!SwiftcastPvE.Cooldown.IsCoolingDown &&
+		!ShouldHoldRaiseSwift;
+
+	// Instants that cover movement without burning Swiftcast.
+	private bool HasCheaperMovementOption =>
+		HasFurtherRuin ||
+		HasCrimsonStrike ||
+		TopazAttunement ||
+		EmeraldAttunement ||
+		InBahamut || InPhoenix || InSolarBahamut ||
+		(AddCrimsonCycloneMoving && HasIfritFavor);
+
+	private bool HasSwiftcastMovementTarget =>
+		(AttunementCount == 0 && SlipstreamPvE.CanUse(out _, skipCastingCheck: true)) ||
+		RubyRitePvE.CanUse(out _, skipCastingCheck: true);
+
+	private bool ShouldSwiftcastForMovement()
+	{
+		if (!SwiftcastReadyForMovement ||
+			IsLastAction(ActionID.SwiftcastPvE) ||
+			!HasSwiftcastMovementTarget)
+		{
+			return false;
+		}
+
+		return SwiftcastMovement == SwiftcastMovementPriority.First || !HasCheaperMovementOption;
+	}
+
+	#endregion
+
 	private bool DynamicSummonTime(out IAction? act)
 	{
 		act = null;
@@ -821,7 +888,7 @@ public sealed class SMN_Reborn : SummonerRotation
 			return false;
 		}
 
-		if (IsMoving)
+		if (MovingPastGrace)
 		{
 			return TitanTime(out act);
 		}
