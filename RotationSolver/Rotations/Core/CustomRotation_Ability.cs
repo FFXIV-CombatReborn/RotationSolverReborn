@@ -350,15 +350,10 @@ public partial class CustomRotation
 		IBaseAction.ShouldEndSpecial = false;
 		IBaseAction.AllEmpty = false;
 
-		if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealSingleAbility))
-		{
-			IBaseAction.ShouldEndSpecial = true;
-		}
-		if (DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleAbility) && UseHpPotion(nextGCD, out act))
+		if (UseHpPotion(nextGCD, out act))
 		{
 			return true;
 		}
-		IBaseAction.ShouldEndSpecial = false;
 
 		if (HasHostilesInRange && ActiveDutyRotation?.AttackAbility(nextGCD, out act) == true)
 		{

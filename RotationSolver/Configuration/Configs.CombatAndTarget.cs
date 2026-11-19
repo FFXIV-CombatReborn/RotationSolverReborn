@@ -147,7 +147,7 @@ internal partial class Configs
 
 	[JobConfig, UI("Tincture usage",
 	Description = "When to use gemdraughts and tinctures. Only rotations that support automatic tincture usage follow this.",
-	Filter = AutoActionUsage, Section = 5, PvPFilter = JobFilterType.NoJob)]
+	Filter = AutoItemUsage, Section = 0, PvPFilter = JobFilterType.NoJob)]
 	private readonly TinctureUseType _TinctureType = TinctureUseType.InHighEndDuty;
 
 	[ConditionBool, UI("Use anti-knockback actions",
@@ -156,23 +156,40 @@ internal partial class Configs
 	private static readonly bool _useKnockback = true;
 
 	[ConditionBool, UI("Use HP potions",
-	Filter = AutoActionUsage, Section = 5)]
+	Description = "Enable individual potions in Actions > Item.",
+	Filter = AutoItemUsage, Section = 1, PvPFilter = JobFilterType.NoJob)]
 	private static readonly bool _useHpPotions = false;
 
-	[UI("Use HP potions below this HP", Parent = nameof(UseHpPotions))]
+	[UI("Use HP potions below this HP", Parent = nameof(UseHpPotions), Order = 0)]
 	[Range(0, 1, ConfigUnitType.Percent, 0.002f)]
 	public float UseHpPotionsPercent { get; set; } = 0.5f;
 
+	[ConditionBool, UI("Use HP potions out of combat", Parent = nameof(UseHpPotions), Order = 1)]
+	private static readonly bool _useHpPotionsOutOfCombat = false;
+
+	[UI("Stop using HP potions when enemies will die within",
+	Description = "In combat, stop using HP potions when the enemies' average time to kill is below this. Set to 0 to disable.",
+	Parent = nameof(UseHpPotions), Order = 2)]
+	[Range(0, 30, ConfigUnitType.Seconds, 0.02f)]
+	public float UseHpPotionsTimeToKill { get; set; } = 0f;
+
+	[ConditionBool, UI("Only when no healer is present or alive", Parent = nameof(UseHpPotions), Order = 3)]
+	private static readonly bool _useHpPotionsOnlyWhenNoHealer = false;
+
 	[ConditionBool, UI("Use MP potions",
-	Filter = AutoActionUsage, Section = 5)]
+	Description = "Enable individual potions in Actions > Item.",
+	Filter = AutoItemUsage, Section = 2, PvPFilter = JobFilterType.NoJob)]
 	private static readonly bool _useMpPotions = false;
 
-	[UI("Use MP potions below this MP", Parent = nameof(UseMpPotions))]
+	[UI("Use MP potions below this MP", Parent = nameof(UseMpPotions), Order = 0)]
 	[Range(0, 1, ConfigUnitType.Percent, 0.002f)]
 	public float UseMpPotionsPercent { get; set; } = 0.5f;
 
+	[ConditionBool, UI("Use MP potions out of combat", Parent = nameof(UseMpPotions), Order = 1)]
+	private static readonly bool _useMpPotionsOutOfCombat = false;
+
 	[ConditionBool, UI("Use Phoenix Down (Experimental)",
-	Filter = AutoActionUsage, Section = 5)]
+	Filter = AutoItemUsage, Section = 3, PvPFilter = JobFilterType.NoJob)]
 	private static readonly bool _usePhoenixDown = false;
 
 	[ConditionBool, UI("Only when no one who can raise is alive",

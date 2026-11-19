@@ -33,6 +33,7 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 		UiWindows = "UiWindows",
 		UiHotbars = "UiHotbars",
 		AutoActionUsage = "AutoActionUsage",
+		AutoItemUsage = "AutoItemUsage",
 		AutoIntercept = "AutoIntercept",
 		HealingActionCondition = "HealingActionCondition",
 		RaiseActionCondition = "RaiseActionCondition",

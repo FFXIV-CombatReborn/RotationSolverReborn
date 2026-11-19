@@ -351,7 +351,7 @@ namespace RotationSolver.Commands
 		{
 			if (DataCenter.PvPAutomationBlocked && stateType != StateCommandType.Off)
 			{
-				Svc.Chat.PrintError("Rotation Solver Reborn: Autorotation is blocked in PvP while 'Auto PVP Series Grind' is enabled. It is an AI generated plugin and has been breaking RSR installations.");
+				Svc.Chat.PrintError("Rotation Solver Reborn: Autorotation is blocked in PvP while 'Auto PVP Series Grind' is enabled. It is an AI generated plugin and an AI slop RSR clone.");
 				stateType = StateCommandType.Off;
 			}
 

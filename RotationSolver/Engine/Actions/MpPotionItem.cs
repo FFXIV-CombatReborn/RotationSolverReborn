@@ -11,7 +11,8 @@ internal class MpPotionItem : BaseItem
 
 	public MpPotionItem(Item item) : base(item)
 	{
-		var data = _item.ItemAction.Value!.DataHQ;
+		var action = _item.ItemAction.Value;
+		var data = action.DataHQ[1] > 0 ? action.DataHQ : action.Data;
 		MaxMp = data[1];
 	}
 
@@ -19,10 +20,10 @@ internal class MpPotionItem : BaseItem
 	{
 		item = this;
 
-		if (Player.Object == null)
+		if (!Player.Available || Player.Object == null || Player.Object.CurrentHp == 0)
 		{
 			return false;
 		}
-		return Player.Available && ObjectHelper.GetPlayerMPRatio() <= Service.Config.UseMpPotionsPercent && Player.Object.MaxMp - DataCenter.CurrentMp >= MaxMp && base.CanUse(out item, clippingCheck);
+		return ObjectHelper.GetPlayerMPRatio() <= Service.Config.UseMpPotionsPercent && Player.Object.MaxMp - DataCenter.CurrentMp >= MaxMp && base.CanUse(out item, clippingCheck);
 	}
 }

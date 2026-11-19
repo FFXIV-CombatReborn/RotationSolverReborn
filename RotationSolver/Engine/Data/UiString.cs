@@ -370,6 +370,12 @@ namespace RotationSolver.Engine.Data
 		[Description("Which actions RSR can use")]
 		ConfigWindow_Auto_ActionUsage_Description,
 
+		[Description("Item Usage and Control")]
+		ConfigWindow_Auto_ItemUsage,
+
+		[Description("Which items and potions RSR can use")]
+		ConfigWindow_Auto_ItemUsage_Description,
+
 		[Description("Action Interception")]
 		ConfigWindow_Auto_Intercept,
 
