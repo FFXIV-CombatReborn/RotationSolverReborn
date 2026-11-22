@@ -76,23 +76,6 @@ public sealed class Rabbs_BLM : BlackMageRotation
 	#endregion
 
 	#region Config Under Hood Stuff
-	// temp flare fix for alt flare opener only
-	public IBaseAction AltFlareOpenerPvE => _AltFlareOpenerPvE.Value;
-
-	private static void ModifyAltFlareOpenerPvE(ref Engine.Actions.ActionSetting setting)
-	{
-		setting.RotationCheck = () => InAstralFire;
-		setting.UnlockedByQuestID = 66614u;
-	}
-
-	private readonly Lazy<IBaseAction> _AltFlareOpenerPvE = new(static delegate
-	{
-		var setting460 = new BaseAction(ActionID.FlarePvE).Setting;
-		ModifyAltFlareOpenerPvE(ref setting460);
-		new BaseAction(ActionID.FlarePvE).Setting = setting460;
-		return new BaseAction(ActionID.FlarePvE);
-	});
-
 	private static readonly StatusID[] burstStatusIds =
 	[
 		StatusID.Divination,
@@ -1470,7 +1453,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
 								return true;
 							}
 
-							if (AltFlareOpenerPvE.CanUse(out act, skipAoeCheck: true))
+							if (FlarePvE.CanUse(out act, skipAoeCheck: true))
 							{
 								return true;
 							}
@@ -1493,7 +1476,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
 					}
 					if (WillBeAbleToFlareStarMT && !WillBeAbleToFlareStarST)
 					{
-						if (AltFlareOpenerPvE.CanUse(out act, skipAoeCheck: true))
+						if (FlarePvE.CanUse(out act, skipAoeCheck: true))
 						{
 							return true;
 						}

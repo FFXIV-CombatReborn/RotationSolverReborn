@@ -435,29 +435,11 @@ public sealed class WAR_Reborn : WarriorRotation
 	#region Extra Methods
 	private static bool IsBurstStatus => !StatusHelper.PlayerWillStatusEndGCD(0, 0, false, StatusID.InnerStrength);
 
-	// Picks the lowest HP% party member under the Nascent Flash threshold, optionally limited to healers.
-	// The target filter is swapped in for this call only and restored afterwards.
-	// Wicked bodge but it works for now
-	// TODO: make a more generic "target filter swap" method in ActionSetting
 	private bool NascentFlashCanUse(out IAction? act, bool healersOnly)
 	{
-		var setting = NascentFlashPvE.Setting;
-		var canTarget = setting.CanTarget;
 		var healRatio = Math.Min(FlashHeal, NascentFlashPvE.Config.AutoHealRatio);
-
-		setting.CanTarget = t => canTarget(t)
-			&& t.GetHealthRatio() < healRatio
-			&& t.CanBeHealed()
-			&& (!healersOnly || t.IsJobCategory(JobRole.Healer));
-
-		try
-		{
-			return NascentFlashPvE.CanUse(out act, targetOverride: TargetType.LowHPPercent);
-		}
-		finally
-		{
-			setting.CanTarget = canTarget;
-		}
+		return NascentFlashPvE.CanUse(out act,targetOverride: TargetType.LowHPPercent,
+			targetFilter: t => t.GetHealthRatio() < healRatio && t.CanBeHealed() && (!healersOnly || t.IsJobCategory(JobRole.Healer)));
 	}
 	#endregion
 }

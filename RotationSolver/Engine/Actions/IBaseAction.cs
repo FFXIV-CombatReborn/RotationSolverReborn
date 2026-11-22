@@ -82,5 +82,5 @@ public interface IBaseAction : IAction
 	/// <param name="targetOverride">Overrides the default target type for the action.</param>
 	/// <returns>can I use it</returns>
 	bool CanUse(out IAction act, bool skipStatusProvideCheck = false, bool skipStatusNeed = false, bool skipTargetStatusNeedCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
-		bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0, bool checkActionManager = false, TargetType targetOverride = default);
+		bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0, bool checkActionManager = false, TargetType targetOverride = default, Func<IBattleChara, bool>? targetFilter = null);
 }

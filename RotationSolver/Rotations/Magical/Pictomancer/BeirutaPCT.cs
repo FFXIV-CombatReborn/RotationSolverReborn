@@ -186,7 +186,6 @@ public sealed class BeirutaPCT : PictomancerRotation
 	private IBaseAction[]? _creatureMotifs;
 
 	private IAction? _heldGCD;
-	private bool _actionChecksInstalled;
 	private bool _motifCheckForSwift;
 
 	private long _starryUsedAtMs;
@@ -314,37 +313,25 @@ public sealed class BeirutaPCT : PictomancerRotation
 		StopMovingTime >= MotifStandStillSeconds ||
 		IsQueuedByUser(motif);
 
-	private static void AddActionCheck(IBaseAction action, Func<bool> check)
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		action.ID == RainbowDripPvE.ID && !RainbowDripCastAllowed;
+
+	private bool TryCometInBlack(out IAction? act, bool skipCastingCheck = false)
 	{
-		var original = action.Setting.ActionCheck;
-		action.Setting.ActionCheck = () => check() && (original?.Invoke() ?? true);
+		act = null;
+		return CometCastAllowed && CometInBlackPvE.CanUse(out act, skipCastingCheck: skipCastingCheck);
 	}
 
-	private void InstallActionChecks()
+	private bool TryMotif(IBaseAction motif, bool skipCastingCheck, out IAction? act)
 	{
-		if (_actionChecksInstalled)
-		{
-			return;
-		}
-
-		AddActionCheck(RainbowDripPvE, () => RainbowDripCastAllowed);
-		AddActionCheck(CometInBlackPvE, () => CometCastAllowed);
-		AddActionCheck(HammerMotifPvE, () => MotifCastAllowed(HammerMotifPvE));
-		AddActionCheck(StarrySkyMotifPvE, () => MotifCastAllowed(StarrySkyMotifPvE));
-
-		foreach (var motif in CreatureMotifs)
-		{
-			AddActionCheck(motif, () => MotifCastAllowed(motif));
-		}
-
-		_actionChecksInstalled = true;
+		act = null;
+		return MotifCastAllowed(motif) && motif.CanUse(out act, skipCastingCheck: skipCastingCheck);
 	}
 
 	protected override void UpdateInfo()
 	{
 		TrackStarryBursts();
 		TrackCountdown();
-		InstallActionChecks();
 
 		base.UpdateInfo();
 	}
@@ -426,7 +413,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 			return null;
 		}
 
-		if (remainTime < RainbowDripPvE.Info.CastTime + 0.4f + CountDownAhead && RainbowDripPvE.CanUse(out var act))
+		if (remainTime < RainbowDripPvE.Info.CastTime + 0.4f + CountDownAhead && RainbowDripCastAllowed && RainbowDripPvE.CanUse(out var act))
 		{
 			return act;
 		}
@@ -480,7 +467,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 		HasRainbowBright ||
 		HasStarstruck ||
 		(HolyCometAllowedByPaintReserve &&
-			(CometInBlackPvE.CanUse(out _) || HolyInWhitePvE.CanUse(out _)));
+			(TryCometInBlack(out _) || HolyInWhitePvE.CanUse(out _)));
 
 	private bool ShouldSwiftcastForMovement(IAction nextGCD)
 	{
@@ -559,8 +546,19 @@ public sealed class BeirutaPCT : PictomancerRotation
 
 	private float LivingCapIn => TimeToChargeCap(LivingMusePvE, LivingMusePvE.Cooldown.MaxCharges);
 
-	private bool TryCreatureMotif(bool skipCastingCheck, out IAction? act) =>
-		TryFirstUsable(CreatureMotifs, skipCastingCheck, out act);
+	private bool TryCreatureMotif(bool skipCastingCheck, out IAction? act)
+	{
+		foreach (var motif in CreatureMotifs)
+		{
+			if (TryMotif(motif, skipCastingCheck, out act))
+			{
+				return true;
+			}
+		}
+
+		act = null;
+		return false;
+	}
 
 	private bool TryOrderedMotif(bool allowWeapon, bool allowCreature, bool skipCastingCheck, out IAction? act)
 	{
@@ -571,7 +569,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 			return true;
 		}
 
-		if (allowWeapon && HammerMotifPvE.CanUse(out act, skipCastingCheck: skipCastingCheck))
+		if (allowWeapon && TryMotif(HammerMotifPvE, skipCastingCheck, out act))
 		{
 			return true;
 		}
@@ -600,7 +598,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 			return true;
 		}
 
-		if (!HasStarryMuse && !HasHyperphantasia && StarrySkyMotifPvE.CanUse(out act, skipCastingCheck: skipCastingCheck))
+		if (!HasStarryMuse && !HasHyperphantasia && TryMotif(StarrySkyMotifPvE, skipCastingCheck, out act))
 		{
 			return true;
 		}
@@ -1124,7 +1122,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 			return true;
 		}
 
-		if (ScenicMusePvE.Cooldown.RecastTimeRemainOneCharge <= BurstPrepWindow && StarrySkyMotifPvE.CanUse(out act))
+		if (ScenicMusePvE.Cooldown.RecastTimeRemainOneCharge <= BurstPrepWindow && TryMotif(StarrySkyMotifPvE, false, out act))
 		{
 			return true;
 		}
@@ -1139,7 +1137,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 			return true;
 		}
 
-		if (!HasHyperphantasia && !IsPotted && StarrySkyMotifPvE.CanUse(out act))
+		if (!HasHyperphantasia && !IsPotted && TryMotif(StarrySkyMotifPvE, false, out act))
 		{
 			return true;
 		}
@@ -1217,12 +1215,12 @@ public sealed class BeirutaPCT : PictomancerRotation
 		if (movingCommit &&
 			(!HasHammerTime || HammersReservedForBurst) &&
 			HolyCometAllowedByPaintReserve &&
-			(CometInBlackPvE.CanUse(out act) || HolyInWhitePvE.CanUse(out act)))
+			(TryCometInBlack(out act) || HolyInWhitePvE.CanUse(out act)))
 		{
 			return true;
 		}
 
-		if (ShouldSpendBlackForPalette && CometInBlackPvE.CanUse(out act))
+		if (ShouldSpendBlackForPalette && TryCometInBlack(out act))
 		{
 			return true;
 		}
@@ -1233,7 +1231,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 		}
 
 		if (TryOrderedMotif(WeaponPaintAllowed, true, skipCastingCheck: false, out act) ||
-			StarrySkyMotifPvE.CanUse(out act))
+			TryMotif(StarrySkyMotifPvE, false, out act))
 		{
 			return true;
 		}
@@ -1252,14 +1250,14 @@ public sealed class BeirutaPCT : PictomancerRotation
 		var needStrikingSlot = !HasHammerTime && StrikingMusePvE.Cooldown.CurrentCharges > 0;
 
 		if (inspirationCasts && palettePending && HasMonochromeTones &&
-			CometInBlackPvE.CanUse(out act, skipCastingCheck: true))
+			TryCometInBlack(out act, skipCastingCheck: true))
 		{
 			return true;
 		}
 
 		if (needStrikingSlot || palettePending || MovingPastGrace)
 		{
-			if (inspirationCasts && CometInBlackPvE.CanUse(out act, skipCastingCheck: true))
+			if (inspirationCasts && TryCometInBlack(out act, skipCastingCheck: true))
 			{
 				return true;
 			}
@@ -1277,7 +1275,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 
 		if (inspirationCasts &&
 			(TryFirstUsable(SubtractiveCombo, skipCastingCheck: false, out act) ||
-				CometInBlackPvE.CanUse(out act, skipCastingCheck: true) ||
+				TryCometInBlack(out act, skipCastingCheck: true) ||
 				TryFirstUsable(WhiteCombo, skipCastingCheck: false, out act)))
 		{
 			return true;
@@ -1336,7 +1334,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 	{
 		if (TryHammerChain(out act) ||
 			TryOrderedMotif(!HasHammerTime, true, skipCastingCheck: false, out act) ||
-			CometInBlackPvE.CanUse(out act))
+			TryCometInBlack(out act))
 		{
 			return true;
 		}

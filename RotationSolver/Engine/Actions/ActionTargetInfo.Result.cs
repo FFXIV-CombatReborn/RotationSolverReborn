@@ -11,7 +11,7 @@ public partial struct ActionTargetInfo
 {
 	#region Target Result
 
-	internal readonly TargetResult? FindTarget(bool skipAoeCheck, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck, TargetType targetOverride)
+	internal readonly TargetResult? FindTarget(bool skipAoeCheck, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck, TargetType targetOverride, Func<IBattleChara, bool>? targetFilter = null)
 	{
 		if (action == null || action.Setting == null || action.Config == null)
 		{
@@ -72,7 +72,7 @@ public partial struct ActionTargetInfo
 			return new TargetResult(Player.Object, [.. selfAffects], Player.Object.Position);
 		}
 
-		IEnumerable<IBattleChara> canTargets = GetCanTargets(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
+		IEnumerable<IBattleChara> canTargets = GetCanTargets(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride, targetFilter);
 		var canAffects = GetCanAffects(skipStatusProvideCheck, skipTargetStatusNeedCheck, type, targetOverride);
 
 		if (canTargets == null || canAffects == null)
@@ -87,7 +87,7 @@ public partial struct ActionTargetInfo
 
 		var commandTarget = DataCenter.GetCommandTarget(action);
 		if (commandTarget is { ObjectId: not 0 } objectTarget
-			&& FindCommandObjectTarget(objectTarget.ObjectId, canAffects, skipStatusProvideCheck, skipTargetStatusNeedCheck) is { } commandResult)
+			&& FindCommandObjectTarget(objectTarget.ObjectId, canAffects, skipStatusProvideCheck, skipTargetStatusNeedCheck, targetFilter) is { } commandResult)
 		{
 			return commandResult;
 		}
@@ -113,7 +113,7 @@ public partial struct ActionTargetInfo
 		return new TargetResult(target, [.. GetAffectsTarget(target, canAffects)], target.Position);
 	}
 
-	private readonly TargetResult? FindCommandObjectTarget(ulong objectId, IEnumerable<IBattleChara> canAffects, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
+	private readonly TargetResult? FindCommandObjectTarget(ulong objectId, IEnumerable<IBattleChara> canAffects, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck, Func<IBattleChara, bool>? targetFilter = null)
 	{
 		if (Player.Object == null || Svc.Objects.SearchById(objectId) is not IBattleChara target)
 		{
@@ -136,6 +136,7 @@ public partial struct ActionTargetInfo
 			|| !CanUseTo(target)
 			|| !CheckStatus(target, skipStatusProvideCheck, skipTargetStatusNeedCheck)
 			|| !action.Setting.CanTarget(target)
+			|| (targetFilter != null && !targetFilter(target))
 			|| (ShouldCheckMoveSafety() && !CheckMovementSafety(target.Position, target)))
 		{
 			return null;

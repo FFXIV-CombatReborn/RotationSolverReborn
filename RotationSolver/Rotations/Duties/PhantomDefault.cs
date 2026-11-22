@@ -1176,13 +1176,19 @@ public sealed class PhantomDefault : PhantomRotation
 			}
 
 			// logic if neither cannons effects can be used on target
-			if ((CannoneerLevel < 4 || DarkShockCannonImmuneUsage == DarkShockCannonImmuneStrategy.DarkCannon) && CanUseOnHighHP(DarkCannonPvE, out act))
+			if ((CannoneerLevel < 4 || DarkShockCannonImmuneUsage == DarkShockCannonImmuneStrategy.DarkCannon))
 			{
-				return true;
+				if (DarkCannonPvE.CanUse(out act, targetOverride: TargetType.HighHP))
+				{
+					return true;
+				}
 			}
-			if (DarkShockCannonImmuneUsage == DarkShockCannonImmuneStrategy.ShockCannon && CanUseOnHighHP(ShockCannonPvE, out act))
+			if (DarkShockCannonImmuneUsage == DarkShockCannonImmuneStrategy.ShockCannon)
 			{
-				return true;
+				if (ShockCannonPvE.CanUse(out act, targetOverride: TargetType.HighHP))
+				{
+					return true;
+				}
 			}
 		}
 
@@ -1411,20 +1417,5 @@ public sealed class PhantomDefault : PhantomRotation
 		}
 
 		return !InBurstWindow();
-	}
-
-	// For targets immune to the cannon's blind/paralysis: target by HP for this call only.
-	private static bool CanUseOnHighHP(IBaseAction action, out IAction? act)
-	{
-		var targetType = action.Setting.TargetType;
-		action.Setting.TargetType = TargetType.HighHP;
-		try
-		{
-			return action.CanUse(out act);
-		}
-		finally
-		{
-			action.Setting.TargetType = targetType;
-		}
 	}
 }
