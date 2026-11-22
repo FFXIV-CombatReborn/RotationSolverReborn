@@ -116,9 +116,6 @@ public sealed class BeirutaRDM : RedMageRotation
 	#endregion
 
 	#region Static actions / constants
-	private static BaseAction VeraeroPvEStartUp { get; } = new(ActionID.VeraeroPvE, false);
-	private static BaseAction VerthunderPvEStartUp { get; } = new(ActionID.VerthunderPvE, false);
-
 	private const long HoldMeleeComboMs = 2000;
 	private const long BuffOgcdDelayMs = 5000;
 	private const long AccelLockAfterEmboldenMs = 5000;
@@ -768,12 +765,12 @@ public sealed class BeirutaRDM : RedMageRotation
 	#region Countdown Logic
 	protected override IAction? CountDownAction(float remainTime)
 	{
-		if (HasDualcast && VerthunderPvEStartUp.CanUse(out var act))
+		if (HasDualcast && VerthunderPvE.CanUse(out var act, skipStatusProvideCheck: true))
 		{
 			return act;
 		}
 
-		if (remainTime < VeraeroPvEStartUp.Info.CastTime + CountDownAhead && VeraeroPvEStartUp.CanUse(out act))
+		if (remainTime < VeraeroPvE.Info.CastTime + CountDownAhead && VeraeroPvE.CanUse(out act, skipStatusProvideCheck: true))
 		{
 			return act;
 		}

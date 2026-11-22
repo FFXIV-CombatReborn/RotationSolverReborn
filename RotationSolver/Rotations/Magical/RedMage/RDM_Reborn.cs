@@ -34,14 +34,12 @@ public sealed class RDM_Reborn : RedMageRotation
 	public bool CorpsacorpsMove { get; set; } = false;
 	#endregion
 
-	private static BaseAction VeraeroPvEStartUp { get; } = new BaseAction(ActionID.VeraeroPvE, false);
-
 	#region Countdown Logic
 	protected override IAction? CountDownAction(float remainTime)
 	{
-		if (remainTime < VeraeroPvEStartUp.Info.CastTime + CountDownAhead)
+		if (remainTime < VeraeroPvE.Info.CastTime + CountDownAhead)
 		{
-			if (VeraeroPvEStartUp.CanUse(out var act))
+			if (VeraeroPvE.CanUse(out var act, skipStatusProvideCheck: true))
 			{
 				return act;
 			}

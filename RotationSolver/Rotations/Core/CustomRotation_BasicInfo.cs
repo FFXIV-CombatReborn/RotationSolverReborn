@@ -166,6 +166,8 @@ public partial class CustomRotation : ICustomRotation
 	/// </summary>
 	protected virtual void UpdateInfo() { }
 
+	protected virtual bool ShouldDelayCommandAction(IBaseAction action) => false;
+
 	/// <summary>
 	///
 	/// </summary>

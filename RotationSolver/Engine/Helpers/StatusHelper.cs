@@ -581,8 +581,19 @@ public static partial class StatusHelper
 
 	internal static bool LocksActions(in GameStatus status, float minRemaining)
 	{
-		return status.StatusId != 0 && status.RemainingTime > minRemaining
-			&& TryGetStatusRow(status.StatusId, out var row) && row.LockActions;
+		if (status.StatusId == 0)
+		{
+			return false;
+		}
+
+		var remaining = status.RemainingTime == 0f ? float.MaxValue : status.RemainingTime;
+		if (remaining <= minRemaining)
+		{
+			return false;
+		}
+
+		return (StatusID)status.StatusId is StatusID.OutOfTheAction_1113 or StatusID.OutOfTheAction_1284 or StatusID.OutOfTheAction_1462
+			|| (TryGetStatusRow(status.StatusId, out var row) && row.LockActions);
 	}
 
 	/// <summary>

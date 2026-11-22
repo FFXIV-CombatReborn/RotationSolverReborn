@@ -196,7 +196,7 @@ public class BaseAction : IBaseAction
 
 	/// <inheritdoc/>
 	public bool CanUse(out IAction act, bool skipStatusProvideCheck = false, bool skipStatusNeed = false, bool skipTargetStatusNeedCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
-	bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0, bool checkActionManagerDirectly = false, TargetType targetOverride = default)
+	bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0, bool checkActionManagerDirectly = false, TargetType targetOverride = default, Func<IBattleChara, bool>? targetFilter = null)
 	{
 		act = this;
 
@@ -241,7 +241,7 @@ public class BaseAction : IBaseAction
 				}
 			}
 		}
-		PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipStatusProvideCheck, skipTargetStatusNeedCheck, targetOverride);
+		PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipStatusProvideCheck, skipTargetStatusNeedCheck, targetOverride, targetFilter);
 		if (PreviewTarget == null)
 		{
 			return ActionTracer.Reject(this, "NoTarget");

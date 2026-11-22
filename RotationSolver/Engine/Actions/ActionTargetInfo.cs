@@ -52,7 +52,7 @@ public partial struct ActionTargetInfo(IBaseAction action)
 	/// <returns>
 	/// A <see cref="List{IBattleChara}"/> containing the valid targets.
 	/// </returns>
-	private readonly List<IBattleChara> GetCanTargets(bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck, TargetType type, TargetType targetOverride)
+	private readonly List<IBattleChara> GetCanTargets(bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck, TargetType type, TargetType targetOverride, Func<IBattleChara, bool>? targetFilter = null)
 	{
 		if (DataCenter.AllTargets == null)
 		{
@@ -99,7 +99,7 @@ public partial struct ActionTargetInfo(IBaseAction action)
 
 			if (!DataCenter.IsManual || IsTargetFriendly || target.GameObjectId == Svc.Targets.Target?.GameObjectId || target.GameObjectId == Player.Object.GameObjectId)
 			{
-				if ((IsTargetFriendly || TargetOnScreen(target)) && CanUseTo(target) && action.Setting.CanTarget(target)
+				if ((IsTargetFriendly || TargetOnScreen(target)) && CanUseTo(target) && action.Setting.CanTarget(target) && (targetFilter?.Invoke(target) ?? true)
 					&& (!config.MinHPFeature || target.GetHealthRatio() > config.MinHPPercent))
 				{
 					validTargets.Add(target);
