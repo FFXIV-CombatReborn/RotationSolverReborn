@@ -522,6 +522,7 @@ internal static class ImGuiHelper
 			ConfigUnitType.Pixels => " p",
 			ConfigUnitType.Yalms => " y",
 			ConfigUnitType.Percent => " %",
+			ConfigUnitType.Multiplier => "x",
 			_ => string.Empty,
 		};
 	}

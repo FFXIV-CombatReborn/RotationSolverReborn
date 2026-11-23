@@ -84,7 +84,7 @@ internal class StateControlWindow : Window
 
 	internal bool IsMinimized => _fold.IsMinimized;
 
-	private static M3WindowBrand Brand => new(MainWindow.GetLogoTexture(), "RSR Autorotation");
+	private static M3WindowBrand Brand => M3Brand.For("RSR Autorotation");
 
 	private static float TabPadding => 4f * M3.Scale;
 
@@ -141,7 +141,7 @@ internal class StateControlWindow : Window
 
 	public override void PreDraw()
 	{
-		_theme = M3Style.Push(M3Density.Tight);
+		_theme = M3Style.Push(M3Window.DefaultDensity);
 
 		var target = CurrentIndex() == ManualIndex ? 1f : 0f;
 		if (_tabTime != target)
@@ -307,19 +307,9 @@ internal class StateControlWindow : Window
 		var height = MathF.Max(pillSize.Y, MathF.Max(logoSize, textHeight));
 
 		var logoMin = new Vector2(origin.X, origin.Y + ((height - logoSize) * 0.5f));
-		var logoMax = logoMin + new Vector2(logoSize, logoSize);
-		var logo = MainWindow.GetLogoTexture();
-		if (logo?.Handle != null)
-		{
-			drawList.AddImageRounded(logo.Handle, logoMin, logoMax, Vector2.Zero, Vector2.One, M3.U32(Vector4.One), M3.ShapeSmall);
-		}
-		else
-		{
-			drawList.AddRectFilled(logoMin, logoMax, M3.U32(s.PrimaryContainer), M3.ShapeSmall);
-			M3Draw.IconCentered(drawList, FontAwesomeIcon.Fire, logoMin, logoMax, s.OnPrimaryContainer);
-		}
+		M3Brand.DrawLogo(drawList, logoMin, logoSize);
 
-		var textX = logoMax.X + logoGap;
+		var textX = logoMin.X + logoSize + logoGap;
 		var textWidth = MathF.Max(0f, origin.X + width - pillSize.X - pillGap - textX);
 		var textY = origin.Y + ((height - textHeight) * 0.5f);
 		using (ImRaii.PushFont(M3.TitleMedium))

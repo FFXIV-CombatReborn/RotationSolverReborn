@@ -1,5 +1,4 @@
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
 using ECommons.DalamudServices;
@@ -19,7 +18,6 @@ public partial class MainWindow
 	private RotationAttribute _curRotationAttribute = new("Unknown", CombatType.PvE);
 	private ICustomRotation? _currentRotation;
 
-	private const string LogoResource = "RotationSolver.Images.Logo.png";
 	private double _rsrIconPressStart = -1;
 	private bool _rsrIconTriggered = false;
 	private const double RsrIconHoldSeconds = 1.2;
@@ -40,37 +38,42 @@ public partial class MainWindow
 		return [.. tabs];
 	}
 
-	private void DrawNavigationColumn(float columnWidth)
+	private void DrawNavigationColumn(float columnWidth, bool expanded, bool iconsOnly)
 	{
-		using var child = ImRaii.Child("Rotation Solver Side bar", new Vector2(columnWidth, -1f), false, ImGuiWindowFlags.NoScrollbar);
+		using var child = ImRaii.Child("Rotation Solver Side bar", new Vector2(columnWidth, -1f), false,
+			ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
 		if (!child)
 		{
 			return;
 		}
 
 		var wholeWidth = ImGui.GetContentRegionAvail().X;
-		var expanded = wholeWidth >= M3Navigation.DrawerBreakpoint * Scale;
 
-		DrawBrandBlock(wholeWidth, expanded);
+		DrawBrandCard(wholeWidth, expanded);
+		ImGui.Dummy(new Vector2(0f, M3.Space1));
+		DrawRotationCard(wholeWidth, expanded, iconsOnly);
+		ImGui.Dummy(new Vector2(0f, M3.Space1));
 
 		if (expanded)
 		{
-			ImGui.Dummy(new Vector2(0f, M3.Space1));
-			ImGui.SetNextItemWidth(wholeWidth);
 			SearchingBox(wholeWidth);
+		}
+		else
+		{
+			DrawRailSearchToggle(wholeWidth);
 		}
 
 		ImGui.Dummy(new Vector2(0f, M3.Space1));
 
-		var footerHeight = M3Widgets.PillSize(string.Empty).Y + ImGui.GetStyle().ItemSpacing.Y + (2f * Scale);
-		var listHeight = MathF.Max(80f * Scale, ImGui.GetContentRegionAvail().Y - footerHeight);
+		var listHeight = MathF.Max(80f * Scale, ImGui.GetContentRegionAvail().Y - NavigationFooterHeight(iconsOnly));
 
-		using (var list = ImRaii.Child("Rotation Solver Nav List", new Vector2(-1f, listHeight), false))
+		using (var list = ImRaii.Child("Rotation Solver Nav List", new Vector2(-1f, listHeight), false,
+			iconsOnly ? ImGuiWindowFlags.NoScrollbar : ImGuiWindowFlags.None))
 		{
 			if (list)
 			{
-				var items = BuildNavigationItems(expanded);
-				var clicked = M3Navigation.Draw("rsr_nav", items, expanded);
+				var items = BuildNavigationItems();
+				var clicked = M3Navigation.Draw("rsr_nav", items, expanded, iconsOnly);
 				if (clicked != null && Enum.TryParse<MainWindowTab>(clicked, out var tab))
 				{
 					SetActiveTab(tab);
@@ -78,10 +81,26 @@ public partial class MainWindow
 			}
 		}
 
-		DrawNavigationFooter(expanded);
+		DrawNavigationFooter(wholeWidth, iconsOnly);
 	}
 
-	private List<M3NavItem> BuildNavigationItems(bool expanded)
+	private static float IconStripWidth => MathF.Max(44f * Scale, (UiBuilder.IconFont.FontSize * 1.25f) + (8f * Scale));
+
+	private static void CenterInSidebar(float width, float itemWidth)
+	{
+		ImGui.SetCursorPosX(ImGui.GetCursorPosX() + MathF.Max(0f, (width - itemWidth) * 0.5f));
+	}
+
+	private static void DrawSidebarIcon(float width, FontAwesomeIcon icon, Vector4 color, string tooltip)
+	{
+		var extent = M3Widgets.IconButtonSize;
+		CenterInSidebar(width, extent);
+		ImGui.Dummy(new Vector2(extent));
+		M3Draw.IconCentered(ImGui.GetWindowDrawList(), icon, ImGui.GetItemRectMin(), ImGui.GetItemRectMax(), color);
+		M3Tooltip.Hovered(tooltip);
+	}
+
+	private List<M3NavItem> BuildNavigationItems()
 	{
 		var scheme = M3.Scheme;
 		List<M3NavItem> items = [];
@@ -149,40 +168,67 @@ public partial class MainWindow
 		};
 	}
 
-	private void DrawBrandBlock(float wholeWidth, bool expanded)
+	private void DrawBrandCard(float width, bool expanded)
 	{
 		var scheme = M3.Scheme;
-		var logoSize = expanded
-			? MathF.Min(wholeWidth - (8f * 2), 72f * 2)
-			: MathF.Min(wholeWidth - (8f * 2), 44f * 2);
-
+		var size = MathF.Min(36f * Scale, width);
+		var height = size + (2f * M3.Space1);
 		var origin = ImGui.GetCursorScreenPos();
+		var max = origin + new Vector2(width, height);
 
-		ImGui.SetCursorScreenPos(new Vector2(origin.X + ((wholeWidth - logoSize) * 0.5f), origin.Y));
-		var pressed = ImGui.InvisibleButton("##rsr_brand", new Vector2(logoSize, logoSize));
-		var hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
-		var logoMin = ImGui.GetItemRectMin();
-		var logoMax = ImGui.GetItemRectMax();
+		var pressed = ImGui.InvisibleButton("##rsr_brand", new Vector2(width, height));
+		var hovered = ImGui.IsItemHovered();
+		var active = ImGui.IsItemActive();
 		var drawList = ImGui.GetWindowDrawList();
-
-		var logo = GetLogoTexture();
-		if (logo?.Handle != null)
-		{
-			drawList.AddImageRounded(logo.Handle, logoMin, logoMax, Vector2.Zero, Vector2.One,
-				M3.U32(Vector4.One), M3.ShapeSmall);
-		}
-		else
-		{
-			M3Draw.IconCentered(drawList, FontAwesomeIcon.Fire, logoMin, logoMax, scheme.Primary);
-		}
 
 		if (hovered)
 		{
-			drawList.AddRectFilled(logoMin, logoMax, M3.U32(scheme.OnSurface, M3.StateHover), M3.ShapeSmall);
+			drawList.AddRectFilled(origin, max, M3.U32(scheme.OnSurface, M3.StateHover), M3.ShapeMedium);
 			ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+			M3Tooltip.Show(nameof(MainWindowTab.About));
 		}
 
-		if (ImGui.IsItemActive())
+		M3Draw.FocusRing(origin, max, M3.ShapeMedium);
+
+		var logoMin = new Vector2(expanded ? origin.X + M3.Space1 : origin.X + ((width - size) * 0.5f), origin.Y + M3.Space1);
+		M3Brand.DrawLogo(drawList, logoMin, size);
+
+		if (expanded)
+		{
+			var textX = logoMin.X + size + M3.Space1;
+			var textWidth = MathF.Max(1f, max.X - textX - (2f * Scale));
+			var lineGap = 2f * Scale;
+			var titleFont = BrandTitleFont(textWidth);
+
+			string title;
+			float titleHeight;
+			using (ImRaii.PushFont(titleFont))
+			{
+				title = M3Navigation.Truncate(M3Brand.Name, textWidth);
+				titleHeight = ImGui.CalcTextSize(title).Y;
+			}
+
+			string version;
+			float versionHeight;
+			using (ImRaii.PushFont(M3.LabelSmall))
+			{
+				version = M3Navigation.Truncate($"v{M3Brand.Version}", textWidth);
+				versionHeight = ImGui.CalcTextSize(version).Y;
+			}
+
+			var top = logoMin.Y + ((size - titleHeight - versionHeight - lineGap) * 0.5f);
+			using (ImRaii.PushFont(titleFont))
+			{
+				drawList.AddText(new Vector2(textX, top), M3.U32(scheme.OnSurface), title);
+			}
+
+			using (ImRaii.PushFont(M3.LabelSmall))
+			{
+				drawList.AddText(new Vector2(textX, top + titleHeight + lineGap), M3.U32(scheme.OnSurfaceVariant, 0.9f), version);
+			}
+		}
+
+		if (active)
 		{
 			var now = ImGui.GetTime();
 			if (_rsrIconPressStart < 0)
@@ -205,21 +251,33 @@ public partial class MainWindow
 		{
 			SetActiveTab(MainWindowTab.About);
 		}
-
-		ImGui.SetCursorScreenPos(new Vector2(origin.X, logoMax.Y));
-		ImGui.Dummy(new Vector2(wholeWidth, M3.Space1));
-
-		DrawRotationCard(wholeWidth, expanded);
 	}
 
-	private void DrawRotationCard(float wholeWidth, bool expanded)
+	private static ImFontPtr BrandTitleFont(float textWidth)
+	{
+		var largest = 16f * M3.TextScale;
+		float titleWidth;
+		using (ImRaii.PushFont(M3.TitleMedium))
+		{
+			titleWidth = ImGui.CalcTextSize(M3Brand.Name).X;
+		}
+
+		if (titleWidth <= textWidth)
+		{
+			return M3.TitleMedium;
+		}
+
+		return M3Fonts.GetFont(MathF.Max(9f * M3.TextScale, MathF.Floor(MathF.Round(largest) * textWidth / titleWidth)));
+	}
+
+	private void DrawRotationCard(float wholeWidth, bool expanded, bool iconsOnly)
 	{
 		var scheme = M3.Scheme;
 		var rotation = DataCenter.CurrentRotation;
 
 		if (rotation == null)
 		{
-			DrawNoRotationNotice(wholeWidth, expanded);
+			DrawNoRotationNotice(wholeWidth, expanded, iconsOnly);
 			return;
 		}
 
@@ -239,12 +297,14 @@ public partial class MainWindow
 		var jobIcon = IconSet.GetJobPixelArtIcon();
 		var rotationName = attribute.Name ?? string.Empty;
 
-		var iconExtent = MathF.Min(wholeWidth - (16f * 2), (expanded ? 56f : 40f) * 2);
-		var padding = 6f * M3.PaddingScale;
+		var padding = (iconsOnly ? 3f : 6f) * M3.PaddingScale;
+		var iconExtent = iconsOnly
+			? MathF.Max(1f, wholeWidth - (padding * 2f))
+			: MathF.Min(wholeWidth - (16f * 2), (expanded ? 56f : 40f) * 2);
 		var nameGap = 4f * M3.PaddingScale;
 		var nameWidth = MathF.Max(16f * Scale, wholeWidth - (padding * 2f));
 		var nameSize = ImGui.CalcTextSize(rotationName);
-		var height = (padding * 2f) + iconExtent + nameGap + nameSize.Y;
+		var height = (padding * 2f) + iconExtent + (iconsOnly ? 0f : nameGap + nameSize.Y);
 
 		var pressed = ImGui.InvisibleButton("##rsr_rotation_card", new Vector2(wholeWidth, height));
 		var hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByActiveItem);
@@ -281,12 +341,15 @@ public partial class MainWindow
 			}
 		}
 
-		var displayName = M3Navigation.Truncate(rotationName, nameWidth);
-		var displaySize = ImGui.CalcTextSize(displayName);
-		drawList.AddText(
-			new Vector2(min.X + ((wholeWidth - displaySize.X) * 0.5f), iconMin.Y + iconExtent + nameGap),
-			M3.U32(rotation.IsExtra() ? scheme.Tertiary : scheme.Primary, 0.98f),
-			displayName);
+		if (!iconsOnly)
+		{
+			var displayName = M3Navigation.Truncate(rotationName, nameWidth);
+			var displaySize = ImGui.CalcTextSize(displayName);
+			drawList.AddText(
+				new Vector2(min.X + ((wholeWidth - displaySize.X) * 0.5f), iconMin.Y + iconExtent + nameGap),
+				M3.U32(rotation.IsExtra() ? scheme.Tertiary : scheme.Primary, 0.98f),
+				displayName);
+		}
 
 		if (hovered)
 		{
@@ -322,12 +385,19 @@ public partial class MainWindow
 		if (BMRTimeline_IPCSubscriber.IsEnabled)
 		{
 			ImGui.Dummy(new Vector2(0f, M3.Space1));
-			_ = M3Widgets.Pill("##bmr_pill", BmrIntegrationLabel, scheme.Success, FontAwesomeIcon.Link,
-				"Boss Mod Reborn integration is active.");
+			const string bmrTooltip = "Boss Mod Reborn integration is active.";
+			if (iconsOnly)
+			{
+				DrawSidebarIcon(wholeWidth, FontAwesomeIcon.Link, scheme.Success, bmrTooltip);
+			}
+			else
+			{
+				_ = M3Widgets.Pill("##bmr_pill", BmrIntegrationLabel, scheme.Success, FontAwesomeIcon.Link, bmrTooltip);
+			}
 		}
 	}
 
-	private static void DrawNoRotationNotice(float wholeWidth, bool expanded)
+	private static void DrawNoRotationNotice(float wholeWidth, bool expanded, bool iconsOnly)
 	{
 		var isDoHDoL = Player.Job is Job.CRP or Job.BSM or Job.ARM or Job.GSM
 			or Job.LTW or Job.WVR or Job.ALC or Job.CUL
@@ -348,6 +418,12 @@ public partial class MainWindow
 		if (string.IsNullOrEmpty(text))
 		{
 			PluginLog.Error("UiString.ConfigWindow_NoRotation.GetDescription() returned null or empty.");
+			return;
+		}
+
+		if (iconsOnly)
+		{
+			DrawSidebarIcon(wholeWidth, FontAwesomeIcon.ExclamationTriangle, M3.Scheme.Error, text);
 			return;
 		}
 
@@ -413,32 +489,47 @@ public partial class MainWindow
 		}
 	}
 
-	internal static IDalamudTextureWrap? GetLogoTexture()
-	{
-		return Svc.Texture.GetFromManifestResource(typeof(MainWindow).Assembly, LogoResource)
-			.TryGetWrap(out var logo, out _) ? logo : null;
-	}
-
 	private const string DiagnosticsLabel = "Copy diagnostics";
+	private const string DiagnosticsMediumLabel = "Diagnostics";
 	private const string DiagnosticsShortLabel = "Diag";
 	private const string BmrIntegrationLabel = "BMR integration";
 
-	private static float NavigationColumnMinWidth()
+	private static float NavigationColumnWidth(float available)
 	{
-		var footer = M3Widgets.PillSize(DiagnosticsLabel, FontAwesomeIcon.Cube).X;
-
-		if (OtherConfiguration.RotationSolverRecord.TicTacToeWinStar == true)
-		{
-			footer += M3.Space1 + M3Widgets.PillSize(string.Empty, FontAwesomeIcon.Star).X;
-		}
-
-		var widest = MathF.Max(footer, M3Widgets.PillSize(BmrIntegrationLabel, FontAwesomeIcon.Link).X);
-		widest = MathF.Max(widest, 160f * Scale);
-
-		return widest + (4f * Scale);
+		var width = MathF.Max(M3Widgets.PillSize(BmrIntegrationLabel, FontAwesomeIcon.Link).X, M3Navigation.DrawerBreakpoint * Scale);
+		return MathF.Min(MathF.Ceiling(width), available * 0.5f);
 	}
 
-	private void DrawNavigationFooter(bool expanded)
+	private static string DiagnosticsLabelFor(float width)
+	{
+		if (OtherConfiguration.RotationSolverRecord.TicTacToeWinStar)
+		{
+			width -= M3.Space1 + M3Widgets.PillSize(string.Empty, FontAwesomeIcon.Star).X;
+		}
+
+		if (M3Widgets.PillSize(DiagnosticsLabel, FontAwesomeIcon.Cube).X <= width)
+		{
+			return DiagnosticsLabel;
+		}
+
+		return M3Widgets.PillSize(DiagnosticsMediumLabel, FontAwesomeIcon.Cube).X <= width
+			? DiagnosticsMediumLabel
+			: DiagnosticsShortLabel;
+	}
+
+	private static float NavigationFooterHeight(bool iconsOnly)
+	{
+		var spacing = ImGui.GetStyle().ItemSpacing.Y;
+		if (!iconsOnly)
+		{
+			return M3Widgets.PillSize(string.Empty).Y + spacing + (2f * Scale);
+		}
+
+		var rows = OtherConfiguration.RotationSolverRecord.TicTacToeWinStar ? 2 : 1;
+		return ((M3Widgets.IconButtonSize + spacing) * rows) + (2f * Scale);
+	}
+
+	private void DrawNavigationFooter(float wholeWidth, bool iconsOnly)
 	{
 		var tick = Environment.TickCount64;
 		if (_diagInfoTick == long.MinValue || tick - _diagInfoTick >= DiagInfoRefreshMs)
@@ -459,8 +550,18 @@ public partial class MainWindow
 			accent = scheme.OnSurfaceVariant;
 		}
 
-		var label = expanded ? DiagnosticsLabel : DiagnosticsShortLabel;
-		if (M3Widgets.Pill("##diag_pill", label, accent, FontAwesomeIcon.Cube, _diagInfoText, interactive: true))
+		bool copy;
+		if (iconsOnly)
+		{
+			CenterInSidebar(wholeWidth, M3Widgets.IconButtonSize);
+			copy = M3Widgets.IconButton("##diag_icon", FontAwesomeIcon.Cube, $"{DiagnosticsLabel}\n \n{_diagInfoText}", tint: accent);
+		}
+		else
+		{
+			copy = M3Widgets.Pill("##diag_pill", DiagnosticsLabelFor(wholeWidth), accent, FontAwesomeIcon.Cube, _diagInfoText, interactive: true);
+		}
+
+		if (copy)
 		{
 			ImGui.SetClipboardText(BuildDiagnosticInfo(out _));
 			M3Snackbar.Show(CNLanguageClient ? "诊断信息已复制到剪贴板" : "Diagnostic info copied to clipboard");
@@ -468,9 +569,16 @@ public partial class MainWindow
 
 		if (OtherConfiguration.RotationSolverRecord.TicTacToeWinStar == true)
 		{
-			ImGui.SameLine(0f, M3.Space1);
-			_ = M3Widgets.Pill("##trophy_pill", string.Empty, ImGuiColors.ParsedGold, FontAwesomeIcon.Star,
-				"Tic-tac-toe winner!");
+			const string trophyTooltip = "Tic-tac-toe winner!";
+			if (iconsOnly)
+			{
+				DrawSidebarIcon(wholeWidth, FontAwesomeIcon.Star, ImGuiColors.ParsedGold, trophyTooltip);
+			}
+			else
+			{
+				ImGui.SameLine(0f, M3.Space1);
+				_ = M3Widgets.Pill("##trophy_pill", string.Empty, ImGuiColors.ParsedGold, FontAwesomeIcon.Star, trophyTooltip);
+			}
 		}
 	}
 

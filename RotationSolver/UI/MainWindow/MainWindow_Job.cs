@@ -459,10 +459,7 @@ public partial class MainWindow
 				drewSeparator = true;
 			}
 
-			var tooltip = GetRotationConfigTooltip(rotation, config);
-			var supporting = Service.Config.UiInlineDescriptions ? tooltip : null;
-
-			DrawRotationConfigRow(config, rotation, OtherCommandType.Rotations, supporting, tooltip);
+			DrawRotationConfigRow(config, rotation, OtherCommandType.Rotations, GetRotationConfigTooltip(rotation, config));
 		}
 
 		DrawJobTargetPriorities();

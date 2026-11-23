@@ -93,6 +93,7 @@ internal class Service : IDisposable
 		set
 		{
 			_config = value;
+			_config.UpdateSpacingDefault();
 
 			M3.Settings = value;
 		}

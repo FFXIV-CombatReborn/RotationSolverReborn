@@ -147,7 +147,7 @@ internal sealed class UpdateNotesWindow : Window
 
 	public override void PreDraw()
 	{
-		_theme = M3Style.Push();
+		_theme = M3Style.Push(M3Window.DefaultDensity);
 
 		var viewport = ImGui.GetMainViewport();
 		ImGui.SetNextWindowSize(Vector2.Min(PreferredSize * M3.Scale, viewport.Size * 0.9f), ImGuiCond.FirstUseEver);
@@ -247,19 +247,9 @@ internal sealed class UpdateNotesWindow : Window
 		var drawList = ImGui.GetWindowDrawList();
 
 		var logoMin = origin + new Vector2(2f * scale, 0f);
-		var logoMax = logoMin + new Vector2(height, height);
-		var logo = MainWindow.GetLogoTexture();
-		if (logo?.Handle != null)
-		{
-			drawList.AddImageRounded(logo.Handle, logoMin, logoMax, Vector2.Zero, Vector2.One, M3.U32(Vector4.One), M3.ShapeSmall);
-		}
-		else
-		{
-			drawList.AddRectFilled(logoMin, logoMax, M3.U32(s.PrimaryContainer), M3.ShapeSmall);
-			M3Draw.IconCentered(drawList, FontAwesomeIcon.Fire, logoMin, logoMax, s.OnPrimaryContainer);
-		}
+		M3Brand.DrawLogo(drawList, logoMin, height);
 
-		var textX = logoMax.X + (14f * scale);
+		var textX = logoMin.X + height + (14f * scale);
 		var textY = origin.Y + ((height - textHeight) * 0.5f);
 		using (ImRaii.PushFont(M3.HeadlineSmall))
 		{

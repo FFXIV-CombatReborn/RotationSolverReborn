@@ -20,15 +20,21 @@ internal class DragFloatSearch : UnitSearchable
 		set => _property.SetValue(Service.Config, value);
 	}
 
+	private float FromSlider(float shown)
+	{
+		var value = shown / SliderScale;
+		return Step > 0f ? MathF.Round(value, 4) : value;
+	}
+
 	internal void DrawCompact(float width)
 	{
 		var value = Value;
 		var shown = value * SliderScale;
 		var trackWidth = MathF.Max(60f * Scale, width - M3Widgets.SliderValueGutter(Format(Max)));
 
-		if (M3Widgets.Slider($"##Config_{ID}{GetHashCode()}_compact", ref shown, Min * SliderScale, Max * SliderScale, Format(value), trackWidth))
+		if (M3Widgets.Slider($"##Config_{ID}{GetHashCode()}_compact", ref shown, Min * SliderScale, Max * SliderScale, Format(value), trackWidth, step: Step * SliderScale))
 		{
-			Value = shown / SliderScale;
+			Value = FromSlider(shown);
 		}
 
 		if (ImGui.IsItemHovered() && !ImGui.IsItemActive())
@@ -49,9 +55,9 @@ internal class DragFloatSearch : UnitSearchable
 		var row = M3SettingRow.Begin(Name, SupportingText, controlSize, leadingIcon: RowIcon);
 
 		ImGui.SetCursorScreenPos(row.ControlPosition);
-		if (M3Widgets.Slider($"##Config_{ID}{GetHashCode()}", ref shown, Min * SliderScale, Max * SliderScale, Format(value), trackWidth))
+		if (M3Widgets.Slider($"##Config_{ID}{GetHashCode()}", ref shown, Min * SliderScale, Max * SliderScale, Format(value), trackWidth, step: Step * SliderScale))
 		{
-			Value = shown / SliderScale;
+			Value = FromSlider(shown);
 		}
 
 		RowInteractions(row);

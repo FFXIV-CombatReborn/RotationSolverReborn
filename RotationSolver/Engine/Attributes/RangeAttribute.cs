@@ -25,6 +25,8 @@ public class RangeAttribute(float minValue, float maxValue, ConfigUnitType unitT
 	/// </summary>
 	public float Speed => speed;
 
+	public float Step { get; set; }
+
 	/// <summary>
 	/// The unit type.
 	/// </summary>
@@ -70,4 +72,7 @@ public enum ConfigUnitType : byte
 	/// </summary>
 	[Description("Display Unit, in pixels.")]
 	Pixels,
+
+	[Description("Scale Unit, as a multiplier.")]
+	Multiplier,
 }

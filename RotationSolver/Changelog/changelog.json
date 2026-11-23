@@ -2,6 +2,20 @@
   "tagline": "Just minor updates til Evercold",
   "entries": [
     {
+      "version": "7.5.8.9",
+      "title": "UI update",
+      "date": "November 22, 2026",
+      "sections": [
+        {
+          "title": "Interface",
+          "icon": "Palette",
+          "items": [
+            "Some under the hood tweaks to the UI, now matching the rest of the Reborn plugins, feedback welcome in the discord."
+          ]
+        }
+      ]
+    },
+    {
       "version": "7.5.8.4",
       "title": "Core tune up",
       "date": "November 16, 2026",
