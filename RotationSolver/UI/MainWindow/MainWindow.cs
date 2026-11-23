@@ -100,12 +100,12 @@ public partial class MainWindow : Window
 	internal void SetActiveTab(MainWindowTab tab)
 	{
 		_activeTab = tab;
-		_searchResults = [];
+		ClearSearch();
 	}
 
 	public override void PreDraw()
 	{
-		_theme = M3Style.Push(M3Density.Tight);
+		_theme = M3Style.Push(M3Window.DefaultDensity);
 		PrepareFold();
 		base.PreDraw();
 	}
@@ -148,7 +148,11 @@ public partial class MainWindow : Window
 		{
 			var available = MathF.Max(1f, ImGui.GetContentRegionAvail().X);
 			var spacing = ImGui.GetStyle().ItemSpacing.X;
-			var sidebarWidth = MathF.Min(NavigationColumnMinWidth(), available * 0.5f);
+			var iconsOnly = Service.Config.UiIconSidebar;
+			var sidebarWidth = iconsOnly
+				? MathF.Min(IconStripWidth, available * 0.3f)
+				: NavigationColumnWidth(available);
+			var expanded = !iconsOnly && sidebarWidth >= M3Navigation.DrawerBreakpoint * Scale;
 
 			var origin = ImGui.GetCursorScreenPos();
 			var paneHeight = MathF.Max(1f, ImGui.GetContentRegionAvail().Y);
@@ -160,7 +164,7 @@ public partial class MainWindow : Window
 
 			try
 			{
-				DrawNavigationColumn(sidebarWidth);
+				DrawNavigationColumn(sidebarWidth, expanded, iconsOnly);
 			}
 			catch (Exception ex)
 			{
@@ -171,7 +175,7 @@ public partial class MainWindow : Window
 
 			try
 			{
-				DrawBody();
+				DrawBody(expanded);
 			}
 			catch (Exception ex)
 			{
@@ -265,8 +269,7 @@ public partial class MainWindow : Window
 			ImGui.SetCursorScreenPos(bar.TrailingPosition(M3Widgets.IconButtonSize));
 			if (M3Widgets.IconButton("##appbar_clear_search", FontAwesomeIcon.Eraser, "Clear search results"))
 			{
-				_searchText = string.Empty;
-				_searchResults = [];
+				ClearSearch();
 			}
 		}
 	}
@@ -288,7 +291,7 @@ public partial class MainWindow : Window
 		return CNLanguageClient ? _activeTab.CNString() : _activeTab.ToString();
 	}
 
-	private void DrawBody()
+	private void DrawBody(bool expanded)
 	{
 		using var child = ImRaii.Child("Rotation Solver Body", -Vector2.One, false,
 			ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse);
@@ -298,6 +301,10 @@ public partial class MainWindow : Window
 		}
 
 		DrawTopAppBar();
+		if (!expanded)
+		{
+			DrawRailSearchField();
+		}
 
 		using var page = ImRaii.Child("Rotation Solver Page", -Vector2.One);
 		if (!page)

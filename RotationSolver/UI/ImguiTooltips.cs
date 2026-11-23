@@ -29,7 +29,11 @@ internal static class ImguiTooltips
 	{
 		if (!string.IsNullOrEmpty(text))
 		{
-			ShowTooltip(() => ImGui.Text(text));
+			ShowTooltip(() =>
+			{
+				using var wrap = ImRaii.TextWrapPos(ImGui.GetFontSize() * 36f);
+				ImGui.TextUnformatted(text);
+			});
 		}
 	}
 

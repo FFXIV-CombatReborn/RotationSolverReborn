@@ -216,7 +216,7 @@ internal sealed class FirstStartTutorialWindow : Window
 
 	public override void PreDraw()
 	{
-		_theme = M3Style.Push();
+		_theme = M3Style.Push(M3Window.DefaultDensity);
 
 		var viewport = ImGui.GetMainViewport();
 		ImGui.SetNextWindowSize(Vector2.Min(PreferredSize * M3.Scale, viewport.Size * 0.9f), ImGuiCond.FirstUseEver);
@@ -325,14 +325,9 @@ internal sealed class FirstStartTutorialWindow : Window
 		var drawList = ImGui.GetWindowDrawList();
 
 		var logoMin = origin + new Vector2(2f * scale, 0f);
-		var logoMax = logoMin + new Vector2(height, height);
-		if (!M3ActionIcon.Image(drawList, MainWindow.GetLogoTexture(), logoMin, logoMax, M3.ShapeSmall))
-		{
-			drawList.AddRectFilled(logoMin, logoMax, M3.U32(s.PrimaryContainer), M3.ShapeSmall);
-			M3Draw.IconCentered(drawList, FontAwesomeIcon.Fire, logoMin, logoMax, s.OnPrimaryContainer);
-		}
+		M3Brand.DrawLogo(drawList, logoMin, height);
 
-		var textX = logoMax.X + (14f * scale);
+		var textX = logoMin.X + height + (14f * scale);
 		var textWidth = MathF.Max(24f * scale, origin.X + width - textX);
 		var textY = origin.Y + ((height - textHeight) * 0.5f);
 		using (ImRaii.PushFont(M3.HeadlineSmall))
@@ -726,8 +721,8 @@ internal sealed class FirstStartTutorialWindow : Window
 		{
 			DrawTextScaleRow();
 			DrawElementScaleRow();
-			DrawSwitch("tutorial_inline_descriptions", "Show setting descriptions inline",
-				"Prints each setting's explanation under its name. Turn it off for a denser list; the explanation stays in the tooltip.",
+			DrawSwitch("tutorial_inline_descriptions", "Inline descriptions",
+				"Show each setting's description under its name. Turn it off to show descriptions on hover instead.",
 				Service.Config.UiInlineDescriptions);
 			DrawSwitch("tutorial_hints", "Show tips in the settings window",
 				"A banner above each settings page that cycles through usage tips.",
@@ -735,7 +730,7 @@ internal sealed class FirstStartTutorialWindow : Window
 		}
 
 		if (M3Widgets.Button("##tutorial_appearance_reset", "Reset to defaults", M3ButtonStyle.Text, FontAwesomeIcon.UndoAlt,
-			tooltip: "Puts the accent colour, text size and element size back to how they started."))
+			tooltip: "Puts the accent colour, text size and control size back to how they started."))
 		{
 			Service.Config.UiAccentColor = M3.DefaultSeed;
 			Service.Config.UiTextScale = 1f;
@@ -1321,9 +1316,9 @@ internal sealed class FirstStartTutorialWindow : Window
 	private static void DrawTextScaleRow()
 	{
 		var value = Service.Config.UiTextScale;
-		if (DrawPercentRow("##tutorial_text_scale", "Text size",
-			"Scales the text in every RSR window, on top of Dalamud's own font settings.",
-			ref value, 0.75f, 1.75f))
+		if (DrawScaleRow("##tutorial_text_scale", "Text size",
+			"Scales the text, on top of Dalamud's own font size.",
+			ref value, 0.75f, 2f))
 		{
 			Service.Config.UiTextScale = MathF.Round(value, 2);
 		}
@@ -1332,21 +1327,21 @@ internal sealed class FirstStartTutorialWindow : Window
 	private static void DrawElementScaleRow()
 	{
 		var value = Service.Config.UiElementScale;
-		if (DrawPercentRow("##tutorial_element_scale", "Element size",
-			"Scales the padding, spacing and controls in every RSR window. Turn it down for a more compact layout.",
-			ref value, 0.75f, 1.75f))
+		if (DrawScaleRow("##tutorial_element_scale", "Control size",
+			"Scales buttons, switches, fields and the other controls.",
+			ref value, 0.75f, 2f))
 		{
 			Service.Config.UiElementScale = MathF.Round(value, 2);
 		}
 	}
 
-	private static bool DrawPercentRow(string id, string label, string supporting, ref float value, float min, float max)
+	private static bool DrawScaleRow(string id, string label, string supporting, ref float value, float min, float max)
 	{
 		var trackWidth = 160f * M3.Scale;
-		var controlSize = new Vector2(trackWidth + M3Widgets.SliderValueGutter($"{max * 100f:0}%"), M3Widgets.ButtonHeight);
+		var controlSize = new Vector2(trackWidth + M3Widgets.SliderValueGutter($"{max:F2}x"), M3Widgets.ButtonHeight);
 
 		var row = M3SettingRow.Begin(label, supporting, controlSize);
-		var changed = M3Widgets.Slider(id, ref value, min, max, $"{value * 100f:0}%", trackWidth);
+		var changed = M3Widgets.Slider(id, ref value, min, max, $"{value:F2}x", trackWidth, step: 0.05f);
 		M3SettingRow.End(row);
 		return changed;
 	}

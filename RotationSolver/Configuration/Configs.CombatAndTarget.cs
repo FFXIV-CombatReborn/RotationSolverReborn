@@ -385,39 +385,49 @@ internal partial class Configs
 	[UI("Tint color", Parent = nameof(ReddenDisabledHotbarActions))]
 	public Vector4 HotbarDisabledTintColor { get; set; } = new(1f, 0f, 0f, 0.40f);
 
-	[ConditionBool, UI("Show setting descriptions inline",
-		Description = "Prints each setting's description underneath its name instead of only in the hover tooltip. Turn this off for a denser list.",
-		Filter = UiCustomize)]
-	private static readonly bool _uiInlineDescriptions = true;
-
-	[UI("Interface accent colour",
-		Description = "This acts as the primary color that all other colors are derived from.",
+	[UI("Accent color",
+		Description = "The whole color scheme is built from this one color. Pick a preset, or the last swatch for your own color.",
 		Filter = UiCustomize)]
 	public Vector4 UiAccentColor { get; set; } = new(0.690f, 0.125f, 0.122f, 1f);
 
 	[UI("Text size",
-		Description = "Scales the text in every RSR window, on top of Dalamud's own font settings.",
+		Description = "Scales the text, on top of Dalamud's own font size.",
 		Filter = UiCustomize)]
-	[Range(0.75f, 1.75f, ConfigUnitType.Percent, 0.01f)]
+	[Range(0.75f, 2f, ConfigUnitType.Multiplier, Step = 0.05f)]
 	public float UiTextScale { get; set; } = 1f;
 
-	[UI("Element size",
-		Description = "Scales the padding, spacing and controls in every RSR window. Turn it down for a more compact layout; text keeps to the Text size setting.",
+	[UI("Control size",
+		Description = "Scales buttons, switches, fields and the other controls.",
 		Filter = UiCustomize)]
-	[Range(0.75f, 1.75f, ConfigUnitType.Percent, 0.01f)]
+	[Range(0.75f, 2f, ConfigUnitType.Multiplier, Step = 0.05f)]
 	public float UiElementScale { get; set; } = 1f;
 
-	[UI("Padding",
-		Description = "Scales the space around and between things in every RSR window: window edges, card and row padding, and the gaps between items. Buttons, icons and text keep their size.",
+	[UI("Spacing",
+		Description = "Scales the space around and between things, without resizing them.",
 		Filter = UiCustomize)]
-	[Range(0.25f, 2f, ConfigUnitType.Percent, 0.01f)]
-	public float UiPaddingScale { get; set; } = 1.5f;
+	[Range(0.5f, 2f, ConfigUnitType.Multiplier, Step = 0.05f)]
+	public float UiPaddingScale { get; set; } = 1f;
 
 	[UI("Animation length",
-		Description = "Scales how long animations take in every RSR window, such as menus, folding windows and moving selections. Set it to 0% to turn animations off.",
+		Description = "How long animations take, such as folding a window or opening a card. 0% turns them off.",
 		Filter = UiCustomize)]
-	[Range(0f, 2f, ConfigUnitType.Percent, 0.01f)]
+	[Range(0f, 2f, ConfigUnitType.Percent, Step = 0.05f)]
 	public float UiMotionScale { get; set; } = 1f;
+
+	[UI("Compact layout",
+		Description = "Tighter padding and shorter rows, so more fits on screen.",
+		Filter = UiCustomize, Order = 1)]
+	public bool UiCompactLayout { get; set; } = false;
+
+	[ConditionBool, UI("Inline descriptions",
+		Description = "Show each setting's description under its name. Turn it off to show descriptions on hover instead.",
+		Filter = UiCustomize, Order = 2)]
+	private static readonly bool _uiInlineDescriptions = true;
+
+	[UI("Icons-only sidebar",
+		Description = "Turn the sidebar into a narrow strip of icons. Hover an icon to see its name.",
+		Filter = UiCustomize, Order = 3)]
+	public bool UiIconSidebar { get; set; } = false;
 
 	[ConditionBool, UI("Show a toast when a command queues an action",
 		Description = "Confirms each action that a /rotation DoAction command adds to the queue.",

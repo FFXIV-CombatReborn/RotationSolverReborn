@@ -7,6 +7,55 @@ public partial class MainWindow
 {
 	private string _searchText = string.Empty;
 	private ISearchable[] _searchResults = [];
+	private bool _railSearch;
+	private bool _focusSearch;
+
+	private bool RailSearchOpen => _railSearch || _searchText.Length > 0;
+
+	private void ClearSearch()
+	{
+		_searchText = string.Empty;
+		_searchResults = [];
+		_railSearch = false;
+	}
+
+	private void DrawRailSearchToggle(float width)
+	{
+		CenterInSidebar(width, M3Widgets.IconButtonSize);
+		var open = RailSearchOpen;
+		if (!M3Widgets.IconToggle("##rsr_search_toggle", FontAwesomeIcon.Search, ref open,
+			open ? "Close search" : UiString.ConfigWindow_Searching.GetDescription()))
+		{
+			return;
+		}
+
+		if (open)
+		{
+			_railSearch = _focusSearch = true;
+		}
+		else
+		{
+			ClearSearch();
+		}
+	}
+
+	private void DrawRailSearchField()
+	{
+		if (!RailSearchOpen)
+		{
+			return;
+		}
+
+		_railSearch = true;
+		if (_focusSearch)
+		{
+			_focusSearch = false;
+			ImGui.SetKeyboardFocusHere();
+		}
+
+		SearchingBox(ImGui.GetContentRegionAvail().X);
+		ImGui.Dummy(new Vector2(0f, M3.Space1));
+	}
 
 	private void SearchingBox(float width)
 	{
@@ -40,8 +89,7 @@ public partial class MainWindow
 					M3.Scheme.Tertiary))
 				{
 					NavigateToFilter(target.Filter);
-					_searchResults = [];
-					_searchText = string.Empty;
+					ClearSearch();
 				}
 			}
 		}

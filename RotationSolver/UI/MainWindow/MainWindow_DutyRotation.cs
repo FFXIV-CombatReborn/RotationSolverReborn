@@ -82,7 +82,7 @@ public partial class MainWindow
 		}
 	}
 
-	private static void DrawRotationConfigRow(IRotationConfig config, object rotation, OtherCommandType commandType, string? supporting, string? tooltip = null)
+	private static void DrawRotationConfigRow(IRotationConfig config, object rotation, OtherCommandType commandType, string? supporting)
 	{
 		var type = rotation.GetType();
 		var key = $"{type.FullName ?? type.Name}.{config.Name}";
@@ -98,11 +98,6 @@ public partial class MainWindow
 		var row = M3SettingRow.Begin(config.DisplayName, supporting, controlSize);
 		ImGui.SetCursorScreenPos(row.ControlPosition);
 		DrawRotationConfigControl(config, id, controlSize.X);
-
-		if (row.Hovered && !string.IsNullOrEmpty(tooltip) && supporting == null)
-		{
-			ImguiTooltips.ShowTooltip(tooltip);
-		}
 
 		ImGuiHelper.ReactPopupAt(row.Hovered, key, false);
 		M3SettingRow.End(row);

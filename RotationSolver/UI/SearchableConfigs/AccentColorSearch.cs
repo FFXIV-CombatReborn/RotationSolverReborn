@@ -7,12 +7,11 @@ internal class AccentColorSearch(PropertyInfo property) : ColorEditSearch(proper
 	internal static readonly M3ColorChoice[] Presets =
 	[
 		new("Crimson (default)", M3ColorMath.FromRgb(0xB0201F)),
-		new("Amber", M3ColorMath.FromRgb(0xC7881C)),
-		new("Emerald", M3ColorMath.FromRgb(0x2E9E63)),
-		new("Teal", M3ColorMath.FromRgb(0x1F8F99)),
-		new("Azure", M3ColorMath.FromRgb(0x2F6FD6)),
-		new("Violet", M3ColorMath.FromRgb(0x7A4FD0)),
-		new("Rose", M3ColorMath.FromRgb(0xC8427F)),
+		new("Ocean", M3ColorMath.FromRgb(0x2F6DB5)),
+		new("Teal", M3ColorMath.FromRgb(0x00897B)),
+		new("Forest", M3ColorMath.FromRgb(0x3E8E41)),
+		new("Amber", M3ColorMath.FromRgb(0xC98A00)),
+		new("Violet", M3ColorMath.FromRgb(0x7E57C2)),
 	];
 
 	protected override void DrawMain()

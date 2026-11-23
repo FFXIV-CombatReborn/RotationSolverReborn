@@ -56,6 +56,12 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 
 	public bool IsMainWindowLock { get; set; } = false;
 
+	private const float OldDefaultSpacing = 1.5f;
+
+	public bool SpacingDefaultUpdated { get; set; } = false;
+
+	bool IM3Settings.UiDescriptionTooltips => !UiInlineDescriptions;
+
 	public List<ActionEventInfo> Events { get; private set; } = [];
 	public SortedSet<Job> DisabledJobs { get; private set; } = [];
 
@@ -140,6 +146,20 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 		var tempPath = path + ".tmp";
 		File.WriteAllText(tempPath, JsonConvert.SerializeObject(this, Formatting.Indented));
 		File.Move(tempPath, path, true);
+	}
+
+	internal void UpdateSpacingDefault()
+	{
+		if (SpacingDefaultUpdated)
+		{
+			return;
+		}
+
+		SpacingDefaultUpdated = true;
+		if (UiPaddingScale == OldDefaultSpacing)
+		{
+			UiPaddingScale = 1f;
+		}
 	}
 
 	public static Configs Migrate(Configs oldConfigs)

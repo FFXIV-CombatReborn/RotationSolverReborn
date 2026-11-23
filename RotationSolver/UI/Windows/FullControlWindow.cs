@@ -113,7 +113,7 @@ internal class FullControlWindow : FullCtrlWindow
 	private static float SpecialGcdSize => SpecialGcdBaseSize * Service.Config.ControlWindowSpecialsScale;
 	private static float SpecialAbilitySize => SpecialAbilityBaseSize * Service.Config.ControlWindowSpecialsScale;
 
-	private static M3WindowBrand Brand => new(MainWindow.GetLogoTexture(), "RSR Control");
+	private static M3WindowBrand Brand => M3Brand.For("RSR Control");
 
 	private readonly M3WindowAction[] _actions = new M3WindowAction[3];
 	private readonly M3WindowFold _fold = new();
@@ -157,7 +157,7 @@ internal class FullControlWindow : FullCtrlWindow
 
 	public override void PreDraw()
 	{
-		_theme = M3Style.Push(M3Density.Tight);
+		_theme = M3Style.Push(M3Window.DefaultDensity);
 
 		base.PreDraw();
 		Flags |= ImGuiWindowFlags.NoTitleBar;
