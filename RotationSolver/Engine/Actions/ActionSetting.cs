@@ -119,6 +119,11 @@ public class ActionSetting
 	public uint ObjectBasedMovementObjectOID { get; set; } = 0;
 
 	/// <summary>
+	///
+	/// </summary>
+	public float FixedMoveDistance { get; set; } = 15f;
+
+	/// <summary>
 	/// Is this status only ever added by the caster/player. 
 	/// By default true, if false, it can be added by other sources and prevents the action from being used in case of overlapping statuses.
 	/// </summary>
