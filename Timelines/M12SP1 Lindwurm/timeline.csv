@@ -1,0 +1,17 @@
+# Duty: AACHeavyweightM4Savage
+Phase,Sync,Watch,Caster,OID,ActionIDs,Occurrence,PhaseTime
+P1,Combat starts (fight 1),CombatStart,Lindwurm,0x4AFB,,1,0.0
+P1,The Fixer,CastStart,Lindwurm,0x4AFB,46295,1,10.2
+P1,Mortal Slayer,CastStart,Lindwurm,0x4AFB,46229,1,28.5
+P1,Grotesquerie: Act 1,CastStart,Lindwurm,0x4AFB,48829,1,66.9
+P1,The Fixer,CastStart,Lindwurm,0x4AFB,46295,1,102.5
+P1,Grotesquerie: Act 2,CastStart,Lindwurm,0x4AFB,48830,1,116.7
+P1,Splattershed,CastStart,Lindwurm,0x4AFB,47556,1,182.6
+P1,Grotesquerie: Act 3,CastStart,Lindwurm,0x4AFB,48831,1,202.9
+P1,The Fixer,CastStart,Lindwurm,0x4AFB,46295,1,235.4
+P1,Grotesquerie: Curtain Call,CastStart,Lindwurm,0x4AFB,48832,1,249.5
+P1,Splattershed,CastStart,Lindwurm,0x4AFB,47555,1,284.1
+P1,Mortal Slayer,CastStart,Lindwurm,0x4AFB,46229,1,303.4
+P1,Slaughtershed,CastStart,Lindwurm,0x4AFB,46275|46278,1,336.7
+P1,Slaughtershed,CastStart,Lindwurm,0x4AFB,46275|46278,1,365.7
+P1,Slaughtershed,CastStart,Lindwurm,0x4AFB,46275|46278,1,394.9

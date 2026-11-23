@@ -1,0 +1,37 @@
+# M12SP1 Default SGE
+# Set.WardMode: false
+# Set.CountdownShield: Zoe + Eukrasian Prognosis
+# Set.PhlegmaOpener: 6s
+# Set.UsePotion: true
+# Set.PotionTiming: Opener (countdown)
+# Set.EarlyDotRefreshWhenMoving: false
+# Set.UseSwiftcastForMovement: true
+# Set.UseCustomHPThreshold: false
+Phase,Start,End,Action,Target
+P1,0.0,3.0,Kerachole,
+P1,15.2,19.2,Physis II,
+P1,37.1,40.1,Kerachole,
+P1,44.6,48.6,Philosophia,
+P1,84.7,87.7,Holos,
+P1,73.5,76.5,Kerachole,
+P1,85.2,88.2,Panhaima,
+P1,86.2,89.2,Zoe,
+P1,104.0,107.0,Kerachole,
+P1,105.5,109.5,Physis II,
+P1,146.5,149.5,Kerachole,
+P1,160.7,170.7,Physis II,
+P1,179.2,182.2,Kerachole,
+P1,225.5,228.5,Kerachole,
+P1,227.0,231.0,Physis II,
+P1,256.1,259.1,Holos,
+P1,264.2,267.2,Kerachole,
+P1,256.6,259.6,Panhaima,
+P1,287.9,291.9,Physis II,
+P1,312.3,315.3,Kerachole,
+P1,319.8,323.8,Philosophia,
+P1,347.7,350.7,Kerachole,
+P1,349.2,352.2,Zoe,
+P1,355.5,359.5,Physis II,
+P1,376.6,379.6,Holos,
+P1,377.1,380.1,Panhaima,
+P1,382.9,385.9,Kerachole,

@@ -1,0 +1,126 @@
+# FRU Default AST
+# CountdownEarthlyStar: 10
+# Set.WardMode: false
+# Set.CountdownShield: None
+# Set.DivinationOpener: 7s (3 GCD)
+# Set.UsePotion: true
+# Set.PotionTiming: Opener (countdown)
+# Set.DelayOracleForAlignment: false
+# Set.EarlyDotRefreshWhenMoving: false
+# Set.UseSwiftcastForMovement: true
+# Set.SwiftcastMovement: Raise and AoE heal GCDs only
+# Set.UseCustomHPThreshold: false
+Phase,Start,End,Action,Target
+P1,10.2,13.2,Collective Unconscious,
+P1,38.6,44.6,Helios Conjunction,Precast
+P1,54.5,60.5,Helios Conjunction,Precast
+P1,58.4,68.0,Earthly Star,
+P1,72.5,81.0,Helios Conjunction,
+P1,76.0,79.0,Horoscope,
+P1,82.1,85.1,Collective Unconscious,
+P1,82.6,85.1,Macrocosmos,
+P1,97.3,105.8,Helios Conjunction,
+P1,99.8,102.8,Neutral Sect,
+P1,104.8,107.8,Sun Sign,
+P1,120.1,126.1,Helios Conjunction,Precast
+P1,118.4,126.6,Earthly Star,
+P1,122.0,125.0,Celestial Opposition,
+P2,18.1,24.1,Helios Conjunction,Precast
+P2,31.3,39.7,Earthly Star,
+P2,36.5,39.5,Collective Unconscious,
+P2,41.7,50.2,Helios Conjunction,
+P2,47.7,50.7,Horoscope,
+P2,50.3,56.0,Helios Conjunction,
+P2,54.5,57.5,Celestial Opposition,
+P2,66.9,72.9,Helios Conjunction,Precast
+P2,81.2,87.2,Helios Conjunction,Precast
+P2,89.2,95.2,Helios Conjunction,Precast
+P2,94.3,104.4,Earthly Star,
+P2,105.9,108.9,Neutral Sect,
+P2,114.0,117.0,Sun Sign,
+P2,126.5,132.5,Helios Conjunction,Precast
+P2,124.0,127.0,Collective Unconscious,
+P2,126.5,129.5,Celestial Opposition,
+P2,125.5,128.0,Macrocosmos,
+P2,135.9,141.9,Helios Conjunction,Precast
+P2,143.9,149.9,Helios Conjunction,Precast
+P2,154.8,163.3,Helios Conjunction,
+P2,157.4,167.1,Earthly Star,
+P2,160.8,163.8,Horoscope,
+P2,163.4,169.5,Helios Conjunction,
+P2,197.8,203.8,Helios Conjunction,Precast
+P2,189.9,192.9,Collective Unconscious,
+P2,192.4,195.4,Celestial Opposition,
+P2,216.6,225.6,Earthly Star,
+P3,13.7,16.7,Collective Unconscious,
+P3,29.9,39.8,Earthly Star,
+P3,48.8,54.8,Helios Conjunction,Precast
+P3,53.7,62.2,Helios Conjunction,
+P3,59.7,62.7,Horoscope,
+P3,56.2,59.2,Neutral Sect,
+P3,62.3,67.4,Helios Conjunction,
+P3,63.4,66.4,Sun Sign,
+P3,67.5,72.2,Helios Conjunction,
+P3,70.7,73.7,Celestial Opposition,
+P3,75.8,81.8,Helios Conjunction,Precast
+P3,80.7,86.7,Helios Conjunction,Precast
+P3,92.7,98.7,Helios Conjunction,Precast
+P3,84.9,87.4,Macrocosmos,
+P3,88.4,91.4,Earthly Star,
+P3,94.4,97.4,Collective Unconscious,
+P3,124.1,132.6,Helios Conjunction,
+P3,130.1,133.1,Horoscope,
+P3,152.1,158.1,Helios Conjunction,Precast
+P3,147.7,157.3,Earthly Star,
+P3,157.0,160.0,Celestial Opposition,
+P3,157.7,160.7,Collective Unconscious,
+P3,180.0,186.0,Helios Conjunction,Precast
+P4,30.7,36.7,Helios Conjunction,Precast
+P4,29.7,32.7,Earthly Star,
+P4,32.7,38.7,Helios Conjunction,Precast
+P4,39.6,42.6,Collective Unconscious,
+P4,54.3,57.3,Celestial Opposition,
+P4,64.5,73.0,Helios Conjunction,
+P4,70.5,73.5,Horoscope,
+P4,72.3,79.5,Helios Conjunction,
+P4,73.5,76.5,Neutral Sect,
+P4,75.5,78.5,Sun Sign,
+P4,78.6,81.6,Helios Conjunction,
+P4,81.7,89.7,Helios Conjunction,
+P4,87.8,90.8,Earthly Star,
+P4,101.3,104.3,Collective Unconscious,
+P4,109.8,115.8,Helios Conjunction,Precast
+P4,107.8,110.3,Macrocosmos,
+P4,128.7,137.2,Helios Conjunction,
+P4,134.7,137.7,Horoscope,
+P4,135.7,138.7,Celestial Opposition,
+P4,137.3,142.9,Helios Conjunction,
+P4,150.3,155.3,Earthly Star,
+P4,161.6,167.6,Helios Conjunction,Precast
+P4,167.9,173.9,Helios Conjunction,Precast
+P4,168.4,171.4,Collective Unconscious,
+P5,78.0,88.1,Earthly Star,
+P5,90.7,93.7,Collective Unconscious,
+P5,123.9,126.9,Celestial Opposition,
+P5,138.8,144.8,Helios Conjunction,Precast
+P5,144.9,147.9,Earthly Star,
+P5,151.2,154.2,Horoscope,
+P5,153.7,162.2,Helios Conjunction,
+P5,152.4,155.4,Neutral Sect,
+P5,162.3,166.8,Helios Conjunction,
+P5,162.8,165.8,Sun Sign,
+P5,167.5,176.0,Helios Conjunction,
+P5,192.3,194.8,Macrocosmos,
+P5,205.1,211.0,Earthly Star,
+P5,204.1,207.1,Collective Unconscious,
+P5,240.6,246.6,Helios Conjunction,Precast
+P5,237.4,240.4,Celestial Opposition,
+P5,265.8,274.3,Helios Conjunction,
+P5,271.8,274.8,Horoscope,
+P5,271.8,274.8,Earthly Star,
+P5,275.1,283.6,Helios Conjunction,
+P5,272.9,275.9,Neutral Sect,
+P5,283.7,290.4,Helios Conjunction,
+P5,284.2,287.2,Sun Sign,
+P5,294.8,297.8,Collective Unconscious,
+P5,301.2,304.2,Celestial Opposition,

@@ -1,0 +1,22 @@
+# Duty: AACHeavyweightM3Savage
+Phase,Sync,Watch,Caster,OID,ActionIDs,Occurrence,PhaseTime
+P1,Combat starts,CombatStart,The Tyrant,0x4AEC,,1,0.0
+P1,Crown of Arcadia,CastStart,The Tyrant,0x4AEC,46086,1,5.2
+P1,Trophy Weapons,CastStart,The Tyrant,0x4AEC,46102,1,35.4
+P1,Trophy Weapons,CastStart,The Tyrant,0x4AEC,46102,1,69.6
+P1,Crown of Arcadia,CastStart,The Tyrant,0x4AEC,46086,1,117.5
+P1,Dance of Domination,CastStart,The Tyrant,0x4AEC,47035,1,133.0
+P1,Charybdistopia (1 HP),CastStart,The Tyrant,0x4AEC,46117,1,174.6
+P1,Great Wall of Fire,CastStart,The Tyrant,0x4AEC,46123,1,248.8
+P1,Meteorain,CastStart,The Tyrant,0x4AEC,46132,1,288.6
+P1,Triple Tyrannhilation,CastStart,The Tyrant,0x4AEC,46140,1,337.2
+P1,Flatliner,CastStart,The Tyrant,0x4AEC,46143,1,357.7
+P1,Massive Meteor,CastStart,The Tyrant,0x4AEC,46152,1,442.4
+P1,Crown of Arcadia,CastStart,The Tyrant,0x4AEC,46086,1,476.8
+P1,Great Wall of Fire,CastStart,The Tyrant,0x4AEC,46123,1,488.1
+P1,Crown of Arcadia,CastStart,The Tyrant,0x4AEC,46086,1,520.4
+P1,Ecliptic Stampede,CastStart,The Tyrant,0x4AEC,46162,1,532.0
+P1,Crown of Arcadia,CastStart,The Tyrant,0x4AEC,46086,1,577.3
+P1,Heartbreak Kick,CastStart,The Tyrant,0x4AEC,46173,1,591.0
+P1,Heartbreak Kick,CastStart,The Tyrant,0x4AEC,46173,1,610.2
+P1,Heartbreak Kick,CastStart,The Tyrant,0x4AEC,46173,1,631.4

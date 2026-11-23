@@ -129,6 +129,8 @@ internal static class MajorUpdater
 			Run("(RSRActivatedCore): TargetUpdater.UpdateTargets", TargetUpdater.UpdateTargets);
 		}
 
+		Run("(RSRActivatedCore): BeirutaTimelineUpdater.Update", () => BeirutaTimelineUpdater.Update(isActivated));
+
 		if (!isActivated)
 		{
 			ResetBmrDataIfLive();

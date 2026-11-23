@@ -1,32 +1,80 @@
+using static RotationSolver.Engine.Helpers.BeirutaParty;
+
 namespace RotationSolver.Rotations.Healer.Sage;
 
 [Rotation("BeirutaSGE", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn, Description =
-	"Savage/Ultimate Sage. Damage and healing are automatic; mitigation comes from your CD planner or your own presses. AutoBurst off is enough to hold burst. Set Intercept to GCD only and leave ability intercept unticked, so your planner's oGCDs go straight through and any extra heal or shield GCD you press is queued. Questions? Ask @Beiruta on the RSR Discord. Hover each setting for details.")]
+	"Savage/Ultimate Sage. Damage and healing are automatic. Mitigation follows the built-in timeline plan when there is one (see [CD Plan]); otherwise use your Boss Mod / BMR CD planner or press it yourself, with Intercept set to GCD only and ability intercept unticked. Questions? Ask @Beiruta on the RSR Discord.")]
 [SourceCode(Path = "main/Rotations/Healer/Sage/BeirutaSGE.cs")]
 [ExtraRotation]
 
-public sealed class BeirutaSGE : SageRotation
+public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, IBeirutaHealContext, IBeirutaHealer
 {
 	#region Config Options
+
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] CD plan from", Tooltip =
+		"Built-in plan: mitigation follows the built-in timeline plan. Built-in SGE plans:\n" +
+		"- Dancing Mad (Ultimate): Default\n" +
+		"- Futures Rewritten (Ultimate): Default\n" +
+		"- AAC Heavyweight (Savage): M9S, M10S, M11S, M12S part 1, M12S part 2: Default\n" +
+		"Manual / BMR / VBM: you or your Boss Mod / BMR CD planner press the mitigation.")]
+	public BeirutaPlanSource CdPlanFrom { get; set; } = BeirutaPlanSource.BuiltIn;
+
+	public bool UseTimelinePlan => CdPlanFrom == BeirutaPlanSource.BuiltIn;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use recommended settings for the plan", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+		"When a built-in plan loads, the settings it recommends are applied, like a preset. Changing a setting afterwards (e.g. your Ward Mode macro) works as usual.\n" +
+		"Your saved settings are not changed by the plan: they show as you set them and come back once the plan unloads or this is off.")]
+	public bool UsePlanSettings { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Eukrasian Prognosis", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+		"On: the plan's Eukrasian Prognosis are cast in their window, unless the party is already shielded.\n" +
+		"Off: they are skipped; the rotation shields as usual (still after a planned Zoe).")]
+	public bool UsePlannedShields { get; set; } = true;
+
+	bool Updaters.IBeirutaTimelineOption.AllowPlannedAction(uint actionId) =>
+		UsePlannedShields ||
+		actionId is not ((uint)ActionID.EukrasianPrognosisPvE or (uint)ActionID.EukrasianPrognosisIiPvE);
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		Updaters.BeirutaTimelineUpdater.HoldQueuedPlannedAction(action.ID);
+
+	bool Updaters.IBeirutaTimelineOption.RotationRunsPlannedAction(uint actionId) =>
+		actionId is (uint)ActionID.EukrasianPrognosisPvE or (uint)ActionID.EukrasianPrognosisIiPvE;
+
+	#endregion
 
 	#region Utility
 
 	[RotationConfig(CombatType.PvE, Name = "[Utility] Ward Mode (right-click for the macro)", Tooltip =
-		"Turn it on for high-pressure phases: keeps the party shielded and heals sooner.\n" +
-		"- Eukrasian Prognosis whenever 4+ are unshielded.\n" +
+		"Turn it on for high-pressure phases: keeps every non-tank shielded.\n" +
+		"- Eukrasian Prognosis whenever a non-tank in range is unshielded.\n" +
 		"- AoE thresholds use real HP and ignore the co-healer, HoTs and Eudaimonia.\n" +
 		"Auto turns off on death, zone change and countdown.")]
 	public bool WardMode { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "[More settings] Show", Tooltip =
+		"Pick a page to show its detailed settings. This only changes what is shown.")]
+	public BeirutaSettingsPage MoreSettings { get; set; } = BeirutaSettingsPage.Hide;
+
+	private bool WardActive => WardMode || Updaters.BeirutaTimelineUpdater.PlannedWardMode;
+
+	bool IBeirutaHealContext.WardMode => WardActive;
 
 	#endregion
 
 	#region Prepull
 
-	[RotationConfig(CombatType.PvE, Name = "[Prepull] Pre-pull GCD", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Prepull] Pre-pull GCD", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.OpenerPage, Tooltip =
 		"Pneuma lands as the countdown ends. Toxikon is sent about 1s earlier, since Eukrasia can't be precast and Toxikon lands late.")]
 	public OpenerStrategy OpenerSelection { get; set; } = OpenerStrategy.PneumaOpener;
 
-	[RotationConfig(CombatType.PvE, Name = "[Prepull] Countdown shield", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Prepull] Countdown shield", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.OpenerPage, Tooltip =
 		"What SGE puts up during the countdown. Kardia is placed between 15s and 9s.")]
 	public CountdownShieldStrategy CountdownShield { get; set; } = CountdownShieldStrategy.ZoeEukrasianPrognosis;
 
@@ -61,7 +109,7 @@ public sealed class BeirutaSGE : SageRotation
 
 	#region Opener
 
-	[RotationConfig(CombatType.PvE, Name = "[Opener] First Phlegma / Psyche", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Opener] First Phlegma / Psyche", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.OpenerPage, Tooltip =
 		"Holds Phlegma and Psyche until this long after the pull. Psyche also needs AutoBurst.")]
 	public PhlegmaOpenerTiming PhlegmaOpener { get; set; } = PhlegmaOpenerTiming.ThreeSeconds;
 
@@ -79,41 +127,37 @@ public sealed class BeirutaSGE : SageRotation
 
 	#endregion
 
-	#region Damage
+	#region Potion
 
-	[RotationConfig(CombatType.PvE, Name = "[Damage] Use potion")]
+	[RotationConfig(CombatType.PvE, Name = "[Potion] Use potion", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.OpenerPage)]
 	public bool UsePotion { get; set; } = true;
 
 	[RotationConfig(CombatType.PvE, Name = "    > First potion", Parent = nameof(UsePotion), Tooltip =
 		"Opener: during the countdown. 2 minutes: the first potion waits for the 2-minute burst.\n" +
-		"In combat it follows raid buffs or party potions, with a Phlegma charge and Psyche ready within 30s.")]
-	public PotTiming PotionTiming { get; set; } = PotTiming.Opener;
+		"In combat it follows raid buffs, with a Phlegma charge and Psyche ready within 30s.\n" +
+		"With others: only when a party member already has the potion buff (Medicated), so you pot together with them.")]
+	public BeirutaPotTiming PotionTiming { get; set; } = BeirutaPotTiming.Opener;
 
-	[RotationConfig(CombatType.PvE, Name = "[Damage] Phlegma / Toxikon on 2+ enemies")]
+	#endregion
+
+	#region Damage
+
+	[RotationConfig(CombatType.PvE, Name = "[Damage] Phlegma / Toxikon on 2+ enemies", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.DamagePage)]
 	public bool MultiTargetPhlegmaDump { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "[Damage] Toxikon at 3 Addersting while your shields are up", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Damage] Toxikon at 3 Addersting while your shields are up", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.DamagePage, Tooltip =
 		"Breaking Eukrasian shields gives Addersting, so Toxikon is spent at 3 to avoid overcapping.")]
 	public bool KeepTwoAddersting { get; set; } = true;
-
-	public enum PotTiming : byte
-	{
-		[Description("Opener (countdown)")]
-		Opener,
-
-		[Description("2 minutes")]
-		TwoMinutes,
-	}
 
 	#endregion
 
 	#region Movement
 
-	[RotationConfig(CombatType.PvE, Name = "[Movement] Early Eukrasian Dosis refresh", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Movement] Early Eukrasian Dosis refresh", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.MovementPage, Tooltip =
 		"While moving, refreshes Eukrasian Dosis early as an instant GCD.")]
 	public bool EarlyDotRefreshWhenMoving { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "[Movement] Use Swiftcast", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Movement] Use Swiftcast", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.MovementPage, Tooltip =
 		"Swiftcast while moving. Raise always takes priority.\n" +
 		"Instant options: Toxikon > spare Phlegma > Eukrasian Prognosis (not in raid buffs) > early Eukrasian Dosis.")]
 	public bool UseSwiftcastForMovement { get; set; } = true;
@@ -168,10 +212,11 @@ public sealed class BeirutaSGE : SageRotation
 		SignalOnly,
 	}
 
-	[RotationConfig(CombatType.PvE, Name = "[Healing] Custom healing settings (off = defaults)", Tooltip =
-		"Off: AoE thresholds come from each heal's potency, the co-healer's smallest GCD heal, incoming HoT ticks and Eudaimonia, so heals are not wasted.\n" +
+	[RotationConfig(CombatType.PvE, Name = "[Healing] Custom healing settings (off = defaults)", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.HealingPage, Tooltip =
+		"Off: each area heal waits until 3+ players are low enough that it won't be wasted, worked out from its potency, the co-healer's smallest GCD heal, incoming HoT ticks and Eudaimonia.\n" +
 		"Off also means: Taurochole on tanks, Zoe before a healing Pneuma, no heals during Macrocosmos, Eukrasian Prognosis while moving, no Kardia swap.\n" +
-		"On: the values below replace the Ward-off thresholds. Heal area = 3+ players below that HP, like RSR's own heal-area settings. Ward Mode always uses its own.")]
+		"On: each area heal fires when 3+ players in range are below the value set here.\n" +
+		"Ward Mode ignores these values and uses its own.")]
 	public bool UseCustomHPThreshold { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "    > Taurochole targets", Parent = nameof(UseCustomHPThreshold))]
@@ -179,7 +224,8 @@ public sealed class BeirutaSGE : SageRotation
 
 	[RotationConfig(CombatType.PvE, Name = "    > Zoe usage", Parent = nameof(UseCustomHPThreshold), Tooltip =
 		"Auto: Zoe right before a healing Pneuma.\n" +
-		"Only after you press Zoe: the rotation follows with Pneuma or Eukrasian Prognosis by party HP.")]
+		"Only after you press Zoe: the rotation follows with Pneuma or Eukrasian Prognosis by party HP.\n" +
+		"A built-in plan that has Zoe presses it itself; the rotation only follows up.")]
 	public ZoeUsage ZoeMode { get; set; } = ZoeUsage.AutoPneuma;
 
 	[RotationConfig(CombatType.PvE, Name = "    > After your Zoe: Pepsis old shields, then reapply", Parent = nameof(UseCustomHPThreshold), Tooltip =
@@ -199,19 +245,19 @@ public sealed class BeirutaSGE : SageRotation
 	public KardiaSwapMode KardiaSwap { get; set; } = KardiaSwapMode.None;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Physis II: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Physis II: area heal when 3+ below", Parent = nameof(UseCustomHPThreshold))]
 	public float PhysisHeal { get; set; } = 0.75f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Ixochole: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Ixochole: area heal when 3+ below", Parent = nameof(UseCustomHPThreshold))]
 	public float IxocholeHeal { get; set; } = 0.75f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Pneuma: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Pneuma: area heal when 3+ below", Parent = nameof(UseCustomHPThreshold))]
 	public float PneumaHeal { get; set; } = 0.7f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Pepsis: heal area, shielded players only", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Pepsis: area heal when 3+ shielded players below", Parent = nameof(UseCustomHPThreshold))]
 	public float PepsisHeal { get; set; } = 0.6f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
@@ -224,7 +270,7 @@ public sealed class BeirutaSGE : SageRotation
 
 	[Range(0, 1, ConfigUnitType.Percent)]
 	[RotationConfig(CombatType.PvE, Name = "    > Druochole: tank below", Parent = nameof(UseCustomHPThreshold))]
-	public float HealSingleDruocholeHeal { get; set; } = 0.8f;
+	public float HealSingleDruocholeHeal { get; set; } = 0.65f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
 	[RotationConfig(CombatType.PvE, Name = "    > After your Zoe: Pneuma if party average below (else Eukrasian Prognosis)", Parent = nameof(UseCustomHPThreshold), Tooltip =
@@ -232,7 +278,7 @@ public sealed class BeirutaSGE : SageRotation
 	public float ZoePneumaHeal { get; set; } = 0.40f;
 
 	private TaurocholeUsage TaurocholeModeValue => UseCustomHPThreshold ? TaurocholeMode : TaurocholeUsage.TanksOnly;
-	private ZoeUsage ZoeModeValue => UseCustomHPThreshold ? ZoeMode : ZoeUsage.AutoPneuma;
+	private ZoeUsage ZoeModeValue => PlannedZoe ? ZoeUsage.SignalOnly : UseCustomHPThreshold ? ZoeMode : ZoeUsage.AutoPneuma;
 	private bool ZoePepsisReshieldValue => UseCustomHPThreshold && ZoePepsisReshield;
 	private bool MacrocosmosLockValue => !UseCustomHPThreshold || LockHealingActionsDuringMacrocosmos;
 	private bool MovementShieldHealingValue => !UseCustomHPThreshold || MovementShieldHealing;
@@ -240,19 +286,8 @@ public sealed class BeirutaSGE : SageRotation
 	private float PepsisHealValue => UseCustomHPThreshold ? PepsisHeal : 0.6f;
 	private float SoteriaHealValue => UseCustomHPThreshold ? SoteriaHeal : 0.8f;
 	private float HealSingleTaurocholeHealValue => UseCustomHPThreshold ? HealSingleTaurocholeHeal : 0.7f;
-	private float HealSingleDruocholeHealValue => UseCustomHPThreshold ? HealSingleDruocholeHeal : 0.8f;
+	private float HealSingleDruocholeHealValue => UseCustomHPThreshold ? HealSingleDruocholeHeal : 0.65f;
 	private float ZoePneumaHealValue => UseCustomHPThreshold ? ZoePneumaHeal : 0.40f;
-
-	#endregion
-
-	#region DMU
-
-	[RotationConfig(CombatType.PvE, Name = "[DMU] Experimental Accretion top-up", Tooltip =
-		"Fills Accretion players in order: the healer first, then the DPS once Earth Resistance Down II is gone.\n" +
-		"Waits until 3+ non-tanks other than the target are above 30%, and 3s after Accretion changes.\n" +
-		"SGE: Krasis > Druochole > Taurochole, then Diagnosis.\n" +
-		"Always active in DMU, even with this off: group heals stop once an Accretion player is above 50%, and the party is kept shielded as in Ward Mode.")]
-	public bool AccretionTopUp { get; set; } = false;
 
 	#endregion
 
@@ -263,47 +298,6 @@ public sealed class BeirutaSGE : SageRotation
 	private const float EarlyDotRefreshSeconds = 12f;
 	private const float PhlegmaDumpTTKSeconds = 10f;
 	private const float DotRefreshTTKSeconds = 15f;
-	private const float MovementLeadSeconds = 0.5f;
-	private const float MovementGraceSeconds = 0.3f;
-	private const float MovementTimeThreshold = 1.0f;
-	private static readonly HashSet<uint> PartyRaidBuffStatusIds =
-	[
-		(uint)StatusID.Divination,
-		(uint)StatusID.Brotherhood,
-		(uint)StatusID.BattleLitany,
-		(uint)StatusID.StarryMuse,
-		(uint)StatusID.Embolden,
-		(uint)StatusID.SearingLight,
-		(uint)StatusID.BattleVoice,
-		(uint)StatusID.TechnicalFinish,
-		(uint)StatusID.ArcaneCircle
-	];
-
-	private static bool PartyHasStatus(Func<uint, bool> match)
-	{
-		if (PartyMembers == null)
-		{
-			return false;
-		}
-
-		foreach (var member in PartyMembers)
-		{
-			if (member?.StatusList == null)
-			{
-				continue;
-			}
-
-			foreach (var status in member.StatusList)
-			{
-				if (match(status.StatusId))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	private static bool PartyHasOwnEukrasianShield
 	{
 		get
@@ -326,10 +320,6 @@ public sealed class BeirutaSGE : SageRotation
 		}
 	}
 
-	private static bool IsPartyMedicated => PartyHasStatus(static id => id == (uint)StatusID.Medicated);
-
-	private static bool IsPartyBurst => PartyHasStatus(static id => PartyRaidBuffStatusIds.Contains(id));
-
 	private float PhlegmaOpenerSeconds => PhlegmaOpener switch
 	{
 		PhlegmaOpenerTiming.ZeroSeconds => 0f,
@@ -348,6 +338,22 @@ public sealed class BeirutaSGE : SageRotation
 
 	private bool HasKerachole => StatusHelper.PlayerHasStatus(true, StatusID.Kerachole);
 	private bool HasZoe => StatusHelper.PlayerHasStatus(true, StatusID.Zoe);
+
+	private bool PlannedZoe => Updaters.BeirutaTimelineUpdater.PlanContains(ZoePvE.ID);
+
+	private bool PlanOwnsPhysis => Updaters.BeirutaTimelineUpdater.PlanContains(PhysisIiPvE.ID);
+
+	private const float PlannedZoeHoldSeconds = 8f;
+
+	private bool ShieldHeldForPlannedZoe =>
+		!HasZoe &&
+		ZoePvE.EnoughLevel &&
+		!ZoePvE.Cooldown.IsCoolingDown &&
+		Updaters.BeirutaTimelineUpdater.PlannedWithin(PlannedZoeHoldSeconds, ZoePvE.ID);
+
+	private bool ZoeReservedForPlan => HasZoe && PlannedZoe;
+
+	private const float PlannedZoeLastCallSeconds = 5f;
 	private static bool HasMacrocosmos => StatusHelper.PlayerHasStatus(false, CoHealerMacrocosmosStatus);
 	private bool HasEukrasianPrognosis => StatusHelper.PlayerHasStatus(true, StatusID.EukrasianPrognosis);
 	private bool HasMedicated => StatusHelper.PlayerHasStatus(true, StatusID.Medicated);
@@ -374,16 +380,6 @@ public sealed class BeirutaSGE : SageRotation
 		return count >= threshold;
 	}
 
-	private bool MovingPastGrace =>
-		InCombat &&
-		IsMoving &&
-		MovingTime > MovementGraceSeconds;
-
-	private bool HasSufficientMovement =>
-		InCombat &&
-		IsMoving &&
-		MovingTime > MovementTimeThreshold;
-
 	private const float MovementShieldHealHp = 0.95f;
 
 	private static bool HasEukrasianShield(IBattleChara? member) =>
@@ -403,7 +399,6 @@ public sealed class BeirutaSGE : SageRotation
 		var unshielded = BeirutaWard.CountMissing(PartyMembers, PrognosisRange, static m => HasEukrasianShield(m));
 		return inRange > 0 && unshielded * 2 >= inRange;
 	}
-
 
 	private bool MovementPrognosisUseful(out IBaseAction? prognosis)
 	{
@@ -483,7 +478,7 @@ public sealed class BeirutaSGE : SageRotation
 	{
 		act = null;
 
-		if (!MovingPastGrace || HasEukrasia || HasSwift || ShouldDeferToRaise())
+		if (!BeirutaMove.PastGrace || HasEukrasia || HasSwift || BeirutaMove.RaiseSwiftHeld)
 		{
 			return false;
 		}
@@ -513,7 +508,7 @@ public sealed class BeirutaSGE : SageRotation
 			}
 		}
 
-		if (HasSufficientMovement && MovementDotRefreshDue && SetEukrasianDosisAim() && DoAimedEukrasianDosis(out act))
+		if (BeirutaMove.Sufficient && MovementDotRefreshDue && SetEukrasianDosisAim() && DoAimedEukrasianDosis(out act))
 		{
 			return true;
 		}
@@ -532,10 +527,6 @@ public sealed class BeirutaSGE : SageRotation
 	private bool HasHealingLockout =>
 		MacrocosmosLockValue &&
 		HasMacrocosmos;
-
-	private bool ShouldDeferToRaise() =>
-		(HasSwift || IsLastAction(ActionID.SwiftcastPvE)) &&
-		MergedStatus.HasFlag(AutoStatus.Raise);
 
 	private static bool HasSingleHealLockoutStatus(IBattleChara? target)
 	{
@@ -583,11 +574,10 @@ public sealed class BeirutaSGE : SageRotation
 	private bool ShouldSwiftcastForMovement(IAction nextGCD)
 	{
 		if (!UseSwiftcastForMovement ||
-			!HasSufficientMovement ||
-			MovingTime <= MovementTimeThreshold + MovementLeadSeconds ||
+			!BeirutaMove.PastLead ||
 			HasSwift ||
 			IsLastAction(ActionID.SwiftcastPvE) ||
-			ShouldDeferToRaise())
+			BeirutaMove.RaiseSwiftHeld)
 		{
 			return false;
 		}
@@ -607,9 +597,9 @@ public sealed class BeirutaSGE : SageRotation
 		SwiftcastPvE.EnoughLevel &&
 		SwiftcastPvE.IsEnabled &&
 		!SwiftcastPvE.Cooldown.IsCoolingDown &&
-		HasSufficientMovement &&
-		MovingTime > MovementTimeThreshold + MovementLeadSeconds &&
-		!ShouldDeferToRaise();
+		BeirutaMove.Sufficient &&
+		BeirutaMove.PastLead &&
+		!BeirutaMove.RaiseSwiftHeld;
 
 	private bool SwiftcastOutranksMovementGCDs =>
 		SwiftcastMovement == SwiftcastMovementPriority.First && SwiftcastReadyForMovement;
@@ -702,13 +692,7 @@ public sealed class BeirutaSGE : SageRotation
 			return EukrasiaPvE.CanUse(out act);
 		}
 
-		if (EukrasianDiagnosisPvE.CanUse(out act, skipStatusProvideCheck: true, targetOverride: TargetType.Tank))
-		{
-			EukrasianDiagnosisPvE.Target = new TargetResult(target, [target], target.Position);
-			return true;
-		}
-
-		return false;
+		return BeirutaTarget.TryRsrTarget(EukrasianDiagnosisPvE, target, out act, skipStatusProvideCheck: true);
 	}
 
 	private float CurrentTargetTTK => CurrentTarget?.GetTTK() ?? float.NaN;
@@ -724,42 +708,27 @@ public sealed class BeirutaSGE : SageRotation
 		return !float.IsNaN(ttk) && ttk < seconds;
 	}
 
-	private bool ShouldUsePotionInCombat
-	{
-		get
-		{
-			if (!UsePotion || !InCombat || !IsBurst)
-			{
-				return false;
-			}
-
-			if (PotionTiming == PotTiming.TwoMinutes && CombatElapsedLess(30f))
-			{
-				return false;
-			}
-
-			if (!IsPartyMedicated && !IsPartyBurst)
-			{
-				return false;
-			}
-
-			if (PhlegmaPvE.EnoughLevel && PhlegmaPvE.Cooldown.CurrentCharges < 1)
-			{
-				return false;
-			}
-
-			if (PsychePvE.EnoughLevel && !PsychePvE.Cooldown.WillHaveOneCharge(30f))
-			{
-				return false;
-			}
-
-			return true;
-		}
-	}
+	private bool ShouldUsePotionInCombat =>
+		BeirutaPotion.Ready(UsePotion, PotionTiming, IsBurst,
+			IsPartyBurst &&
+			!(PhlegmaPvE.EnoughLevel && PhlegmaPvE.Cooldown.CurrentCharges < 1) &&
+			!(PsychePvE.EnoughLevel && !PsychePvE.Cooldown.WillHaveOneCharge(30f)));
 
 	private bool ShouldDumpPhlegmaForTTK => CurrentTargetDiesWithin(PhlegmaDumpTTKSeconds);
 
-	private bool ShouldSkipDotForTTK => CurrentTargetDiesWithin(DotRefreshTTKSeconds);
+	private const int ToxikonWeaveAbilities = 2;
+
+	private static bool WeaveRoomWanted => BeirutaHealerFlow.WeaveRoomWanted(ToxikonWeaveAbilities);
+
+	private bool ShouldSkipDotForTTK => CurrentTargetDiesWithin(DotRefreshTTKSeconds) || !DotWorthBeforeDowntime;
+
+	private const float EukrasianDosisInitialPotency = 0f;
+	private const float EukrasianDosisTickPotency = 85f;
+	private const float DosisFillerPotency = 380f;
+	private const float EukrasianDosisGcdCost = 1.4f;
+
+	private bool DotWorthBeforeDowntime =>
+		BeirutaDotValue.WorthBeforeDowntime(CurrentTarget, EukrasianDosisInitialPotency, EukrasianDosisTickPotency, DosisFillerPotency, EukrasianDosisGcdCost);
 
 	#region Kardia Swap
 
@@ -821,9 +790,7 @@ public sealed class BeirutaSGE : SageRotation
 			return false;
 		}
 
-		KardiaPvE.Target = new TargetResult(target!, [target!], target!.Position);
-		act = KardiaPvE;
-		return true;
+		return BeirutaTarget.TryRsrTarget(KardiaPvE, target!, out act, skipStatusProvideCheck: true);
 	}
 
 	private const float KardiaNotFullHp = 0.95f;
@@ -915,39 +882,18 @@ public sealed class BeirutaSGE : SageRotation
 	}
 	#endregion
 
-
 	public override void DisplayRotationStatus()
 	{
 		ImGui.Text($"Last E.Action Aim Cleared From Queue: {_lastEukrasiaActionAim}");
 		ImGui.Text($"Current E.Action Aim: {_EukrasiaActionAim}");
-		ImGui.Text($"Moving: {IsMoving} ({MovingTime:F1}s)  Grace passed: {MovingPastGrace}  Sustained: {HasSufficientMovement}");
+		ImGui.Text($"Moving: {IsMoving} ({MovingTime:F1}s)  Grace passed: {BeirutaMove.PastGrace}  Sustained: {BeirutaMove.Sufficient}");
 	}
 
 	#endregion
 
 	#region Countdown Logic
 
-	private const long CountdownResponseDelayMs = 1_000;
-	private long _countdownStartedAtMs;
-	private long _countdownLastSeenMs;
-	private float _countdownLastRemain;
-
-	private bool CountdownDelayPassed(float remainTime)
-	{
-		var now = Environment.TickCount64;
-
-		if (_countdownStartedAtMs == 0 ||
-			now - _countdownLastSeenMs > 500 ||
-			remainTime > _countdownLastRemain + 0.5f)
-		{
-			_countdownStartedAtMs = now;
-		}
-
-		_countdownLastSeenMs = now;
-		_countdownLastRemain = remainTime;
-
-		return now - _countdownStartedAtMs >= CountdownResponseDelayMs;
-	}
+	private readonly BeirutaCountdownDelay _countdownDelay = new();
 
 	private const float ToxikonCountdownLeadSeconds = 1f;
 
@@ -958,7 +904,7 @@ public sealed class BeirutaSGE : SageRotation
 			BeirutaWard.SetWardMode(this, false);
 		}
 
-		if (!CountdownDelayPassed(remainTime))
+		if (!_countdownDelay.Passed(remainTime))
 		{
 			return null;
 		}
@@ -974,7 +920,7 @@ public sealed class BeirutaSGE : SageRotation
 
 		if (remainTime <= 2.1f
 			&& UsePotion
-			&& PotionTiming == PotTiming.Opener
+			&& PotionTiming == BeirutaPotTiming.Opener
 			&& UseBurstMedicine(out act))
 		{
 			return act;
@@ -1043,6 +989,29 @@ public sealed class BeirutaSGE : SageRotation
 
 	#region Healing Engine
 
+	private bool CanRunHealEngine => BeirutaHeal.CanRun(HasHealingLockout);
+
+	private static bool AccretionGroupHealBlocked => BeirutaHeal.GroupHealBlocked;
+
+	private float EffectiveHpRatio(IBattleChara member) => BeirutaHeal.EffectiveHpRatio(this, member);
+
+	private bool CountsAsInjured(IBattleChara member, float threshold) => BeirutaHeal.Injured(this, member, threshold);
+
+	private int CountInjured(float range, float threshold) => BeirutaHeal.CountInjured(this, range, threshold);
+
+	private bool AoeNeeded(float range, float threshold) => BeirutaHeal.AoeNeeded(this, range, threshold);
+
+	private bool SpotHealOk(IBattleChara member) => SpotHealAllowed(member, AoeNeeded(IxocholeRange, IxocholeHp), IxocholeRange);
+
+	private bool AoeGcdNeeded(float range, float threshold) => BeirutaHeal.AoeGcdNeeded(this, range, threshold);
+
+	private float AoeThreshold(float potency, float customWardOff, float wardOffCap = 1f) => BeirutaHeal.Threshold(this, potency, customWardOff, wardOffCap);
+
+	float IBeirutaHealContext.HealBoost => HealBoost;
+
+	float IBeirutaHealContext.LandingHotPotency(IBattleChara member) => LandingHotPotency(member);
+	private static bool HoldAoeForCoHealer(float range) => BeirutaHeal.HoldAoe(range);
+
 	private const float IxocholeRange = 15f;
 	private const float PhysisRange = 30f;
 	private const float PneumaHealRange = 20f;
@@ -1060,40 +1029,8 @@ public sealed class BeirutaSGE : SageRotation
 
 	private const float TopUpHp = 0.85f;
 	private const float KrasisTankHp = 0.6f;
-	private const float MitigatingKrasisHp = 0.8f;
-	private const float CriticalHp = 0.3f;
-	private const float ExtremeLowTankHp = 0.3f;
-	private const float UndeadReleaseSeconds = 1f;
-	private const float EarthlyDominanceGateSeconds = 3f;
+	private const long DiagnosisThrottleMs = 30_000;
 
-	private static readonly StatusID[] FullInvulnStatus =
-	[
-		StatusID.HallowedGround,
-		StatusID.HallowedGround_1302,
-		StatusID.Superbolide,
-	];
-
-	private static readonly StatusID[] UndeadStatus =
-	[
-		StatusID.Holmgang_409,
-		StatusID.WalkingDead,
-	];
-
-	private static readonly StatusID[] TankBigMitigationStatus =
-	[
-		StatusID.Rampart,
-		StatusID.Rampart_1191,
-		StatusID.Sentinel,
-		StatusID.Guardian,
-		StatusID.Vengeance,
-		StatusID.Damnation,
-		StatusID.ShadowWall,
-		StatusID.ShadowedVigil,
-		StatusID.Nebula,
-		StatusID.GreatNebula,
-	];
-
-	private const long DiagnosisThrottleMs = 20_000;
 	private long _lastDiagnosisCastMs;
 	private bool _diagnosisWasLastGcd;
 
@@ -1112,45 +1049,6 @@ public sealed class BeirutaSGE : SageRotation
 		_lastDiagnosisCastMs != 0 &&
 		Environment.TickCount64 - _lastDiagnosisCastMs < DiagnosisThrottleMs;
 
-	private const float FreshMitigationSeconds = 6f;
-	private const float RampartDuration = 20f;
-	private const float BigMitigationDuration = 15f;
-
-	private static bool HasFreshBigMitigation(IBattleChara member)
-	{
-		foreach (var status in TankBigMitigationStatus)
-		{
-			if (!member.HasStatus(false, status))
-			{
-				continue;
-			}
-
-			var duration = status is StatusID.Rampart or StatusID.Rampart_1191 ? RampartDuration : BigMitigationDuration;
-			if (duration - member.StatusTime(false, status) <= FreshMitigationSeconds)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private static bool IsBigMitigatingTank(IBattleChara member) =>
-		IsTankMember(member) &&
-		!IsHealBlocked(member) &&
-		HasFreshBigMitigation(member);
-
-	private static readonly StatusID[] TankMitigationStatus =
-	[
-		StatusID.BlackestNight,
-		StatusID.HeartOfStone,
-		StatusID.HeartOfCorundum,
-		StatusID.RawIntuition,
-		StatusID.Bloodwhetting,
-		StatusID.Sheltron,
-		StatusID.HolySheltron,
-	];
-
 	private static readonly StatusID[] CoHealerMacrocosmosStatus =
 	[
 		StatusID.Macrocosmos,
@@ -1158,56 +1056,6 @@ public sealed class BeirutaSGE : SageRotation
 		StatusID.Macrocosmos_3989,
 	];
 
-	private bool CanRunHealEngine =>
-		Service.Config.AutoHeal &&
-		InCombat &&
-		!HasHealingLockout;
-
-	private static bool IsTankMember(IBattleChara member) => member.IsJobCategory(JobRole.Tank);
-
-	private static bool WhmInParty
-	{
-		get
-		{
-			foreach (var member in PartyMembers)
-			{
-				if (member != null && !member.IsDead && member.IsJobs(ECommons.ExcelServices.Job.WHM))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
-	private static bool IsHealBlocked(IBattleChara member)
-	{
-		if (member.HasStatus(false, FullInvulnStatus) || member.HasStatus(false, StatusID.LivingDead))
-		{
-			return true;
-		}
-
-		if (member.HasStatus(false, UndeadStatus))
-		{
-			return WhmInParty || member.StatusTime(false, UndeadStatus) > UndeadReleaseSeconds;
-		}
-
-		return false;
-	}
-
-	private static bool IsJustOffUndead(IBattleChara member) =>
-		!WhmInParty &&
-		member.HasStatus(false, UndeadStatus) &&
-		member.StatusTime(false, UndeadStatus) <= UndeadReleaseSeconds;
-
-	private static bool SkipSingleHeal(IBattleChara member) =>
-		IsHealBlocked(member) ||
-		(WhmInParty && IsTankMember(member) && member.GetHealthRatio() < ExtremeLowTankHp);
-
-	private static bool IsMitigatingTank(IBattleChara member) =>
-		IsTankMember(member) &&
-		!IsHealBlocked(member) &&
-		(HasFreshBigMitigation(member) || member.HasStatus(false, TankMitigationStatus));
 
 	private float LandingHotPotency(IBattleChara member)
 	{
@@ -1230,55 +1078,13 @@ public sealed class BeirutaSGE : SageRotation
 		return potency;
 	}
 
-	private float EffectiveHpRatio(IBattleChara member) =>
-		BeirutaHealModel.EffectiveHpRatio(member, WardMode, LandingHotPotency(member));
-
-	private bool CountsAsInjured(IBattleChara member, float threshold) =>
-		member.GetHealthRatio() < BeirutaHealModel.AlwaysInjuredHp ||
-		EffectiveHpRatio(member) < threshold;
-
 	private static float HealBoost => HasPhilosophia ? PhilosophiaBoost : 1f;
-
-	private float AoeThreshold(float potency, float customWardOff, float wardOffCap = 1f) =>
-		BeirutaHealModel.Threshold(potency, HealBoost, WardMode, UseCustomHPThreshold, customWardOff, PartyMembers, wardOffCap);
 
 	private float PhysisHp => AoeThreshold(PhysisIiCountedPotency, PhysisHeal);
 
 	private float IxocholeHp => AoeThreshold(IxocholePotency, IxocholeHeal);
 
 	private float PneumaHp => AoeThreshold(PneumaPotency, PneumaHeal, PneumaWardOffCap);
-
-	private static bool IsHealableInRange(IBattleChara? member, float range) =>
-		member != null &&
-		!member.IsDead &&
-		member.DistanceToPlayer() <= range;
-
-	private int CountInjured(float range, float threshold)
-	{
-		var count = 0;
-		foreach (var member in PartyMembers)
-		{
-			if (IsHealableInRange(member, range) && !IsHealBlocked(member) && CountsAsInjured(member, threshold))
-			{
-				count++;
-			}
-		}
-		return count;
-	}
-
-	private static bool AnyCritical(float range)
-	{
-		foreach (var member in PartyMembers)
-		{
-			if (IsHealableInRange(member, range) && !IsHealBlocked(member) && member.GetHealthRatio() < CriticalHp)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private bool AoeNeeded(float range, float threshold) => CountInjured(range, threshold) >= AoeInjuredCount;
 
 	private const int CoHealerSpreadNonTankCount = 3;
 
@@ -1316,33 +1122,6 @@ public sealed class BeirutaSGE : SageRotation
 		}
 		return count;
 	}
-
-	private static bool CoHealerBigHealSoon
-	{
-		get
-		{
-			foreach (var member in PartyMembers)
-			{
-				if (member == null || member.IsDead)
-				{
-					continue;
-				}
-
-				if (member.HasStatus(false, StatusID.GiantDominance) ||
-					member.HasStatus(false, CoHealerMacrocosmosStatus) ||
-					(member.HasStatus(false, StatusID.EarthlyDominance) &&
-					 member.StatusTime(false, StatusID.EarthlyDominance) < EarthlyDominanceGateSeconds))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
-	private static bool AccretionGroupHealBlocked => BeirutaAccretion.GroupHealBlocked(PartyMembers);
-
-	private static bool HoldAoeForCoHealer(float range) => AccretionGroupHealBlocked || (CoHealerBigHealSoon && !AnyCritical(range));
 
 	private int CountPepsisTargets(float threshold)
 	{
@@ -1395,37 +1174,13 @@ public sealed class BeirutaSGE : SageRotation
 	{
 		act = null;
 
-		if (MergedStatus.HasFlag(AutoStatus.DefenseArea) || MergedStatus.HasFlag(AutoStatus.DefenseSingle))
+		if (MergedStatus.HasFlag(AutoStatus.DefenseArea) || TankbusterSoon)
 		{
 			return false;
 		}
 
 		return !AccretionGroupHealBlocked && CountPepsisTargets(PepsisHealValue) >= AoeInjuredCount && PepsisPvE.CanUse(out act);
 	}
-
-	private static IBattleChara? FindLowest(float range, Func<IBattleChara, bool> filter)
-	{
-		IBattleChara? best = null;
-		foreach (var member in PartyMembers)
-		{
-			if (!IsHealableInRange(member, range) || SkipSingleHeal(member) || !filter(member))
-			{
-				continue;
-			}
-
-			if (best == null || member.GetHealthRatio() < best.GetHealthRatio())
-			{
-				best = member;
-			}
-		}
-		return best;
-	}
-
-	private IBattleChara? NonTankTopUp =>
-		WardMode && BeirutaWard.NonTanksShielded(PartyMembers, SingleHealRange)
-			? BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m) || HasSingleHealLockoutStatus(m), AoeInjuredCount)
-			: null;
-
 
 	private bool CanSpendAddersgall(bool ignoreReserve = false)
 	{
@@ -1442,10 +1197,13 @@ public sealed class BeirutaSGE : SageRotation
 		return ignoreReserve || !KeracholeNeedsReserve;
 	}
 
+	private const float PlannedKeracholeReserveSeconds = 25f;
+
 	private bool KeracholeNeedsReserve =>
 		KeracholePvE.EnoughLevel &&
-		!(RhizomataPvE.EnoughLevel && !RhizomataPvE.Cooldown.IsCoolingDown) &&
-		KeracholePvE.Cooldown.WillHaveOneCharge(AddersgallTime);
+		((!(RhizomataPvE.EnoughLevel && !RhizomataPvE.Cooldown.IsCoolingDown) &&
+		  KeracholePvE.Cooldown.WillHaveOneCharge(AddersgallTime)) ||
+		 Updaters.BeirutaTimelineUpdater.PlannedWithin(PlannedKeracholeReserveSeconds, KeracholePvE.ID));
 
 	private const uint AddersgallDumpMaxMp = 9000;
 
@@ -1469,7 +1227,7 @@ public sealed class BeirutaSGE : SageRotation
 		IxocholePvE.CanUse(out _);
 
 	private bool IxocholeFirst =>
-		!WardMode &&
+		!WardActive &&
 		AddersgallRich &&
 		IxocholeReady &&
 		AoeNeeded(IxocholeRange, BeirutaHealModel.RoundToFive(BeirutaHealModel.FullUseHp(IxocholePotency, HealBoost))) &&
@@ -1487,13 +1245,13 @@ public sealed class BeirutaSGE : SageRotation
 	private bool TryKrasisOn(IBattleChara target, out IAction? act)
 	{
 		act = null;
-		return !target.HasStatus(false, StatusID.Krasis) && BeirutaAccretion.TryUseOn(KrasisPvE, target, out act);
+		return !target.HasStatus(false, StatusID.Krasis) && BeirutaTarget.TryUseOn(KrasisPvE, target, out act);
 	}
 
 	private bool TryDruocholeOn(IBattleChara target, bool ignoreReserve, out IAction? act)
 	{
 		act = null;
-		return CanSpendAddersgall(ignoreReserve) && BeirutaAccretion.TryUseOn(DruocholePvE, target, out act);
+		return CanSpendAddersgall(ignoreReserve) && BeirutaTarget.TryUseOn(DruocholePvE, target, out act);
 	}
 
 	private bool TaurocholeAllowedOn(IBattleChara target) =>
@@ -1512,13 +1270,13 @@ public sealed class BeirutaSGE : SageRotation
 			!target.HasStatus(false, StatusID.Kerachole) &&
 			!target.HasStatus(false, StatusID.Taurochole) &&
 			CanSpendAddersgall(ignoreReserve) &&
-			BeirutaAccretion.TryUseOn(TaurocholePvE, target, out act);
+			BeirutaTarget.TryUseOn(TaurocholePvE, target, out act);
 	}
 
 	private bool TryHaimaOn(IBattleChara target, out IAction? act)
 	{
 		act = null;
-		return !target.HasStatus(false, StatusID.Haima) && BeirutaAccretion.TryUseOn(HaimaPvE, target, out act);
+		return !target.HasStatus(false, StatusID.Haima) && BeirutaTarget.TryUseOn(HaimaPvE, target, out act);
 	}
 
 	private bool TrySoteriaFor(IBattleChara target, out IAction? act)
@@ -1546,7 +1304,7 @@ public sealed class BeirutaSGE : SageRotation
 			return true;
 		}
 
-		if (tank.GetHealthRatio() < MitigatingKrasisHp && TryKrasisOn(tank, out act))
+		if (TryKrasisOn(tank, out act))
 		{
 			return true;
 		}
@@ -1559,171 +1317,28 @@ public sealed class BeirutaSGE : SageRotation
 		HasEukrasia &&
 		(_EukrasiaActionAim == EukrasianPrognosisPvE || _EukrasiaActionAim == EukrasianPrognosisIiPvE);
 
-	private bool TryHealAbility(out IAction? act)
+	#endregion
+
+	#region Steps
+
+	private const float TankbusterLeadSeconds = BeirutaIncoming.TankbusterLeadSeconds;
+
+	private static bool TankbusterSoon => BeirutaIncoming.TankbusterWithin(TankbusterLeadSeconds);
+
+	public bool PlanAbility(IAction nextGCD, out IAction? act)
 	{
-		act = null;
-
-		if (!CanRunHealEngine)
-		{
-			return false;
-		}
-
-		var undeadTank = FindLowest(SingleHealRange, static m => IsTankMember(m) && IsJustOffUndead(m));
-		if (undeadTank != null &&
-			(TryKrasisOn(undeadTank, out act) ||
-			 TryTaurocholeOn(undeadTank, true, out act) ||
-			 TryDruocholeOn(undeadTank, true, out act) ||
-			 TrySoteriaFor(undeadTank, out act)))
-		{
-			return true;
-		}
-
-		if (PrognosisQueued)
-		{
-			var lowest = FindLowest(SingleHealRange, static m => m.GetHealthRatio() < 1f);
-			if (lowest != null && TryKrasisOn(lowest, out act))
-			{
-				return true;
-			}
-		}
-
-		if (!HoldAoeForCoHealer(PhysisRange))
-		{
-			if (!IxocholeFirst &&
-				AoeNeeded(PhysisRange, PhysisHp) &&
-				(PhysisIiPvE.CanUse(out act) || (!PhysisIiPvE.EnoughLevel && PhysisPvE.CanUse(out act))))
-			{
-				return true;
-			}
-
-			if (IxocholeCanCover && IxocholePvE.CanUse(out act))
-			{
-				return true;
-			}
-		}
-
-		if (TryPepsis(out act))
-		{
-			return true;
-		}
-
-		foreach (var member in PartyMembers)
-		{
-			if (IsMitigatingTank(member) && TryMitigationSupport(member, out act))
-			{
-				return true;
-			}
-		}
-
-		var aoeSituation =
-			AoeNeeded(IxocholeRange, IxocholeHp) ||
-			(CoHealerInParty && CountNonTankInjured(SingleHealRange, TopUpHp) > CoHealerSpreadNonTankCount);
-
-		if (!aoeSituation)
-		{
-			var lowTank = FindLowest(SingleHealRange, static m => IsTankMember(m) && m.GetHealthRatio() < KrasisTankHp);
-			if (lowTank != null && TryKrasisOn(lowTank, out act))
-			{
-				return true;
-			}
-
-			var soteriaHolder = FindLowest(SingleHealRange, m => m.HasStatus(true, StatusID.Kardion) && m.GetHealthRatio() < SoteriaHealValue);
-			if (soteriaHolder != null && TrySoteriaFor(soteriaHolder, out act))
-			{
-				return true;
-			}
-
-			var taurocholeTarget = FindLowest(SingleHealRange, m => TaurocholeAllowedOn(m) && m.GetHealthRatio() < HealSingleTaurocholeHealValue);
-			if (taurocholeTarget != null && TryTaurocholeOn(taurocholeTarget, false, out act))
-			{
-				return true;
-			}
-
-			var druocholeTank = FindLowest(SingleHealRange, m => IsTankMember(m) && m.GetHealthRatio() < HealSingleDruocholeHealValue);
-			if (druocholeTank != null && TryDruocholeOn(druocholeTank, false, out act))
-			{
-				return true;
-			}
-
-			if (NonTankTopUp is { } topUp && TryDruocholeOn(topUp, false, out act))
-			{
-				return true;
-			}
-		}
-
-		if (AddersgallOvercapSoon)
-		{
-			var dumpTarget = FindLowest(SingleHealRange, static _ => true);
-			if (dumpTarget != null && TryDruocholeOn(dumpTarget, false, out act))
-			{
-				return true;
-			}
-		}
-
 		act = null;
 		return false;
 	}
 
-	private bool TryHealGCD(out IAction? act)
+	public bool SpecialAbility(IAction nextGCD, out IAction? act)
 	{
-		act = null;
-
-		if (!CanRunHealEngine || ShouldDeferToRaise())
-		{
-			return false;
-		}
-
-		if (!HoldAoeForCoHealer(PneumaHealRange) &&
-			(!(IxocholeCanCover || PhysisCanCover) || AnyCritical(PneumaHealRange)))
-		{
-			if (AoeNeeded(PneumaHealRange, PneumaHp) && PneumaPvE.CanUse(out act))
-			{
-				return true;
-			}
-		}
-
-		if (NonTankTopUp is { } topUp &&
-			!CanSpendAddersgall() &&
-			!HasEukrasia &&
-			BeirutaAccretion.TryUseOn(DiagnosisPvE, topUp, out act))
+		if (TryAccretionAbility(out act) || TryZoePepsisReshield(out act))
 		{
 			return true;
 		}
 
-		if (IsPartyBurst || HasMedicated || HasPhilosophia || !EukrasianDiagnosisPvE.EnoughLevel || !EukrasianDiagnosisPvE.IsEnabled)
-		{
-			return false;
-		}
-
-		if (DiagnosisThrottled && !(HasEukrasia && _EukrasiaActionAim == EukrasianDiagnosisPvE))
-		{
-			return false;
-		}
-
-		var tank = FindLowest(SingleHealRange, static m => IsBigMitigatingTank(m) && CanDiagnose(m));
-		if (tank == null)
-		{
-			return false;
-		}
-
-		if (!HasEukrasia && Addersting >= 3)
-		{
-			return ToxikonPvE.CanUse(out act);
-		}
-
-		QueueDiagnosis(tank);
-		return DoEukrasianDiagnosis(out act);
-	}
-
-	#endregion
-
-	#region oGCD Logic
-
-	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
-	{
-		act = null;
-
-		if (TryAccretionAbility(out act) || TryZoePepsisReshield(out act))
+		if (DoomTarget(SingleHealRange) is { } doomed && TryDruocholeOn(doomed, true, out act))
 		{
 			return true;
 		}
@@ -1746,66 +1361,139 @@ public sealed class BeirutaSGE : SageRotation
 			return true;
 		}
 
-		if (ZoeModeValue == ZoeUsage.AutoPneuma &&
+		return ZoeModeValue == ZoeUsage.AutoPneuma &&
 			ZoePvE.EnoughLevel &&
 			!ZoePvE.Cooldown.IsCoolingDown &&
 			nextGCD.IsTheSameTo(false, PneumaPvE) &&
-			ZoePvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (TryHealAbility(out act))
-		{
-			return true;
-		}
-
-		return base.EmergencyAbility(nextGCD, out act);
+			ZoePvE.CanUse(out act);
 	}
 
-	[RotationDesc(ActionID.PsychePvE, ActionID.SwiftcastPvE)]
-	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
+	public bool BurstAbility(IAction nextGCD, out IAction? act)
 	{
 		act = null;
-
-		if (ShouldSwiftcastForMovement(nextGCD) &&
-			SwiftcastPvE.CanUse(out act))
-		{
-			return true;
-		}
-
 		if (IsBurst && PhlegmaOpenerAllowed && PsychePvE.CanUse(out act))
 		{
 			return true;
 		}
 
-		return base.AttackAbility(nextGCD, out act);
+		return ShouldUsePotionInCombat && UseBurstMedicine(out act);
 	}
 
-	[RotationDesc(ActionID.HaimaPvE, ActionID.TaurocholePvE, ActionID.KrasisPvE)]
-	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
+	public bool ResourceAbility(IAction nextGCD, out IAction? act)
 	{
-		var tank = FindLowest(SingleHealRange, static m => IsMitigatingTank(m)) ?? EnemyAggroTarget ?? FindLowest(SingleHealRange, static m => IsTankMember(m));
-		if (TryMitigationSupport(tank, out act))
+		act = null;
+		return Addersgall <= 1 && RhizomataPvE.CanUse(out act);
+	}
+
+	public bool AreaHealAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		if (!CanRunHealEngine)
+		{
+			return false;
+		}
+
+		if (!HoldAoeForCoHealer(PhysisRange))
+		{
+			if (!IxocholeFirst &&
+				AoeNeeded(PhysisRange, PhysisHp) &&
+				!PlanOwnsPhysis &&
+				(PhysisIiPvE.CanUse(out act) || (!PhysisIiPvE.EnoughLevel && PhysisPvE.CanUse(out act))))
+			{
+				return true;
+			}
+
+			if (IxocholeCanCover && IxocholePvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		return TryPepsis(out act);
+	}
+
+	public bool SpotHealAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		if (!CanRunHealEngine)
+		{
+			return false;
+		}
+
+		if (TopUpAllTarget(SingleHealRange) is { } topUp &&
+			(TryDruocholeOn(topUp, false, out act) || TryTaurocholeOn(topUp, false, out act)))
 		{
 			return true;
 		}
 
-		return base.DefenseSingleAbility(nextGCD, out act);
+		if (FindLowest(SingleHealRange, static m => IsTankMember(m) && IsJustOffUndead(m)) is { } undeadTank &&
+			(TryKrasisOn(undeadTank, out act) ||
+			 TryTaurocholeOn(undeadTank, true, out act) ||
+			 TryDruocholeOn(undeadTank, true, out act) ||
+			 TrySoteriaFor(undeadTank, out act)))
+		{
+			return true;
+		}
+
+		if (FindLowest(SingleHealRange, m => SpotHealWorthy(m) && SpotHealOk(m) && HealHp(m) < KrasisTankHp) is { } lowTank &&
+			TryKrasisOn(lowTank, out act))
+		{
+			return true;
+		}
+
+		if (FindLowest(SingleHealRange, m => m.HasStatus(true, StatusID.Kardion) && SpotHealWorthy(m) && SpotHealOk(m) && HealHp(m) < SoteriaHealValue) is { } soteriaHolder &&
+			TrySoteriaFor(soteriaHolder, out act))
+		{
+			return true;
+		}
+
+		if (CoHealerInParty && CountNonTankInjured(SingleHealRange, TopUpHp) > CoHealerSpreadNonTankCount)
+		{
+			return false;
+		}
+
+		if (FindLowest(SingleHealRange, m => TaurocholeAllowedOn(m) && SpotHealWorthy(m) && SpotHealOk(m) && HealHp(m) < HealSingleTaurocholeHealValue) is { } taurocholeTarget &&
+			TryTaurocholeOn(taurocholeTarget, false, out act))
+		{
+			return true;
+		}
+
+		return FindLowest(SingleHealRange, m => SpotHealWorthy(m) && SpotHealOk(m) && HealHp(m) < HealSingleDruocholeHealValue) is { } druocholeTarget &&
+			TryDruocholeOn(druocholeTarget, false, out act);
 	}
 
-
-	[RotationDesc(ActionID.KardiaPvE, ActionID.RhizomataPvE)]
-	protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
+	public bool TankHelpAbility(IAction nextGCD, out IAction? act)
 	{
 		act = null;
-
-		if (InCombat || !HasKardia)
+		if (!CanRunHealEngine)
 		{
-			if (KardiaPvE.CanUse(out act))
+			return false;
+		}
+
+		if (TankbusterSoon &&
+			TryMitigationSupport(FindLowest(SingleHealRange, IsFreshMitigatingTank) ?? EnemyAggroTarget ?? FindLowest(SingleHealRange, static m => IsTankMember(m)), out act))
+		{
+			return true;
+		}
+
+		foreach (var member in PartyMembers)
+		{
+			if (IsFreshMitigatingTank(member) && TryMitigationSupport(member, out act))
 			{
 				return true;
 			}
+		}
+
+		act = null;
+		return false;
+	}
+
+	public bool LowPriorityAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		if ((InCombat || !HasKardia) && KardiaPvE.CanUse(out act))
+		{
+			return true;
 		}
 
 		if (TrySwapKardiaBack(out act))
@@ -1813,23 +1501,174 @@ public sealed class BeirutaSGE : SageRotation
 			return true;
 		}
 
-		if (!HasHealingLockout && TrySwapKardiaToInjured(out act))
+		if (CanRunHealEngine && !AccretionUp)
 		{
-			return true;
+			if (PrognosisQueued &&
+				FindLowest(SingleHealRange, static m => HealHp(m) < 1f) is { } lowest &&
+				TryKrasisOn(lowest, out act))
+			{
+				return true;
+			}
+
+			if (AddersgallOvercapSoon &&
+				(FindLowest(SingleHealRange, IsTankMember) ?? FindLowest(SingleHealRange, static _ => true)) is { } dumpTarget &&
+				TryDruocholeOn(dumpTarget, false, out act))
+			{
+				return true;
+			}
 		}
 
-		if (Addersgall <= 1 && RhizomataPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (ShouldUsePotionInCombat && UseBurstMedicine(out act))
-		{
-			return true;
-		}
-
-		return base.GeneralAbility(nextGCD, out act);
+		return !HasHealingLockout && !AccretionUp && TrySwapKardiaToInjured(out act);
 	}
+
+	public bool PlanGCD(out IAction? act)
+	{
+		act = null;
+		if (!UsePlannedShields ||
+			!Updaters.BeirutaTimelineUpdater.PlannedWithin(0f, (uint)ActionID.EukrasianPrognosisIiPvE, (uint)ActionID.EukrasianPrognosisPvE) ||
+			(!MostPartyLacksEukrasianShield() &&
+			 !Updaters.BeirutaTimelineUpdater.PlannedForcedNow((uint)ActionID.EukrasianPrognosisIiPvE, (uint)ActionID.EukrasianPrognosisPvE)))
+		{
+			return false;
+		}
+
+		_EukrasiaActionAim = null;
+		if (EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisIiPvE.IsEnabled)
+		{
+			SetEukrasia(EukrasianPrognosisIiPvE);
+			return DoEukrasianPrognosisIi(out act);
+		}
+
+		SetEukrasia(EukrasianPrognosisPvE);
+		return DoEukrasianPrognosis(out act);
+	}
+
+	public bool SpecialGCD(out IAction? act)
+	{
+		act = null;
+		if (DoomTarget(SingleHealRange) is { } doomed &&
+			!HasEukrasia &&
+			BeirutaTarget.TryUseOn(DiagnosisPvE, doomed, out act))
+		{
+			return true;
+		}
+
+		return BeirutaAccretion.FindTarget(PartyMembers) is { } target &&
+			!HasEukrasia &&
+			!HasSwift &&
+			BeirutaTarget.TryUseOn(DiagnosisPvE, target, out act);
+	}
+
+	public bool WardGCD(out IAction? act) => TryWardModeGCD(out act);
+
+	public bool AreaHealGCD(out IAction? act)
+	{
+		act = null;
+		if (HasZoe)
+		{
+			if (ZoeModeValue == ZoeUsage.AutoPneuma || PartyMembersAverHP < ZoePneumaHealValue)
+			{
+				if (PneumaPvE.CanUse(out act))
+				{
+					return true;
+				}
+			}
+			else if (PlannedZoe
+				? MostPartyLacksEukrasianShield() || StatusHelper.PlayerStatusTime(true, StatusID.Zoe) < PlannedZoeLastCallSeconds
+				: !HasEukrasianPrognosis)
+			{
+				_EukrasiaActionAim = null;
+
+				if (EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisIiPvE.IsEnabled)
+				{
+					SetEukrasia(EukrasianPrognosisIiPvE);
+					if (DoEukrasianPrognosisIi(out act))
+					{
+						return true;
+					}
+				}
+				else if (EukrasianPrognosisPvE.EnoughLevel && EukrasianPrognosisPvE.IsEnabled)
+				{
+					SetEukrasia(EukrasianPrognosisPvE);
+					if (DoEukrasianPrognosis(out act))
+					{
+						return true;
+					}
+				}
+			}
+		}
+
+		if (!CanRunHealEngine || BeirutaMove.RaiseSwiftHeld)
+		{
+			return false;
+		}
+
+		return !HoldAoeForCoHealer(PneumaHealRange) &&
+			(!(IxocholeCanCover || PhysisCanCover) || AnyCritical(PneumaHealRange)) &&
+			AoeNeeded(PneumaHealRange, PneumaHp) &&
+			PneumaPvE.CanUse(out act);
+	}
+
+	public bool SpotHealGCD(out IAction? act)
+	{
+		act = null;
+		if (!CanRunHealEngine ||
+			BeirutaMove.RaiseSwiftHeld ||
+			ZoeReservedForPlan ||
+			IsPartyBurst ||
+			HasMedicated ||
+			HasPhilosophia ||
+			!EukrasianDiagnosisPvE.EnoughLevel ||
+			!EukrasianDiagnosisPvE.IsEnabled ||
+			(DiagnosisThrottled && !(HasEukrasia && _EukrasiaActionAim == EukrasianDiagnosisPvE)))
+		{
+			return false;
+		}
+
+		if (DiagnosisTankTarget() is not { } tank)
+		{
+			return false;
+		}
+
+		QueueDiagnosis(tank);
+		return DoEukrasianDiagnosis(out act);
+	}
+
+	private IBattleChara? DiagnosisTankTarget()
+	{
+		if (Addersting >= 2 || WardActive || AccretionUp || !BeirutaMove.Sufficient)
+		{
+			return null;
+		}
+
+		return FindLowest(SingleHealRange, static m => IsFreshBigMitigatingTank(m) && CanDiagnose(m)) ??
+			(TankbusterSoon ? FindLowest(SingleHealRange, static m => IsTankMember(m) && HasTankMitigation(m) && CanDiagnose(m)) : null);
+	}
+
+	#endregion
+
+	#region Hooks
+
+	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act) =>
+		BeirutaHealerFlow.Ability(this, nextGCD, out act) || base.EmergencyAbility(nextGCD, out act);
+
+	[RotationDesc(ActionID.PsychePvE, ActionID.SwiftcastPvE)]
+	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
+	{
+		if (ShouldSwiftcastForMovement(nextGCD) && SwiftcastPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return BurstAbility(nextGCD, out act) || base.AttackAbility(nextGCD, out act);
+	}
+
+	[RotationDesc(ActionID.KardiaPvE, ActionID.RhizomataPvE)]
+	protected override bool GeneralAbility(IAction nextGCD, out IAction? act) =>
+		LowPriorityAbility(nextGCD, out act) || ResourceAbility(nextGCD, out act) || base.GeneralAbility(nextGCD, out act);
+
+	protected override bool EmergencyGCD(IAction? nextGCD, out IAction? act) =>
+		BeirutaHealerFlow.UrgentGcd(this, out act) || base.EmergencyGCD(nextGCD, out act);
 
 	#endregion
 
@@ -1866,7 +1705,7 @@ public sealed class BeirutaSGE : SageRotation
 
 	private bool DefenseSignalActive =>
 		MergedStatus.HasFlag(AutoStatus.DefenseArea) ||
-		MergedStatus.HasFlag(AutoStatus.DefenseSingle);
+		TankbusterSoon;
 
 	private bool ShieldEukrasiaOnRetryCooldown =>
 		_shieldEukrasiaFailedMs != 0 &&
@@ -1891,7 +1730,7 @@ public sealed class BeirutaSGE : SageRotation
 		if (HasEukrasia &&
 			_EukrasiaActionAim != null &&
 			!MergedStatus.HasFlag(AutoStatus.DefenseArea) &&
-			!MergedStatus.HasFlag(AutoStatus.DefenseSingle))
+			!TankbusterSoon)
 		{
 			return false;
 		}
@@ -1900,6 +1739,7 @@ public sealed class BeirutaSGE : SageRotation
 			&& EukrasianPrognosisIiPvE.IsEnabled
 			&& MergedStatus.HasFlag(AutoStatus.DefenseArea)
 			&& MostPartyLacksEukrasianShield()
+			&& !ShieldHeldForPlannedZoe
 			&& EukrasianPrognosisIiPvE.CanUse(out _))
 		{
 			SetEukrasia(EukrasianPrognosisIiPvE);
@@ -1917,10 +1757,9 @@ public sealed class BeirutaSGE : SageRotation
 		}
 		else if (EukrasianDiagnosisPvE.EnoughLevel
 			&& EukrasianDiagnosisPvE.IsEnabled
-			&& Addersting < 3
 			&& !DiagnosisThrottled
-			&& MergedStatus.HasFlag(AutoStatus.DefenseSingle)
-			&& FindLowest(SingleHealRange, static m => IsMitigatingTank(m) && CanDiagnose(m)) is { } defenseTank)
+			&& TankbusterSoon
+			&& DiagnosisTankTarget() is { } defenseTank)
 		{
 			SetEukrasia(EukrasianDiagnosisPvE);
 			_diagnosisTarget = defenseTank;
@@ -1929,7 +1768,7 @@ public sealed class BeirutaSGE : SageRotation
 		else if (!ShouldSkipDotForTTK
 			&& EukrasianDyskrasiaPvE.EnoughLevel
 			&& EukrasianDyskrasiaPvE.IsEnabled
-			&& !MergedStatus.HasFlag(AutoStatus.DefenseSingle)
+			&& !TankbusterSoon
 			&& !MergedStatus.HasFlag(AutoStatus.DefenseArea)
 			&& EukrasianDyskrasiaPvE.CanUse(out _))
 		{
@@ -1940,7 +1779,7 @@ public sealed class BeirutaSGE : SageRotation
 			&& (!EukrasianDyskrasiaPvE.CanUse(out _) || !DyskrasiaPvE.CanUse(out _))
 			&& EukrasianDosisIiiPvE.CanUse(out _)
 			&& EukrasianDosisIiiPvE.EnoughLevel
-			&& !MergedStatus.HasFlag(AutoStatus.DefenseSingle)
+			&& !TankbusterSoon
 			&& !MergedStatus.HasFlag(AutoStatus.DefenseArea)
 			&& EukrasianDosisIiiPvE.IsEnabled)
 		{
@@ -1952,7 +1791,7 @@ public sealed class BeirutaSGE : SageRotation
 			&& EukrasianDosisIiPvE.CanUse(out _)
 			&& !EukrasianDosisIiiPvE.EnoughLevel
 			&& EukrasianDosisIiPvE.EnoughLevel
-			&& !MergedStatus.HasFlag(AutoStatus.DefenseSingle)
+			&& !TankbusterSoon
 			&& !MergedStatus.HasFlag(AutoStatus.DefenseArea)
 			&& EukrasianDosisIiPvE.IsEnabled)
 		{
@@ -1964,7 +1803,7 @@ public sealed class BeirutaSGE : SageRotation
 			&& EukrasianDosisPvE.CanUse(out _)
 			&& !EukrasianDosisIiPvE.EnoughLevel
 			&& EukrasianDosisPvE.EnoughLevel
-			&& !MergedStatus.HasFlag(AutoStatus.DefenseSingle)
+			&& !TankbusterSoon
 			&& !MergedStatus.HasFlag(AutoStatus.DefenseArea)
 			&& EukrasianDosisPvE.IsEnabled)
 		{
@@ -1993,6 +1832,11 @@ public sealed class BeirutaSGE : SageRotation
 	{
 		act = null;
 
+		if (ShieldHeldForPlannedZoe)
+		{
+			return false;
+		}
+
 		if (_EukrasiaActionAim != EukrasianPrognosisIiPvE)
 		{
 			return false;
@@ -2009,6 +1853,11 @@ public sealed class BeirutaSGE : SageRotation
 	private bool DoEukrasianPrognosis(out IAction? act)
 	{
 		act = null;
+
+		if (ShieldHeldForPlannedZoe)
+		{
+			return false;
+		}
 
 		if (_EukrasiaActionAim != EukrasianPrognosisPvE)
 		{
@@ -2027,6 +1876,11 @@ public sealed class BeirutaSGE : SageRotation
 	{
 		act = null;
 
+		if (ZoeReservedForPlan)
+		{
+			return false;
+		}
+
 		if (_EukrasiaActionAim != EukrasianDiagnosisPvE)
 		{
 			return false;
@@ -2044,7 +1898,7 @@ public sealed class BeirutaSGE : SageRotation
 			return EukrasiaPvE.CanUse(out act);
 		}
 
-		return BeirutaAccretion.TryUseOn(EukrasianDiagnosisPvE, _diagnosisTarget!, out act);
+		return BeirutaTarget.TryUseOn(EukrasianDiagnosisPvE, _diagnosisTarget!, out act);
 	}
 
 	private IBattleChara? _diagnosisTarget;
@@ -2209,37 +2063,20 @@ public sealed class BeirutaSGE : SageRotation
 	{
 		act = null;
 
-		var target = AccretionTopUp ? BeirutaAccretion.FindTarget(PartyMembers) : null;
+		var target = BeirutaAccretion.FindTarget(PartyMembers);
 		if (target == null)
 		{
 			return false;
 		}
 
-		return BeirutaAccretion.TryUseOn(KrasisPvE, target, out act)
-			|| BeirutaAccretion.TryUseOn(DruocholePvE, target, out act)
-			|| BeirutaAccretion.TryUseOn(TaurocholePvE, target, out act);
-	}
-
-	protected override bool EmergencyGCD(IAction? nextGCD, out IAction? act)
-	{
-		act = null;
-
-		var target = AccretionTopUp ? BeirutaAccretion.FindTarget(PartyMembers) : null;
-		if (target != null &&
-			!HasEukrasia &&
-			!HasSwift &&
-			BeirutaAccretion.TryUseOn(DiagnosisPvE, target, out act))
-		{
-			return true;
-		}
-
-		return base.EmergencyGCD(nextGCD, out act);
+		return BeirutaTarget.TryUseOn(KrasisPvE, target, out act)
+			|| BeirutaTarget.TryUseOn(DruocholePvE, target, out act)
+			|| BeirutaTarget.TryUseOn(TaurocholePvE, target, out act);
 	}
 
 	#endregion
 
 	#region GCD Logic
-
 
 	[RotationDesc(ActionID.EgeiroPvE)]
 	protected override bool RaiseGCD(out IAction? act)
@@ -2277,7 +2114,7 @@ public sealed class BeirutaSGE : SageRotation
 	{
 		act = null;
 
-		if (!(WardMode || BeirutaAccretion.GuardActive(PartyMembers)) || HasHealingLockout)
+		if (!(WardActive || BeirutaAccretion.GuardActive(PartyMembers)) || HasHealingLockout || ShieldHeldForPlannedZoe)
 		{
 			return false;
 		}
@@ -2292,8 +2129,12 @@ public sealed class BeirutaSGE : SageRotation
 			prognosis = EukrasianPrognosisPvE;
 		}
 
-		if (prognosis == null ||
-			BeirutaWard.CountMissing(PartyMembers, PrognosisRange, static m => HasEukrasianShield(m)) < BeirutaWard.UnshieldedPartyCount)
+		var shieldWanted =
+			(WardActive && BeirutaWard.CountNonTanksMissing(PartyMembers, PrognosisRange, static m => HasEukrasianShield(m)) > 0) ||
+			(BeirutaAccretion.GuardActive(PartyMembers) &&
+			 BeirutaWard.CountMissing(PartyMembers, PrognosisRange, static m => HasEukrasianShield(m)) >= BeirutaWard.UnshieldedPartyCount);
+
+		if (prognosis == null || !shieldWanted)
 		{
 			return false;
 		}
@@ -2313,51 +2154,12 @@ public sealed class BeirutaSGE : SageRotation
 	{
 		act = null;
 
-		if (ShouldDeferToRaise())
+		if (BeirutaMove.RaiseSwiftHeld)
 		{
 			return base.GeneralGCD(out act);
 		}
 
-		if (TryWardModeGCD(out act))
-		{
-			return true;
-		}
-
-		if (HasZoe)
-		{
-			if (ZoeModeValue == ZoeUsage.AutoPneuma || PartyMembersAverHP < ZoePneumaHealValue)
-			{
-				if (PneumaPvE.CanUse(out act))
-				{
-					return true;
-				}
-			}
-			else if (!HasEukrasianPrognosis)
-			{
-				_EukrasiaActionAim = null;
-
-				if (EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisIiPvE.IsEnabled)
-				{
-					SetEukrasia(EukrasianPrognosisIiPvE);
-
-					if (DoEukrasianPrognosisIi(out act))
-					{
-						return true;
-					}
-				}
-				else if (EukrasianPrognosisPvE.EnoughLevel && EukrasianPrognosisPvE.IsEnabled)
-				{
-					SetEukrasia(EukrasianPrognosisPvE);
-
-					if (DoEukrasianPrognosis(out act))
-					{
-						return true;
-					}
-				}
-			}
-		}
-
-		if (TryHealGCD(out act))
+		if (BeirutaHealerFlow.HealGcd(this, out act))
 		{
 			return true;
 		}
@@ -2437,6 +2239,11 @@ public sealed class BeirutaSGE : SageRotation
 		}
 
 		if (DoEukrasianDosis(out act))
+		{
+			return true;
+		}
+
+		if (WeaveRoomWanted && Addersting > 0 && ToxikonPvE.CanUse(out act))
 		{
 			return true;
 		}

@@ -1,0 +1,144 @@
+# UMAD Default AST
+# CountdownEarthlyStar: 10
+# Set.WardMode: false
+# Set.CountdownShield: Aspected Benefic + Celestial Intersection on stance tank (5s)
+# Set.DivinationOpener: 0s
+# Set.UsePotion: true
+# Set.PotionTiming: 2 minutes
+# Set.DelayOracleForAlignment: false
+# Set.EarlyDotRefreshWhenMoving: false
+# Set.UseSwiftcastForMovement: true
+# Set.SwiftcastMovement: Raise and AoE heal GCDs only
+# Set.UseCustomHPThreshold: false
+Phase,Start,End,Action,Target
+P1,17.7,20.7,Neutral Sect,
+P1,21.2,24.2,Horoscope,
+P1,24.3,32.8,Helios Conjunction,
+P1,33.0,36.0,Lightspeed,
+P1,34.7,37.7,Sun Sign,
+P1,37.2,40.2,Celestial Opposition,
+P1,48.1,50.6,Macrocosmos,
+P1,50.0,55.0,Earthly Star,
+P1,53.9,56.9,Collective Unconscious,
+P1,86.6,89.6,Horoscope,
+P1,89.3,97.8,Helios Conjunction,
+P1,110.8,116.8,Helios Conjunction,Precast
+P1,107.8,110.8,Celestial Opposition,
+P1,110.0,115.0,Earthly Star,
+P1,114.4,117.4,Collective Unconscious,
+P1,148.5,151.5,Neutral Sect,
+P1,157.5,160.5,Horoscope,
+P1,160.0,168.5,Helios Conjunction,
+P1,160.0,163.0,Lightspeed,
+P1,164.5,167.5,Sun Sign,
+P1,167.0,172.0,Celestial Opposition,
+P1,170.0,179.6,Earthly Star,
+P2,14.5,20.5,Helios Conjunction,Precast
+P2,27.6,30.6,Horoscope,
+P2,29.8,38.3,Helios Conjunction,
+P2,34.3,37.3,Collective Unconscious,
+P2,40.6,50.6,Earthly Star,
+P2,55.2,58.8,Helios Conjunction,
+P2,63.0,66.0,Lightspeed,
+P2,67.2,69.7,Macrocosmos,
+P2,71.1,74.1,Celestial Opposition,
+P2,76.2,79.2,Neutral Sect,
+P2,91.1,94.1,Horoscope,
+P2,89.6,92.6,Sun Sign,
+P2,94.6,103.1,Helios Conjunction,
+P2,103.5,113.5,Earthly Star,
+P2,106.1,113.1,Helios Conjunction,Precast
+P2,110.7,113.7,Collective Unconscious,
+P2,118.3,121.7,Helios Conjunction,
+P2,136.7,139.7,Celestial Opposition,
+P2,163.5,169.5,Earthly Star,
+P2,176.0,179.0,Collective Unconscious,
+P2,178.0,181.0,Lightspeed,
+P3,40.2,45.2,Earthly Star,
+P3,65.4,68.4,Collective Unconscious,
+P3,70.9,73.9,Celestial Opposition,
+P3,100.6,110.6,Earthly Star,
+P3,100.6,181.0,Keep:Essential Dignity,2
+P3,105.0,108.0,Sun Sign,
+P3,102.8,105.8,Neutral Sect,
+P3,120.3,128.8,Helios Conjunction,
+P3,121.7,124.7,Horoscope,
+P3,122.8,125.8,Collective Unconscious,
+P3,135.4,138.4,Celestial Opposition,
+P3,150.0,153.0,Lightspeed,
+P3,174.0,176.5,Macrocosmos,
+P3,176.8,186.8,Earthly Star,
+P3,193.0,196.0,Collective Unconscious,
+P3,194.5,197.5,Horoscope,
+P3,198.5,201.5,Celestial Opposition,
+P3,223.3,226.3,Neutral Sect,
+P3,232.1,240.6,Helios Conjunction,
+P3,231.5,234.5,Sun Sign,
+P3,236.0,239.0,Earthly Star,
+P3,246.0,249.0,Lightspeed,
+P3,266.4,274.9,Helios Conjunction,
+P3,267.3,270.3,Horoscope,
+P3,284.3,290.0,Ward Mode,
+P3,284.3,290.0,Top Up All,
+P3,287.1,290.1,Collective Unconscious,
+P3,296.8,303.7,Earthly Star,
+P3,301.8,304.8,Celestial Opposition,
+P3,315.8,321.8,Helios Conjunction,Precast
+P3,321.0,324.0,Lightspeed,
+P3,325.5,326.6,Helios Conjunction,
+P3,334.9,340.9,Helios Conjunction,Precast
+P4,18.5,21.8,Earthly Star,
+P4,23.7,26.7,Horoscope,
+P4,23.8,32.3,Helios Conjunction,
+P4,25.1,28.1,Collective Unconscious,
+P4,29.0,56.5,Ward Mode,
+P4,32.4,40.3,Helios Conjunction,
+P4,34.3,37.3,Neutral Sect,
+P4,40.6,49.1,Helios Conjunction,
+P4,40.0,43.0,Sun Sign,
+P4,54.0,56.8,Helios Conjunction,Precast
+P4,65.2,67.7,Macrocosmos,
+P4,74.0,77.0,Celestial Opposition,
+P4,80.8,89.3,Helios Conjunction,
+P4,84.7,94.7,Earthly Star,
+P4,86.8,89.8,Horoscope,
+P4,94.5,97.5,Collective Unconscious,
+P5,27.3,37.3,Earthly Star,
+P5,31.2,39.7,Helios Conjunction,
+P5,37.2,40.2,Horoscope,
+P5,35.7,38.7,Collective Unconscious,
+P5,38.2,38.9,Helios Conjunction,Force
+P5,40.2,41.4,Helios Conjunction,Force
+P5,42.0,48.4,Ward Mode,
+P5,48.7,57.2,Helios Conjunction,
+P5,51.2,54.2,Neutral Sect,
+P5,56.7,59.7,Celestial Opposition,
+P5,61.7,70.2,Helios Conjunction,
+P5,66.2,69.2,Sun Sign,
+P5,87.3,95.8,Earthly Star,
+P5,91.7,100.2,Helios Conjunction,
+P5,97.7,100.7,Horoscope,
+P5,103.8,112.3,Helios Conjunction,
+P5,117.7,120.7,Collective Unconscious,
+P5,120.2,123.2,Celestial Opposition,
+P5,120.2,120.9,Helios Conjunction,Force
+P5,122.2,123.4,Helios Conjunction,Force
+P5,124.0,127.2,Ward Mode,
+P5,153.2,163.2,Earthly Star,
+P5,160.9,166.9,Helios Conjunction,Precast
+P5,173.3,177.4,Ward Mode,
+P5,175.3,181.3,Helios Conjunction,Precast
+P5,182.8,191.3,Helios Conjunction,
+P5,185.3,188.3,Neutral Sect,
+P5,187.3,190.3,Collective Unconscious,
+P5,188.0,189.7,Lightspeed,
+P5,188.8,191.8,Horoscope,
+P5,189.8,190.5,Helios Conjunction,Force
+P5,192.3,193.4,Helios Conjunction,Force
+P5,194.0,218.5,Ward Mode,
+P5,202.4,203.0,Helios Conjunction,Precast
+P5,203.0,206.0,Celestial Opposition,
+P5,205.8,208.3,Macrocosmos,
+P5,203.6,206.6,Sun Sign,
+P5,213.2,214.2,Earthly Star,
+P5,223.2,226.2,Stellar Detonation,

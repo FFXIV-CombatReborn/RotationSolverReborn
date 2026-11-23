@@ -1,0 +1,19 @@
+# Duty: AACHeavyweightM2Savage
+Phase,Sync,Watch,Caster,OID,ActionIDs,Occurrence,PhaseTime
+P1,Combat starts,CombatStart,Red Hot,0x4B57,,1,0.0
+P1,Hot Impact,CastStart,Red Hot,0x4B57,46518,1,9.2
+P1,Diver's Dare,CastStart,Red Hot,0x4B57,46520,1,77.3
+P1,Sickest Take-Off,CastStart,Deep Blue,0x4B58,46541,1,102.1
+P1,Diver's Dare (blue),CastStart,Deep Blue,0x4B58,46521,1,138.9
+P1,Xtreme Spectacular,CastStart,Red Hot,0x4B57,46553,1,157.3
+P1,Insane Air,CastStart,Red Hot,0x4B57,47255,1,188.9
+P1,Diver's Dare,CastStart,Red Hot,0x4B57,46520,1,224.7
+P1,Firesnaking,CastStart,Red Hot,0x4B57,45953,1,240.4
+P1,Diver's Dare,CastStart,Red Hot,0x4B57,46520,1,316.0
+P1,Diver's Dare (after bubble),CastStart,Red Hot,0x4B57,46520,1,394.9
+P1,Flame Floater (split),CastStart,Red Hot,0x4B57,46548,1,410.6
+P1,Diver's Dare,CastStart,Red Hot,0x4B57,46520,1,448.4
+P1,Xtreme Firesnaking,CastStart,Red Hot,0x4B57,46510,1,463.9
+P1,Diver's Dare,CastStart,Red Hot,0x4B57,46520,1,521.9
+P1,Diver's Dare,CastStart,Red Hot,0x4B57,46520,1,562.8
+P1,Diver's Dare,CastStart,Red Hot,0x4B57,46520,1,572.0

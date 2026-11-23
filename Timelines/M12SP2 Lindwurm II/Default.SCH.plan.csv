@@ -1,0 +1,63 @@
+# M12SP2 Default SCH
+# AetherflowFirst: off
+# Set.WardMode: false
+# Set.CountdownOpener: Adloquium - Deployment Tactics
+# Set.ChainStratagemOpener: 5s
+# Set.UsePotion: true
+# Set.PotionTiming: Opener (countdown)
+# Set.EnergyDrainUsage: Use all
+# Set.DelayBanefulImpaction: true
+# Set.EarlyDotRefreshWhenMoving: false
+# Set.UseCustomSwiftcast: true
+# Set.UseCustomHPThreshold: false
+Phase,Start,End,Action,Target
+P1,0.0,3.0,Expedient,
+P1,33.4,37.4,Summon Seraph,
+P1,36.4,40.4,Consolation,
+P1,44.5,48.5,Consolation,
+P1,44.5,47.5,Recitation,
+P1,46.5,49.5,Indomitability,
+P1,46.0,49.0,Fey Illumination,
+P1,51.5,54.5,Whispering Dawn,
+P1,69.9,72.9,Fey Blessing,
+P1,124.3,127.3,Expedient,
+P1,125.8,128.8,Recitation,
+P1,134.1,137.1,Indomitability,
+P1,158.6,162.6,Consolation,
+P1,158.6,172.5,Summon Seraph,
+P1,160.4,164.4,Seraphism,
+P1,167.4,170.4,Whispering Dawn,
+P1,172.5,176.5,Consolation,
+P1,180.5,183.5,Fey Blessing,
+P1,189.5,192.5,Fey Illumination,
+P1,197.1,200.1,Recitation,
+P1,207.0,210.0,Indomitability,
+P1,226.2,229.2,Sacred Soil,
+P1,228.7,231.7,Whispering Dawn,
+P1,249.9,252.9,Expedient,
+P1,274.6,277.6,Recitation,
+P1,276.6,280.1,Excogitation,TankWithAggro
+P1,276.6,279.6,Fey Blessing,
+P1,333.6,336.6,Fey Illumination,
+P1,336.1,339.1,Whispering Dawn,
+P1,349.2,355.3,Summon Seraph,
+P1,351.2,354.2,Fey Blessing,
+P1,355.3,359.3,Consolation,
+P1,360.8,363.8,Sacred Soil,
+P1,362.3,366.3,Seraphism,
+P1,365.4,369.4,Consolation,
+P1,368.4,371.4,Expedient,
+P1,368.4,371.4,Recitation,
+P1,379.5,382.5,Indomitability,
+P1,397.6,400.6,Whispering Dawn,
+P1,407.7,415.7,Fey Blessing,
+P1,419.4,422.4,Sacred Soil,
+P1,437.0,440.0,Recitation,
+P1,446.1,449.1,Indomitability,
+P1,452.6,455.6,Sacred Soil,
+P1,455.7,458.7,Fey Illumination,
+P1,464.2,467.2,Whispering Dawn,
+P1,470.1,474.1,Summon Seraph,
+P1,471.3,475.3,Consolation,
+P1,472.1,475.1,Fey Blessing,
+P1,478.8,482.8,Consolation,

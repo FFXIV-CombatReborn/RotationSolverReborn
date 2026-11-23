@@ -1,0 +1,13 @@
+# Duty: AACHeavyweightM1Savage
+Phase,Sync,Watch,Caster,OID,ActionIDs,Occurrence,PhaseTime
+P1,Combat starts,CombatStart,Vamp Fatale,0x4ADF,,1,0.0
+P1,Killer Voice,CastStart,Vamp Fatale,0x4ADF,45956,1,5.2
+P1,Sadistic Screech (saws 1),CastStart,Vamp Fatale,0x4ADF,45875,1,54.9
+P1,Sadistic Screech (after Buzzsaw),CastStart,Vamp Fatale,0x4ADF,45875,1,132.5
+P1,Crowd Kill,CastStart,Vamp Fatale,0x4ADF,45886,1,146.9
+P1,Insatiable Thirst,CastStart,Vamp Fatale,0x4ADF,45892,1,264.9
+P1,Sadistic Screech (saws 2),CastStart,Vamp Fatale,0x4ADF,45875,1,278.2
+P1,Sadistic Screech (saws 2 end),CastStart,Vamp Fatale,0x4ADF,45875,1,350.5
+P1,Crowd Kill,CastStart,Vamp Fatale,0x4ADF,45886,1,364.9
+P1,Sanguine Scratch,CastStart,Vamp Fatale,0x4ADF,45988,1,457.7
+P1,Insatiable Thirst,CastStart,Vamp Fatale,0x4ADF,45892,1,564.9
