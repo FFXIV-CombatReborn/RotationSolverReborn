@@ -63,7 +63,7 @@ internal static class BMRTimeline_IPCSubscriber
 	internal static readonly Func<Vector3, Vector3, bool>? IsDashSafe;
 
 	[EzIPC("Hints.IsFixedDashSafe", true)]
-	internal static readonly Func<Vector3, Vector3, bool>? IsFixedDashSafe;
+	internal static readonly Func<float, bool, bool>? IsFixedDashSafe;
 
 	internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
 }

@@ -338,7 +338,7 @@ public partial struct ActionTargetInfo
 		{
 			case SpecialActionType.FixedDistanceMoveForward:
 			case SpecialActionType.FixedDistanceMoveBackward:
-				return DataCenter.IsFixedDashSafe(playerPos, destination);
+				return DataCenter.IsFixedDashSafe(action.Setting.FixedMoveDistance, specialType == SpecialActionType.FixedDistanceMoveBackward);
 
 			case SpecialActionType.HostileMovingForward:
 			case SpecialActionType.FriendlyMovingForward:

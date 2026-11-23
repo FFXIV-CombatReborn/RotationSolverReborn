@@ -508,6 +508,11 @@ public partial class MainWindow
 				});
 		}
 
+		if (Player.Object.IsJobs(Job.BST))
+		{
+			DrawBeastmasterPreferredKinships();
+		}
+
 		if (!Player.Object.IsJobs(Job.AST))
 		{
 			return;

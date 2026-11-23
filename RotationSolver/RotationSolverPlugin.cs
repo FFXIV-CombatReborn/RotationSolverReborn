@@ -426,6 +426,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		BMRInfo_IPCSubscriber.Dispose();
 		BMRTimeline_IPCSubscriber.Dispose();
 		BMRPlan_IPCSubscriber.Dispose();
+		BMRCrucible_IPCSubscriber.Dispose();
 		Wrath_IPCSubscriber.Dispose();
 
 		await saveLists;

@@ -435,24 +435,9 @@ public partial class MainWindow
 			switch (specialType)
 			{
 				case SpecialActionType.FixedDistanceMoveForward:
-					{
-						var range = action.TargetInfo.Range;
-						var faceVector = Player.Object.GetFaceVector();
-						var destination = playerPos + (Vector3.Normalize(faceVector) * range);
-						var isSafe = DataCenter.IsFixedDashSafe(playerPos, destination);
-						return new MovementSafetyResult
-						{
-							Status = isSafe ? MovementSafetyStatus.Safe : MovementSafetyStatus.NotSafe,
-							Reason = isSafe ? string.Empty : "Destination unsafe (IsFixedDashSafe)"
-						};
-					}
-
 				case SpecialActionType.FixedDistanceMoveBackward:
 					{
-						var range = action.TargetInfo.Range;
-						var faceVector = Player.Object.GetFaceVector();
-						var destination = playerPos - (Vector3.Normalize(faceVector) * range);
-						var isSafe = DataCenter.IsFixedDashSafe(playerPos, destination);
+						var isSafe = DataCenter.IsFixedDashSafe(action.Setting.FixedMoveDistance, specialType == SpecialActionType.FixedDistanceMoveBackward);
 						return new MovementSafetyResult
 						{
 							Status = isSafe ? MovementSafetyStatus.Safe : MovementSafetyStatus.NotSafe,
