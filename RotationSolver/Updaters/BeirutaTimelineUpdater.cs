@@ -33,7 +33,8 @@ internal static class BeirutaTimelineUpdater
 	#region State
 
 	// Loaded rows and the live phase clock.
-	private static bool PlanAllowed => DataCenter.CurrentRotation is not IBeirutaTimelineOption o || o.UseTimelinePlan;
+	// Plans only run for rotations that opt in (the Beiruta healers for now).
+	private static bool PlanAllowed => DataCenter.CurrentRotation is IBeirutaTimelineOption { UseTimelinePlan: true };
 
 	private sealed record SyncRow(string Phase, string Name, string Watch, uint Oid, HashSet<uint> ActionIds, float PhaseTime);
 	private sealed record PlanRow(string Phase, float Start, float End, string Action, string Target);
@@ -1406,19 +1407,28 @@ internal static class BeirutaTimelineUpdater
 
 	#region Chat Messages
 
-	// Timeline messages in chat and the log.
+	// Timeline messages in chat and the log. Only rotations that opt into the timeline get chat output; everything else is log only.
+	// Info: sync/queue chatter, shown only with ShowTimelineMessages on.
 	private static void Info(string msg)
 	{
-		if (DataCenter.CurrentRotation is not IBeirutaTimelineOption o || o.ShowTimelineMessages)
+		if (DataCenter.CurrentRotation is IBeirutaTimelineOption { ShowTimelineMessages: true })
 		{
 			Print(msg);
 		}
+		else
+		{
+			PluginLog.Debug($"[BeirutaTimeline] {msg}");
+		}
 	}
 
+	// Print: load notices and plan problems, shown when the rotation uses the plan or wants timeline messages.
 	private static void Print(string msg)
 	{
 		PluginLog.Debug($"[BeirutaTimeline] {msg}");
-		Svc.Chat.Print($"[Timeline] {msg}");
+		if (DataCenter.CurrentRotation is IBeirutaTimelineOption o && (o.UseTimelinePlan || o.ShowTimelineMessages))
+		{
+			Svc.Chat.Print($"[Timeline] {msg}");
+		}
 	
 
 	#endregion
