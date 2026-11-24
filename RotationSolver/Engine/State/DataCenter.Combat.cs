@@ -332,6 +332,18 @@ internal static partial class DataCenter
 		_actions.Enqueue(new ActionRec(_timeLastActionUsed, act));
 	}
 
+	private static readonly Dictionary<uint, long> _actionRejectedTicks = [];
+
+	internal static void AddActionRejected(uint actionId)
+	{
+		_actionRejectedTicks[actionId] = Environment.TickCount64;
+	}
+
+	internal static bool WasActionRejectedRecently(uint actionId, long withinMs)
+	{
+		return _actionRejectedTicks.TryGetValue(actionId, out var tick) && Environment.TickCount64 - tick < withinMs;
+	}
+
 	internal static void ResetAllRecords()
 	{
 		LastAction = 0;
@@ -344,6 +356,7 @@ internal static partial class DataCenter
 		_partyHpStatsCacheTick = long.MinValue;
 		_timeLastActionUsed = DateTime.Now;
 		_actions.Clear();
+		_actionRejectedTicks.Clear();
 
 		AttackedTargets.Clear();
 		while (VfxDataQueue.TryDequeue(out _))

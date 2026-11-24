@@ -14,6 +14,7 @@ public static class Watcher
 {
 	private const uint CancelAbilityCategory = 15;
 	private const uint EnemyDotTickCategory = 0x605;
+	private const uint ActionRejectedCategory = 0x2BC;
 
 	private delegate void ActorControlDelegate(uint entityId, uint category, uint p1, uint p2, uint p3, uint p4, uint p5, uint p6, uint p7, uint p8, ulong targetId, byte replaying);
 	private static Hook<ActorControlDelegate>? _actorControlHook;
@@ -56,6 +57,14 @@ public static class Watcher
 			else if (category == CancelAbilityCategory && entityId == Player.Object?.EntityId)
 			{
 				ActionTimelineManager.Current?.CancelInterruptedCast(DateTime.Now);
+			}
+			else if (category == ActionRejectedCategory && p2 == 1 && entityId == Player.Object?.EntityId)
+			{
+				DataCenter.AddActionRejected(p3);
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Debug($"[Watcher] The server rejected action {p3} (log message {p1}).");
+				}
 			}
 		}
 		catch (Exception ex)

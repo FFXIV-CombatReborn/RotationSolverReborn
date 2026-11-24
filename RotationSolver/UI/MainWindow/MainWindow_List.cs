@@ -5,8 +5,6 @@ using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using ECommons.Logging;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using GAction = Lumina.Excel.Sheets.Action;
 using Status = Lumina.Excel.Sheets.Status;
 
@@ -767,34 +765,15 @@ public partial class MainWindow
 
 			if (ImGui.Button(UiString.ConfigWindow_List_AddPosition.GetDescription()) && Player.Object != null && Player.Available)
 			{
-				unsafe
+				var newPts = new Vector3[pts.Length + 1];
+				for (var i = 0; i < pts.Length; i++)
 				{
-					var point = Player.Object.Position;
-					var pointMathed = point + (Vector3.UnitY * 5);
-					var direction = Vector3.UnitY;
-					var directionPtr = &direction;
-					var pointPtr = &pointMathed;
-					var unknown = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
-					RaycastHit hit = default;
-
-					var newPts = new Vector3[pts.Length + 1];
-					for (var i = 0; i < pts.Length; i++)
-					{
-						newPts[i] = pts[i];
-					}
-
-					if (Framework.Instance()->BGCollisionModule
-						->RaycastMaterialFilter(&hit, pointPtr, directionPtr, 20, 1, unknown))
-					{
-						newPts[^1] = hit.Point;
-					}
-					else
-					{
-						newPts[^1] = point;
-					}
-					OtherConfiguration.BeneficialPositions[territoryId] = newPts;
-					_ = OtherConfiguration.SaveBeneficialPositions();
+					newPts[i] = pts[i];
 				}
+
+				newPts[^1] = ObjectHelper.SnapToGround(Player.Object.Position);
+				OtherConfiguration.BeneficialPositions[territoryId] = newPts;
+				_ = OtherConfiguration.SaveBeneficialPositions();
 			}
 
 			var removePosIndex = -1;
