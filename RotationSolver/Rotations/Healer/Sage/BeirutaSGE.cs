@@ -1521,26 +1521,48 @@ public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, 
 		return !HasHealingLockout && !AccretionUp && TrySwapKardiaToInjured(out act);
 	}
 
-	public bool PlanGCD(out IAction? act)
+	// A planned Eukrasian Prognosis is in its window and wanted: the party lacks shields, or the row is Force.
+	private bool PlannedShieldDue =>
+		UsePlannedShields &&
+		!ShieldHeldForPlannedZoe &&
+		Updaters.BeirutaTimelineUpdater.PlannedWithin(0f, (uint)ActionID.EukrasianPrognosisIiPvE, (uint)ActionID.EukrasianPrognosisPvE) &&
+		(MostPartyLacksEukrasianShield() ||
+		 Updaters.BeirutaTimelineUpdater.PlannedForcedNow((uint)ActionID.EukrasianPrognosisIiPvE, (uint)ActionID.EukrasianPrognosisPvE));
+
+	private IBaseAction? PlannedPrognosis =>
+		EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisIiPvE.IsEnabled ? EukrasianPrognosisIiPvE :
+		EukrasianPrognosisPvE.EnoughLevel && EukrasianPrognosisPvE.IsEnabled ? EukrasianPrognosisPvE :
+		null;
+
+	// Points the Eukrasia chain at the planned Prognosis, replacing any other aim (the Eukrasia buff is shared).
+	private bool AimPlannedPrognosis(out IBaseAction? prognosis)
 	{
-		act = null;
-		if (!UsePlannedShields ||
-			!Updaters.BeirutaTimelineUpdater.PlannedWithin(0f, (uint)ActionID.EukrasianPrognosisIiPvE, (uint)ActionID.EukrasianPrognosisPvE) ||
-			(!MostPartyLacksEukrasianShield() &&
-			 !Updaters.BeirutaTimelineUpdater.PlannedForcedNow((uint)ActionID.EukrasianPrognosisIiPvE, (uint)ActionID.EukrasianPrognosisPvE)))
+		prognosis = PlannedShieldDue ? PlannedPrognosis : null;
+		if (prognosis == null)
 		{
 			return false;
 		}
 
-		_EukrasiaActionAim = null;
-		if (EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisIiPvE.IsEnabled)
+		if (_EukrasiaActionAim != prognosis)
 		{
-			SetEukrasia(EukrasianPrognosisIiPvE);
-			return DoEukrasianPrognosisIi(out act);
+			_EukrasiaActionAim = null;
+			_diagnosisTarget = null;
+			SetEukrasia(prognosis);
 		}
 
-		SetEukrasia(EukrasianPrognosisPvE);
-		return DoEukrasianPrognosis(out act);
+		return true;
+	}
+
+	// GCD side of the chain: if the GCD comes up before an ability slot, aim and run the planned shield from here.
+	public bool PlanGCD(out IAction? act)
+	{
+		act = null;
+		if (!AimPlannedPrognosis(out var prognosis))
+		{
+			return false;
+		}
+
+		return prognosis == EukrasianPrognosisIiPvE ? DoEukrasianPrognosisIi(out act) : DoEukrasianPrognosis(out act);
 	}
 
 	public bool SpecialGCD(out IAction? act)
@@ -1721,6 +1743,12 @@ public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, 
 	{
 		act = null;
 		var selected = false;
+
+		// A planned shield comes first and overrides any other aim.
+		if (AimPlannedPrognosis(out var planned))
+		{
+			return !HasEukrasia && planned!.CanUse(out _) && EukrasiaPvE.CanUse(out act);
+		}
 
 		if (!HasEukrasia && DefenseSignalActive && ShieldEukrasiaOnRetryCooldown)
 		{
