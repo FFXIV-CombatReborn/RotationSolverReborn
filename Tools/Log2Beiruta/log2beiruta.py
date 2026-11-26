@@ -151,7 +151,9 @@ class FFLogs:
             fights { id name encounterID difficulty kill fightPercentage startTime endTime friendlyPlayers gameZone { id }
                      phaseTransitions { id startTime } }
             masterData(translate: true) {
-                actors { id name type subType gameID petOwner }
+                npcs: actors(type: "NPC") { id name type subType gameID petOwner }
+                players: actors(type: "Player") { id type subType gameID }
+                pets: actors(type: "Pet") { id type subType gameID petOwner }
                 abilities { gameID name }
             }
         } } }"""
@@ -338,7 +340,9 @@ class Builder:
         self.job = None  # set before building each healer's plan
         self.few_players = False
         self.t0 = fight["startTime"]
-        self.actors = {a["id"]: a for a in report["masterData"]["actors"]}
+        # Player and pet names are never downloaded, so they can't end up in the files or the console.
+        md = report["masterData"]
+        self.actors = {a["id"]: a for a in (md.get("npcs") or []) + (md.get("players") or []) + (md.get("pets") or [])}
         self.abilities = {a["gameID"]: a["name"] for a in report["masterData"]["abilities"]}
         # Real party members only (FFLogs also lists a "Multiple Players" limit break actor).
         self.players = {i for i in (fight.get("friendlyPlayers") or [])
@@ -455,13 +459,16 @@ class Builder:
 
     # ---- the healer's casts
     def healers(self):
-        """[(job, actor)] for every AST/SCH/SGE/WHM in the pull (narrowed by --player)."""
+        """[(job, actor)] for every AST/SCH/SGE/WHM in the pull (narrowed by --healer)."""
         by_sub = {v: k for k, v in JOBS.items()}
         found = [(by_sub[a["subType"]], a) for a in self.actors.values()
                  if a.get("type") == "Player" and a.get("subType") in by_sub and a["id"] in self.players]
-        if self.args.player:
-            found = [h for h in found if h[1]["name"].lower() == self.args.player.lower()]
-        return sorted(found, key=lambda h: h[0])
+        found.sort(key=lambda h: (h[0], h[1]["id"]))
+        if self.args.healer:
+            if not 1 <= self.args.healer <= len(found):
+                raise SystemExit(f"--healer {self.args.healer}: this pull has {len(found)} healer(s): {healer_list(found)}.")
+            found = [found[self.args.healer - 1]]
+        return found
 
     def healer_casts(self, me):
         ids = {me["id"]} | {a["id"] for a in self.actors.values() if a.get("petOwner") == me["id"]}
@@ -583,7 +590,7 @@ def write_timeline(path, duty, b, sync, origins, code):
     boss_name, boss_oid = b.boss(sync)
     origin_of = dict(origins)
     lines = [f"# Duty: {duty}",
-             f"# Draft from FFLogs report {code} fight {b.fight['id']} ({clean(b.fight['name'])} {kill})"
+             f"# Draft from FFLogs report {short_code(code)} fight {b.fight['id']} ({clean(b.fight['name'])} {kill})"
              f" made {datetime.date.today().isoformat()}",
              "Phase,Sync,Watch,Caster,OID,ActionIDs,Occurrence,PhaseTime",
              "# ===== P1 =====",
@@ -601,8 +608,14 @@ def write_timeline(path, duty, b, sync, origins, code):
         fh.write("\n".join(lines) + "\n")
 
 
-def write_plan(path, folder, job, plan, me, b, code):
-    lines = [f"# {folder} Log {job} draft ({clean(me['name'])} in {code} fight {b.fight['id']})",
+def short_code(code):
+    """Last 4 characters of the report code: enough to tell your own drafts apart, not enough to open the log
+    (the full code would show every player's name)."""
+    return f"...{code[-4:]}" if code else ""
+
+
+def write_plan(path, folder, job, plan, b, code):
+    lines = [f"# {folder} Log {job} draft ({short_code(code)} fight {b.fight['id']})",
              "Phase,Start,End,Action,Target,Note"]
     for r in plan:
         lines.append(",".join([r["phase"], fmt(r["start"]), fmt(r["end"]), r["action"], r["target"], clean(r["note"])]))
@@ -612,20 +625,34 @@ def write_plan(path, folder, job, plan, me, b, code):
 
 # ---------------------------------------------------------------- main
 
+def healer_labels(found):
+    """'SGE', or 'SGE #1' / 'SGE #2' when the pull has two of the same job. No character names."""
+    counts, seen, labels = {}, {}, []
+    for job, _ in found:
+        counts[job] = counts.get(job, 0) + 1
+    for job, _ in found:
+        seen[job] = seen.get(job, 0) + 1
+        labels.append(f"{job} #{seen[job]}" if counts[job] > 1 else job)
+    return labels
+
+
+def healer_list(found):
+    return ", ".join(f"{i}. {label}" for i, label in enumerate(healer_labels(found), 1)) or "none"
+
+
 def choose_healers(found, wanted_job, interactive):
     if wanted_job:
         picked = [h for h in found if h[0] == wanted_job]
         if picked:
             return picked[:1]
-        present = ", ".join(f"{j} ({a['name']})" for j, a in found) or "none"
-        raise SystemExit(f"No {wanted_job} in this pull. Beiruta healers in it: {present}.")
+        raise SystemExit(f"No {wanted_job} in this pull. Beiruta healers in it: {healer_list(found)}.")
     if not found:
         raise SystemExit("No AST, SCH, SGE or WHM in this pull, so there is nothing to make a plan from.")
     if not interactive or len(found) == 1:
         return found
     print("\nHealers in this pull:")
-    for i, (job, actor) in enumerate(found, 1):
-        print(f"  {i}. {job}  {actor['name']}")
+    for i, label in enumerate(healer_labels(found), 1):
+        print(f"  {i}. {label}")
     while True:
         pick = ask("Make plans for which? Type numbers (e.g. 1 2) or jobs (e.g. SGE), or just press Enter for all"
                    ).upper().replace(",", " ").split()
@@ -702,19 +729,19 @@ def run(args, interactive):
     hits = b.party_hits()
     plans = []
     for job, me in healers:
-        print(f"Reading {me['name']}'s ({job}) casts...")
+        print(f"Reading the {job}'s casts...")
         b.job = job
         plans.append((job, me, b.plan_rows(b.healer_casts(me), hits, origins)))
 
     os.makedirs(path, exist_ok=True)
     write_timeline(path, duty, b, sync, origins, code)
-    for job, me, plan in plans:
-        write_plan(path, folder, job, plan, me, b, code)
+    for job, _, plan in plans:
+        write_plan(path, folder, job, plan, b, code)
 
     print(f"\nDone! Saved in {path}")
     print(f"  timeline.csv: {len(sync) + 1} sync rows, {len(origins)} phase(s)")
-    for job, me, plan in plans:
-        print(f"  Default.{job}.plan.csv: {len(plan)} rows (from {me['name']})")
+    for job, _, plan in plans:
+        print(f"  Default.{job}.plan.csv: {len(plan)} rows")
     notes = []
     if guessed:
         notes.append(f"Couldn't look up the duty name (XIVAPI unreachable?), so '# Duty: {duty}' is a guess. It must be"
@@ -743,7 +770,8 @@ def main():
     ap.add_argument("job", nargs="?", help="SGE, WHM, AST or SCH (default: every one of them in the pull)")
     ap.add_argument("--client-id")
     ap.add_argument("--client-secret")
-    ap.add_argument("--player", help="healer's character name, if the pull has two of the same job")
+    ap.add_argument("--healer", type=int,
+                    help="which healer to use, by number in the pull's healer list (sorted by job), e.g. 2")
     ap.add_argument("--duty", help="Duty Finder name, if the automatic lookup gets it wrong")
     ap.add_argument("--install", action="store_true", help="write straight into RotationSolver's Timelines folder")
     ap.add_argument("--out", help="output folder (default: output/ next to this script)")

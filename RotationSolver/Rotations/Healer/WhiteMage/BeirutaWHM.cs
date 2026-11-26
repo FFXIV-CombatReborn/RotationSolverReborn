@@ -3,7 +3,7 @@ using static RotationSolver.Engine.Helpers.BeirutaParty;
 namespace RotationSolver.Rotations.Healer.WhiteMage;
 
 [Rotation("BeirutaWHM", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn, Description =
-	"Savage/Ultimate White Mage. Damage and healing are automatic. Mitigation follows the built-in timeline plan when there is one (see [CD Plan]); otherwise use your Boss Mod / BMR CD planner or press it yourself, with Intercept set to GCD only and ability intercept unticked. Questions? Ask @Beiruta on the RSR Discord.")]
+	"Savage/Ultimate White Mage. Damage and healing are automatic. Planned cooldowns (mitigation, HoTs, Lightspeed and the like) follow the built-in CD plan when there is one (see the CD Plan section); otherwise use your Boss Mod / BMR CD planner or press them yourself, with Intercept set to GCD only and ability intercept unticked. Questions? Ask @Beiruta on the RSR Discord.")]
 [SourceCode(Path = "main/Rotations/Healer/WhiteMage/BeirutaWHM.cs")]
 [ExtraRotation]
 
@@ -13,12 +13,9 @@ public sealed class BeirutaWHM : WhiteMageRotation, Updaters.IBeirutaTimelineOpt
 
 	#region CD Plan
 
-	[RotationConfig(CombatType.PvE, Name = "[CD Plan] CD plan from", Tooltip =
-		"Built-in plan: mitigation follows the built-in timeline plan. Built-in WHM plans:\n" +
-		"- Dancing Mad (Ultimate): Default\n" +
-		"- Futures Rewritten (Ultimate): Default\n" +
-		"- AAC Heavyweight (Savage): M9S, M10S, M11S, M12S part 1, M12S part 2: Default\n" +
-		"Manual / BMR / VBM: you or your Boss Mod / BMR CD planner press the mitigation.")]
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Use built-in CD plan: mitigation follows the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press those cooldowns.")]
 	public BeirutaPlanSource CdPlanFrom { get; set; } = BeirutaPlanSource.BuiltIn;
 
 	public bool UseTimelinePlan => CdPlanFrom == BeirutaPlanSource.BuiltIn;
@@ -47,6 +44,13 @@ public sealed class BeirutaWHM : WhiteMageRotation, Updaters.IBeirutaTimelineOpt
 		"Lilies are kept for it, and Afflatus Misery is used before a planned Rapture would overcap Blood Lilies.\n" +
 		"Off: planned Afflatus Rapture is skipped; lilies go by party HP.")]
 	public bool UsePlannedAfflatusRapture { get; set; } = false;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.IBeirutaTimelineOption.OptionalPlannedActions =>
+	[
+		((uint)ActionID.CureIiiPvE, nameof(UsePlannedCureIii)),
+		((uint)ActionID.MedicaIiiPvE, nameof(UsePlannedMedicaIii)),
+		((uint)ActionID.AfflatusRapturePvE, nameof(UsePlannedAfflatusRapture)),
+	];
 
 	bool Updaters.IBeirutaTimelineOption.AllowPlannedAction(uint actionId) => actionId switch
 	{

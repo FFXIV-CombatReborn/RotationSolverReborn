@@ -3,7 +3,7 @@ using static RotationSolver.Engine.Helpers.BeirutaParty;
 namespace RotationSolver.Rotations.Healer.Scholar;
 
 [Rotation("BeirutaSCH", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn, Description =
-	"Savage/Ultimate Scholar. Damage and healing are automatic. Mitigation follows the built-in timeline plan when there is one (see [CD Plan]); otherwise use your Boss Mod / BMR CD planner or press it yourself, with Intercept set to GCD only and ability intercept unticked. Questions? Ask @Beiruta on the RSR Discord.")]
+	"Savage/Ultimate Scholar. Damage and healing are automatic. Planned cooldowns (mitigation, HoTs, Lightspeed and the like) follow the built-in CD plan when there is one (see the CD Plan section); otherwise use your Boss Mod / BMR CD planner or press them yourself, with Intercept set to GCD only and ability intercept unticked. Questions? Ask @Beiruta on the RSR Discord.")]
 [SourceCode(Path = "main/Rotations/Healer/Scholar/BeirutaSCH.cs")]
 [ExtraRotation]
 
@@ -13,12 +13,9 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 
 	#region CD Plan
 
-	[RotationConfig(CombatType.PvE, Name = "[CD Plan] CD plan from", Tooltip =
-		"Built-in plan: mitigation follows the built-in timeline plan. Built-in SCH plans:\n" +
-		"- Dancing Mad (Ultimate): Default\n" +
-		"- Futures Rewritten (Ultimate): Default\n" +
-		"- AAC Heavyweight (Savage): M9S, M10S, M11S, M12S part 1, M12S part 2: Default\n" +
-		"Manual / BMR / VBM: you or your Boss Mod / BMR CD planner press the mitigation; the trigger settings below tell the rotation when to prepare Deployment Tactics.")]
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Use built-in CD plan: mitigation follows the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press those cooldowns; the trigger settings below tell the rotation when to prepare Deployment Tactics.")]
 	public BeirutaPlanSource CdPlanFrom { get; set; } = BeirutaPlanSource.BuiltIn;
 
 	public bool UseTimelinePlan => CdPlanFrom == BeirutaPlanSource.BuiltIn;
@@ -37,6 +34,12 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 		"Off: they are skipped; the rotation shields as usual.\n" +
 		"Under Seraphism the rotation keeps non-tanks shielded with Accession by itself (as in Ward Mode).")]
 	public bool UsePlannedShields { get; set; } = true;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.IBeirutaTimelineOption.OptionalPlannedActions =>
+	[
+		((uint)ActionID.ConcitationPvE, nameof(UsePlannedShields)),
+		((uint)ActionID.AccessionPvE, nameof(UsePlannedShields)),
+	];
 
 	bool Updaters.IBeirutaTimelineOption.AllowPlannedAction(uint actionId) =>
 		UsePlannedShields ||
@@ -61,7 +64,7 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 	[RotationConfig(CombatType.PvE, Name = "    > [Deployment Tactics] Custom triggers (off = your Protraction on yourself)", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.ManualPlan, Tooltip =
 		"A trigger is something you do that tells the rotation to prepare Deployment Tactics: Adloquium on the right target, then Deployment Tactics, within 15s.\n" +
 		"A toast shows Preparing Deployment Tactics, or the cooldown left if it is not ready.\n" +
-		"Only used with CD plan from Manual / BMR / VBM; the built-in plan runs the Deployment chain itself.")]
+		"Only used with BMR / VBM / Manual; the built-in CD plan runs the Deployment chain itself.")]
 	public bool UseCustomDeploymentSignals { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "        > Your Protraction on yourself", Parent = nameof(UseCustomDeploymentSignals))]
@@ -273,7 +276,7 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 
 	[RotationConfig(CombatType.PvE, Name = "    > Automatic Protraction", Parent = nameof(UseCustomHPThreshold), Tooltip =
 		"On: Protraction goes on a tank that just pressed a mitigation or before a tankbuster, and on the lowest non-tank before a raidwide.\n" +
-		"With CD plan from Manual / BMR / VBM, your own Protraction on yourself can also prepare Deployment Tactics.")]
+		"With BMR / VBM / Manual, your own Protraction on yourself can also prepare Deployment Tactics.")]
 	public ProtractionUsageStrategy ProtractionUsage { get; set; } = ProtractionUsageStrategy.Both;
 
 	public enum ProtractionUsageStrategy : byte

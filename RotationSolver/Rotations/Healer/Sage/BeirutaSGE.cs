@@ -3,7 +3,7 @@ using static RotationSolver.Engine.Helpers.BeirutaParty;
 namespace RotationSolver.Rotations.Healer.Sage;
 
 [Rotation("BeirutaSGE", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn, Description =
-	"Savage/Ultimate Sage. Damage and healing are automatic. Mitigation follows the built-in timeline plan when there is one (see [CD Plan]); otherwise use your Boss Mod / BMR CD planner or press it yourself, with Intercept set to GCD only and ability intercept unticked. Questions? Ask @Beiruta on the RSR Discord.")]
+	"Savage/Ultimate Sage. Damage and healing are automatic. Planned cooldowns (mitigation, HoTs, Lightspeed and the like) follow the built-in CD plan when there is one (see the CD Plan section); otherwise use your Boss Mod / BMR CD planner or press them yourself, with Intercept set to GCD only and ability intercept unticked. Questions? Ask @Beiruta on the RSR Discord.")]
 [SourceCode(Path = "main/Rotations/Healer/Sage/BeirutaSGE.cs")]
 [ExtraRotation]
 
@@ -13,12 +13,9 @@ public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, 
 
 	#region CD Plan
 
-	[RotationConfig(CombatType.PvE, Name = "[CD Plan] CD plan from", Tooltip =
-		"Built-in plan: mitigation follows the built-in timeline plan. Built-in SGE plans:\n" +
-		"- Dancing Mad (Ultimate): Default\n" +
-		"- Futures Rewritten (Ultimate): Default\n" +
-		"- AAC Heavyweight (Savage): M9S, M10S, M11S, M12S part 1, M12S part 2: Default\n" +
-		"Manual / BMR / VBM: you or your Boss Mod / BMR CD planner press the mitigation.")]
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Use built-in CD plan: mitigation follows the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press those cooldowns.")]
 	public BeirutaPlanSource CdPlanFrom { get; set; } = BeirutaPlanSource.BuiltIn;
 
 	public bool UseTimelinePlan => CdPlanFrom == BeirutaPlanSource.BuiltIn;
@@ -36,6 +33,11 @@ public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, 
 		"On: the plan's Eukrasian Prognosis are cast in their window, unless the party is already shielded.\n" +
 		"Off: they are skipped; the rotation shields as usual (still after a planned Zoe).")]
 	public bool UsePlannedShields { get; set; } = true;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.IBeirutaTimelineOption.OptionalPlannedActions =>
+	[
+		((uint)ActionID.EukrasianPrognosisIiPvE, nameof(UsePlannedShields)),
+	];
 
 	bool Updaters.IBeirutaTimelineOption.AllowPlannedAction(uint actionId) =>
 		UsePlannedShields ||

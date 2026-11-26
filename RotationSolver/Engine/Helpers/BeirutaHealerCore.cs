@@ -134,8 +134,8 @@ internal static class BeirutaMove
 
 public static class BeirutaSettingNames
 {
-	public const string BuiltInPlan = "Built-in plan";
-	public const string ManualPlan = "Manual / BMR / VBM";
+	public const string BuiltInPlan = "Use built-in CD plan";
+	public const string ManualPlan = "BMR / VBM / Manual";
 
 	public const string HidePage = "Hide";
 	public const string OpenerPage = "Opener / Potion";

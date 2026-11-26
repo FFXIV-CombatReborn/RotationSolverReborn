@@ -3,7 +3,7 @@ using static RotationSolver.Engine.Helpers.BeirutaParty;
 namespace RotationSolver.Rotations.Healer.Astrologian;
 
 [Rotation("BeirutaAST", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn, Description =
-	"Savage/Ultimate Astrologian. Damage and healing are automatic. Mitigation follows the built-in timeline plan when there is one (see [CD Plan]); otherwise use your Boss Mod / BMR CD planner or press it yourself, with Intercept set to GCD only and ability intercept unticked. Questions? Ask @Beiruta on the RSR Discord.")]
+	"Savage/Ultimate Astrologian. Damage and healing are automatic. Planned cooldowns (mitigation, HoTs, Lightspeed and the like) follow the built-in CD plan when there is one (see the CD Plan section); otherwise use your Boss Mod / BMR CD planner or press them yourself, with Intercept set to GCD only and ability intercept unticked. Questions? Ask @Beiruta on the RSR Discord.")]
 [SourceCode(Path = "main/Rotations/Healer/Astrologian/BeirutaAST.cs")]
 [ExtraRotation]
 
@@ -13,12 +13,9 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 
 	#region CD Plan
 
-	[RotationConfig(CombatType.PvE, Name = "[CD Plan] CD plan from", Tooltip =
-		"Built-in plan: mitigation follows the built-in timeline plan. Built-in AST plans:\n" +
-		"- Dancing Mad (Ultimate): Default\n" +
-		"- Futures Rewritten (Ultimate): Default\n" +
-		"- AAC Heavyweight (Savage): M9S, M10S, M11S, M12S part 1, M12S part 2: Default\n" +
-		"Manual / BMR / VBM: you or your Boss Mod / BMR CD planner press the mitigation.")]
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Use built-in CD plan: mitigation follows the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press those cooldowns.")]
 	public BeirutaPlanSource CdPlanFrom { get; set; } = BeirutaPlanSource.BuiltIn;
 
 	public bool UseTimelinePlan => CdPlanFrom == BeirutaPlanSource.BuiltIn;
@@ -42,6 +39,12 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 		"Off: it is placed whenever it is ready.\n" +
 		"Stellar Detonation always goes by party HP under Giant Dominance.")]
 	public bool UsePlannedEarthlyStar { get; set; } = true;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.IBeirutaTimelineOption.OptionalPlannedActions =>
+	[
+		((uint)ActionID.HeliosConjunctionPvE, nameof(UsePlannedHeliosConjunction)),
+		((uint)ActionID.EarthlyStarPvE, nameof(UsePlannedEarthlyStar)),
+	];
 
 	bool Updaters.IBeirutaTimelineOption.AllowPlannedAction(uint actionId) =>
 		(UsePlannedHeliosConjunction || actionId != (uint)ActionID.HeliosConjunctionPvE) &&
@@ -88,7 +91,7 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 	[RotationConfig(CombatType.PvE, Name = "    > [Macrocosmos] Custom triggers (off = CD planner / manual)", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.ManualPlan, Tooltip =
 		"A trigger is something you do that makes AST cast Macrocosmos.\n" +
 		"In DMU, triggers are blocked while 2+ players have Accretion, or while Earth Resistance Down II is up with one left.\n" +
-		"Only used with CD plan from Manual / BMR / VBM; the built-in plan presses Macrocosmos itself.")]
+		"Only used with BMR / VBM / Manual; the built-in CD plan presses Macrocosmos itself.")]
 	public bool UseMacrocosmosSignals { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "        > Your Surecast", Parent = nameof(UseMacrocosmosSignals))]

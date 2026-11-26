@@ -99,7 +99,7 @@ Command-line values win over YOUR SETTINGS.
 | `--install` | Write straight into RotationSolver's Timelines folder |
 | `--out <folder>` | Write somewhere else (default: `output\` next to the script) |
 | `--force` | Replace existing files without asking |
-| `--player "Name"` | Pick the healer when two players have the same job |
+| `--healer 2` | Pick the healer by number in the pull's healer list (sorted by job, e.g. `1. SGE #1, 2. SGE #2`) |
 | `--duty "Name"` | Override the duty name if the lookup is wrong |
 | `--suffix Test` | Text added to the folder name (`--suffix ""` for none) |
 | `--min-cast 2.0` | Shortest boss cast bar that becomes a sync row (seconds) |

@@ -18,6 +18,9 @@ internal interface IBeirutaTimelineOption
 	bool UsePlanSettings => false;
 
 	bool RotationRunsPlannedAction(uint actionId) => false;
+
+	// Planned actions the player can opt in / out of, with the bool setting that controls each (shown in the CD Plan section).
+	IEnumerable<(uint ActionId, string Config)> OptionalPlannedActions => [];
 }
 
 // How a timeline Damage row hits: a light or heavy raidwide, or a tankbuster.
@@ -926,7 +929,7 @@ internal static class BeirutaTimelineUpdater
 		return false;
 	}
 
-	private static IAction? FindAction(string name)
+	internal static IAction? FindAction(string name)
 	{
 		foreach (var list in new[] { RotationUpdater.CurrentRotationActions, RotationUpdater.CurrentDutyRotationActions })
 		{
@@ -981,6 +984,7 @@ internal static class BeirutaTimelineUpdater
 		_planPath = planPath;
 
 		_loadedFor = key;
+		LoadedFolder = dutyDir;
 		_fileStamp = FileStamp(syncPath, planPath);
 		_sync = [];
 		_downtime = [];
@@ -1076,7 +1080,7 @@ internal static class BeirutaTimelineUpdater
 	private static string ChooseTimelineFolder(string duty)
 	{
 		_candidateCount = 0;
-		var root = Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "Timelines");
+		var root = TimelineRoot;
 		if (string.IsNullOrEmpty(duty) || !Directory.Exists(root))
 		{
 			return string.Empty;
@@ -1113,7 +1117,7 @@ internal static class BeirutaTimelineUpdater
 		return candidates[0];
 	}
 
-	private static string TimelineHeader(string path, string key)
+	internal static string TimelineHeader(string path, string key)
 	{
 		foreach (var line in File.ReadLines(path))
 		{
@@ -1153,17 +1157,54 @@ internal static class BeirutaTimelineUpdater
 			return string.Empty;
 		}
 
+		if (Service.Config.BeirutaPlanChoice.TryGetValue(PlanChoiceKey(dutyDir, job), out var chosen))
+		{
+			var chosenPath = Path.Combine(dutyDir, chosen);
+			if (File.Exists(chosenPath))
+			{
+				return chosenPath;
+			}
+		}
+
 		var files = Directory.GetFiles(dutyDir, $"*.{job}.plan.csv");
 		Array.Sort(files, StringComparer.OrdinalIgnoreCase);
 		return files.Length > 0 ? files[0] : string.Empty;
 	}
+
+	// The plan file the player picked for a timeline folder and job (CD Plan section). Falls back to the first file by name.
+	internal static string PlanChoiceKey(string dutyDir, string job) => $"{Path.GetFileName(dutyDir)}|{job}";
+
+	internal static string ChosenPlanFile(string dutyDir, string job) => Path.GetFileName(FindPlanFile(dutyDir, job));
+
+	internal static void ChoosePlan(string dutyDir, string job, string fileName)
+	{
+		Service.Config.BeirutaPlanChoice[PlanChoiceKey(dutyDir, job)] = fileName;
+		Service.Config.Save();
+		_nextFileCheck = DateTime.MinValue;
+	}
+
+	internal static string TimelineRoot => Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "Timelines");
+
+	// The timeline folder and plan file loaded for the current duty, or empty.
+	internal static string LoadedFolder { get; private set; } = string.Empty;
+
+	internal static string LoadedPlanPath => _planPath;
+
+	// The fight is running, so the plan can't be swapped.
+	internal static bool PlanLocked => FightActive() && _phase != null;
+
+	// Plan rows that aren't actions: Keep:<action> and flag rows like Ward Mode.
+	internal static bool IsPlanMetaAction(string action) =>
+		action.StartsWith(KeepPrefix, StringComparison.OrdinalIgnoreCase) ||
+		action.Equals(WardModeRow, StringComparison.OrdinalIgnoreCase) ||
+		action.Equals(TopUpAllRow, StringComparison.OrdinalIgnoreCase);
 	private static long _fileStamp;
 
 	private static long FileStamp(string syncPath, string planPath) =>
 		(File.Exists(syncPath) ? File.GetLastWriteTimeUtc(syncPath).Ticks : 0) ^
 		(File.Exists(planPath) ? File.GetLastWriteTimeUtc(planPath).Ticks * 31 : 0);
 
-	private static string PlanName(string path)
+	internal static string PlanName(string path)
 	{
 		foreach (var line in File.ReadLines(path))
 		{
@@ -1173,7 +1214,7 @@ internal static class BeirutaTimelineUpdater
 		return Path.GetFileNameWithoutExtension(path);
 	}
 
-	private static IEnumerable<string[]> ReadCsv(string path)
+	internal static IEnumerable<string[]> ReadCsv(string path)
 	{
 		var first = true;
 		foreach (var line in File.ReadAllLines(path))
@@ -1196,7 +1237,7 @@ internal static class BeirutaTimelineUpdater
 		}
 	}
 
-	private static string Normalize(string? name)
+	internal static string Normalize(string? name)
 	{
 		if (name == null)
 		{

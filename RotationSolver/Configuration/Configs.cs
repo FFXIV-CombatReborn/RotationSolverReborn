@@ -137,6 +137,9 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 
 	public ConcurrentDictionary<uint, string> DutyRotationChoice = new();
 
+	// Beiruta CD Plan: picked plan file per "<timeline folder>|<job>".
+	public ConcurrentDictionary<string, string> BeirutaPlanChoice = new();
+
 	public void Save()
 	{
 #if DEBUG
