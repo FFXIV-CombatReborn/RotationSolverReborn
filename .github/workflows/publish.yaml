@@ -38,10 +38,10 @@ jobs:
         run: dotnet restore --locked-mode RotationSolver/RotationSolver.csproj
 
       - name: Build Plugin
-        run: dotnet build --no-restore -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=$env:tag -p:FileVersion=$env:tag -p:PackageVersion=$env:tag -p:InformationalVersion=$env:tag -p:OutDir=..\build\RotationSolver\
+        run: dotnet build --no-restore -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=$env:tag -p:FileVersion=$env:tag -p:PackageVersion=$env:tag -p:InformationalVersion=$env:tag
 
       - name: Publish Plugin
         uses: softprops/action-gh-release@v3
         with:
-          files: ./build/RotationSolver/latest.zip
+          files: ./bin/Release/RotationSolver/latest.zip
           token: ${{ secrets.GITHUB_TOKEN }}
