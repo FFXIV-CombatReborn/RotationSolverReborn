@@ -29,6 +29,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 	private static NextActionWindow? _nextActionWindow;
 	private static InterceptedActionWindow? _interceptedActionWindow;
 	private static ActionTimelineWindow? _actionTimelineWindow;
+	private static PlanTimelineWindow? _planTimelineWindow;
 	private static OverlayWindow? _overlayWindow;
 	private static StateControlWindow? _stateControlWindow;
 	private static EasterEggWindow? _easterEggWindow;
@@ -68,6 +69,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		_nextActionWindow = new();
 		_interceptedActionWindow = new();
 		_actionTimelineWindow = new();
+		_planTimelineWindow = new();
 		_overlayWindow = new();
 		_stateControlWindow = new();
 		_easterEggWindow = new();
@@ -80,6 +82,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		windowSystem.AddWindow(_nextActionWindow);
 		windowSystem.AddWindow(_interceptedActionWindow);
 		windowSystem.AddWindow(_actionTimelineWindow);
+		windowSystem.AddWindow(_planTimelineWindow);
 		windowSystem.AddWindow(_overlayWindow);
 		windowSystem.AddWindow(_stateControlWindow);
 		windowSystem.AddWindow(_easterEggWindow);
@@ -355,6 +358,9 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		_nextActionWindow!.IsOpen = isValid && Service.Config.ShowNextActionWindow;
 		_interceptedActionWindow!.IsOpen = isValid && Service.Config.ShowInterceptedActionWindow;
 		UpdateActionTimeline(isValid);
+		_planTimelineWindow!.IsOpen = isValid
+			&& DataCenter.CurrentRotation is Updaters.IBeirutaTimelineOption { UseTimelinePlan: true, ShowPlanTimeline: true }
+			&& Updaters.BeirutaTimelineUpdater.HasPlan;
 		_overlayWindow!.IsOpen = isValid && Service.Config.TeachingMode;
 	}
 

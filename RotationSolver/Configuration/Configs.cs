@@ -140,6 +140,9 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 	// Beiruta CD Plan: picked plan file per "<timeline folder>|<job>".
 	public ConcurrentDictionary<string, string> BeirutaPlanChoice = new();
 
+	// Beiruta CD Plan timeline window locked in place.
+	public bool BeirutaPlanTimelineLock;
+
 	public void Save()
 	{
 #if DEBUG

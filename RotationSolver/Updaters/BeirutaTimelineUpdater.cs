@@ -21,7 +21,25 @@ internal interface IBeirutaTimelineOption
 
 	// Planned actions the player can opt in / out of, with the bool setting that controls each (shown in the CD Plan section).
 	IEnumerable<(uint ActionId, string Config)> OptionalPlannedActions => [];
+
+	// Show the CD Plan timeline window (the plan's next few seconds).
+	bool ShowPlanTimeline => false;
 }
+
+// One plan row for the CD Plan timeline window.
+internal enum BeirutaPlanPreviewState : byte
+{
+	Upcoming,
+	Queued,
+	Waiting,
+	Done,
+	Skipped,
+	Off,
+	RotationRuns,
+}
+
+internal sealed record BeirutaPlanPreview(IAction Action, bool Gcd, string Phase, float Start, float End, string Target,
+	BeirutaPlanPreviewState State, string? Note);
 
 // How a timeline Damage row hits: a light or heavy raidwide, or a tankbuster.
 internal enum BeirutaDamageKind : byte
@@ -641,6 +659,71 @@ internal static class BeirutaTimelineUpdater
 	}
 
 	public static bool HasPlan => PlanAllowed && _plan.Count > 0;
+
+	// Fills the CD Plan timeline window: plan rows whose window is open now or opens within `seconds`.
+	// Before the pull the first phase is previewed from the countdown (or held at 0s).
+	public static bool PreviewPlan(float seconds, List<BeirutaPlanPreview> into, out float now, out bool pulled)
+	{
+		into.Clear();
+		pulled = _phase != null;
+		now = 0f;
+		if (!HasPlan)
+		{
+			return false;
+		}
+
+		string phase;
+		if (pulled)
+		{
+			phase = _phase!;
+			now = PhaseTime;
+		}
+		else
+		{
+			phase = _sync.Count > 0 ? _sync[0].Phase : _plan[0].Phase;
+			now = Service.CountDownTime > 0f ? -Service.CountDownTime : 0f;
+		}
+
+		for (var i = 0; i < _plan.Count; i++)
+		{
+			var row = _plan[i];
+			if (row.Phase != phase || row.End <= now || row.Start > now + seconds ||
+				row.Action.StartsWith(KeepPrefix, StringComparison.OrdinalIgnoreCase) || IsFlagRow(row) ||
+				FindAction(row.Action) is not { } action)
+			{
+				continue;
+			}
+
+			var state = BeirutaPlanPreviewState.Upcoming;
+			string? note = null;
+			if (!ActionAllowed(action.ID))
+			{
+				state = BeirutaPlanPreviewState.Off;
+			}
+			else if (RotationRuns(action.ID))
+			{
+				state = BeirutaPlanPreviewState.RotationRuns;
+			}
+			else if (pulled && _queuedAt.TryGetValue(i, out var queuedAt))
+			{
+				state = UsedSince(action.ID, queuedAt) ? BeirutaPlanPreviewState.Done : BeirutaPlanPreviewState.Queued;
+			}
+			else if (pulled && _waiting.TryGetValue(i, out var wait))
+			{
+				state = BeirutaPlanPreviewState.Waiting;
+				note = wait;
+			}
+			else if (pulled && _queued.Contains(i))
+			{
+				state = BeirutaPlanPreviewState.Skipped;
+			}
+
+			var gcd = action is IBaseAction b && b.Info.IsRealGCD;
+			into.Add(new BeirutaPlanPreview(action, gcd, row.Phase, row.Start, row.End, row.Target, state, note));
+		}
+
+		return true;
+	}
 
 	public static string? PlanOption(string key) =>
 		PlanAllowed && _plan.Count > 0 && _planOptions.TryGetValue(key, out var v) ? v : null;

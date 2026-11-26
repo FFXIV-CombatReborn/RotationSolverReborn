@@ -226,7 +226,7 @@ public partial class MainWindow
 		ImGui.SetCursorPosY(ImGui.GetCursorPosY() + (CdPlanRowPad * Scale) + MathF.Max(0f, (iconSize - itemHeight) / 2f));
 	}
 
-	private static IRotationConfig? FindRotationConfig(ICustomRotation rotation, string name)
+	internal static IRotationConfig? FindRotationConfig(ICustomRotation rotation, string name)
 	{
 		foreach (var c in rotation.Configs.Configs)
 		{
