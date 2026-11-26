@@ -125,23 +125,33 @@ public sealed class SGE_Reborn : SageRotation
 	}
 	#endregion
 
-	#region oGCD Logic
-	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+	protected override void OnFrameUpdate()
 	{
-		// If the last action performed matches any of a list of specific actions, it clears the Eukrasia aim.
-		// This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
+		if (IsInCountdown)
+		{
+			return;
+		}
+
 		if (IsLastGCD(false, EukrasianPrognosisIiPvE, EukrasianPrognosisPvE,
 			EukrasianDiagnosisPvE, EukrasianDyskrasiaPvE, EukrasianDosisIiiPvE, EukrasianDosisIiPvE,
 			EukrasianDosisPvE) || !InCombat)
 		{
-			ClearEukrasia(nextGCD);
+			ClearEukrasia();
 		}
 
-		if (ChoiceEukrasia(out act))
+		ChoiceEukrasia();
+
+		if (HasEukrasia && InCombat && HasHostilesInMaxRange && NextGCDAction == null && SecondsSinceLastNextGCDChange >= 2f)
 		{
-			return true;
+			_lastEukrasiaActionAim = _EukrasiaActionAim;
+			_EukrasiaActionAim = null;
+			StatusHelper.StatusOff(StatusID.Eukrasia);
 		}
+	}
 
+	#region oGCD Logic
+	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+	{
 		if (ZoePvE.EnoughLevel && !ZoePvE.Cooldown.IsCoolingDown)
 		{
 			if (nextGCD.IsTheSameTo(false, PneumaPvE))
@@ -444,23 +454,21 @@ public sealed class SGE_Reborn : SageRotation
 	}
 
 	// Clears the Eukrasia action aim, effectively resetting any planned Eukrasia action.
-	private void ClearEukrasia(IAction nextGCD)
+	private void ClearEukrasia()
 	{
 		if (_EukrasiaActionAim != null)
 		{
 			_lastEukrasiaActionAim = _EukrasiaActionAim;
 			_EukrasiaActionAim = null;
-			if (HasEukrasia && ((InCombat && HasHostilesInMaxRange && nextGCD == null && SecondsSinceLastNextGCDChange >= 2f) || (!InCombat && !HasHostilesInMaxRange)))
+			if (HasEukrasia && !InCombat && !HasHostilesInMaxRange)
 			{
 				StatusHelper.StatusOff(StatusID.Eukrasia);
 			}
 		}
 	}
 
-	private bool ChoiceEukrasia(out IAction? act)
+	private void ChoiceEukrasia()
 	{
-		act = null;
-
 		// Only decide the aim; do not require Eukrasia to be currently usable here.
 		// Attempts to set correct Eukrasia action based on availability and MergedStatus.
 		if (EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisIiPvE.IsEnabled && MergedStatus.HasFlag(AutoStatus.DefenseArea)
@@ -498,12 +506,6 @@ public sealed class SGE_Reborn : SageRotation
 		{
 			SetEukrasia(EukrasianDosisPvE);
 		}
-		else
-		{
-			return false; // Indicates that no specific Eukrasia action was chosen in this cycle.
-		}
-
-		return false;
 	}
 	#endregion
 

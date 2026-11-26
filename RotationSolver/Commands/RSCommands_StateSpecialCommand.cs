@@ -39,7 +39,7 @@ namespace RotationSolver.Commands
 		{
 			DoOneCommandType(role =>
 			{
-				if (!DataCenter.State && DataCenter.IsPvP && !DataCenter.IsPvPStateEnabled && Service.Config.PvpStateControl)
+				if (!DataCenter.State && DataCenter.IsPvP && !DataCenter.IsPvPStateEnabled && Service.Config.PvpStateControl && stateType != StateCommandType.Off)
 				{
 					stateType = AdjustStateType(StateCommandType.PvP, ref index);
 				}
@@ -63,11 +63,11 @@ namespace RotationSolver.Commands
 				}
 				UpdateState(stateType, role);
 
-				if (!DataCenter.AutoFaceTargetOnActionSetting() && DataCenter.MoveModeSetting() == 1)
+				if (DataCenter.State && !DataCenter.AutoFaceTargetOnActionSetting() && DataCenter.MoveModeSetting() == 1)
 				{
 					Svc.GameConfig.UiControl.Set(UiControlOption.AutoFaceTargetOnAction.ToString(), 1);
 				}
-			});
+			}, stateType == StateCommandType.Off);
 		}
 
 		public static void SetStateCommandType(StateCommandType stateType)
@@ -88,11 +88,11 @@ namespace RotationSolver.Commands
 
 				UpdateState(stateType, role);
 
-				if (!DataCenter.AutoFaceTargetOnActionSetting() && DataCenter.MoveModeSetting() == 1)
+				if (DataCenter.State && !DataCenter.AutoFaceTargetOnActionSetting() && DataCenter.MoveModeSetting() == 1)
 				{
 					Svc.GameConfig.UiControl.Set(UiControlOption.AutoFaceTargetOnAction.ToString(), 1);
 				}
-			});
+			}, stateType == StateCommandType.Off);
 		}
 
 		public static void SetTargetingIndex(int index)
@@ -123,6 +123,11 @@ namespace RotationSolver.Commands
 
 		private static StateCommandType AdjustStateType(StateCommandType stateType, ref int index)
 		{
+			if (stateType == StateCommandType.Off)
+			{
+				return StateCommandType.Off;
+			}
+
 			if (DataCenter.IsInDutyReplay())
 			{
 				return StateCommandType.Off;
@@ -152,7 +157,7 @@ namespace RotationSolver.Commands
 						UpdateTargetingIndex(ref index);
 					}
 				}
-				else if (Service.Config.ToggleAuto)
+				else if (index == -1 && Service.Config.ToggleAuto)
 				{
 					return StateCommandType.Off;
 				}
@@ -349,6 +354,11 @@ namespace RotationSolver.Commands
 
 		private static void ApplyState(StateCommandType stateType, JobRole role, TargetingType? autodutyTargeting, IpcStateOverrides? ipcOverrides)
 		{
+			if (stateType != StateCommandType.Off && DataCenter.IsInDutyReplay())
+			{
+				stateType = StateCommandType.Off;
+			}
+
 			if (DataCenter.PvPAutomationBlocked && stateType != StateCommandType.Off)
 			{
 				Svc.Chat.PrintError("Rotation Solver Reborn: Autorotation is blocked in PvP while 'Auto PVP Series Grind' is enabled. It is an AI generated plugin and an AI slop RSR clone.");
@@ -406,16 +416,21 @@ namespace RotationSolver.Commands
 				{
 					UpdateToast();
 				}
-			});
+			}, specialType == SpecialCommandType.EndSpecial);
 		}
 
-		private static void DoOneCommandType(Action<JobRole> doingSomething)
+		private static void DoOneCommandType(Action<JobRole> doingSomething, bool allowWithoutPlayer = false)
 		{
 			var role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
 
 			if (role == JobRole.None)
 			{
-				return;
+				if (!allowWithoutPlayer)
+				{
+					return;
+				}
+
+				role = DataCenter.Role;
 			}
 
 			doingSomething(role);

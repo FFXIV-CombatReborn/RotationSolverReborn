@@ -1,11 +1,95 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
+using System.Collections.Immutable;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace RotationSolver.SourceGenerators
 {
+	internal readonly struct DiagnosticSpec : IEquatable<DiagnosticSpec>
+	{
+		public string Id { get; }
+		public string FilePath { get; }
+		public TextSpan TextSpan { get; }
+		public LinePositionSpan LineSpan { get; }
+		public string? Arg { get; }
+
+		public DiagnosticSpec(string id, Location location, string? arg = null)
+		{
+			Id = id;
+			var lineSpan = location.GetLineSpan();
+			FilePath = lineSpan.Path ?? string.Empty;
+			TextSpan = location.SourceSpan;
+			LineSpan = lineSpan.Span;
+			Arg = arg;
+		}
+
+		public Location ToLocation() => string.IsNullOrEmpty(FilePath)
+			? Location.None
+			: Location.Create(FilePath, TextSpan, LineSpan);
+
+		public bool Equals(DiagnosticSpec other)
+			=> Id == other.Id
+			&& FilePath == other.FilePath
+			&& TextSpan.Equals(other.TextSpan)
+			&& LineSpan.Equals(other.LineSpan)
+			&& Arg == other.Arg;
+
+		public override bool Equals(object? obj) => obj is DiagnosticSpec other && Equals(other);
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				var hash = Id.GetHashCode();
+				hash = (hash * 397) ^ FilePath.GetHashCode();
+				hash = (hash * 397) ^ TextSpan.GetHashCode();
+				hash = (hash * 397) ^ LineSpan.GetHashCode();
+				hash = (hash * 397) ^ (Arg?.GetHashCode() ?? 0);
+				return hash;
+			}
+		}
+	}
+
+	internal sealed class TypeHierarchyPart : IEquatable<TypeHierarchyPart>
+	{
+		public string Keyword { get; }
+		public string NameWithTypeParams { get; }
+
+		public TypeHierarchyPart(string keyword, string nameWithTypeParams)
+		{
+			Keyword = keyword;
+			NameWithTypeParams = nameWithTypeParams;
+		}
+
+		public bool Equals(TypeHierarchyPart? other)
+			=> other is not null && Keyword == other.Keyword && NameWithTypeParams == other.NameWithTypeParams;
+
+		public override bool Equals(object? obj) => Equals(obj as TypeHierarchyPart);
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				return (Keyword.GetHashCode() * 397) ^ NameWithTypeParams.GetHashCode();
+			}
+		}
+	}
+
 	internal static class Util
 	{
+		private static readonly SymbolDisplayFormat FullyQualifiedWithNullabilityFormat =
+			SymbolDisplayFormat.FullyQualifiedFormat.WithMiscellaneousOptions(
+				SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+
+		private static readonly Regex InvalidCharsRgx = new(@"[^_a-zA-Z0-9]", RegexOptions.Compiled);
+		private static readonly Regex WhiteSpaceRgx = new(@"(?<=\s)", RegexOptions.Compiled);
+		private static readonly Regex StartsWithLowerCaseCharRgx = new("^[a-z]", RegexOptions.Compiled);
+		private static readonly Regex FirstCharFollowedByUpperCasesOnlyRgx = new("(?<=[A-Z])[A-Z0-9]+$", RegexOptions.Compiled);
+		private static readonly Regex LowerCaseNextToNumberRgx = new("(?<=[0-9])[a-z]", RegexOptions.Compiled);
+		private static readonly Regex UpperCaseInsideRgx = new("(?<=[A-Z])[A-Z]+?((?=[A-Z][a-z])|(?=[0-9]))", RegexOptions.Compiled);
+
 		/// <summary>
 		/// Gets the parent node of the specified type.
 		/// </summary>
@@ -32,79 +116,182 @@ namespace RotationSolver.SourceGenerators
 		/// </summary>
 		/// <param name="s">The symbol.</param>
 		/// <returns>The full metadata name of the symbol.</returns>
-		public static string GetFullMetadataName(this ISymbol s)
+		public static string GetFullMetadataName(this ISymbol? s)
 		{
 			if (s == null || s is INamespaceSymbol)
 			{
 				return string.Empty;
 			}
 
-			while (s is not ITypeSymbol)
+			while (s != null && s is not ITypeSymbol)
 			{
 				s = s.ContainingSymbol;
 			}
 
-			if (s == null)
+			if (s is not ITypeSymbol typeSymbol)
 			{
 				return string.Empty;
 			}
 
-			var sb = new StringBuilder(s.GetTypeSymbolName());
+			var display = typeSymbol.ToDisplayString(FullyQualifiedWithNullabilityFormat);
+			return display.StartsWith("global::", StringComparison.Ordinal)
+				? display.Substring("global::".Length)
+				: display;
+		}
 
-			s = s.ContainingSymbol;
-			while (!IsRootNamespace(s))
+		public static string GetFullyQualifiedTypeName(this ITypeSymbol typeSymbol)
+			=> typeSymbol.ToDisplayString(FullyQualifiedWithNullabilityFormat);
+
+		public static bool CanInstantiateWithParameterlessCtor(this ITypeSymbol typeSymbol)
+		{
+			if (!typeSymbol.IsReferenceType || typeSymbol.SpecialType == SpecialType.System_String || typeSymbol.IsAbstract)
 			{
-				try
+				return false;
+			}
+
+			if (typeSymbol is not INamedTypeSymbol namedType)
+			{
+				return false;
+			}
+
+			foreach (var ctor in namedType.InstanceConstructors)
+			{
+				if (ctor.Parameters.Length == 0 && ctor.DeclaredAccessibility is Accessibility.Public or Accessibility.Internal)
 				{
-					sb.Insert(0, s.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat) + '.');
+					return true;
 				}
-				catch
+			}
+
+			return false;
+		}
+
+		public static string GetNamespaceDisplay(INamedTypeSymbol containingType)
+			=> containingType.ContainingNamespace is { IsGlobalNamespace: false } ns
+				? ns.ToDisplayString()
+				: string.Empty;
+
+		public static ImmutableArray<TypeHierarchyPart> GetTypeHierarchy(INamedTypeSymbol containingType)
+		{
+			var parts = new List<TypeHierarchyPart>();
+			for (INamedTypeSymbol? current = containingType; current != null; current = current.ContainingType)
+			{
+				var keyword = current.TypeKind switch
 				{
-					break;
+					TypeKind.Struct => current.IsRecord ? "record struct" : "struct",
+					_ => current.IsRecord ? "record" : "class",
+				};
+
+				var name = current.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+				parts.Add(new TypeHierarchyPart(keyword, name));
+			}
+
+			parts.Reverse();
+			return ImmutableArray.CreateRange(parts);
+		}
+
+		public static ImmutableArray<string> GetAllowedAttributes(
+			FieldDeclarationSyntax field,
+			SemanticModel model,
+			params string[] allowedMetadataNames)
+		{
+			var result = ImmutableArray.CreateBuilder<string>();
+			foreach (var attrSet in field.AttributeLists)
+			{
+				if (attrSet == null)
+				{
+					continue;
 				}
 
-				s = s.ContainingSymbol;
+				foreach (var attr in attrSet.Attributes)
+				{
+					var attrType = model.GetSymbolInfo(attr).Symbol?.ContainingType;
+					if (attrType == null)
+					{
+						continue;
+					}
+
+					var metadataName = attrType.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat);
+					for (var i = 0; i < allowedMetadataNames.Length; i++)
+					{
+						if (metadataName == allowedMetadataNames[i])
+						{
+							result.Add(attr.ToString());
+							break;
+						}
+					}
+				}
+			}
+
+			return result.ToImmutable();
+		}
+
+		public static string GetSafeHintPrefix(string namespaceName, ImmutableArray<TypeHierarchyPart> hierarchy)
+		{
+			var sb = new StringBuilder();
+			if (!string.IsNullOrEmpty(namespaceName))
+			{
+				sb.Append(namespaceName).Append('_');
+			}
+
+			for (var i = 0; i < hierarchy.Length; i++)
+			{
+				if (i > 0)
+				{
+					sb.Append('.');
+				}
+				sb.Append(InvalidCharsRgx.Replace(hierarchy[i].NameWithTypeParams, "_"));
 			}
 
 			return sb.ToString();
-
-			static bool IsRootNamespace(ISymbol symbol)
-			{
-				return symbol is INamespaceSymbol s && s.IsGlobalNamespace;
-			}
 		}
 
-		private static string GetTypeSymbolName(this ISymbol symbol)
+		public static bool SequenceEquals<T>(ImmutableArray<T> left, ImmutableArray<T> right) where T : IEquatable<T>
 		{
-			if (symbol is IArrayTypeSymbol arrayTypeSymbol)
+			if (left.Length != right.Length)
 			{
-				return arrayTypeSymbol.ElementType.GetFullMetadataName() + "[]";
+				return false;
 			}
 
-			var str = symbol.MetadataName;
-			if (symbol is INamedTypeSymbol symbolType)
+			for (var i = 0; i < left.Length; i++)
 			{
-				var strs = str.Split('`');
-				if (strs.Length < 2)
+				if (!left[i].Equals(right[i]))
 				{
-					return str;
+					return false;
 				}
-
-				str = strs[0];
-
-				var sb2 = new StringBuilder();
-				for (var i = 0; i < symbolType.TypeArguments.Length; i++)
-				{
-					if (i > 0)
-					{
-						sb2.Append(", ");
-					}
-
-					sb2.Append(symbolType.TypeArguments[i].GetFullMetadataName());
-				}
-				str += "<" + sb2.ToString() + ">";
 			}
-			return str;
+
+			return true;
+		}
+
+		public static bool StringSequenceEquals(ImmutableArray<string> left, ImmutableArray<string> right)
+		{
+			if (left.Length != right.Length)
+			{
+				return false;
+			}
+
+			for (var i = 0; i < left.Length; i++)
+			{
+				if (!string.Equals(left[i], right[i], StringComparison.Ordinal))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		public static int GetSequenceHashCode<T>(ImmutableArray<T> items)
+		{
+			unchecked
+			{
+				var hash = 17;
+				for (var i = 0; i < items.Length; i++)
+				{
+					hash = (hash * 31) + (items[i]?.GetHashCode() ?? 0);
+				}
+				return hash;
+			}
 		}
 
 		/// <summary>
@@ -130,22 +317,15 @@ namespace RotationSolver.SourceGenerators
 
 			static string ConvertToPascalCase(string input)
 			{
-				Regex invalidCharsRgx = new(@"[^_a-zA-Z0-9]");
-				Regex whiteSpace = new(@"(?<=\s)");
-				Regex startsWithLowerCaseChar = new("^[a-z]");
-				Regex firstCharFollowedByUpperCasesOnly = new("(?<=[A-Z])[A-Z0-9]+$");
-				Regex lowerCaseNextToNumber = new("(?<=[0-9])[a-z]");
-				Regex upperCaseInside = new("(?<=[A-Z])[A-Z]+?((?=[A-Z][a-z])|(?=[0-9]))");
-
-				var cleaned = invalidCharsRgx.Replace(whiteSpace.Replace(input, "_"), string.Empty);
+				var cleaned = InvalidCharsRgx.Replace(WhiteSpaceRgx.Replace(input, "_"), string.Empty);
 				var parts = cleaned.Split(['_'], StringSplitOptions.RemoveEmptyEntries);
 				var sb = new StringBuilder();
 				foreach (var w0 in parts)
 				{
-					var w = startsWithLowerCaseChar.Replace(w0, m => m.Value.ToUpper());
-					w = firstCharFollowedByUpperCasesOnly.Replace(w, m => m.Value.ToLower());
-					w = lowerCaseNextToNumber.Replace(w, m => m.Value.ToUpper());
-					w = upperCaseInside.Replace(w, m => m.Value.ToLower());
+					var w = StartsWithLowerCaseCharRgx.Replace(w0, m => m.Value.ToUpperInvariant());
+					w = FirstCharFollowedByUpperCasesOnlyRgx.Replace(w, m => m.Value.ToLowerInvariant());
+					w = LowerCaseNextToNumberRgx.Replace(w, m => m.Value.ToUpperInvariant());
+					w = UpperCaseInsideRgx.Replace(w, m => m.Value.ToLowerInvariant());
 					sb.Append(w);
 				}
 

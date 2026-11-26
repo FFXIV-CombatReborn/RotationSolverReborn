@@ -30,13 +30,31 @@ internal class Service : IDisposable
 	private static IntPtr forceDisableMovementPtr = IntPtr.Zero;
 #pragma warning restore IDE0044
 
-	private static unsafe ref int ForceDisableMovement => ref *(int*)(forceDisableMovementPtr + 4);
+	private static unsafe int GetForceDisableMovement()
+		=> forceDisableMovementPtr == IntPtr.Zero ? 0 : *(int*)(forceDisableMovementPtr + 4);
+
+	private static unsafe void IncrementForceDisableMovement()
+	{
+		if (forceDisableMovementPtr != IntPtr.Zero)
+		{
+			(*(int*)(forceDisableMovementPtr + 4))++;
+		}
+	}
+
+	private static unsafe void DecrementForceDisableMovement()
+	{
+		if (forceDisableMovementPtr != IntPtr.Zero && *(int*)(forceDisableMovementPtr + 4) > 0)
+		{
+			(*(int*)(forceDisableMovementPtr + 4))--;
+		}
+	}
 
 	private static bool _canMove = true;
+	private bool _disposed;
 
 	internal static bool CanMove
 	{
-		get => ForceDisableMovement == 0;
+		get => GetForceDisableMovement() == 0;
 		set
 		{
 			var realCanMove = value || DataCenter.NoPoslock;
@@ -49,11 +67,11 @@ internal class Service : IDisposable
 
 			if (!realCanMove)
 			{
-				ForceDisableMovement++;
+				IncrementForceDisableMovement();
 			}
-			else if (ForceDisableMovement > 0)
+			else
 			{
-				ForceDisableMovement--;
+				DecrementForceDisableMovement();
 			}
 		}
 	}
@@ -132,7 +150,8 @@ internal class Service : IDisposable
 	/// <returns>The adjusted action ID.</returns>
 	public static unsafe uint GetAdjustedActionId(uint id)
 	{
-		return ActionManager.Instance()->GetAdjustedActionId(id);
+		var actionManager = ActionManager.Instance();
+		return actionManager == null ? id : actionManager->GetAdjustedActionId(id);
 	}
 
 	private static readonly ConcurrentDictionary<Type, AddonAttribute?> AddonCache = new();
@@ -204,15 +223,22 @@ internal class Service : IDisposable
 	/// </summary>
 	protected virtual void Dispose(bool disposing)
 	{
+		if (_disposed)
+		{
+			return;
+		}
+		_disposed = true;
+
 		if (disposing)
 		{
 			// Dispose the EzHook instance
 			actorVfxCreateHook?.Disable();
 
 			// Clean up ForceDisableMovement if necessary
-			if (!_canMove && ForceDisableMovement > 0)
+			if (!_canMove)
 			{
-				ForceDisableMovement--;
+				DecrementForceDisableMovement();
+				_canMove = true;
 			}
 		}
 	}

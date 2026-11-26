@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Configuration.RotationConfig;
+﻿using System.Globalization;
+
+namespace RotationSolver.Configuration.RotationConfig;
 
 internal class RotationConfigInt : RotationConfigBase
 {
@@ -30,7 +32,7 @@ internal class RotationConfigInt : RotationConfigBase
 		{
 			Min = (int)attr.MinValue;
 			Max = (int)attr.MaxValue;
-			Speed = (int)attr.Speed;
+			Speed = Math.Max(1, (int)attr.Speed);
 		}
 		else
 		{
@@ -53,7 +55,7 @@ internal class RotationConfigInt : RotationConfigBase
 		{
 			Min = (int)attr.MinValue;
 			Max = (int)attr.MaxValue;
-			Speed = (int)attr.Speed;
+			Speed = Math.Max(1, (int)attr.Speed);
 		}
 		else
 		{
@@ -88,9 +90,11 @@ internal class RotationConfigInt : RotationConfigBase
 
 		var numStr = str[Name.Length..].Trim();
 
-		if (int.TryParse(numStr, out var parsedValue))
+		if (int.TryParse(numStr, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsedValue)
+			|| int.TryParse(numStr, out parsedValue))
 		{
-			Value = parsedValue.ToString();
+			parsedValue = Math.Clamp(parsedValue, Math.Min(Min, Max), Math.Max(Min, Max));
+			Value = parsedValue.ToString(CultureInfo.InvariantCulture);
 			return true;
 		}
 

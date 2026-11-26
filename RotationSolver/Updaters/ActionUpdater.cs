@@ -5,6 +5,7 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using RotationSolver.Commands;
+using RotationSolver.Integrations.IPC;
 
 namespace RotationSolver.Updaters;
 
@@ -12,10 +13,10 @@ internal static class ActionUpdater
 {
 	internal static DateTime AutoCancelTime { get; set; } = DateTime.MinValue;
 
-	static ActionUpdater()
-	{
-		_ = EzIPC.Init(typeof(ActionUpdater), "RotationSolverReborn.ActionUpdater");
-	}
+	private static readonly EzIPCDisposalToken[] _disposalTokens =
+		EzIPC.Init(typeof(ActionUpdater), "RotationSolverReborn.ActionUpdater");
+
+	internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
 
 	[EzIPCEvent] public static Action<uint> NextGCDActionChanged = delegate { };
 	[EzIPCEvent] public static Action<uint> NextActionChanged = delegate { };
@@ -171,6 +172,10 @@ internal static class ActionUpdater
 				DataCenter.BluSlots[i] = actionManager->GetActiveBlueMageActionInSlot(i);
 			}
 		}
+		else if (DataCenter.BluSlots.AsSpan().ContainsAnyExcept(0u))
+		{
+			Array.Clear(DataCenter.BluSlots);
+		}
 
 		if (DataCenter.IsInDuty)
 		{
@@ -178,6 +183,10 @@ internal static class ActionUpdater
 			{
 				DataCenter.DutyActions[i] = DutyActionManager.GetDutyActionId(i);
 			}
+		}
+		else if (DataCenter.DutyActions.AsSpan().ContainsAnyExcept(0u))
+		{
+			Array.Clear(DataCenter.DutyActions);
 		}
 	}
 
@@ -281,7 +290,7 @@ internal static class ActionUpdater
 			return false;
 		}
 
-		if (player.TotalCastTime - DataCenter.CalculatedActionAhead > 0)
+		if (player.IsCasting && (player.TotalCastTime - player.CurrentCastTime) > DataCenter.CalculatedActionAhead)
 		{
 			return false;
 		}

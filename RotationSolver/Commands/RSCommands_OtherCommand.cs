@@ -135,37 +135,58 @@ public static partial class RSCommands
 				continue;
 			}
 
-			var type = property.PropertyType == typeof(ConditionBoolean) ? typeof(bool) : property.PropertyType;
-			if (!TryConvertValue(type, command, out var convertedValue))
-			{
-				if (property.GetValue(Service.Config) is ConditionBoolean config)
-				{
-					config.Value = !config.Value;
-					convertedValue = config.Value;
-				}
-				else
-				{
-					Svc.Chat.PrintError("Failed to parse the value.");
-					return;
-				}
-			}
-
 			if (property.PropertyType == typeof(ConditionBoolean))
 			{
-				if (convertedValue is bool boolValue)
+				if (property.GetValue(Service.Config) is not ConditionBoolean config)
 				{
-					var relay = (ConditionBoolean)property.GetValue(Service.Config)!;
-					relay.Value = boolValue;
-					convertedValue = relay;
+					Svc.Chat.PrintError("Failed to read the config value.");
+					return;
+				}
+
+				if (TryConvertValue(typeof(bool), command, out var parsedBool) && parsedBool is bool boolValue)
+				{
+					config.Value = boolValue;
 				}
 				else
 				{
-					Svc.Chat.PrintError("Failed to parse the value as boolean.");
-					return;
+					config.Value = !config.Value;
 				}
+
+				Service.Config.Save();
+				command = FormatSettingValue(config);
+
+				if (Service.Config.ShowToggledSettingInChat)
+				{
+					Svc.Chat.Print($"Changed setting {property.Name} to {command}");
+				}
+
+				return;
 			}
 
-			property.SetValue(Service.Config, convertedValue);
+			if (property.SetMethod is not { IsPublic: true })
+			{
+				Svc.Chat.PrintError($"Setting {property.Name} is read-only.");
+				return;
+			}
+
+			if (!TryConvertValue(property.PropertyType, command, out var convertedValue))
+			{
+				Svc.Chat.PrintError("Failed to parse the value.");
+				return;
+			}
+
+			try
+			{
+				property.SetValue(Service.Config, convertedValue);
+			}
+			catch (Exception ex)
+			{
+				Svc.Log.Warning($"Failed to set config {property.Name}: {ex.Message}");
+				Svc.Chat.PrintError($"Failed to set {property.Name}.");
+				return;
+			}
+
+			Service.Config.Save();
 			command = FormatSettingValue(convertedValue);
 
 			if (Service.Config.ShowToggledSettingInChat)
@@ -184,7 +205,8 @@ public static partial class RSCommands
 		convertedValue = null;
 		if (type.IsEnum)
 		{
-			return Enum.TryParse(type, command, ignoreCase: true, out convertedValue);
+			return Enum.TryParse(type, command, ignoreCase: true, out convertedValue)
+				&& Enum.IsDefined(type, convertedValue);
 		}
 
 		if (type == typeof(Vector2) || type == typeof(Vector2Int) || type == typeof(Vector4))
@@ -326,7 +348,9 @@ public static partial class RSCommands
 
 	private static void AddTargetingType(string? value)
 	{
-		if (string.IsNullOrEmpty(value) || !Enum.TryParse(typeof(TargetingType), value, true, out var parsedEnumAdd))
+		if (string.IsNullOrEmpty(value)
+			|| !Enum.TryParse(typeof(TargetingType), value, true, out var parsedEnumAdd)
+			|| !Enum.IsDefined(typeof(TargetingType), parsedEnumAdd))
 		{
 			Svc.Chat.PrintError("Invalid TargetingType value.");
 			return;
@@ -346,7 +370,9 @@ public static partial class RSCommands
 
 	private static void RemoveTargetingType(string? value)
 	{
-		if (string.IsNullOrEmpty(value) || !Enum.TryParse(typeof(TargetingType), value, true, out var parsedEnumRemove))
+		if (string.IsNullOrEmpty(value)
+			|| !Enum.TryParse(typeof(TargetingType), value, true, out var parsedEnumRemove)
+			|| !Enum.IsDefined(typeof(TargetingType), parsedEnumRemove))
 		{
 			Svc.Chat.PrintError("Invalid TargetingType value.");
 			return;
@@ -468,7 +494,7 @@ public static partial class RSCommands
 
 	internal static void DoActionCommand(string actName, double time, CommandTarget? target = null)
 	{
-		if (double.IsFinite(time))
+		if (double.IsFinite(time) && time > 0)
 		{
 			var allActions = GetCommandableActions();
 			for (var i = 0; i < allActions.Length; i++)

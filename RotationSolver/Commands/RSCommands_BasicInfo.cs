@@ -5,8 +5,11 @@ namespace RotationSolver.Commands
 {
 	public static partial class RSCommands
 	{
+		private static volatile bool _commandsEnabled;
+
 		internal static void Enable()
 		{
+			_commandsEnabled = true;
 			DataCenter.OnSpecialTypeChanged = specialType => _specialString = specialType.ToSpecialString();
 
 			var helpMessage = $"{UiString.Commands_Rotation.GetDescription()}\n"
@@ -27,6 +30,9 @@ namespace RotationSolver.Commands
 
 		internal static void Disable()
 		{
+			_commandsEnabled = false;
+			started = false;
+			_targetDelayPending = false;
 			_ = Svc.Commands.RemoveHandler(Service.COMMAND);
 			_ = Svc.Commands.RemoveHandler(Service.ALTCOMMAND);
 		}

@@ -95,7 +95,8 @@ internal class RotationConfigFloat : RotationConfigBase
 			{
 				parsedValue /= 100.0f;
 			}
-			Value = parsedValue.ToString();
+			parsedValue = Math.Clamp(parsedValue, Math.Min(Min, Max), Math.Max(Min, Max));
+			Value = parsedValue.ToString(CultureInfo.InvariantCulture);
 			return true;
 		}
 

@@ -84,7 +84,7 @@ public partial class SageRotation
 	// Eukrasia takes a GCD of its own unless it is already up.
 	private static float EukrasiaGcds()
 	{
-		return HasEukrasia ? 0 : 1;
+		return HasEukrasia ? 0f : 1f / DataCenter.GCDTime(1);
 	}
 	#endregion
 

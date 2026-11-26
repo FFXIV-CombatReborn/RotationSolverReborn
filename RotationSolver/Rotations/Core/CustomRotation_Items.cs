@@ -79,11 +79,7 @@ public partial class CustomRotation
 			{
 				if (phoenixdown.CanUse(out act, true))
 				{
-					if (phoenixdown.Use())
-					{
-						return true;
-					}
-					act = null;
+					return true;
 				}
 			}
 			return false;

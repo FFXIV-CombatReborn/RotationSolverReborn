@@ -22,17 +22,17 @@ internal class PhoenixDownItem : BaseItem
 				continue;
 			}
 
-			if (member.IsJobCategory(JobRole.Healer))
+			if (member.IsJobCategory(JobRole.Healer) && member.Level >= 12)
 			{
 				return true;
 			}
 
-			if (member.IsJobs(ECommons.ExcelServices.Job.SMN))
+			if (member.IsJobs(ECommons.ExcelServices.Job.SMN) && member.Level >= 12)
 			{
 				return true;
 			}
 
-			if (member.IsJobs(ECommons.ExcelServices.Job.RDM))
+			if (member.IsJobs(ECommons.ExcelServices.Job.RDM) && member.Level >= 64)
 			{
 				return true;
 			}

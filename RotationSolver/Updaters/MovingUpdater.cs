@@ -12,6 +12,7 @@ internal static class MovingUpdater
 	{
 		if (Player.Object == null)
 		{
+			Service.CanMove = true;
 			return;
 		}
 
@@ -32,20 +33,24 @@ internal static class MovingUpdater
 		var cfgImpro = Service.Config?.PosImprovisation == true;
 
 		ActionID action;
+		bool checkCastTime;
 		if (DateTime.Now - RSCommands._lastUsedTime < TimeSpan.FromMilliseconds(100f))
 		{
 			action = (ActionID)RSCommands._lastActionID;
+			checkCastTime = RSCommands._lastActionIsBaseAction;
 		}
 		else if (doNextAction)
 		{
 			action = (ActionID)(ActionUpdater.NextAction?.AdjustedID ?? 0);
+			checkCastTime = ActionUpdater.NextAction is IBaseAction;
 		}
 		else
 		{
 			action = 0;
+			checkCastTime = false;
 		}
 
-		var specialActions = ActionManager.GetAdjustedCastTime(ActionType.Action, (uint)action) > 0
+		var specialActions = (action != 0 && checkCastTime && Array.IndexOf(ActionBasicInfo.ActionsNoNeedCasting, (uint)action) < 0 && ActionManager.GetAdjustedCastTime(ActionType.Action, (uint)action) > 0)
 							  || (cfgFlame && Service.GetAdjustedActionId(ActionID.FlameThrowerPvE) == action)
 							  || (cfgPassage && Service.GetAdjustedActionId(ActionID.PassageOfArmsPvE) == action)
 							  || (cfgImpro && Service.GetAdjustedActionId(ActionID.ImprovisationPvE) == action);

@@ -1,4 +1,5 @@
 using Lumina.Excel.Sheets;
+using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -104,10 +105,10 @@ internal static partial class Util
 		var sb = new StringBuilder();
 		foreach (var w0 in parts)
 		{
-			var w = StartWithLowerCaseChar().Replace(w0, m => m.Value.ToUpper());
-			w = FirstCharFollowedByUpperCasesOnly().Replace(w, m => m.Value.ToLower());
-			w = LowerCaseNextToNumber().Replace(w, m => m.Value.ToUpper());
-			w = UpperCaseInside().Replace(w, m => m.Value.ToLower());
+			var w = StartWithLowerCaseChar().Replace(w0, m => m.Value.ToUpperInvariant());
+			w = FirstCharFollowedByUpperCasesOnly().Replace(w, m => m.Value.ToLowerInvariant());
+			w = LowerCaseNextToNumber().Replace(w, m => m.Value.ToUpperInvariant());
+			w = UpperCaseInside().Replace(w, m => m.Value.ToLowerInvariant());
 			sb.Append(w);
 		}
 		var result = sb.ToString();
@@ -151,7 +152,7 @@ internal static partial class Util
 			]
 			""";
 		return $$"""
-        private {{propertyType}}[] _{{propertyName}} = null;
+        private {{propertyType}}[]? _{{propertyName}};
 
         /// <inheritdoc/>
         {{modifier}} {{propertyType}}[] {{propertyName}} => _{{propertyName}} ??= {{thisItems}};
@@ -178,7 +179,7 @@ internal static partial class Util
 		return $$"""
         private readonly Lazy<IBaseAction> _{{actionName}}Creator = new(() => 
         {
-            IBaseAction action = new BaseAction((ActionID){{item.RowId}}, {{isDuty.ToString().ToLower()}});
+            IBaseAction action = new BaseAction((ActionID){{item.RowId}}, {{(isDuty ? "true" : "false")}});
             CustomRotation.LoadActionSetting(ref action);
 
             var setting = action.Setting;
@@ -214,33 +215,34 @@ internal static partial class Util
 			return description;
 		}
 
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"<colortype\([^)]*\)>", "", RegexOptions.IgnoreCase);
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"</colortype>", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"<colortype\([^)]*\)>", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"</colortype>", "", RegexOptions.IgnoreCase);
 
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"<edgecolortype\([^)]*\)>", "", RegexOptions.IgnoreCase);
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"</edgecolortype>", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"<edgecolortype\([^)]*\)>", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"</edgecolortype>", "", RegexOptions.IgnoreCase);
 
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"<if\([^)]*\)>", "", RegexOptions.IgnoreCase);
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"</if>", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"<if\([^)]*\)>", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"</if>", "", RegexOptions.IgnoreCase);
 
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"</?br/?>", " ", RegexOptions.IgnoreCase);
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"</?indent/?>", "", RegexOptions.IgnoreCase);
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"</?sheet\([^)]*\)/?>", "", RegexOptions.IgnoreCase);
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"</?value\([^)]*\)/?>", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"</?br/?>", "\n", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"</?indent/?>", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"</?sheet\([^)]*\)/?>", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"</?value\([^)]*\)/?>", "", RegexOptions.IgnoreCase);
 
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"<[^>]*\([^>]*\)[^>]*>", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"<[^>]*\([^>]*\)[^>]*>", "", RegexOptions.IgnoreCase);
 
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"[,)]\s*>", "", RegexOptions.IgnoreCase);
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"<\s*[,)]", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"[,)]\s*>", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"<\s*[,)]", "", RegexOptions.IgnoreCase);
 
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"(?<=^|\s)[,)]+(?=\s|$)", "", RegexOptions.IgnoreCase);
+		description = Regex.Replace(description, @"(?<=^|\s)[,)]+(?=\s|$)", "", RegexOptions.IgnoreCase);
 
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"\s+", " ");
+		description = description.Replace("\r\n", "\n").Replace("\r", "\n");
+		description = Regex.Replace(description, @"[^\S\n]+", " ");
+		description = Regex.Replace(description, @" *\n *", "\n");
 
-		description = System.Text.RegularExpressions.Regex.Replace(description, @"[\x00-\x08\x0B\x0C\x0E-\x1F]", "");
+		description = Regex.Replace(description, @"[\x00-\x08\x0B\x0C\x0E-\x1F]", "");
 
-		description = description.Replace("&", "&amp;");
-		description = description.Replace("\"", "&quot;");
+		description = SecurityElement.Escape(description) ?? string.Empty;
 
 		return description.Trim();
 	}
@@ -252,11 +254,13 @@ internal static partial class Util
 	/// <returns>The description name of the action.</returns>
 	public static string GetDescName(this Lumina.Excel.Sheets.Action action)
 	{
-		var jobs = action.ClassJobCategory.IsValid ? action.ClassJobCategory.Value.Name.ToString() : string.Empty;
+		var jobs = action.ClassJobCategory.IsValid ? SecurityElement.Escape(action.ClassJobCategory.Value.Name.ToString()) : string.Empty;
 		jobs = string.IsNullOrEmpty(jobs) ? string.Empty : $" ({jobs})";
 
 		var cate = (action.IsPvP || action.Unknown16) ? " <i>PvP</i>" : " <i>PvE</i>";
+		var name = SecurityElement.Escape(action.Name.ToString());
+		var category = action.ActionCategory.IsValid ? SecurityElement.Escape(action.ActionCategory.Value.Name.ToString()) : string.Empty;
 
-		return $"<see href=\"https://garlandtools.org/db/#action/{action.RowId}\"><strong>{action.Name}</strong></see>{cate}{jobs} [{action.RowId}] [{(action.ActionCategory.IsValid ? action.ActionCategory.Value.Name.ToString() : string.Empty)}]";
+		return $"<see href=\"https://garlandtools.org/db/#action/{action.RowId}\"><strong>{name}</strong></see>{cate}{jobs} [{action.RowId}] [{category}]";
 	}
 }

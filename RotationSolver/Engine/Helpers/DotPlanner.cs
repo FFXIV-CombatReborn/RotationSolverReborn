@@ -8,8 +8,6 @@ internal static class DotPlanner
 
 	private const float UnknownTtk = 600;
 
-	private const float BaseGcd = 2.5f;
-
 	internal static bool ShouldApply(IBaseAction action, IBattleChara target)
 	{
 		var setting = action.Setting;
@@ -26,13 +24,14 @@ internal static class DotPlanner
 			return false;
 		}
 
-		var gcd = DataCenter.DefaultGCDTotal > 0 ? DataCenter.DefaultGCDTotal : BaseGcd;
+		var gcd = DataCenter.GCDTime(1);
 		var extraGcds = dot.ExtraGcds?.Invoke() ?? 0;
 		var ttk = target.GetTTK();
 		var plan = new Plan(target.GameObjectId, dot, expiry, float.IsNaN(ttk) ? UnknownTtk : ttk, gcd);
 		var land = DataCenter.DefaultGCDRemain + (extraGcds * gcd) + action.Info.CastTime + ApplyDelay;
 
-		if (expiry > land && plan.Loss(land) >= plan.Loss(land + gcd + DeferMargin))
+		var setupSpent = dot.ExtraGcds != null && extraGcds <= 0f && expiry <= (2f * gcd) + ApplyDelay;
+		if (!setupSpent && expiry > land && plan.Loss(land) >= plan.Loss(land + gcd + DeferMargin))
 		{
 			return false;
 		}

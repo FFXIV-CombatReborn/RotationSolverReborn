@@ -7,7 +7,7 @@ namespace RotationSolver.Engine.Helpers
 	/// </summary>
 	public static class TargetHelper
 	{
-		private static readonly HashSet<long> s_emptyStopTargets = [];
+		private static readonly HashSet<uint> _blacklistedCache = [];
 
 		/// <summary>
 		/// Retrieves a collection of valid battle characters that can be targeted based on the specified criteria.
@@ -39,13 +39,12 @@ namespace RotationSolver.Engine.Helpers
 				return cachedTargets;
 			}
 
-			var candidates = getFriendly.HasValue ? GetValidTargets(source, groupBias) : source;
+			var candidates = getFriendly.HasValue ? GetValidTargets(source, groupBias, getFriendly.Value) : source;
 			var targets = new List<IBattleChara>(candidates.Count);
 			HashSet<uint>? blacklisted = null;
-			HashSet<long>? stopTargets = null;
 			foreach (var target in candidates.GetObjectInRadius(range))
 			{
-				if (getFriendly.HasValue || ValidityCheck(target, blacklisted ??= GetBlacklisted(), stopTargets ??= GetStopTargets()))
+				if (getFriendly.HasValue || ValidityCheck(target, blacklisted ??= GetBlacklisted(), null))
 				{
 					targets.Add(target);
 				}
@@ -55,7 +54,7 @@ namespace RotationSolver.Engine.Helpers
 			return targets;
 		}
 
-		private static List<IBattleChara> GetValidTargets(List<IBattleChara> source, float groupBias)
+		private static List<IBattleChara> GetValidTargets(List<IBattleChara> source, float groupBias, bool isFriendly)
 		{
 			var validKey = -1f - groupBias;
 			if (DataCenter.TargetsByRange.TryGetValue(validKey, out var valid))
@@ -64,11 +63,10 @@ namespace RotationSolver.Engine.Helpers
 			}
 
 			var blacklisted = GetBlacklisted();
-			var stopTargets = GetStopTargets();
 			valid = new List<IBattleChara>(source.Count);
 			foreach (var target in source)
 			{
-				if (ValidityCheck(target, blacklisted, stopTargets))
+				if (ValidityCheck(target, blacklisted, isFriendly))
 				{
 					valid.Add(target);
 				}
@@ -80,15 +78,12 @@ namespace RotationSolver.Engine.Helpers
 
 		private static HashSet<uint> GetBlacklisted()
 		{
-			return [.. DataCenter.BlacklistedNameIds];
+			_blacklistedCache.Clear();
+			DataCenter.CopyBlacklistedNameIds(_blacklistedCache);
+			return _blacklistedCache;
 		}
 
-		private static HashSet<long> GetStopTargets()
-		{
-			return Service.Config.FilterStopMark2 ? [.. MarkingHelper.GetStopTargets()] : s_emptyStopTargets;
-		}
-
-		private static bool ValidityCheck(IBattleChara battleChara, HashSet<uint> blacklisted, HashSet<long> stopTargets)
+		private static bool ValidityCheck(IBattleChara battleChara, HashSet<uint> blacklisted, bool? knownFriendly)
 		{
 			if (battleChara == null)
 			{
@@ -108,23 +103,23 @@ namespace RotationSolver.Engine.Helpers
 				return false;
 			}
 
-			var isEnemy = battleChara.IsEnemy();
-			if (!isEnemy && battleChara.IsConditionCannotTarget())
-			{
-				return false;
-			}
-
 			if (blacklisted.Contains(battleChara.NameId))
 			{
 				return false;
 			}
 
-			if (isEnemy && !battleChara.IsAttackable())
+			if (knownFriendly == true)
 			{
-				return false;
+				return !battleChara.IsConditionCannotTarget();
 			}
 
-			return !Service.Config.FilterStopMark2 || !isEnemy || !stopTargets.Contains((long)battleChara.GameObjectId);
+			var isEnemy = knownFriendly == false || battleChara.IsEnemy();
+			if (!isEnemy)
+			{
+				return !battleChara.IsConditionCannotTarget();
+			}
+
+			return battleChara.IsAttackable();
 		}
 	}
 }

@@ -7,7 +7,7 @@ namespace RotationSolver.Integrations.IPC;
 internal static class BMRTimeline_IPCSubscriber
 {
 	private static readonly EzIPCDisposalToken[] _disposalTokens =
-		EzIPC.Init(typeof(BMRTimeline_IPCSubscriber), "BossMod", SafeWrapper.AnyException);
+		EzIPC.Init(typeof(BMRTimeline_IPCSubscriber), "BossMod", SafeWrapper.None);
 
 	internal static bool IsEnabled => IPCSubscriber_Common.IsReady("BossModReborn");
 

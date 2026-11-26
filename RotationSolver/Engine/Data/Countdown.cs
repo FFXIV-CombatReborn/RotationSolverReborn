@@ -12,10 +12,24 @@ public unsafe struct Countdown
 	/// <summary>
 	/// 
 	/// </summary>
-	public static bool CountdownActive => AgentCountDownSettingDialog.Instance()->Active;
+	public static bool CountdownActive
+	{
+		get
+		{
+			var dialog = AgentCountDownSettingDialog.Instance();
+			return dialog != null && dialog->Active;
+		}
+	}
 
 	/// <summary>
 	/// Gets the remaining time of the countdown.
 	/// </summary>
-	public static float TimeRemaining => CountdownActive ? MathF.Max(0f, AgentCountDownSettingDialog.Instance()->TimeRemaining) : 0f;
+	public static float TimeRemaining
+	{
+		get
+		{
+			var dialog = AgentCountDownSettingDialog.Instance();
+			return dialog != null && dialog->Active ? MathF.Max(0f, dialog->TimeRemaining) : 0f;
+		}
+	}
 }

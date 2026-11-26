@@ -9,11 +9,44 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 {
 	private int[]? _enumKeys;
 	private string[]? _displayNames;
+	private (Func<Configs, int> Get, Action<Configs, int> Set)? _enumAccessors;
+
+	private static (Func<Configs, int>, Action<Configs, int>) CreateEnumAccessors(PropertyInfo property)
+	{
+		if (typeof(Configs).IsAssignableFrom(property.DeclaringType) && property.PropertyType.IsEnum)
+		{
+			var method = typeof(EnumSearch).GetMethod(nameof(CreateEnumAccessorsCore), BindingFlags.Static | BindingFlags.NonPublic)!
+				.MakeGenericMethod(property.PropertyType);
+			return ((Func<Configs, int>, Action<Configs, int>))method.Invoke(null, [property])!;
+		}
+
+		return (
+			cfg => Convert.ToInt32(property.GetValue(cfg)),
+			(cfg, val) => property.SetValue(cfg, Enum.ToObject(property.PropertyType, val)));
+	}
+
+	private static (Func<Configs, int>, Action<Configs, int>) CreateEnumAccessorsCore<TEnum>(PropertyInfo property)
+		where TEnum : struct, Enum
+	{
+		var getter = property.GetMethod?.CreateDelegate<Func<Configs, TEnum>>();
+		var setter = property.SetMethod?.CreateDelegate<Action<Configs, TEnum>>();
+		return (
+			getter != null ? cfg => Convert.ToInt32(getter(cfg)) : cfg => Convert.ToInt32(property.GetValue(cfg)),
+			setter != null ? (cfg, val) => setter(cfg, (TEnum)Enum.ToObject(typeof(TEnum), val)) : (cfg, val) => property.SetValue(cfg, Enum.ToObject(typeof(TEnum), val)));
+	}
 
 	protected int Value
 	{
-		get => Convert.ToInt32(_property.GetValue(Service.Config));
-		set => _property.SetValue(Service.Config, Enum.ToObject(_property.PropertyType, value));
+		get
+		{
+			_enumAccessors ??= CreateEnumAccessors(_property);
+			return _enumAccessors.Value.Get(Service.Config);
+		}
+		set
+		{
+			_enumAccessors ??= CreateEnumAccessors(_property);
+			_enumAccessors.Value.Set(Service.Config, value);
+		}
 	}
 
 	private void EnsureEnumCache()
@@ -104,7 +137,7 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 			leadingIcon: RowIcon);
 
 		ImGui.SetCursorScreenPos(row.ControlPosition);
-		if (M3Widgets.Combo($"##Config_{ID}{GetHashCode()}", ref currentIndex, displayNames, comboWidth)
+		if (M3Widgets.Combo(ControlId, ref currentIndex, displayNames, comboWidth)
 			&& currentIndex >= 0 && currentIndex < enumKeys.Length)
 		{
 			Value = enumKeys[currentIndex];

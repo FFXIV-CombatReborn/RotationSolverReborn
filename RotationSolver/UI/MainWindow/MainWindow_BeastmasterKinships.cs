@@ -163,7 +163,7 @@ public partial class MainWindow
 				var name = _kinshipDisplay.TryGetValue(kinType, out var display) ? display.Name : kinType.ToString();
 
 				_ = ImGui.TableNextColumn();
-				if (display.Action != ActionID.None && display.Action.GetTexture(out var texture) && texture?.Handle != null)
+				if (display.Action != ActionID.None && display.Action.GetTexture(out var texture) && texture is { Handle.IsNull: false })
 				{
 					ImGui.Image(texture.Handle, new Vector2(iconSize));
 					ImguiTooltips.HoveredTooltip(display.Action.ToString().Replace("PvE", string.Empty));

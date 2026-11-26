@@ -23,7 +23,9 @@ public static partial class ObjectHelper
 				List<MethodInfo> matching = [];
 				foreach (var m in methods)
 				{
-					if (m.ReturnType == typeof(TetherInfo[]) || typeof(System.Collections.IEnumerable).IsAssignableFrom(m.ReturnType))
+					if (m.GetParameters().Length == 0
+						&& m.ReturnType != typeof(string)
+						&& (m.ReturnType == typeof(TetherInfo[]) || typeof(System.Collections.IEnumerable).IsAssignableFrom(m.ReturnType)))
 					{
 						matching.Add(m);
 					}
@@ -34,7 +36,15 @@ public static partial class ObjectHelper
 
 			foreach (var m in candidates)
 			{
-				var res = m.Invoke(null, null);
+				object? res;
+				try
+				{
+					res = m.Invoke(null, null);
+				}
+				catch
+				{
+					continue;
+				}
 				if (res == null)
 				{
 					continue;

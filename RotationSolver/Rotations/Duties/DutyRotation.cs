@@ -10,6 +10,8 @@ namespace RotationSolver.Rotations.Duties;
 /// </summary>
 public partial class DutyRotation : IDisposable
 {
+	public virtual void OnFrameUpdate() { }
+
 	#region GCD
 	public virtual bool EmergencyGCD(IAction? nextGCD, out IAction? act)
 	{

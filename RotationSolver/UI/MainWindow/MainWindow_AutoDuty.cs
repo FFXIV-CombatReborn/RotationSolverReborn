@@ -8,6 +8,57 @@ namespace RotationSolver.UI;
 
 public partial class MainWindow
 {
+	private static readonly AutoDutyPlugin[] _autoDutyPlugins =
+	[
+		new AutoDutyPlugin { Name = "AutoDuty", Url = "https://puni.sh/api/repository/erdelf" },
+		new AutoDutyPlugin { Name = "vnavmesh", Url = "https://puni.sh/api/repository/veyn" },
+		new AutoDutyPlugin { Name = "BossModReborn", Url = "https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json" },
+		new AutoDutyPlugin { Name = "Boss Mod", Url = "https://puni.sh/api/repository/veyn" },
+		new AutoDutyPlugin { Name = "Avarice", Url = "https://love.puni.sh/ment.json" },
+		new AutoDutyPlugin { Name = "AutoRetainer", Url = "https://love.puni.sh/ment.json" },
+		new AutoDutyPlugin { Name = "SkipCutscene", Url = "https://raw.githubusercontent.com/KangasZ/DalamudPluginRepository/main/plugin_repository.json" },
+		new AutoDutyPlugin { Name = "AntiAfkKick", Url = "https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json" },
+		new AutoDutyPlugin { Name = "Gearsetter", Url = "https://puni.sh/api/repository/vera" },
+	];
+
+	private static long _autoDutyCacheTick = long.MinValue;
+	private static readonly HashSet<string> _autoDutyEnabledNames = new(StringComparer.OrdinalIgnoreCase);
+	private static readonly HashSet<string> _autoDutyInstalledNames = new(StringComparer.OrdinalIgnoreCase);
+	private static readonly HashSet<string> _autoDutyRepos = new(StringComparer.OrdinalIgnoreCase);
+
+	private static void RefreshAutoDutyPluginCache()
+	{
+		var now = Environment.TickCount64;
+		if (_autoDutyCacheTick != long.MinValue && now - _autoDutyCacheTick < 1000)
+		{
+			return;
+		}
+
+		_autoDutyCacheTick = now;
+		_autoDutyEnabledNames.Clear();
+		_autoDutyInstalledNames.Clear();
+		_autoDutyRepos.Clear();
+
+		foreach (var x in Svc.PluginInterface.InstalledPlugins)
+		{
+			_ = _autoDutyInstalledNames.Add(x.Name);
+			_ = _autoDutyInstalledNames.Add(x.InternalName);
+			if (x.IsLoaded)
+			{
+				_ = _autoDutyEnabledNames.Add(x.Name);
+				_ = _autoDutyEnabledNames.Add(x.InternalName);
+			}
+		}
+
+		foreach (var plugin in _autoDutyPlugins)
+		{
+			if (DalamudReflector.HasRepo(plugin.Url))
+			{
+				_ = _autoDutyRepos.Add(plugin.Url);
+			}
+		}
+	}
+
 	private static void DrawAutoduty()
 	{
 		var scheme = M3.Scheme;
@@ -19,48 +70,20 @@ public partial class MainWindow
 		ImGui.Dummy(new Vector2(0f, M3.Space2));
 		DrawPageIntro("These are the plugins AutoDuty relies on, and their current state.");
 
-		List<AutoDutyPlugin> pluginsToCheck =
-		[
-			new AutoDutyPlugin { Name = "AutoDuty", Url = "https://puni.sh/api/repository/erdelf" },
-			new AutoDutyPlugin { Name = "vnavmesh", Url = "https://puni.sh/api/repository/veyn" },
-			new AutoDutyPlugin { Name = "BossModReborn", Url = "https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json" },
-			new AutoDutyPlugin { Name = "Boss Mod", Url = "https://puni.sh/api/repository/veyn" },
-			new AutoDutyPlugin { Name = "Avarice", Url = "https://love.puni.sh/ment.json" },
-			new AutoDutyPlugin { Name = "AutoRetainer", Url = "https://love.puni.sh/ment.json" },
-			new AutoDutyPlugin { Name = "SkipCutscene", Url = "https://raw.githubusercontent.com/KangasZ/DalamudPluginRepository/main/plugin_repository.json" },
-			new AutoDutyPlugin { Name = "AntiAfkKick", Url = "https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json" },
-			new AutoDutyPlugin { Name = "Gearsetter", Url = "https://puni.sh/api/repository/vera" },
-		];
+		RefreshAutoDutyPluginCache();
 
-		var isBossModEnabled = false;
-		var isBossModRebornEnabled = false;
-		foreach (var plugin in pluginsToCheck)
-		{
-			if (plugin.Name == "Boss Mod" && plugin.IsEnabled)
-			{
-				isBossModEnabled = true;
-			}
+		var isBossModEnabled = _autoDutyEnabledNames.Contains("Boss Mod");
+		var isBossModRebornEnabled = _autoDutyEnabledNames.Contains("BossModReborn");
 
-			if (plugin.Name == "BossModReborn" && plugin.IsEnabled)
-			{
-				isBossModRebornEnabled = true;
-			}
-
-			if (isBossModEnabled && isBossModRebornEnabled)
-			{
-				break;
-			}
-		}
-
-		foreach (var plugin in pluginsToCheck)
+		foreach (var plugin in _autoDutyPlugins)
 		{
 			if (plugin.Name == "Boss Mod" && !isBossModEnabled)
 			{
 				continue;
 			}
 
-			var isEnabled = plugin.IsEnabled;
-			var isInstalled = plugin.IsInstalled;
+			var isEnabled = _autoDutyEnabledNames.Contains(plugin.Name);
+			var isInstalled = _autoDutyInstalledNames.Contains(plugin.Name);
 
 			Vector4 accent;
 			string? advice = null;
@@ -109,13 +132,15 @@ public partial class MainWindow
 
 			ImGui.Dummy(new Vector2(0f, M3.Space2));
 
-			if (DalamudReflector.HasRepo(plugin.Url) && !isInstalled)
+			var hasRepo = _autoDutyRepos.Contains(plugin.Url);
+			if (hasRepo && !isInstalled)
 			{
 				if (M3Widgets.Button($"##autoduty_add_plugin_{plugin.Name}", "Add plugin", M3ButtonStyle.Tonal, FontAwesomeIcon.Download))
 				{
 					PluginLog.Information($"Attempting to add plugin: {plugin.Name} from URL: {plugin.Url}");
 					var pluginName = plugin.Name;
 					var pluginUrl = plugin.Url;
+					_autoDutyCacheTick = long.MinValue;
 					_ = DalamudReflector.AddPlugin(pluginUrl, pluginName).ContinueWith(t =>
 					{
 						if (t.IsCompletedSuccessfully && t.Result)
@@ -127,17 +152,22 @@ public partial class MainWindow
 							PluginLog.Error($"Failed to add plugin: {pluginName} from URL: {pluginUrl}");
 						}
 
-						DalamudReflector.ReloadPluginMasters();
+						_ = Svc.Framework.Run(() =>
+						{
+							DalamudReflector.ReloadPluginMasters();
+							_autoDutyCacheTick = long.MinValue;
+						});
 					});
 				}
 			}
-			else if (!DalamudReflector.HasRepo(plugin.Url))
+			else if (!hasRepo)
 			{
 				if (M3Widgets.Button($"##autoduty_add_repo_{plugin.Name}", "Add repository", M3ButtonStyle.Outlined, FontAwesomeIcon.Plus))
 				{
 					PluginLog.Information($"Attempting to add repository: {plugin.Url}");
 					DalamudReflector.AddRepo(plugin.Url, true);
 					DalamudReflector.ReloadPluginMasters();
+					_autoDutyCacheTick = long.MinValue;
 					PluginLog.Information($"Successfully added repository: {plugin.Url}");
 				}
 			}

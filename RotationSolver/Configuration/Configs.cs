@@ -136,16 +136,38 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 	private readonly ConcurrentDictionary<string, string> _rotationConfigurations = new();
 
 	public ConcurrentDictionary<uint, string> DutyRotationChoice = new();
+	public ConcurrentDictionary<string, Dictionary<string, string>> DutyRotationConfigurations = new();
+
+	private readonly Lock _saveLock = new();
 
 	public void Save()
 	{
 #if DEBUG
 		PluginLog.Information("Saved configurations.");
 #endif
-		var path = Svc.PluginInterface.ConfigFile.FullName;
-		var tempPath = path + ".tmp";
-		File.WriteAllText(tempPath, JsonConvert.SerializeObject(this, Formatting.Indented));
-		File.Move(tempPath, path, true);
+		lock (_saveLock)
+		{
+			var path = Svc.PluginInterface.ConfigFile.FullName;
+			var tempPath = $"{path}.{Guid.NewGuid():N}.tmp";
+			try
+			{
+				File.WriteAllText(tempPath, JsonConvert.SerializeObject(this, Formatting.Indented));
+				File.Move(tempPath, path, true);
+			}
+			finally
+			{
+				if (File.Exists(tempPath))
+				{
+					try
+					{
+						File.Delete(tempPath);
+					}
+					catch
+					{
+					}
+				}
+			}
+		}
 	}
 
 	internal void UpdateSpacingDefault()
@@ -180,21 +202,45 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 
 	public void Restore()
 	{
-		File.Copy(Svc.PluginInterface.ConfigFile.FullName, Svc.PluginInterface.ConfigFile.Directory + "\\RotationSolver_SafetySave.json", true);
-		File.Copy(Svc.PluginInterface.ConfigFile.Directory + "\\RotationSolver_Backup.json", Svc.PluginInterface.ConfigFile.FullName, true);
+		var configDir = Svc.PluginInterface.ConfigFile.Directory?.FullName;
+		if (string.IsNullOrEmpty(configDir))
+		{
+			return;
+		}
 
-		var restoredConfigs = JsonConvert.DeserializeObject<Configs>(
-									  File.ReadAllText(Svc.PluginInterface.ConfigFile.FullName))
-								  ?? new Configs();
+		var backupPath = Path.Combine(configDir, "RotationSolver_Backup.json");
+		if (!File.Exists(backupPath))
+		{
+			Svc.Toasts.ShowNormal("No backup configs file found.");
+			return;
+		}
 
-		if (restoredConfigs.Version != CurrentVersion)
+		Configs? restoredConfigs;
+		try
+		{
+			restoredConfigs = JsonConvert.DeserializeObject<Configs>(File.ReadAllText(backupPath));
+		}
+		catch (Exception ex)
+		{
+			PluginLog.Warning($"Failed to read backup configs: {ex.Message}");
+			Svc.Toasts.ShowNormal("Backed up configs could not be read.");
+			return;
+		}
+
+		if (restoredConfigs == null || restoredConfigs.Version != CurrentVersion)
 		{
 			Svc.Toasts.ShowNormal("Backed up configs are not compatible with the current version.");
 			return;
 		}
 
+		var safetySavePath = Path.Combine(configDir, "RotationSolver_SafetySave.json");
+		if (File.Exists(Svc.PluginInterface.ConfigFile.FullName))
+		{
+			File.Copy(Svc.PluginInterface.ConfigFile.FullName, safetySavePath, true);
+		}
+
 		Service.Config = restoredConfigs;
-		Save();
+		restoredConfigs.Save();
 		Svc.Toasts.ShowNormal("Configs restored. Closing to set.");
 		DataCenter.HoldingRestore = true;
 	}
