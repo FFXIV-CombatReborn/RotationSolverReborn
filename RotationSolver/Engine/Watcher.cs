@@ -127,6 +127,10 @@ public static class Watcher
 						{
 							DataCenter.KnockbackFinished = DateTime.Now + TimeSpan.FromSeconds(knock.Distance / (float)knock.Speed);
 						}
+						else
+						{
+							DataCenter.KnockbackFinished = DataCenter.KnockbackStart;
+						}
 
 						if (set.Action.HasValue && Service.Config.RecordKnockbackies
 							&& OtherConfiguration.HostileCastingKnockback.Add(set.Action.Value.RowId))
@@ -255,38 +259,41 @@ public static class Watcher
 
 			if (attackedTargetsCount > 0)
 			{
-				foreach (var effect in set.TargetEffects)
+				lock (DataCenter._attackedTargetsLock)
 				{
-					if (!effect.GetSpecificTypeEffect(ActionEffectType.Damage, out _))
+					foreach (var effect in set.TargetEffects)
 					{
-						continue;
-					}
-
-					var targetExists = false;
-					foreach ((var id, var time) in attackedTargets)
-					{
-						if (id == effect.TargetID)
+						if (!effect.GetSpecificTypeEffect(ActionEffectType.Damage, out _))
 						{
-							targetExists = true;
-							break;
+							continue;
 						}
-					}
-					if (targetExists)
-					{
-						continue;
-					}
 
-					while (attackedTargets.Count >= attackedTargetsCount && attackedTargets.Count > 0)
-					{
-						(var id, var time) = attackedTargets.Peek();
-						if (id == effect.TargetID)
+						var targetExists = false;
+						foreach ((var id, var time) in attackedTargets)
 						{
-							break;
+							if (id == effect.TargetID)
+							{
+								targetExists = true;
+								break;
+							}
 						}
-						_ = attackedTargets.Dequeue();
-					}
+						if (targetExists)
+						{
+							continue;
+						}
 
-					attackedTargets.Enqueue((effect.TargetID, DateTime.Now));
+						while (attackedTargets.Count >= attackedTargetsCount && attackedTargets.Count > 0)
+						{
+							(var id, var time) = attackedTargets.Peek();
+							if (id == effect.TargetID)
+							{
+								break;
+							}
+							_ = attackedTargets.Dequeue();
+						}
+
+						attackedTargets.Enqueue((effect.TargetID, DateTime.Now));
+					}
 				}
 			}
 

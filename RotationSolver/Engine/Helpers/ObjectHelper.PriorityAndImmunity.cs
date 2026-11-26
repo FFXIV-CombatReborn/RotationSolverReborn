@@ -726,21 +726,45 @@ public static partial class ObjectHelper
 
 	internal static unsafe uint GetNamePlateIcon(this IBattleChara battleChara)
 	{
-		return battleChara.Struct()->NamePlateIconId;
+		if (battleChara == null)
+		{
+			return 0;
+		}
+
+		var s = battleChara.Struct();
+		return s == null ? 0 : s->NamePlateIconId;
 	}
 
 	internal static unsafe EventHandlerContent GetEventType(this IBattleChara battleChara)
 	{
-		return battleChara.Struct()->EventId.ContentId;
+		if (battleChara == null)
+		{
+			return default;
+		}
+
+		var s = battleChara.Struct();
+		return s == null ? default : s->EventId.ContentId;
 	}
 
 	internal static unsafe BattleNpcSubKind GetBattleNPCSubKind(this IBattleChara battleChara)
 	{
-		return (BattleNpcSubKind)battleChara.Struct()->SubKind;
+		if (battleChara == null)
+		{
+			return default;
+		}
+
+		var s = battleChara.Struct();
+		return s == null ? default : (BattleNpcSubKind)s->SubKind;
 	}
 
 	internal static unsafe uint FateId(this IBattleChara battleChara)
 	{
-		return battleChara.Struct()->FateId;
+		if (battleChara == null)
+		{
+			return 0;
+		}
+
+		var s = battleChara.Struct();
+		return s == null ? 0u : (uint)s->FateId;
 	}
 }

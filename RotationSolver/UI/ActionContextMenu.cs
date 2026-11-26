@@ -132,7 +132,11 @@ internal static class ActionContextMenu
 			PrefixColor = 545
 		};
 
-		toggleEntry.OnClicked += _ => contextAction.IsEnabled = !enabled;
+		toggleEntry.OnClicked += _ =>
+		{
+			contextAction.IsEnabled = !enabled;
+			Service.Config.Save();
+		};
 		args.AddMenuItem(toggleEntry);
 	}
 }

@@ -99,6 +99,22 @@ public partial class MainWindow
 		(UiString.ConfigWindow_About_Compatibility, FontAwesomeIcon.PuzzlePiece),
 		(UiString.ConfigWindow_About_Links, FontAwesomeIcon.Link));
 
+	private static string[]? _sortedSupportersSource;
+	private static string[]? _sortedSupporters;
+
+	private static string[] GetSortedSupporters(string[] supporters)
+	{
+		if (!ReferenceEquals(_sortedSupportersSource, supporters) || _sortedSupporters == null)
+		{
+			_sortedSupportersSource = supporters;
+			var copy = (string[])supporters.Clone();
+			Array.Sort(copy, StringComparer.OrdinalIgnoreCase);
+			_sortedSupporters = copy;
+		}
+
+		return _sortedSupporters;
+	}
+
 	private static void DrawThanksToSupporters()
 	{
 		if (M3Widgets.Button("##join_supporters", "Join this list", M3ButtonStyle.Tonal, FontAwesomeIcon.MugHot))
@@ -117,14 +133,13 @@ public partial class MainWindow
 			$"Special thanks to the {_supporters.Length} supporters, including those not listed here",
 			M3.Scheme.Tertiary);
 
-		var names = new List<string>(_supporters);
-		names.Sort(StringComparer.OrdinalIgnoreCase);
+		var names = GetSortedSupporters(_supporters);
 
 		var startX = ImGui.GetCursorPosX();
 		var available = ImGui.GetContentRegionAvail().X;
 		var usedWidth = 0f;
 
-		for (var i = 0; i < names.Count; i++)
+		for (var i = 0; i < names.Length; i++)
 		{
 			var name = names[i];
 			var chipWidth = M3Widgets.ChipWidth(name) + M3.Space1;
@@ -204,13 +219,14 @@ public partial class MainWindow
 
 		foreach (var item in PluginCompatibility.IncompatiblePlugins)
 		{
+			var isEnabled = item.IsEnabled;
 			var severity = item.Type.HasFlag(CompatibleType.Crash) || item.Type.HasFlag(CompatibleType.Broken)
 				? M3Severity.Error
 				: M3Severity.Warning;
 			var accent = M3.Severity(severity);
 
 			using var card = M3Card.Begin($"compat_{item.Name}", null,
-				style: item.IsEnabled ? M3CardStyle.Filled : M3CardStyle.Outlined, accent: accent);
+				style: isEnabled ? M3CardStyle.Filled : M3CardStyle.Outlined, accent: accent);
 
 			var iconUrl = string.IsNullOrEmpty(item.Icon)
 				? "https://raw.githubusercontent.com/goatcorp/DalamudAssets/master/UIRes/defaultIcon.png"
@@ -234,8 +250,8 @@ public partial class MainWindow
 
 			ImGui.SameLine(0f, M3.Space2);
 			_ = M3Widgets.Pill($"##compat_state_{item.Name}",
-				item.IsEnabled ? "Enabled" : "Not loaded",
-				item.IsEnabled ? accent : scheme.OnSurfaceVariant);
+				isEnabled ? "Enabled" : "Not loaded",
+				isEnabled ? accent : scheme.OnSurfaceVariant);
 
 			DisplayPluginType(item.Type);
 

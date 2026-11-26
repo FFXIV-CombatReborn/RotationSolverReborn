@@ -210,7 +210,10 @@ namespace RotationSolver.Updaters
 				return false;
 			}
 
-			var action = actionSheet.GetRow(actionId);
+			if (!actionSheet.TryGetRow(actionId, out var action))
+			{
+				return false;
+			}
 			var type = ActionHelper.GetActionCate(action);
 
 			if (type == ActionCate.None)

@@ -721,7 +721,7 @@ public partial class DutyRotation
 		setting.ActionCheck = () => SamuraiLevel >= 2;
 		setting.TargetType = TargetType.Self;
 		setting.IsFriendly = true;
-		setting.StatusNeed = [StatusID.Shirahadori];
+		setting.StatusProvide = [StatusID.Shirahadori];
 	}
 
 	/// <summary>
@@ -1327,7 +1327,7 @@ public partial class DutyRotation
 	{
 		setting.ActionCheck = () => SummonerLevel >= 4;
 		setting.IsFriendly = false;
-		setting.AspectOverride = Aspect.Lightning;
+		setting.AspectOverride = Aspect.Wind;
 		setting.TargetStatusNeed = [StatusID.WindWeakness];
 		setting.StatusFromSelf = false;
 		setting.CreateConfig = () => new ActionConfig()

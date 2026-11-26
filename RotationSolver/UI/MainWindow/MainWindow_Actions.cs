@@ -10,6 +10,66 @@ namespace RotationSolver.UI;
 
 public partial class MainWindow
 {
+	private static IEnumerable<IGrouping<string, IAction>>? _cachedGroupedActionsSource;
+	private static readonly Dictionary<string, IAction[]> _sortedActionGroupCache = [];
+
+	private static IAction[] GetSortedActionGroup(string key, IGrouping<string, IAction> group, IEnumerable<IGrouping<string, IAction>> sourceRef)
+	{
+		if (!ReferenceEquals(_cachedGroupedActionsSource, sourceRef))
+		{
+			_cachedGroupedActionsSource = sourceRef;
+			_sortedActionGroupCache.Clear();
+		}
+
+		if (_sortedActionGroupCache.TryGetValue(key, out var cached))
+		{
+			return cached;
+		}
+
+		List<IAction> source = [.. group];
+		var byAdjusted = new Dictionary<uint, List<IAction>>();
+		for (var i = 0; i < source.Count; i++)
+		{
+			var a = source[i];
+			if (!byAdjusted.TryGetValue(a.AdjustedID, out var list))
+			{
+				list = [];
+				byAdjusted[a.AdjustedID] = list;
+			}
+			list.Add(a);
+		}
+
+		var groups = new List<(uint AdjustedID, byte MinLevel, List<IAction> Items)>(byAdjusted.Count);
+		foreach (var kv in byAdjusted)
+		{
+			var items = kv.Value;
+			items.Sort((x, y) =>
+			{
+				var cmp = x.Level.CompareTo(y.Level);
+				return cmp != 0 ? cmp : x.ID.CompareTo(y.ID);
+			});
+			var minLvl = items.Count > 0 ? items[0].Level : (byte)0;
+			groups.Add((kv.Key, minLvl, items));
+		}
+
+		groups.Sort((g1, g2) =>
+		{
+			var cmp = g1.MinLevel.CompareTo(g2.MinLevel);
+			return cmp != 0 ? cmp : g1.AdjustedID.CompareTo(g2.AdjustedID);
+		});
+
+		var sorted = new IAction[source.Count];
+		var pos = 0;
+		foreach ((_, _, var items) in groups)
+		{
+			items.CopyTo(sorted, pos);
+			pos += items.Count;
+		}
+
+		_sortedActionGroupCache[key] = sorted;
+		return sorted;
+	}
+
 	private unsafe void DrawActions()
 	{
 		DrawPageIntro(UiString.ConfigWindow_Actions_Description.GetDescription());
@@ -35,49 +95,13 @@ public partial class MainWindow
 						_actionsList.AddCollapsingHeader(() => pair.Key, () =>
 						{
 							var index = 0;
-
-							List<IAction> source = [.. pair];
-
-							var byAdjusted = new Dictionary<uint, List<IAction>>();
-							for (var i = 0; i < source.Count; i++)
-							{
-								var a = source[i];
-								if (!byAdjusted.TryGetValue(a.AdjustedID, out var list))
-								{
-									list = [];
-									byAdjusted[a.AdjustedID] = list;
-								}
-								list.Add(a);
-							}
-
-							var groups = new List<(uint AdjustedID, byte MinLevel, List<IAction> Items)>(byAdjusted.Count);
-							foreach (var kv in byAdjusted)
-							{
-								var items = kv.Value;
-								items.Sort((x, y) =>
-								{
-									var cmp = x.Level.CompareTo(y.Level);
-									return cmp != 0 ? cmp : x.ID.CompareTo(y.ID);
-								});
-								var minLvl = items.Count > 0 ? items[0].Level : (byte)0;
-								groups.Add((kv.Key, minLvl, items));
-							}
-
-							groups.Sort((g1, g2) =>
-							{
-								var cmp = g1.MinLevel.CompareTo(g2.MinLevel);
-								return cmp != 0 ? cmp : g1.AdjustedID.CompareTo(g2.AdjustedID);
-							});
-
-							List<IAction> sorted = new(source.Count);
-							foreach ((var AdjustedID, var MinLevel, var Items) in groups)
-							{
-								sorted.AddRange(Items);
-							}
+							var sorted = GetSortedActionGroup(pair.Key, pair, allGroupedActions);
+							var hasReadyCheckTex = IconSet.GetTexture("ui/uld/readycheck_hr1.tex", out var readyCheckTexture)
+								&& readyCheckTexture is { Handle.IsNull: false };
 
 							foreach (var item in sorted)
 							{
-								if (!IconSet.GetTexture(item.IconID, out var icon))
+								if (!IconSet.GetTexture(item.IconID, out var icon) || icon is not { Handle.IsNull: false })
 								{
 									continue;
 								}
@@ -95,11 +119,11 @@ public partial class MainWindow
 								}
 								ImGuiHelper.DrawActionOverlay(cursor, size, _activeAction == item ? 1 : 0);
 
-								if (IconSet.GetTexture("ui/uld/readycheck_hr1.tex", out var texture))
+								if (hasReadyCheckTex && readyCheckTexture != null)
 								{
 									Vector2 offset = new(1 / 12f, 1 / 6f);
 									ImGui.SetCursorPos(cursor + (new Vector2(0.6f, 0.7f) * size));
-									ImGui.Image(texture.Handle, Vector2.One * size * 0.5f,
+									ImGui.Image(readyCheckTexture.Handle, Vector2.One * size * 0.5f,
 										new Vector2(item.IsEnabled ? 0 : 0.5f, 0) + offset,
 										new Vector2(item.IsEnabled ? 0.5f : 1, 1) - offset);
 								}
@@ -242,7 +266,7 @@ public partial class MainWindow
 						if (M3Widgets.RowDragInt($"{UiString.ConfigWindow_Actions_GcdCount.GetDescription()}##{a}",
 							ref StatusRefreshGcdCount, 1, 10))
 						{
-							config.StatusRefreshGcdCount = (byte)StatusRefreshGcdCount;
+							config.StatusRefreshGcdCount = (byte)Math.Clamp(StatusRefreshGcdCount, 1, byte.MaxValue);
 						}
 					}
 				}
@@ -253,7 +277,7 @@ public partial class MainWindow
 					if (M3Widgets.RowDragInt($"{UiString.ConfigWindow_Actions_AoeCount.GetDescription()}##{a}",
 						ref aoeCount, 1, 10))
 					{
-						config.AoeCount = (byte)aoeCount;
+						config.AoeCount = (byte)Math.Clamp(aoeCount, 1, byte.MaxValue);
 					}
 				}
 

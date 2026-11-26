@@ -780,7 +780,7 @@ internal partial class Configs
 		Description = "The minimum time between RSR's updates. Raising it can help your framerate but can hurt rotation performance.",
 		Filter = BasicTimer, Order = 1)]
 	[JobConfig, Range(0, 0.3f, ConfigUnitType.Seconds, 0.002f)]
-	public float MinUpdatingTime { get; set; } = 0.00f;
+	private readonly float _minUpdatingTime = 0.00f;
 
 	[JobConfig, Range(0.05f, 0.4f, ConfigUnitType.Percent)]
 	[UI("Action ahead", Filter = BasicTimer,

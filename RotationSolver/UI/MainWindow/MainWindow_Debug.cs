@@ -16,16 +16,28 @@ namespace RotationSolver.UI;
 
 public partial class MainWindow
 {
+	private static long _debugTraceCheckTick = long.MinValue;
+	private static bool _cachedTraceHasFile;
+	private static bool _cachedTraceHasAnyData;
+
 	private static void DrawDebug()
 	{
 		_allSearchable.DrawItems(Configs.Debug);
 
 		{
 			var tracePath = ActionTracer.CurrentFilePath;
-			var hasFile = !string.IsNullOrEmpty(tracePath) && File.Exists(tracePath);
-			var hasAnyData = hasFile
-				|| !string.IsNullOrEmpty(ActionTracer.LastFrameSummary)
-				|| ActionTracer.HasAnyTraceFiles();
+			var now = Environment.TickCount64;
+			if (_debugTraceCheckTick == long.MinValue || now - _debugTraceCheckTick >= 1000)
+			{
+				_debugTraceCheckTick = now;
+				_cachedTraceHasFile = !string.IsNullOrEmpty(tracePath) && File.Exists(tracePath);
+				_cachedTraceHasAnyData = _cachedTraceHasFile
+					|| !string.IsNullOrEmpty(ActionTracer.LastFrameSummary)
+					|| ActionTracer.HasAnyTraceFiles();
+			}
+
+			var hasFile = _cachedTraceHasFile;
+			var hasAnyData = _cachedTraceHasAnyData;
 
 			if (!hasFile)
 			{
@@ -62,6 +74,7 @@ public partial class MainWindow
 			if (ImGui.Button("Clear Trace"))
 			{
 				ActionTracer.ClearTrace();
+				_debugTraceCheckTick = long.MinValue;
 			}
 			if (!hasAnyData)
 			{
@@ -218,12 +231,9 @@ public partial class MainWindow
 					_ = ImGui.TableNextColumn();
 					ImGui.TextUnformatted(kvp.Key.ToString());
 					_ = ImGui.TableNextColumn();
-					var npcName = string.Empty;
-					try
-					{
-						npcName = Service.GetSheet<Lumina.Excel.Sheets.BNpcName>().GetRow(kvp.Key).Singular.ToString();
-					}
-					catch { }
+					var npcName = Service.GetSheet<Lumina.Excel.Sheets.BNpcName>().TryGetRow(kvp.Key, out var bnpcRow)
+						? bnpcRow.Singular.ToString()
+						: string.Empty;
 					ImGui.TextUnformatted(npcName);
 					_ = ImGui.TableNextColumn();
 					ImGui.TextUnformatted(string.Join(", ", kvp.Value));
@@ -265,12 +275,9 @@ public partial class MainWindow
 					continue;
 				}
 
-				var npcName = string.Empty;
-				try
-				{
-					npcName = Service.GetSheet<Lumina.Excel.Sheets.BNpcName>().GetRow(hostile.NameId).Singular.ToString();
-				}
-				catch { }
+				var npcName = Service.GetSheet<Lumina.Excel.Sheets.BNpcName>().TryGetRow(hostile.NameId, out var bnpcRow)
+					? bnpcRow.Singular.ToString()
+					: string.Empty;
 
 				unknownNames.Add(string.IsNullOrEmpty(npcName) ? $"NameId {hostile.NameId}" : npcName);
 			}
@@ -702,15 +709,20 @@ public partial class MainWindow
 			var npcEnumName = string.Empty;
 			if (battleChara.NameId != 0)
 			{
-				var bnpcName = Service.GetSheet<Lumina.Excel.Sheets.BNpcName>().GetRow(battleChara.NameId);
-				npcName = bnpcName.Singular.ToString();
+				if (Service.GetSheet<Lumina.Excel.Sheets.BNpcName>().TryGetRow(battleChara.NameId, out var bnpcName))
+				{
+					npcName = bnpcName.Singular.ToString();
+				}
 
 				if (Enum.IsDefined(typeof(NPCName), battleChara.NameId))
 				{
-					npcEnumName = $"{Enum.GetName(typeof(NPCName), battleChara.NameId)}";
+					npcEnumName = Enum.GetName(typeof(NPCName), battleChara.NameId) ?? string.Empty;
 				}
 			}
-			ImGui.Text($"NPC Name: {npcEnumName}");
+			var npcDisplay = !string.IsNullOrEmpty(npcName) && !string.IsNullOrEmpty(npcEnumName)
+				? $"{npcName} ({npcEnumName})"
+				: !string.IsNullOrEmpty(npcName) ? npcName : npcEnumName;
+			ImGui.Text($"NPC Name: {npcDisplay}");
 			ImGui.Text($"Name Id: {battleChara.NameId}");
 			ImGui.Text($"Data Id: {battleChara.BaseId}");
 			ImGui.Spacing();

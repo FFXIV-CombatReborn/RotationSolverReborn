@@ -246,9 +246,18 @@ public partial class MainWindow
 		ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_List_AddStatus.GetDescription());
 
 		var statusSheet = Service.GetSheet<Status>();
+		var filterText = _statusSearching.Trim();
+		var hasFilter = !string.IsNullOrWhiteSpace(filterText);
 		foreach (var statusId in statuses)
 		{
 			if (!statusSheet.TryGetRow(statusId, out var status) || status.RowId == 0)
+			{
+				continue;
+			}
+
+			if (hasFilter
+				&& !status.Name.ToString().Contains(filterText, StringComparison.OrdinalIgnoreCase)
+				&& !status.RowId.ToString().Contains(filterText, StringComparison.OrdinalIgnoreCase))
 			{
 				continue;
 			}
@@ -262,7 +271,7 @@ public partial class MainWindow
 
 			ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Delete, ImGuiHelper.DeleteHint));
 
-			if (IconSet.GetTexture(status.Icon, out var texture, notLoadId) && texture?.Handle != null)
+			if (IconSet.GetTexture(status.Icon, out var texture, notLoadId) && texture is { Handle.IsNull: false })
 			{
 				if (index++ % count != 0)
 				{
@@ -342,7 +351,7 @@ public partial class MainWindow
 				foreach (var tuple in filtered)
 				{
 					var status = tuple.status;
-					if (status.Icon != 215049 && IconSet.GetTexture(status.Icon, out var texture, notLoadId) && texture?.Handle != null)
+					if (status.Icon != 215049 && IconSet.GetTexture(status.Icon, out var texture, notLoadId) && texture is { Handle.IsNull: false })
 					{
 						if (index++ % count != 0)
 						{
@@ -427,8 +436,57 @@ public partial class MainWindow
 
 	private static string _actionSearching = string.Empty;
 	private static string _actionPopupSearching = string.Empty;
+	private static string _lastActionPopupId = string.Empty;
 	private static string _lastActionPopupSearching = string.Empty;
 	private static readonly List<(GAction action, float sim)> _cachedPopupFiltered = [];
+	private static readonly Dictionary<string, (int Count, uint Checksum, string Search, List<GAction> Actions)> _actionsListCache = [];
+
+	private static List<GAction> GetFilteredActionList(string name, HashSet<uint> actions)
+	{
+		uint checksum = 0;
+		foreach (var id in actions)
+		{
+			checksum ^= (id * 2654435761u) + 0x9e3779b9u;
+		}
+
+		if (_actionsListCache.TryGetValue(name, out var cached)
+			&& cached.Count == actions.Count
+			&& cached.Checksum == checksum
+			&& string.Equals(cached.Search, _actionSearching, StringComparison.Ordinal))
+		{
+			return cached.Actions;
+		}
+
+		List<GAction> actionList = new(actions.Count);
+		var actionSheet = Service.GetSheet<GAction>();
+		foreach (var a in actions)
+		{
+			if (actionSheet.TryGetRow(a, out var act))
+			{
+				actionList.Add(act);
+			}
+		}
+
+		if (!string.IsNullOrEmpty(_actionSearching))
+		{
+			var scored = new List<(GAction action, float score)>(actionList.Count);
+			var searchKeys = SearchableCollection.SplitQuery(_actionSearching);
+			foreach (var action in actionList)
+			{
+				var sim = SearchableCollection.Similarity($"{action.Name} {action.RowId}", searchKeys);
+				scored.Add((action, sim));
+			}
+			scored.Sort((a, b) => b.score.CompareTo(a.score));
+			actionList.Clear();
+			foreach ((var action, _) in scored)
+			{
+				actionList.Add(action);
+			}
+		}
+
+		_actionsListCache[name] = (actions.Count, checksum, _actionSearching, actionList);
+		return actionList;
+	}
 
 	private static void DrawActionsList(string name, HashSet<uint> actions)
 	{
@@ -454,32 +512,7 @@ public partial class MainWindow
 
 		ImGui.Spacing();
 
-		List<GAction> actionList = [];
-		var actionSheet = Service.GetSheet<GAction>();
-		foreach (var a in actions)
-		{
-			if (actionSheet.TryGetRow(a, out var act))
-			{
-				actionList.Add(act);
-			}
-		}
-
-		if (!string.IsNullOrEmpty(_actionSearching))
-		{
-			var scored = new List<(GAction action, float score)>(actionList.Count);
-			var searchKeys = SearchableCollection.SplitQuery(_actionSearching);
-			foreach (var action in actionList)
-			{
-				var sim = SearchableCollection.Similarity($"{action.Name} {action.RowId}", searchKeys);
-				scored.Add((action, sim));
-			}
-			scored.Sort((a, b) => b.score.CompareTo(a.score));
-			actionList.Clear();
-			foreach ((var action, var score) in scored)
-			{
-				actionList.Add(action);
-			}
-		}
+		var actionList = GetFilteredActionList(name, actions);
 
 		for (var idx = 0; idx < actionList.Count; idx++)
 		{
@@ -489,7 +522,7 @@ public partial class MainWindow
 
 			ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Reset, ImGuiHelper.DeleteHint));
 
-			_ = ImGui.Selectable($"{action.Name} ({action.RowId})");
+			_ = ImGui.Selectable($"{action.Name} ({action.RowId})##{idx}");
 
 			ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, false, (Reset, new[] { VirtualKey.DELETE }));
 		}
@@ -497,6 +530,7 @@ public partial class MainWindow
 		if (removeId != 0)
 		{
 			_ = actions.Remove(removeId);
+			_ = _actionsListCache.Remove(name);
 			_ = OtherConfiguration.SaveList(name);
 		}
 
@@ -525,16 +559,19 @@ public partial class MainWindow
 				if (string.IsNullOrWhiteSpace(_actionPopupSearching))
 				{
 					ImGui.TextColored(ImGuiColors.DalamudYellow, "Enter a search term to filter actions.");
-					if (!string.IsNullOrEmpty(_lastActionPopupSearching))
+					if (!string.IsNullOrEmpty(_lastActionPopupSearching) || !string.IsNullOrEmpty(_lastActionPopupId))
 					{
+						_lastActionPopupId = string.Empty;
 						_lastActionPopupSearching = string.Empty;
 						_cachedPopupFiltered.Clear();
 					}
 				}
 				else
 				{
-					if (!string.Equals(_actionPopupSearching, _lastActionPopupSearching, StringComparison.Ordinal))
+					if (!string.Equals(popupId, _lastActionPopupId, StringComparison.Ordinal)
+						|| !string.Equals(_actionPopupSearching, _lastActionPopupSearching, StringComparison.Ordinal))
 					{
+						_lastActionPopupId = popupId;
 						_lastActionPopupSearching = _actionPopupSearching;
 						_cachedPopupFiltered.Clear();
 
@@ -578,13 +615,15 @@ public partial class MainWindow
 					for (var i = 0; i < _cachedPopupFiltered.Count && shown < MaxDisplayCount; i++)
 					{
 						var action = _cachedPopupFiltered[i].action;
-						var selected = ImGui.Selectable($"{action.Name} ({action.RowId})");
+						var selected = ImGui.Selectable($"{action.Name} ({action.RowId})##{action.RowId}");
 						if (ImGui.IsItemHovered())
 						{
 							ImguiTooltips.ShowTooltip($"{action.Name} ({action.RowId})");
 							if (selected)
 							{
 								_ = actions.Add(action.RowId);
+								_lastActionPopupId = string.Empty;
+								_ = _actionsListCache.Remove(name);
 								_ = OtherConfiguration.SaveList(name);
 								ImGui.CloseCurrentPopup();
 							}
@@ -610,7 +649,7 @@ public partial class MainWindow
 
 		var territoryId = Svc.ClientState.TerritoryType;
 
-		using var table = ImRaii.Table("Rotation Solver List Territories", 4,
+		using var table = ImRaii.Table("Rotation Solver List Territories", 3,
 			ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
 		if (table)
 		{
@@ -783,7 +822,7 @@ public partial class MainWindow
 				var key = "Beneficial Positions" + i.ToString();
 				ImGuiHelper.DrawHotKeysPopup(key, string.Empty,
 					(UiString.ConfigWindow_List_Remove.GetDescription(), Reset, ["Delete"]));
-				_ = ImGui.Selectable(pts[i].ToString());
+				_ = ImGui.Selectable($"{pts[i]}##{i}");
 
 				ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, false,
 					(Reset, [VirtualKey.DELETE]));

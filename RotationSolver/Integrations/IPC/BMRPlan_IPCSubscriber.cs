@@ -20,7 +20,7 @@ internal static class BMRPlan_IPCSubscriber
 	private static ICallGateSubscriber<object>? _actionsChangedSubscriber;
 	private static Action? _actionsChangedCallback;
 
-	internal static void SubscribeActionsChanged(Action callback)
+	internal static bool SubscribeActionsChanged(Action callback)
 	{
 		UnsubscribeActionsChanged();
 
@@ -29,12 +29,14 @@ internal static class BMRPlan_IPCSubscriber
 			_actionsChangedCallback = callback;
 			_actionsChangedSubscriber = Svc.PluginInterface.GetIpcSubscriber<object>("BossMod.Plan.ActionsChanged");
 			_actionsChangedSubscriber.Subscribe(OnActionsChanged);
+			return true;
 		}
 		catch (Exception ex)
 		{
 			PluginLog.LogDebug($"[BMRPlan_IPCSubscriber] Failed to subscribe to Plan.ActionsChanged: {ex}");
 			_actionsChangedSubscriber = null;
 			_actionsChangedCallback = null;
+			return false;
 		}
 	}
 

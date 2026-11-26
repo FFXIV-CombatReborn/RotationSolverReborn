@@ -18,11 +18,19 @@ namespace RotationSolver.GameData
 		/// <summary>
 		/// Main method to execute the program.
 		/// </summary>
-		public static async Task Main()
+		public static async Task<int> Main(string[] args)
 		{
 			try
 			{
-				var gameData = new Lumina.GameData(@"C:\FF14\game\sqpack", new LuminaOptions
+				var sqpackPath = args.Length > 0 && !string.IsNullOrWhiteSpace(args[0])
+					? args[0]
+					: Environment.GetEnvironmentVariable("FFXIV_SQPACK_PATH");
+				if (string.IsNullOrWhiteSpace(sqpackPath))
+				{
+					sqpackPath = @"C:\FF14\game\sqpack";
+				}
+
+				var gameData = new Lumina.GameData(sqpackPath, new LuminaOptions
 				{
 					LoadMultithreaded = true,
 					CacheFileResources = true,
@@ -30,10 +38,9 @@ namespace RotationSolver.GameData
 					DefaultExcelLanguage = Language.English,
 				});
 
-				var assemblyLocation = typeof(Program).Assembly.Location;
-				Console.WriteLine($"Assembly location: {assemblyLocation}");
-
-				var solutionRoot = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(assemblyLocation)!, "..", "..", "..", "..", ".."));
+				var solutionRoot = FindSolutionRoot(AppContext.BaseDirectory)
+					?? FindSolutionRoot(Environment.CurrentDirectory)
+					?? throw new DirectoryNotFoundException("Could not locate RotationSolver.sln in parent directories.");
 				Console.WriteLine($"Solution root: {solutionRoot}");
 
 				var propertiesDir = Path.Combine(solutionRoot, "RotationSolver.SourceGenerators", "Properties");
@@ -114,12 +121,13 @@ namespace RotationSolver.GameData
             """;
 
 				var rotationsSheet = gameData.GetExcelSheet<ClassJob>()!;
+				var pvpLimitBreaks = RotationGetter.CollectPvPLimitBreaks(gameData);
 				var rotationList = new List<string>();
 				foreach (var job in rotationsSheet)
 				{
 					if (job.JobIndex > 0)
 					{
-						rotationList.Add(new RotationGetter(gameData, job).GetCode());
+						rotationList.Add(new RotationGetter(gameData, job, pvpLimitBreaks).GetCode());
 					}
 				}
 				WriteResource("Rotation", header + string.Join("\n\n", rotationList));
@@ -129,13 +137,27 @@ namespace RotationSolver.GameData
 
 				if (result.StatusCode != HttpStatusCode.OK)
 				{
-					return;
+					Console.Error.WriteLine($"Failed to fetch opcodes.json: HTTP {(int)result.StatusCode} ({result.StatusCode})");
+					return 1;
 				}
 
 				var responseStream = await result.Content.ReadAsStringAsync();
 
-				var root = JToken.Parse(responseStream)[0]!["lists"]!;
+				var regions = JArray.Parse(responseStream);
+				JToken? globalRegion = null;
+				foreach (var regionToken in regions)
+				{
+					if (string.Equals(regionToken["region"]?.Value<string>(), "Global", StringComparison.OrdinalIgnoreCase))
+					{
+						globalRegion = regionToken;
+						break;
+					}
+				}
+				globalRegion ??= regions.First;
+
+				var root = globalRegion?["lists"] ?? throw new InvalidDataException("Missing opcode lists in opcodes.json.");
 				var strs = new List<string>();
+				var seenOpCodes = new HashSet<string>(StringComparer.Ordinal);
 				foreach (var level1 in root.Children())
 				{
 					foreach (var level2 in level1.Children())
@@ -144,15 +166,20 @@ namespace RotationSolver.GameData
 						{
 							if (tok is JObject i)
 							{
-								var name = ((JValue)i["name"]!).Value as string;
-								var description = name!.Space();
+								var name = ((JValue?)i["name"])?.Value as string;
+								if (string.IsNullOrWhiteSpace(name) || !seenOpCodes.Add(name))
+								{
+									continue;
+								}
+
+								var description = name.Space();
 
 								strs.Add($$"""
                     /// <summary>
                     ///{{description}}
                     /// </summary>
                     [Description("{{description}}")]
-                    {{name}} = {{((JValue)i["opcode"]!).Value}},
+                    {{name}} = {{((JValue?)i["opcode"])?.Value}},
                     """);
 							}
 						}
@@ -161,11 +188,29 @@ namespace RotationSolver.GameData
 				WriteResource("OpCode", string.Join("\n", strs));
 
 				Console.WriteLine("Finished!");
+				return 0;
 			}
 			catch (Exception ex)
 			{
-				Console.Error.WriteLine($"An error occurred: {ex.Message}");
+				Console.Error.WriteLine($"An error occurred: {ex}");
+				return 1;
 			}
+		}
+
+		private static string? FindSolutionRoot(string startDirectory)
+		{
+			var current = new DirectoryInfo(Path.GetFullPath(startDirectory));
+			while (current != null)
+			{
+				if (File.Exists(Path.Combine(current.FullName, "RotationSolver.sln")))
+				{
+					return current.FullName;
+				}
+
+				current = current.Parent;
+			}
+
+			return null;
 		}
 	}
 }

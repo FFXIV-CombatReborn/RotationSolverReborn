@@ -112,6 +112,8 @@ public interface ICustomRotation : ITexture
 	internal IAction? ActionRaiseShirkAbility { get; }
 	internal IAction? ActionAntiKnockbackAbility { get; }
 
+	void ProcessFrame();
+
 	/// <summary>
 	/// Tries to use this rotation.
 	/// </summary>

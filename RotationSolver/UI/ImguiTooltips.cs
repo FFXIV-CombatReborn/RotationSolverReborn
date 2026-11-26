@@ -52,12 +52,16 @@ internal static class ImguiTooltips
 		ImGui.SetNextWindowSizeConstraints(new Vector2(150, 0) * globalScale, new Vector2(1200, 1500) * globalScale);
 		ImGui.SetWindowPos(TooltipId, ImGui.GetIO().MousePos);
 
-		var visible = ImGui.Begin(TooltipId, TooltipFlag);
-		if (visible)
+		try
 		{
-			act();
+			if (ImGui.Begin(TooltipId, TooltipFlag))
+			{
+				act();
+			}
 		}
-
-		ImGui.End();
+		finally
+		{
+			ImGui.End();
+		}
 	}
 }

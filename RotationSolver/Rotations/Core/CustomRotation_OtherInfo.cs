@@ -175,6 +175,7 @@ public partial class CustomRotation
 				return false;
 			}
 
+			var hasBuffEntries = false;
 			var playerHasBuffs = true;
 			if (Player == null)
 			{
@@ -190,6 +191,7 @@ public partial class CustomRotation
 						continue;
 					}
 
+					hasBuffEntries = true;
 					if (!StatusHelper.PlayerHasStatus(false, buff.Ids) || StatusHelper.PlayerWillStatusEnd(0, false, buff.Ids))
 					{
 						playerHasBuffs = false;
@@ -198,6 +200,7 @@ public partial class CustomRotation
 				}
 			}
 
+			var hasDebuffEntries = false;
 			var targetHasDebuffs = HostileTarget != null;
 			if (targetHasDebuffs)
 			{
@@ -210,6 +213,7 @@ public partial class CustomRotation
 						continue;
 					}
 
+					hasDebuffEntries = true;
 					if (!target.HasStatus(false, buff.Ids) || target.WillStatusEnd(0, false, buff.Ids))
 					{
 						targetHasDebuffs = false;
@@ -218,7 +222,7 @@ public partial class CustomRotation
 				}
 			}
 
-			return playerHasBuffs || targetHasDebuffs;
+			return (hasBuffEntries && playerHasBuffs) || (hasDebuffEntries && targetHasDebuffs);
 		}
 	}
 
@@ -304,34 +308,33 @@ public partial class CustomRotation
 		_buffsTick = now;
 		Buffs.Clear();
 		_buffJobs.Clear();
+		var hasRadiantFinale = false;
 		foreach (var member in PartyMembers)
 		{
 			if (member != null)
 			{
-				AddJobBuffs((Job)member.ClassJob.RowId);
+				AddJobBuffs((Job)member.ClassJob.RowId, member.Level, ref hasRadiantFinale);
 			}
 		}
 
 		if (_buffJobs.Count == 0 && Player != null)
 		{
-			AddJobBuffs((Job)Player.ClassJob.RowId);
+			AddJobBuffs((Job)Player.ClassJob.RowId, Player.Level, ref hasRadiantFinale);
 		}
 	}
 
 	private static long _buffsTick = long.MinValue;
 	private static readonly HashSet<Job> _buffJobs = [];
+	private static readonly StatusInfo RadiantFinaleInfo = new("Radiant Finale", "BRD", StatusType.Buff, StatusID.RadiantFinale_2964, StatusID.RadiantFinale);
 
 	private static readonly Dictionary<Job, List<StatusInfo>> JobBuffs = new()
 	{
 		{ Job.AST, [new StatusInfo("Divination", "AST", StatusType.Buff, StatusID.Divination)] },
-		{ Job.BRD, [new StatusInfo("Battle Voice", "BRD", StatusType.Buff, StatusID.BattleVoice),
-			new StatusInfo("Radiant Finale", "BRD", StatusType.Buff, StatusID.RadiantFinale_2964,
-					StatusID.RadiantFinale)] },
+		{ Job.BRD, [new StatusInfo("Battle Voice", "BRD", StatusType.Buff, StatusID.BattleVoice)] },
 		{ Job.DNC, [new StatusInfo("Technical Finish", "DNC", StatusType.Buff, StatusID.TechnicalFinish)] },
 		{ Job.DRG, [new StatusInfo("Battle Litany", "DRG", StatusType.Buff, StatusID.BattleLitany)] },
 		{ Job.MNK, [new StatusInfo("Brotherhood", "MNK", StatusType.Buff, StatusID.Brotherhood)] },
-		{ Job.NIN, [new StatusInfo("Mug", "NIN", StatusType.Debuff, StatusID.Mug),
-			new StatusInfo("Dokumori", "NIN", StatusType.Debuff, StatusID.Dokumori, StatusID.Dokumori_4303)] },
+		{ Job.NIN, [new StatusInfo("Mug / Dokumori", "NIN", StatusType.Debuff, StatusID.Mug, StatusID.Dokumori, StatusID.Dokumori_4303)] },
 		{ Job.PCT, [new StatusInfo("Starry Muse", "PCT", StatusType.Buff, StatusID.StarryMuse)] },
 		{ Job.RPR, [new StatusInfo("Arcane Circle", "RPR", StatusType.Buff, StatusID.ArcaneCircle)] },
 		{ Job.RDM, [new StatusInfo("Embolden", "RDM", StatusType.Buff, StatusID.Embolden, StatusID.Embolden_1297)] },
@@ -339,11 +342,17 @@ public partial class CustomRotation
 		{ Job.SMN, [new StatusInfo("Searing Light", "SMN", StatusType.Buff, StatusID.SearingLight)] }
 	};
 
-	private static void AddJobBuffs(Job job)
+	private static void AddJobBuffs(Job job, byte level, ref bool hasRadiantFinale)
 	{
 		if (_buffJobs.Add(job) && JobBuffs.TryGetValue(job, out var buffs))
 		{
 			Buffs.AddRange(buffs);
+		}
+
+		if (job == Job.BRD && level >= 90 && !hasRadiantFinale)
+		{
+			hasRadiantFinale = true;
+			Buffs.Add(RadiantFinaleInfo);
 		}
 	}
 
@@ -491,8 +500,8 @@ public partial class CustomRotation
 				return null;
 			}
 
-			IBattleChara lowest = Player;
-			var lowestHp = Player?.GetHealthRatio();
+			IBattleChara? lowest = Player.IsDead ? null : Player;
+			var lowestHp = Player.IsDead ? float.MaxValue : Player.GetHealthRatio();
 
 			foreach (var member in PartyMembers)
 			{

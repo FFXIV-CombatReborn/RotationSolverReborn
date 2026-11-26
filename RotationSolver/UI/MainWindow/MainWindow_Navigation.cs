@@ -23,6 +23,7 @@ public partial class MainWindow
 	private const double RsrIconHoldSeconds = 1.2;
 
 	private static readonly MainWindowTab[] _navigableTabs = BuildNavigableTabs();
+	private static readonly HashSet<string> _warnedComboPlugins = new(StringComparer.OrdinalIgnoreCase);
 
 	private static MainWindowTab[] BuildNavigableTabs()
 	{
@@ -325,7 +326,7 @@ public partial class MainWindow
 		drawList.AddRect(min, max, M3.U32(scheme.OutlineVariant, 0.6f), M3.ShapeMedium, ImDrawFlags.None, 1f * Scale);
 
 		var iconMin = new Vector2(min.X + ((wholeWidth - iconExtent) * 0.5f), min.Y + padding);
-		if (jobIcon?.Handle != null)
+		if (jobIcon is { Handle.IsNull: false })
 		{
 			drawList.AddImage(jobIcon.Handle, iconMin, iconMin + new Vector2(iconExtent, iconExtent));
 		}
@@ -333,7 +334,7 @@ public partial class MainWindow
 		if (DutyRotation.GetPhantomJob() != DutyRotation.PhantomJob.None)
 		{
 			var phantomIcon = IconSet.GetOccultIcon();
-			if (phantomIcon?.Handle != null)
+			if (phantomIcon is { Handle.IsNull: false })
 			{
 				var badgeExtent = iconExtent * 0.55f;
 				var badgeMin = iconMin + new Vector2(iconExtent - badgeExtent, iconExtent - badgeExtent);
@@ -646,7 +647,7 @@ public partial class MainWindow
 					anyCrash = true;
 				}
 
-				if (!string.IsNullOrEmpty(item.Name) && item.Name.Contains("Combo"))
+				if (!string.IsNullOrEmpty(item.Name) && item.Name.Contains("Combo") && _warnedComboPlugins.Add(item.Name))
 				{
 					BasicWarningHelper.AddSystemWarning($"Disable {item.Name}");
 				}

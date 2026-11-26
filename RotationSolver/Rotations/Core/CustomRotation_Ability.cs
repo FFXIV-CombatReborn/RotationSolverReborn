@@ -268,7 +268,7 @@ public partial class CustomRotation
 			}
 
 			IBaseAction.TargetOverride = TargetType.Provoke;
-			if (ProvokePvE.CanUse(out act) || ProvokeAbility(nextGCD, out act))
+			if (ProvokePvE.CanUse(out act) || ActiveDutyRotation?.ProvokeAbility(nextGCD, out act) == true || ProvokeAbility(nextGCD, out act))
 			{
 				return true;
 			}
@@ -319,7 +319,7 @@ public partial class CustomRotation
 			IBaseAction.ShouldEndSpecial = true;
 		}
 		IBaseAction.AllEmpty = true;
-		if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward) && Player != null && !StatusHelper.PlayerHasStatus(true, StatusID.Bind))
+		if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward) && Player != null && !StatusHelper.PlayerHasStatus(false, StatusID.Bind))
 		{
 			if (ActiveDutyRotation?.MoveForwardAbility(nextGCD, out act) == true)
 			{
@@ -373,7 +373,7 @@ public partial class CustomRotation
 			return true;
 		}
 
-		return UseMpPotion(nextGCD, out act) || GeneralUsingAbility(role, nextGCD, out act) || (DataCenter.AutoStatus.HasFlag(AutoStatus.Speed) && SpeedAbility(nextGCD, out act));
+		return UseMpPotion(nextGCD, out act) || GeneralUsingAbility(role, nextGCD, out act) || (DataCenter.AutoStatus.HasFlag(AutoStatus.Speed) && (ActiveDutyRotation?.SpeedAbility(nextGCD, out act) == true || SpeedAbility(nextGCD, out act)));
 	}
 
 	private bool MyInterruptAbility(JobRole role, IAction nextGCD, out IAction? act)
@@ -587,7 +587,8 @@ public partial class CustomRotation
 			}
 		}
 
-		if (Service.Config.RaisePlayerBySwift && DataCenter.CanRaise() && IActionHelper.IsLastActionGCD() && nextGCD.IsTheSameTo(true, ActionID.RaisePvE, ActionID.EgeiroPvE, ActionID.ResurrectionPvE, ActionID.AscendPvE))
+		if (Service.Config.RaisePlayerBySwift && DataCenter.CanRaise() && IActionHelper.IsLastActionGCD()
+			&& nextGCD.IsTheSameTo(true, ActionID.RaisePvE, ActionID.EgeiroPvE, ActionID.ResurrectionPvE, ActionID.AscendPvE, ActionID.VariantRaisePvE, ActionID.VariantRaiseIiPvE, ActionID.LostArisePvE, ActionID.OccultRaisePvE))
 		{
 			if (SwiftcastPvE.CanUse(out act))
 			{

@@ -42,6 +42,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 	private static readonly Random _random = new();
 
 	internal static IPCProvider IPCProvider { get; private set; } = null!;
+	private static volatile bool _disposed;
 
 	public RotationSolverPlugin(IDalamudPluginInterface pluginInterface)
 	{
@@ -93,6 +94,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 	public async Task LoadAsync(CancellationToken cancellationToken)
 	{
+		_disposed = false;
 		var textureWarmupTask = Svc.Framework.Run(() =>
 		{
 			_ = ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
@@ -135,26 +137,36 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 			PluginLog.Warning("Texture warmup was canceled; continuing plugin load.");
 		}
 
-		await Svc.Framework.Run(() =>
+		try
 		{
+			await Svc.Framework.Run(() =>
+			{
+				if (cancellationToken.IsCancellationRequested || _disposed)
+				{
+					return;
+				}
 
-			MajorUpdater.Enable();
-			AutoAttackUpdater.Enable();
-			Watcher.Enable();
-			ActionQueueManager.Enable();
-			ActionManagerEx.Enable();
-			BMRPlanUpdater.Enable();
-			ActionContextMenu.Init();
-			HotbarHighlightManager.Init();
+				MajorUpdater.Enable();
+				AutoAttackUpdater.Enable();
+				Watcher.Enable();
+				ActionQueueManager.Enable();
+				ActionManagerEx.Enable();
+				BMRPlanUpdater.Enable();
+				ActionContextMenu.Init();
+				HotbarHighlightManager.Init();
 
-			Svc.DutyState.DutyStarted += DutyState_DutyStarted;
-			Svc.DutyState.DutyWiped += DutyState_DutyWiped;
-			Svc.DutyState.DutyCompleted += DutyState_DutyCompleted;
-			Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
-			ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
+				Svc.DutyState.DutyStarted += DutyState_DutyStarted;
+				Svc.DutyState.DutyWiped += DutyState_DutyWiped;
+				Svc.DutyState.DutyCompleted += DutyState_DutyCompleted;
+				Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
+				ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
 
-			ChangeUITranslation();
-		}, CancellationToken.None);
+				ChangeUITranslation();
+			}, cancellationToken);
+		}
+		catch (OperationCanceledException)
+		{
+		}
 	}
 
 	private static void BackupUnreadableConfig()
@@ -178,6 +190,11 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		var delay = TimeSpan.FromSeconds(_random.Next(4, 6));
 		_ = Svc.Framework.RunOnTick(() =>
 		{
+			if (_disposed)
+			{
+				return;
+			}
+
 			_ = Service.Config.DutyEnd.AddMacro();
 
 			if (Service.Config.AutoOffWhenDutyCompleted)
@@ -190,6 +207,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 	private static void ClientState_TerritoryChanged(uint id)
 	{
 		DataCenter.ResetAllRecords();
+		MacroUpdater.Clear();
 
 		if (id == 0)
 		{
@@ -197,7 +215,12 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 			return;
 		}
 
-		var territory = Service.GetSheet<TerritoryType>().GetRow(id);
+		if (!Service.GetSheet<TerritoryType>().TryGetRow(id, out var territory))
+		{
+			PluginLog.Warning($"Unknown territory id: {id}");
+			return;
+		}
+
 		DataCenter.Territory = new TerritoryInfo(territory);
 
 		try
@@ -389,6 +412,7 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 
 	public async ValueTask DisposeAsync()
 	{
+		_disposed = true;
 		MajorUpdater.Dispose();
 
 		ActionTracer.Shutdown();
@@ -403,6 +427,8 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		ActionManagerEx.DisposeInstance();
 		BMRPlanUpdater.Disable();
 		ActionContextMenu.Dispose();
+		IPCProvider?.Dispose();
+		ActionUpdater.Dispose();
 		Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
 		Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenConfigUi;
 		Svc.PluginInterface.UiBuilder.Draw -= OnDraw;
