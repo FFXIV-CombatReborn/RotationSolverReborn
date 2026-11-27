@@ -79,12 +79,13 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 		List<IDrawing2D> result = [];
 		var color = ImGui.ColorConvertFloat4ToU32(Color);
 
-		HotbarAddonHelper.GetHotbarAddons(_addons);
-
-		var hotBarIndex = -1;
-		foreach (var intPtr in _addons)
+		for (var hotBarIndex = 0; hotBarIndex < HotbarAddonHelper.AddonCount; hotBarIndex++)
 		{
-			hotBarIndex++;
+			var intPtr = HotbarAddonHelper.GetHotbarAddon(hotBarIndex);
+			if (intPtr == nint.Zero)
+			{
+				continue;
+			}
 
 			var actionBar = (AddonActionBarBase*)intPtr;
 			if (!HotbarAddonHelper.IsVisible(&actionBar->AtkUnitBase))
@@ -100,7 +101,7 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 				continue;
 			}
 
-			var hotBar = raptureModule->Hotbars[resolvedHotbarIndex];
+			ref var hotBar = ref raptureModule->Hotbars[resolvedHotbarIndex];
 
 			var slotIndex = -1;
 			foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
@@ -159,17 +160,16 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 		}
 
 		var manager = frameComponent->Component->UldManager;
-		AtkResNode* node = null;
 		for (var i = 0; i < manager.NodeListCount; i++)
 		{
-			node = manager.NodeList[i];
+			var node = manager.NodeList[i];
 			if (node != null && node->Width == 72)
 			{
-				break;
+				return node;
 			}
 		}
 
-		return node;
+		return null;
 	}
 
 	protected override void UpdateOnFrame()

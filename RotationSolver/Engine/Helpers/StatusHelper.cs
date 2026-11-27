@@ -24,12 +24,18 @@ public static partial class StatusHelper
 	/// </returns>
 	public unsafe static bool IsStatusCapped(IBattleChara battleChara)
 	{
-		if (battleChara == null || battleChara.Struct() == null || !battleChara.IsValid())
+		if (battleChara == null || !battleChara.IsValid() || battleChara.Struct() == null)
 		{
 			return false;
 		}
 
-		foreach (ref readonly var status in battleChara.GetStatuses())
+		var statuses = battleChara.GetStatuses();
+		if (statuses.IsEmpty)
+		{
+			return false;
+		}
+
+		foreach (ref readonly var status in statuses)
 		{
 			if (status.StatusId == 0)
 			{
@@ -55,6 +61,11 @@ public static partial class StatusHelper
 
 		var statuses = chara->StatusManager.Status;
 		int count = chara->StatusManager.NumValidStatuses;
+		if (count <= 0)
+		{
+			return default;
+		}
+
 		return count < statuses.Length ? statuses[..count] : statuses;
 	}
 
@@ -117,12 +128,7 @@ public static partial class StatusHelper
 
 		try
 		{
-			if (Svc.Objects.SearchById(Doomp.GameObjectId) is not IBattleChara fresh || !fresh.IsValid())
-			{
-				return false;
-			}
-
-			if (HasStatus(fresh, false, DoomHealStatus))
+			if (HasStatus(Doomp, false, DoomHealStatus))
 			{
 				return true;
 			}
@@ -422,8 +428,9 @@ public static partial class StatusHelper
 			return string.Empty;
 		}
 
-		var statusRow = sheet.GetRow((uint)id);
-		return statusRow.RowId == 0 ? string.Empty : statusRow.Name.ToString() ?? string.Empty;
+		return sheet.TryGetRow((uint)id, out var statusRow) && statusRow.RowId != 0
+			? statusRow.Name.ToString() ?? string.Empty
+			: string.Empty;
 	}
 
 	private static bool ContainsId(uint id, ReadOnlySpan<StatusID> ids)
@@ -447,6 +454,11 @@ public static partial class StatusHelper
 		}
 
 		var playerId = isFromSelf ? Player.Object?.GameObjectId ?? 0 : 0;
+		if (isFromSelf && playerId == 0)
+		{
+			return false;
+		}
+
 		foreach (ref readonly var status in statuses)
 		{
 			if (status.StatusId != 0 && ContainsId(status.StatusId, statusIDs) && (!isFromSelf || IsFromPlayer(status, playerId)))
@@ -457,10 +469,44 @@ public static partial class StatusHelper
 		return false;
 	}
 
+	private static long _ownedIdsTick = long.MinValue;
+	private static ulong _ownedIdsPlayerId;
+	private static readonly HashSet<uint> _ownedIds = [];
+
 	private static bool IsFromPlayer(in GameStatus status, ulong playerId)
 	{
+		if (playerId == 0)
+		{
+			return false;
+		}
+
 		var sourceId = status.SourceObject.ObjectId;
-		return sourceId == playerId || Svc.Objects.SearchById(sourceId)?.OwnerId == playerId;
+		if (sourceId == playerId)
+		{
+			return true;
+		}
+
+		if (sourceId is 0 or 0xE0000000)
+		{
+			return false;
+		}
+
+		var now = Environment.TickCount64;
+		if (_ownedIdsPlayerId != playerId || _ownedIdsTick == long.MinValue || now - _ownedIdsTick >= 15)
+		{
+			_ownedIds.Clear();
+			_ownedIdsPlayerId = playerId;
+			_ownedIdsTick = now;
+			foreach (var obj in Svc.Objects)
+			{
+				if (obj != null && obj.OwnerId == playerId)
+				{
+					_ = _ownedIds.Add(obj.EntityId);
+				}
+			}
+		}
+
+		return _ownedIds.Contains(sourceId);
 	}
 
 	internal static float MinStatusRemainingTime(IBattleChara? battleChara, bool isFromSelf, ReadOnlySpan<StatusID> statusIDs, out bool found)
@@ -474,6 +520,10 @@ public static partial class StatusHelper
 		}
 
 		var playerId = isFromSelf ? Player.Object?.GameObjectId ?? 0 : 0;
+		if (isFromSelf && playerId == 0)
+		{
+			return min;
+		}
 		foreach (ref readonly var status in statuses)
 		{
 			if (status.StatusId != 0 && ContainsId(status.StatusId, statusIDs) && (!isFromSelf || IsFromPlayer(status, playerId)))
@@ -633,7 +683,7 @@ public static partial class StatusHelper
 			return false;
 		}
 
-		if (status.GameData.Value.Icon == 215503 && status.RemainingTime > 3)
+		if (status.GameData.IsValid && status.GameData.Value.Icon == 215503 && status.RemainingTime > 3)
 		{
 			return true;
 		}
@@ -658,7 +708,7 @@ public static partial class StatusHelper
 	/// <returns>True if the status can be dispelled, otherwise false.</returns>
 	public static bool CanDispel(this IStatus status)
 	{
-		return status != null && status.GameData.Value.CanDispel == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+		return status != null && status.GameData.IsValid && status.GameData.Value.CanDispel == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
 	}
 
 	/// <summary>
@@ -666,7 +716,7 @@ public static partial class StatusHelper
 	/// </summary>
 	public static bool CanStatusOff(this IStatus status)
 	{
-		return status != null && status.GameData.Value.CanStatusOff == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+		return status != null && status.GameData.IsValid && status.GameData.Value.CanStatusOff == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
 	}
 
 	/// <summary>
@@ -674,7 +724,7 @@ public static partial class StatusHelper
 	/// </summary>
 	public static bool LockActions(this IStatus status)
 	{
-		return status != null && status.GameData.Value.LockActions == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+		return status != null && status.GameData.IsValid && status.GameData.Value.LockActions == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
 	}
 
 	/// <summary>
@@ -682,7 +732,7 @@ public static partial class StatusHelper
 	/// </summary>
 	public static bool LockMovement(this IStatus status)
 	{
-		return status != null && status.GameData.Value.LockMovement == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+		return status != null && status.GameData.IsValid && status.GameData.Value.LockMovement == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
 	}
 
 	/// <summary>
@@ -690,7 +740,7 @@ public static partial class StatusHelper
 	/// </summary>
 	public static bool LockControl(this IStatus status)
 	{
-		return status != null && status.GameData.Value.LockControl == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+		return status != null && status.GameData.IsValid && status.GameData.Value.LockControl == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
 	}
 
 	/// <summary>
@@ -698,6 +748,6 @@ public static partial class StatusHelper
 	/// </summary>
 	public static bool IsTether(this IStatus status)
 	{
-		return status != null && status.GameData.Value.Unknown3 == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+		return status != null && status.GameData.IsValid && status.GameData.Value.Unknown3 == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
 	}
 }

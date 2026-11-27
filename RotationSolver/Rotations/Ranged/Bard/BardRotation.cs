@@ -205,6 +205,7 @@ public partial class BardRotation
 	{
 		setting.UnlockedByQuestID = 65604;
 		setting.SpecialType = SpecialActionType.FixedDistanceMoveBackward;
+		setting.FixedMoveDistance = 10f;
 	}
 
 	static partial void ModifyQuickNockPvE(ref ActionSetting setting)

@@ -4,6 +4,30 @@ namespace RotationSolver.Rotations;
 
 public partial class CustomRotation
 {
+	public void ProcessFrame()
+	{
+		if (!IsEnabled)
+		{
+			return;
+		}
+
+		ActionTracer.Suppressed = true;
+		try
+		{
+			ActiveDutyRotation?.OnFrameUpdate();
+			OnFrameUpdate();
+		}
+		catch (Exception ex)
+		{
+			LogErrorOnce($"Exception in OnFrameUpdate method: {ex.Message}");
+		}
+		finally
+		{
+			ActionTracer.Suppressed = false;
+			IBaseAction.ResetOverrides();
+		}
+	}
+
 	/// <inheritdoc/>
 	public bool TryInvoke(out IAction? newAction, out IAction? gcdAction)
 	{

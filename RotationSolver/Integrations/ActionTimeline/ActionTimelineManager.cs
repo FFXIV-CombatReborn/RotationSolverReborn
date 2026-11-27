@@ -147,7 +147,7 @@ public class ActionTimelineManager : IDisposable
 			var actionId = set.Header.ActionID;
 			var type = GetActionType(actionId, set.Action);
 
-			if (type == TimelineItemType.GCD && TakeCastEndingAt(now) is { } cast)
+			if (type == TimelineItemType.GCD && TakeCastEndingAt(now, actionId) is { } cast)
 			{
 				cast.ActionId = actionId;
 				cast.AnimationLockTime = set.Header.AnimationLockTime;
@@ -175,12 +175,21 @@ public class ActionTimelineManager : IDisposable
 		}
 	}
 
-	private TimelineItem? TakeCastEndingAt(DateTime now)
+	private TimelineItem? TakeCastEndingAt(DateTime now, uint actionId)
 	{
+		var adjustedActionId = Service.GetAdjustedActionId(actionId);
 		var matched = -1;
 		for (var i = 0; i < _pendingCasts.Count; i++)
 		{
-			var fromEnd = SecondsPastCastEnd(_pendingCasts[i], now);
+			var castItem = _pendingCasts[i];
+			if (castItem.ActionId != actionId
+				&& castItem.ActionId != adjustedActionId
+				&& Service.GetAdjustedActionId(castItem.ActionId) != adjustedActionId)
+			{
+				continue;
+			}
+
+			var fromEnd = SecondsPastCastEnd(castItem, now);
 			if (fromEnd >= -CastEffectEarly && fromEnd <= CastEffectLate)
 			{
 				matched = i;
@@ -386,8 +395,8 @@ public class ActionTimelineManager : IDisposable
 			DurationSeconds = (endTime - startTime).TotalSeconds,
 			PlayerName = Player.Available && Player.Object != null ? Player.Object.Name.TextValue : "Unknown",
 			PlayerJob = Player.Available ? Player.Job.ToString() : "Unknown",
-			Territory = DataCenter.Territory?.Name ?? "Unknown",
-			Duty = DataCenter.Territory?.ContentFinderName ?? "Unknown",
+			Territory = !string.IsNullOrWhiteSpace(DataCenter.Territory?.Name) ? DataCenter.Territory.Name : "Unknown",
+			Duty = !string.IsNullOrWhiteSpace(DataCenter.Territory?.ContentFinderName) ? DataCenter.Territory.ContentFinderName : "Unknown",
 			ExportedAt = DateTime.Now
 		};
 
@@ -415,7 +424,11 @@ public class ActionTimelineManager : IDisposable
 	{
 		var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 		var jobName = Player.Available ? Player.Job.ToString() : "Unknown";
-		var dutyName = DataCenter.Territory?.ContentFinderName ?? DataCenter.Territory?.Name ?? "Timeline";
+		var dutyName = !string.IsNullOrWhiteSpace(DataCenter.Territory?.ContentFinderName)
+			? DataCenter.Territory.ContentFinderName
+			: !string.IsNullOrWhiteSpace(DataCenter.Territory?.Name)
+				? DataCenter.Territory.Name
+				: "Timeline";
 
 		// Sanitize filename
 		dutyName = string.Join("_", dutyName.Split(Path.GetInvalidFileNameChars()));

@@ -14,6 +14,7 @@ public static class Watcher
 {
 	private const uint CancelAbilityCategory = 15;
 	private const uint EnemyDotTickCategory = 0x605;
+	private const uint ActionRejectedCategory = 0x2BC;
 
 	private delegate void ActorControlDelegate(uint entityId, uint category, uint p1, uint p2, uint p3, uint p4, uint p5, uint p6, uint p7, uint p8, ulong targetId, byte replaying);
 	private static Hook<ActorControlDelegate>? _actorControlHook;
@@ -58,6 +59,14 @@ public static class Watcher
 			else if (category == CancelAbilityCategory && entityId == Player.Object?.EntityId)
 			{
 				ActionTimelineManager.Current?.CancelInterruptedCast(DateTime.Now);
+			}
+			else if (category == ActionRejectedCategory && p2 == 1 && entityId == Player.Object?.EntityId)
+			{
+				DataCenter.AddActionRejected(p3);
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Debug($"[Watcher] The server rejected action {p3} (log message {p1}).");
+				}
 			}
 		}
 		catch (Exception ex)
@@ -119,6 +128,10 @@ public static class Watcher
 						if (knock.Speed > 0)
 						{
 							DataCenter.KnockbackFinished = DateTime.Now + TimeSpan.FromSeconds(knock.Distance / (float)knock.Speed);
+						}
+						else
+						{
+							DataCenter.KnockbackFinished = DataCenter.KnockbackStart;
 						}
 
 						if (set.Action.HasValue && Service.Config.RecordKnockbackies
@@ -248,38 +261,41 @@ public static class Watcher
 
 			if (attackedTargetsCount > 0)
 			{
-				foreach (var effect in set.TargetEffects)
+				lock (DataCenter._attackedTargetsLock)
 				{
-					if (!effect.GetSpecificTypeEffect(ActionEffectType.Damage, out _))
+					foreach (var effect in set.TargetEffects)
 					{
-						continue;
-					}
-
-					var targetExists = false;
-					foreach ((var id, var time) in attackedTargets)
-					{
-						if (id == effect.TargetID)
+						if (!effect.GetSpecificTypeEffect(ActionEffectType.Damage, out _))
 						{
-							targetExists = true;
-							break;
+							continue;
 						}
-					}
-					if (targetExists)
-					{
-						continue;
-					}
 
-					while (attackedTargets.Count >= attackedTargetsCount && attackedTargets.Count > 0)
-					{
-						(var id, var time) = attackedTargets.Peek();
-						if (id == effect.TargetID)
+						var targetExists = false;
+						foreach ((var id, var time) in attackedTargets)
 						{
-							break;
+							if (id == effect.TargetID)
+							{
+								targetExists = true;
+								break;
+							}
 						}
-						_ = attackedTargets.Dequeue();
-					}
+						if (targetExists)
+						{
+							continue;
+						}
 
-					attackedTargets.Enqueue((effect.TargetID, DateTime.Now));
+						while (attackedTargets.Count >= attackedTargetsCount && attackedTargets.Count > 0)
+						{
+							(var id, var time) = attackedTargets.Peek();
+							if (id == effect.TargetID)
+							{
+								break;
+							}
+							_ = attackedTargets.Dequeue();
+						}
+
+						attackedTargets.Enqueue((effect.TargetID, DateTime.Now));
+					}
 				}
 			}
 

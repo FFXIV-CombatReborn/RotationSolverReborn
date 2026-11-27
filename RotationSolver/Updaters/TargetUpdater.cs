@@ -14,8 +14,16 @@ internal static partial class TargetUpdater
 		_dispelPartyTargets = new(() => Service.Config.EsunaDelay);
 	private static readonly List<IBattleChara> _raiseCandidates = [];
 	private static readonly List<IBattleChara> _dispelCandidates = [];
+	private static readonly List<IBattleChara> _allTargetsCache = [];
+	private static readonly List<IBattleChara> _partyMembersCache = [];
+	private static readonly List<IBattleChara> _allianceMembersCache = [];
+	private static readonly List<IBattleChara> _hostileTargetsCache = [];
+	private static readonly List<IBattleChara> _deathTanksCache = [];
+	private static readonly List<IBattleChara> _deathHealersCache = [];
+	private static readonly List<IBattleChara> _deathOffHealersCache = [];
+	private static readonly List<IBattleChara> _deathOthersCache = [];
 
-	private static List<IBattleChara> _outOfDutyPlayers = [];
+	private static readonly List<IBattleChara> _outOfDutyPlayers = [];
 
 	private static long _lastUpdateTimeToKill;
 	private const long TimeToKillUpdateIntervalMs = 1000;
@@ -59,10 +67,10 @@ internal static partial class TargetUpdater
 	{
 		var allTargets = DataCenter.AllTargets;
 
-		List<IBattleChara> partyMembers = new(capacity: allTargets.Count);
-		List<IBattleChara> allianceMembers = new(capacity: allTargets.Count);
-		List<IBattleChara> hostileTargets = new(capacity: allTargets.Count);
-		List<IBattleChara> outOfDutyPlayers = [];
+		_partyMembersCache.Clear();
+		_allianceMembersCache.Clear();
+		_hostileTargetsCache.Clear();
+		_outOfDutyPlayers.Clear();
 
 		var raisetype = Service.Config.RaiseType;
 		var ignoreInvincibility = DataCenter.IsPvP && Service.Config.IgnorePvPInvincibility;
@@ -87,25 +95,25 @@ internal static partial class TargetUpdater
 					if (member.DistanceToPlayer() < 48 && member.CanSeeFrom(playerEye.Value)
 						&& (ignoreInvincibility || !member.HasInvincibleStatus()))
 					{
-						hostileTargets.Add(member);
+						_hostileTargetsCache.Add(member);
 					}
 				}
 				else if (member.IsParty())
 				{
 					if (member.Character() != null)
 					{
-						partyMembers.Add(member);
+						_partyMembersCache.Add(member);
 					}
 				}
 				else if (member.Character() != null)
 				{
 					if (member.IsAllianceMember())
 					{
-						allianceMembers.Add(member);
+						_allianceMembersCache.Add(member);
 					}
 					else if (raisetype == RaiseType.AllOutOfDuty && member.IsOtherPlayerOutOfDuty())
 					{
-						outOfDutyPlayers.Add(member);
+						_outOfDutyPlayers.Add(member);
 					}
 				}
 			}
@@ -115,13 +123,12 @@ internal static partial class TargetUpdater
 			}
 		}
 
-		DataCenter.PartyMembers = partyMembers;
-		DataCenter.AllianceMembers = allianceMembers;
-		DataCenter.AllHostileTargets = hostileTargets;
-		_outOfDutyPlayers = outOfDutyPlayers;
+		DataCenter.PartyMembers = _partyMembersCache;
+		DataCenter.AllianceMembers = _allianceMembersCache;
+		DataCenter.AllHostileTargets = _hostileTargetsCache;
 
 		DataCenter.AllHostileTargetIds.Clear();
-		foreach (var hostile in hostileTargets)
+		foreach (var hostile in _hostileTargetsCache)
 		{
 			_ = DataCenter.AllHostileTargetIds.Add(hostile.GameObjectId);
 		}
@@ -129,7 +136,7 @@ internal static partial class TargetUpdater
 
 	private static List<IBattleChara> GetAllTargets()
 	{
-		List<IBattleChara> allTargets = [];
+		_allTargetsCache.Clear();
 		var skipDummyCheck = !Service.Config.DisableTargetDummys;
 
 		var objects = Svc.Objects;
@@ -145,13 +152,13 @@ internal static partial class TargetUpdater
 						&& battleChara.IsTargetable
 						&& !battleChara.IsPet())
 					{
-						allTargets.Add(battleChara);
+						_allTargetsCache.Add(battleChara);
 					}
 				}
 			}
 		}
 
-		return allTargets;
+		return _allTargetsCache;
 	}
 
 	private static IBattleChara? GetFirstHostileTarget(Func<IBattleChara, bool> predicate)
@@ -277,10 +284,15 @@ internal static partial class TargetUpdater
 			return null;
 		}
 
-		List<IBattleChara> deathTanks = [];
-		List<IBattleChara> deathHealers = [];
-		List<IBattleChara> deathOffHealers = [];
-		List<IBattleChara> deathOthers = [];
+		_deathTanksCache.Clear();
+		_deathHealersCache.Clear();
+		_deathOffHealersCache.Clear();
+		_deathOthersCache.Clear();
+
+		var deathTanks = _deathTanksCache;
+		var deathHealers = _deathHealersCache;
+		var deathOffHealers = _deathOffHealersCache;
+		var deathOthers = _deathOthersCache;
 
 		foreach (var chara in validRaiseTargets)
 		{
@@ -306,17 +318,17 @@ internal static partial class TargetUpdater
 			}
 		}
 
-		if (raiseType == RaiseType.PartyAndAllianceHealers && deathHealers.Count > 0)
-		{
-			return deathHealers[0];
-		}
-
 		if (Service.Config.H2)
 		{
 			deathTanks.Reverse();
 			deathHealers.Reverse();
 			deathOffHealers.Reverse();
 			deathOthers.Reverse();
+		}
+
+		if (raiseType == RaiseType.PartyAndAllianceHealers && deathHealers.Count > 0)
+		{
+			return deathHealers[0];
 		}
 
 		if (deathTanks.Count > 1)

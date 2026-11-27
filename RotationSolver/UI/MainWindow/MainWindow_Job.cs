@@ -1,3 +1,4 @@
+using System.Globalization;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using ECommons.ExcelServices;
@@ -52,36 +53,18 @@ public partial class MainWindow
 			return;
 		}
 
-		var descriptions = GetRotationDescriptions(rotation.GetType());
+		var entries = GetRotationDescriptionEntries(rotation);
 
 		using var table = ImRaii.Table("Rotation Description", 2, ImGuiTableFlags.Borders
 			| ImGuiTableFlags.Resizable
 			| ImGuiTableFlags.SizingStretchProp);
 		if (table)
 		{
-			foreach (var attr in descriptions)
+			foreach (var (attr, allActions) in entries)
 			{
-				List<IBaseAction> allActions = [];
-				foreach (var actionId in attr.Actions)
-				{
-					IBaseAction? action = null;
-					foreach (var baseAction in rotation.AllBaseActions)
-					{
-						if (baseAction.ID == (uint)actionId)
-						{
-							action = baseAction;
-							break;
-						}
-					}
-					if (action != null)
-					{
-						allActions.Add(action);
-					}
-				}
-
 				var hasDesc = !string.IsNullOrEmpty(attr.Description);
 
-				if (!hasDesc && allActions.Count == 0)
+				if (!hasDesc && allActions.Length == 0)
 				{
 					continue;
 				}
@@ -89,7 +72,7 @@ public partial class MainWindow
 				ImGui.TableNextRow();
 				_ = ImGui.TableNextColumn();
 
-				if (IconSet.GetTexture(attr.IconID, out var image) && image?.Handle != null)
+				if (IconSet.GetTexture(attr.IconID, out var image) && image is { Handle.IsNull: false })
 				{
 					ImGui.Image(image.Handle, Vector2.One * DESC_SIZE * Scale);
 				}
@@ -117,8 +100,9 @@ public partial class MainWindow
 				var notStart = false;
 				var size = DESC_SIZE * Scale;
 				var y = ImGui.GetCursorPosY() + (size * 4 / 82);
-				foreach (var item in allActions)
+				for (var i = 0; i < allActions.Length; i++)
 				{
+					var item = allActions[i];
 					if (item == null)
 					{
 						continue;
@@ -133,6 +117,7 @@ public partial class MainWindow
 					{
 						ImGui.SetCursorPosY(y);
 						var cursor = ImGui.GetCursorPos();
+						using var id = ImRaii.PushId((int)item.ID ^ (i << 20));
 						_ = ImGuiHelper.NoPaddingNoColorImageButton(texture, Vector2.One * size);
 						ImGuiHelper.DrawActionOverlay(cursor, size, 1);
 						ImguiTooltips.HoveredTooltip(item.Name);
@@ -141,6 +126,46 @@ public partial class MainWindow
 				}
 			}
 		}
+	}
+
+	private static ICustomRotation? _cachedDescriptionRotation;
+	private static readonly List<(RotationDescAttribute Attr, IBaseAction[] Actions)> _cachedDescriptionEntries = [];
+
+	private static List<(RotationDescAttribute Attr, IBaseAction[] Actions)> GetRotationDescriptionEntries(ICustomRotation rotation)
+	{
+		if (ReferenceEquals(_cachedDescriptionRotation, rotation))
+		{
+			return _cachedDescriptionEntries;
+		}
+
+		_cachedDescriptionRotation = rotation;
+		_cachedDescriptionEntries.Clear();
+
+		var descriptions = GetRotationDescriptions(rotation.GetType());
+		foreach (var attr in descriptions)
+		{
+			List<IBaseAction> allActions = [];
+			foreach (var actionId in attr.Actions)
+			{
+				IBaseAction? action = null;
+				foreach (var baseAction in rotation.AllBaseActions)
+				{
+					if (baseAction.ID == (uint)actionId)
+					{
+						action = baseAction;
+						break;
+					}
+				}
+				if (action != null)
+				{
+					allActions.Add(action);
+				}
+			}
+
+			_cachedDescriptionEntries.Add((attr, [.. allActions]));
+		}
+
+		return _cachedDescriptionEntries;
 	}
 
 	private static readonly Dictionary<Type, List<RotationDescAttribute>> _rotationDescriptions = [];
@@ -303,9 +328,12 @@ public partial class MainWindow
 						parentValueStr = dotIndex >= 0 ? parentValueStr[(dotIndex + 1)..] : parentValueStr;
 					}
 
-					if (parentConfig.Value == null ||
-						!string.Equals(parentConfig.Value.Trim(), parentValueStr?.Trim(),
-							StringComparison.OrdinalIgnoreCase))
+					var isMatch = parentConfig is RotationConfigCombo parentCombo
+						? parentCombo.MatchesValue(parentCombo.Value, parentValueStr)
+						: parentConfig.Value != null
+							&& string.Equals(parentConfig.Value.Trim(), parentValueStr?.Trim(),
+								StringComparison.OrdinalIgnoreCase);
+					if (!isMatch)
 					{
 						visiting.Remove(config.Name);
 						return false;
@@ -340,7 +368,16 @@ public partial class MainWindow
 
 	private static int SelectedComboIndex(RotationConfigCombo combo)
 	{
-		return Math.Max(0, Array.FindIndex(combo.DisplayValues, n => n.Equals(combo.Value, StringComparison.OrdinalIgnoreCase)));
+		for (var i = 0; i < combo.DisplayValues.Length; i++)
+		{
+			if (combo.DisplayValues[i].Equals(combo.Value, StringComparison.OrdinalIgnoreCase)
+				|| combo.EnumNames[i].Equals(combo.Value, StringComparison.OrdinalIgnoreCase))
+			{
+				return i;
+			}
+		}
+
+		return 0;
 	}
 
 	private static void DrawRotationConfigControl(IRotationConfig config, string id, float controlWidth)
@@ -383,13 +420,13 @@ public partial class MainWindow
 						if (M3Widgets.Slider($"{id}_slider", ref display, f.Min * 100f, f.Max * 100f,
 							$"{display:F1}{f.UnitType.ToSymbol()}", trackWidth))
 						{
-							config.Value = (display / 100f).ToString();
+							config.Value = (display / 100f).ToString(CultureInfo.InvariantCulture);
 						}
 					}
 					else if (M3Widgets.Slider($"{id}_slider", ref value, f.Min, f.Max,
 						$"{value:F2}{f.UnitType.ToSymbol()}", trackWidth))
 					{
-						config.Value = value.ToString();
+						config.Value = value.ToString(CultureInfo.InvariantCulture);
 					}
 
 					break;
@@ -514,6 +551,11 @@ public partial class MainWindow
 					OtherConfiguration.AdloquiumTankPriority = list;
 					_ = OtherConfiguration.SaveAdloquiumTankPriority();
 				});
+		}
+
+		if (Player.Object.IsJobs(Job.BST))
+		{
+			DrawBeastmasterPreferredKinships();
 		}
 
 		if (!Player.Object.IsJobs(Job.AST))

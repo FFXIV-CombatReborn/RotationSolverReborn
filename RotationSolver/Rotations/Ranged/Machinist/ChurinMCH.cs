@@ -149,6 +149,10 @@ public sealed class ChurinMCH : MachinistRotation
 			UpdateQueenStep();
 			UpdateQueenStepPair();
 		}
+		else
+		{
+			ResetQueenTracking();
+		}
 
 		return TryUseQueen(out act) ||
 				TryUseWildfire(out act) ||
@@ -402,6 +406,7 @@ public sealed class ChurinMCH : MachinistRotation
         (50, 60, 13)   // 60
     ];
 	private int _queenStep;
+	private bool _wasRobotActive;
 	private byte _lastTrackedQueenBattery;
 	private byte _lastOddQueenBattery;
 	private byte _nextOddQueenBattery;
@@ -439,13 +444,19 @@ public sealed class ChurinMCH : MachinistRotation
 			_foundQueenStepPair = false;
 		}
 	}
+	public override void OnTerritoryChanged()
+	{
+		ResetQueenTracking();
+		base.OnTerritoryChanged();
+	}
 	private void UpdateQueenStep()
 	{
-		if (_lastTrackedQueenBattery != LastSummonBatteryPower)
+		if (IsRobotActive && !_wasRobotActive)
 		{
 			_lastTrackedQueenBattery = LastSummonBatteryPower;
 			_queenStep++;
 		}
+		_wasRobotActive = IsRobotActive;
 	}
 	private void ResetQueenTracking()
 	{
@@ -454,6 +465,7 @@ public sealed class ChurinMCH : MachinistRotation
 		_lastOddQueenBattery = 0;
 		_nextOddQueenBattery = 0;
 		_foundQueenStepPair = false;
+		_wasRobotActive = IsRobotActive;
 	}
 	private bool TryUseQueen(out IAction? act)
 	{

@@ -1,4 +1,5 @@
 using Lumina.Excel.Sheets;
+using System.Security;
 
 namespace RotationSolver.GameData.Getters;
 
@@ -10,12 +11,15 @@ internal class ItemGetter(Lumina.GameData gameData)
 	/// </summary>
 	public List<string> AddedNames { get; } = [];
 
+	private readonly HashSet<string> _addedNamesSet = [];
+
 	/// <summary>
 	/// Clears the list of added item names before creating the list of items.
 	/// </summary>
 	protected override void BeforeCreating()
 	{
 		AddedNames.Clear();
+		_addedNamesSet.Clear();
 		base.BeforeCreating();
 	}
 
@@ -36,7 +40,7 @@ internal class ItemGetter(Lumina.GameData gameData)
 			return false;
 		}
 
-		return true;
+		return !string.IsNullOrEmpty(item.Singular.ToString().ToPascalCase());
 	}
 
 	/// <summary>
@@ -47,14 +51,12 @@ internal class ItemGetter(Lumina.GameData gameData)
 	protected override string ToCode(Item item)
 	{
 		var name = item.Singular.ToString().ToPascalCase();
-		if (AddedNames.Contains(name))
+		if (!_addedNamesSet.Add(name))
 		{
 			name += $"_{item.RowId}";
+			_addedNamesSet.Add(name);
 		}
-		else
-		{
-			AddedNames.Add(name);
-		}
+		AddedNames.Add(name);
 
 		var desc = item.Description.ToString() ?? string.Empty;
 
@@ -62,7 +64,8 @@ internal class ItemGetter(Lumina.GameData gameData)
 
 		desc = $"<para>{desc.Replace("\n", "</para>\n/// <para>")}</para>";
 
-		var descName = $"<see href=\"https://garlandtools.org/db/#item/{item.RowId}\"><strong>{item.Name}</strong></see> [{item.RowId}]";
+		var escapedName = SecurityElement.Escape(item.Name.ToString());
+		var descName = $"<see href=\"https://garlandtools.org/db/#item/{item.RowId}\"><strong>{escapedName}</strong></see> [{item.RowId}]";
 
 		return $$"""
         private readonly Lazy<IBaseItem> _{{name}}Creator = new(() => new BaseItem({{item.RowId}}));

@@ -306,18 +306,20 @@ public partial struct ActionTargetInfo(IBaseAction action)
 
 		if (action.Setting.TargetStatusNeed != null && !skipTargetStatusNeedCheck && action.Config.ShouldCheckTargetStatus)
 		{
+			var hasKnownWeakness = false;
 			if (DataCenter.IsInOccultCrescentOp && battleChara.NameId != 0)
 			{
 				foreach (var id in action.Setting.TargetStatusNeed)
 				{
 					if (StatusHelper.IsOccultWeaknessStatus(id) && StatusHelper.HasKnownOccultWeakness(battleChara.NameId, id))
 					{
-						return true;
+						hasKnownWeakness = true;
+						break;
 					}
 				}
 			}
 
-			if (battleChara.WillStatusEndGCD(0, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusNeed))
+			if (!hasKnownWeakness && battleChara.WillStatusEndGCD(0, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusNeed))
 			{
 				return false;
 			}

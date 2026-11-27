@@ -40,7 +40,7 @@ internal class ActionCategoryGetter(Lumina.GameData gameData)
 			return false;
 		}
 
-		return true;
+		return !string.IsNullOrEmpty(name.ToPascalCase());
 	}
 
 	/// <summary>

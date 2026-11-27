@@ -16,7 +16,6 @@ public class ObjectListDelay<T>(Func<(float min, float max)> getRange) : IEnumer
 	private readonly Func<(float min, float max)> _getRange = getRange;
 	private readonly Dictionary<ulong, DateTime> _revealTime = [];
 	private readonly Dictionary<ulong, DateTime> _lastSeen = [];
-	private readonly Random _ran = new();
 	private static readonly TimeSpan StaleGracePeriod = TimeSpan.FromSeconds(2);
 
 	/// <summary>
@@ -49,12 +48,12 @@ public class ObjectListDelay<T>(Func<(float min, float max)> getRange) : IEnumer
 			if (!_revealTime.TryGetValue(id, out var time))
 			{
 				(var min, var max) = _getRange();
-				var delaySecond = min + ((float)_ran.NextDouble() * (max - min));
+				var delaySecond = min + ((float)Random.Shared.NextDouble() * (max - min));
 				time = now + TimeSpan.FromMilliseconds(delaySecond * 1000);
 				_revealTime[id] = time;
 			}
 
-			if (now > time)
+			if (now >= time)
 			{
 				outList.Add(item);
 			}

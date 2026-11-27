@@ -54,7 +54,14 @@ public readonly struct ActionCooldownInfo : ICooldown
 	/// <summary>
 	/// Gets the current number of charges.
 	/// </summary>
-	public unsafe ushort CurrentCharges => (ushort)ActionManager.Instance()->GetCurrentCharges(_action.Info.AdjustedID);
+	public unsafe ushort CurrentCharges
+	{
+		get
+		{
+			var actionManager = ActionManager.Instance();
+			return actionManager == null ? (ushort)0 : (ushort)actionManager->GetCurrentCharges(_action.Info.AdjustedID);
+		}
+	}
 
 	/// <summary>
 	/// Gets the maximum number of charges.
@@ -75,7 +82,26 @@ public readonly struct ActionCooldownInfo : ICooldown
 	/// <summary>
 	/// Gets the raw remaining recast time for one charge.
 	/// </summary>
-	internal float RecastTimeRemainOneChargeRaw => RecastTimeRemain % RecastTimeOneChargeRaw;
+	internal float RecastTimeRemainOneChargeRaw
+	{
+		get
+		{
+			var oneCharge = RecastTimeOneChargeRaw;
+			if (oneCharge <= 0f || !IsCoolingDown)
+			{
+				return 0f;
+			}
+
+			var remain = RecastTimeRemain;
+			if (remain <= 0f)
+			{
+				return 0f;
+			}
+
+			var mod = remain % oneCharge;
+			return mod == 0f ? oneCharge : mod;
+		}
+	}
 
 	/// <summary>
 	/// Gets the elapsed recast time for one charge minus the default GCD elapsed.
@@ -85,7 +111,14 @@ public readonly struct ActionCooldownInfo : ICooldown
 	/// <summary>
 	/// Gets the raw elapsed recast time for one charge.
 	/// </summary>
-	private float RecastTimeElapsedOneChargeRaw => RecastTimeElapsedRaw % RecastTimeOneChargeRaw;
+	private float RecastTimeElapsedOneChargeRaw
+	{
+		get
+		{
+			var oneCharge = RecastTimeOneChargeRaw;
+			return oneCharge <= 0f ? 0f : RecastTimeElapsedRaw % oneCharge;
+		}
+	}
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ActionCooldownInfo"/> struct.
@@ -180,6 +213,11 @@ public readonly struct ActionCooldownInfo : ICooldown
 	/// <returns>True if the action will have the specified number of charges; otherwise, false.</returns>
 	public bool WillHaveXCharges(uint charges, float remain)
 	{
+		if (charges > MaxCharges)
+		{
+			return false;
+		}
+
 		if (charges <= CurrentCharges)
 		{
 			return true;
@@ -201,7 +239,8 @@ public readonly struct ActionCooldownInfo : ICooldown
 			return false;
 		}
 
-		var elapsed = RecastTimeElapsedRaw % RecastTimeOneChargeRaw;
+		var oneCharge = RecastTimeOneChargeRaw;
+		var elapsed = oneCharge <= 0f ? 0f : RecastTimeElapsedRaw % oneCharge;
 		return elapsed + DataCenter.DefaultGCDRemain < time;
 	}
 

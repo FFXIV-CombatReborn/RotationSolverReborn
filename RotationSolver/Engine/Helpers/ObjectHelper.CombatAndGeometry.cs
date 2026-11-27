@@ -10,7 +10,9 @@ namespace RotationSolver.Engine.Helpers;
 
 public static partial class ObjectHelper
 {
-	private static readonly Dictionary<ulong, Vector3> LastPositions = [];
+	private const long MovingSampleIntervalMs = 75;
+	private static readonly Dictionary<ulong, (long Tick, Vector3 Pos, bool IsMoving)> LastPositions = [];
+
 	internal static bool IsTargetMoving(this IBattleChara battleChara)
 	{
 		if (battleChara == null)
@@ -25,15 +27,21 @@ public static partial class ObjectHelper
 
 		var id = battleChara.GameObjectId;
 		var currentPos = battleChara.Position;
-		if (LastPositions.TryGetValue(id, out var lastPos))
+		var now = Environment.TickCount64;
+		if (LastPositions.TryGetValue(id, out var entry))
 		{
-			var isMoving = Vector3.Distance(currentPos, lastPos) > 0.01f;
-			LastPositions[id] = currentPos;
+			if (now - entry.Tick < MovingSampleIntervalMs)
+			{
+				return entry.IsMoving;
+			}
+
+			var isMoving = Vector3.Distance(currentPos, entry.Pos) > 0.01f;
+			LastPositions[id] = (now, currentPos, isMoving);
 			return isMoving;
 		}
 		else
 		{
-			LastPositions[id] = currentPos;
+			LastPositions[id] = (now, currentPos, false);
 			return false;
 		}
 	}
@@ -94,6 +102,15 @@ public static partial class ObjectHelper
 	private static readonly ConcurrentDictionary<ulong, DateTime> _aliveStartTimes = [];
 	private static readonly ConcurrentDictionary<ulong, DateTime> _deadStartTimes = [];
 
+	internal static void ClearTrackingCaches()
+	{
+		LastPositions.Clear();
+		_aliveStartTimes.Clear();
+		_deadStartTimes.Clear();
+		_healthRatioCache.Clear();
+		_losCache.Clear();
+	}
+
 	internal static float TimeAlive(this IBattleChara? battleChara)
 	{
 		if (battleChara == null)
@@ -107,6 +124,11 @@ public static partial class ObjectHelper
 			return 0;
 		}
 
+		if (_aliveStartTimes.Count > 4096)
+		{
+			_aliveStartTimes.Clear();
+		}
+
 		return SecondsSinceFirstSeen(_aliveStartTimes, battleChara.GameObjectId);
 	}
 
@@ -117,10 +139,15 @@ public static partial class ObjectHelper
 			return float.NaN;
 		}
 
-		if (!battleChara.IsDead)
+		if (!battleChara.IsDead || Svc.Condition[ConditionFlag.BetweenAreas])
 		{
 			_ = _deadStartTimes.TryRemove(battleChara.GameObjectId, out _);
 			return 0;
+		}
+
+		if (_deadStartTimes.Count > 4096)
+		{
+			_deadStartTimes.Clear();
 		}
 
 		return SecondsSinceFirstSeen(_deadStartTimes, battleChara.GameObjectId);
@@ -140,11 +167,15 @@ public static partial class ObjectHelper
 		}
 
 		var now = DateTime.Now;
-		foreach ((var id, var time) in DataCenter.AttackedTargets)
+		var targetId = battleChara.GameObjectId;
+		lock (DataCenter._attackedTargetsLock)
 		{
-			if (id == battleChara.GameObjectId)
+			foreach ((var id, var time) in DataCenter.AttackedTargets)
 			{
-				return now - time >= TimeSpan.FromSeconds(1);
+				if (id == targetId)
+				{
+					return now - time >= TimeSpan.FromSeconds(1);
+				}
 			}
 		}
 		return false;
@@ -206,14 +237,7 @@ public static partial class ObjectHelper
 			return true;
 		}
 
-		var direction = offset / maxDist;
-
-		RaycastHit hit;
-		var materialFilter = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
-		var module = Framework.Instance()->BGCollisionModule;
-		var blocked = module->RaycastMaterialFilter(&hit, &playerEyePos, &direction, maxDist, 1, materialFilter);
-
-		var visible = !blocked;
+		var visible = !Raycast(playerEyePos, offset / maxDist, maxDist, out _);
 		_losCache[id] = new LosCacheEntry
 		{
 			PlayerPos = playerEyePos,
@@ -222,6 +246,56 @@ public static partial class ObjectHelper
 			Visible = visible
 		};
 		return visible;
+	}
+
+	private static unsafe bool Raycast(Vector3 origin, Vector3 direction, float maxDistance, out Vector3 point)
+	{
+		point = default;
+		var framework = Framework.Instance();
+		if (framework == null)
+		{
+			return false;
+		}
+
+		var module = framework->BGCollisionModule;
+		if (module == null)
+		{
+			return false;
+		}
+
+		RaycastHit hit;
+		var materialFilter = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
+		if (!module->RaycastMaterialFilter(&hit, &origin, &direction, maxDistance, 1, materialFilter))
+		{
+			return false;
+		}
+
+		point = hit.Point;
+		return true;
+	}
+
+	internal static Vector3 SnapToGround(Vector3 position, float above = 2.5f, float below = 6f)
+	{
+		var origin = position + (Vector3.UnitY * above);
+		if (Raycast(origin, -Vector3.UnitY, above + below, out var ground))
+		{
+			position.Y = ground.Y;
+		}
+
+		return position;
+	}
+
+	internal static bool CanSeePosition(Vector3 position, float playerYOffset = 2.0f, float targetYOffset = 1.0f)
+	{
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		var eye = Player.Object.Position + (Vector3.UnitY * playerYOffset);
+		var offset = position + (Vector3.UnitY * targetYOffset) - eye;
+		var maxDist = offset.Length();
+		return maxDist < 0.01f || !Raycast(eye, offset / maxDist, maxDist, out _);
 	}
 
 	internal static bool CanSee(this IBattleChara battleChara, float playerYOffset = 2.0f, float targetYOffset = 2.0f)
@@ -397,7 +471,7 @@ public static partial class ObjectHelper
 		}
 
 		double dotProduct = Vector3.Dot(vec1, vec2);
-		return Math.Acos(dotProduct / lengthProduct);
+		return Math.Acos(Math.Clamp(dotProduct / lengthProduct, -1.0, 1.0));
 	}
 
 	/// <summary>

@@ -276,13 +276,13 @@ public class BaseAction : IBaseAction
 		var adjustId = AdjustedID;
 		if (TargetInfo.IsTargetArea)
 		{
-			if (adjustId != ID || !target.Position.HasValue)
+			if (!target.Position.HasValue)
 			{
 				return false;
 			}
 
 			var loc = target.Position.Value;
-			return actionManager->UseActionLocation(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
+			return actionManager->UseActionLocation(ActionType.Action, adjustId, Player.Object.GameObjectId, &loc);
 		}
 
 		var targetId = target.Target?.GameObjectId ?? Player.Object.GameObjectId;

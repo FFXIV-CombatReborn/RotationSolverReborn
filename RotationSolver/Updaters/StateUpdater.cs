@@ -5,6 +5,8 @@ namespace RotationSolver.Updaters;
 
 internal static class StateUpdater
 {
+	private static bool _wasInCombat;
+
 	private static bool CanUseHealAction =>
 		DataCenter.IsPvP
 		|| ((DataCenter.Role == JobRole.Healer || Service.Config.UseHealWhenNotAHealer)
@@ -16,9 +18,14 @@ internal static class StateUpdater
 	{
 		DataCenter.CommandStatus = StatusFromCmdOrCondition();
 		DataCenter.AutoStatus = StatusFromAutomatic();
-		if (!DataCenter.InCombat && DataCenter.AttackedTargets.Count > 0)
+		if (DataCenter.InCombat)
 		{
-			DataCenter.ResetAllRecords();
+			_wasInCombat = true;
+		}
+		else if (_wasInCombat || (DataCenter.HasAttackedTargets && DataCenter.TimeSinceLastAction.TotalSeconds > 5))
+		{
+			_wasInCombat = false;
+			DataCenter.ResetCombatRecords();
 		}
 	}
 
@@ -133,8 +140,14 @@ internal static class StateUpdater
 
 			try
 			{
-				if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out var positional)
-					&& target.HasPositional())
+				var positional = ActionUpdater.NextGCDAction.Setting.EnemyPositional;
+				if (positional == EnemyPositional.None
+					&& ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out var configuredPositional))
+				{
+					positional = configuredPositional;
+				}
+
+				if (positional != EnemyPositional.None && target.HasPositional())
 				{
 					var current = target.FindEnemyPositional();
 					return current != EnemyPositional.None && current != positional && !target.IsDying();
@@ -308,23 +321,26 @@ internal static class StateUpdater
 				Service.Config.HealthSingleSpellHot)
 			: 0;
 
-		var partyCount = DataCenter.PartyMembers.Count;
-		var areaHotRatio = partyCount > 2 ? SelfHealingOfTimeRatio(StatusHelper.AreaHots) : 0f;
-
-		if (doomNeedHealingCount > 1 || singleAbilityCount > 2
-			|| ShouldHealArea(partyCount, Service.Config.HealthAreaAbility, Service.Config.HealthAreaAbilityHot, areaHotRatio))
-		{
-			status |= AutoStatus.HealAreaAbility;
-		}
-
-		if (canUseHealSpell && (doomNeedHealingCount > 1 || singleSpellCount > 2
-			|| ShouldHealArea(partyCount, Service.Config.HealthAreaSpell, Service.Config.HealthAreaSpellHot, areaHotRatio)))
-		{
-			status |= AutoStatus.HealAreaSpell;
-		}
-
 		var onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer
 			&& DataCenter.Role != JobRole.Healer;
+
+		if (!onlyHealSelf)
+		{
+			var partyCount = DataCenter.PartyMembers.Count;
+			var areaHotRatio = partyCount > 2 ? SelfHealingOfTimeRatio(StatusHelper.AreaHots) : 0f;
+
+			if (doomNeedHealingCount > 1 || singleAbilityCount > 2
+				|| ShouldHealArea(partyCount, Service.Config.HealthAreaAbility, Service.Config.HealthAreaAbilityHot, areaHotRatio))
+			{
+				status |= AutoStatus.HealAreaAbility;
+			}
+
+			if (canUseHealSpell && (doomNeedHealingCount > 1 || singleSpellCount > 2
+				|| ShouldHealArea(partyCount, Service.Config.HealthAreaSpell, Service.Config.HealthAreaSpellHot, areaHotRatio)))
+			{
+				status |= AutoStatus.HealAreaSpell;
+			}
+		}
 
 		if (onlyHealSelf)
 		{

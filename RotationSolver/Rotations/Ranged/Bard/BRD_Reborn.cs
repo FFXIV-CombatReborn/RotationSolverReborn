@@ -315,7 +315,7 @@ public sealed class BRD_Reborn : BardRotation
 			return base.AttackAbility(nextGCD, out act);
 		}
 
-		if ((RagingStrikesPvE.Cooldown.IsCoolingDown || !RagingStrikesPvE.Cooldown.WillHaveOneCharge(15)) && Song != Song.None && EmpyrealArrowPvE.CanUse(out act))
+		if (RagingStrikesPvE.Cooldown.IsCoolingDown && !RagingStrikesPvE.Cooldown.WillHaveOneCharge(15) && Song != Song.None && EmpyrealArrowPvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -595,7 +595,7 @@ public sealed class BRD_Reborn : BardRotation
 			return true;
 		}
 
-		if (Song == Song.MagesBallad && SoulVoice >= 80 && SongEndAfter(22) && SongEndAfter(18))
+		if (Song == Song.MagesBallad && SoulVoice >= 80 && SongEndAfter(22) && !SongEndAfter(18))
 		{
 			return true;
 		}

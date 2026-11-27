@@ -115,12 +115,8 @@ internal static partial class DataCenter
 
 	public static unsafe bool SylphManagementFinished()
 	{
-		if (UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(66049))
-		{
-			return true;
-		}
-
-		return false;
+		var uiState = UIState.Instance();
+		return uiState != null && uiState->IsUnlockLinkUnlockedOrQuestCompleted(66049);
 	}
 
 	public static bool BaseClass()
@@ -169,6 +165,31 @@ internal static partial class DataCenter
 	/// </summary>
 	public static float CalculatedActionAhead => Math.Max(0f, DefaultGCDTotal * Service.Config.Action6Head);
 
+	private static Job _lastNormalGcdJob = Job.ADV;
+	private static float _lastNormalGcdTotal = 2.5f;
+
+	private static float NormalGCDTotal
+	{
+		get
+		{
+			var job = Job;
+			if (job != _lastNormalGcdJob)
+			{
+				_lastNormalGcdJob = job;
+				_lastNormalGcdTotal = 2.5f;
+			}
+
+			var current = DefaultGCDTotal;
+			if (current >= 1.8f)
+			{
+				_lastNormalGcdTotal = current;
+				return current;
+			}
+
+			return _lastNormalGcdTotal;
+		}
+	}
+
 	/// <summary>
 	/// Calculates the total GCD time for a given number of GCDs and an optional offset.
 	/// </summary>
@@ -177,7 +198,7 @@ internal static partial class DataCenter
 	/// <returns>The total GCD time.</returns>
 	public static float GCDTime(uint gcdCount = 0, float offset = 0)
 	{
-		return (DefaultGCDTotal * gcdCount) + offset;
+		return gcdCount == 0 ? offset : (NormalGCDTotal * gcdCount) + offset;
 	}
 	#endregion
 }

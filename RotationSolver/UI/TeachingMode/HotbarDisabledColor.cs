@@ -36,31 +36,25 @@ internal static class HotbarDisabledColor
 		CollectDisabledActionIds();
 		HasTint = true;
 
-		HotbarAddonHelper.GetHotbarAddons(_addons);
-
-		var hotBarIndex = 0;
-		foreach (var intPtr in _addons)
+		for (var hotBarIndex = 0; hotBarIndex < HotbarAddonHelper.AddonCount; hotBarIndex++)
 		{
+			var intPtr = HotbarAddonHelper.GetHotbarAddon(hotBarIndex);
+			if (intPtr == nint.Zero)
+			{
+				continue;
+			}
+
 			var actionBar = (AddonActionBarBase*)intPtr;
 			if (!HotbarAddonHelper.IsVisible(&actionBar->AtkUnitBase))
 			{
-				hotBarIndex++;
 				continue;
 			}
 
-			var resolvedHotbarIndex = hotBarIndex;
-			if (hotBarIndex > 9)
+			if (!HotbarAddonHelper.TryGetRaptureHotbarIndex(intPtr, hotBarIndex, raptureModule, out var resolvedHotbarIndex))
 			{
-				resolvedHotbarIndex = hotBarIndex == 10
-					? ((AddonActionCross*)intPtr)->RaptureHotbarId
-					: ((AddonActionDoubleCrossBase*)intPtr)->BarTarget;
-			}
-
-			if (resolvedHotbarIndex < 0 || resolvedHotbarIndex >= raptureModule->Hotbars.Length)
-			{
-				hotBarIndex++;
 				continue;
 			}
+
 			ref var raptureHotbar = ref raptureModule->Hotbars[resolvedHotbarIndex];
 
 			var slotIndex = -1;
@@ -80,20 +74,19 @@ internal static class HotbarDisabledColor
 				}
 
 				ref var hotbarSlot = ref raptureHotbar.Slots[slotIndex];
-				if (hotbarSlot.ApparentSlotType != HotbarSlotType.Action || hotbarSlot.OriginalApparentSlotType != HotbarSlotType.Action)
+				if (hotbarSlot.ApparentSlotType != HotbarSlotType.Action
+					|| (hotbarSlot.OriginalApparentSlotType != HotbarSlotType.Action && hotbarSlot.CommandType != HotbarSlotType.PvPCombo))
 				{
 					continue;
 				}
 
 				var adjusted = actionManager->GetAdjustedActionId((uint)slot.ActionId);
-				var shouldRedden = adjusted != 0 && _disabledActionIds.Contains((uint)slot.ActionId);
+				var shouldRedden = adjusted != 0 && (_disabledActionIds.Contains(adjusted) || _disabledActionIds.Contains((uint)slot.ActionId));
 				if (iconAddon->Component != null)
 				{
 					ApplyIconReddening((AtkComponentIcon*)iconAddon->Component, shouldRedden);
 				}
 			}
-
-			hotBarIndex++;
 		}
 	}
 
@@ -142,9 +135,10 @@ internal static class HotbarDisabledColor
 		if (redden)
 		{
 			var tint = Service.Config.HotbarDisabledTintColor;
-			iconComponent->IconImage->Color.R = (byte)Math.Clamp((int)(tint.X * 255f), 0, 255);
-			iconComponent->IconImage->Color.G = (byte)Math.Clamp((int)(tint.Y * 255f), 0, 255);
-			iconComponent->IconImage->Color.B = (byte)Math.Clamp((int)(tint.Z * 255f), 0, 255);
+			var alpha = Math.Clamp(tint.W, 0f, 1f);
+			iconComponent->IconImage->Color.R = (byte)Math.Clamp((int)(float.Lerp(1f, Math.Clamp(tint.X, 0f, 1f), alpha) * 255f), 0, 255);
+			iconComponent->IconImage->Color.G = (byte)Math.Clamp((int)(float.Lerp(1f, Math.Clamp(tint.Y, 0f, 1f), alpha) * 255f), 0, 255);
+			iconComponent->IconImage->Color.B = (byte)Math.Clamp((int)(float.Lerp(1f, Math.Clamp(tint.Z, 0f, 1f), alpha) * 255f), 0, 255);
 		}
 		else
 		{
@@ -161,9 +155,14 @@ internal static class HotbarDisabledColor
 		foreach (var intPtr in _addons)
 		{
 			var actionBar = (AddonActionBarBase*)intPtr;
+			if (actionBar == null)
+			{
+				continue;
+			}
+
 			foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
 			{
-				if (slot.Icon == null)
+				if (slot.Icon == null || slot.Icon->Component == null)
 				{
 					continue;
 				}

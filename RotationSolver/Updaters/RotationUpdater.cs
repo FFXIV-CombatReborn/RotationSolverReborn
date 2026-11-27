@@ -340,23 +340,31 @@ internal static class RotationUpdater
 		CurrentDutyRotationActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
 	}
 
+	private static uint _curDutyTerritory;
+
 	private static void UpdateDutyRotation()
 	{
-		if (!DutyRotations.TryGetValue(Svc.ClientState.TerritoryType, out var rotations))
+		var territory = Svc.ClientState.TerritoryType;
+		if (!DutyRotations.TryGetValue(territory, out var rotations))
 		{
 			if (DataCenter.CurrentDutyRotation != null)
 			{
 				DataCenter.CurrentDutyRotation.Dispose();
 				DataCenter.CurrentDutyRotation = null;
 				_curDutyRotationName = string.Empty;
+				_curDutyTerritory = 0;
 				CurrentDutyRotationActions = [];
+			}
+			else
+			{
+				_curDutyTerritory = 0;
 			}
 			return;
 		}
 
-		_ = Service.Config.DutyRotationChoice.TryGetValue(Svc.ClientState.TerritoryType, out var value);
+		_ = Service.Config.DutyRotationChoice.TryGetValue(territory, out var value);
 		var name = value ?? string.Empty;
-		if (name == _curDutyRotationName && DataCenter.CurrentDutyRotation != null)
+		if (territory == _curDutyTerritory && name == _curDutyRotationName && DataCenter.CurrentDutyRotation != null)
 		{
 			return;
 		}
@@ -369,6 +377,7 @@ internal static class RotationUpdater
 			_actionsRefreshTick = long.MinValue;
 		}
 
+		_curDutyTerritory = territory;
 		_curDutyRotationName = name;
 
 		static DutyRotation? GetRotation(Type? t)
@@ -486,6 +495,16 @@ internal static class RotationUpdater
 		CurrentRotationActions = DataCenter.CurrentRotation?.AllActions ?? [];
 	}
 
+	internal static void UpdateRotationFrame()
+	{
+		if (Player.Object == null)
+		{
+			return;
+		}
+
+		DataCenter.CurrentRotation?.ProcessFrame();
+	}
+
 	private static ICustomRotation? GetRotation(Type? t)
 	{
 		if (t == null)
@@ -568,6 +587,11 @@ internal static class RotationUpdater
 					rotationsListByType[(CombatType)comType].Add(possibleRotation);
 				}
 			}
+		}
+
+		if (!CustomRotationsLookup.ContainsKey(currentJob))
+		{
+			CustomRotationsLookup[currentJob] = [];
 		}
 	}
 

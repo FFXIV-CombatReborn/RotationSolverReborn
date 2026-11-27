@@ -68,7 +68,14 @@ internal static partial class DataCenter
 		return PlayerMaxLevel;
 	}
 
-	public unsafe static int PlayerCurrentLevel => PlayerState.Instance()->CurrentLevel;
+	public unsafe static int PlayerCurrentLevel
+	{
+		get
+		{
+			var playerState = PlayerState.Instance();
+			return playerState == null ? 0 : playerState->CurrentLevel;
+		}
+	}
 
 	public static int PlayerMaxLevel => Player.MaxLevel;
 
@@ -151,6 +158,23 @@ internal static partial class DataCenter
 
 	internal static List<uint> PrioritizedNameIds { get; set; } = [];
 	internal static List<uint> BlacklistedNameIds { get; set; } = [];
+	internal static readonly Lock _nameIdLock = new();
+
+	internal static void CopyBlacklistedNameIds(HashSet<uint> destination)
+	{
+		lock (_nameIdLock)
+		{
+			if (BlacklistedNameIds == null)
+			{
+				return;
+			}
+
+			for (var i = 0; i < BlacklistedNameIds.Count; i++)
+			{
+				_ = destination.Add(BlacklistedNameIds[i]);
+			}
+		}
+	}
 
 	internal static List<uint> RestrictedDotNameIds { get; set; } =
 	[
@@ -167,6 +191,17 @@ internal static partial class DataCenter
 	internal static List<ulong> TankbusterTargetIds { get; } = [];
 
 	private static readonly Lock _tankbusterLock = new();
+	internal static readonly Lock _attackedTargetsLock = new();
+	private static readonly Lock _nextActsLock = new();
+
+	internal static void CopyTankbusterTargetIds(List<ulong> destination)
+	{
+		destination.Clear();
+		lock (_tankbusterLock)
+		{
+			destination.AddRange(TankbusterTargetIds);
+		}
+	}
 
 	public static ICustomRotation? CurrentRotation { get; internal set; }
 	public static DutyRotation? CurrentDutyRotation { get; internal set; }
@@ -208,60 +243,69 @@ internal static partial class DataCenter
 	{
 		get
 		{
-			NextAct? next = null;
-			if (NextActs.Count > 0)
+			lock (_nextActsLock)
 			{
-				next = NextActs[0];
-			}
+				NextAct? next = null;
+				if (NextActs.Count > 0)
+				{
+					next = NextActs[0];
+				}
 
-			while (next != null && NextActs.Count > 0 &&
-				   (next.DeadTime < DateTime.Now || IActionHelper.IsLastAction(false, next.Act)))
-			{
-				NextActs.RemoveAt(0);
-				next = NextActs.Count > 0 ? NextActs[0] : null;
-			}
+				while (next != null && NextActs.Count > 0 &&
+					   (next.DeadTime < DateTime.Now || IActionHelper.IsLastAction(false, next.Act)))
+				{
+					NextActs.RemoveAt(0);
+					next = NextActs.Count > 0 ? NextActs[0] : null;
+				}
 
-			return next?.Act;
+				return next?.Act;
+			}
 		}
 	}
 
 	internal static CommandTarget? GetCommandTarget(IAction act)
 	{
-		for (var i = 0; i < NextActs.Count; i++)
+		lock (_nextActsLock)
 		{
-			var next = NextActs[i];
-			if (next.Act.ID == act.ID && next.DeadTime >= DateTime.Now)
+			for (var i = 0; i < NextActs.Count; i++)
 			{
-				return next.Target;
+				var next = NextActs[i];
+				if (next.Act.ID == act.ID && next.DeadTime >= DateTime.Now)
+				{
+					return next.Target;
+				}
 			}
-		}
 
-		return null;
+			return null;
+		}
 	}
 
 	internal static void AddCommandAction(IAction act, double time, CommandTarget? target = null)
 	{
-		var index = -1;
-		for (var i = 0; i < NextActs.Count; i++)
+		lock (_nextActsLock)
 		{
-			if (NextActs[i].Act.ID == act.ID)
+			var index = -1;
+			for (var i = 0; i < NextActs.Count; i++)
 			{
-				index = i;
-				break;
+				if (NextActs[i].Act.ID == act.ID)
+				{
+					index = i;
+					break;
+				}
 			}
-		}
 
-		NextAct newItem = new(act, DateTime.Now.AddSeconds(time), target);
-		if (index < 0)
-		{
-			NextActs.Add(newItem);
-		}
-		else
-		{
-			NextActs[index] = newItem;
-		}
+			NextAct newItem = new(act, DateTime.Now.AddSeconds(time), target);
+			if (index < 0)
+			{
+				NextActs.Add(newItem);
+			}
+			else
+			{
+				NextActs[index] = newItem;
+			}
 
-		NextActs.Sort((a, b) => a.DeadTime.CompareTo(b.DeadTime));
+			NextActs.Sort((a, b) => a.DeadTime.CompareTo(b.DeadTime));
+		}
 	}
 
 	public static IpcStateOverrides? IpcOverrides { get; set; }
@@ -311,7 +355,7 @@ internal static partial class DataCenter
 		get
 		{
 			var manager = ActionManager.Instance();
-			if (manager->Combo.Timer <= 0)
+			if (manager == null || manager->Combo.Timer <= 0)
 			{
 				return ActionID.None;
 			}
@@ -329,7 +373,14 @@ internal static partial class DataCenter
 		}
 	}
 
-	public static unsafe float ComboTime => ActionManager.Instance()->Combo.Timer;
+	public static unsafe float ComboTime
+	{
+		get
+		{
+			var manager = ActionManager.Instance();
+			return manager == null ? 0f : manager->Combo.Timer;
+		}
+	}
 
 	public static bool IsMoving => Player.IsMoving || BMRIsMoving;
 

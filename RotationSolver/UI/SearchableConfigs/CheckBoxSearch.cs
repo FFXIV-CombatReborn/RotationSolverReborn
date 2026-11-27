@@ -6,7 +6,9 @@ namespace RotationSolver.UI.SearchableConfigs;
 internal class CheckBoxCondition(PropertyInfo property, params ISearchable[] children)
 	: CheckBoxSearch(property, children)
 {
-	private ConditionBoolean? Condition => _property.GetValue(Service.Config) as ConditionBoolean;
+	private readonly Func<Configs, ConditionBoolean>? _getter = CreateGetter<ConditionBoolean>(property);
+
+	private ConditionBoolean? Condition => _getter != null ? _getter(Service.Config) : _property.GetValue(Service.Config) as ConditionBoolean;
 
 	protected override bool Value
 	{
@@ -29,15 +31,29 @@ internal class CheckBoxCondition(PropertyInfo property, params ISearchable[] chi
 internal class CheckBoxSearchNoCondition(PropertyInfo property, params ISearchable[] children)
 	: CheckBoxSearch(property, children)
 {
+	private readonly Func<Configs, bool>? _getter = CreateGetter<bool>(property);
+	private readonly Action<Configs, bool>? _setter = CreateSetter<bool>(property);
+
 	protected override bool Value
 	{
-		get => (bool)_property.GetValue(Service.Config)!;
-		set => _property.SetValue(Service.Config, value);
+		get => _getter != null ? _getter(Service.Config) : (bool)_property.GetValue(Service.Config)!;
+		set
+		{
+			if (_setter != null)
+			{
+				_setter(Service.Config, value);
+			}
+			else
+			{
+				_property.SetValue(Service.Config, value);
+			}
+		}
 	}
 }
 
 internal abstract class CheckBoxSearch : Searchable
 {
+	private string? _switchId;
 	public List<ISearchable> Children { get; } = [];
 
 	public ActionID Action { get; init; } = ActionID.None;
@@ -83,7 +99,7 @@ internal abstract class CheckBoxSearch : Searchable
 			leadingIcon: RowIcon, leadingTexture: texture);
 
 		ImGui.SetCursorScreenPos(row.ControlPosition);
-		if (M3Widgets.Switch($"##{ID}_switch", ref enable))
+		if (M3Widgets.Switch(_switchId ??= $"##{ID}_switch", ref enable))
 		{
 			Value = enable;
 		}

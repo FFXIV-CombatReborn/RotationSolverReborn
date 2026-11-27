@@ -119,7 +119,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
 
 	public bool IsOpenerChosen => (When2Open == OpenWhen.BossIsTarget && IsCurrentTargetBoss) || (When2Open == OpenWhen.BossInRoom && IsAnyBossinRange) || When2Open == OpenWhen.Allday;
 
-	public bool IsInOpener => IsOpenerChosen && CombatTime > 0 && CombatTime < 60 && InCombat && !StatusHelper.PlayerHasStatus(true, StatusID.BrinkOfDeath, StatusID.Weakness);
+	public bool IsInOpener => IsOpenerChosen && CombatTime > 0 && CombatTime < 60 && InCombat && !StatusHelper.PlayerHasStatus(false, StatusID.BrinkOfDeath, StatusID.Weakness);
 
 	public bool IsPotReady => (Poterchoice == Potchoice.WithOthers && IsPartyMedicated) || (Poterchoice == Potchoice.Q2M && IsWithinFirst15SecondsOfEvenMinute()) || (Poterchoice == Potchoice.Allday);
 

@@ -1,4 +1,5 @@
-﻿using ECommons.DalamudServices;
+﻿using System.Collections.Concurrent;
+using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.Logging;
 using Newtonsoft.Json.Converters;
@@ -150,7 +151,12 @@ internal class OtherConfiguration
 			}
 
 			var legacy = ReadFile<T>(legacyPath);
-			var changes = legacy == null ? null : Migrate(BuiltIn, legacy);
+			if (legacy == null)
+			{
+				return null;
+			}
+
+			var changes = Migrate(BuiltIn, legacy);
 			if (changes != null)
 			{
 				WriteFile(FilePath, JsonConvert.SerializeObject(changes, Formatting.Indented, SerializerSettings));
@@ -188,8 +194,16 @@ internal class OtherConfiguration
 		protected override HashSet<uint> Apply(HashSet<uint> builtIn, SetChanges changes)
 		{
 			var result = new HashSet<uint>(builtIn);
-			result.ExceptWith(changes.Removed);
-			result.UnionWith(changes.Added);
+			if (changes.Removed != null)
+			{
+				result.ExceptWith(changes.Removed);
+			}
+
+			if (changes.Added != null)
+			{
+				result.UnionWith(changes.Added);
+			}
+
 			return result;
 		}
 
@@ -238,7 +252,7 @@ internal class OtherConfiguration
 			var result = new Dictionary<uint, TItem[]>(value.Count);
 			foreach (var (key, items) in value)
 			{
-				result[key] = [.. items];
+				result[key] = items == null ? [] : [.. items];
 			}
 
 			return result;
@@ -247,17 +261,30 @@ internal class OtherConfiguration
 		protected override Dictionary<uint, TItem[]> Apply(Dictionary<uint, TItem[]> builtIn, MapChanges<TItem> changes)
 		{
 			var result = Copy(builtIn);
-			foreach (var (key, removed) in changes.Removed)
+			if (changes.Removed != null)
 			{
-				if (result.TryGetValue(key, out var items))
+				foreach (var (key, removed) in changes.Removed)
 				{
-					result[key] = Except(items, removed, false);
+					if (removed != null && result.TryGetValue(key, out var items))
+					{
+						result[key] = Except(items, removed, false);
+					}
 				}
 			}
 
-			foreach (var (key, added) in changes.Added)
+			if (changes.Added != null)
 			{
-				result[key] = result.TryGetValue(key, out var items) ? [.. items, .. Except(added, items, true)] : [.. added];
+				foreach (var (key, added) in changes.Added)
+				{
+					if (added == null)
+					{
+						continue;
+					}
+
+					result[key] = result.TryGetValue(key, out var items)
+						? [.. items, .. Except(added, items, true)]
+						: Except(added, null, true);
+				}
 			}
 
 			return result;
@@ -321,11 +348,14 @@ internal class OtherConfiguration
 		protected override List<Job> Apply(List<Job> builtIn, List<Job> changes)
 		{
 			var result = new List<Job>(builtIn.Count);
-			foreach (var job in changes)
+			if (changes != null)
 			{
-				if (builtIn.Contains(job) && !result.Contains(job))
+				foreach (var job in changes)
 				{
-					result.Add(job);
+					if (builtIn.Contains(job) && !result.Contains(job))
+					{
+						result.Add(job);
+					}
 				}
 			}
 
@@ -338,6 +368,11 @@ internal class OtherConfiguration
 			}
 
 			return result;
+		}
+
+		protected override List<Job>? Migrate(List<Job> builtIn, List<Job> legacy)
+		{
+			return Diff(builtIn, Apply(builtIn, legacy));
 		}
 
 		protected override List<Job> Diff(List<Job> builtIn, List<Job> current)
@@ -591,27 +626,46 @@ internal class OtherConfiguration
 		}
 	}
 
+	private static readonly ConcurrentDictionary<string, Lock> _fileLocks = new(StringComparer.OrdinalIgnoreCase);
+
 	private static void WriteFile(string path, string json)
 	{
-		const int retryCount = 3;
-		for (var i = 0; i < retryCount; i++)
+		var fileLock = _fileLocks.GetOrAdd(path, static _ => new Lock());
+		lock (fileLock)
 		{
-			try
+			const int retryCount = 3;
+			for (var i = 0; i < retryCount; i++)
 			{
-				var tempPath = path + ".tmp";
-				File.WriteAllText(tempPath, json);
-				File.Move(tempPath, path, true);
-				return;
-			}
-			catch (IOException ex) when (i < retryCount - 1)
-			{
-				PluginLog.Warning($"Failed to save the file to {path}. Retrying in 1s...: {ex.Message}");
-				Thread.Sleep(1000);
-			}
-			catch (Exception ex)
-			{
-				PluginLog.Warning($"Failed to save the file to {path}: {ex.Message}");
-				return;
+				var tempPath = $"{path}.{Guid.NewGuid():N}.tmp";
+				try
+				{
+					File.WriteAllText(tempPath, json);
+					File.Move(tempPath, path, true);
+					return;
+				}
+				catch (IOException ex) when (i < retryCount - 1)
+				{
+					PluginLog.Warning($"Failed to save the file to {path}. Retrying in 1s...: {ex.Message}");
+					Thread.Sleep(1000);
+				}
+				catch (Exception ex)
+				{
+					PluginLog.Warning($"Failed to save the file to {path}: {ex.Message}");
+					return;
+				}
+				finally
+				{
+					if (File.Exists(tempPath))
+					{
+						try
+						{
+							File.Delete(tempPath);
+						}
+						catch
+						{
+						}
+					}
+				}
 			}
 		}
 	}

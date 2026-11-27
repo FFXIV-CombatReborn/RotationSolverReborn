@@ -28,7 +28,7 @@ internal class AccentColorSearch(PropertyInfo property) : ColorEditSearch(proper
 		var row = M3SettingRow.Begin(Name, SupportingText, controlSize, leadingIcon: RowIcon);
 
 		ImGui.SetCursorScreenPos(row.ControlPosition);
-		if (M3Widgets.ColorChoices($"##Config_{ID}{GetHashCode()}", ref value, Presets, custom: true, maxWidth: width))
+		if (M3Widgets.ColorChoices(ControlId, ref value, Presets, custom: true, maxWidth: width))
 		{
 			Value = value;
 		}

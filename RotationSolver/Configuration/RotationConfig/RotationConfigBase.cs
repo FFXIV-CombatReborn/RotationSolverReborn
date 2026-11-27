@@ -52,12 +52,51 @@ internal abstract class RotationConfigBase : IRotationConfig
 	/// </summary>
 	public string Value
 	{
-		get => !Service.Config.RotationConfigurations.TryGetValue(Name, out var config) ? DefaultValue : config;
+		get
+		{
+			if (_dutyRotation != null)
+			{
+				var dutyKey = GetDutyConfigKey(_dutyRotation);
+				if (Service.Config.DutyRotationConfigurations.TryGetValue(dutyKey, out var dutyConfigs))
+				{
+					lock (dutyConfigs)
+					{
+						if (dutyConfigs.TryGetValue(Name, out var dutyConfig))
+						{
+							return dutyConfig;
+						}
+					}
+				}
+
+				return DefaultValue;
+			}
+
+			return !Service.Config.RotationConfigurations.TryGetValue(Name, out var config) ? DefaultValue : config;
+		}
 		set
 		{
-			Service.Config.RotationConfigurations[Name] = value;
+			if (_dutyRotation != null)
+			{
+				var dutyKey = GetDutyConfigKey(_dutyRotation);
+				var dutyConfigs = Service.Config.DutyRotationConfigurations.GetOrAdd(dutyKey, static _ => []);
+				lock (dutyConfigs)
+				{
+					dutyConfigs[Name] = value;
+				}
+			}
+			else
+			{
+				Service.Config.RotationConfigurations[Name] = value;
+			}
+
 			SetValue(value);
 		}
+	}
+
+	private static string GetDutyConfigKey(DutyRotation rotation)
+	{
+		var type = rotation.GetType();
+		return type.FullName ?? type.Name;
 	}
 
 	/// <summary>
@@ -90,7 +129,7 @@ internal abstract class RotationConfigBase : IRotationConfig
 			}
 			else if (!string.IsNullOrEmpty(Parent))
 			{
-				var parentProperty = rotation.GetType().GetProperty(Parent);
+				var parentProperty = rotation.GetType().GetProperty(Parent, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 				if (parentProperty != null)
 				{
 					ParentValue = parentProperty.GetValue(rotation);
@@ -130,7 +169,7 @@ internal abstract class RotationConfigBase : IRotationConfig
 			}
 			else if (!string.IsNullOrEmpty(Parent))
 			{
-				var parentProperty = rotation.GetType().GetProperty(Parent);
+				var parentProperty = rotation.GetType().GetProperty(Parent, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 				if (parentProperty != null)
 				{
 					ParentValue = parentProperty.GetValue(rotation);
@@ -144,9 +183,19 @@ internal abstract class RotationConfigBase : IRotationConfig
 			Parent = string.Empty;
 		}
 
-		if (Service.Config.RotationConfigurations.TryGetValue(Name, out var value))
+		var dutyKey = GetDutyConfigKey(rotation);
+		if (Service.Config.DutyRotationConfigurations.TryGetValue(dutyKey, out var dutyConfigs))
 		{
-			SetValue(value);
+			string? value;
+			lock (dutyConfigs)
+			{
+				_ = dutyConfigs.TryGetValue(Name, out value);
+			}
+
+			if (value != null)
+			{
+				SetValue(value);
+			}
 		}
 	}
 
@@ -171,7 +220,14 @@ internal abstract class RotationConfigBase : IRotationConfig
 		catch (Exception ex)
 		{
 			PluginLog.Error($"Failed to convert type: {ex.Message}");
-			_property.SetValue(currentRotation, ChangeType(DefaultValue, type));
+			try
+			{
+				_property.SetValue(currentRotation, ChangeType(DefaultValue, type));
+			}
+			catch (Exception fallbackEx)
+			{
+				PluginLog.Error($"Failed to apply default rotation config '{Name}': {fallbackEx.Message}");
+			}
 		}
 	}
 
