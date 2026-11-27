@@ -99,40 +99,26 @@ public partial struct ActionTargetInfo
 				break;
 
 			case SpecialActionType.FriendlyMovingForward:
-				if (Svc.Targets.FocusTarget != null)
+				if (Svc.Targets.FocusTarget is IBattleChara focus && focus.IsParty() && IsInCandidates(battleChara, focus))
 				{
-					if (Svc.Targets.FocusTarget is IBattleChara focus && focus.IsParty())
-					{
-						return focus;
-					}
+					return focus;
 				}
-				else if (Svc.Targets.FocusTarget == null && Svc.Targets.Target != null)
+
+				if (Svc.Targets.Target is IBattleChara isPartyTarget && isPartyTarget.IsParty() && IsInCandidates(battleChara, isPartyTarget))
 				{
-					if (Svc.Targets.Target is IBattleChara IsPartytarg && IsPartytarg.IsParty())
-					{
-						return IsPartytarg;
-					}
+					return isPartyTarget;
 				}
 				break;
 
 			case SpecialActionType.HostileFriendlyMovingForward:
-				if (Svc.Targets.FocusTarget != null)
+				if (Svc.Targets.FocusTarget is IBattleChara focusParty && focusParty.IsParty() && IsInCandidates(battleChara, focusParty))
 				{
-					if (Svc.Targets.FocusTarget is IBattleChara focus && focus.IsParty())
-					{
-						return focus;
-					}
+					return focusParty;
 				}
-				else if (Svc.Targets.FocusTarget == null && Svc.Targets.Target != null)
+
+				if (Svc.Targets.Target is IBattleChara selectedTarget && (selectedTarget.IsParty() || selectedTarget.IsHostile()) && IsInCandidates(battleChara, selectedTarget))
 				{
-					if (Svc.Targets.Target is IBattleChara IsPartytarg && IsPartytarg.IsParty())
-					{
-						return IsPartytarg;
-					}
-					if (Svc.Targets.Target is IBattleChara IsHostiletarg && IsHostiletarg.IsHostile())
-					{
-						return IsHostiletarg;
-					}
+					return selectedTarget;
 				}
 				break;
 
@@ -176,21 +162,14 @@ public partial struct ActionTargetInfo
 					break;
 
 				case TargetType.FriendMove:
+					if (Svc.Targets.FocusTarget is IBattleChara focusFriend && focusFriend.IsParty() && IsInCandidates(battleChara, focusFriend))
 					{
-						if (Svc.Targets.FocusTarget != null)
-						{
-							if (Svc.Targets.FocusTarget is IBattleChara focus && focus.IsParty())
-							{
-								return focus;
-							}
-						}
-						else if (Svc.Targets.Target != null)
-						{
-							if (Svc.Targets.Target is IBattleChara targ && targ.IsParty())
-							{
-								return targ;
-							}
-						}
+						return focusFriend;
+					}
+
+					if (Svc.Targets.Target is IBattleChara targ && targ.IsParty() && IsInCandidates(battleChara, targ))
+					{
+						return targ;
 					}
 					break;
 
@@ -364,8 +343,8 @@ public partial struct ActionTargetInfo
 
 			var priority = OtherConfiguration.DancePartnerPriority;
 			var playerId = Player.Object!.GameObjectId;
-			var partner = FirstByJobPriority(priority, m => m.GameObjectId != playerId && !m.HasStatus(false, PoorOrPartneredStatuses))
-				?? FirstByJobPriority(priority, m => m.GameObjectId != playerId && !m.HasStatus(false, PoorTargetStatuses));
+			var partner = FirstByJobPriority(priority, m => m.GameObjectId != playerId && IsInCandidates(battleChara, m) && !m.HasStatus(false, PoorOrPartneredStatuses))
+				?? FirstByJobPriority(priority, m => m.GameObjectId != playerId && IsInCandidates(battleChara, m) && !m.HasStatus(false, PoorTargetStatuses));
 			if (partner != null)
 			{
 				return partner;
@@ -377,12 +356,12 @@ public partial struct ActionTargetInfo
 
 		IBattleChara? FindTheSpear()
 		{
-			return FindCardTarget(OtherConfiguration.TheSpearPriority, StatusID.TheSpear_3889, true);
+			return FindCardTarget(OtherConfiguration.TheSpearPriority, StatusID.TheSpear_3889, true, battleChara);
 		}
 
 		IBattleChara? FindTheBalance()
 		{
-			return FindCardTarget(OtherConfiguration.TheBalancePriority, StatusID.TheBalance_3887, false);
+			return FindCardTarget(OtherConfiguration.TheBalancePriority, StatusID.TheBalance_3887, false, battleChara);
 		}
 
 		IBattleChara? FindKardia()
@@ -394,21 +373,20 @@ public partial struct ActionTargetInfo
 
 			if (DataCenter.PartyMembers.Count == 1)
 			{
-				return Player.Object;
+				return IsInCandidates(battleChara, Player.Object) ? Player.Object : null;
 			}
 
 			var priority = OtherConfiguration.KardiaTankPriority;
-			var tank = FirstByJobPriority(priority, static m => m.IsJobCategory(JobRole.Tank) && m.HasStatus(false, StatusHelper.TankStanceStatus) && !m.HasStatus(false, StatusID.Kardion))
-				?? FirstByJobPriority(priority, static m => m.IsJobCategory(JobRole.Tank) && m.HasStatus(false, StatusHelper.TankStanceStatus))
-				?? FirstByJobPriority(priority, static m => m.IsJobCategory(JobRole.Tank));
+			var tank = FirstByJobPriority(priority, m => IsInCandidates(battleChara, m) && m.IsJobCategory(JobRole.Tank) && m.HasStatus(false, StatusHelper.TankStanceStatus) && !m.HasStatus(false, StatusID.Kardion))
+				?? FirstByJobPriority(priority, m => IsInCandidates(battleChara, m) && m.IsJobCategory(JobRole.Tank) && m.HasStatus(false, StatusHelper.TankStanceStatus))
+				?? FirstByJobPriority(priority, m => IsInCandidates(battleChara, m) && m.IsJobCategory(JobRole.Tank));
 			if (tank != null)
 			{
 				return tank;
 			}
 
-			var party = DataCenter.PartyMembers;
-			return FindTankTarget() ?? RandomMeleeTarget(party) ?? RandomPhysicalTarget(party)
-				?? RandomRangeTarget(party) ?? RandomMagicalTarget(party);
+			return FindTankTarget() ?? RandomMeleeTarget(battleChara) ?? RandomPhysicalTarget(battleChara)
+				?? RandomRangeTarget(battleChara) ?? RandomMagicalTarget(battleChara);
 		}
 		IBattleChara? FindDeploymentTacticsTarget()
 		{
@@ -428,32 +406,32 @@ public partial struct ActionTargetInfo
 			IBattleChara? bestGalvanize = null;
 			uint bestGalvanizeShield = 0;
 
-			foreach (var battleChara in DataCenter.PartyMembers)
+			foreach (var member in DataCenter.PartyMembers)
 			{
-				if (battleChara == null || battleChara.IsDead)
+				if (member == null || member.IsDead || !IsInCandidates(battleChara, member))
 				{
 					continue;
 				}
 
-				var shield = ObjectHelper.GetObjectShield(battleChara);
+				var shield = ObjectHelper.GetObjectShield(member);
 				if (shield == 0)
 				{
 					continue;
 				}
 
-				if (battleChara.HasStatus(true, StatusID.Catalyze))
+				if (member.HasStatus(true, StatusID.Catalyze))
 				{
 					if (bestCatalyze == null || shield > bestCatalyzeShield)
 					{
-						bestCatalyze = battleChara;
+						bestCatalyze = member;
 						bestCatalyzeShield = shield;
 					}
 				}
-				else if (battleChara.HasStatus(true, StatusID.Galvanize))
+				else if (member.HasStatus(true, StatusID.Galvanize))
 				{
 					if (bestGalvanize == null || shield > bestGalvanizeShield)
 					{
-						bestGalvanize = battleChara;
+						bestGalvanize = member;
 						bestGalvanizeShield = shield;
 					}
 				}
@@ -468,7 +446,7 @@ public partial struct ActionTargetInfo
 				return bestCatalyze;
 			}
 
-			if (bestGalvanize != null && bestCatalyze == null)
+			if (bestGalvanize != null)
 			{
 				if (Service.Config.InDebug)
 				{
@@ -879,7 +857,7 @@ public partial struct ActionTargetInfo
 
 			foreach (var m in DataCenter.PartyMembers)
 			{
-				if (m.IsJobCategory(JobRole.Tank) && !m.IsDead && m.GameObjectId != self)
+				if (m.IsJobCategory(JobRole.Tank) && !m.IsDead && m.GameObjectId != self && IsInCandidates(battleChara, m))
 				{
 					if (m.HasStatus(false, StatusHelper.TankStanceStatus))
 					{
@@ -899,7 +877,7 @@ public partial struct ActionTargetInfo
 
 			foreach (var m in DataCenter.PartyMembers)
 			{
-				if (m.IsJobCategory(JobRole.Tank) && !m.IsDead && m.GameObjectId != self)
+				if (m.IsJobCategory(JobRole.Tank) && !m.IsDead && m.GameObjectId != self && IsInCandidates(battleChara, m))
 				{
 					if (m.IsConditionCannotTarget())
 					{
@@ -939,10 +917,11 @@ public partial struct ActionTargetInfo
 				return null;
 			}
 
+			DataCenter.CopyTankbusterTargetIds(_tankbusterIdBuffer);
 			IBattleChara? first = null;
-			foreach (var id in DataCenter.TankbusterTargetIds)
+			foreach (var id in _tankbusterIdBuffer)
 			{
-				if (Svc.Objects.SearchById(id) is not IBattleChara t || !t.IsAlive() || t.IsConditionCannotTarget())
+				if (Svc.Objects.SearchById(id) is not IBattleChara t || !t.IsAlive() || t.IsConditionCannotTarget() || !IsInCandidates(battleChara, t))
 				{
 					continue;
 				}
@@ -959,6 +938,27 @@ public partial struct ActionTargetInfo
 		}
 	}
 
+	private static readonly List<ulong> _tankbusterIdBuffer = [];
+
+	private static bool IsInCandidates(IEnumerable<IBattleChara>? candidates, IBattleChara? target)
+	{
+		if (candidates == null || target == null)
+		{
+			return false;
+		}
+
+		var targetId = target.GameObjectId;
+		foreach (var c in candidates)
+		{
+			if (c != null && c.GameObjectId == targetId)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	private static IBattleChara? FindMimicryTarget()
 	{
 		if (DataCenter.AllTargets == null)
@@ -971,10 +971,10 @@ public partial struct ActionTargetInfo
 
 		foreach (var target in DataCenter.AllTargets)
 		{
-			if (target != null && IsNeededRole(target))
+			if (target != null && !target.IsConditionCannotTarget() && IsNeededRole(target))
 			{
-				var distance = Player.Object != null ? Player.DistanceTo(target.Position) : float.MaxValue;
-				if (distance < bestDistance)
+				var distance = target.DistanceToPlayer();
+				if (distance <= 25f && distance < bestDistance && target.CanSee())
 				{
 					bestDistance = distance;
 					bestTarget = target;
@@ -1018,38 +1018,49 @@ public partial struct ActionTargetInfo
 	}
 
 	private static readonly Comparison<IBattleChara> NearestFirst = static (a, b) => a.DistanceToPlayer().CompareTo(b.DistanceToPlayer());
+	private static readonly Comparison<IBattleChara> FarthestFirst = static (a, b) => b.DistanceToPlayer().CompareTo(a.DistanceToPlayer());
+	private static readonly Comparison<IBattleChara> HighHpCompare = static (a, b) => b.CurrentHp.CompareTo(a.CurrentHp);
+	private static readonly Comparison<IBattleChara> LowHpCompare = static (a, b) => a.CurrentHp.CompareTo(b.CurrentHp);
+	private static readonly Comparison<IBattleChara> HighHpPercentCompare = static (a, b) => HpPercent(b).CompareTo(HpPercent(a));
+	private static readonly Comparison<IBattleChara> LowHpPercentCompare = static (a, b) => HpPercent(a).CompareTo(HpPercent(b));
+	private static readonly Comparison<IBattleChara> HighMaxHpCompare = static (a, b) => b.MaxHp.CompareTo(a.MaxHp);
+	private static readonly Comparison<IBattleChara> LowMaxHpCompare = static (a, b) => a.MaxHp.CompareTo(b.MaxHp);
+	private static readonly Comparison<IBattleChara> SmallMinHpCompare = static (a, b) => CompareHitboxThenHp(a, b, ascendingHitbox: true, lowerHpFirst: true);
+	private static readonly Comparison<IBattleChara> SmallMaxHpCompare = static (a, b) => CompareHitboxThenHp(a, b, ascendingHitbox: true, lowerHpFirst: false);
+	private static readonly Comparison<IBattleChara> BigMinHpCompare = static (a, b) => CompareHitboxThenHp(a, b, ascendingHitbox: false, lowerHpFirst: true);
+	private static readonly Comparison<IBattleChara> BigMaxHpCompare = static (a, b) => CompareHitboxThenHp(a, b, ascendingHitbox: false, lowerHpFirst: false);
+
+	private static float HpPercent(IBattleChara c)
+	{
+		return c.MaxHp == 0 ? 0 : (float)c.CurrentHp / c.MaxHp;
+	}
+
+	private static int CompareHitboxThenHp(IBattleChara a, IBattleChara b, bool ascendingHitbox, bool lowerHpFirst)
+	{
+		var cmp = ascendingHitbox ? a.HitboxRadius.CompareTo(b.HitboxRadius) : b.HitboxRadius.CompareTo(a.HitboxRadius);
+		if (cmp != 0)
+		{
+			return cmp;
+		}
+
+		return lowerHpFirst ? a.CurrentHp.CompareTo(b.CurrentHp) : b.CurrentHp.CompareTo(a.CurrentHp);
+	}
 
 	private static Comparison<IBattleChara> GetTargetingComparison(TargetType type)
 	{
 		return type switch
 		{
-			TargetType.Small => (a, b) => CompareHitboxThenHp(a, b, ascendingHitbox: true, Service.Config.SmallHp),
-			TargetType.HighHP => static (a, b) => b.CurrentHp.CompareTo(a.CurrentHp),
-			TargetType.LowHP => static (a, b) => a.CurrentHp.CompareTo(b.CurrentHp),
-			TargetType.HighHPPercent => static (a, b) => HpPercent(b).CompareTo(HpPercent(a)),
-			TargetType.LowHPPercent => static (a, b) => HpPercent(a).CompareTo(HpPercent(b)),
-			TargetType.HighMaxHP => static (a, b) => b.MaxHp.CompareTo(a.MaxHp),
-			TargetType.LowMaxHP => static (a, b) => a.MaxHp.CompareTo(b.MaxHp),
+			TargetType.Small => Service.Config.SmallHp ? SmallMinHpCompare : SmallMaxHpCompare,
+			TargetType.HighHP => HighHpCompare,
+			TargetType.LowHP => LowHpCompare,
+			TargetType.HighHPPercent => HighHpPercentCompare,
+			TargetType.LowHPPercent => LowHpPercentCompare,
+			TargetType.HighMaxHP => HighMaxHpCompare,
+			TargetType.LowMaxHP => LowMaxHpCompare,
 			TargetType.Nearest => NearestFirst,
-			TargetType.Farthest => static (a, b) => b.DistanceToPlayer().CompareTo(a.DistanceToPlayer()),
-			_ => (a, b) => CompareHitboxThenHp(a, b, ascendingHitbox: false, Service.Config.BigHp),
+			TargetType.Farthest => FarthestFirst,
+			_ => Service.Config.BigHp ? BigMinHpCompare : BigMaxHpCompare,
 		};
-
-		static float HpPercent(IBattleChara c)
-		{
-			return c.MaxHp == 0 ? 0 : (float)c.CurrentHp / c.MaxHp;
-		}
-
-		static int CompareHitboxThenHp(IBattleChara a, IBattleChara b, bool ascendingHitbox, bool lowerHpFirst)
-		{
-			var cmp = ascendingHitbox ? a.HitboxRadius.CompareTo(b.HitboxRadius) : b.HitboxRadius.CompareTo(a.HitboxRadius);
-			if (cmp != 0)
-			{
-				return cmp;
-			}
-
-			return lowerHpFirst ? a.CurrentHp.CompareTo(b.CurrentHp) : b.CurrentHp.CompareTo(a.CurrentHp);
-		}
 	}
 
 	private static bool IsSortType(TargetType type) => type is TargetType.Small or TargetType.HighHP or TargetType.LowHP
@@ -1113,7 +1124,7 @@ public partial struct ActionTargetInfo
 		return null;
 	}
 
-	private static IBattleChara? FindCardTarget(List<Job> priority, StatusID cardStatus, bool preferRanged)
+	private static IBattleChara? FindCardTarget(List<Job> priority, StatusID cardStatus, bool preferRanged, IEnumerable<IBattleChara>? validCandidates)
 	{
 		var player = Player.Object;
 		if (!TargetFilter.PlayerIsJobs(Job.AST) || player == null)
@@ -1126,13 +1137,14 @@ public partial struct ActionTargetInfo
 
 		if (party.Count == 1 || (party.Count == 2 && party.Exists(m => m.GameObjectId == playerId) && party.Exists(ObjectHelper.IsPlayerCharacterChocobo)))
 		{
-			return player;
+			return IsInCandidates(validCandidates, player) ? player : null;
 		}
 
 		List<IBattleChara> candidates = [];
 		foreach (var m in party)
 		{
 			if (m == null || m.GameObjectId == playerId || m.IsPlayerCharacterChocobo() || m.IsDead || m.IsConditionCannotTarget()
+				|| !IsInCandidates(validCandidates, m)
 				|| m.HasStatus(false, PoorTargetStatuses) || m.HasStatus(false, cardStatus))
 			{
 				continue;

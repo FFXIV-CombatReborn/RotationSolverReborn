@@ -165,12 +165,12 @@ public class StaticCodeGenerator : IIncrementalGenerator
 
 	private static void GenerateBaseRotation(IncrementalGeneratorPostInitializationContext context)
 	{
-		context.AddSource("CustomRotation.g.cs", Properties.Action.Value);
-		context.AddSource("DutyRotation.g.cs", Properties.DutyAction.Value);
+		context.AddSource("CustomRotation.g.cs", "#nullable enable\n" + Properties.Action.Value);
+		context.AddSource("DutyRotation.g.cs", "#nullable enable\n" + Properties.DutyAction.Value);
 	}
 
 	private static void GenerateRotations(IncrementalGeneratorPostInitializationContext context)
 	{
-		context.AddSource("BaseRotations.g.cs", Properties.Rotation.Value);
+		context.AddSource("BaseRotations.g.cs", "#nullable enable\n" + Properties.Rotation.Value);
 	}
 }

@@ -27,4 +27,10 @@ internal static class MacroUpdater
 
 		_ = DoingMacro.StartUseMacro();
 	}
+
+	internal static void Clear()
+	{
+		DoingMacro = null;
+		DataCenter.Macros.Clear();
+	}
 }

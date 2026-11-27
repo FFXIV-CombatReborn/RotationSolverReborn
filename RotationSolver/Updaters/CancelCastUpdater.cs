@@ -10,18 +10,25 @@ internal static class CancelCastUpdater
 #pragma warning disable IDE0044
 	private static RandomDelay _tarStopCastDelay = new(() => Service.Config.StopCastingDelay);
 #pragma warning restore IDE0044
+	private static uint _lastCastActionId;
+	private static ulong _lastCastTargetId;
 
 	internal static unsafe void UpdateCancelCast()
 	{
 		var player = Player.Object;
-		if (player == null || !player.IsCasting)
+		if (player == null || !player.IsCasting || !DataCenter.State)
 		{
+			_ = _tarStopCastDelay.Delay(false);
+			_lastCastActionId = 0;
+			_lastCastTargetId = 0;
 			return;
 		}
 
-		if (!DataCenter.State)
+		if (player.CastActionId != _lastCastActionId || player.CastTargetObjectId != _lastCastTargetId)
 		{
-			return;
+			_ = _tarStopCastDelay.Delay(false);
+			_lastCastActionId = player.CastActionId;
+			_lastCastTargetId = player.CastTargetObjectId;
 		}
 
 		var castTarget = Svc.Objects.SearchById(player.CastTargetObjectId) as IBattleChara;

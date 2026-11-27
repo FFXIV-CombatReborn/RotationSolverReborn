@@ -34,6 +34,7 @@ public partial class MainWindow
 			M3ButtonStyle.Tonal, FontAwesomeIcon.Plus))
 		{
 			Service.Config.TargetingTypes.Add(TargetingType.Big);
+			Service.Config.Save();
 		}
 
 		ImGui.Dummy(new Vector2(0f, M3.Space2));
@@ -42,6 +43,11 @@ public partial class MainWindow
 		var comboWidth = 220f * Scale;
 		var iconExtent = 30f * Scale;
 
+		var removeIndex = -1;
+		var moveFrom = -1;
+		var moveTo = -1;
+		var changed = false;
+
 		for (var i = 0; i < Service.Config.TargetingTypes.Count; i++)
 		{
 			var targetType = Service.Config.TargetingTypes[i];
@@ -49,32 +55,25 @@ public partial class MainWindow
 
 			void Delete()
 			{
-				if (index < Service.Config.TargetingTypes.Count)
-				{
-					Service.Config.TargetingTypes.RemoveAt(index);
-				}
+				removeIndex = index;
 			}
 
 			void Up()
 			{
-				if (index >= Service.Config.TargetingTypes.Count)
+				if (index > 0)
 				{
-					return;
+					moveFrom = index;
+					moveTo = index - 1;
 				}
-
-				Service.Config.TargetingTypes.RemoveAt(index);
-				Service.Config.TargetingTypes.Insert(Math.Max(0, index - 1), targetType);
 			}
 
 			void Down()
 			{
-				if (index >= Service.Config.TargetingTypes.Count)
+				if (index < Service.Config.TargetingTypes.Count - 1)
 				{
-					return;
+					moveFrom = index;
+					moveTo = index + 1;
 				}
-
-				Service.Config.TargetingTypes.RemoveAt(index);
-				Service.Config.TargetingTypes.Insert(Math.Min(Service.Config.TargetingTypes.Count, index + 1), targetType);
 			}
 
 			var key = $"TargetingTypePopup_{i}";
@@ -83,21 +82,16 @@ public partial class MainWindow
 				(UiString.ConfigWindow_Actions_MoveUp.GetDescription(), Up, ImGuiHelper.MoveUpHint),
 				(UiString.ConfigWindow_Actions_MoveDown.GetDescription(), Down, ImGuiHelper.MoveDownHint));
 
-			// Deleting from the popup can shrink the list mid-loop.
-			if (i >= Service.Config.TargetingTypes.Count)
-			{
-				break;
-			}
-
 			var controlWidth = comboWidth + (3f * (iconExtent + (4f * Scale)));
 			var row = M3SettingRow.Begin($"{i + 1}. {UiString.ConfigWindow_Param_HostileCondition.GetDescription()}",
 				null, new Vector2(controlWidth, M3Widgets.ComboHeight));
 
-			var selected = (int)Service.Config.TargetingTypes[i];
+			var selected = (int)targetType;
 			ImGui.SetCursorScreenPos(row.ControlPosition);
 			if (M3Widgets.Combo($"##HostileCondition{i}", ref selected, names, comboWidth))
 			{
 				Service.Config.TargetingTypes[i] = (TargetingType)selected;
+				changed = true;
 			}
 
 			var buttonY = row.ControlPosition.Y + ((M3Widgets.ComboHeight - iconExtent) * 0.5f);
@@ -133,6 +127,25 @@ public partial class MainWindow
 				(Delete, new[] { VirtualKey.DELETE }),
 				(Up, new[] { VirtualKey.UP }),
 				(Down, new[] { VirtualKey.DOWN }));
+		}
+
+		if (removeIndex >= 0 && removeIndex < Service.Config.TargetingTypes.Count)
+		{
+			Service.Config.TargetingTypes.RemoveAt(removeIndex);
+			changed = true;
+		}
+		else if (moveFrom >= 0 && moveFrom < Service.Config.TargetingTypes.Count
+			&& moveTo >= 0 && moveTo < Service.Config.TargetingTypes.Count && moveFrom != moveTo)
+		{
+			var moved = Service.Config.TargetingTypes[moveFrom];
+			Service.Config.TargetingTypes.RemoveAt(moveFrom);
+			Service.Config.TargetingTypes.Insert(moveTo, moved);
+			changed = true;
+		}
+
+		if (changed)
+		{
+			Service.Config.Save();
 		}
 	}
 }

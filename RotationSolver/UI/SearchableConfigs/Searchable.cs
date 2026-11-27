@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using Lumina.Excel.Sheets;
@@ -8,8 +9,12 @@ namespace RotationSolver.UI.SearchableConfigs;
 
 internal readonly struct JobFilter
 {
+	private static readonly ConcurrentDictionary<JobFilterType, string> _typeDescriptionCache = [];
+	private readonly JobFilterType? _filterType;
+
 	public JobFilter(JobFilterType type)
 	{
+		_filterType = type;
 		switch (type)
 		{
 			case JobFilterType.NoJob:
@@ -93,11 +98,16 @@ internal readonly struct JobFilter
 	{
 		get
 		{
+			if (JobRoles == null && Jobs == null)
+			{
+				return true;
+			}
+
 			var hasRoles = JobRoles is { Length: > 0 };
 			var hasJobs = Jobs is { Length: > 0 };
 			if (!hasRoles && !hasJobs)
 			{
-				return true;
+				return false;
 			}
 
 			var role = DataCenter.CurrentRotation?.Role;
@@ -151,20 +161,34 @@ internal readonly struct JobFilter
 	{
 		get
 		{
-			var sheet = Svc.Data.GetExcelSheet<ClassJob>();
-			var sb = new System.Text.StringBuilder();
-			foreach (var job in AllJobs)
+			if (_filterType is { } filterType)
 			{
-				if (sb.Length > 0)
-				{
-					_ = sb.Append('\n');
-				}
-
-				_ = sb.Append(sheet?.GetRow((uint)job).Name ?? job.ToString());
+				var jobs = AllJobs;
+				return _typeDescriptionCache.GetOrAdd(filterType, _ => BuildDescription(jobs));
 			}
 
-			return string.Format(UiString.NotInJob.GetDescription(), sb.ToString());
+			return BuildDescription(AllJobs);
 		}
+	}
+
+	private static string BuildDescription(Job[] allJobs)
+	{
+		var sheet = Svc.Data.GetExcelSheet<ClassJob>();
+		var sb = new System.Text.StringBuilder();
+		foreach (var job in allJobs)
+		{
+			if (sb.Length > 0)
+			{
+				_ = sb.Append('\n');
+			}
+
+			var name = sheet != null && sheet.TryGetRow((uint)job, out var row)
+				? row.Name.ToString()
+				: job.ToString();
+			_ = sb.Append(name);
+		}
+
+		return string.Format(UiString.NotInJob.GetDescription(), sb.ToString());
 	}
 }
 
@@ -175,6 +199,10 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 	private readonly bool _isJob = property.GetCustomAttribute<JobConfigAttribute>() != null
 		|| property.GetCustomAttribute<JobChoiceConfigAttribute>() != null;
 	private string? _popupKey;
+	private string? _searchingKeys;
+	private string? _controlId;
+	private string? _pvpFilterDescription;
+	private string? _pveFilterDescription;
 
 	public const float DRAG_WIDTH = 150;
 
@@ -184,7 +212,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 	public JobFilter PvPFilter { get; set; }
 	public JobFilter PvEFilter { get; set; }
 
-	public virtual string SearchingKeys => Name + " " + Description;
+	public virtual string SearchingKeys => _searchingKeys ??= Name + " " + Description;
 	public virtual string Name => _ui?.Name ?? string.Empty;
 	public virtual string Description => string.IsNullOrEmpty(_ui?.Description) ? string.Empty : _ui.Description;
 
@@ -208,6 +236,23 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 	public virtual string ID => _property.Name;
 	protected bool IsJob => _isJob;
 	protected string PopupKey => _popupKey ??= $"Rotation Solver RightClicking##{ID}_{GetHashCode()}";
+	protected string ControlId => _controlId ??= $"##Config_{ID}{GetHashCode()}";
+
+	internal static Func<Configs, T>? CreateGetter<T>(PropertyInfo property)
+	{
+		var getter = property.GetMethod;
+		return getter != null && typeof(Configs).IsAssignableFrom(property.DeclaringType) && property.PropertyType == typeof(T)
+			? getter.CreateDelegate<Func<Configs, T>>()
+			: null;
+	}
+
+	internal static Action<Configs, T>? CreateSetter<T>(PropertyInfo property)
+	{
+		var setter = property.SetMethod;
+		return setter != null && typeof(Configs).IsAssignableFrom(property.DeclaringType) && property.PropertyType == typeof(T)
+			? setter.CreateDelegate<Action<Configs, T>>()
+			: null;
+	}
 
 	protected string? SupportingText
 		=> Service.Config.UiInlineDescriptions && !string.IsNullOrEmpty(Description) ? Description : null;
@@ -216,7 +261,8 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 
 	public virtual void Draw()
 	{
-		var filter = DataCenter.IsPvP ? PvPFilter : PvEFilter;
+		var isPvp = DataCenter.IsPvP;
+		var filter = isPvp ? PvPFilter : PvEFilter;
 
 		if (!filter.CanDraw)
 		{
@@ -225,7 +271,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 				return;
 			}
 
-			DrawUnavailable(filter);
+			DrawUnavailable(filter, isPvp);
 			return;
 		}
 
@@ -243,14 +289,17 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 		}
 	}
 
-	private void DrawUnavailable(JobFilter filter)
+	private void DrawUnavailable(JobFilter filter, bool isPvp)
 	{
 		var row = M3SettingRow.Begin(Name, null, Vector2.Zero,
 			leadingIcon: FontAwesomeIcon.Ban, disabled: true, strikeThrough: true);
 
 		if (row.Hovered)
 		{
-			ImguiTooltips.ShowTooltip(filter.Description);
+			var desc = isPvp
+				? (_pvpFilterDescription ??= filter.Description)
+				: (_pveFilterDescription ??= filter.Description);
+			ImguiTooltips.ShowTooltip(desc);
 		}
 
 		M3SettingRow.End(row);

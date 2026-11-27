@@ -1,5 +1,6 @@
 using ECommons.DalamudServices;
 using ECommons.Logging;
+using RotationSolver.Integrations.IPC;
 
 namespace RotationSolver.Engine.State;
 
@@ -79,10 +80,9 @@ internal static partial class DataCenter
 	public static Func<Vector3, Vector3, bool>? BMRIsDashSafe { get; set; }
 
 	/// <summary>
-	/// Delegate wired up by BossModUpdater to the <c>Hints.IsFixedDashSafe</c> IPC endpoint.
-	/// When null, BossModReborn is not available and all fixed dashes are considered safe.
+	///
 	/// </summary>
-	public static Func<Vector3, Vector3, bool>? BMRIsFixedDashSafe { get; set; }
+	public static Func<float, bool, bool>? BMRIsFixedDashSafe { get; set; }
 
 	/// <summary>
 	/// The most recently polled set of upcoming planned actions from BossMod's Cooldown Planner,
@@ -147,11 +147,9 @@ internal static partial class DataCenter
 	}
 
 	/// <summary>
-	/// Returns true if a fixed-distance dash (game-determined destination) from <paramref name="from"/> to
-	/// <paramref name="to"/> is safe, or if BossModReborn IPC is unavailable.
-	/// For FixedDistanceMoveForward, FixedDistanceMoveBackward
+	///
 	/// </summary>
-	public static bool IsFixedDashSafe(Vector3 from, Vector3 to)
+	public static bool IsFixedDashSafe(float range, bool backwards)
 	{
 		if (BMRIsFixedDashSafe == null)
 		{
@@ -159,7 +157,7 @@ internal static partial class DataCenter
 		}
 
 		try
-		{ return BMRIsFixedDashSafe(from, to); }
+		{ return BMRIsFixedDashSafe(range, backwards); }
 		catch { return true; }
 	}
 	public static void ResetBmrData()
@@ -201,6 +199,59 @@ internal static partial class DataCenter
 	public static void ResetBmrPlanData()
 	{
 		BMRPlannedActions = [];
+	}
+	#endregion
+
+	#region BossModReborn Crucible Kinships
+	private const long BmrCrucibleOpponentsRefreshMs = 10000;
+	private const long BmrActiveModuleTypeRefreshMs = 1000;
+
+	private static List<BMRCrucibleOpponent> _bmrCrucibleOpponents = [];
+	private static long _bmrCrucibleOpponentsTick = -BmrCrucibleOpponentsRefreshMs;
+	private static string? _bmrActiveModuleType;
+	private static long _bmrActiveModuleTypeTick = -BmrActiveModuleTypeRefreshMs;
+
+	/// <summary>
+	///
+	/// </summary>
+	public static IReadOnlyList<BMRCrucibleOpponent> BMRCrucibleOpponents
+	{
+		get
+		{
+			var now = Environment.TickCount64;
+			if (now - _bmrCrucibleOpponentsTick >= BmrCrucibleOpponentsRefreshMs)
+			{
+				_bmrCrucibleOpponentsTick = now;
+				_bmrCrucibleOpponents = BMRCrucible_IPCSubscriber.IsEnabled ? BMRCrucible_IPCSubscriber.GetCrucibleOpponents() : [];
+			}
+
+			return _bmrCrucibleOpponents;
+		}
+	}
+
+	/// <summary>
+	///
+	/// </summary>
+	public static string? BMRActiveModuleType
+	{
+		get
+		{
+			var now = Environment.TickCount64;
+			if (now - _bmrActiveModuleTypeTick >= BmrActiveModuleTypeRefreshMs)
+			{
+				_bmrActiveModuleTypeTick = now;
+				try
+				{
+					_bmrActiveModuleType = BMRCrucible_IPCSubscriber.IsEnabled ? BMRCrucible_IPCSubscriber.ActiveModuleType?.Invoke() : null;
+				}
+				catch
+				{
+					_bmrActiveModuleType = null;
+				}
+			}
+
+			return _bmrActiveModuleType;
+		}
 	}
 	#endregion
 }

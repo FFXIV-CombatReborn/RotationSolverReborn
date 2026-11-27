@@ -1,7 +1,11 @@
-﻿[*.cs]
+﻿root = true
+
+[*.cs]
 
 # IDE0046: Convert to conditional expression
 dotnet_diagnostic.IDE0046.severity = silent
 
 # IDE0011: Add braces
 dotnet_diagnostic.IDE0011.severity = suggestion
+
+dotnet_diagnostic.RS0030.severity = error

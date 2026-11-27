@@ -30,7 +30,6 @@ public sealed class NIN_Reborn : NinjaRotation
 	private IBaseAction? _lastNinActionAim = null;
 	// Holds the next ninjutsu action to perform.
 	private IBaseAction? _ninActionAim = null;
-	private readonly ActionID NinjutsuPvEid = AdjustId(ActionID.NinjutsuPvE);
 	private static bool NoActiveNinjutsu => AdjustId(ActionID.NinjutsuPvE) == ActionID.NinjutsuPvE;
 	private static bool RabbitMediumCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.RabbitMediumPvE;
 	private static bool FumaShurikenCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.FumaShurikenPvE;
@@ -49,7 +48,7 @@ public sealed class NIN_Reborn : NinjaRotation
 	{
 		ImGui.Text($"Last Ninjutsu Action Cleared From Queue: {_lastNinActionAim}");
 		ImGui.Text($"Current Ninjutsu Action: {_ninActionAim}");
-		ImGui.Text($"Ninjutsu ID: {AdjustId(NinjutsuPvEid)}");
+		ImGui.Text($"Ninjutsu ID: {AdjustId(ActionID.NinjutsuPvE)}");
 	}
 	#endregion
 
@@ -106,17 +105,18 @@ public sealed class NIN_Reborn : NinjaRotation
 	}
 	#endregion
 
-	#region oGCD Logic
-	// Determines the emergency abilities to use, overriding the base class implementation.
-	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+	protected override void OnFrameUpdate()
 	{
+		if (IsInCountdown)
+		{
+			return;
+		}
+
 		if (!InCombat && !CombatMudra)
 		{
 			ClearNinjutsu();
 		}
 
-		// If the last action performed matches any of a list of specific actions, it clears the Ninjutsu aim.
-		// This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
 		if (IsLastAction(false, FumaShurikenPvE, KatonPvE, RaitonPvE, HyotonPvE, DotonPvE, SuitonPvE)
 			|| (IsShadowWalking && (_ninActionAim == SuitonPvE || _ninActionAim == HutonPvE))
 			|| (_ninActionAim == GokaMekkyakuPvE && IsLastGCD(false, GokaMekkyakuPvE))
@@ -127,12 +127,16 @@ public sealed class NIN_Reborn : NinjaRotation
 			ClearNinjutsu();
 		}
 
-		// Side-effect: decide/refresh ninjutsu aim; do not consume the oGCD slot here.
 		if ((InCombat && HasHostilesInMaxRange) || (CombatMudra && HasHostilesInMaxRange && TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges))
 		{
-			_ = ChoiceNinjutsu(out _);
+			ChoiceNinjutsu();
 		}
+	}
 
+	#region oGCD Logic
+	// Determines the emergency abilities to use, overriding the base class implementation.
+	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+	{
 		if (RabbitMediumPvE.CanUse(out act))
 		{
 			return true;
@@ -325,10 +329,8 @@ public sealed class NIN_Reborn : NinjaRotation
 	}
 
 	// Logic for choosing which ninjutsu action to set up next, based on various game state conditions.
-	private bool ChoiceNinjutsu(out IAction? act)
+	private void ChoiceNinjutsu()
 	{
-		act = null;
-
 		// Checks for Kassatsu status to prioritize high-impact Ninjutsu due to its buff.
 		if (HasKassatsu)
 		{
@@ -336,22 +338,19 @@ public sealed class NIN_Reborn : NinjaRotation
 			{
 				SetNinjutsu(GokaMekkyakuPvE);
 			}
-			if (!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _) && HyoshoRanryuPvE.EnoughLevel && !IsLastAction(false, HyoshoRanryuPvE) && HyoshoRanryuPvE.IsEnabled && JinPvE.Info.IsQuestUnlocked())
+			else if (!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _) && HyoshoRanryuPvE.EnoughLevel && !IsLastAction(false, HyoshoRanryuPvE) && HyoshoRanryuPvE.IsEnabled && JinPvE.Info.IsQuestUnlocked())
 			{
 				SetNinjutsu(HyoshoRanryuPvE);
 			}
-
-			if (!IsShadowWalking && ShadowWalkerNeeded && !HyoshoRanryuPvE.EnoughLevel && HutonPvE.EnoughLevel && HutonPvE.IsEnabled && JinPvE.Info.IsQuestUnlocked())
+			else if (!IsShadowWalking && ShadowWalkerNeeded && !HyoshoRanryuPvE.EnoughLevel && HutonPvE.EnoughLevel && HutonPvE.IsEnabled && JinPvE.Info.IsQuestUnlocked())
 			{
 				SetNinjutsu(HutonPvE);
 			}
-
-			if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && !HyoshoRanryuPvE.EnoughLevel && KatonPvE.EnoughLevel && KatonPvE.IsEnabled && ChiPvE.Info.IsQuestUnlocked())
+			else if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && !HyoshoRanryuPvE.EnoughLevel && KatonPvE.EnoughLevel && KatonPvE.IsEnabled && ChiPvE.Info.IsQuestUnlocked())
 			{
 				SetNinjutsu(KatonPvE);
 			}
-
-			if (!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel && RaitonPvE.EnoughLevel && RaitonPvE.IsEnabled && ChiPvE.Info.IsQuestUnlocked())
+			else if (!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel && RaitonPvE.EnoughLevel && RaitonPvE.IsEnabled && ChiPvE.Info.IsQuestUnlocked())
 			{
 				SetNinjutsu(RaitonPvE);
 			}
@@ -361,8 +360,7 @@ public sealed class NIN_Reborn : NinjaRotation
 			//Aoe
 			if (DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _))
 			{
-				if ((!HasDoton && !IsMoving && !IsLastGCD(true, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) && DotonPvE.EnoughLevel)
-					|| (!HasDoton && !IsLastGCD(true, DotonPvE) && !TenChiJinPvE.Cooldown.IsCoolingDown && DotonPvE.EnoughLevel))
+				if (!HasDoton && !IsMoving && !IsLastGCD(true, DotonPvE) && DotonPvE.EnoughLevel && (!TenChiJinPvE.EnoughLevel || !TenChiJinPvE.Cooldown.WillHaveOneCharge(6)))
 				{
 					if (JinPvE.CanUse(out _) && DotonPvE.IsEnabled && JinPvE.Info.IsQuestUnlocked())
 					{
@@ -376,7 +374,7 @@ public sealed class NIN_Reborn : NinjaRotation
 			}
 
 			//Vulnerable
-			if (ShadowWalkerNeeded && (!MeisuiPvE.Cooldown.IsCoolingDown || !TrickAttackPvE.Cooldown.IsCoolingDown || KunaisBanePvE.Cooldown.IsCoolingDown) && !IsShadowWalking && !HasTenChiJin && SuitonPvE.EnoughLevel)
+			if (ShadowWalkerNeeded && (!MeisuiPvE.Cooldown.IsCoolingDown || !TrickAttackPvE.Cooldown.IsCoolingDown || !KunaisBanePvE.Cooldown.IsCoolingDown) && !IsShadowWalking && !HasTenChiJin && SuitonPvE.EnoughLevel)
 			{
 				if (DeathBlossomPvE.CanUse(out _) && JinPvE.CanUse(out _) && JinPvE.Info.IsQuestUnlocked() && HutonPvE.IsEnabled)
 				{
@@ -402,7 +400,6 @@ public sealed class NIN_Reborn : NinjaRotation
 				}
 			}
 		}
-		return false; // Indicates that no specific Ninjutsu action was chosen in this cycle.
 	}
 	#endregion
 
@@ -920,29 +917,6 @@ public sealed class NIN_Reborn : NinjaRotation
 	#region GCD Logic
 	protected override bool EmergencyGCD(IAction? nextGCD, out IAction? act)
 	{
-		if (!InCombat && !CombatMudra)
-		{
-			ClearNinjutsu();
-		}
-
-		// If the last action performed matches any of a list of specific actions, it clears the Ninjutsu aim.
-		// This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
-		if (IsLastAction(false, FumaShurikenPvE, KatonPvE, RaitonPvE, HyotonPvE, DotonPvE, SuitonPvE)
-			|| (IsShadowWalking && (_ninActionAim == SuitonPvE || _ninActionAim == HutonPvE))
-			|| (_ninActionAim == GokaMekkyakuPvE && IsLastGCD(false, GokaMekkyakuPvE))
-			|| (_ninActionAim == HyoshoRanryuPvE && IsLastGCD(false, HyoshoRanryuPvE))
-			|| (_ninActionAim == GokaMekkyakuPvE && !HasKassatsu)
-			|| (_ninActionAim == HyoshoRanryuPvE && !HasKassatsu))
-		{
-			ClearNinjutsu();
-		}
-
-		// Side-effect: decide/refresh ninjutsu aim; do not consume the oGCD slot here.
-		if ((InCombat && HasHostilesInMaxRange) || (CombatMudra && HasHostilesInMaxRange && TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges))
-		{
-			_ = ChoiceNinjutsu(out _);
-		}
-
 		if (RabbitMediumPvE.CanUse(out act))
 		{
 			return true;

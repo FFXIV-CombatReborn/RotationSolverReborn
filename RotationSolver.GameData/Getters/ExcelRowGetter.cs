@@ -51,8 +51,12 @@ namespace RotationSolver.GameData.Getters
 			{
 				if (AddToList(it))
 				{
-					cnt++;
-					codes.Add(ToCode(it));
+					var code = ToCode(it);
+					if (!string.IsNullOrWhiteSpace(code))
+					{
+						cnt++;
+						codes.Add(code);
+					}
 				}
 			}
 			Count = cnt;

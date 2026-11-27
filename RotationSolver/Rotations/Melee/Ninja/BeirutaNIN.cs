@@ -124,8 +124,6 @@ public sealed class BeirutaNIN : NinjaRotation
 	private IBaseAction? _lastNinActionAim;
 	private IBaseAction? _ninActionAim;
 
-	private readonly ActionID NinjutsuPvEid = AdjustId(ActionID.NinjutsuPvE);
-
 	private bool ShouldUseDisengageNinjutsuFallback =>
 		UseRaitonDisengageFallback &&
 		CurrentTarget != null &&
@@ -221,18 +219,14 @@ public sealed class BeirutaNIN : NinjaRotation
 		(!RaitonPvE.EnoughLevel || HasRaijuExactly3);
 
 	private bool CanQueueDoton =>
-		(((!HasDoton &&
-		   !IsMoving &&
-		   !IsLastGCD(true, DotonPvE) &&
-		   !TenChiJinPvE.Cooldown.WillHaveOneCharge(6) &&
-		   DotonPvE.EnoughLevel) ||
-		  (!HasDoton &&
-		   !IsLastGCD(true, DotonPvE) &&
-		   !TenChiJinPvE.Cooldown.IsCoolingDown &&
-		   DotonPvE.EnoughLevel)) &&
-		 JinPvE.CanUse(out _) &&
-		 DotonPvE.IsEnabled &&
-		 JinPvE.Info.IsQuestUnlocked());
+		!HasDoton &&
+		!IsMoving &&
+		!IsLastGCD(true, DotonPvE) &&
+		DotonPvE.EnoughLevel &&
+		(!TenChiJinPvE.EnoughLevel || !TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) &&
+		JinPvE.CanUse(out _) &&
+		DotonPvE.IsEnabled &&
+		JinPvE.Info.IsQuestUnlocked();
 
 	private new static bool EnoughWeaveTime =>
 	WeaponRemain > DataCenter.CalculatedActionAhead && WeaponRemain < WeaponTotal;
@@ -465,7 +459,7 @@ public sealed class BeirutaNIN : NinjaRotation
 	{
 		ImGui.Text($"Last Ninjutsu Action Cleared From Queue: {_lastNinActionAim}");
 		ImGui.Text($"Current Ninjutsu Action: {_ninActionAim}");
-		ImGui.Text($"Ninjutsu ID: {AdjustId(NinjutsuPvEid)}");
+		ImGui.Text($"Ninjutsu ID: {AdjustId(ActionID.NinjutsuPvE)}");
 		ImGui.Text($"Burst Prep Threshold: {BurstPrepThreshold}");
 		ImGui.Text($"Should Queue Burst Prep Suiton/Huton: {ShouldQueueBurstPrepSuitonOrHuton}");
 		ImGui.Text($"In Burst Phase: {InBurstPhase}");

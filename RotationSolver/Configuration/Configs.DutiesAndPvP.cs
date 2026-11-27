@@ -217,7 +217,7 @@ internal partial class Configs
 	[JobConfig, UI("Use Guard below this HP",
 		Filter = DutySpecificPvP)]
 	[Range(0, 1, ConfigUnitType.Percent, 0.02f)]
-	public float HealthForGuard { get; set; } = 0.15f;
+	private readonly float _healthForGuard = 0.15f;
 
 	[ConditionBool, UI("Ignore time to kill in PvP", Filter = DutySpecificPvP)]
 	private static readonly bool _ignorePvPTTK = true;

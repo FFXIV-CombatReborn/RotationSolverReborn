@@ -5,6 +5,14 @@ namespace RotationSolver.GameData.Getters;
 internal class ContentTypeGetter(Lumina.GameData gameData)
 	: ExcelRowGetter<ContentType>(gameData)
 {
+	private readonly HashSet<string> _addedNames = [];
+
+	protected override void BeforeCreating()
+	{
+		_addedNames.Clear();
+		base.BeforeCreating();
+	}
+
 	/// <summary>
 	/// Determines whether the specified item should be added to the list.
 	/// </summary>
@@ -27,7 +35,7 @@ internal class ContentTypeGetter(Lumina.GameData gameData)
 		{
 			return false;
 		}
-		return true;
+		return !string.IsNullOrEmpty(name.ToPascalCase());
 	}
 
 	/// <summary>
@@ -38,6 +46,12 @@ internal class ContentTypeGetter(Lumina.GameData gameData)
 	protected override string ToCode(ContentType item)
 	{
 		var name = item.Name.ToString().ToPascalCase();
+		if (!_addedNames.Add(name))
+		{
+			name += "_" + item.RowId;
+			_addedNames.Add(name);
+		}
+
 		return $"""
         /// <summary>
         /// 

@@ -306,12 +306,12 @@ public sealed class WHM_Reborn : WhiteMageRotation
 		}
 		if (MedicaIiPvE.EnoughLevel)
 		{
-			if (MedicaIiiPvE.EnoughLevel && MedicaIiiPvE.CanUse(out act) && hasMedica2 < partyCount / 2 && !IsLastAction(true, MedicaIiPvE))
+			if (MedicaIiiPvE.EnoughLevel && MedicaIiiPvE.CanUse(out act) && hasMedica2 < (partyCount + 1) / 2 && !IsLastAction(true, MedicaIiPvE))
 			{
 				return true;
 			}
 
-			if (!MedicaIiiPvE.EnoughLevel && MedicaIiPvE.CanUse(out act) && hasMedica2 < partyCount / 2 && !IsLastAction(true, MedicaIiPvE))
+			if (!MedicaIiiPvE.EnoughLevel && MedicaIiPvE.CanUse(out act) && hasMedica2 < (partyCount + 1) / 2 && !IsLastAction(true, MedicaIiPvE))
 			{
 				return true;
 			}

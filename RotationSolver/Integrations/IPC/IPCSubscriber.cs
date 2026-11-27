@@ -125,15 +125,17 @@ namespace RotationSolver.Integrations.IPC
 					_curLease = null;
 					Register();
 					return false;
+				case SetResult.BlacklistedLease:
+					_curLease = null;
+					return false;
 				case SetResult.IPCDisabled:
 				case SetResult.Duplicate:
 				case SetResult.PlayerNotAvailable:
 				case SetResult.InvalidConfiguration:
 				case SetResult.InvalidValue:
 				case SetResult.IGNORED:
-					return false;
 				default:
-					throw new ArgumentOutOfRangeException(nameof(result), result, null);
+					return false;
 			}
 		}
 
@@ -149,6 +151,29 @@ namespace RotationSolver.Integrations.IPC
 			}
 
 			_lastDisableTick = now;
+			if (!IsEnabled)
+			{
+				return;
+			}
+
+			var autoRotationEnabled = true;
+			if (GetAutoRotationState != null)
+			{
+				try
+				{
+					autoRotationEnabled = GetAutoRotationState();
+				}
+				catch (Exception ex)
+				{
+					Svc.Log.Debug($"Failed to check Wrath auto rotation state: {ex.Message}");
+				}
+			}
+
+			if (!autoRotationEnabled)
+			{
+				return;
+			}
+
 			if (Register())
 			{
 				DoThing(() => _curLease.HasValue ? SetAutoRotationState(_curLease.Value, false) : SetResult.InvalidLease);
@@ -158,9 +183,22 @@ namespace RotationSolver.Integrations.IPC
 		internal static void Release()
 		{
 			_lastDisableTick = long.MinValue;
-			if (_curLease.HasValue)
+			var lease = _curLease;
+			if (!lease.HasValue)
 			{
-				ReleaseControl(_curLease.Value);
+				return;
+			}
+
+			try
+			{
+				ReleaseControl?.Invoke(lease.Value);
+			}
+			catch (Exception ex)
+			{
+				Svc.Log.Debug($"Failed to release Wrath control: {ex.Message}");
+			}
+			finally
+			{
 				_curLease = null;
 			}
 		}

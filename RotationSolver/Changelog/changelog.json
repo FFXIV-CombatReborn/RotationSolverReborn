@@ -2,6 +2,20 @@
   "tagline": "Just minor updates til Evercold",
   "entries": [
     {
+      "version": "7.5.8.11",
+      "title": "Ground heal fixes",
+      "date": "November 24, 2026",
+      "sections": [
+        {
+          "title": "Fixes",
+          "icon": "Bug",
+          "items": [
+            "Fixes for the ground target actions. Added a new fallback for failed placements. Should be the last real big change for this 4 year old system lol"
+          ]
+        }
+      ]
+    },
+    {
       "version": "7.5.8.9",
       "title": "UI update",
       "date": "November 22, 2026",

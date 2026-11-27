@@ -10,7 +10,7 @@ internal class RotationConfigCombo : RotationConfigBase
 	/// <summary>
 	/// Gets the enum names for the combo box.
 	/// </summary>
-	private string[] EnumNames { get; }
+	public string[] EnumNames { get; }
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="RotationConfigCombo"/> class.
@@ -37,18 +37,6 @@ internal class RotationConfigCombo : RotationConfigBase
 
 		DisplayValues = [.. names];
 		EnumNames = [.. enumNames];
-
-		var defaultEnumValue = property.GetValue(rotation);
-		if (defaultEnumValue is Enum defaultEnum)
-		{
-			var defaultFieldInfo = property.PropertyType.GetField(defaultEnum.ToString());
-			var defaultDescriptionAttribute = defaultFieldInfo?.GetCustomAttribute<DescriptionAttribute>();
-			Value = defaultDescriptionAttribute?.Description ?? defaultEnum.ToString();
-		}
-		else
-		{
-			Value = DisplayValues[0];
-		}
 	}
 
 	/// <summary>
@@ -76,18 +64,6 @@ internal class RotationConfigCombo : RotationConfigBase
 
 		DisplayValues = [.. names];
 		EnumNames = [.. enumNames];
-
-		var defaultEnumValue = property.GetValue(rotation);
-		if (defaultEnumValue is Enum defaultEnum)
-		{
-			var defaultFieldInfo = property.PropertyType.GetField(defaultEnum.ToString());
-			var defaultDescriptionAttribute = defaultFieldInfo?.GetCustomAttribute<DescriptionAttribute>();
-			Value = defaultDescriptionAttribute?.Description ?? defaultEnum.ToString();
-		}
-		else
-		{
-			Value = DisplayValues[0];
-		}
 	}
 
 	/// <summary>
@@ -119,6 +95,10 @@ internal class RotationConfigCombo : RotationConfigBase
 	internal static int ResolveIndex(string[] displayValues, string[] enumNames, string current, string arg)
 	{
 		var length = displayValues.Length;
+		if (length == 0)
+		{
+			return 0;
+		}
 
 		if (int.TryParse(arg, out var num))
 		{
@@ -134,6 +114,41 @@ internal class RotationConfigCombo : RotationConfigBase
 			}
 		}
 
-		return (Math.Max(Array.IndexOf(displayValues, current), 0) + 1) % length;
+		var currentIdx = Array.IndexOf(displayValues, current);
+		if (currentIdx < 0)
+		{
+			currentIdx = Array.IndexOf(enumNames, current);
+		}
+
+		return (Math.Max(currentIdx, 0) + 1) % length;
+	}
+
+	internal int FindIndex(string? value)
+	{
+		if (string.IsNullOrEmpty(value))
+		{
+			return -1;
+		}
+
+		var idx = Array.IndexOf(DisplayValues, value);
+		if (idx >= 0)
+		{
+			return idx;
+		}
+
+		return Array.IndexOf(EnumNames, value);
+	}
+
+	internal bool MatchesValue(string? value, object? targetValue)
+	{
+		var targetStr = targetValue?.ToString();
+		if (string.Equals(value, targetStr, StringComparison.Ordinal))
+		{
+			return true;
+		}
+
+		var idx = FindIndex(value);
+		return idx >= 0 && (string.Equals(DisplayValues[idx], targetStr, StringComparison.Ordinal)
+			|| string.Equals(EnumNames[idx], targetStr, StringComparison.Ordinal));
 	}
 }

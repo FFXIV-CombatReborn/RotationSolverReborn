@@ -11,6 +11,73 @@ namespace RotationSolver.SourceGenerators;
 [Generator(LanguageNames.CSharp)]
 public class ConditionBoolGenerator : IIncrementalGenerator
 {
+	private static readonly DiagnosticDescriptor NamingWarningDescriptor = new(
+		"RS001",
+		"Naming Warning",
+		"Please don't use Pascal Case to name your field!",
+		"Naming",
+		DiagnosticSeverity.Warning,
+		true);
+
+	private static readonly DiagnosticDescriptor TypeWarningDescriptor = new(
+		"RS002",
+		"Type Warning",
+		"Field type must be System.Boolean",
+		"Type",
+		DiagnosticSeverity.Warning,
+		true);
+
+	private sealed class ConditionBoolModel : IEquatable<ConditionBoolModel>
+	{
+		public string NamespaceName { get; }
+		public ImmutableArray<TypeHierarchyPart> TypeHierarchy { get; }
+		public string VariableName { get; }
+		public string PropertyName { get; }
+		public ImmutableArray<string> Attributes { get; }
+		public DiagnosticSpec? Diagnostic { get; }
+
+		public ConditionBoolModel(
+			string namespaceName,
+			ImmutableArray<TypeHierarchyPart> typeHierarchy,
+			string variableName,
+			string propertyName,
+			ImmutableArray<string> attributes,
+			DiagnosticSpec? diagnostic)
+		{
+			NamespaceName = namespaceName;
+			TypeHierarchy = typeHierarchy;
+			VariableName = variableName;
+			PropertyName = propertyName;
+			Attributes = attributes;
+			Diagnostic = diagnostic;
+		}
+
+		public bool Equals(ConditionBoolModel? other)
+			=> other is not null
+			&& NamespaceName == other.NamespaceName
+			&& VariableName == other.VariableName
+			&& PropertyName == other.PropertyName
+			&& Nullable.Equals(Diagnostic, other.Diagnostic)
+			&& Util.SequenceEquals(TypeHierarchy, other.TypeHierarchy)
+			&& Util.StringSequenceEquals(Attributes, other.Attributes);
+
+		public override bool Equals(object? obj) => Equals(obj as ConditionBoolModel);
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				var hash = NamespaceName.GetHashCode();
+				hash = (hash * 397) ^ VariableName.GetHashCode();
+				hash = (hash * 397) ^ PropertyName.GetHashCode();
+				hash = (hash * 397) ^ (Diagnostic?.GetHashCode() ?? 0);
+				hash = (hash * 397) ^ Util.GetSequenceHashCode(TypeHierarchy);
+				hash = (hash * 397) ^ Util.GetSequenceHashCode(Attributes);
+				return hash;
+			}
+		}
+	}
+
 	/// <summary>
 	/// Initializes the incremental generator.
 	/// </summary>
@@ -20,126 +87,148 @@ public class ConditionBoolGenerator : IIncrementalGenerator
 		var provider = context.SyntaxProvider.ForAttributeWithMetadataName(
 			"RotationSolver.Engine.Attributes.ConditionBoolAttribute",
 			static (node, _) => node is VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: FieldDeclarationSyntax { Parent: ClassDeclarationSyntax or StructDeclarationSyntax } } },
-			static (n, ct) => ((VariableDeclaratorSyntax)n.TargetNode, n.SemanticModel))
-			.Where(m => m.Item1 != null);
+			static (n, _) => Transform(n))
+			.Where(static m => m is not null);
 
 		context.RegisterSourceOutput(provider.Collect(), Execute);
 	}
 
-	private void Execute(SourceProductionContext context, ImmutableArray<(VariableDeclaratorSyntax, SemanticModel SemanticModel)> array)
+	private static ConditionBoolModel? Transform(GeneratorAttributeSyntaxContext context)
 	{
-		var dict = new Dictionary<(string NameSpace, string ClassType, string ClassName), List<(VariableDeclaratorSyntax, SemanticModel)>>();
-		foreach (var entry in array)
+		if (context.TargetNode is not VariableDeclaratorSyntax variableInfo
+			|| context.TargetSymbol is not IFieldSymbol fieldSymbol
+			|| variableInfo.Parent?.Parent is not FieldDeclarationSyntax field)
 		{
-			var type = (TypeDeclarationSyntax)entry.Item1.Parent!.Parent!.Parent!;
-			var nameSpace = type.GetParent<BaseNamespaceDeclarationSyntax>()?.Name.ToString() ?? "Null";
-			var classType = type is ClassDeclarationSyntax ? "class" : "struct";
-			var className = type.Identifier.Text;
-			var key = (nameSpace, classType, className);
-			if (!dict.TryGetValue(key, out var list))
-			{
-				list = [];
-				dict[key] = list;
-			}
-			list.Add((entry.Item1, entry.SemanticModel));
+			return null;
 		}
 
-		foreach (var kv in dict)
+		var containingType = fieldSymbol.ContainingType;
+		var namespaceName = Util.GetNamespaceDisplay(containingType);
+		var typeHierarchy = Util.GetTypeHierarchy(containingType);
+		var variableName = variableInfo.Identifier.ValueText;
+		var propertyName = variableName.ToPascalCase();
+
+		if (variableName == propertyName)
 		{
-			var (nameSpace, classType, className) = kv.Key;
-			var propertyCodes = GeneratePropertyCodes(kv.Value, context, nameSpace, className);
-
-			if (propertyCodes.Count == 0)
-			{
-				continue;
-			}
-
-			var code = GenerateClassCode(nameSpace, classType, className, propertyCodes);
-			context.AddSource($"{nameSpace}_{className}.g.cs", code);
+			return new ConditionBoolModel(
+				namespaceName,
+				typeHierarchy,
+				variableName,
+				propertyName,
+				ImmutableArray<string>.Empty,
+				new DiagnosticSpec("RS001", variableInfo.Identifier.GetLocation()));
 		}
+
+		if (fieldSymbol.Type.SpecialType != SpecialType.System_Boolean)
+		{
+			return new ConditionBoolModel(
+				namespaceName,
+				typeHierarchy,
+				variableName,
+				propertyName,
+				ImmutableArray<string>.Empty,
+				new DiagnosticSpec("RS002", variableInfo.GetLocation()));
+		}
+
+		var attributes = Util.GetAllowedAttributes(
+			field,
+			context.SemanticModel,
+			"RotationSolver.Engine.Attributes.UIAttribute",
+			"RotationSolver.Engine.Attributes.UnitAttribute",
+			"RotationSolver.Engine.Attributes.RangeAttribute",
+			"RotationSolver.Engine.Attributes.LinkDescriptionAttribute");
+
+		return new ConditionBoolModel(namespaceName, typeHierarchy, variableName, propertyName, attributes, null);
 	}
 
-	private List<string> GeneratePropertyCodes(IEnumerable<(VariableDeclaratorSyntax, SemanticModel)> group, SourceProductionContext context, string nameSpace, string className)
+	private static void Execute(SourceProductionContext context, ImmutableArray<ConditionBoolModel?> array)
 	{
-		var propertyCodes = new List<string>();
-
-		foreach ((var variableInfo, var model) in group)
+		var groups = new Dictionary<string, (string NamespaceName, ImmutableArray<TypeHierarchyPart> Hierarchy, List<ConditionBoolModel> Items)>(StringComparer.Ordinal);
+		foreach (var item in array)
 		{
-			var field = (FieldDeclarationSyntax)variableInfo.Parent!.Parent!;
-			var variableName = variableInfo.Identifier.ToString();
-			var propertyName = variableName.ToPascalCase();
-
-			if (variableName == propertyName)
+			if (item == null)
 			{
-				context.ReportDiagnostic(Diagnostic.Create(new DiagnosticDescriptor("RS001", "Naming Warning", "Please don't use Pascal Case to name your field!", "Naming", DiagnosticSeverity.Warning, true), variableInfo.Identifier.GetLocation()));
 				continue;
 			}
 
-			var fieldType = model.GetTypeInfo(field.Declaration.Type).Type!;
-			if (fieldType.GetFullMetadataName() != "System.Boolean")
+			if (item.Diagnostic is { } diag)
 			{
-				context.ReportDiagnostic(Diagnostic.Create(new DiagnosticDescriptor("RS002", "Type Warning", "Field type must be System.Boolean", "Type", DiagnosticSeverity.Warning, true), variableInfo.GetLocation()));
+				var descriptor = diag.Id == "RS001" ? NamingWarningDescriptor : TypeWarningDescriptor;
+				context.ReportDiagnostic(Diagnostic.Create(descriptor, diag.ToLocation()));
 				continue;
 			}
 
-			var attributeStr = GetFieldAttributes(field, model);
-			var propertyCode = $$"""
+			var key = Util.GetSafeHintPrefix(item.NamespaceName, item.TypeHierarchy);
+			if (!groups.TryGetValue(key, out var group))
+			{
+				group = (item.NamespaceName, item.TypeHierarchy, new List<ConditionBoolModel>());
+				groups[key] = group;
+			}
+			group.Items.Add(item);
+		}
+
+		foreach (var kv in groups)
+		{
+			var (namespaceName, hierarchy, items) = kv.Value;
+			if (items.Count == 0)
+			{
+				continue;
+			}
+
+			var propertyCodes = new List<string>(items.Count);
+			foreach (var item in items)
+			{
+				var attributeStr = item.Attributes.Length == 0 ? string.Empty : $"[{string.Join(", ", item.Attributes)}]";
+				var propertyCode = $$"""
                 {{attributeStr}}
-                public ConditionBoolean {{propertyName}} { get; private set; } = new({{variableName}}, "{{propertyName}}");
+                public ConditionBoolean {{item.PropertyName}} { get; private set; } = new({{item.VariableName}}, "{{item.PropertyName}}");
             """;
+				propertyCodes.Add(propertyCode);
+			}
 
-			propertyCodes.Add(propertyCode);
+			var code = GenerateClassCode(namespaceName, hierarchy, propertyCodes);
+			context.AddSource($"{kv.Key}_ConditionBool.g.cs", code);
 		}
-
-		return propertyCodes;
 	}
 
-	private string GenerateClassCode(string nameSpace, string classType, string className, List<string> propertyCodes)
+	private static string GenerateClassCode(string namespaceName, ImmutableArray<TypeHierarchyPart> hierarchy, List<string> propertyCodes)
 	{
 		var sb = new StringBuilder();
 		sb.AppendLine("using RotationSolver.Engine.Data;");
 		sb.AppendLine();
-		sb.AppendLine($"namespace {nameSpace}");
-		sb.AppendLine("{");
-		sb.AppendLine($"    partial {classType} {className}");
-		sb.AppendLine("    {");
+
+		var indent = string.Empty;
+		if (!string.IsNullOrEmpty(namespaceName))
+		{
+			sb.AppendLine($"namespace {namespaceName}");
+			sb.AppendLine("{");
+			indent = "    ";
+		}
+
+		for (var i = 0; i < hierarchy.Length; i++)
+		{
+			sb.AppendLine($"{indent}partial {hierarchy[i].Keyword} {hierarchy[i].NameWithTypeParams}");
+			sb.AppendLine($"{indent}{{");
+			indent += "    ";
+		}
 
 		foreach (var propertyCode in propertyCodes)
 		{
-			sb.AppendLine("        " + propertyCode);
+			sb.AppendLine(indent + propertyCode);
 			sb.AppendLine();
 		}
 
-		sb.AppendLine("    }");
-		sb.AppendLine("}");
-
-		return sb.ToString();
-	}
-
-	private string GetFieldAttributes(FieldDeclarationSyntax field, SemanticModel model)
-	{
-		var names = new List<string>();
-
-		foreach (var attrSet in field.AttributeLists)
+		for (var i = hierarchy.Length - 1; i >= 0; i--)
 		{
-			if (attrSet == null)
-			{
-				continue;
-			}
-
-			foreach (var attr in attrSet.Attributes)
-			{
-				if (model.GetSymbolInfo(attr).Symbol?.GetFullMetadataName()
-					is "RotationSolver.Engine.Attributes.UIAttribute"
-					or "RotationSolver.Engine.Attributes.UnitAttribute"
-					or "RotationSolver.Engine.Attributes.RangeAttribute"
-					or "RotationSolver.Engine.Attributes.LinkDescriptionAttribute")
-				{
-					names.Add(attr.ToString());
-				}
-			}
+			indent = indent.Substring(0, indent.Length - 4);
+			sb.AppendLine($"{indent}}}");
 		}
 
-		return names.Count == 0 ? "" : $"[{string.Join(", ", names)}]";
+		if (!string.IsNullOrEmpty(namespaceName))
+		{
+			sb.AppendLine("}");
+		}
+
+		return sb.ToString();
 	}
 }

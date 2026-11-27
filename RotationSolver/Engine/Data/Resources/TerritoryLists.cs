@@ -8,6 +8,7 @@ internal static class TerritoryLists
 
 	public static readonly Dictionary<uint, Vector3[]> BeneficialPositions = new()
 	{
+		[445] = [new(-0.011972902f, 10.599999f, -0.048323914f)],
 		[751] = [new(0.015657552f, 0f, -0.0062397607f)],
 		[840] = [new(-0.0033443314f, -848f, -328.842f)],
 		[884] = [new(0.009307822f, 0f, 186.98294f), new(0.01387836f, 27f, -339.9755f), new(-0.09785645f, -12.5f, -60.806553f)],

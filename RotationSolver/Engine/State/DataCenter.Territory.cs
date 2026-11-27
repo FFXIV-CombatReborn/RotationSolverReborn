@@ -149,6 +149,7 @@ internal static partial class DataCenter
 		&& StatusHelper.PlayerHasStatus(false, StatusID.DutiesAsAssigned);
 
 	public static bool IsInDelubrumNormal => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid
+		&& Content.ContentDifficulty != ContentDifficulty.FieldRaidsSavage
 		&& Territory?.ContentType == TerritoryContentType.SaveTheQueen;
 
 	public static bool IsInDelubrumSavage => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid

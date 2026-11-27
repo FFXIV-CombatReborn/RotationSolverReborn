@@ -42,14 +42,13 @@ internal static class BeirutaHealModel
 			return 1f;
 		}
 
-		var hp = (float)member.CurrentHp + PendingHeals.PendingHp(member);
-
+		var ratio = (float)member.CurrentHp / member.MaxHp;
 		if (!wardMode)
 		{
-			hp += (HotCreditPotency(member) + landingPotency) * HpPerPotency;
+			ratio += PotencyToRatio(HotCreditPotency(member) + landingPotency);
 		}
 
-		return MathF.Min(1f, hp / member.MaxHp);
+		return MathF.Min(1f, ratio);
 	}
 
 	public static float FullUseHp(float potency, float healBoost = 1f) =>
@@ -168,50 +167,14 @@ internal static class BeirutaHealWindow
 	public static bool GcdJustUsed(params ReadOnlySpan<ActionID> ids) =>
 		IsCasting(ids) || UsedWithin(GcdSeconds, ids);
 
-	public static bool UsedSince(DateTime since, params ReadOnlySpan<ActionID> ids)
-	{
-		if (IsCasting(ids))
-		{
-			return true;
-		}
-
-		foreach (var rec in DataCenter.RecordActions)
-		{
-			if (rec.UsedTime < since)
-			{
-				break;
-			}
-
-			if (Contains(ids, rec.Action.RowId))
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
+	public static bool UsedSince(DateTime since, params ReadOnlySpan<ActionID> ids) =>
+		IsCasting(ids) || DataCenter.AnyRecordedActionSince(since, ids);
 
 	private static bool IsCasting(ReadOnlySpan<ActionID> ids) =>
 		ECommons.GameHelpers.Player.Object is { IsCasting: true } player && Contains(ids, player.CastActionId);
 
-	private static bool UsedWithin(double seconds, ReadOnlySpan<ActionID> ids)
-	{
-		var now = DateTime.Now;
-		foreach (var rec in DataCenter.RecordActions)
-		{
-			if ((now - rec.UsedTime).TotalSeconds >= seconds)
-			{
-				break;
-			}
-
-			if (Contains(ids, rec.Action.RowId))
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
+	private static bool UsedWithin(double seconds, ReadOnlySpan<ActionID> ids) =>
+		DataCenter.AnyRecordedActionWithin(seconds, ids);
 
 	private static bool Contains(ReadOnlySpan<ActionID> ids, uint id)
 	{
@@ -703,7 +666,12 @@ internal static class BeirutaTarget
 	{
 		act = null;
 
-		if (!action.EnoughLevel || !action.IsEnabled)
+		if (!action.EnoughLevel || !action.IsEnabled || target == null || !target.IsValid() || target.IsDead)
+		{
+			return false;
+		}
+
+		if (target.DistanceToPlayer() > action.TargetInfo.Range || !target.CanSee())
 		{
 			return false;
 		}

@@ -86,42 +86,30 @@ internal class VariantDefault : VariantRotation
 
 	public override bool GeneralAbility(IAction nextGCD, out IAction? act)
 	{
-		if (VariantRampartPvE_46941.Info.IsOnSlot)
+		if (VariantRampartSpam)
 		{
-			if (VariantRampartSpam && VariantRampartPvE_46941.CanUse(out act, skipStatusProvideCheck: true))
+			if (VariantRampartPvE_46941.Info.IsOnSlot)
 			{
-				return true;
+				if (VariantRampartPvE_46941.CanUse(out act, skipStatusProvideCheck: true) || VariantRampartPvE_46941.CanUse(out act))
+				{
+					return true;
+				}
 			}
 
-			if (VariantRampartPvE_46941.CanUse(out act))
+			if (VariantRampartPvE_33864.Info.IsOnSlot)
 			{
-				return true;
-			}
-		}
-
-		if (VariantRampartPvE_33864.Info.IsOnSlot)
-		{
-			if (VariantRampartSpam && VariantRampartPvE_33864.CanUse(out act, skipStatusProvideCheck: true))
-			{
-				return true;
+				if (VariantRampartPvE_33864.CanUse(out act, skipStatusProvideCheck: true) || VariantRampartPvE_33864.CanUse(out act))
+				{
+					return true;
+				}
 			}
 
-			if (VariantRampartPvE_33864.CanUse(out act))
+			if (VariantRampartPvE.Info.IsOnSlot)
 			{
-				return true;
-			}
-		}
-
-		if (VariantRampartPvE.Info.IsOnSlot)
-		{
-			if (VariantRampartSpam && VariantRampartPvE.CanUse(out act, skipStatusProvideCheck: true))
-			{
-				return true;
-			}
-
-			if (VariantRampartPvE.CanUse(out act))
-			{
-				return true;
+				if (VariantRampartPvE.CanUse(out act, skipStatusProvideCheck: true) || VariantRampartPvE.CanUse(out act))
+				{
+					return true;
+				}
 			}
 		}
 

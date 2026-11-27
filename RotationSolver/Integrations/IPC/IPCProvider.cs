@@ -5,11 +5,24 @@ using RotationSolver.Updaters;
 
 namespace RotationSolver.Integrations.IPC
 {
-	internal class IPCProvider
+	internal sealed class IPCProvider : IDisposable
 	{
+		private readonly EzIPCDisposalToken[] _disposalTokens;
+		private bool _disposed;
+
 		internal IPCProvider()
 		{
-			_ = EzIPC.Init(this, prefix: "RotationSolverReborn");
+			_disposalTokens = EzIPC.Init(this, prefix: "RotationSolverReborn");
+		}
+
+		public void Dispose()
+		{
+			if (_disposed)
+			{
+				return;
+			}
+			_disposed = true;
+			IPCSubscriber_Common.DisposeAll(_disposalTokens);
 		}
 
 		[EzIPC]
@@ -21,77 +34,93 @@ namespace RotationSolver.Integrations.IPC
 		[EzIPC]
 		public void AddPriorityNameID(uint nameId)
 		{
-			if (DataCenter.PrioritizedNameIds != null)
+			lock (DataCenter._nameIdLock)
 			{
-				DataCenter.PrioritizedNameIds.Add(nameId);
-				PluginLog.Debug($"IPC AddPriorityNameID was called. NameID:{nameId}");
-			}
-			else
-			{
-				PluginLog.Error("DataCenter.PrioritizedNameIds is null.");
+				if (DataCenter.PrioritizedNameIds != null)
+				{
+					if (!DataCenter.PrioritizedNameIds.Contains(nameId))
+					{
+						DataCenter.PrioritizedNameIds.Add(nameId);
+					}
+					PluginLog.Debug($"IPC AddPriorityNameID was called. NameID:{nameId}");
+				}
+				else
+				{
+					PluginLog.Error("DataCenter.PrioritizedNameIds is null.");
+				}
 			}
 		}
 
 		[EzIPC]
 		public void RemovePriorityNameID(uint nameId)
 		{
-			if (DataCenter.PrioritizedNameIds != null)
+			lock (DataCenter._nameIdLock)
 			{
-				if (DataCenter.PrioritizedNameIds.Contains(nameId))
+				if (DataCenter.PrioritizedNameIds != null)
 				{
-					_ = DataCenter.PrioritizedNameIds.Remove(nameId);
-					PluginLog.Debug($"IPC RemovePriorityNameID was called. NameID:{nameId}");
+					if (DataCenter.PrioritizedNameIds.RemoveAll(id => id == nameId) > 0)
+					{
+						PluginLog.Debug($"IPC RemovePriorityNameID was called. NameID:{nameId}");
+					}
+					else
+					{
+						PluginLog.Warning($"IPC RemovePriorityNameID was called but NameID:{nameId} was not found.");
+					}
 				}
 				else
 				{
-					PluginLog.Warning($"IPC RemovePriorityNameID was called but NameID:{nameId} was not found.");
+					PluginLog.Error("DataCenter.PrioritizedNameIds is null.");
 				}
-			}
-			else
-			{
-				PluginLog.Error("DataCenter.PrioritizedNameIds is null.");
 			}
 		}
 
 		[EzIPC]
 		public void AddBlacklistNameID(uint nameId)
 		{
-			if (DataCenter.BlacklistedNameIds != null)
+			lock (DataCenter._nameIdLock)
 			{
-				DataCenter.BlacklistedNameIds.Add(nameId);
-				PluginLog.Debug($"IPC AddBlacklistNameID was called. NameID:{nameId}");
-			}
-			else
-			{
-				PluginLog.Error("DataCenter.BlacklistedNameIds is null.");
+				if (DataCenter.BlacklistedNameIds != null)
+				{
+					if (!DataCenter.BlacklistedNameIds.Contains(nameId))
+					{
+						DataCenter.BlacklistedNameIds.Add(nameId);
+					}
+					PluginLog.Debug($"IPC AddBlacklistNameID was called. NameID:{nameId}");
+				}
+				else
+				{
+					PluginLog.Error("DataCenter.BlacklistedNameIds is null.");
+				}
 			}
 		}
 
 		[EzIPC]
 		public void RemoveBlacklistNameID(uint nameId)
 		{
-			if (DataCenter.BlacklistedNameIds != null)
+			lock (DataCenter._nameIdLock)
 			{
-				if (DataCenter.BlacklistedNameIds.Contains(nameId))
+				if (DataCenter.BlacklistedNameIds != null)
 				{
-					_ = DataCenter.BlacklistedNameIds.Remove(nameId);
-					PluginLog.Debug($"IPC RemoveBlacklistNameID was called. NameID:{nameId}");
+					if (DataCenter.BlacklistedNameIds.RemoveAll(id => id == nameId) > 0)
+					{
+						PluginLog.Debug($"IPC RemoveBlacklistNameID was called. NameID:{nameId}");
+					}
+					else
+					{
+						PluginLog.Warning($"IPC RemoveBlacklistNameID was called but NameID:{nameId} was not found.");
+					}
 				}
 				else
 				{
-					PluginLog.Warning($"IPC RemoveBlacklistNameID was called but NameID:{nameId} was not found.");
+					PluginLog.Error("DataCenter.BlacklistedNameIds is null.");
 				}
-			}
-			else
-			{
-				PluginLog.Error("DataCenter.BlacklistedNameIds is null.");
 			}
 		}
 
 		[EzIPC]
 		public void ChangeOperatingMode(StateCommandType stateCommand)
 		{
-			if (!DataCenter.IsPvP)
+			if (!DataCenter.IsPvP || stateCommand == StateCommandType.Off)
 			{
 				RSCommands.UpdateState(stateCommand, DataCenter.Role);
 			}
@@ -101,7 +130,7 @@ namespace RotationSolver.Integrations.IPC
 		[EzIPC]
 		public void ChangeOperatingModeWithOverrides(StateCommandType stateCommand, TargetHostileType targetHostileType, SettingOverride targetFreely, SettingOverride autoOffAfterCombat, SettingOverride friendlyPartyNpcHealRaise)
 		{
-			if (!DataCenter.IsPvP)
+			if (!DataCenter.IsPvP || stateCommand == StateCommandType.Off)
 			{
 				RSCommands.UpdateState(stateCommand, DataCenter.Role, CreateOverrides(targetHostileType, targetFreely, autoOffAfterCombat, friendlyPartyNpcHealRaise));
 			}
@@ -111,7 +140,7 @@ namespace RotationSolver.Integrations.IPC
 		[EzIPC]
 		public void AutodutyChangeOperatingMode(StateCommandType stateCommand, TargetingType targetingType)
 		{
-			if (!DataCenter.IsPvP)
+			if (!DataCenter.IsPvP || stateCommand == StateCommandType.Off)
 			{
 				RSCommands.AutodutyUpdateState(stateCommand, DataCenter.Role, targetingType);
 			}
@@ -121,7 +150,7 @@ namespace RotationSolver.Integrations.IPC
 		[EzIPC]
 		public void AutodutyChangeOperatingModeWithOverrides(StateCommandType stateCommand, TargetingType targetingType, TargetHostileType targetHostileType, SettingOverride targetFreely, SettingOverride autoOffAfterCombat, SettingOverride friendlyPartyNpcHealRaise)
 		{
-			if (!DataCenter.IsPvP)
+			if (!DataCenter.IsPvP || stateCommand == StateCommandType.Off)
 			{
 				RSCommands.AutodutyUpdateState(stateCommand, DataCenter.Role, targetingType, CreateOverrides(targetHostileType, targetFreely, autoOffAfterCombat, friendlyPartyNpcHealRaise));
 			}
@@ -156,9 +185,8 @@ namespace RotationSolver.Integrations.IPC
 		[EzIPC]
 		public void TriggerSpecialStateWithDuration(SpecialCommandType specialCommand, float duration)
 		{
-			if (!DataCenter.IsPvP)
+			if (!DataCenter.IsPvP && (specialCommand == SpecialCommandType.EndSpecial || (float.IsFinite(duration) && duration > 0)))
 			{
-				RSCommands.DoSpecialCommandType(specialCommand, false);
 				DataCenter.SetSpecialTypeWithDuration(specialCommand, duration);
 			}
 			PluginLog.Debug($"IPC TriggerSpecialStateWithDuration was called. SpecialCommand:{specialCommand}, Duration:{duration}");

@@ -390,7 +390,7 @@ public partial class BlackMageRotation
 
 	static partial void ModifyFireIvPvE(ref ActionSetting setting)
 	{
-		setting.ActionCheck = () => InAstralFire && AstralSoulStacks <= 5;
+		setting.ActionCheck = () => InAstralFire;
 		setting.UnlockedByQuestID = 67219;
 	}
 

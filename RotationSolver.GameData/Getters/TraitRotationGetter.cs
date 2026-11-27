@@ -1,10 +1,12 @@
 using Lumina.Excel.Sheets;
+using System.Security;
 
 namespace RotationSolver.GameData.Getters;
 
 internal class TraitRotationGetter : ExcelRowGetter<Trait>
 {
 	private readonly ClassJob _job;
+	private readonly HashSet<string> _addedNamesSet = [];
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="TraitRotationGetter"/> class.
@@ -28,6 +30,7 @@ internal class TraitRotationGetter : ExcelRowGetter<Trait>
 	protected override void BeforeCreating()
 	{
 		AddedNames.Clear();
+		_addedNamesSet.Clear();
 		base.BeforeCreating();
 	}
 
@@ -38,7 +41,7 @@ internal class TraitRotationGetter : ExcelRowGetter<Trait>
 	/// <returns>True if the item should be added; otherwise, false.</returns>
 	protected override bool AddToList(Trait item)
 	{
-		if (item.ClassJob.RowId == 0)
+		if (item.ClassJob.RowId == 0 || !item.ClassJob.IsValid)
 		{
 			return false;
 		}
@@ -55,7 +58,7 @@ internal class TraitRotationGetter : ExcelRowGetter<Trait>
 			if (!char.IsAscii(c))
 			{ allAscii = false; break; }
 		}
-		if (!allAscii)
+		if (!allAscii || string.IsNullOrEmpty(name.ToPascalCase()))
 		{
 			return false;
 		}
@@ -67,7 +70,19 @@ internal class TraitRotationGetter : ExcelRowGetter<Trait>
 
 		var category = item.ClassJob.Value;
 		var jobName = _job.Abbreviation.ToString();
-		return category.Abbreviation.ToString() == jobName;
+		if (category.Abbreviation.ToString() == jobName)
+		{
+			return true;
+		}
+
+		if (item.ClassJobCategory.IsValid && RotationGetter.IsJobCompatible(item.ClassJobCategory.Value, _job))
+		{
+			return true;
+		}
+
+		return _job.RowId != 28
+			&& _job.ClassJobParent.IsValid
+			&& category.RowId == _job.ClassJobParent.RowId;
 	}
 
 	/// <summary>
@@ -79,14 +94,12 @@ internal class TraitRotationGetter : ExcelRowGetter<Trait>
 	{
 		var name = item.Name.ToString().ToPascalCase() + "Trait";
 
-		if (AddedNames.Contains(name))
+		if (!_addedNamesSet.Add(name))
 		{
 			name += "_" + item.RowId.ToString();
+			_addedNamesSet.Add(name);
 		}
-		else
-		{
-			AddedNames.Add(name);
-		}
+		AddedNames.Add(name);
 
 		return $$"""
         /// <summary>
@@ -99,16 +112,19 @@ internal class TraitRotationGetter : ExcelRowGetter<Trait>
 
 	private static string GetDescName(Trait item)
 	{
-		var jobs = item.ClassJobCategory.IsValid ? item.ClassJobCategory.Value.Name.ToString() : string.Empty;
+		var jobs = item.ClassJobCategory.IsValid ? SecurityElement.Escape(item.ClassJobCategory.Value.Name.ToString()) : string.Empty;
 		jobs = string.IsNullOrEmpty(jobs) ? string.Empty : $" ({jobs})";
+		var escapedName = SecurityElement.Escape(item.Name.ToString());
 
-		return $"<see href=\"https://garlandtools.org/db/#action/{50000 + item.RowId}\"><strong>{item.Name.ToString()}</strong></see>{jobs} [{item.RowId}]";
+		return $"<see href=\"https://garlandtools.org/db/#action/{50000 + item.RowId}\"><strong>{escapedName}</strong></see>{jobs} [{item.RowId}]";
 	}
 
 	private string GetDesc(Trait item)
 	{
-		var transient = _gameData.GetExcelSheet<TraitTransient>()?.GetRow(item.RowId);
-		var desc = transient?.Description.ToString() ?? string.Empty;
+		var transientSheet = _gameData.GetExcelSheet<TraitTransient>();
+		var desc = transientSheet != null && transientSheet.TryGetRow(item.RowId, out var transient)
+			? transient.Description.ToString()
+			: string.Empty;
 
 		desc = Util.SanitizeXmlDescription(desc);
 

@@ -11,6 +11,7 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGet
 	/// </summary>
 	public List<string> AddedNames { get; } = [];
 
+	private readonly HashSet<string> _addedNamesSet = [];
 	private string[] _notCombatJobs = [];
 
 	/// <summary>
@@ -19,6 +20,7 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGet
 	protected override void BeforeCreating()
 	{
 		AddedNames.Clear();
+		_addedNamesSet.Clear();
 		var classJobs = _gameData.GetExcelSheet<ClassJob>()!;
 		var tmp = new List<string>();
 		foreach (var c in classJobs)
@@ -71,6 +73,12 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGet
 			return false;
 		}
 
+		var pascalName = name.ToPascalCase();
+		if (string.IsNullOrEmpty(pascalName))
+		{
+			return false;
+		}
+
 		if (item.Icon is 0 or 405 or 784)
 		{
 			return false;
@@ -98,23 +106,34 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGet
 			return true;
 		}
 
-		var isNotCombat = false;
 		for (var i = 0; i < _notCombatJobs.Length; i++)
 		{
-			var jobName = _notCombatJobs[i];
-			var val = (bool?)category.GetType().GetRuntimeProperty(jobName)?.GetValue(category) ?? false;
-			if (val)
+			if (IsNonCombatJobCompatible(category, _notCombatJobs[i]))
 			{
-				isNotCombat = true;
-				break;
+				return false;
 			}
-		}
-		if (isNotCombat)
-		{
-			return false;
 		}
 
 		return true;
+	}
+
+	private static bool IsNonCombatJobCompatible(ClassJobCategory category, string jobAbbreviation)
+	{
+		return jobAbbreviation switch
+		{
+			"CRP" => category.CRP,
+			"BSM" => category.BSM,
+			"ARM" => category.ARM,
+			"GSM" => category.GSM,
+			"LTW" => category.LTW,
+			"WVR" => category.WVR,
+			"ALC" => category.ALC,
+			"CUL" => category.CUL,
+			"MIN" => category.MIN,
+			"BTN" => category.BTN,
+			"FSH" => category.FSH,
+			_ => false
+		};
 	}
 
 	/// <summary>
@@ -161,16 +180,20 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGet
 	/// <returns>The name of the action.</returns>
 	protected string GetName(Action item)
 	{
-		var name = item.Name.ToString().ToPascalCase() + (item.IsPvP ? "PvP" : "PvE");
+		var baseName = item.Name.ToString().ToPascalCase();
+		if (string.IsNullOrEmpty(baseName))
+		{
+			baseName = $"Action_{item.RowId}";
+		}
+		var name = baseName + (item.IsPvP ? "PvP" : "PvE");
 
-		if (AddedNames.Contains(name))
+		if (!_addedNamesSet.Add(name))
 		{
 			name += "_" + item.RowId;
+			_addedNamesSet.Add(name);
 		}
-		else
-		{
-			AddedNames.Add(name);
-		}
+
+		AddedNames.Add(name);
 		return name;
 	}
 
@@ -181,8 +204,10 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData) : ExcelRowGet
 	/// <returns>The description of the action.</returns>
 	protected string GetDesc(Action item)
 	{
-		var transient = _gameData.GetExcelSheet<ActionTransient>()?.GetRow(item.RowId);
-		var desc = transient?.Description.ToString() ?? string.Empty;
+		var transientSheet = _gameData.GetExcelSheet<ActionTransient>();
+		var desc = transientSheet != null && transientSheet.TryGetRow(item.RowId, out var transient)
+			? transient.Description.ToString()
+			: string.Empty;
 
 		desc = Util.SanitizeXmlDescription(desc);
 

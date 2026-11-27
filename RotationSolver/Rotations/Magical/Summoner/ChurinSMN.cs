@@ -209,7 +209,7 @@ public sealed class ChurinSMN : SummonerRotation
 		// Configuration
 		ImGui.Text("=== Configuration ===");
 		ImGui.Text($"Order: {SummonOrder}");
-		ImGui.Text($"Is Crimson Cyclone Target in Range: {CrimsonCyclonePvE.Target.Target.DistanceToPlayer() <= CrimsonCycloneDistance && HasIfritFavor}");
+		ImGui.Text($"Is Crimson Cyclone Target in Range: {CrimsonCyclonePvE.Target.Target?.DistanceToPlayer() <= CrimsonCycloneDistance && HasIfritFavor}");
 		ImGui.Text($"Add Crimson Cyclone: {AddCrimsonCyclone}");
 		ImGui.Text($"Add Swiftcast on Garuda: {AddSwiftcastOnGaruda}");
 		ImGui.Text($"Skip Attunement: {SkipAttunement}");
@@ -880,7 +880,7 @@ public sealed class ChurinSMN : SummonerRotation
 								return CrimsonCyclonePvE.CanUse(out act);
 							}
 
-							if ((UseOneAttunement && usedOneAttunement && (UseBothAttunements || !UseBothAttunements))
+							if ((UseOneAttunement && usedOneAttunement)
 								|| (AttunementCount < 1 && UseBothAttunements && !UseOneAttunement))
 							{
 								if (canUseCrimsonCyclone)
@@ -1066,7 +1066,7 @@ public sealed class ChurinSMN : SummonerRotation
 
 			if (nextGCD.IsTheSameTo(false, RubyRitePvE, RubyCatastrophePvE) && IsMoving)
 			{
-				return !HasFurtherRuin && RubyAttunement && (!StatusHelper.PlayerHasStatus(true, StatusID.IfritsFavor) || !AddCrimsonCyclone && CrimsonCyclonePvE.Target.Target.DistanceToPlayer() > CrimsonCycloneDistance);
+				return !HasFurtherRuin && RubyAttunement && (!StatusHelper.PlayerHasStatus(true, StatusID.IfritsFavor) || (!AddCrimsonCyclone && CrimsonCyclonePvE.Target.Target?.DistanceToPlayer() > CrimsonCycloneDistance));
 			}
 		}
 		return false;
@@ -1164,7 +1164,7 @@ public sealed class ChurinSMN : SummonerRotation
 
 	private bool UseRuin3 { get; set; }
 
-	private bool CrimsonCycloneTargetTooFar => (CrimsonCyclonePvE.Target.Target.DistanceToPlayer() > CrimsonCycloneDistance) && HasIfritFavor;
+	private bool CrimsonCycloneTargetTooFar => (CrimsonCyclonePvE.Target.Target?.DistanceToPlayer() > CrimsonCycloneDistance) && HasIfritFavor;
 
 	private bool SkipAttunement { get; set; }
 
@@ -1370,8 +1370,8 @@ public sealed class ChurinSMN : SummonerRotation
 		var castAlmostFinished = Player != null && IsCasting && isCastingRubyRite && WeaponRemain < 1f;
 		var attunementUsedUp = (HasIfritFavor && !RubyAttunement) || (Player != null && IsLastGCD(ActionID.RubyRitePvE) && castAlmostFinished && AttunementCount <= 1);
 		var hasOneAttunementLeft = (castAlmostFinished && AttunementCount <= 2) || (Player != null && IsLastGCD(ActionID.RubyRitePvE) && AttunementCount == 1);
-		var crimsonCycloneTargetInRange = CrimsonCyclonePvE.Target.Target.DistanceToPlayer() <= CrimsonCycloneDistance;
-		var defaultCycloneCondition = (CrimsonCycloneTargetTooFar || crimsonCycloneTargetInRange) && attunementUsedUp;
+		var crimsonCycloneTargetInRange = CrimsonCyclonePvE.Target.Target != null && CrimsonCyclonePvE.Target.Target.DistanceToPlayer() <= CrimsonCycloneDistance;
+		var defaultCycloneCondition = crimsonCycloneTargetInRange && attunementUsedUp;
 
 		UseRuin3 = false;
 		UseRuin4 = false;
@@ -1391,7 +1391,7 @@ public sealed class ChurinSMN : SummonerRotation
 				SetRuin4Flag(EmeraldAttunement && !HasGarudaFavor && HasFurtherRuin);
 				break;
 			case 5:
-				SetIfritAttunementFlags(false, true, false, hasOneAttunementLeft && (CrimsonCycloneTargetTooFar || crimsonCycloneTargetInRange));
+				SetIfritAttunementFlags(false, true, false, hasOneAttunementLeft && crimsonCycloneTargetInRange);
 				SetSkipAttunementFlag((RubyAttunement && !HasIfritFavor && !HasCrimsonStrike && AttunementCount == 1 && IsGarudaReady && IsLastGCD(ActionID.CrimsonStrikePvE)) || (EmeraldAttunement && !HasGarudaFavor && AttunementCount < 3 && IsTitanReady));
 				break;
 			case 6:

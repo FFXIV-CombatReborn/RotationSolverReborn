@@ -164,16 +164,15 @@ public sealed class ChurinDRK : DarkKnightRotation
 	[RotationDesc(ActionID.DarkMissionaryPvE, ActionID.ReprisalPvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
-		switch (InBurstWindow)
+		if (DarkMissionaryPvE.CanUse(out act)
+			|| ReprisalPvE.CanUse(out act, skipAoeCheck: true)
+			|| (ShouldUseMp(MpSpendingStrategy) && BlackLantern && TheBlackestNightPvE.CanUse(out act) && TheBlackestNightPvE.Target.Target != null && TheBlackestNightPvE.Target.Target == LowestHealthPartyMember &&
+				TheBlackestNightPvE.Target.Target.GetHealthRatio() <= BlackLanternRatio))
 		{
-			case false when DarkMissionaryPvE.CanUse(out act):
-			case false when ReprisalPvE.CanUse(out act, skipAoeCheck: true):
-			case false when ShouldUseMp(MpSpendingStrategy) && BlackLantern && TheBlackestNightPvE.CanUse(out act) && TheBlackestNightPvE.Target.Target == LowestHealthPartyMember &&
-							TheBlackestNightPvE.Target.Target.GetHealthRatio() <= BlackLanternRatio:
-				return true;
-			default:
-				return base.DefenseAreaAbility(nextGCD, out act);
+			return true;
 		}
+
+		return base.DefenseAreaAbility(nextGCD, out act);
 	}
 
 	[RotationDesc(ActionID.OblationPvE, ActionID.TheBlackestNightPvE, ActionID.DarkMindPvE, ActionID.ShadowWallPvE, ActionID.ShadowedVigilPvE, ActionID.RampartPvE, ActionID.ReprisalPvE)]
@@ -186,12 +185,6 @@ public sealed class ChurinDRK : DarkKnightRotation
 		}
 
 		if (ShouldUseMp(MpSpendingStrategy) && TheBlackestNightPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (ShouldUseMp(MpSpendingStrategy) &&
-			TheBlackestNightPvE.CanUse(out act) && TheBlackestNightPvE.Target.Target == Player)
 		{
 			return true;
 		}
@@ -265,12 +258,16 @@ public sealed class ChurinDRK : DarkKnightRotation
 			return false;
 		}
 
-		if (InBurstWindow)
+		if (InBurstWindow && DisesteemPvE.CanUse(out act))
 		{
-			if ((NoCombo && IsLastGCD(ActionID.SouleaterPvE)) || (NoCombo && HasDelirium && CurrentMp >= 9600) || DisesteemPvE.Target.Target.DistanceToPlayer() > 3f)
+			if ((NoCombo && IsLastGCD(ActionID.SouleaterPvE))
+				|| (NoCombo && HasDelirium && CurrentMp >= 9600)
+				|| (DisesteemPvE.Target.Target?.DistanceToPlayer() > 3f))
 			{
-				return DisesteemPvE.CanUse(out act);
+				return true;
 			}
+
+			act = null;
 		}
 
 		return false;

@@ -3,10 +3,11 @@ using RotationSolver.GameData.Getters.Actions;
 
 namespace RotationSolver.GameData.Getters;
 
-internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
+internal class RotationGetter(Lumina.GameData gameData, ClassJob job, IReadOnlyList<Lumina.Excel.Sheets.Action>? pvpLimitBreaks = null)
 {
 	private readonly Lumina.GameData gameData = gameData;
 	private readonly ClassJob job = job;
+	private readonly IReadOnlyList<Lumina.Excel.Sheets.Action>? pvpLimitBreaks = pvpLimitBreaks;
 
 	/// <summary>
 	/// Gets the name of the rotation.
@@ -65,7 +66,7 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
      namespace {{GetNamespace()}}
      {
      /// <summary>
-     /// <see href="https://na.finalfantasyxiv.com/jobguide/{{jobName?.Replace(" ", "").ToLower()}}"><strong>{{jobName}}</strong></see>
+     /// <see href="https://na.finalfantasyxiv.com/jobguide/{{jobName?.Replace(" ", "").ToLowerInvariant()}}"><strong>{{jobName}}</strong></see>
      /// <br>Number of Actions: {{rotationsGetter.Count}}</br>
      /// <br>Number of Traits: {{traitsGetter.Count}}</br>
      /// </summary>
@@ -80,9 +81,9 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
      {{Util.ArrayNames("AllBaseActions", "IBaseAction",
 		 "public override", [.. rotationsGetter.AddedNames]).Table()}}
 
-     {{GetLBInRotation(job.LimitBreak1.Value, 1)}}
-     {{GetLBInRotation(job.LimitBreak2.Value, 2)}}
-     {{GetLBInRotation(job.LimitBreak3.Value, 3)}}
+     {{GetLBInRotation(job.LimitBreak1.IsValid ? job.LimitBreak1.Value : default, 1)}}
+     {{GetLBInRotation(job.LimitBreak2.IsValid ? job.LimitBreak2.Value : default, 2)}}
+     {{GetLBInRotation(job.LimitBreak3.IsValid ? job.LimitBreak3.Value : default, 3)}}
      {{GetLBInRotationPvP(FindPvPLimitBreak())}}
 
      #endregion
@@ -99,38 +100,42 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
      """;
 	}
 
-	private Lumina.Excel.Sheets.Action? FindPvPLimitBreak()
+	internal static List<Lumina.Excel.Sheets.Action> CollectPvPLimitBreaks(Lumina.GameData gameData)
 	{
-		try
+		var result = new List<Lumina.Excel.Sheets.Action>();
+		var actionSheet = gameData.GetExcelSheet<Lumina.Excel.Sheets.Action>();
+		if (actionSheet == null)
 		{
-			var actionSheet = gameData.GetExcelSheet<Lumina.Excel.Sheets.Action>();
-			if (actionSheet == null)
-			{
-				return null;
-			}
-
-			var jobCategory = job.ClassJobCategory.Value;
-
-			foreach (var action in actionSheet)
-			{
-				if (action.ActionCategory.RowId == 15 && action.ClassJobCategory.IsValid && action.IsPvP)
-				{
-					if (IsJobCompatible(action.ClassJobCategory.Value, job))
-					{
-						return action;
-					}
-				}
-			}
-
-			return null;
+			return result;
 		}
-		catch (Exception)
+
+		foreach (var action in actionSheet)
 		{
-			return null;
+			if (action.ActionCategory.RowId == 15 && action.ClassJobCategory.IsValid && action.IsPvP)
+			{
+				result.Add(action);
+			}
 		}
+
+		return result;
 	}
 
-	private static bool IsJobCompatible(ClassJobCategory category, ClassJob targetJob)
+	private Lumina.Excel.Sheets.Action? FindPvPLimitBreak()
+	{
+		var limitBreaks = pvpLimitBreaks ?? CollectPvPLimitBreaks(gameData);
+		for (var i = 0; i < limitBreaks.Count; i++)
+		{
+			var action = limitBreaks[i];
+			if (action.ClassJobCategory.IsValid && IsJobCompatible(action.ClassJobCategory.Value, job))
+			{
+				return action;
+			}
+		}
+
+		return null;
+	}
+
+	internal static bool IsJobCompatible(ClassJobCategory category, ClassJob targetJob)
 	{
 		return targetJob.Abbreviation.ToString() switch
 		{
@@ -228,8 +233,10 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
 
 	private string GetDesc(Lumina.Excel.Sheets.Action item)
 	{
-		var transient = gameData.GetExcelSheet<ActionTransient>()?.GetRow(item.RowId);
-		var desc = transient?.Description.ToString() ?? string.Empty;
+		var transientSheet = gameData.GetExcelSheet<ActionTransient>();
+		var desc = transientSheet != null && transientSheet.TryGetRow(item.RowId, out var transient)
+			? transient.Description.ToString()
+			: string.Empty;
 
 		desc = Util.SanitizeXmlDescription(desc);
 

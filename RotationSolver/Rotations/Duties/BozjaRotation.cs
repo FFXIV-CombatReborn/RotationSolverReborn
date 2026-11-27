@@ -137,7 +137,6 @@ public partial class DutyRotation
 	{
 		setting.IsFriendly = true;
 		setting.TargetType = TargetType.Self;
-		setting.StatusNeed = [StatusID.Weakness];
 		setting.StatusProvide = [StatusID.LostExcellence];
 		setting.ActionCheck = () => InCombat;
 	}
@@ -365,7 +364,7 @@ public partial class DutyRotation
 	static partial void ModifyLostParalyzeIiiPvE(ref ActionSetting setting)
 	{
 		setting.IsFriendly = false;
-		setting.StatusProvide = [StatusID.Paralysis];
+		setting.TargetStatusProvide = [StatusID.Paralysis];
 		setting.CreateConfig = () => new ActionConfig
 		{
 			AoeCount = 1,

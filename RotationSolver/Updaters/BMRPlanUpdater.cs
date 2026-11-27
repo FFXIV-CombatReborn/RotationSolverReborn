@@ -7,6 +7,7 @@ internal static class BMRPlanUpdater
 {
 	private static bool _subscribed;
 	private static volatile bool _dirty = true;
+	private static volatile bool _clearQueued;
 	private static DateTime _lastPoll = DateTime.MinValue;
 
 	private static readonly HashSet<uint> _queuedActionIds = [];
@@ -24,13 +25,21 @@ internal static class BMRPlanUpdater
 
 		try
 		{
-			BMRPlan_IPCSubscriber.SubscribeActionsChanged(OnActionsChanged);
-			_subscribed = true;
+			_subscribed = BMRPlan_IPCSubscriber.SubscribeActionsChanged(OnActionsChanged);
 		}
 		catch (Exception ex)
 		{
 			PluginLog.Error($"[BMRPlanUpdater] Failed to subscribe to Plan.ActionsChanged: {ex}");
 		}
+	}
+
+	public static void Reset()
+	{
+		_queuedActionIds.Clear();
+		_activeActionIds.Clear();
+		_dirty = true;
+		_clearQueued = false;
+		_lastPoll = DateTime.MinValue;
 	}
 
 	public static void Disable()
@@ -51,24 +60,24 @@ internal static class BMRPlanUpdater
 		finally
 		{
 			_subscribed = false;
-			_queuedActionIds.Clear();
+			Reset();
 		}
 	}
 
 	private static void OnActionsChanged()
 	{
 		_dirty = true;
-		_queuedActionIds.Clear();
+		_clearQueued = true;
 	}
 
 	public static void Update()
 	{
 		if (!Service.Config.UseBmrPlan)
 		{
-			if (DataCenter.BMRPlannedActions.Count > 0)
+			if (DataCenter.BMRPlannedActions.Count > 0 || _queuedActionIds.Count > 0)
 			{
 				DataCenter.ResetBmrPlanData();
-				_queuedActionIds.Clear();
+				Reset();
 			}
 
 			return;
@@ -79,9 +88,14 @@ internal static class BMRPlanUpdater
 		if (!BMRPlan_IPCSubscriber.IsEnabled)
 		{
 			DataCenter.ResetBmrPlanData();
-			_queuedActionIds.Clear();
-			_dirty = true;
+			Reset();
 			return;
+		}
+
+		if (_clearQueued)
+		{
+			_clearQueued = false;
+			_queuedActionIds.Clear();
 		}
 
 		var now = DateTime.Now;
@@ -135,7 +149,7 @@ internal static class BMRPlanUpdater
 				continue;
 			}
 
-			if (!_queuedActionIds.Add(planned.ActionId))
+			if (_queuedActionIds.Contains(planned.ActionId))
 			{
 				continue;
 			}
@@ -143,9 +157,19 @@ internal static class BMRPlanUpdater
 			var matchingAction = ((ActionID)planned.ActionId).GetActionFromID(false, rotationActions, dutyActions);
 			if (matchingAction == null)
 			{
+				var adjustedId = Service.GetAdjustedActionId(planned.ActionId);
+				if (adjustedId != 0 && adjustedId != planned.ActionId)
+				{
+					matchingAction = ((ActionID)adjustedId).GetActionFromID(false, rotationActions, dutyActions);
+				}
+			}
+
+			if (matchingAction == null)
+			{
 				continue;
 			}
 
+			_ = _queuedActionIds.Add(planned.ActionId);
 			DataCenter.AddCommandAction(matchingAction, windowEndIn);
 			PluginLog.Debug($"[BMRPlanUpdater] Queued BMR planned action: {matchingAction.Name} (ActionId: {planned.ActionId}) for {windowEndIn:F1}s");
 		}
@@ -155,7 +179,8 @@ internal static class BMRPlanUpdater
 	{
 		windowEndIn = planned.WindowEndIn - elapsedSincePoll;
 
-		return planned.ActionId != 0
+		return planned.ActionType == 1
+			&& planned.ActionId != 0
 			&& planned.ActivationIn - elapsedSincePoll <= 0f
 			&& windowEndIn > 0f;
 	}

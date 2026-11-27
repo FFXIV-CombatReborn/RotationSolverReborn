@@ -775,16 +775,6 @@ public sealed class BeirutaRDM : RedMageRotation
 			return act;
 		}
 
-		if (HasAccelerate && remainTime < 0f)
-		{
-			StatusHelper.StatusOff(StatusID.Acceleration);
-		}
-
-		if (HasSwift && remainTime < 0f)
-		{
-			StatusHelper.StatusOff(StatusID.Swiftcast);
-		}
-
 		return base.CountDownAction(remainTime);
 	}
 	#endregion

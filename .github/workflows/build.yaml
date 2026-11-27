@@ -1,8 +1,13 @@
 name: Build
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
+permissions:
+  contents: read
 jobs:
   Build:
     runs-on: windows-latest
@@ -19,11 +24,16 @@ jobs:
 
       - name: Download Dalamud Latest
         run: |
-          Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
-          Expand-Archive -Force latest.zip -DestinationPath "$env:AppData\XIVLauncher\addon\Hooks\dev"
+          $archivePath = Join-Path $env:TEMP "latest.zip"
+          Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile $archivePath
+          Expand-Archive -Force $archivePath -DestinationPath "$env:AppData\XIVLauncher\addon\Hooks\dev"
 
       - name: Restore NuGet Packages
-        run: dotnet restore RotationSolver/RotationSolver.csproj
+        run: |
+          dotnet restore --locked-mode RotationSolver/RotationSolver.csproj
+          dotnet restore RotationSolver.GameData/RotationSolver.GameData.csproj
 
       - name: Build Plugin
-        run: dotnet build --no-restore -c Release RotationSolver/RotationSolver.csproj
+        run: |
+          dotnet build --no-restore -c Release RotationSolver/RotationSolver.csproj
+          dotnet build --no-restore -c Release RotationSolver.GameData/RotationSolver.GameData.csproj
