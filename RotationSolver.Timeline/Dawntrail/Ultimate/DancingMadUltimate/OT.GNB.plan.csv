@@ -1,0 +1,70 @@
+# OT GNB
+Phase,Start,End,Action,Target
+P1,5.5,132.0,Tank Stance,On
+P1,11.1,14.1,Provoke,
+P1,13.6,15.6,Heart of Corundum,OtherTank
+P1,36.7,39.7,Heart of Light,
+P1,53.0,56.0,Reprisal,
+P1,53.2,56.2,Rampart,
+P1,56.9,59.9,Great Nebula,
+P1,59.4,62.0,Camouflage,
+P1,63.6,65.6,Heart of Corundum,Self
+P1,92.4,95.4,Superbolide,
+P1,113.0,117.7,Reprisal,
+P1,127.1,130.1,Heart of Light,
+P2,2.1,27.1,Tank Stance,Off
+P2,12.1,15.1,Rampart,
+P2,12.6,15.6,Great Nebula,
+P2,12.8,15.8,Reprisal,
+P2,15.2,18.2,Camouflage,
+P2,17.9,20.9,Heart of Corundum,Self
+P2,23.4,25.8,Heart of Light,
+P2,49.6,183.8,Tank Stance,On
+P2,73.8,76.8,Reprisal,
+P2,130.5,133.5,Heart of Light,
+P2,134.0,137.0,Reprisal,
+P2,162.5,165.5,Rampart,
+P2,168.1,171.1,Great Nebula,
+P2,170.2,172.2,Camouflage,
+P2,175.9,178.9,Heart of Corundum,Self
+P3,0.0,338.3,Tank Stance,On
+P3,68.6,71.6,Heart of Light,
+P3,80.9,83.9,Reprisal,
+P3,87.9,90.9,Rampart,
+P3,91.0,94.0,Heart of Corundum,Self
+P3,91.3,94.3,Camouflage,
+P3,161.0,164.0,Reprisal,
+P3,162.5,165.5,Heart of Corundum,Self
+P3,163.3,166.3,Great Nebula,
+P3,189.4,192.4,Heart of Light,
+P3,209.9,212.9,Superbolide,
+P3,244.3,246.3,Reprisal,
+P3,248.7,251.7,Rampart,
+P3,250.2,253.2,Camouflage,
+P3,252.0,255.0,Heart of Corundum,Self
+P3,282.0,285.0,Heart of Light,
+P3,315.7,318.5,Reprisal,
+P4,0.0,1.5,Tank Stance,On
+P4,4.0,18.5,Tank Stance,Off
+P4,25.5,51.5,Tank Stance,Off
+P4,36.7,39.7,Heart of Light,
+P4,130.9,133.9,Reprisal,
+P5,0.0,251.6,Tank Stance,On
+P5,24.8,26.8,Heart of Light,
+P5,32.9,35.9,Rampart,
+P5,33.2,38.2,Camouflage,
+P5,33.2,38.2,Heart of Corundum,Self
+P5,49.2,54.2,Provoke,
+P5,54.0,56.1,Reprisal,
+P5,63.9,66.9,Great Nebula,
+P5,67.6,69.6,Heart of Corundum,Self
+P5,114.8,116.8,Heart of Light,
+P5,115.2,120.2,Heart of Corundum,Self
+P5,116.0,119.0,Reprisal,
+P5,154.2,159.2,Provoke,
+P5,154.2,159.2,Superbolide,
+P5,157.2,160.2,Camouflage,
+P5,158.6,161.2,Rampart,
+P5,159.2,161.2,Heart of Corundum,Self
+P5,204.2,206.4,Reprisal,
+P5,204.8,206.4,Heart of Light,

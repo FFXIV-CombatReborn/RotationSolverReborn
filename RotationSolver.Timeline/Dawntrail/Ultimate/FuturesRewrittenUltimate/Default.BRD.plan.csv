@@ -1,0 +1,18 @@
+# Default BRD
+Phase,Start,End,Action,Target
+P1,43.6,58.3,Nature's Minne,
+P1,103.6,105.6,Troubadour,
+P2,39.4,43.8,Nature's Minne,
+P2,48.7,51.7,Troubadour,
+P2,142.2,145.2,Troubadour,
+P3,30.2,33.2,Nature's Minne,
+P3,54.1,57.1,Troubadour,
+P3,154.8,157.8,Nature's Minne,
+P4,35.5,38.5,Troubadour,
+P4,135.3,138.3,Troubadour,
+P4,157.6,162.3,Nature's Minne,
+P5,84.2,87.2,Troubadour,
+P5,145.0,148.0,Nature's Minne,
+P5,187.1,189.2,Troubadour,
+P5,265.0,266.2,Nature's Minne,
+P5,287.0,290.0,Troubadour,

@@ -51,6 +51,11 @@
 		<EmbeddedResource Include="..\Images\Logo.png" Link="Images\Logo.png" LogicalName="RotationSolver.Images.Logo.png" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<!-- Built-in timelines and CD plans, read from the plugin folder next to the user's own Timelines folder. -->
+		<None Include="..\RotationSolver.Timeline\**\*.csv" Link="RotationSolver.Timeline\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
 	<Target Name="PruneOutputDlls" AfterTargets="ResolveReferences">
 		<ItemGroup>
 			<ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="'%(Filename)' != 'ECommons' and '%(Filename)' != 'RebornMaterial'" />

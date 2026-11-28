@@ -4,8 +4,64 @@ namespace RotationSolver.Rotations.Ranged.Bard;
 	Description = "Please make sure that the three song times add up to 120 seconds, Wanderers default first song for now.")]
 [SourceCode(Path = "main/Rotations/Ranged/Bard/BRD_Reborn.cs")]
 
-public sealed class BRD_Reborn : BardRotation
+public sealed class BRD_Reborn : BardRotation, Updaters.ICdPlanRotation
 {
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Auto: Troubadour and Nature's Minne respond to RSR's defense / heal signals (raidwide detection, Boss Mod or the commands).\n" +
+		"Use built-in CD plan: they follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press them.\n" +
+		"With the built-in plan or BMR / VBM / Manual, the defense / heal signals do not use them.")]
+	public CdPlanSource CdPlanFrom { get; set; } = CdPlanSource.Auto;
+
+	public bool UseTimelinePlan => CdPlanFrom == CdPlanSource.BuiltIn;
+
+	private bool AutoDefense => CdPlanFrom == CdPlanSource.Auto;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned songs", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Off (default): the rotation sings its own cycle from the song settings below (e.g. Wanderer's Minuet first).\n" +
+		"On: the plan decides when each song goes out (e.g. a Mage's Ballad first plan for a fight's downtime), and the rotation's own cycle stops while the plan has songs. " +
+		"If no song is up and none is planned in the next few seconds, the rotation still sings one so you're never songless.")]
+	public bool UsePlannedSongs { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Nature's Minne", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Nature's Minne are used in their window (built-in plans use it as often as it fits).\nOff: they are skipped, and Nature's Minne is not used.")]
+	public bool UsePlannedNaturesMinne { get; set; } = true;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
+	[
+		((uint)ActionID.MagesBalladPvE, nameof(UsePlannedSongs)),
+		((uint)ActionID.ArmysPaeonPvE, nameof(UsePlannedSongs)),
+		((uint)ActionID.TheWanderersMinuetPvE, nameof(UsePlannedSongs)),
+		((uint)ActionID.NaturesMinnePvE, nameof(UsePlannedNaturesMinne)),
+	];
+
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
+		(UsePlannedSongs || (actionId != (uint)ActionID.MagesBalladPvE && actionId != (uint)ActionID.ArmysPaeonPvE && actionId != (uint)ActionID.TheWanderersMinuetPvE)) &&
+		(UsePlannedNaturesMinne || actionId != (uint)ActionID.NaturesMinnePvE);
+
+	// The plan has songs, so it decides the song order and timing instead of the song settings.
+	private bool PlanOwnsSongs =>
+		Updaters.TimelineUpdater.PlanContains(MagesBalladPvE.ID) ||
+		Updaters.TimelineUpdater.PlanContains(ArmysPaeonPvE.ID) ||
+		Updaters.TimelineUpdater.PlanContains(TheWanderersMinuetPvE.ID);
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => CdPlanHelper.Wait(actionId);
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		CdPlanHelper.HoldCommand(action, UseTimelinePlan);
+
+	#endregion
+
 	#region Config Options
 
 	[Range(1, 5, ConfigUnitType.Seconds, 0.1f)]
@@ -75,6 +131,11 @@ public sealed class BRD_Reborn : BardRotation
 	#region oGCD Logic
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
 	{
+		if (CdPlanHelper.TryPlanned(out act))
+		{
+			return true;
+		}
+
 		if (StatusHelper.PlayerHasStatus(false, StatusID.Doom))
 		{
 			if (TheWardensPaeanPvE.CanUse(out act))
@@ -114,7 +175,7 @@ public sealed class BRD_Reborn : BardRotation
 	[RotationDesc(ActionID.NaturesMinnePvE)]
 	protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
 	{
-		if (NaturesMinnePvE.CanUse(out act))
+		if (AutoDefense && NaturesMinnePvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -124,7 +185,7 @@ public sealed class BRD_Reborn : BardRotation
 	[RotationDesc(ActionID.TroubadourPvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
-		if ((!BurstDefense || (BurstDefense && !InBurstStatus)) && TroubadourPvE.CanUse(out act))
+		if (AutoDefense && (!BurstDefense || (BurstDefense && !InBurstStatus)) && TroubadourPvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -152,6 +213,18 @@ public sealed class BRD_Reborn : BardRotation
 		};
 	}
 
+	// The first song in the configured order that can be sung now.
+	private bool TryAnySong(out IAction? act) =>
+		TrySongTrackAction(FirstSong, out act) ||
+		TrySongTrackAction(SecondSong, out act) ||
+		TrySongTrackAction(ThirdSong, out act);
+
+	private const float PlannedSongGraceSeconds = 3f;
+
+	private bool PlannedSongSoon =>
+		Updaters.TimelineUpdater.PlannedWithin(PlannedSongGraceSeconds,
+			MagesBalladPvE.ID, ArmysPaeonPvE.ID, TheWanderersMinuetPvE.ID);
+
 	private bool TrySongTrackAction(SongTrack track, out IAction? act)
 	{
 		act = null;
@@ -168,6 +241,17 @@ public sealed class BRD_Reborn : BardRotation
 	{
 		if (!InCombat)
 		{
+			return base.GeneralAbility(nextGCD, out act);
+		}
+
+		if (PlanOwnsSongs)
+		{
+			// Fallback: no song up and none planned in the next few seconds, so don't stay songless.
+			if (Song == Song.None && !PlannedSongSoon && TryAnySong(out act))
+			{
+				return true;
+			}
+
 			return base.GeneralAbility(nextGCD, out act);
 		}
 
@@ -252,22 +336,9 @@ public sealed class BRD_Reborn : BardRotation
 			}
 		}
 
-		if (Song == Song.None)
+		if (Song == Song.None && TryAnySong(out act))
 		{
-			if (TrySongTrackAction(FirstSong, out act))
-			{
-				return true;
-			}
-
-			if (TrySongTrackAction(SecondSong, out act))
-			{
-				return true;
-			}
-
-			if (TrySongTrackAction(ThirdSong, out act))
-			{
-				return true;
-			}
+			return true;
 		}
 
 		return base.GeneralAbility(nextGCD, out act);

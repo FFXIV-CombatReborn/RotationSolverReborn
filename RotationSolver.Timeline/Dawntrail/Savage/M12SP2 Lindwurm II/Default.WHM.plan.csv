@@ -1,0 +1,43 @@
+# Default WHM
+# Set.WardMode: false
+# Set.CountdownShield: Regen + Divine Benison on stance tank (5s)
+# Set.PresenceOfMindOpener: 6s
+# Set.UsePotion: true
+# Set.PotionTiming: Opener (countdown)
+# Set.UseSwiftcastForMovement: true
+# Set.SwiftcastMovement: Raise and AoE heal GCDs only
+# Set.UseCustomHPThreshold: false
+Phase,Start,End,Action,Target
+P1,13.2,16.2,Plenary Indulgence,
+P1,27.2,30.2,Asylum,
+P1,34.8,37.8,Temperance,
+P1,46.3,51.3,Afflatus Rapture,
+P1,54.9,57.9,Divine Caress,
+P1,69.9,74.9,Afflatus Rapture,
+P1,93.0,96.0,Plenary Indulgence,
+P1,123.0,127.5,Liturgy of the Bell,
+P1,142.0,147.0,Afflatus Rapture,
+P1,158.8,161.8,Asylum,
+P1,158.8,161.8,Plenary Indulgence,
+P1,157.3,160.3,Temperance,
+P1,162.5,167.5,Afflatus Rapture,
+P1,165.1,168.1,Divine Caress,
+P1,207.1,212.1,Afflatus Rapture,
+P1,222.2,227.2,Afflatus Rapture,
+P1,230.6,233.6,Plenary Indulgence,
+P1,232.6,237.6,Afflatus Rapture,
+P1,274.5,277.5,Asylum,
+P1,341.8,344.8,Plenary Indulgence,
+P1,351.0,356.0,Afflatus Rapture,
+P1,366.9,371.4,Liturgy of the Bell,
+P1,367.1,372.1,Afflatus Rapture,
+P1,366.7,369.7,Temperance,
+P1,370.2,375.2,Afflatus Rapture,
+P1,372.2,375.2,Divine Caress,
+P1,407.4,412.4,Afflatus Rapture,
+P1,448.7,453.7,Afflatus Rapture,
+P1,464.8,469.8,Afflatus Rapture,
+P1,470.2,473.2,Asylum,
+P1,470.2,473.2,Plenary Indulgence,
+P1,472.2,477.2,Afflatus Rapture,
+P1,480.9,485.9,Afflatus Rapture,

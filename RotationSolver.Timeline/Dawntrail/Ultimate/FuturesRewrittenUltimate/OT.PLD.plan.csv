@@ -1,0 +1,60 @@
+# OT PLD
+Phase,Start,End,Action,Target
+P1,9.5,134.0,Tank Stance,On
+P1,11.1,13.7,Reprisal,
+P1,19.7,22.7,Provoke,
+P1,20.7,23.5,Intervention,OtherTank
+P1,22.9,25.9,Rampart,
+P1,46.1,49.1,Divine Veil,
+P1,82.5,85.5,Passage of Arms,
+P1,107.6,110.4,Reprisal,
+P1,125.7,128.7,Hallowed Ground,
+P1,131.1,134.1,Rampart,
+P1,135.0,138.0,Guardian,
+P1,137.9,139.9,Bulwark,
+P1,141.6,144.6,Holy Sheltron,
+P2,13.0,15.0,Intervention,OtherTank
+P2,40.6,43.6,Divine Veil,
+P2,79.1,82.1,Reprisal,
+P2,80.2,83.2,Passage of Arms,
+P2,80.7,177.2,Tank Stance,Off
+P2,165.7,168.7,Reprisal,
+P2,167.2,170.2,Divine Veil,
+P2,257.2,259.2,Divine Veil,
+P2,263.9,266.9,Passage of Arms,
+P3,53.3,56.3,Reprisal,
+P3,96.8,99.8,Divine Veil,
+P3,97.6,115.1,Tank Stance,On
+P3,105.5,108.5,Intervention,OtherTank
+P3,147.0,150.0,Rampart,
+P3,148.7,151.3,Guardian,
+P3,155.1,157.1,Holy Sheltron,
+P3,169.1,171.3,Reprisal,
+P3,181.7,184.7,Passage of Arms,
+P4,1.7,172.9,Tank Stance,On
+P4,28.5,31.5,Divine Veil,
+P4,31.9,34.9,Provoke,
+P4,72.1,74.3,Reprisal,
+P4,135.9,138.9,Divine Veil,
+P4,138.6,141.6,Guardian,
+P4,140.4,143.4,Rampart,
+P4,153.8,156.8,Intervention,OtherTank
+P4,155.1,158.1,Passage of Arms,
+P4,156.5,158.5,Reprisal,
+P5,0.0,211.8,Tank Stance,On
+P5,98.7,101.0,Divine Veil,
+P5,108.6,111.6,Reprisal,
+P5,127.8,130.8,Provoke,
+P5,129.6,132.6,Hallowed Ground,
+P5,131.1,133.4,Intervention,OtherTank
+P5,186.0,188.7,Reprisal,
+P5,210.8,213.8,Divine Veil,
+P5,213.8,400.0,Tank Stance,On
+P5,240.7,243.7,Rampart,
+P5,242.5,245.5,Guardian,
+P5,245.3,248.3,Bulwark,
+P5,245.4,248.4,Provoke,
+P5,247.8,250.8,Holy Sheltron,
+P5,263.7,266.7,Reprisal,
+P5,288.2,291.2,Passage of Arms,
+P5,300.8,303.6,Divine Veil,

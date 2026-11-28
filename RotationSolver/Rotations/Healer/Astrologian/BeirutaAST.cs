@@ -1,34 +1,153 @@
+using static RotationSolver.Engine.Helpers.BeirutaParty;
+
 namespace RotationSolver.Rotations.Healer.Astrologian;
 
 [Rotation("BeirutaAST", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn, Description =
-	"Savage/Ultimate Astrologian. Damage and healing are automatic; mitigation comes from your CD planner or your own presses. AutoBurst off is enough to hold burst. Set Intercept to GCD only and leave ability intercept unticked, so your planner's oGCDs go straight through and any extra heal or shield GCD you press is queued. Questions? Ask @Beiruta on the RSR Discord. Hover each setting for details.")]
+	"Savage/Ultimate Astrologian. Damage and healing are automatic. Planned cooldowns (mitigation, HoTs, Lightspeed and the like) follow the built-in CD plan when there is one (see the CD Plan section); otherwise use your Boss Mod / BMR CD planner or press them yourself, with Intercept set to GCD only and ability intercept unticked. Questions? Ask @Beiruta on the RSR Discord.")]
 [SourceCode(Path = "main/Rotations/Healer/Astrologian/BeirutaAST.cs")]
 [ExtraRotation]
 
-public sealed class BeirutaAST : AstrologianRotation
+public sealed class BeirutaAST : AstrologianRotation, Updaters.ICdPlanRotation, IBeirutaHealContext, IBeirutaHealer
 {
 	#region Config Options
+
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Use built-in CD plan: planned cooldowns (mitigation, HoTs, Lightspeed and the like) follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press those cooldowns.")]
+	public BeirutaPlanSource CdPlanFrom { get; set; } = BeirutaPlanSource.BuiltIn;
+
+	public bool UseTimelinePlan => CdPlanFrom == BeirutaPlanSource.BuiltIn;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use recommended settings for the plan", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"When a built-in plan loads, the settings it recommends are applied, like a preset. Changing a setting afterwards (e.g. your Ward Mode macro) works as usual.\n" +
+		"Your saved settings are not changed by the plan: they show as you set them and come back once the plan unloads or this is off.")]
+	public bool UsePlanSettings { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Helios Conjunction", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Helios Conjunctions are cast in their window, and no automatic Helios GCD 15s around them.\n" +
+		"Off: they are skipped; Helios Conjunction goes by party HP and after Neutral Sect / Horoscope.")]
+	public bool UsePlannedHeliosConjunction { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Earthly Star", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: Earthly Star follows the plan, including the countdown one, and goes where RSR places ground heals (Beneficial positions list); [Damage] Earthly Star and [Prepull] Earthly Star at are ignored.\n" +
+		"Off: it is placed whenever it is ready.\n" +
+		"Stellar Detonation always goes by party HP under Giant Dominance.")]
+	public bool UsePlannedEarthlyStar { get; set; } = true;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
+	[
+		((uint)ActionID.HeliosConjunctionPvE, nameof(UsePlannedHeliosConjunction)),
+		((uint)ActionID.EarthlyStarPvE, nameof(UsePlannedEarthlyStar)),
+	];
+
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
+		(UsePlannedHeliosConjunction || actionId != (uint)ActionID.HeliosConjunctionPvE) &&
+		(UsePlannedEarthlyStar || actionId != (uint)ActionID.EarthlyStarPvE);
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) =>
+		actionId != (uint)ActionID.HeliosConjunctionPvE ? null
+		: PlannedPartnerPending(NeutralSectPvE, HasNeutralSect) ? "waiting for the planned Neutral Sect"
+		: PlannedPartnerPending(HoroscopePvE, HasHoroscope || HasHoroscopeHelios) ? "waiting for the planned Horoscope"
+		: null;
+
+	private static bool PlannedPartnerPending(IBaseAction partner, bool active) =>
+		!active &&
+		partner.EnoughLevel &&
+		!partner.Cooldown.IsCoolingDown &&
+		Updaters.TimelineUpdater.PlannedWithin(PairedHeliosWaitSeconds, partner.ID);
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		Updaters.TimelineUpdater.HoldQueuedPlannedAction(action.ID);
+
+	private float? CountdownEarthlyStarAt
+	{
+		get
+		{
+			if (UsePlannedEarthlyStar &&
+				Updaters.TimelineUpdater.PlanOption("CountdownEarthlyStar") is { } v &&
+				float.TryParse(v, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var seconds))
+			{
+				return seconds > 0 ? seconds : null;
+			}
+
+			return EarthlyStarMode == EarthlyStarUsage.OnCooldown ? UseEarthlyStarTime : null;
+		}
+	}
+
+	private bool EarthlyStarOnCooldown =>
+		EarthlyStarMode == EarthlyStarUsage.OnCooldown ||
+		(!UsePlannedEarthlyStar && Updaters.TimelineUpdater.HasPlan);
+
+	#endregion
+
+	#region Manual / BMR / VBM Triggers
+
+	[RotationConfig(CombatType.PvE, Name = "    > [Macrocosmos] Custom triggers (off = CD planner / manual)", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.ManualPlan, Tooltip =
+		"A trigger is something you do that makes AST cast Macrocosmos.\n" +
+		"In DMU, triggers are blocked while 2+ players have Accretion, or while Earth Resistance Down II is up with one left.\n" +
+		"Only used with BMR / VBM / Manual; the built-in CD plan presses Macrocosmos itself.")]
+	public bool UseMacrocosmosSignals { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "        > Your Surecast", Parent = nameof(UseMacrocosmosSignals))]
+	public bool MacrocosmosSignalSurecast { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "        > Your Sprint", Parent = nameof(UseMacrocosmosSignals))]
+	public bool MacrocosmosSignalSprint { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "        > Your Synastry (Synastry is then never automatic)", Parent = nameof(UseMacrocosmosSignals))]
+	public bool MacrocosmosSignalSynastry { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "        > Your Celestial Intersection on yourself (keeps a charge)", Parent = nameof(UseMacrocosmosSignals), Tooltip =
+		"While Macrocosmos is ready within 30s, one Intersection charge is kept for the trigger.")]
+	public bool MacrocosmosSignalIntersection { get; set; } = false;
+
+	private bool MacrocosmosSignalsAllowed => !UseTimelinePlan;
+	private bool MacrocosmosSignalsOn => UseMacrocosmosSignals && MacrocosmosSignalsAllowed;
+	private bool SignalSurecast => MacrocosmosSignalsOn && MacrocosmosSignalSurecast;
+	private bool SignalSprint => MacrocosmosSignalsOn && MacrocosmosSignalSprint;
+	private bool SignalSynastry => MacrocosmosSignalsOn && MacrocosmosSignalSynastry;
+	private bool SignalIntersection => MacrocosmosSignalsOn && MacrocosmosSignalIntersection;
+
+	#endregion
 
 	#region Utility
 
 	[RotationConfig(CombatType.PvE, Name = "[Utility] Ward Mode (right-click for the macro)", Tooltip =
-		"Turn it on for high-pressure phases: keeps everyone topped up.\n" +
-		"- Helios / Helios Conjunction as soon as 3+ are below the heal's full-use line (about 85-90%).\n" +
+		"Turn it on for high-pressure phases: keeps every non-tank full.\n" +
+		"- Helios Conjunction / Helios as soon as one non-tank is below the heal's full-use line (about 85-90%). Plain Helios is only used in Ward Mode.\n" +
 		"- No waiting for AoE oGCDs, Giant Dominance or Macrocosmos; thresholds use real HP and ignore the co-healer and HoTs.\n" +
 		"Auto turns off on death, zone change and countdown.")]
 	public bool WardMode { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "[More settings] Show", Tooltip =
+		"Pick a page to show its detailed settings. This only changes what is shown.")]
+	public BeirutaSettingsPage MoreSettings { get; set; } = BeirutaSettingsPage.Hide;
+
+	private bool WardActive => WardMode || Updaters.TimelineUpdater.PlannedWardMode;
+
+	bool IBeirutaHealContext.WardMode => WardActive;
 
 	#endregion
 
 	#region Prepull
 
-	[RotationConfig(CombatType.PvE, Name = "[Prepull] Countdown shield", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Prepull] Countdown shield", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.OpenerPage, Tooltip =
 		"Aspected Benefic + Celestial Intersection on the stance tank at about 5s, or Neutral Sect + Helios Conjunction for the party.")]
 	public CountdownShieldStrategy CountdownShield { get; set; } = CountdownShieldStrategy.None;
 
 	[Range(4, 20, ConfigUnitType.Seconds)]
-	[RotationConfig(CombatType.PvE, Name = "[Prepull] Earthly Star at", Tooltip =
-		"Seconds left on the countdown when Earthly Star is placed. Needs Earthly Star = On cooldown.")]
+	[RotationConfig(CombatType.PvE, Name = "[Prepull] Earthly Star at", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.OpenerPage, Tooltip =
+		"Seconds left on the countdown when Earthly Star is placed. Needs Earthly Star = On cooldown. A built-in plan with planned Earthly Star sets its own time.")]
 	public float UseEarthlyStarTime { get; set; } = 4;
 
 	public enum CountdownShieldStrategy : byte
@@ -47,7 +166,7 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	#region Opener
 
-	[RotationConfig(CombatType.PvE, Name = "[Opener] First Divination", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Opener] First Divination", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.OpenerPage, Tooltip =
 		"When the first Divination goes out (needs AutoBurst).\n" +
 		"0s: sent just before the countdown ends, then Combust, then Lightspeed in its two weave windows.")]
 	public DivinationOpenerTiming DivinationOpener { get; set; } = DivinationOpenerTiming.ThreeGcd;
@@ -69,31 +188,28 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	#endregion
 
-	#region Damage
+	#region Potion
 
-	[RotationConfig(CombatType.PvE, Name = "[Damage] Use potion")]
+	[RotationConfig(CombatType.PvE, Name = "[Potion] Use potion", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.OpenerPage)]
 	public bool UsePotion { get; set; } = true;
 
 	[RotationConfig(CombatType.PvE, Name = "    > First potion", Parent = nameof(UsePotion), Tooltip =
-		"Opener: during the countdown. 2 minutes: the first potion waits for the 2-minute burst.")]
-	public PotTiming PotionTiming { get; set; } = PotTiming.Opener;
+		"Opener: during the countdown. 2 minutes: the first potion waits for the 2-minute burst.\n" +
+		"With others: only when a party member already has the potion buff (Medicated), so you pot together with them.")]
+	public BeirutaPotTiming PotionTiming { get; set; } = BeirutaPotTiming.Opener;
 
-	[RotationConfig(CombatType.PvE, Name = "[Damage] Delay Oracle 5s after Divination", Tooltip =
+	#endregion
+
+	#region Damage
+
+	[RotationConfig(CombatType.PvE, Name = "[Damage] Delay Oracle 5s after Divination", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.DamagePage, Tooltip =
 		"Burst oGCD order: Divination > Lightspeed > potion > Balance / Spear > Lord of Crowns > Draw > Oracle.")]
 	public bool DelayOracleForAlignment { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "[Damage] Earthly Star", Tooltip =
-		"On cooldown: placed in the countdown and again whenever it is ready. Healing changes while Earthly / Giant Dominance is up.")]
+	[RotationConfig(CombatType.PvE, Name = "[Damage] Earthly Star", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.DamagePage, Tooltip =
+		"On cooldown: placed in the countdown and again whenever it is ready. Healing changes while Earthly / Giant Dominance is up.\n" +
+		"A built-in plan with planned Earthly Star places it instead.")]
 	public EarthlyStarUsage EarthlyStarMode { get; set; } = EarthlyStarUsage.OnCooldown;
-
-	public enum PotTiming : byte
-	{
-		[Description("Opener (countdown)")]
-		Opener,
-
-		[Description("2 minutes")]
-		TwoMinutes,
-	}
 
 	public enum EarthlyStarUsage : byte
 	{
@@ -108,8 +224,9 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	#region Lightspeed
 
-	[RotationConfig(CombatType.PvE, Name = "[Lightspeed] Spare charge", Tooltip =
-		"One charge is always kept for burst and used about 5s before Divination. This sets what the other charge does.")]
+	[RotationConfig(CombatType.PvE, Name = "[Lightspeed] Spare charge", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.MovementPage, Tooltip =
+		"One charge is always kept for burst and used about 5s before Divination. This sets what the other charge does.\n" +
+		"A built-in plan that has Lightspeed uses the other charge itself.")]
 	public LightspeedOtherChargeUsage LightspeedOtherCharge { get; set; } = LightspeedOtherChargeUsage.Manual;
 
 	public enum LightspeedOtherChargeUsage : byte
@@ -126,40 +243,13 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	#endregion
 
-	#region Macrocosmos
-
-	[RotationConfig(CombatType.PvE, Name = "[Macrocosmos] Custom triggers (off = CD planner / manual)", Tooltip =
-		"A trigger is something you do that makes AST cast Macrocosmos.\n" +
-		"In DMU, triggers are blocked while 2+ players have Accretion, or while Earth Resistance Down II is up with one left.")]
-	public bool UseMacrocosmosSignals { get; set; } = false;
-
-	[RotationConfig(CombatType.PvE, Name = "    > Your Surecast", Parent = nameof(UseMacrocosmosSignals))]
-	public bool MacrocosmosSignalSurecast { get; set; } = false;
-
-	[RotationConfig(CombatType.PvE, Name = "    > Your Sprint", Parent = nameof(UseMacrocosmosSignals))]
-	public bool MacrocosmosSignalSprint { get; set; } = false;
-
-	[RotationConfig(CombatType.PvE, Name = "    > Your Synastry (Synastry is then never automatic)", Parent = nameof(UseMacrocosmosSignals))]
-	public bool MacrocosmosSignalSynastry { get; set; } = false;
-
-	[RotationConfig(CombatType.PvE, Name = "    > Your Celestial Intersection on yourself (keeps a charge)", Parent = nameof(UseMacrocosmosSignals), Tooltip =
-		"While Macrocosmos is ready within 30s, one Intersection charge is kept for the trigger.")]
-	public bool MacrocosmosSignalIntersection { get; set; } = false;
-
-	private bool SignalSurecast => UseMacrocosmosSignals && MacrocosmosSignalSurecast;
-	private bool SignalSprint => UseMacrocosmosSignals && MacrocosmosSignalSprint;
-	private bool SignalSynastry => UseMacrocosmosSignals && MacrocosmosSignalSynastry;
-	private bool SignalIntersection => UseMacrocosmosSignals && MacrocosmosSignalIntersection;
-
-	#endregion
-
 	#region Movement
 
-	[RotationConfig(CombatType.PvE, Name = "[Movement] Early Combust refresh", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Movement] Early Combust refresh", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.MovementPage, Tooltip =
 		"While moving, refreshes Combust early as an instant GCD.")]
 	public bool EarlyDotRefreshWhenMoving { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "[Movement] Use Swiftcast", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Movement] Use Swiftcast", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.MovementPage, Tooltip =
 		"Instant options while moving: Lightspeed > early Combust > Aspected Benefic (tanks first), then Swiftcast.\n" +
 		"Nothing extra is used while Lightspeed or Swiftcast is up.")]
 	public bool UseSwiftcastForMovement { get; set; } = true;
@@ -185,10 +275,11 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	#region Healing
 
-	[RotationConfig(CombatType.PvE, Name = "[Healing] Custom healing settings (off = defaults)", Tooltip =
-		"Off: AoE thresholds come from each heal's potency, Neutral Sect, the co-healer's smallest GCD heal and incoming HoT ticks, so heals are not wasted.\n" +
-		"Off also means: Helios Conjunction after Horoscope, Essential Dignity below 70% / 50% / 30% (3 / 2 / 1 charges), Synastry second target below 50%.\n" +
-		"On: the values below replace the Ward-off thresholds. Heal area = 3+ players below that HP, like RSR's own heal-area settings. Ward Mode always uses its own.")]
+	[RotationConfig(CombatType.PvE, Name = "[Healing] Custom healing settings (off = defaults)", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.HealingPage, Tooltip =
+		"Off: each area heal waits until 3+ players are low enough that it won't be wasted, worked out from its potency, Neutral Sect, the co-healer's smallest GCD heal and incoming HoT ticks.\n" +
+		"Off also means: Helios Conjunction after Horoscope, Essential Dignity on tanks below 80% / 45% / 30% (3 / 2 / 1 charges), Synastry second target below 50%.\n" +
+		"On: each area heal fires when 3+ players in range are below the value set here.\n" +
+		"Ward Mode ignores these values and uses its own.")]
 	public bool UseCustomHPThreshold { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "    > Helios Conjunction after Horoscope", Parent = nameof(UseCustomHPThreshold), Tooltip =
@@ -196,36 +287,36 @@ public sealed class BeirutaAST : AstrologianRotation
 	public bool AutoUpgradeHoroscope { get; set; } = true;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Lady of Crowns: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Lady of Crowns: area heal when 3+ below", Parent = nameof(UseCustomHPThreshold))]
 	public float LadyOfHeals { get; set; } = 0.8f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Stellar Detonation: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Stellar Detonation: area heal when 3+ below", Parent = nameof(UseCustomHPThreshold))]
 	public float StellarDetonationHeal { get; set; } = 0.65f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Horoscope: heal area, Horoscope holders only (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Horoscope: area heal when 3+ Horoscope holders below", Parent = nameof(UseCustomHPThreshold))]
 	public float HoroscopeHeal { get; set; } = 0.8f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Celestial Opposition: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Celestial Opposition: area heal when 3+ below", Parent = nameof(UseCustomHPThreshold))]
 	public float CelestialOppositionHeal { get; set; } = 0.65f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Helios Conjunction: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Helios Conjunction: area heal when 3+ below", Parent = nameof(UseCustomHPThreshold))]
 	public float HeliosConjunctionHeal { get; set; } = 0.65f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Helios: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Helios: area heal when 3+ below", Parent = nameof(UseCustomHPThreshold))]
 	public float HeliosHeal { get; set; } = 0.6f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
 	[RotationConfig(CombatType.PvE, Name = "    > Essential Dignity 3 charges: below", Parent = nameof(UseCustomHPThreshold))]
-	public float EssentialDignityThird { get; set; } = 0.7f;
+	public float EssentialDignityThird { get; set; } = 0.8f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
 	[RotationConfig(CombatType.PvE, Name = "    > Essential Dignity 2 charges: below", Parent = nameof(UseCustomHPThreshold))]
-	public float EssentialDignitySecond { get; set; } = 0.5f;
+	public float EssentialDignitySecond { get; set; } = 0.45f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
 	[RotationConfig(CombatType.PvE, Name = "    > Essential Dignity 1 charge: below", Parent = nameof(UseCustomHPThreshold))]
@@ -236,21 +327,10 @@ public sealed class BeirutaAST : AstrologianRotation
 	public float SynastryHeal { get; set; } = 0.5f;
 
 	private bool AutoUpgradeHoroscopeValue => !UseCustomHPThreshold || AutoUpgradeHoroscope;
-	private float EssentialDignityThirdValue => UseCustomHPThreshold ? EssentialDignityThird : 0.7f;
-	private float EssentialDignitySecondValue => UseCustomHPThreshold ? EssentialDignitySecond : 0.5f;
+	private float EssentialDignityThirdValue => UseCustomHPThreshold ? EssentialDignityThird : 0.8f;
+	private float EssentialDignitySecondValue => UseCustomHPThreshold ? EssentialDignitySecond : 0.45f;
 	private float EssentialDignityLastValue => UseCustomHPThreshold ? EssentialDignityLast : 0.3f;
 	private float SynastryHealValue => UseCustomHPThreshold ? SynastryHeal : 0.5f;
-
-	#endregion
-
-	#region DMU
-
-	[RotationConfig(CombatType.PvE, Name = "[DMU] Experimental Accretion top-up", Tooltip =
-		"Fills Accretion players in order: the healer first, then the DPS once Earth Resistance Down II is gone.\n" +
-		"Waits until 3+ non-tanks other than the target are above 30%, and 3s after Accretion changes.\n" +
-		"AST: Essential Dignity, then Benefic II once Dignity is out of charges. Microcosmos fills the last Accretion DPS if they have your Macrocosmos (no 30% check).\n" +
-		"Always active in DMU, even with this off: group heals stop once an Accretion player is above 50%.")]
-	public bool AccretionTopUp { get; set; } = false;
 
 	#endregion
 
@@ -261,9 +341,6 @@ public sealed class BeirutaAST : AstrologianRotation
 	private const long DivinationFirst5sMs = 5_000;
 	private const float BallparkPercent = 0.08f;
 	private const float DivinationCombustRefreshSeconds = 11f;
-	private const float MovementLeadSeconds = 0.5f;
-	private const float MovementGraceSeconds = 0.3f;
-	private const float MovementTimeThreshold = 1.0f;
 	private const float CombustWorthRefreshSeconds = 15f;
 	private const float LightspeedLocksSwiftcastSeconds = 18f;
 	private const float SwiftcastLocksLightspeedSeconds = 3f;
@@ -322,28 +399,9 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	private bool BurstCardsAllowed => !DivinationPvE.EnoughLevel || HasDivination;
 
-	private static bool IsPartyMedicated
-	{
-		get
-		{
-			foreach (var member in PartyMembers)
-			{
-				if (member != null && member.HasStatus(false, StatusID.Medicated))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
 	private bool ShouldUsePotionInCombat =>
-		UsePotion &&
-		InCombat &&
-		IsBurst &&
 		!OpenerWeaveHold &&
-		!(PotionTiming == PotTiming.TwoMinutes && CombatElapsedLess(30f)) &&
-		(IsPartyMedicated || HasDivination || BurstPrep);
+		BeirutaPotion.Ready(UsePotion, PotionTiming, IsBurst, BurstPrep || !DivinationPvE.EnoughLevel);
 
 	private bool ShouldUseLightspeedForBurst =>
 		IsBurst &&
@@ -361,69 +419,6 @@ public sealed class BeirutaAST : AstrologianRotation
 		HasLord &&
 		(HasDivination || !DivinationPvE.EnoughLevel);
 
-	private bool TryPriorityWeaves(out IAction? act)
-	{
-		act = null;
-
-		if (!InCombat)
-		{
-			return false;
-		}
-
-		if (IsBurst && DivinationOpenerPassed && DivinationPvE.CanUse(out act))
-		{
-			_divinationUsedAtMs = Environment.TickCount64;
-			return true;
-		}
-
-		if (OpenerWeaveHold)
-		{
-			return false;
-		}
-
-		if (ShouldUseLightspeedForBurst && LightspeedPvE.CanUse(out act, usedUp: true))
-		{
-			return true;
-		}
-
-		if (ShouldUsePotionInCombat && UseBurstMedicine(out act))
-		{
-			return true;
-		}
-
-		if (BurstCardsAllowed && (TheBalancePvE.CanUse(out act) || TheSpearPvE.CanUse(out act)))
-		{
-			return true;
-		}
-
-		if (ShouldUseLord && LordOfCrownsPvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (HasLady &&
-			!HasDivination &&
-			!AccretionGroupHealBlocked &&
-			DrawReadySoon(1) &&
-			LadyOfCrownsPvE.CanUse(out act, skipAoeCheck: true))
-		{
-			return true;
-		}
-
-		if (TryDraw(out act))
-		{
-			return true;
-		}
-
-		if (!OracleGatedByDivination && OraclePvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		act = null;
-		return false;
-	}
-
 	private static bool HoldingDamageCard => HasBalance || HasSpear || HasLord;
 
 	private bool TryDraw(out IAction? act)
@@ -437,15 +432,7 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	#region Lightspeed / Movement
 
-	private bool MovingPastGrace => InCombat && IsMoving && MovingTime > MovementGraceSeconds;
-
-	private bool HasSufficientMovement => InCombat && IsMoving && MovingTime > MovementTimeThreshold;
-
-	private bool MovingPastLead => HasSufficientMovement && MovingTime > MovementTimeThreshold + MovementLeadSeconds;
-
-	private bool ShouldHoldRaiseSwift =>
-		(HasSwift || IsLastAction(ActionID.SwiftcastPvE)) &&
-		MergedStatus.HasFlag(AutoStatus.Raise);
+	private bool MovingPastLead => BeirutaMove.PastLead;
 
 	private bool IsLightspeedLockingSwiftcastActive =>
 		InCombat &&
@@ -500,7 +487,10 @@ public sealed class BeirutaAST : AstrologianRotation
 		}
 	}
 
+	private bool PlanOwnsLightspeed => Updaters.TimelineUpdater.PlanContains(LightspeedPvE.ID);
+
 	private bool LightspeedReadyForMovement =>
+		!PlanOwnsLightspeed &&
 		LightspeedOtherCharge != LightspeedOtherChargeUsage.Manual &&
 		MovingPastLead &&
 		!HasLightspeed &&
@@ -526,19 +516,20 @@ public sealed class BeirutaAST : AstrologianRotation
 		SwiftcastPvE.EnoughLevel &&
 		SwiftcastPvE.IsEnabled &&
 		!SwiftcastPvE.Cooldown.IsCoolingDown &&
-		!ShouldHoldRaiseSwift &&
+		!BeirutaMove.RaiseSwiftHeld &&
 		!IsLightspeedLockingSwiftcastActive;
 
 	private bool MovementCombustDue(float expectedHPToLive12Seconds) =>
 		EarlyDotRefreshWhenMoving &&
-		HasSufficientMovement &&
+		BeirutaMove.Sufficient &&
 		CurrentTarget != null &&
 		CurrentTargetCombustMissingOrEnding(CombustWorthRefreshSeconds) &&
 		CurrentTargetHasEnoughHpForCombust(expectedHPToLive12Seconds);
 
 	private static IBattleChara? MovementAspectedBeneficTarget() =>
-		FindLowest(SingleHealRange, static m => IsTankMember(m) && m.GetHealthRatio() < 1f && !HasAspectedBeneficFromSelf(m)) ??
-		FindLowest(SingleHealRange, static m => m.GetHealthRatio() < 1f && !HasAspectedBeneficFromSelf(m));
+		AccretionUp ? null : FindLowest(SingleHealRange, static m => SpotHealWorthy(m) && HealHp(m) < MovementBeneficHp && !HasSingleTargetHot(m));
+
+	private const float MovementBeneficHp = 0.8f;
 
 	private bool HasCheaperMovementOption =>
 		LightspeedReadyForMovement ||
@@ -596,7 +587,7 @@ public sealed class BeirutaAST : AstrologianRotation
 	{
 		act = null;
 
-		if (!MovingPastGrace || HasSwift || HasLightspeed || ShouldHoldRaiseSwift)
+		if (!BeirutaMove.PastGrace || HasSwift || HasLightspeed || BeirutaMove.RaiseSwiftHeld)
 		{
 			return false;
 		}
@@ -614,7 +605,7 @@ public sealed class BeirutaAST : AstrologianRotation
 		}
 
 		if (MovementAspectedBeneficTarget() is { } target &&
-			BeirutaAccretion.TryUseOn(AspectedBeneficPvE, target, out act))
+			BeirutaTarget.TryUseOn(AspectedBeneficPvE, target, out act))
 		{
 			return true;
 		}
@@ -627,19 +618,29 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	#region Damage / DoT Helpers
 
+	private const float CombustInitialPotency = 0f;
+	private const float CombustTickPotency = 70f;
+	private const float MaleficFillerPotency = 270f;
+
+	private static bool CombustWorthBeforeDowntime(IBaseAction combust) =>
+		BeirutaDotValue.WorthBeforeDowntime(combust.Target.Target, CombustInitialPotency, CombustTickPotency, MaleficFillerPotency);
+
 	private bool CanUseCurrentCombust(out IAction? act, bool skipStatusProvideCheck = false)
 	{
-		if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+		if (CombustIiiPvE.EnoughLevel && CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck) &&
+			CombustWorthBeforeDowntime(CombustIiiPvE))
 		{
 			return true;
 		}
 
-		if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+		if (!CombustIiiPvE.EnoughLevel && CombustIiPvE.EnoughLevel && CombustIiPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck) &&
+			CombustWorthBeforeDowntime(CombustIiPvE))
 		{
 			return true;
 		}
 
-		if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+		if (!CombustIiPvE.EnoughLevel && CombustPvE.EnoughLevel && CombustPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck) &&
+			CombustWorthBeforeDowntime(CombustPvE))
 		{
 			return true;
 		}
@@ -743,18 +744,35 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	#region Healing Engine
 
+	private bool CanRunHealEngine => BeirutaHeal.CanRun();
+
+	private static bool AccretionGroupHealBlocked => BeirutaHeal.GroupHealBlocked;
+
+	private float EffectiveHpRatio(IBattleChara member) => BeirutaHeal.EffectiveHpRatio(this, member);
+
+	private bool CountsAsInjured(IBattleChara member, float threshold) => BeirutaHeal.Injured(this, member, threshold);
+
+	private int CountInjured(float range, float threshold) => BeirutaHeal.CountInjured(this, range, threshold);
+
+	private bool AoeNeeded(float range, float threshold) => BeirutaHeal.AoeNeeded(this, range, threshold);
+
+	private bool SpotHealOk(IBattleChara member) => SpotHealAllowed(member, AoeNeeded(PartyHealRange, LadyHp), PartyHealRange);
+
+	private bool AoeGcdNeeded(float range, float threshold) => BeirutaHeal.AoeGcdNeeded(this, range, threshold);
+
+	private float AoeThreshold(float potency, float customWardOff, float wardOffCap = 1f) => BeirutaHeal.Threshold(this, potency, customWardOff, wardOffCap);
+
+	float IBeirutaHealContext.HealBoost => HealBoost;
+
+	float IBeirutaHealContext.LandingHotPotency(IBattleChara member) => LandingHotPotency(member);
+	private static bool HoldAoe => BeirutaHeal.HoldAoe(PartyHealRange);
+
 	private const float SingleHealRange = 30f;
 	private const float PartyHealRange = 20f;
 	private const float HeliosRange = 15f;
 	private const int AoeInjuredCount = 3;
-	private const float CriticalHp = 0.3f;
 	private const float CapTankHp = 0.9f;
 	private const float NeutralSectTankHp = 0.9f;
-	private const float UndeadReleaseSeconds = 1f;
-	private const float EarthlyDominanceGateSeconds = 3f;
-	private const float FreshMitigationSeconds = 6f;
-	private const float RampartDuration = 20f;
-	private const float BigMitigationDuration = 15f;
 	private const float LadyPotency = 400f;
 	private const float HoroscopeHeliosPotency = 400f;
 	private const float StellarDetonationPotency = 720f;
@@ -767,33 +785,6 @@ public sealed class BeirutaAST : AstrologianRotation
 	private const float ConjunctionHotCountedPotency = 175f * BeirutaHealModel.HotCreditTicks;
 	private const float ConjunctionCountedPotency = ConjunctionDirectPotency + ConjunctionHotCountedPotency;
 	private const float NeutralSectBoost = 1.2f;
-
-	private static readonly StatusID[] FullInvulnStatus =
-	[
-		StatusID.HallowedGround,
-		StatusID.HallowedGround_1302,
-		StatusID.Superbolide,
-	];
-
-	private static readonly StatusID[] UndeadStatus =
-	[
-		StatusID.Holmgang_409,
-		StatusID.WalkingDead,
-	];
-
-	private static readonly StatusID[] TankBigMitigationStatus =
-	[
-		StatusID.Rampart,
-		StatusID.Rampart_1191,
-		StatusID.Sentinel,
-		StatusID.Guardian,
-		StatusID.Vengeance,
-		StatusID.Damnation,
-		StatusID.ShadowWall,
-		StatusID.ShadowedVigil,
-		StatusID.Nebula,
-		StatusID.GreatNebula,
-	];
 
 	private static readonly StatusID[] HeliosHotStatus =
 	[
@@ -808,46 +799,7 @@ public sealed class BeirutaAST : AstrologianRotation
 		StatusID.Macrocosmos_3989,
 	];
 
-	private static bool CanRunHealEngine => Service.Config.AutoHeal && InCombat;
-
-	private static bool AccretionGroupHealBlocked => BeirutaAccretion.GroupHealBlocked(PartyMembers);
-
-	private static bool IsTankMember(IBattleChara member) => member.IsJobCategory(JobRole.Tank);
-
 	private static bool IsSelf(IBattleChara member) => member.GameObjectId == Player?.GameObjectId;
-
-	private static bool IsHealBlocked(IBattleChara member) =>
-		member.HasStatus(false, FullInvulnStatus) ||
-		member.HasStatus(false, StatusID.LivingDead) ||
-		(member.HasStatus(false, UndeadStatus) && member.StatusTime(false, UndeadStatus) > UndeadReleaseSeconds);
-
-	private static bool IsJustOffUndead(IBattleChara member) =>
-		member.HasStatus(false, UndeadStatus) &&
-		member.StatusTime(false, UndeadStatus) <= UndeadReleaseSeconds;
-
-	private static bool HasFreshBigMitigation(IBattleChara member)
-	{
-		foreach (var status in TankBigMitigationStatus)
-		{
-			if (!member.HasStatus(false, status))
-			{
-				continue;
-			}
-
-			var duration = status is StatusID.Rampart or StatusID.Rampart_1191 ? RampartDuration : BigMitigationDuration;
-			if (duration - member.StatusTime(false, status) <= FreshMitigationSeconds)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private static bool IsFreshMitigatingTank(IBattleChara member) =>
-		IsTankMember(member) &&
-		!IsHealBlocked(member) &&
-		HasFreshBigMitigation(member);
 
 	private float LandingHotPotency(IBattleChara member)
 	{
@@ -870,45 +822,6 @@ public sealed class BeirutaAST : AstrologianRotation
 		return potency;
 	}
 
-	private float EffectiveHpRatio(IBattleChara member) =>
-		BeirutaHealModel.EffectiveHpRatio(member, WardMode, LandingHotPotency(member));
-
-	private bool CountsAsInjured(IBattleChara member, float threshold) =>
-		member.GetHealthRatio() < BeirutaHealModel.AlwaysInjuredHp ||
-		EffectiveHpRatio(member) < threshold;
-
-	private static bool IsHealableInRange(IBattleChara? member, float range) =>
-		member != null &&
-		!member.IsDead &&
-		member.DistanceToPlayer() <= range;
-
-	private int CountInjured(float range, float threshold)
-	{
-		var count = 0;
-		foreach (var member in PartyMembers)
-		{
-			if (IsHealableInRange(member, range) && !IsHealBlocked(member) && CountsAsInjured(member, threshold))
-			{
-				count++;
-			}
-		}
-		return count;
-	}
-
-	private static bool AnyCritical(float range)
-	{
-		foreach (var member in PartyMembers)
-		{
-			if (IsHealableInRange(member, range) && !IsHealBlocked(member) && member.GetHealthRatio() < CriticalHp)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private bool AoeNeeded(float range, float threshold) => CountInjured(range, threshold) >= AoeInjuredCount;
-
 	private int CountInjuredWithHoroscope(float threshold)
 	{
 		var count = 0;
@@ -926,79 +839,12 @@ public sealed class BeirutaAST : AstrologianRotation
 		return count;
 	}
 
-	private static bool PartyBigHealSoon
-	{
-		get
-		{
-			foreach (var member in PartyMembers)
-			{
-				if (member == null || member.IsDead)
-				{
-					continue;
-				}
-
-				if (member.HasStatus(false, StatusID.GiantDominance) ||
-					member.HasStatus(false, MacrocosmosStatus) ||
-					(member.HasStatus(false, StatusID.EarthlyDominance) &&
-					 member.StatusTime(false, StatusID.EarthlyDominance) < EarthlyDominanceGateSeconds))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
-	private static bool HoldAoe => AccretionGroupHealBlocked || (PartyBigHealSoon && !AnyCritical(PartyHealRange));
-
-	private static IBattleChara? FindLowest(float range, Func<IBattleChara, bool> filter)
-	{
-		IBattleChara? best = null;
-		foreach (var member in PartyMembers)
-		{
-			if (!IsHealableInRange(member, range) || IsHealBlocked(member) || !filter(member))
-			{
-				continue;
-			}
-
-			if (best == null || member.GetHealthRatio() < best.GetHealthRatio())
-			{
-				best = member;
-			}
-		}
-		return best;
-	}
-
-	private static IBattleChara? EnemyAggroTank
-	{
-		get
-		{
-			var aggroId = CurrentTarget?.TargetObject?.GameObjectId;
-			if (aggroId == null)
-			{
-				return null;
-			}
-
-			foreach (var member in PartyMembers)
-			{
-				if (member.GameObjectId == aggroId && IsTankMember(member))
-				{
-					return member;
-				}
-			}
-			return null;
-		}
-	}
-
 	private static IBattleChara? MainTank => EnemyAggroTank ?? FindLowest(SingleHealRange, static m => IsTankMember(m));
 
 	private static float HealBoost => HasNeutralSect ? NeutralSectBoost : 1f;
 
-	private float AoeThreshold(float potency, float customWardOff, float wardOffCap = 1f) =>
-		BeirutaHealModel.Threshold(potency, HealBoost, WardMode, UseCustomHPThreshold, customWardOff, PartyMembers, wardOffCap);
-
 	private float DirectPartThreshold(float directPotency, float countedPotency, float customWardOff) =>
-		WardMode
+		WardActive
 			? BeirutaHealModel.RoundToFive(BeirutaHealModel.FullUseHp(directPotency, HealBoost))
 			: AoeThreshold(countedPotency, customWardOff);
 
@@ -1016,6 +862,10 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	private static bool AoeHealGcdPending =>
 		BeirutaHealWindow.GcdJustUsed(ActionID.HeliosPvE, ActionID.AspectedHeliosPvE, ActionID.HeliosConjunctionPvE);
+
+	private const float HeliosHotRefreshSeconds = 5f;
+
+	private static bool HeliosWithHot => HasNeutralSect || !PartyHasHeliosHot;
 
 	private static bool PartyHasHeliosHot
 	{
@@ -1036,7 +886,7 @@ public sealed class BeirutaAST : AstrologianRotation
 				}
 
 				total++;
-				if (member.HasStatus(true, HeliosHotStatus))
+				if (member.StatusTime(true, HeliosHotStatus) > HeliosHotRefreshSeconds)
 				{
 					withHot++;
 				}
@@ -1121,6 +971,7 @@ public sealed class BeirutaAST : AstrologianRotation
 	private static bool HasAspectedBeneficFromSelf(IBattleChara target) => target.HasStatus(true, StatusID.AspectedBenefic);
 
 	private bool IntersectionAllowedOn(IBattleChara target) =>
+		!IsHealBlocked(target) &&
 		!HasCelestialIntersection(target) &&
 		!(SignalIntersection && IsSelf(target)) &&
 		!(SignalIntersection && MacrocosmosReadySoon && CelestialIntersectionPvE.Cooldown.CurrentCharges < 2);
@@ -1129,14 +980,15 @@ public sealed class BeirutaAST : AstrologianRotation
 	{
 		act = null;
 		return IntersectionAllowedOn(target) &&
-			BeirutaAccretion.TryUseOn(CelestialIntersectionPvE, target, out act, usedUp: true);
+			BeirutaTarget.TryUseOn(CelestialIntersectionPvE, target, out act, usedUp: true);
 	}
 
 	private bool TryExaltationOn(IBattleChara target, out IAction? act)
 	{
 		act = null;
-		return !target.HasStatus(true, StatusID.Exaltation) &&
-			BeirutaAccretion.TryUseOn(ExaltationPvE, target, out act);
+		return !IsHealBlocked(target) &&
+			!target.HasStatus(true, StatusID.Exaltation) &&
+			BeirutaTarget.TryUseOn(ExaltationPvE, target, out act);
 	}
 
 	private bool TryTankMitigation(IBattleChara? tank, out IAction? act)
@@ -1158,44 +1010,25 @@ public sealed class BeirutaAST : AstrologianRotation
 		return target != null && TryIntersectionOn(target, out act);
 	}
 
+	private bool SaveDignityForAccretion =>
+		BeirutaAccretion.GuardActive(PartyMembers) ||
+		EssentialDignityPvE.Cooldown.CurrentCharges <= Updaters.TimelineUpdater.KeepCharges(EssentialDignityPvE.ID);
+
 	private bool TryEssentialDignityOn(IBattleChara target, out IAction? act) =>
-		BeirutaAccretion.TryUseOn(EssentialDignityPvE, target, out act, usedUp: true);
+		BeirutaTarget.TryUseOn(EssentialDignityPvE, target, out act, usedUp: true);
+
+	private bool DignitySpareForSpot =>
+		EssentialDignityPvE.Cooldown.CurrentCharges > BeirutaAccretion.ToFillCount(PartyMembers);
 
 	#endregion
 
 	#region Countdown Logic
 
-	private const long CountdownResponseDelayMs = 1_000;
-	private long _countdownStartedAtMs;
-	private long _countdownLastSeenMs;
-	private float _countdownLastRemain;
+	private readonly BeirutaOpenerHold _openerHold = new();
 
-	private bool CountdownDelayPassed(float remainTime)
-	{
-		var now = Environment.TickCount64;
+	private bool OpenerWeaveHold => _openerHold.Active(CombustIiiPvE, CombustIiPvE, CombustPvE);
 
-		if (_countdownStartedAtMs == 0 ||
-			now - _countdownLastSeenMs > 500 ||
-			remainTime > _countdownLastRemain + 0.5f)
-		{
-			_countdownStartedAtMs = now;
-		}
-
-		_countdownLastSeenMs = now;
-		_countdownLastRemain = remainTime;
-
-		return now - _countdownStartedAtMs >= CountdownResponseDelayMs;
-	}
-
-	private const float OpenerBuffCountdownSeconds = 0.35f;
-	private const long OpenerWeaveHoldMs = 3_500;
-
-	private long _openerBuffSentMs;
-
-	private bool OpenerWeaveHold =>
-		_openerBuffSentMs != 0 &&
-		Environment.TickCount64 - _openerBuffSentMs < OpenerWeaveHoldMs &&
-		!IsLastGCD(true, CombustIiiPvE, CombustIiPvE, CombustPvE);
+	private readonly BeirutaCountdownDelay _countdownDelay = new();
 
 	private bool TryOpenerDivination(float remainTime, out IAction? act)
 	{
@@ -1203,15 +1036,15 @@ public sealed class BeirutaAST : AstrologianRotation
 
 		if (DivinationOpener != DivinationOpenerTiming.ZeroSeconds ||
 			!IsBurst ||
-			remainTime >= OpenerBuffCountdownSeconds ||
+			remainTime >= BeirutaOpenerHold.SendAtCountdownSeconds ||
 			ECommons.GameHelpers.Player.Object is not { IsCasting: false } ||
 			!DivinationPvE.CanUse(out act, skipTTKCheck: true))
 		{
 			return false;
 		}
 
-		_openerBuffSentMs = Environment.TickCount64;
-		_divinationUsedAtMs = _openerBuffSentMs;
+		_openerHold.Start();
+		_divinationUsedAtMs = Environment.TickCount64;
 		return true;
 	}
 
@@ -1222,7 +1055,7 @@ public sealed class BeirutaAST : AstrologianRotation
 			BeirutaWard.SetWardMode(this, false);
 		}
 
-		if (!CountdownDelayPassed(remainTime))
+		if (!_countdownDelay.Passed(remainTime))
 		{
 			return null;
 		}
@@ -1239,14 +1072,14 @@ public sealed class BeirutaAST : AstrologianRotation
 
 		if (remainTime < 3f &&
 			UsePotion &&
-			PotionTiming == PotTiming.Opener &&
+			PotionTiming == BeirutaPotTiming.Opener &&
 			UseBurstMedicine(out act))
 		{
 			return act;
 		}
 
-		if (EarthlyStarMode == EarthlyStarUsage.OnCooldown &&
-			remainTime < UseEarthlyStarTime &&
+		if (CountdownEarthlyStarAt is { } starAt &&
+			remainTime < starAt &&
 			EarthlyStarPvE.CanUse(out act, skipTTKCheck: true))
 		{
 			return act;
@@ -1276,7 +1109,7 @@ public sealed class BeirutaAST : AstrologianRotation
 
 				if (remainTime is < 5.5f and > 4.5f &&
 					!HasAspectedBeneficFromSelf(tank) &&
-					BeirutaAccretion.TryUseOn(AspectedBeneficPvE, tank, out act))
+					BeirutaTarget.TryUseOn(AspectedBeneficPvE, tank, out act))
 				{
 					return true;
 				}
@@ -1300,107 +1133,6 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	#region Healing Abilities
 
-	private bool TryHealAbility(out IAction? act)
-	{
-		act = null;
-
-		if (!CanRunHealEngine)
-		{
-			return false;
-		}
-
-		var undeadTank = FindLowest(SingleHealRange, static m => IsTankMember(m) && IsJustOffUndead(m));
-		if (undeadTank != null && TryEssentialDignityOn(undeadTank, out act))
-		{
-			return true;
-		}
-
-		var critical = FindLowest(SingleHealRange, static m => m.GetHealthRatio() < CriticalHp);
-		if (critical != null && TryEssentialDignityOn(critical, out act))
-		{
-			return true;
-		}
-
-		if (_raidwide.Coming && TryRaidwideIntersection(out act))
-		{
-			return true;
-		}
-
-		foreach (var member in PartyMembers)
-		{
-			if (IsFreshMitigatingTank(member) && TryTankMitigation(member, out act))
-			{
-				return true;
-			}
-		}
-
-		if (CelestialIntersectionPvE.EnoughLevel &&
-			CelestialIntersectionPvE.Cooldown.MaxCharges >= 2 &&
-			CelestialIntersectionPvE.Cooldown.CurrentCharges >= CelestialIntersectionPvE.Cooldown.MaxCharges &&
-			MainTank is { } capTank &&
-			capTank.GetHealthRatio() < CapTankHp &&
-			TryIntersectionOn(capTank, out act))
-		{
-			return true;
-		}
-
-		var edThreshold = EssentialDignityThreshold;
-		var edTank = FindLowest(SingleHealRange, m => IsTankMember(m) && EffectiveHpRatio(m) < edThreshold);
-		if (edTank != null && TryEssentialDignityOn(edTank, out act))
-		{
-			return true;
-		}
-
-		if (!AccretionGroupHealBlocked)
-		{
-			if (AoeNeeded(PartyHealRange, LadyHp) &&
-				LadyOfCrownsPvE.CanUse(out act, skipAoeCheck: true))
-			{
-				return true;
-			}
-
-			if (HasGiantDominance &&
-				AoeNeeded(PartyHealRange, StellarHp) &&
-				StellarDetonationPvE.CanUse(out act, skipAoeCheck: true))
-			{
-				return true;
-			}
-		}
-
-		if (!HoldAoe)
-		{
-			if (HasHoroscopeHelios &&
-				CountInjuredWithHoroscope(HoroscopeHp) >= AoeInjuredCount &&
-				HoroscopePvE_16558.CanUse(out act, skipAoeCheck: true))
-			{
-				return true;
-			}
-
-			if (AoeNeeded(PartyHealRange, OppositionHp) &&
-				CelestialOppositionPvE.CanUse(out act, skipAoeCheck: true))
-			{
-				return true;
-			}
-		}
-
-		if (!AoeNeeded(PartyHealRange, LadyHp))
-		{
-			var topUp = FindLowest(SingleHealRange, m => EffectiveHpRatio(m) < edThreshold);
-			if (topUp != null && TryEssentialDignityOn(topUp, out act))
-			{
-				return true;
-			}
-		}
-
-		if (NonTankTopUp is { } nonTank && TryEssentialDignityOn(nonTank, out act))
-		{
-			return true;
-		}
-
-		act = null;
-		return false;
-	}
-
 	private bool TrySynastryPairing(IAction nextGCD, out IAction? act)
 	{
 		act = null;
@@ -1416,10 +1148,9 @@ public sealed class BeirutaAST : AstrologianRotation
 		var healTargetId = BeneficIiPvE.Target.Target?.GameObjectId;
 		var threshold = SynastryHealValue;
 		var bond =
-			FindLowest(SingleHealRange, m => IsTankMember(m) && m.GameObjectId != healTargetId && m.GetHealthRatio() < threshold) ??
-			FindLowest(SingleHealRange, m => m.GameObjectId != healTargetId && m.GetHealthRatio() < threshold);
+			FindLowest(SingleHealRange, m => SpotHealWorthy(m) && SpotHealOk(m) && m.GameObjectId != healTargetId && HealHp(m) < threshold);
 
-		return bond != null && BeirutaAccretion.TryUseOn(SynastryPvE, bond, out act);
+		return bond != null && BeirutaTarget.TryUseOn(SynastryPvE, bond, out act);
 	}
 
 	#endregion
@@ -1449,7 +1180,7 @@ public sealed class BeirutaAST : AstrologianRotation
 			return false;
 		}
 
-		return BeirutaAccretion.TryUseOn(TheArrowPvE, self, out act);
+		return BeirutaTarget.TryUseOn(TheArrowPvE, self, out act);
 	}
 
 	private bool TryUtilityCards(out IAction? act)
@@ -1474,7 +1205,7 @@ public sealed class BeirutaAST : AstrologianRotation
 				target = tank;
 			}
 
-			if (target != null && BeirutaAccretion.TryUseOn(card, target, out act))
+			if (target != null && BeirutaTarget.TryUseOn(card, target, out act))
 			{
 				return true;
 			}
@@ -1486,7 +1217,7 @@ public sealed class BeirutaAST : AstrologianRotation
 				FindLowest(SingleHealRange, static m => IsTankMember(m) && m.GetHealthRatio() < 1f && !HasCardStatus(m)) ??
 				FindLowest(SingleHealRange, static m => m.GetHealthRatio() < 1f && !HasCardStatus(m));
 
-			if (target != null && BeirutaAccretion.TryUseOn(TheEwerPvE, target, out act))
+			if (target != null && BeirutaTarget.TryUseOn(TheEwerPvE, target, out act))
 			{
 				return true;
 			}
@@ -1498,63 +1229,308 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	#endregion
 
-	#region oGCD Logic
+	#region Steps
+
+	private const float TankbusterLeadSeconds = BeirutaIncoming.TankbusterLeadSeconds;
+
+	public bool PlanAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		return false;
+	}
+
+	public bool SpecialAbility(IAction nextGCD, out IAction? act) =>
+		TryAccretionAbility(out act) ||
+		(DoomTarget(SingleHealRange) is { } doomed && TryEssentialDignityOn(doomed, out act));
+
+	public bool BurstAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		if (!InCombat)
+		{
+			return false;
+		}
+
+		if (IsBurst && DivinationOpenerPassed && DivinationPvE.CanUse(out act))
+		{
+			_divinationUsedAtMs = Environment.TickCount64;
+			return true;
+		}
+
+		if (OpenerWeaveHold)
+		{
+			return false;
+		}
+
+		if (ShouldUseLightspeedForBurst && LightspeedPvE.CanUse(out act, usedUp: true))
+		{
+			return true;
+		}
+
+		if (ShouldUsePotionInCombat && UseBurstMedicine(out act))
+		{
+			return true;
+		}
+
+		if (BurstCardsAllowed && (TheBalancePvE.CanUse(out act) || TheSpearPvE.CanUse(out act)))
+		{
+			return true;
+		}
+
+		return ShouldUseLord && LordOfCrownsPvE.CanUse(out act);
+	}
+
+	public bool ResourceAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		if (!InCombat || OpenerWeaveHold)
+		{
+			return false;
+		}
+
+		if (HasLady &&
+			!HasDivination &&
+			!AccretionGroupHealBlocked &&
+			DrawReadySoon(1) &&
+			LadyOfCrownsPvE.CanUse(out act, skipAoeCheck: true))
+		{
+			return true;
+		}
+
+		if (TryDraw(out act))
+		{
+			return true;
+		}
+
+		if (!OracleGatedByDivination && OraclePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return StatusHelper.PlayerHasStatus(true, StatusID.Suntouched) &&
+			StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.Suntouched) &&
+			SunSignPvE.CanUse(out act, skipAoeCheck: true, skipTTKCheck: true);
+	}
+
+	public bool AreaHealAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		if (!CanRunHealEngine)
+		{
+			return false;
+		}
+
+		if (!AccretionGroupHealBlocked)
+		{
+			if (AoeNeeded(PartyHealRange, LadyHp) && LadyOfCrownsPvE.CanUse(out act, skipAoeCheck: true))
+			{
+				return true;
+			}
+
+			if (HasGiantDominance &&
+				AoeNeeded(PartyHealRange, StellarHp) &&
+				StellarDetonationPvE.CanUse(out act, skipAoeCheck: true))
+			{
+				return true;
+			}
+		}
+
+		if (!HoldAoe)
+		{
+			if (HasHoroscopeHelios &&
+				CountInjuredWithHoroscope(HoroscopeHp) >= AoeInjuredCount &&
+				HoroscopePvE_16558.CanUse(out act, skipAoeCheck: true))
+			{
+				return true;
+			}
+
+			if (AoeNeeded(PartyHealRange, OppositionHp) &&
+				!Updaters.TimelineUpdater.PlanContains(CelestialOppositionPvE.ID) &&
+				CelestialOppositionPvE.CanUse(out act, skipAoeCheck: true))
+			{
+				return true;
+			}
+		}
+
+		return TryArrowBeforeHelios(nextGCD, out act);
+	}
+
+	public bool SpotHealAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		if (!CanRunHealEngine)
+		{
+			return false;
+		}
+
+		if (TopUpAllTarget(SingleHealRange) is { } topUp &&
+			TryEssentialDignityOn(topUp, out act))
+		{
+			return true;
+		}
+
+		if (FindLowest(SingleHealRange, static m => IsTankMember(m) && IsJustOffUndead(m)) is { } undeadTank &&
+			TryEssentialDignityOn(undeadTank, out act))
+		{
+			return true;
+		}
+
+		if (FindLowest(SingleHealRange, static m => SpotHealWorthy(m) && HealHp(m) < CriticalHp) is { } critical &&
+			DignitySpareForSpot &&
+			TryEssentialDignityOn(critical, out act))
+		{
+			return true;
+		}
+
+		if (CelestialIntersectionPvE.EnoughLevel &&
+			CelestialIntersectionPvE.Cooldown.MaxCharges >= 2 &&
+			CelestialIntersectionPvE.Cooldown.CurrentCharges >= CelestialIntersectionPvE.Cooldown.MaxCharges &&
+			MainTank is { } capTank &&
+			HealHp(capTank) < CapTankHp &&
+			SpotHealOk(capTank) &&
+			TryIntersectionOn(capTank, out act))
+		{
+			return true;
+		}
+
+		var edThreshold = EssentialDignityThreshold;
+		if (!SaveDignityForAccretion &&
+			FindLowest(SingleHealRange, m => SpotHealWorthy(m) && SpotHealOk(m) && EffectiveHpRatio(m) < edThreshold) is { } edTarget &&
+			TryEssentialDignityOn(edTarget, out act))
+		{
+			return true;
+		}
+
+		return TrySynastryPairing(nextGCD, out act);
+	}
+
+	public bool TankHelpAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		if (!CanRunHealEngine)
+		{
+			return false;
+		}
+
+		if (BeirutaIncoming.TankbusterWithin(TankbusterLeadSeconds) &&
+			TryTankMitigation(FindLowest(SingleHealRange, IsFreshMitigatingTank) ?? MainTank, out act))
+		{
+			return true;
+		}
+
+		foreach (var member in PartyMembers)
+		{
+			if (IsFreshMitigatingTank(member) && (TryTankMitigation(member, out act) || TrySupportCardOn(member, out act)))
+			{
+				return true;
+			}
+		}
+
+		act = null;
+		return false;
+	}
+
+	private bool TrySupportCardOn(IBattleChara tank, out IAction? act)
+	{
+		act = null;
+		if (UtilityCardsHeld || IsHealBlocked(tank) || HasCardStatus(tank) || !IsHealableInRange(tank, SingleHealRange))
+		{
+			return false;
+		}
+
+		return ((HasBole || HasSpire) && BeirutaTarget.TryUseOn(HasBole ? TheBolePvE : TheSpirePvE, tank, out act)) ||
+			(HasEwer && BeirutaTarget.TryUseOn(TheEwerPvE, tank, out act));
+	}
+
+	public bool LowPriorityAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		if (!CanRunHealEngine)
+		{
+			return TryUtilityCards(out act);
+		}
+
+		if (_raidwide.Coming &&
+			CelestialIntersectionPvE.Cooldown.CurrentCharges >= 2 &&
+			TryRaidwideIntersection(out act))
+		{
+			return true;
+		}
+
+		return TryUtilityCards(out act);
+	}
+
+	public bool PlanGCD(out IAction? act)
+	{
+		act = null;
+		return false;
+	}
+
+	public bool SpecialGCD(out IAction? act)
+	{
+		act = null;
+		if (!EssentialDignityReady &&
+			DoomTarget(SingleHealRange) is { } doomed &&
+			BeirutaTarget.TryUseOn(BeneficIiPvE.EnoughLevel ? BeneficIiPvE : BeneficPvE, doomed, out act))
+		{
+			return true;
+		}
+
+		return BeirutaAccretion.FindTarget(PartyMembers) is { } target &&
+			!MicrocosmosFillsAccretion(target) &&
+			!HasSwift &&
+			!EssentialDignityReady &&
+			BeirutaTarget.TryUseOn(BeneficIiPvE, target, out act);
+	}
+
+	public bool WardGCD(out IAction? act)
+	{
+		act = null;
+		return WardActive && HeliosGcdWanted && TryHeliosGCD(HeliosWithHot, out act);
+	}
+
+	public bool AreaHealGCD(out IAction? act)
+	{
+		act = null;
+		return !WardActive && HeliosGcdWanted && TryHeliosGCD(HeliosWithHot, out act);
+	}
+
+	public bool SpotHealGCD(out IAction? act)
+	{
+		act = null;
+		if (!CanRunHealEngine)
+		{
+			return false;
+		}
+
+		if ((!EssentialDignityReady || !DignitySpareForSpot) &&
+			FindLowest(SingleHealRange, static m => SpotHealWorthy(m) && BeirutaCritical.ForGcd(m, CriticalHp)) is { } critical &&
+			BeirutaTarget.TryUseOn(BeneficIiPvE.EnoughLevel ? BeneficIiPvE : BeneficPvE, critical, out act))
+		{
+			return true;
+		}
+
+		return HasNeutralSect &&
+			MainTank is { } tank &&
+			!IsHealBlocked(tank) &&
+			HealHp(tank) < NeutralSectTankHp &&
+			SpotHealOk(tank) &&
+			!tank.HasStatus(true, StatusID.NeutralSect_1921) &&
+			BeirutaTarget.TryUseOn(AspectedBeneficPvE, tank, out act);
+	}
+
+	#endregion
+
+	#region Hooks
 
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
 	{
 		UpdateMovementCooldownTracking();
-
-		if (TryPriorityWeaves(out act) ||
-			TryAccretionAbility(out act) ||
-			TryHealAbility(out act) ||
-			TrySynastryPairing(nextGCD, out act) ||
-			TryArrowBeforeHelios(nextGCD, out act))
-		{
-			return true;
-		}
-
-		return base.EmergencyAbility(nextGCD, out act);
+		return BeirutaHealerFlow.Ability(this, nextGCD, out act) || base.EmergencyAbility(nextGCD, out act);
 	}
 
-	[RotationDesc(ActionID.CelestialIntersectionPvE)]
-	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
-	{
-		if (TryRaidwideIntersection(out act))
-		{
-			return true;
-		}
-
-		return base.DefenseAreaAbility(nextGCD, out act);
-	}
-
-	[RotationDesc(ActionID.CelestialIntersectionPvE, ActionID.ExaltationPvE)]
-	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
-	{
-		var tank = FindLowest(SingleHealRange, static m => IsFreshMitigatingTank(m)) ?? MainTank;
-		if (TryTankMitigation(tank, out act))
-		{
-			return true;
-		}
-
-		return base.DefenseSingleAbility(nextGCD, out act);
-	}
-
-	protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
-	{
-		if (StatusHelper.PlayerHasStatus(true, StatusID.Suntouched) &&
-			StatusHelper.PlayerWillStatusEndGCD(3, 0, true, StatusID.Suntouched) &&
-			SunSignPvE.CanUse(out act, skipAoeCheck: true, skipTTKCheck: true))
-		{
-			return true;
-		}
-
-		if (TryUtilityCards(out act))
-		{
-			return true;
-		}
-
-		return base.GeneralAbility(nextGCD, out act);
-	}
+	protected override bool GeneralAbility(IAction nextGCD, out IAction? act) =>
+		LowPriorityAbility(nextGCD, out act) || base.GeneralAbility(nextGCD, out act);
 
 	[RotationDesc(
 		ActionID.DivinationPvE,
@@ -1571,7 +1547,7 @@ public sealed class BeirutaAST : AstrologianRotation
 	{
 		UpdateMovementCooldownTracking();
 
-		if (TryPriorityWeaves(out act))
+		if (BurstAbility(nextGCD, out act) || ResourceAbility(nextGCD, out act))
 		{
 			return true;
 		}
@@ -1589,11 +1565,12 @@ public sealed class BeirutaAST : AstrologianRotation
 				return true;
 			}
 
-			if (EarthlyStarMode == EarthlyStarUsage.OnCooldown &&
+			if (EarthlyStarOnCooldown &&
 				IsBurst &&
 				!OpenerWeaveHold &&
 				!HasGiantDominance &&
 				!HasEarthlyDominance &&
+				!Updaters.TimelineUpdater.PlanContains(EarthlyStarPvE.ID) &&
 				EarthlyStarPvE.CanUse(out act))
 			{
 				return true;
@@ -1607,6 +1584,9 @@ public sealed class BeirutaAST : AstrologianRotation
 
 		return base.AttackAbility(nextGCD, out act);
 	}
+
+	protected override bool EmergencyGCD(IAction? nextGCD, out IAction? act) =>
+		BeirutaHealerFlow.UrgentGcd(this, out act) || base.EmergencyGCD(nextGCD, out act);
 
 	#endregion
 
@@ -1622,34 +1602,24 @@ public sealed class BeirutaAST : AstrologianRotation
 	{
 		act = null;
 
-		if (!AccretionTopUp)
-		{
-			return false;
-		}
-
 		if (BeirutaAccretion.FindTarget(PartyMembers, requireSafeParty: false) is { } last &&
 			MicrocosmosFillsAccretion(last))
 		{
 			return MicrocosmosPvE.CanUse(out act, skipAoeCheck: true);
 		}
 
-		var target = BeirutaAccretion.FindTarget(PartyMembers);
-		return target != null && BeirutaAccretion.TryUseOn(EssentialDignityPvE, target, out act, usedUp: true);
-	}
-
-	protected override bool EmergencyGCD(IAction? nextGCD, out IAction? act)
-	{
-		var target = AccretionTopUp ? BeirutaAccretion.FindTarget(PartyMembers) : null;
-		if (target != null &&
-			!MicrocosmosFillsAccretion(target) &&
-			!HasSwift &&
-			!EssentialDignityReady &&
-			BeirutaAccretion.TryUseOn(BeneficIiPvE, target, out act))
+		if (!SignalSynastry &&
+			!HasSynastry &&
+			BeirutaAccretion.NextToFill(PartyMembers) is { } accretionHealer &&
+			accretionHealer.IsJobCategory(JobRole.Healer) &&
+			accretionHealer.GameObjectId != Player?.GameObjectId &&
+			BeirutaTarget.TryUseOn(SynastryPvE, accretionHealer, out act))
 		{
 			return true;
 		}
 
-		return base.EmergencyGCD(nextGCD, out act);
+		var target = BeirutaAccretion.FindTarget(PartyMembers);
+		return target != null && BeirutaTarget.TryUseOn(EssentialDignityPvE, target, out act, usedUp: true);
 	}
 
 	#endregion
@@ -1670,8 +1640,19 @@ public sealed class BeirutaAST : AstrologianRotation
 	private bool NeutralSectHeliosDone =>
 		BeirutaHealWindow.UsedSince(_neutralSectStartedAt, ActionID.HeliosConjunctionPvE, ActionID.AspectedHeliosPvE);
 
+	private const float PlannedConjunctionGapSeconds = 15f;
+
+	private bool PlannedConjunctionNear =>
+		Updaters.TimelineUpdater.PlannedAround(PlannedConjunctionGapSeconds, HeliosConjunctionPvE.ID);
+
 	private bool TryHeliosGCD(bool withHot, out IAction? act)
 	{
+		if (PlannedConjunctionNear)
+		{
+			act = null;
+			return false;
+		}
+
 		if (withHot)
 		{
 			if (HeliosConjunctionPvE.EnoughLevel &&
@@ -1703,8 +1684,26 @@ public sealed class BeirutaAST : AstrologianRotation
 			HasHoroscope &&
 			!HasHoroscopeHelios &&
 			!AoeHealGcdPending &&
-			TryHeliosGCD(!PartyHasHeliosHot, out act);
+			!WaitForPlannedNeutralSect &&
+			TryHeliosGCD(true, out act);
 	}
+
+	private const float PairedHeliosWaitSeconds = 6f;
+	private const float HoroscopeKeepSeconds = 3f;
+
+	private bool WaitForPlannedNeutralSect =>
+		!HasNeutralSect &&
+		NeutralSectPvE.EnoughLevel &&
+		!NeutralSectPvE.Cooldown.IsCoolingDown &&
+		StatusHelper.PlayerStatusTime(true, StatusID.Horoscope) > HoroscopeKeepSeconds &&
+		Updaters.TimelineUpdater.PlannedWithin(PairedHeliosWaitSeconds, NeutralSectPvE.ID);
+
+	private bool WaitForPlannedHoroscope =>
+		!HasHoroscope &&
+		!HasHoroscopeHelios &&
+		HoroscopePvE.EnoughLevel &&
+		!HoroscopePvE.Cooldown.IsCoolingDown &&
+		Updaters.TimelineUpdater.PlannedWithin(PairedHeliosWaitSeconds, HoroscopePvE.ID);
 
 	private bool TryNeutralSectHeliosGCD(out IAction? act)
 	{
@@ -1712,6 +1711,7 @@ public sealed class BeirutaAST : AstrologianRotation
 		return HasNeutralSect &&
 			!NeutralSectHeliosDone &&
 			!AccretionGroupHealBlocked &&
+			!WaitForPlannedHoroscope &&
 			CountWithoutNeutralSectShield(HeliosRange) >= BeirutaWard.UnshieldedPartyCount &&
 			TryHeliosGCD(true, out act);
 	}
@@ -1720,81 +1720,25 @@ public sealed class BeirutaAST : AstrologianRotation
 
 	#region GCD Logic
 
-	private IBattleChara? NonTankTopUp =>
-		WardMode && BeirutaWard.NonTanksShielded(PartyMembers, SingleHealRange)
-			? BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m), AoeInjuredCount)
-			: null;
-	private bool TryHealGCD(out IAction? act)
-	{
-		act = null;
-
-		if (!CanRunHealEngine)
-		{
-			return false;
-		}
-
-		if (!EssentialDignityReady &&
-			FindLowest(SingleHealRange, static m => BeirutaCritical.ForGcd(m, CriticalHp)) is { } critical &&
-			BeirutaAccretion.TryUseOn(BeneficIiPvE.EnoughLevel ? BeneficIiPvE : BeneficPvE, critical, out act))
-		{
-			return true;
-		}
-
-		if (HasNeutralSect &&
-			MainTank is { } tank &&
-			tank.GetHealthRatio() < NeutralSectTankHp &&
-			!tank.HasStatus(true, StatusID.NeutralSect_1921) &&
-			BeirutaAccretion.TryUseOn(AspectedBeneficPvE, tank, out act))
-		{
-			return true;
-		}
-
-		if (HeliosGcdWanted && TryHeliosGCD(!PartyHasHeliosHot, out act))
-		{
-			return true;
-		}
-
-		if (NonTankTopUp is { } topUp &&
-			!EssentialDignityReady &&
-			BeirutaAccretion.TryUseOn(BeneficIiPvE.EnoughLevel ? BeneficIiPvE : BeneficPvE, topUp, out act))
-		{
-			return true;
-		}
-
-		act = null;
-		return false;
-	}
-
 	private bool HeliosGcdWanted
 	{
 		get
 		{
 			if (!CanRunHealEngine ||
-				(WardMode ? AccretionGroupHealBlocked : HoldAoe) ||
-				AoeHealGcdPending)
+				(WardActive ? AccretionGroupHealBlocked : HoldAoe) ||
+				AoeHealGcdPending ||
+				(EssentialDignityReady && BeirutaAccretion.ToFillCount(PartyMembers) > 1 && BeirutaAccretion.FindTarget(PartyMembers) != null))
 			{
 				return false;
 			}
 
-			var aoeNeeded = AoeNeeded(HeliosRange, PartyHasHeliosHot ? HeliosHp : ConjunctionHp);
+			var aoeNeeded = AoeGcdNeeded(HeliosRange, HeliosWithHot ? ConjunctionHp : HeliosHp);
 			var aoeEmergency =
 				AoeNeeded(HeliosRange, 0f) ||
 				(AnyCritical(HeliosRange) && aoeNeeded);
 
-			return aoeEmergency || (aoeNeeded && (WardMode || !AoeOgcdHealReady));
+			return aoeEmergency || (aoeNeeded && (WardActive || !AoeOgcdHealReady));
 		}
-	}
-
-
-	[RotationDesc(ActionID.HeliosConjunctionPvE)]
-	protected override bool DefenseAreaGCD(out IAction? act)
-	{
-		if (!ShouldHoldRaiseSwift && TryNeutralSectHeliosGCD(out act))
-		{
-			return true;
-		}
-
-		return base.DefenseAreaGCD(out act);
 	}
 
 	[RotationDesc(ActionID.AscendPvE)]
@@ -1812,7 +1756,7 @@ public sealed class BeirutaAST : AstrologianRotation
 	{
 		UpdateMovementCooldownTracking();
 
-		if (ShouldHoldRaiseSwift)
+		if (BeirutaMove.RaiseSwiftHeld)
 		{
 			return base.GeneralGCD(out act);
 		}
@@ -1821,7 +1765,7 @@ public sealed class BeirutaAST : AstrologianRotation
 			TryNeutralSectHeliosGCD(out act) ||
 			TryHoroscopeUpgradeGCD(out act) ||
 
-			TryHealGCD(out act) ||
+			BeirutaHealerFlow.HealGcd(this, out act) ||
 			CanUseCurrentGravity(out act))
 		{
 			return true;

@@ -140,6 +140,31 @@ internal partial class Configs : IPluginConfiguration, IM3Settings
 
 	private readonly Lock _saveLock = new();
 
+	// CD Plan: picked plan file per "<timeline folder>|<job>".
+	public ConcurrentDictionary<string, string> CdPlanChoice = new();
+
+	// CD Plan timeline window locked in place.
+	public bool CdPlanTimelineLock;
+
+	// Read-only migration of the settings' earlier names (Beiruta...): loaded once, never written back.
+	[JsonProperty("BeirutaPlanChoice")]
+	private ConcurrentDictionary<string, string> LegacyPlanChoice
+	{
+		set
+		{
+			foreach (var (key, file) in value)
+			{
+				CdPlanChoice.TryAdd(key, file);
+			}
+		}
+	}
+
+	[JsonProperty("BeirutaPlanTimelineLock")]
+	private bool LegacyPlanTimelineLock
+	{
+		set => CdPlanTimelineLock |= value;
+	}
+
 	public void Save()
 	{
 #if DEBUG

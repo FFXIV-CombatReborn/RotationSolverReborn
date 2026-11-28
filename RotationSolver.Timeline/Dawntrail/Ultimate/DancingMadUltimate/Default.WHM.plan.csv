@@ -1,0 +1,134 @@
+# Default WHM
+# Set.WardMode: false
+# Set.CountdownShield: Regen + Divine Benison on stance tank (5s)
+# Set.PresenceOfMindOpener: 0s
+# Set.UsePotion: true
+# Set.PotionTiming: 2 minutes
+# Set.HoldMiseryForBurst: false
+# Set.UseSwiftcastForMovement: true
+# Set.SwiftcastMovement: Raise and AoE heal GCDs only
+# Set.UseCustomHPThreshold: false
+Phase,Start,End,Action,Target
+P1,35.2,38.2,Asylum,
+P1,33.7,36.7,Temperance,
+P1,34.7,37.7,Divine Caress,
+P1,54.4,59.4,Afflatus Rapture,
+P1,52.4,55.4,Plenary Indulgence,
+P1,65.4,70.4,Afflatus Rapture,
+P1,91.3,96.3,Afflatus Rapture,
+P1,92.1,96.6,Liturgy of the Bell,
+P1,108.8,113.8,Afflatus Rapture,
+P1,115.8,118.8,Plenary Indulgence,
+P1,120.8,125.8,Afflatus Rapture,
+P1,124.9,127.9,Asylum,
+P1,145.7,150.7,Afflatus Rapture,
+P1,164.2,167.2,Temperance,
+P1,173.3,178.3,Afflatus Rapture,
+P1,169.8,172.8,Divine Caress,
+P2,15.3,20.3,Afflatus Rapture,
+P2,35.6,38.6,Asylum,
+P2,35.6,38.6,Plenary Indulgence,
+P2,42.5,47.5,Afflatus Rapture,
+P2,55.2,58.1,Cure III,
+P2,71.9,76.9,Afflatus Rapture,
+P2,70.5,76.9,Medica III,Precast
+P2,81.5,86.5,Afflatus Rapture,
+P2,76.5,81.0,Liturgy of the Bell,
+P2,92.9,97.9,Afflatus Rapture,
+P2,100.5,103.5,Plenary Indulgence,
+P2,113.9,118.9,Afflatus Rapture,
+P2,110.4,113.4,Divine Caress,
+P2,110.4,113.4,Temperance,
+P2,118.3,121.2,Cure III,
+P2,123.5,128.5,Afflatus Rapture,
+P2,121.5,130.5,Asylum,
+P2,146.0,151.0,Afflatus Rapture,
+P2,170.6,173.6,Plenary Indulgence,
+P3,0.7,5.7,Afflatus Rapture,
+P3,52.7,57.7,Afflatus Rapture,
+P3,65.9,68.9,Plenary Indulgence,
+P3,73.9,78.9,Afflatus Rapture,
+P3,78.0,81.0,Asylum,
+P3,95.2,100.2,Afflatus Rapture,
+P3,102.5,107.5,Afflatus Rapture,
+P3,111.1,114.1,Temperance,
+P3,120.7,125.7,Afflatus Rapture,
+P3,126.3,129.3,Plenary Indulgence,
+P3,133.5,139.3,Medica III,Precast
+P3,140.3,145.3,Afflatus Rapture,
+P3,136.9,139.9,Divine Caress,
+P3,171.0,174.0,Asylum,
+P3,175.5,181.1,Medica III,Precast
+P3,184.1,189.1,Afflatus Rapture,
+P3,185.1,191.1,Plenary Indulgence,
+P3,190.5,195.2,Cure III,
+P3,199.3,204.3,Afflatus Rapture,
+P3,220.5,225.0,Liturgy of the Bell,
+P3,230.5,236.6,Medica III,Precast
+P3,236.5,239.5,Temperance,
+P3,259.0,262.0,Divine Caress,
+P3,263.5,266.5,Asylum,
+P3,273.5,279.2,Medica III,Precast
+P3,278.9,281.9,Plenary Indulgence,
+P3,284.3,290.0,Ward Mode,
+P3,284.3,290.0,Top Up All,
+P3,290.7,295.7,Afflatus Rapture,
+P3,290.5,295.7,Cure III,
+P3,294.5,300.4,Medica III,Precast
+P3,310.0,315.0,Afflatus Rapture,
+P3,315.5,321.9,Medica III,Precast
+P3,325.5,326.6,Afflatus Rapture,
+P4,23.8,26.8,Asylum,
+P4,26.6,29.6,Plenary Indulgence,
+P4,29.0,56.0,Ward Mode,
+P4,31.5,36.9,Cure III,
+P4,39.9,44.9,Afflatus Rapture,
+P4,41.5,47.9,Medica III,Precast
+P4,39.4,42.4,Temperance,
+P4,57.0,62.0,Afflatus Rapture,
+P4,53.5,56.5,Divine Caress,
+P4,66.3,70.8,Liturgy of the Bell,
+P4,74.5,80.1,Medica III,Precast
+P4,88.8,93.8,Afflatus Rapture,
+P4,95.9,98.9,Plenary Indulgence,
+P4,98.5,103.6,Cure III,
+P4,104.8,109.8,Afflatus Rapture,
+P4,109.7,114.7,Afflatus Rapture,
+P4,119.7,124.7,Afflatus Rapture,
+P5,37.1,40.1,Asylum,
+P5,37.1,40.1,Plenary Indulgence,
+P5,38.2,38.9,Medica III,Force
+P5,40.2,41.4,Afflatus Rapture,Force
+P5,42.0,48.4,Ward Mode,
+P5,50.3,55.3,Afflatus Rapture,
+P5,46.8,49.8,Temperance,
+P5,53.2,56.2,Divine Caress,
+P5,76.3,81.3,Afflatus Rapture,
+P5,83.5,89.1,Medica III,Precast
+P5,105.6,110.6,Afflatus Rapture,
+P5,104.5,110.6,Medica III,Precast
+P5,111.6,116.6,Afflatus Rapture,
+P5,119.1,122.1,Plenary Indulgence,
+P5,120.2,120.9,Cure III,Force
+P5,122.2,123.4,Afflatus Rapture,Force
+P5,124.0,127.2,Ward Mode,
+P5,152.5,157.5,Afflatus Rapture,
+P5,161.7,166.7,Afflatus Rapture,
+P5,160.5,166.7,Medica III,Precast
+P5,172.5,178.0,Medica III,Precast
+P5,173.3,177.4,Ward Mode,
+P5,179.2,184.2,Afflatus Rapture,
+P5,177.2,180.2,Asylum,
+P5,185.5,190.0,Liturgy of the Bell,
+P5,188.5,191.5,Plenary Indulgence,
+P5,193.0,195.0,Swiftcast,
+P5,188.3,188.8,Medica III,Force
+P5,192.3,193.4,Afflatus Rapture,Force
+P5,194.0,218.0,Ward Mode,
+P5,192.1,195.1,Temperance,
+P5,194.4,195.3,Cure III,Precast
+P5,201.6,202.6,Medica III,Precast
+P5,212.0,217.0,Afflatus Rapture,
+P5,208.5,211.5,Divine Caress,
+P5,220.1,225.1,Afflatus Rapture,
+P5,220.5,225.1,Cure III,

@@ -4,8 +4,46 @@ namespace RotationSolver.Rotations.Magical.RedMage;
 	"Automatic Red Mage for level 100 high-end fights; Variant / Occult Crescent GCDs may break combos. Recommended GCD is 2.48 or slower. AutoBurst off is enough to hold burst, but you then press Enchanted Riposte yourself to start a combo, and Enchanted Reprise if a combo can't start before the fight ends. Set Impact to 2 targets (Actions > GCD > Attack): it is then used on 2 with Acceleration, 3 without. Hover each setting for details.")]
 [SourceCode(Path = "main/Rotations/Magical/RedMage/BeirutaRDM.cs")]
 [ExtraRotation]
-public sealed class BeirutaRDM : RedMageRotation
+public sealed class BeirutaRDM : RedMageRotation, Updaters.ICdPlanRotation
 {
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Auto: Addle and Magick Barrier respond to RSR's defense signals (raidwide detection, Boss Mod or the commands).\n" +
+		"Use built-in CD plan: they follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press them.\n" +
+		"With the built-in plan or BMR / VBM / Manual, the defense signals do not use them.")]
+	public CdPlanSource CdPlanFrom { get; set; } = CdPlanSource.Auto;
+
+	public bool UseTimelinePlan => CdPlanFrom == CdPlanSource.BuiltIn;
+
+	private bool AutoDefense => CdPlanFrom == CdPlanSource.Auto;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Addle from", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Where planned Addle comes from. R2 / Fake melee profile: the duty's shared Addle plan for that slot (Fake melee = the second caster of a double caster comp, using Addle like a melee's Feint); the job plan's own Addle rows are then not used (everything else still comes from the job plan).\n" +
+		"Auto: R2, and once an R2 Addle turns out to be another caster's, Fake melee for the rest of the duty.\n" +
+		"Job plan: Addle from the picked job plan. Also used when the duty has no profile.")]
+	public AddleProfile AddleFrom { get; set; } = AddleProfile.Auto;
+
+	string Updaters.ICdPlanRotation.MitProfileAction => "Addle";
+
+	MitProfileChoice Updaters.ICdPlanRotation.MitProfile => (MitProfileChoice)AddleFrom;
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => CdPlanHelper.Wait(actionId);
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		CdPlanHelper.HoldCommand(action, UseTimelinePlan);
+
+	#endregion
+
 	#region Config Options
 
 	#region Opener
@@ -805,12 +843,12 @@ public sealed class BeirutaRDM : RedMageRotation
 	[RotationDesc(ActionID.AddlePvE, ActionID.MagickBarrierPvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
-		if (AddlePvE.CanUse(out act))
+		if (AutoDefense && AddlePvE.CanUse(out act))
 		{
 			return true;
 		}
 
-		if (MagickBarrierPvE.CanUse(out act))
+		if (AutoDefense && MagickBarrierPvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -827,6 +865,11 @@ public sealed class BeirutaRDM : RedMageRotation
 		UpdateTripleComboReached(embRem);
 
 		var gateMelee = ShouldGateMeleeStarterAndManafication(embRem);
+
+		if (CdPlanHelper.TryPlanned(out act))
+		{
+			return true;
+		}
 
 		if (IsOpen && IsBurst)
 		{

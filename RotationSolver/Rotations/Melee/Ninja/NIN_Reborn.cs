@@ -3,8 +3,144 @@ namespace RotationSolver.Rotations.Melee.Ninja;
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/Rotations/Melee/Ninja/NIN_Reborn.cs")]
 
-public sealed class NIN_Reborn : NinjaRotation
+public sealed class NIN_Reborn : NinjaRotation, Updaters.ICdPlanRotation
 {
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Auto: Feint and Shade Shift respond to RSR's defense / heal signals (raidwide detection, Boss Mod or the commands).\n" +
+		"Use built-in CD plan: they follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press them.\n" +
+		"With the built-in plan or BMR / VBM / Manual, the defense / heal signals do not use them.")]
+	public CdPlanSource CdPlanFrom { get; set; } = CdPlanSource.Auto;
+
+	public bool UseTimelinePlan => CdPlanFrom == CdPlanSource.BuiltIn;
+
+	protected override bool AutoDefense => CdPlanFrom == CdPlanSource.Auto;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Feint from", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Where planned Feint comes from. M1 / M2 profile: the duty's shared Feint plan for that melee slot; the job plan's own Feint rows are then not used (everything else still comes from the job plan).\n" +
+		"Auto: M1, and once an M1 Feint turns out to be another melee's, M2 for the rest of the duty.\n" +
+		"Job plan: Feint from the picked job plan, e.g. for double caster or your own agreement. Also used when the duty has no profile.")]
+	public FeintProfile FeintFrom { get; set; } = FeintProfile.Auto;
+
+	string Updaters.ICdPlanRotation.MitProfileAction => "Feint";
+
+	MitProfileChoice Updaters.ICdPlanRotation.MitProfile => (MitProfileChoice)FeintFrom;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Shade Shift", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Shade Shift are used in their window.\nOff: they are skipped.")]
+	public bool UsePlannedShadeShift { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Downtime Mudra (experimental)", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: plan rows naming a ninjutsu (Suiton, Raiton, ...) are used for downtime. While there is nothing to attack, the mudras for it start when the row opens and the ninjutsu goes off once the boss is targetable.\n" +
+		"While there is nothing to attack and no such row is open, no other mudras are started.\n" +
+		"Off: those rows are skipped.")]
+	public bool DowntimeMudra { get; set; } = false;
+
+	private IBaseAction[] DowntimeNinjutsu =>
+		[SuitonPvE, HutonPvE, RaitonPvE, KatonPvE, DotonPvE, HyotonPvE, FumaShurikenPvE, HyoshoRanryuPvE, GokaMekkyakuPvE];
+
+	private bool InDowntimeMudra => UseTimelinePlan && DowntimeMudra && InCombat && DataCenter.AllHostileTargets.Count == 0;
+
+	// The ninjutsu named by the plan's open downtime row, as written.
+	private IBaseAction? PlannedDowntimeRow
+	{
+		get
+		{
+			if (!InDowntimeMudra)
+			{
+				return null;
+			}
+
+			foreach (var ninjutsu in DowntimeNinjutsu)
+			{
+				if (Updaters.TimelineUpdater.PlannedOpenByName(ninjutsu.Name))
+				{
+					return ninjutsu;
+				}
+			}
+
+			return null;
+		}
+	}
+
+	private bool NeedsKassatsu(IBaseAction ninjutsu) =>
+		ninjutsu.ID == HyoshoRanryuPvE.ID || ninjutsu.ID == GokaMekkyakuPvE.ID;
+
+	// Hyosho Ranryu / Goka Mekkyaku rows: Kassatsu goes in first (as the logs do, during the downtime).
+	private bool PlannedDowntimeKassatsu =>
+		PlannedDowntimeRow is { } row && NeedsKassatsu(row) && !HasKassatsu && !KassatsuPvE.Cooldown.IsCoolingDown;
+
+	// What the downtime mudras aim at: the row's ninjutsu; for a Kassatsu ninjutsu nothing until Kassatsu is up
+	// (mudras wait), or Raiton when Kassatsu is on cooldown.
+	private IBaseAction? PlannedDowntimeNinjutsu => PlannedDowntimeRow switch
+	{
+		null => null,
+		var row when !NeedsKassatsu(row) || HasKassatsu => row,
+		_ when KassatsuPvE.Cooldown.IsCoolingDown => RaitonPvE,
+		_ => null,
+	};
+
+	private bool DowntimeMudraHold => InDowntimeMudra && !IsExecutingMudra && PlannedDowntimeNinjutsu == null;
+
+	private bool IsDowntimeNinjutsu(uint actionId)
+	{
+		foreach (var action in AllBaseActions)
+		{
+			if (action.ID != actionId)
+			{
+				continue;
+			}
+
+			foreach (var ninjutsu in DowntimeNinjutsu)
+			{
+				if (ninjutsu.Name == action.Name)
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		return false;
+	}
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions
+	{
+		get
+		{
+			yield return ((uint)ActionID.ShadeShiftPvE, nameof(UsePlannedShadeShift));
+			foreach (var ninjutsu in DowntimeNinjutsu)
+			{
+				yield return (ninjutsu.ID, nameof(DowntimeMudra));
+			}
+		}
+	}
+
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
+		(UsePlannedShadeShift || actionId != (uint)ActionID.ShadeShiftPvE) &&
+		(DowntimeMudra || !IsDowntimeNinjutsu(actionId));
+
+	bool Updaters.ICdPlanRotation.RotationRunsPlannedAction(uint actionId) => IsDowntimeNinjutsu(actionId);
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => CdPlanHelper.Wait(actionId);
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		CdPlanHelper.HoldCommand(action, UseTimelinePlan) ||
+		(UseTimelinePlan && IsExecutingMudra);
+
+	#endregion
+
 	#region Config Options
 	// Configuration properties for rotation behavior.
 
@@ -127,7 +263,11 @@ public sealed class NIN_Reborn : NinjaRotation
 			ClearNinjutsu();
 		}
 
-		if ((InCombat && HasHostilesInMaxRange) || (CombatMudra && HasHostilesInMaxRange && TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges))
+		if (PlannedDowntimeNinjutsu is { } planned)
+		{
+			SetNinjutsu(planned);
+		}
+		else if ((InCombat && HasHostilesInMaxRange) || (CombatMudra && HasHostilesInMaxRange && TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges))
 		{
 			ChoiceNinjutsu();
 		}
@@ -138,6 +278,16 @@ public sealed class NIN_Reborn : NinjaRotation
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
 	{
 		if (RabbitMediumPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (!IsExecutingMudra && PlannedDowntimeKassatsu && KassatsuPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (!IsExecutingMudra && CdPlanHelper.TryPlanned(out act))
 		{
 			return true;
 		}
@@ -932,7 +1082,7 @@ public sealed class NIN_Reborn : NinjaRotation
 			return true;
 		}
 
-		if (_ninActionAim != null)
+		if (_ninActionAim != null && !DowntimeMudraHold)
 		{
 			if (DoGokaMekkyaku(out act))
 			{

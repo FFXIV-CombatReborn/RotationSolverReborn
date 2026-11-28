@@ -1,0 +1,80 @@
+# MT DRK
+Phase,Start,End,Action,Target
+P1,0.5,3.5,Provoke,
+P1,6.1,9.1,Reprisal,
+P1,11.4,13.7,Shadowed Vigil,
+P1,20.0,23.0,The Blackest Night,Self
+P1,20.1,23.1,Rampart,
+P1,21.8,24.8,Oblation,Self
+P1,31.0,38.4,Oblation,Self
+P1,82.2,85.2,Reprisal,
+P1,106.9,108.9,Dark Missionary,
+P1,119.3,122.3,Oblation,LowHP
+P1,132.1,135.1,Rampart,
+P1,133.0,152.3,Tank Stance,Off
+P1,137.9,140.9,Shadowed Vigil,
+P1,137.9,140.7,Dark Mind,
+P1,140.9,143.7,The Blackest Night,Self
+P1,144.1,147.1,Oblation,OtherTank
+P2,0.0,14.2,Tank Stance,Off
+P2,4.5,7.5,Provoke,
+P2,12.4,15.0,Living Dead,
+P2,22.2,254.6,Tank Stance,On
+P2,25.5,28.5,Reprisal,
+P2,77.4,80.4,Provoke,
+P2,80.8,83.8,Oblation,Self
+P2,119.7,122.7,Dark Missionary,
+P2,120.5,123.1,Reprisal,
+P2,129.6,132.8,Oblation,LowHP
+P2,180.5,183.5,Reprisal,
+P2,183.2,186.2,Oblation,LowHP
+P2,259.9,262.9,Oblation,LowHP
+P3,0.0,15.6,Tank Stance,On
+P3,24.6,34.6,Tank Stance,Off
+P3,31.5,33.5,Reprisal,
+P3,46.6,84.6,Tank Stance,Off
+P3,53.4,56.4,Dark Missionary,
+P3,84.6,189.0,Tank Stance,On
+P3,91.5,93.4,Reprisal,
+P3,100.1,103.1,Shadowed Vigil,
+P3,100.4,103.4,Rampart,
+P3,103.7,106.7,Dark Mind,
+P3,105.9,108.9,The Blackest Night,Self
+P3,106.4,109.4,Oblation,OtherTank
+P3,154.3,157.3,Oblation,Self
+P3,155.0,157.1,The Blackest Night,OtherTank
+P3,155.1,157.1,Reprisal,
+P3,167.2,170.2,Dark Missionary,
+P4,0.0,172.9,Tank Stance,On
+P4,6.3,9.3,Provoke,
+P4,31.0,34.0,Reprisal,
+P4,58.9,61.7,Living Dead,
+P4,70.2,76.6,Oblation,Self
+P4,72.1,74.5,Dark Missionary,
+P4,94.2,97.2,Reprisal,
+P4,137.4,140.4,Shadowed Vigil,
+P4,156.3,159.5,Oblation,Self
+P4,156.5,158.5,The Blackest Night,Self
+P4,162.1,164.6,Dark Missionary,
+P5,0.0,400.0,Tank Stance,On
+P5,76.9,79.9,Provoke,
+P5,81.3,84.3,Reprisal,
+P5,88.7,91.7,Oblation,Self
+P5,99.0,101.0,Dark Missionary,
+P5,124.9,127.9,Rampart,
+P5,129.8,132.8,Shadowed Vigil,
+P5,130.4,133.4,Oblation,Self
+P5,130.6,133.3,Dark Mind,
+P5,131.3,133.3,The Blackest Night,Self
+P5,144.1,147.1,Provoke,
+P5,151.9,154.9,Reprisal,
+P5,183.4,186.4,Oblation,LowHP
+P5,210.8,213.8,Dark Missionary,
+P5,216.2,219.2,Reprisal,
+P5,246.5,248.5,Living Dead,
+P5,247.1,250.1,Oblation,OtherTank
+P5,248.7,250.7,The Blackest Night,OtherTank
+P5,259.2,262.2,Provoke,
+P5,283.2,286.2,Reprisal,
+P5,289.1,292.1,Oblation,OtherTank
+P5,301.5,304.5,Dark Missionary,

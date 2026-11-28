@@ -1,0 +1,50 @@
+# Default SGE
+# Set.WardMode: false
+# Set.CountdownShield: Zoe + Eukrasian Prognosis
+# Set.PhlegmaOpener: 6s
+# Set.UsePotion: true
+# Set.PotionTiming: Opener (countdown)
+# Set.EarlyDotRefreshWhenMoving: false
+# Set.UseSwiftcastForMovement: true
+# Set.UseCustomHPThreshold: false
+Phase,Start,End,Action,Target
+P1,0.0,3.0,Kerachole,
+P1,18.5,21.5,Panhaima,
+P1,46.6,49.6,Kerachole,
+P1,48.1,52.1,Physis II,
+P1,81.8,84.8,Kerachole,
+P1,97.0,100.0,Holos,
+P1,112.3,115.3,Kerachole,
+P1,113.8,117.8,Physis II,
+P1,139.0,142.0,Panhaima,
+P1,140.0,143.0,Zoe,
+P1,147.5,150.5,Kerachole,
+P1,191.9,194.9,Kerachole,
+P1,193.4,197.4,Physis II,
+P1,198.5,202.5,Philosophia,
+P1,223.9,226.9,Holos,
+P1,238.1,241.1,Kerachole,
+P1,242.7,258.7,Physis II,
+P1,286.5,289.5,Kerachole,
+P1,298.3,301.3,Panhaima,
+P1,308.4,312.4,Physis II,
+P1,317.0,320.0,Kerachole,
+P1,320.6,323.6,Zoe,
+P1,348.6,351.6,Holos,
+P1,351.6,354.6,Kerachole,
+P1,368.4,372.4,Physis II,
+P1,402.0,405.0,Kerachole,
+P1,445.1,448.1,Panhaima,
+P1,446.1,450.1,Physis II,
+P1,449.0,452.0,Zoe,
+P1,472.8,475.8,Kerachole,
+P1,514.7,517.7,Kerachole,
+P1,521.9,525.9,Physis II,
+P1,544.5,548.5,Philosophia,
+P1,546.0,549.0,Kerachole,
+P1,569.7,572.7,Holos,
+P1,578.1,581.1,Kerachole,
+P1,581.6,585.6,Physis II,
+P1,594.1,597.1,Zoe,
+P1,611.7,614.7,Kerachole,
+P1,612.2,615.2,Panhaima,

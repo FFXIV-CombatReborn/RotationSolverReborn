@@ -3,8 +3,55 @@ namespace RotationSolver.Rotations.Ranged.Dancer;
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/Rotations/Ranged/Dancer/DNC_Reborn.cs")]
 
-public sealed class DNC_Reborn : DancerRotation
+public sealed class DNC_Reborn : DancerRotation, Updaters.ICdPlanRotation
 {
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Auto: Shield Samba, Curing Waltz and Improvisation respond to RSR's defense / heal signals (raidwide detection, Boss Mod or the commands).\n" +
+		"Use built-in CD plan: they follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press them.\n" +
+		"With the built-in plan or BMR / VBM / Manual, the defense / heal signals do not use them.")]
+	public CdPlanSource CdPlanFrom { get; set; } = CdPlanSource.Auto;
+
+	public bool UseTimelinePlan => CdPlanFrom == CdPlanSource.BuiltIn;
+
+	private bool AutoDefense => CdPlanFrom == CdPlanSource.Auto;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Curing Waltz", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Curing Waltz are used in their window (built-in plans use it as often as it fits).\nOff: they are skipped, and Curing Waltz is not used.")]
+	public bool UsePlannedCuringWaltz { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Improvisation", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Improvisation are used in their window (built-in plans use it as often as it fits).\nOff: they are skipped, and Improvisation is not used.")]
+	public bool UsePlannedImprovisation { get; set; } = true;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
+	[
+		((uint)ActionID.CuringWaltzPvE, nameof(UsePlannedCuringWaltz)),
+		((uint)ActionID.ImprovisationPvE, nameof(UsePlannedImprovisation)),
+	];
+
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
+		(UsePlannedCuringWaltz || actionId != (uint)ActionID.CuringWaltzPvE) &&
+		(UsePlannedImprovisation || actionId != (uint)ActionID.ImprovisationPvE);
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => CdPlanHelper.Wait(actionId);
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		CdPlanHelper.HoldCommand(action, UseTimelinePlan) ||
+		(UseTimelinePlan && IsDancing);
+
+	#endregion
+
 	#region Config Options
 	[RotationConfig(CombatType.PvE, Name = "Holds Tech Step if no targets in range (Warning, will drift)")]
 	public bool HoldTechForTargets { get; set; } = true;
@@ -66,7 +113,12 @@ public sealed class DNC_Reborn : DancerRotation
 			return true;
 		}
 
-		if (ImprovisedFinishPvEReady && ImprovisedFinishPvE.CanUse(out act))
+		if (!IsDancing && CdPlanHelper.TryPlanned(out act))
+		{
+			return true;
+		}
+
+		if (ImprovisedFinishPvEReady && !HoldImprovisedFinish && ImprovisedFinishPvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -101,15 +153,25 @@ public sealed class DNC_Reborn : DancerRotation
 		return base.EmergencyAbility(nextGCD, out act);
 	}
 
+	private const int ImprovisationMaxStacks = 4;
+
+	// Nothing to attack (downtime) and still dancing: keep building Rising Rhythm for a stronger Improvised Finish,
+	// like players do before a boss comes back. In combat it is finished straight away.
+	private static bool HoldImprovisedFinish =>
+		DataCenter.AllHostileTargets.Count == 0 &&
+		StatusHelper.PlayerHasStatus(true, StatusID.Improvisation, StatusID.Improvisation_2695) &&
+		StatusHelper.PlayerStatusStack(true, StatusID.RisingRhythm) < ImprovisationMaxStacks &&
+		!StatusHelper.PlayerWillStatusEnd(1f, true, StatusID.Improvisation, StatusID.Improvisation_2695);
+
 	[RotationDesc(ActionID.CuringWaltzPvE, ActionID.ImprovisationPvE)]
 	protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
 	{
-		if (CuringWaltzPvE.CanUse(out act, usedUp: true))
+		if (AutoDefense && CuringWaltzPvE.CanUse(out act, usedUp: true))
 		{
 			return true;
 		}
 
-		if (ImprovisationPvE.CanUse(out act, usedUp: true))
+		if (AutoDefense && ImprovisationPvE.CanUse(out act, usedUp: true))
 		{
 			return true;
 		}
@@ -120,7 +182,7 @@ public sealed class DNC_Reborn : DancerRotation
 	[RotationDesc(ActionID.ShieldSambaPvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
-		if ((!BurstDefense || (BurstDefense && !InBurstStatus)) && ShieldSambaPvE.CanUse(out act))
+		if (AutoDefense && (!BurstDefense || (BurstDefense && !InBurstStatus)) && ShieldSambaPvE.CanUse(out act))
 		{
 			return true;
 		}

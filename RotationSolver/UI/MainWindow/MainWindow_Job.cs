@@ -37,10 +37,12 @@ public partial class MainWindow
 			{ () => UiString.ConfigWindow_Rotation_Description.GetDescription(), DrawRotationDescription },
 			{ GetRotationStatusHead, DrawRotationStatus },
 			{ () => UiString.ConfigWindow_Rotation_Configuration.GetDescription(), DrawRotationConfiguration },
+			{ GetCdPlanHead, DrawRotationCdPlan },
 		},
 		(UiString.ConfigWindow_Rotation_Description, FontAwesomeIcon.BookOpen),
 		(UiString.ConfigWindow_Rotation_Status, FontAwesomeIcon.HeartBroken),
-		(UiString.ConfigWindow_Rotation_Configuration, FontAwesomeIcon.SlidersH));
+		(UiString.ConfigWindow_Rotation_Configuration, FontAwesomeIcon.SlidersH),
+		(UiString.ConfigWindow_Rotation_CdPlan, FontAwesomeIcon.Clock));
 
 	private const float DESC_SIZE = 24;
 	private static void DrawRotationDescription()
@@ -486,6 +488,12 @@ public partial class MainWindow
 		{
 			var requiredType = DataCenter.IsPvP ? CombatType.PvP : CombatType.PvE;
 			if (!config.Type.HasFlag(requiredType) || !ShouldShowRotationConfig(config, set))
+			{
+				continue;
+			}
+
+			// [CD Plan] settings live in their own section.
+			if (rotation is Updaters.ICdPlanRotation && IsCdPlanConfig(config, set))
 			{
 				continue;
 			}

@@ -118,6 +118,9 @@ namespace RotationSolver.Engine.Data
 		[Description("Status")]
 		ConfigWindow_Rotation_Status,
 
+		[Description("CD Plan")]
+		ConfigWindow_Rotation_CdPlan,
+
 		[Description("Duty Rotation Status")]
 		ConfigWindow_DutyRotation_Status,
 
@@ -790,6 +793,7 @@ namespace RotationSolver.Engine.Data
 				UiString.ConfigWindow_Rotation_Configuration => "配置",
 				UiString.ConfigWindow_DutyRotation_Configuration => "任务配置",
 				UiString.ConfigWindow_Rotation_Status => "状态",
+				UiString.ConfigWindow_Rotation_CdPlan => "技能冷却轴",
 				UiString.ConfigWindow_DutyRotation_Status => "任务循环状态",
 				UiString.ConfigWindow_Actions_Description => "用于自定义RSR何时自动使用特定动作。在左侧列表中点击动作图标。下方可以设置该特定动作的使用条件。每个动作都可以有不同的条件，以覆盖默认循环行为。",
 				UiString.ConfigWindow_Actions_IsIntercepted => "允许该动作被拦截系统拦截",

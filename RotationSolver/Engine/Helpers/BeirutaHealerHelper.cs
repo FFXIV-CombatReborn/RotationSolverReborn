@@ -1,7 +1,9 @@
+// Shared building blocks behind the healer rules: the HP and heal-over-time model, recent-cast checks, Ward Mode, raidwide prep, DMU Accretion, single-target casting and pending heals.
 namespace RotationSolver.Engine.Helpers;
 
 #region Heal Model
 
+// HP after pending heals and heal-over-time ticks, and the HP threshold where a heal of a given potency is fully used.
 internal static class BeirutaHealModel
 {
 	public const float HpPerPotency = 84f;
@@ -125,53 +127,13 @@ internal static class BeirutaHealModel
 
 		return 0f;
 	}
-
-	public const float NonTankTopUpHp = 0.9f;
-
-	public static IBattleChara? NonTankTopUpTarget(IEnumerable<IBattleChara>? party, float range, Func<IBattleChara, float> hpRatio, Func<IBattleChara, bool> blocked, int aoeCount)
-	{
-		if (party == null)
-		{
-			return null;
-		}
-
-		IBattleChara? best = null;
-		var bestHp = 1f;
-		var count = 0;
-		foreach (var member in party)
-		{
-			if (member == null ||
-				member.IsDead ||
-				member.IsJobCategory(JobRole.Tank) ||
-				member.DistanceToPlayer() > range ||
-				(DataCenter.IsInDMU && member.HasStatus(false, StatusID.Accretion)) ||
-				blocked(member))
-			{
-				continue;
-			}
-
-			var hp = hpRatio(member);
-			if (hp >= NonTankTopUpHp)
-			{
-				continue;
-			}
-
-			count++;
-			if (best == null || hp < bestHp)
-			{
-				best = member;
-				bestHp = hp;
-			}
-		}
-
-		return count < aoeCount ? best : null;
-	}
 }
 
 #endregion
 
 #region Heal Window
 
+// Whether a heal was just used or is being cast, so two heals don't go out back to back.
 internal static class BeirutaHealWindow
 {
 	public const float OgcdSeconds = 5f;
@@ -232,6 +194,7 @@ internal static class BeirutaHealWindow
 
 #region Ward Mode
 
+// The Ward Mode toggle, its on/off toast, and counts of players missing a shield.
 internal static class BeirutaWard
 {
 	public const int UnshieldedPartyCount = 4;
@@ -267,7 +230,7 @@ internal static class BeirutaWard
 		}
 	}
 
-	public static int CountMissing(IEnumerable<IBattleChara>? party, float range, Func<IBattleChara, bool> hasEffect)
+	public static int CountMissing(IEnumerable<IBattleChara>? party, float range, Func<IBattleChara, bool> hasEffect, bool nonTanksOnly = false)
 	{
 		if (party == null)
 		{
@@ -279,6 +242,7 @@ internal static class BeirutaWard
 		{
 			if (member == null ||
 				member.IsDead ||
+				(nonTanksOnly && member.IsJobCategory(JobRole.Tank)) ||
 				member.DistanceToPlayer() > range ||
 				hasEffect(member))
 			{
@@ -291,31 +255,8 @@ internal static class BeirutaWard
 		return count;
 	}
 
-	public static bool NonTanksShielded(IEnumerable<IBattleChara>? party, float range)
-	{
-		if (party == null)
-		{
-			return false;
-		}
-
-		var counted = 0;
-		foreach (var member in party)
-		{
-			if (member == null || member.IsDead || member.IsJobCategory(JobRole.Tank) || member.DistanceToPlayer() > range)
-			{
-				continue;
-			}
-
-			if (!member.HasStatus(false, StatusID.Galvanize, StatusID.EukrasianPrognosis))
-			{
-				return false;
-			}
-
-			counted++;
-		}
-
-		return counted > 0;
-	}
+	public static int CountNonTanksMissing(IEnumerable<IBattleChara>? party, float range, Func<IBattleChara, bool> hasEffect) =>
+		CountMissing(party, range, hasEffect, true);
 
 	public static IBattleChara? StanceTank(IEnumerable<IBattleChara>? party, float range)
 	{
@@ -351,6 +292,7 @@ internal static class BeirutaWard
 
 #region Raidwide Tracking
 
+// Treats a raidwide as coming when the timeline says so, or for 10s after most of the party gets prep shields or mitigation.
 internal sealed class BeirutaRaidwide
 {
 	private const float Range = 30f;
@@ -377,8 +319,10 @@ internal sealed class BeirutaRaidwide
 	private long _sinceMs;
 	private bool _wasActive;
 
+	private const float TimelineLeadSeconds = 10f;
+
 	public bool Coming =>
-		DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea) ||
+		BeirutaIncoming.RaidwideWithin(TimelineLeadSeconds) ||
 		(_sinceMs != 0 && Environment.TickCount64 - _sinceMs <= WindowMs);
 
 	public void Track(bool inCombat, IEnumerable<IBattleChara>? party)
@@ -430,6 +374,7 @@ internal sealed class BeirutaRaidwide
 
 #region DMU Accretion
 
+// DMU P3 Accretion: who to fill next, and keeping group heals from filling players out of order.
 internal static class BeirutaAccretion
 {
 	private const float HealRange = 30f;
@@ -445,7 +390,7 @@ internal static class BeirutaAccretion
 				member.GameObjectId != target.GameObjectId &&
 				!member.IsDead &&
 				!member.IsJobCategory(JobRole.Tank) &&
-				member.GetHealthRatio() > TopUpSafeHp)
+				BeirutaParty.HpWithShield(member) > TopUpSafeHp)
 			{
 				count++;
 			}
@@ -476,36 +421,60 @@ internal static class BeirutaAccretion
 		return target != null && (!requireSafeParty || PartySafeForTopUp(party, target)) ? target : null;
 	}
 
-	private static IBattleChara? FindLowest(IEnumerable<IBattleChara> party, Func<IBattleChara, bool> role)
-	{
-		IBattleChara? best = null;
-		foreach (var member in party)
-		{
-			if (member == null ||
-				member.IsDead ||
-				!role(member) ||
-				!member.HasStatus(false, StatusID.Accretion) ||
-				member.HasStatus(false, StatusID.EarthResistanceDownIi_3372) ||
-				member.GetHealthRatio() >= 1f ||
-				member.DistanceToPlayer() > HealRange)
-			{
-				continue;
-			}
+	private static IBattleChara? FindLowest(IEnumerable<IBattleChara> party, Func<IBattleChara, bool> role) =>
+		LowestMatching(party, m =>
+			!m.IsDead &&
+			role(m) &&
+			m.HasStatus(false, StatusID.Accretion) &&
+			!m.HasStatus(false, StatusID.EarthResistanceDownIi_3372) &&
+			BeirutaParty.HealHp(m) < 1f &&
+			m.DistanceToPlayer() <= HealRange);
 
-			if (best == null || member.GetHealthRatio() < best.GetHealthRatio())
-			{
-				best = member;
-			}
-		}
-
-		return best;
-	}
+	private static bool HoldsAccretion(IBattleChara m) =>
+		!m.IsDead && !m.IsJobCategory(JobRole.Tank) && m.HasStatus(false, StatusID.Accretion);
 
 	private static bool HasAccretionToFill(IBattleChara m) =>
 		!m.IsDead &&
 		!m.IsJobCategory(JobRole.Tank) &&
 		m.HasStatus(false, StatusID.Accretion) &&
 		!m.HasStatus(false, StatusID.EarthResistanceDownIi_3372);
+
+	public static bool AnyHolder(IEnumerable<IBattleChara>? party)
+	{
+		if (party == null || !DataCenter.IsInDMU)
+		{
+			return false;
+		}
+
+		foreach (var member in party)
+		{
+			if (member != null && !member.IsDead && member.HasStatus(false, StatusID.Accretion))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static int ToFillCount(IEnumerable<IBattleChara>? party)
+	{
+		if (party == null || !DataCenter.IsInDMU)
+		{
+			return 0;
+		}
+
+		var count = 0;
+		foreach (var member in party)
+		{
+			if (member != null && HasAccretionToFill(member))
+			{
+				count++;
+			}
+		}
+
+		return count;
+	}
 
 	public static bool GuardActive(IEnumerable<IBattleChara>? party) =>
 		party != null &&
@@ -567,7 +536,7 @@ internal static class BeirutaAccretion
 		return !state.Settling && (state.Holders == 0 || (state.Holders == 1 && !state.EarthDown));
 	}
 
-	public const float GroupHealSafeHp = 0.5f;
+	public const float GroupHealSafeHp = 0.3f;
 
 	public static bool GroupHealBlocked(IEnumerable<IBattleChara>? party)
 	{
@@ -576,15 +545,28 @@ internal static class BeirutaAccretion
 			return false;
 		}
 
+		var holders = 0;
+		IBattleChara? blocking = null;
 		foreach (var member in party)
 		{
-			if (member != null && HasAccretionToFill(member) && member.GetHealthRatio() > GroupHealSafeHp)
+			if (member == null || !HoldsAccretion(member))
 			{
-				return true;
+				continue;
+			}
+
+			holders++;
+			if (BeirutaParty.HealHp(member) > GroupHealSafeHp)
+			{
+				blocking = member;
 			}
 		}
 
-		return false;
+		if (blocking == null)
+		{
+			return false;
+		}
+
+		return holders > 1 || NextToFill(party)?.GameObjectId != blocking.GameObjectId;
 	}
 
 	public static IBattleChara? NextToFill(IEnumerable<IBattleChara> party)
@@ -605,7 +587,7 @@ internal static class BeirutaAccretion
 
 	public static bool WouldFillOutOfOrder(IEnumerable<IBattleChara>? party, IBattleChara? member, float healHp)
 	{
-		if (party == null || member == null || !GuardActive(party) || !HasAccretionToFill(member))
+		if (party == null || member == null || !AnyHolder(party) || !HoldsAccretion(member))
 		{
 			return false;
 		}
@@ -616,12 +598,12 @@ internal static class BeirutaAccretion
 			return false;
 		}
 
-		return (float)member.MaxHp - member.CurrentHp <= healHp;
+		return (float)member.MaxHp - member.CurrentHp - PendingHeals.PendingHp(member) <= healHp;
 	}
 
 	public static bool AreaSafe(IEnumerable<IBattleChara>? party, System.Numerics.Vector3 center, float radius, float healHp)
 	{
-		if (party == null || !GuardActive(party))
+		if (party == null || !AnyHolder(party))
 		{
 			return true;
 		}
@@ -649,7 +631,7 @@ internal static class BeirutaAccretion
 				continue;
 			}
 
-			if (best == null || member.GetHealthRatio() < best.GetHealthRatio())
+			if (best == null || BeirutaParty.HealHp(member) < BeirutaParty.HealHp(best))
 			{
 				best = member;
 			}
@@ -671,6 +653,15 @@ internal static class BeirutaAccretion
 		return false;
 	}
 
+}
+
+#endregion
+
+#region Single-Target Casting
+
+// Casts an action on one specific party member, trying the RSR target types that can reach them.
+internal static class BeirutaTarget
+{
 	public static bool TryUseOn(IBaseAction action, IBattleChara target, out IAction? act, bool usedUp = false)
 	{
 		act = null;
@@ -685,19 +676,43 @@ internal static class BeirutaAccretion
 			return false;
 		}
 
-		if (!action.CanUse(out act,
-				skipStatusProvideCheck: true,
-				skipTargetStatusNeedCheck: true,
-				usedUp: usedUp,
-				skipAoeCheck: true,
-				targetOverride: TargetType.Self))
+		return TryRsrTarget(action, target, out act, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, usedUp: usedUp, skipAoeCheck: true);
+	}
+
+	public static bool TryRsrTarget(IBaseAction action, IBattleChara target, out IAction? act,
+		bool skipStatusProvideCheck = false, bool skipTargetStatusNeedCheck = false, bool usedUp = false,
+		bool skipAoeCheck = false, bool skipCastingCheck = false, bool skipTTKCheck = false)
+	{
+		act = null;
+		if (target == null)
 		{
-			act = null;
 			return false;
 		}
 
-		action.Target = new TargetResult(target, [target], target.Position);
-		return true;
+		var self = ECommons.GameHelpers.Player.Object;
+		var isSelf = self != null && target.GameObjectId == self.GameObjectId;
+		ReadOnlySpan<TargetType> tries = isSelf
+			? [TargetType.Self]
+			: !target.IsJobCategory(JobRole.Tank) || target.IsEnemy()
+				? [default, TargetType.LowHPPercent, TargetType.LowHP, TargetType.Heal]
+				: [default, TargetType.BeAttacked, TargetType.Tank, TargetType.LowHPPercent, TargetType.LowHP];
+
+		var id = target.GameObjectId;
+		bool OnlyTarget(IBattleChara member) => member.GameObjectId == id;
+
+		foreach (var type in tries)
+		{
+			if (action.CanUse(out var used, skipStatusProvideCheck: skipStatusProvideCheck, skipTargetStatusNeedCheck: skipTargetStatusNeedCheck,
+					usedUp: usedUp, skipAoeCheck: skipAoeCheck, skipCastingCheck: skipCastingCheck, skipTTKCheck: skipTTKCheck, targetOverride: type,
+					targetFilter: OnlyTarget) &&
+				action.Target.Target?.GameObjectId == id)
+			{
+				act = used;
+				return true;
+			}
+		}
+
+		return false;
 	}
 }
 
@@ -705,6 +720,7 @@ internal static class BeirutaAccretion
 
 #region Critical Delay
 
+// A non-tank must stay critical for a moment before a GCD rescue heal goes on them.
 internal static class BeirutaCritical
 {
 	public const float NonTankDelaySeconds = 1.5f;
@@ -713,13 +729,13 @@ internal static class BeirutaCritical
 	private static readonly Dictionary<ulong, (long Since, long Seen)> _low = [];
 
 	public static bool ForGcd(IBattleChara member, float criticalHp) =>
-		member.GetHealthRatio() < criticalHp &&
+		BeirutaParty.HealHp(member) < criticalHp &&
 		(member.IsJobCategory(JobRole.Tank) || HeldBelow(member, criticalHp, NonTankDelaySeconds));
 
 	private static bool HeldBelow(IBattleChara member, float hpRatio, float seconds)
 	{
 		var id = member.GameObjectId;
-		if (member.GetHealthRatio() >= hpRatio)
+		if (BeirutaParty.HealHp(member) >= hpRatio)
 		{
 			_low.Remove(id);
 			return false;
@@ -733,6 +749,126 @@ internal static class BeirutaCritical
 
 		_low[id] = (entry.Since, now);
 		return now - entry.Since >= seconds * 1000f;
+	}
+}
+
+#endregion
+
+#region DoT Before Downtime
+
+// Whether a DoT still beats a filler when the target leaves soon, using timeline downtime.
+internal static class BeirutaDotValue
+{
+	private const float TickSeconds = 3f;
+	private const float DotDuration = 30f;
+
+	public static bool WorthBeforeDowntime(IBattleChara? target, float initial, float tick, float filler, float gcdCost = 1f)
+	{
+		if (target == null ||
+			Updaters.TimelineUpdater.SecondsUntilDowntime(target.BaseId) is not { } left)
+		{
+			return true;
+		}
+
+		var ticks = Math.Min(left, DotDuration) / TickSeconds;
+		return initial + (tick * ticks) >= filler * gcdCost;
+	}
+}
+
+#endregion
+
+#region Pending Heals
+
+// Heals that have landed but not yet shown on the HP bar, so the same player isn't healed twice.
+internal static class PendingHeals
+{
+	private const long TimeoutMs = 3000;
+
+	private readonly record struct Entry(ulong TargetId, uint Amount, uint HpAtSend, long SentAt);
+
+	private static readonly List<Entry> _entries = [];
+
+	public static void OnActionEffect(ECommons.Hooks.ActionEffectTypes.ActionEffectSet set)
+	{
+		try
+		{
+			var party = DataCenter.PartyMembers;
+			if (party == null || party.Count == 0)
+			{
+				return;
+			}
+
+			var now = Environment.TickCount64;
+			foreach (var effect in set.TargetEffects)
+			{
+				var targetId = effect.TargetID;
+				IBattleChara? target = null;
+				foreach (var member in party)
+				{
+					if (member != null && member.GameObjectId == targetId)
+					{
+						target = member;
+						break;
+					}
+				}
+
+				if (target == null || target.IsDead)
+				{
+					continue;
+				}
+
+				uint amount = 0;
+				effect.ForEach(entry =>
+				{
+					if (entry.type == ECommons.Hooks.ActionEffectTypes.ActionEffectType.Heal)
+					{
+						amount += entry.value;
+					}
+				});
+
+				if (amount > 0)
+				{
+					_entries.Add(new Entry(targetId, amount, target.CurrentHp, now));
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			ECommons.Logging.PluginLog.Error($"Error in PendingHeals: {ex.Message}");
+		}
+	}
+
+	public static uint PendingHp(IBattleChara member)
+	{
+		if (_entries.Count == 0)
+		{
+			return 0;
+		}
+
+		var now = Environment.TickCount64;
+		_ = _entries.RemoveAll(e => now - e.SentAt > TimeoutMs);
+
+		uint total = 0;
+		var id = member.GameObjectId;
+		var hp = member.CurrentHp;
+		for (var i = _entries.Count - 1; i >= 0; i--)
+		{
+			var e = _entries[i];
+			if (e.TargetId != id)
+			{
+				continue;
+			}
+
+			if (hp != e.HpAtSend || member.IsDead)
+			{
+				_entries.RemoveAt(i);
+				continue;
+			}
+
+			total += e.Amount;
+		}
+
+		return total;
 	}
 }
 

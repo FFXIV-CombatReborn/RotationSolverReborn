@@ -146,6 +146,8 @@ internal static class MajorUpdater
 			Run("(RSRActivatedCore): TargetUpdater.UpdateTargets", TargetUpdater.UpdateTargets);
 		}
 
+		Run("(RSRActivatedCore): TimelineUpdater.Update", () => TimelineUpdater.Update(isActivated));
+
 		if (!isActivated)
 		{
 			if (_wasActivated)

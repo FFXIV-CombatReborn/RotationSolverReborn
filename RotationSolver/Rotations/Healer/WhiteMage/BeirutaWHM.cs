@@ -1,28 +1,105 @@
+using static RotationSolver.Engine.Helpers.BeirutaParty;
+
 namespace RotationSolver.Rotations.Healer.WhiteMage;
 
 [Rotation("BeirutaWHM", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn, Description =
-	"Savage/Ultimate White Mage. Damage and healing are automatic; mitigation comes from your CD planner or your own presses. AutoBurst off is enough to hold burst, including Presence of Mind and Assize. Set Intercept to GCD only and leave ability intercept unticked, so your planner's oGCDs go straight through and any extra heal or shield GCD you press is queued. Questions? Ask @Beiruta on the RSR Discord. Hover each setting for details.")]
+	"Savage/Ultimate White Mage. Damage and healing are automatic. Planned cooldowns (mitigation, HoTs, Lightspeed and the like) follow the built-in CD plan when there is one (see the CD Plan section); otherwise use your Boss Mod / BMR CD planner or press them yourself, with Intercept set to GCD only and ability intercept unticked. Questions? Ask @Beiruta on the RSR Discord.")]
 [SourceCode(Path = "main/Rotations/Healer/WhiteMage/BeirutaWHM.cs")]
 [ExtraRotation]
 
-public sealed class BeirutaWHM : WhiteMageRotation
+public sealed class BeirutaWHM : WhiteMageRotation, Updaters.ICdPlanRotation, IBeirutaHealContext, IBeirutaHealer
 {
 	#region Config Options
+
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Use built-in CD plan: planned cooldowns (mitigation, HoTs, Lightspeed and the like) follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press those cooldowns.")]
+	public BeirutaPlanSource CdPlanFrom { get; set; } = BeirutaPlanSource.BuiltIn;
+
+	public bool UseTimelinePlan => CdPlanFrom == BeirutaPlanSource.BuiltIn;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use recommended settings for the plan", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"When a built-in plan loads, the settings it recommends are applied, like a preset. Changing a setting afterwards (e.g. your Ward Mode macro) works as usual.\n" +
+		"Your saved settings are not changed by the plan: they show as you set them and come back once the plan unloads or this is off.")]
+	public bool UsePlanSettings { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Cure III", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Cure III is cast in its window once 2+ party members are below 95%, and no automatic AoE heal GCD within 5s of it.\n" +
+		"Off: planned Cure III is skipped; AoE heal GCDs go by party HP.")]
+	public bool UsePlannedCureIii { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Medica III", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Medica III is cast in its window once 2+ party members are below 95%, and no automatic AoE heal GCD within 5s of it.\n" +
+		"Off: planned Medica III is skipped; AoE heal GCDs go by party HP.")]
+	public bool UsePlannedMedicaIii { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Afflatus Rapture", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Afflatus Rapture is cast in its window once 2+ party members are below 95%, and no automatic AoE heal GCD within 5s of it.\n" +
+		"Lilies are kept for it, and Afflatus Misery is used before a planned Rapture would overcap Blood Lilies.\n" +
+		"Off: planned Afflatus Rapture is skipped; lilies go by party HP.")]
+	public bool UsePlannedAfflatusRapture { get; set; } = false;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
+	[
+		((uint)ActionID.CureIiiPvE, nameof(UsePlannedCureIii)),
+		((uint)ActionID.MedicaIiiPvE, nameof(UsePlannedMedicaIii)),
+		((uint)ActionID.AfflatusRapturePvE, nameof(UsePlannedAfflatusRapture)),
+	];
+
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) => actionId switch
+	{
+		(uint)ActionID.CureIiiPvE => UsePlannedCureIii,
+		(uint)ActionID.MedicaIiiPvE => UsePlannedMedicaIii,
+		(uint)ActionID.AfflatusRapturePvE => UsePlannedAfflatusRapture,
+		_ => true,
+	};
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		Updaters.TimelineUpdater.HoldQueuedPlannedAction(action.ID);
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => actionId switch
+	{
+		(uint)ActionID.CureIiiPvE or (uint)ActionID.MedicaIiiPvE or (uint)ActionID.MedicaIiPvE or (uint)ActionID.MedicaPvE or (uint)ActionID.AfflatusRapturePvE
+			=> CountInjured(PartyHealRange, PlannedHealHp) >= PlannedAoeHealCount ? null : "nobody needed healing",
+		(uint)ActionID.AfflatusSolacePvE or (uint)ActionID.CurePvE or (uint)ActionID.CureIiPvE or (uint)ActionID.TetragrammatonPvE or (uint)ActionID.BenedictionPvE
+			=> FindLowest(SingleHealRange, static m => HealHp(m) < PlannedHealHp) != null ? null : "nobody needed healing",
+		_ => null,
+	};
+
+	#endregion
 
 	#region Utility
 
 	[RotationConfig(CombatType.PvE, Name = "[Utility] Ward Mode (right-click for the macro)", Tooltip =
-		"Turn it on for high-pressure phases: keeps everyone topped up.\n" +
-		"- Afflatus Rapture (also spends the kept lily) > Medica III > Cure III as soon as 3+ are below the heal's full-use line (about 85-90%).\n" +
+		"Turn it on for high-pressure phases: keeps every non-tank full.\n" +
+		"- Afflatus Rapture (also spends the kept lily) > Medica III > Cure III as soon as one non-tank is below the heal's full-use line (about 85-90%).\n" +
 		"- Thresholds use real HP; no waiting for Presence of Mind or the co-healer.\n" +
 		"Auto turns off on death, zone change and countdown.")]
 	public bool WardMode { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "[More settings] Show", Tooltip =
+		"Pick a page to show its detailed settings. This only changes what is shown.")]
+	public BeirutaSettingsPage MoreSettings { get; set; } = BeirutaSettingsPage.Hide;
+
+	private bool WardActive => WardMode || Updaters.TimelineUpdater.PlannedWardMode;
+
+	bool IBeirutaHealContext.WardMode => WardActive;
 
 	#endregion
 
 	#region Prepull
 
-	[RotationConfig(CombatType.PvE, Name = "[Prepull] Countdown shield", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Prepull] Countdown shield", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.OpenerPage, Tooltip =
 		"Regen on the stance tank at about 5s, then Divine Benison before the pull.")]
 	public CountdownShieldStrategy CountdownShield { get; set; } = CountdownShieldStrategy.None;
 
@@ -39,7 +116,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 	#region Opener
 
-	[RotationConfig(CombatType.PvE, Name = "[Opener] First Presence of Mind / Afflatus Misery", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Opener] First Presence of Mind / Afflatus Misery", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.OpenerPage, Tooltip =
 		"Holds Presence of Mind and Afflatus Misery until this long after the pull. Presence of Mind also needs AutoBurst.")]
 	public PresenceOfMindOpenerTiming PresenceOfMindOpener { get; set; } = PresenceOfMindOpenerTiming.SixSeconds;
 
@@ -57,25 +134,21 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 	#endregion
 
-	#region Damage
+	#region Potion
 
-	[RotationConfig(CombatType.PvE, Name = "[Damage] Use potion")]
+	[RotationConfig(CombatType.PvE, Name = "[Potion] Use potion", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.OpenerPage)]
 	public bool UsePotion { get; set; } = true;
 
 	[RotationConfig(CombatType.PvE, Name = "    > First potion", Parent = nameof(UsePotion), Tooltip =
-		"Opener: during the countdown. 2 minutes: the first potion waits for the 2-minute burst.")]
-	public PotTiming PotionTiming { get; set; } = PotTiming.Opener;
+		"Opener: during the countdown. 2 minutes: the first potion waits for the 2-minute burst.\n" +
+		"With others: only when a party member already has the potion buff (Medicated), so you pot together with them.")]
+	public BeirutaPotTiming PotionTiming { get; set; } = BeirutaPotTiming.Opener;
 
-	public enum PotTiming : byte
-	{
-		[Description("Opener (countdown)")]
-		Opener,
+	#endregion
 
-		[Description("2 minutes")]
-		TwoMinutes,
-	}
+	#region Damage
 
-	[RotationConfig(CombatType.PvE, Name = "[Damage] Hold Afflatus Misery for raid buffs (if a raid-buff job is present)", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Damage] Hold Afflatus Misery for raid buffs (if a raid-buff job is present)", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.DamagePage, Tooltip =
 		"Glare IV is also held until the shortest raid buff is about to end.\n" +
 		"Misery is still dumped early when there is enough time and lilies to rebuild 3 Blood Lilies before the next burst, so it doesn't block lilies.")]
 	public bool HoldMiseryForBurst { get; set; } = true;
@@ -85,11 +158,11 @@ public sealed class BeirutaWHM : WhiteMageRotation
 	#region Thin Air
 
 	[Range(0, 10000, ConfigUnitType.None, 100)]
-	[RotationConfig(CombatType.PvE, Name = "[Thin Air] Minimum spell MP", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Thin Air] Minimum spell MP", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.DamagePage, Tooltip =
 		"Thin Air goes on spells costing at least this much MP, on Raise, and before it would cap.")]
 	public float ThinAirNeed { get; set; } = 1000;
 
-	[RotationConfig(CombatType.PvE, Name = "[Thin Air] Last charge")]
+	[RotationConfig(CombatType.PvE, Name = "[Thin Air] Last charge", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.DamagePage)]
 	public ThinAirUsageStrategy ThinAirLastChargeUsage { get; set; } = ThinAirUsageStrategy.ReserveLastChargeForRaise;
 
 	public enum ThinAirUsageStrategy : byte
@@ -108,7 +181,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 	#region Movement
 
-	[RotationConfig(CombatType.PvE, Name = "[Movement] Use Swiftcast", Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "[Movement] Use Swiftcast", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.MovementPage, Tooltip =
 		"Instant options while moving: lily heals > Afflatus Misery > Glare IV > early Dia, then Swiftcast, then Regen.\n" +
 		"No heal GCDs are used just for movement in burst.")]
 	public bool UseSwiftcastForMovement { get; set; } = true;
@@ -134,10 +207,11 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 	#region Healing
 
-	[RotationConfig(CombatType.PvE, Name = "[Healing] Custom healing settings (off = defaults)", Tooltip =
-		"Off: AoE thresholds come from each heal's potency, Temperance, the co-healer's smallest GCD heal and incoming HoT ticks, so heals are not wasted.\n" +
-		"Off also means: one lily kept, Benediction off, Tetragrammaton below 70% (2 charges) / 60% (1 charge), Afflatus Solace on tanks below 50%.\n" +
-		"On: the values below replace the Ward-off thresholds. Heal area = 3+ players below that HP, like RSR's own heal-area settings. Ward Mode always uses its own.")]
+	[RotationConfig(CombatType.PvE, Name = "[Healing] Custom healing settings (off = defaults)", Parent = nameof(MoreSettings), ParentValue = BeirutaSettingNames.HealingPage, Tooltip =
+		"Off: each area heal waits until 3+ players are low enough that it won't be wasted, worked out from its potency, Temperance, the co-healer's smallest GCD heal and incoming HoT ticks.\n" +
+		"Off also means: one lily kept, Benediction off, Tetragrammaton on tanks below 60% (2 charges) / 50% (1 charge), Afflatus Solace on tanks below 40%.\n" +
+		"On: each area heal fires when 3+ players in range are below the value set here.\n" +
+		"Ward Mode ignores these values and uses its own.")]
 	public bool UseCustomHPThreshold { get; set; } = false;
 
 	[RotationConfig(CombatType.PvE, Name = "    > Keep one lily for emergencies", Parent = nameof(UseCustomHPThreshold), Tooltip =
@@ -156,26 +230,26 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 	[Range(0, 1, ConfigUnitType.Percent)]
 	[RotationConfig(CombatType.PvE, Name = "    > Tetragrammaton 2 charges: below", Parent = nameof(UseCustomHPThreshold))]
-	public float TetragrammatonSecond { get; set; } = 0.7f;
+	public float TetragrammatonSecond { get; set; } = 0.6f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
 	[RotationConfig(CombatType.PvE, Name = "    > Tetragrammaton 1 charge: below", Parent = nameof(UseCustomHPThreshold))]
-	public float TetragrammatonLast { get; set; } = 0.6f;
+	public float TetragrammatonLast { get; set; } = 0.5f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
 	[RotationConfig(CombatType.PvE, Name = "    > Afflatus Solace (no Tetragrammaton): tank below", Parent = nameof(UseCustomHPThreshold))]
-	public float SolaceTankHeal { get; set; } = 0.5f;
+	public float SolaceTankHeal { get; set; } = 0.4f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Afflatus Rapture: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Afflatus Rapture: area heal when 3+ below", Parent = nameof(UseCustomHPThreshold))]
 	public float RaptureHeal { get; set; } = 0.8f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Medica III: heal area (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Medica III: area heal when 3+ below", Parent = nameof(UseCustomHPThreshold))]
 	public float MedicaHeal { get; set; } = 0.65f;
 
 	[Range(0, 1, ConfigUnitType.Percent)]
-	[RotationConfig(CombatType.PvE, Name = "    > Cure III: heal area around the target (Ward off)", Parent = nameof(UseCustomHPThreshold))]
+	[RotationConfig(CombatType.PvE, Name = "    > Cure III: area heal when 3+ around the target below", Parent = nameof(UseCustomHPThreshold))]
 	public float CureIIIHeal { get; set; } = 0.7f;
 
 	public enum BenedictionUsage : byte
@@ -194,20 +268,9 @@ public sealed class BeirutaWHM : WhiteMageRotation
 	private bool BenedictionTankOnlyValue => !UseCustomHPThreshold || BenedictionTankOnly;
 	private float BenedictionHealValue => UseCustomHPThreshold ? BenedictionHeal : 0.15f;
 	private bool KeepEmergencyLilyValue => !UseCustomHPThreshold || KeepEmergencyLily;
-	private float TetragrammatonSecondValue => UseCustomHPThreshold ? TetragrammatonSecond : 0.7f;
-	private float TetragrammatonLastValue => UseCustomHPThreshold ? TetragrammatonLast : 0.6f;
-	private float SolaceTankHealValue => UseCustomHPThreshold ? SolaceTankHeal : 0.5f;
-
-	#endregion
-
-	#region DMU
-
-	[RotationConfig(CombatType.PvE, Name = "[DMU] Experimental Accretion top-up", Tooltip =
-		"Fills Accretion players in order: the healer first, then the DPS once Earth Resistance Down II is gone.\n" +
-		"Waits until 3+ non-tanks other than the target are above 30%, and 3s after Accretion changes.\n" +
-		"WHM: Benediction > Tetragrammaton, then Afflatus Solace > Cure II once Benediction is used.\n" +
-		"Always active in DMU, even with this off: group heals stop once an Accretion player is above 50%, and no heal fills an Accretion player out of order.")]
-	public bool AccretionTopUp { get; set; } = false;
+	private float TetragrammatonSecondValue => UseCustomHPThreshold ? TetragrammatonSecond : 0.6f;
+	private float TetragrammatonLastValue => UseCustomHPThreshold ? TetragrammatonLast : 0.5f;
+	private float SolaceTankHealValue => UseCustomHPThreshold ? SolaceTankHeal : 0.4f;
 
 	#endregion
 
@@ -217,31 +280,16 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 	private const float BurstDiaRefreshSeconds = 11f;
 	private const float MovingDiaRefreshSeconds = 11f;
-	private const float MovementGraceSeconds = 0.3f;
-	private const float MovementTimeThreshold = 1.0f;
-	private const float MovementLeadSeconds = 0.5f;
-	private const float MovementHealHp = 0.9f;
+	private const float MovementHealHp = 0.8f;
+	private const float MovementRegenTankHp = 0.8f;
+	private const float MovementSolaceHp = 0.9f;
 	private const float BurstLilyPrepSeconds = 15f;
-
-	private bool MovingPastGrace =>
-		InCombat &&
-		IsMoving &&
-		MovingTime > MovementGraceSeconds;
-
-	private bool HasSufficientMovement =>
-		InCombat &&
-		IsMoving &&
-		MovingTime > MovementTimeThreshold;
 
 	private bool HasLiturgyOfTheBell => StatusHelper.PlayerHasStatus(true, StatusID.LiturgyOfTheBell);
 
 	private bool HasSacredSight => SacredSightStacks > 0;
 
 	private bool HasHealingLockout => HasLiturgyOfTheBell;
-
-	private bool ShouldHoldRaiseSwift =>
-		(HasSwift || IsLastAction(ActionID.SwiftcastPvE)) &&
-		MergedStatus.HasFlag(AutoStatus.Raise);
 
 	private bool CurrentTargetDiaMissingOrEnding(float remainingSeconds)
 	{
@@ -262,22 +310,32 @@ public sealed class BeirutaWHM : WhiteMageRotation
 			  CurrentTarget.WillStatusEnd(remainingSeconds, true, StatusID.Aero)));
 	}
 
+	private const float DiaInitialPotency = 85f;
+	private const float DiaTickPotency = 85f;
+	private const float GlareFillerPotency = 330f;
+
+	private static bool DiaWorthBeforeDowntime(IBaseAction dia) =>
+		BeirutaDotValue.WorthBeforeDowntime(dia.Target.Target, DiaInitialPotency, DiaTickPotency, GlareFillerPotency);
+
 	private bool CanUseCurrentDia(out IAction? act, bool skipStatusProvideCheck = false)
 	{
 		if (DiaPvE.EnoughLevel &&
-			DiaPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+			DiaPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck) &&
+			DiaWorthBeforeDowntime(DiaPvE))
 		{
 			return true;
 		}
 
 		if (!DiaPvE.EnoughLevel && AeroIiPvE.EnoughLevel &&
-			AeroIiPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+			AeroIiPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck) &&
+			DiaWorthBeforeDowntime(AeroIiPvE))
 		{
 			return true;
 		}
 
 		if (!DiaPvE.EnoughLevel && !AeroIiPvE.EnoughLevel && AeroPvE.EnoughLevel &&
-			AeroPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck))
+			AeroPvE.CanUse(out act, skipStatusProvideCheck: skipStatusProvideCheck) &&
+			DiaWorthBeforeDowntime(AeroPvE))
 		{
 			return true;
 		}
@@ -321,47 +379,6 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		(uint)StatusID.ArcaneCircle,
 	];
 
-	private static readonly StatusID[] TargetRaidDebuffStatus =
-	[
-		StatusID.ChainStratagem,
-		StatusID.ChainStratagem_1406,
-		StatusID.Dokumori,
-		StatusID.Dokumori_4303,
-	];
-
-	private static bool IsPartyBurst
-	{
-		get
-		{
-			if (CurrentTarget != null && CurrentTarget.HasStatus(false, TargetRaidDebuffStatus))
-			{
-				return true;
-			}
-
-			if (PartyMembers == null)
-			{
-				return false;
-			}
-
-			foreach (var member in PartyMembers)
-			{
-				if (member?.StatusList == null)
-				{
-					continue;
-				}
-
-				foreach (var status in member.StatusList)
-				{
-					if (PartyRaidBuffStatusIds.Contains(status.StatusId))
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-	}
-
 	private static bool RaidBuffJobInParty
 	{
 		get
@@ -402,11 +419,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 	private bool PresenceOfMindAllowed => IsBurst && OpenerTimingPassed;
 
 	private bool ShouldUsePotionInCombat =>
-		UsePotion &&
-		InCombat &&
-		IsBurst &&
-		!(PotionTiming == PotTiming.TwoMinutes && CombatElapsedLess(30f)) &&
-		(HasPresenceOfMind ||
+		BeirutaPotion.Ready(UsePotion, PotionTiming, IsBurst, HasPresenceOfMind ||
 		 (PresenceOfMindPvE.EnoughLevel &&
 		  !CombatElapsedLess(Math.Max(0f, PresenceOfMindOpenerSeconds - 5f)) &&
 		  PresenceOfMindPvE.Cooldown.WillHaveOneCharge(5)));
@@ -452,14 +465,14 @@ public sealed class BeirutaWHM : WhiteMageRotation
 			return false;
 		}
 
-		if (TargetDying)
+		if (TargetDying || PlannedLilySoon)
 		{
 			return true;
 		}
 
 		return MiseryHoldActive
 			? IsPartyBurst || MiseryDumpSafe
-			: MovingPastGrace || InDamageBurst;
+			: BeirutaMove.PastGrace || InDamageBurst;
 	}
 
 	private const uint SacredSightSpareGcds = 2;
@@ -468,7 +481,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 	private bool SacredSightExpiring =>
 		HasSacredSight &&
 		StatusHelper.PlayerWillStatusEndGCD(
-			SacredSightStacks + SacredSightSpareGcds + (WardMode ? SacredSightWardSpareGcds : 0u),
+			SacredSightStacks + SacredSightSpareGcds + (WardActive ? SacredSightWardSpareGcds : 0u),
 			1f, true, StatusID.SacredSight);
 
 	private static readonly HashSet<uint> TargetRaidDebuffIds =
@@ -522,17 +535,64 @@ public sealed class BeirutaWHM : WhiteMageRotation
 	private bool BurstEndingForGlareIv =>
 		IsPartyBurst &&
 		ShortestBurstRemaining <= GCDTime(
-			SacredSightStacks + SacredSightSpareGcds + (WardMode ? SacredSightWardSpareGcds : 0u),
+			SacredSightStacks + SacredSightSpareGcds + (WardActive ? SacredSightWardSpareGcds : 0u),
 			DataCenter.DefaultGCDRemain);
 
-	private bool ShouldUseGlareIv => BurstEndingForGlareIv || SacredSightExpiring || MovingPastGrace || TargetDying;
+	private bool ShouldUseGlareIv => BurstEndingForGlareIv || SacredSightExpiring || BeirutaMove.PastGrace || TargetDying;
 
 	#endregion
 
 	#region Lilies
 
 	private bool LilyAvailable(bool emergency) =>
-		Lily > (KeepEmergencyLilyValue && !emergency ? 1 : 0);
+		Lily > (KeepEmergencyLilyValue && !emergency ? 1 : 0) &&
+		(emergency || PlanLilyAllowsSpend);
+
+	private const float PlannedHealHp = 0.95f;
+	private const int PlannedAoeHealCount = 2;
+	private const float PlannedLilyLookahead = 60f;
+	private const float PlannedMiseryLeadSeconds = 6f;
+	private const float PlannedAoeHealGapSeconds = 5f;
+
+	private static readonly List<float> _plannedLilyStarts = [];
+
+	private bool PlanLilyAllowsSpend
+	{
+		get
+		{
+			Updaters.TimelineUpdater.UpcomingStarts(PlannedLilyLookahead, _plannedLilyStarts,
+				AfflatusRapturePvE.ID, AfflatusSolacePvE.ID);
+			return _plannedLilyStarts.Count == 0 || PlannedLiliesServed(Lily - 1) >= PlannedLiliesServed(Lily);
+		}
+	}
+
+	private static int PlannedLiliesServed(int lilies)
+	{
+		var next = MathF.Max(0f, LilyTime);
+		var served = 0;
+		foreach (var at in _plannedLilyStarts)
+		{
+			while (next <= at)
+			{
+				lilies = Math.Min(3, lilies + 1);
+				next += LilyIntervalSeconds;
+			}
+
+			if (lilies > 0)
+			{
+				lilies--;
+				served++;
+			}
+		}
+
+		return served;
+	}
+
+	private bool PlannedLilySoon =>
+		Updaters.TimelineUpdater.PlannedWithin(PlannedMiseryLeadSeconds, AfflatusRapturePvE.ID, AfflatusSolacePvE.ID);
+
+	private bool PlannedAoeHealNear =>
+		Updaters.TimelineUpdater.PlannedAround(PlannedAoeHealGapSeconds, CureIiiPvE.ID, MedicaIiiPvE.ID, AfflatusRapturePvE.ID);
 
 	private const float LilyCapSoonSeconds = 5f;
 
@@ -572,6 +632,29 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 	#region Healing Engine
 
+	private bool CanRunHealEngine => BeirutaHeal.CanRun(HasHealingLockout);
+
+	private static bool AccretionGroupHealBlocked => BeirutaHeal.GroupHealBlocked;
+
+	private float EffectiveHpRatio(IBattleChara member) => BeirutaHeal.EffectiveHpRatio(this, member);
+
+	private bool CountsAsInjured(IBattleChara member, float threshold) => BeirutaHeal.Injured(this, member, threshold);
+
+	private int CountInjured(float range, float threshold) => BeirutaHeal.CountInjured(this, range, threshold);
+
+	private bool AoeNeeded(float range, float threshold) => BeirutaHeal.AoeNeeded(this, range, threshold);
+
+	private bool SpotHealOk(IBattleChara member) => SpotHealAllowed(member, AoeNeeded(PartyHealRange, RaptureHp), PartyHealRange);
+
+	private bool AoeGcdNeeded(float range, float threshold) => BeirutaHeal.AoeGcdNeeded(this, range, threshold);
+
+	private float AoeThreshold(float potency, float customWardOff, float wardOffCap = 1f) => BeirutaHeal.Threshold(this, potency, customWardOff, wardOffCap);
+
+	float IBeirutaHealContext.HealBoost => HealBoost;
+
+	float IBeirutaHealContext.LandingHotPotency(IBattleChara member) => LandingHotPotency(member);
+	private static bool HoldAoeForCoHealer => BeirutaHeal.HoldAoe(PartyHealRange);
+
 	private const float SingleHealRange = 30f;
 	private const float PartyHealRange = 20f;
 	private const float CureIiiRadius = 10f;
@@ -585,42 +668,8 @@ public sealed class BeirutaWHM : WhiteMageRotation
 	private const float RaptureWardOffCap = 0.8f;
 	private const float CureIiiWardOffCap = 0.7f;
 	private const float TemperanceBoost = 1.2f;
-	private const float CriticalHp = 0.3f;
 	private const float BenisonCapTankHp = 0.9f;
-	private const float UndeadReleaseSeconds = 1f;
-	private const float EarthlyDominanceGateSeconds = 3f;
-	private const float FreshMitigationSeconds = 6f;
-	private const float RampartDuration = 20f;
-	private const float BigMitigationDuration = 15f;
-
 	private readonly BeirutaRaidwide _raidwide = new();
-
-	private static readonly StatusID[] FullInvulnStatus =
-	[
-		StatusID.HallowedGround,
-		StatusID.HallowedGround_1302,
-		StatusID.Superbolide,
-	];
-
-	private static readonly StatusID[] HolmgangStatus =
-	[
-		StatusID.Holmgang,
-		StatusID.Holmgang_409,
-	];
-
-	private static readonly StatusID[] TankBigMitigationStatus =
-	[
-		StatusID.Rampart,
-		StatusID.Rampart_1191,
-		StatusID.Sentinel,
-		StatusID.Guardian,
-		StatusID.Vengeance,
-		StatusID.Damnation,
-		StatusID.ShadowWall,
-		StatusID.ShadowedVigil,
-		StatusID.Nebula,
-		StatusID.GreatNebula,
-	];
 
 	private static readonly StatusID[] RegenStatus =
 	[
@@ -636,59 +685,6 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		StatusID.MedicaIi,
 	];
 
-	private static readonly StatusID[] CoHealerMacrocosmosStatus =
-	[
-		StatusID.Macrocosmos,
-		StatusID.Macrocosmos_3104,
-		StatusID.Macrocosmos_3989,
-	];
-
-	private bool CanRunHealEngine =>
-		Service.Config.AutoHeal &&
-		InCombat &&
-		!HasHealingLockout;
-
-	private static bool IsTankMember(IBattleChara member) => member.IsJobCategory(JobRole.Tank);
-
-	private static bool IsHealBlocked(IBattleChara member)
-	{
-		if (member.HasStatus(false, FullInvulnStatus) || member.HasStatus(false, StatusID.LivingDead))
-		{
-			return true;
-		}
-
-		return member.HasStatus(false, HolmgangStatus) &&
-			member.StatusTime(false, HolmgangStatus) > UndeadReleaseSeconds;
-	}
-
-	private static bool IsJustOffHolmgang(IBattleChara member) =>
-		member.HasStatus(false, HolmgangStatus) &&
-		member.StatusTime(false, HolmgangStatus) <= UndeadReleaseSeconds;
-
-	private static bool HasFreshBigMitigation(IBattleChara member)
-	{
-		foreach (var status in TankBigMitigationStatus)
-		{
-			if (!member.HasStatus(false, status))
-			{
-				continue;
-			}
-
-			var duration = status is StatusID.Rampart or StatusID.Rampart_1191 ? RampartDuration : BigMitigationDuration;
-			if (duration - member.StatusTime(false, status) <= FreshMitigationSeconds)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private static bool IsFreshMitigatingTank(IBattleChara member) =>
-		IsTankMember(member) &&
-		!IsHealBlocked(member) &&
-		HasFreshBigMitigation(member);
-
 	private float LandingHotPotency(IBattleChara member) =>
 		MedicaHotPending &&
 		IsHealableInRange(member, PartyHealRange) &&
@@ -696,101 +692,16 @@ public sealed class BeirutaWHM : WhiteMageRotation
 			? MedicaHotCountedPotency
 			: 0f;
 
-	private float EffectiveHpRatio(IBattleChara member) =>
-		BeirutaHealModel.EffectiveHpRatio(member, WardMode, LandingHotPotency(member));
-
-	private bool CountsAsInjured(IBattleChara member, float threshold) =>
-		member.GetHealthRatio() < BeirutaHealModel.AlwaysInjuredHp ||
-		EffectiveHpRatio(member) < threshold;
-
-	private static bool IsHealableInRange(IBattleChara? member, float range) =>
-		member != null &&
-		!member.IsDead &&
-		member.DistanceToPlayer() <= range;
-
-	private int CountInjured(float range, float threshold)
-	{
-		var count = 0;
-		foreach (var member in PartyMembers)
-		{
-			if (IsHealableInRange(member, range) && !IsHealBlocked(member) && CountsAsInjured(member, threshold))
-			{
-				count++;
-			}
-		}
-		return count;
-	}
-
-	private static bool AnyCritical(float range)
-	{
-		foreach (var member in PartyMembers)
-		{
-			if (IsHealableInRange(member, range) && !IsHealBlocked(member) && member.GetHealthRatio() < CriticalHp)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private bool AoeNeeded(float range, float threshold) => CountInjured(range, threshold) >= AoeInjuredCount;
-
-	private static bool CoHealerBigHealSoon
-	{
-		get
-		{
-			foreach (var member in PartyMembers)
-			{
-				if (member == null || member.IsDead)
-				{
-					continue;
-				}
-
-				if (member.HasStatus(false, StatusID.GiantDominance) ||
-					member.HasStatus(false, CoHealerMacrocosmosStatus) ||
-					(member.HasStatus(false, StatusID.EarthlyDominance) &&
-					 member.StatusTime(false, StatusID.EarthlyDominance) < EarthlyDominanceGateSeconds))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-
-	private static bool HoldAoeForCoHealer => CoHealerBigHealSoon && !AnyCritical(PartyHealRange);
-
-	private static IBattleChara? FindLowest(float range, Func<IBattleChara, bool> filter)
-	{
-		IBattleChara? best = null;
-		foreach (var member in PartyMembers)
-		{
-			if (!IsHealableInRange(member, range) || IsHealBlocked(member) || !filter(member))
-			{
-				continue;
-			}
-
-			if (best == null || member.GetHealthRatio() < best.GetHealthRatio())
-			{
-				best = member;
-			}
-		}
-		return best;
-	}
-
 	private static bool MedicaHotPending => BeirutaHealWindow.GcdJustUsed(ActionID.MedicaIiiPvE, ActionID.MedicaIiPvE);
 
 	private static float HealBoost => StatusHelper.PlayerHasStatus(true, StatusID.Temperance) ? TemperanceBoost : 1f;
-
-	private float AoeThreshold(float potency, float customWardOff, float wardOffCap = 1f) =>
-		BeirutaHealModel.Threshold(potency, HealBoost, WardMode, UseCustomHPThreshold, customWardOff, PartyMembers, wardOffCap);
 
 	private float RaptureHp => AoeThreshold(RapturePotency, RaptureHeal, RaptureWardOffCap);
 
 	private float CureIiiHp => AoeThreshold(CureIiiPotency, CureIIIHeal, CureIiiWardOffCap);
 
 	private float MedicaHp =>
-		WardMode
+		WardActive
 			? BeirutaHealModel.RoundToFive(BeirutaHealModel.FullUseHp(MedicaDirectPotency, HealBoost))
 			: AoeThreshold(MedicaCountedPotency, MedicaHeal);
 
@@ -825,31 +736,10 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		}
 	}
 
-	private IBattleChara? EnemyAggroTank
-	{
-		get
-		{
-			var aggroId = CurrentTarget?.TargetObject?.GameObjectId;
-			if (aggroId == null)
-			{
-				return null;
-			}
-
-			foreach (var member in PartyMembers)
-			{
-				if (member.GameObjectId == aggroId && IsTankMember(member))
-				{
-					return member;
-				}
-			}
-			return null;
-		}
-	}
-
 	private IBattleChara? FindCureIiiCenter(float threshold)
 	{
 		IBattleChara? best = null;
-		var bestCount = AoeInjuredCount - 1;
+		var bestCount = WardActive ? 0 : AoeInjuredCount - 1;
 		foreach (var center in PartyMembers)
 		{
 			if (!IsHealableInRange(center, SingleHealRange) ||
@@ -865,6 +755,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 					!member.IsDead &&
 					!IsHealBlocked(member) &&
 					System.Numerics.Vector3.Distance(center.Position, member.Position) <= CureIiiRadius &&
+					(!WardActive || !IsTankMember(member)) &&
 					CountsAsInjured(member, threshold))
 				{
 					count++;
@@ -890,8 +781,6 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 	private static bool AccretionTargetSafe(IBattleChara target, float healHp) =>
 		!BeirutaAccretion.WouldFillOutOfOrder(PartyMembers, target, healHp);
-
-	private static bool AccretionGroupHealBlocked => BeirutaAccretion.GroupHealBlocked(PartyMembers);
 
 	private static bool AccretionAreaSafe(System.Numerics.Vector3 center, float radius, float healHp) =>
 		!AccretionGroupHealBlocked &&
@@ -921,7 +810,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		!HasHealingLockout;
 
 	private IBattleChara? MovementSolaceTarget() =>
-		FindLowest(SingleHealRange, static m => m.GetHealthRatio() < MovementHealHp && AccretionTargetSafe(m, SolaceHealHp));
+		AccretionUp ? null : FindLowest(SingleHealRange, static m => SpotHealWorthy(m) && HealHp(m) < MovementSolaceHp && AccretionTargetSafe(m, SolaceHealHp));
 
 	private bool MovementRaptureUseful =>
 		CanUseMovementHeal &&
@@ -940,10 +829,10 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 	private IBattleChara? MovementRegenTarget()
 	{
-		var tank = FindLowest(SingleHealRange, static m => IsTankMember(m) && m.GetHealthRatio() < 1f && !m.HasStatus(true, RegenStatus));
-		return tank ?? FindLowest(SingleHealRange, static m =>
-			m.GetHealthRatio() < MovementHealHp &&
-			!m.HasStatus(true, RegenStatus) &&
+		return AccretionUp ? null : FindLowest(SingleHealRange, static m =>
+			SpotHealWorthy(m) &&
+			HealHp(m) < MovementRegenTankHp &&
+			!HasSingleTargetHot(m) &&
 			AccretionTargetSafe(m, RegenHealHp));
 	}
 
@@ -956,7 +845,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 	private bool MovementMiseryUseful => (!MiseryHoldActive || MiseryDumpSafe) && OpenerTimingPassed && BloodLily >= 3 && AfflatusMiseryPvE.CanUse(out _, skipAoeCheck: true);
 
 	private bool MovementDiaDue =>
-		HasSufficientMovement &&
+		BeirutaMove.Sufficient &&
 		CurrentTargetDiaMissingOrEnding(MovingDiaRefreshSeconds);
 
 	private bool SwiftcastAvailableForMovement =>
@@ -965,12 +854,13 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		SwiftcastPvE.EnoughLevel &&
 		SwiftcastPvE.IsEnabled &&
 		!SwiftcastPvE.Cooldown.IsCoolingDown &&
-		!ShouldHoldRaiseSwift;
+		!BeirutaMove.RaiseSwiftHeld &&
+		!Updaters.TimelineUpdater.PlannedWithin(40f, SwiftcastPvE.ID);
 
 	private bool SwiftcastReadyForMovement =>
 		SwiftcastAvailableForMovement &&
-		HasSufficientMovement &&
-		MovingTime > MovementTimeThreshold + MovementLeadSeconds;
+		BeirutaMove.Sufficient &&
+		BeirutaMove.PastLead;
 
 	private bool HasCheaperMovementOption =>
 		HasSacredSight ||
@@ -1003,7 +893,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 	{
 		act = null;
 
-		if (!MovingPastGrace || HasSwift || ShouldHoldRaiseSwift)
+		if (!BeirutaMove.PastGrace || HasSwift || BeirutaMove.RaiseSwiftHeld)
 		{
 			return false;
 		}
@@ -1019,7 +909,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		}
 
 		if (MovementSolaceUseful && MovementSolaceTarget() is { } solaceTarget &&
-			BeirutaAccretion.TryUseOn(AfflatusSolacePvE, solaceTarget, out act))
+			BeirutaTarget.TryUseOn(AfflatusSolacePvE, solaceTarget, out act))
 		{
 			return true;
 		}
@@ -1039,10 +929,10 @@ public sealed class BeirutaWHM : WhiteMageRotation
 			return true;
 		}
 
-		if (HasSufficientMovement &&
+		if (BeirutaMove.Sufficient &&
 			!SwiftcastAvailableForMovement &&
 			MovementRegenUseful && MovementRegenTarget() is { } regenTarget &&
-			BeirutaAccretion.TryUseOn(RegenPvE, regenTarget, out act))
+			BeirutaTarget.TryUseOn(RegenPvE, regenTarget, out act))
 		{
 			return true;
 		}
@@ -1078,27 +968,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 	#region Countdown Logic
 
-	private const long CountdownResponseDelayMs = 1_000;
-	private long _countdownStartedAtMs;
-	private long _countdownLastSeenMs;
-	private float _countdownLastRemain;
-
-	private bool CountdownDelayPassed(float remainTime)
-	{
-		var now = Environment.TickCount64;
-
-		if (_countdownStartedAtMs == 0 ||
-			now - _countdownLastSeenMs > 500 ||
-			remainTime > _countdownLastRemain + 0.5f)
-		{
-			_countdownStartedAtMs = now;
-		}
-
-		_countdownLastSeenMs = now;
-		_countdownLastRemain = remainTime;
-
-		return now - _countdownStartedAtMs >= CountdownResponseDelayMs;
-	}
+	private readonly BeirutaCountdownDelay _countdownDelay = new();
 
 	protected override IAction? CountDownAction(float remainTime)
 	{
@@ -1107,7 +977,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 			BeirutaWard.SetWardMode(this, false);
 		}
 
-		if (!CountdownDelayPassed(remainTime))
+		if (!_countdownDelay.Passed(remainTime))
 		{
 			return null;
 		}
@@ -1116,7 +986,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 		if (remainTime <= 2.1f &&
 			UsePotion &&
-			PotionTiming == PotTiming.Opener &&
+			PotionTiming == BeirutaPotTiming.Opener &&
 			UseBurstMedicine(out act))
 		{
 			return act;
@@ -1133,7 +1003,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		{
 			if (remainTime is < 5.5f and > 4.5f &&
 				!tank.HasStatus(true, RegenStatus) &&
-				BeirutaAccretion.TryUseOn(RegenPvE, tank, out act))
+				BeirutaTarget.TryUseOn(RegenPvE, tank, out act))
 			{
 				return act;
 			}
@@ -1155,14 +1025,14 @@ public sealed class BeirutaWHM : WhiteMageRotation
 	{
 		act = null;
 		return !target.HasStatus(false, StatusID.DivineBenison, StatusID.DivineBenison_1404) &&
-			BeirutaAccretion.TryUseOn(DivineBenisonPvE, target, out act, usedUp: true);
+			BeirutaTarget.TryUseOn(DivineBenisonPvE, target, out act, usedUp: true);
 	}
 
 	private bool TryAquaveilOn(IBattleChara target, out IAction? act)
 	{
 		act = null;
 		return !target.HasStatus(false, StatusID.Aquaveil, StatusID.Aquaveil_3086) &&
-			BeirutaAccretion.TryUseOn(AquaveilPvE, target, out act);
+			BeirutaTarget.TryUseOn(AquaveilPvE, target, out act);
 	}
 
 	private bool TryTankMitigation(IBattleChara? tank, out IAction? act)
@@ -1191,7 +1061,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		act = null;
 		return !HasSingleHealLockoutStatus(target) &&
 			AccretionTargetSafe(target, TetragrammatonHealHp) &&
-			BeirutaAccretion.TryUseOn(TetragrammatonPvE, target, out act, usedUp: true);
+			BeirutaTarget.TryUseOn(TetragrammatonPvE, target, out act, usedUp: true);
 	}
 
 	private static bool HasSingleHealLockoutStatus(IBattleChara target) =>
@@ -1209,7 +1079,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		if (BenedictionModeValue == BenedictionUsage.CriticalAndWalkingDead)
 		{
 			var walkingDead = FindLowest(SingleHealRange, static m => m.HasStatus(false, StatusID.WalkingDead));
-			if (walkingDead != null && BeirutaAccretion.TryUseOn(BenedictionPvE, walkingDead, out act))
+			if (walkingDead != null && BeirutaTarget.TryUseOn(BenedictionPvE, walkingDead, out act))
 			{
 				return true;
 			}
@@ -1218,85 +1088,14 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		var tankOnly = BenedictionTankOnlyValue;
 		var threshold = BenedictionHealValue;
 		var critical = FindLowest(SingleHealRange, m =>
+			SpotHealWorthy(m) &&
 			(!tankOnly || IsTankMember(m)) &&
-			m.GetHealthRatio() < threshold &&
+			HealHp(m) < threshold &&
 			AccretionTargetSafe(m, BenedictionHealHp) &&
 			!HasFreshBigMitigation(m) &&
 			!m.HasStatus(false, StatusID.WalkingDead));
 
-		return critical != null && BeirutaAccretion.TryUseOn(BenedictionPvE, critical, out act);
-	}
-
-	private bool TryHealAbility(out IAction? act)
-	{
-		act = null;
-
-		if (!CanRunHealEngine)
-		{
-			return false;
-		}
-
-		if (TryBenediction(out act))
-		{
-			return true;
-		}
-
-		var holmgangTank = FindLowest(SingleHealRange, static m => IsTankMember(m) && IsJustOffHolmgang(m));
-		if (holmgangTank != null && TryTetragrammatonOn(holmgangTank, out act))
-		{
-			return true;
-		}
-
-		if (_raidwide.Coming && TryRaidwideBenison(out act))
-		{
-			return true;
-		}
-
-		foreach (var member in PartyMembers)
-		{
-			if (IsFreshMitigatingTank(member) && TryTankMitigation(member, out act))
-			{
-				return true;
-			}
-		}
-
-		if (DivineBenisonPvE.EnoughLevel &&
-			DivineBenisonPvE.Cooldown.CurrentCharges >= DivineBenisonPvE.Cooldown.MaxCharges &&
-			DivineBenisonPvE.Cooldown.MaxCharges >= 2)
-		{
-			var capTank = EnemyAggroTank ?? FindLowest(SingleHealRange, static m => IsTankMember(m));
-			if (capTank != null &&
-				!IsHealBlocked(capTank) &&
-				capTank.GetHealthRatio() < BenisonCapTankHp &&
-				TryBenisonOn(capTank, out act))
-			{
-				return true;
-			}
-		}
-
-		var threshold = CurrentTetragrammatonThreshold;
-		var tetraTank = FindLowest(SingleHealRange, m => IsTankMember(m) && EffectiveHpRatio(m) < threshold);
-		if (tetraTank != null && TryTetragrammatonOn(tetraTank, out act))
-		{
-			return true;
-		}
-
-		if (!AoeNeeded(PartyHealRange, RaptureHp))
-		{
-			var topUp = FindLowest(SingleHealRange, m => EffectiveHpRatio(m) < threshold && AccretionTargetSafe(m, TetragrammatonHealHp));
-			if (topUp != null && TryTetragrammatonOn(topUp, out act))
-			{
-				return true;
-			}
-		}
-
-		if (NonTankTopUp is { } nonTank && TryTetragrammatonOn(nonTank, out act))
-		{
-			return true;
-		}
-
-		act = null;
-		return false;
+		return critical != null && BeirutaTarget.TryUseOn(BenedictionPvE, critical, out act);
 	}
 
 	private bool TryThinAir(IAction nextGCD, out IAction? act)
@@ -1335,18 +1134,24 @@ public sealed class BeirutaWHM : WhiteMageRotation
 			ThinAirPvE.CanUse(out act);
 	}
 
-	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+	#endregion
+
+	#region Steps
+
+	private const float TankbusterLeadSeconds = BeirutaIncoming.TankbusterLeadSeconds;
+
+	public bool PlanAbility(IAction nextGCD, out IAction? act)
 	{
-		if (TryAccretionAbility(out act))
-		{
-			return true;
-		}
+		act = null;
+		return false;
+	}
 
-		if (TryThinAir(nextGCD, out act))
-		{
-			return true;
-		}
+	public bool SpecialAbility(IAction nextGCD, out IAction? act) =>
+		TryAccretionAbility(out act) ||
+		(DoomTarget(SingleHealRange) is { } doomed && TryTetragrammatonOn(doomed, out act));
 
+	public bool BurstAbility(IAction nextGCD, out IAction? act)
+	{
 		if (ShouldUsePotionInCombat && UseBurstMedicine(out act))
 		{
 			return true;
@@ -1357,65 +1162,204 @@ public sealed class BeirutaWHM : WhiteMageRotation
 			return true;
 		}
 
-		if (TryHealAbility(out act))
-		{
-			return true;
-		}
-
-		return base.EmergencyAbility(nextGCD, out act);
+		act = null;
+		return InCombat && IsBurst && CombatTime > 6f && !AccretionGroupHealBlocked && AssizePvE.CanUse(out act, skipAoeCheck: true);
 	}
 
-	[RotationDesc(ActionID.DivineBenisonPvE)]
-	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
+	public bool ResourceAbility(IAction nextGCD, out IAction? act) => TryThinAir(nextGCD, out act);
+
+	public bool AreaHealAbility(IAction nextGCD, out IAction? act)
 	{
-		if (TryRaidwideBenison(out act))
-		{
-			return true;
-		}
-
-		return base.DefenseAreaAbility(nextGCD, out act);
+		act = null;
+		return false;
 	}
 
-	[RotationDesc(ActionID.DivineBenisonPvE, ActionID.AquaveilPvE)]
-	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
+	public bool SpotHealAbility(IAction nextGCD, out IAction? act)
 	{
-		var tank =
-			FindLowest(SingleHealRange, static m => IsFreshMitigatingTank(m)) ??
-			EnemyAggroTank ??
-			FindLowest(SingleHealRange, static m => IsTankMember(m));
+		act = null;
+		if (!CanRunHealEngine)
+		{
+			return false;
+		}
 
-		if (TryTankMitigation(tank, out act))
+		if (TopUpAllTarget(SingleHealRange) is { } topUp &&
+			TryTetragrammatonOn(topUp, out act))
 		{
 			return true;
 		}
 
-		return base.DefenseSingleAbility(nextGCD, out act);
+		if (TryBenediction(out act))
+		{
+			return true;
+		}
+
+		if (FindLowest(SingleHealRange, static m => IsTankMember(m) && IsJustOffUndead(m)) is { } holmgangTank &&
+			TryTetragrammatonOn(holmgangTank, out act))
+		{
+			return true;
+		}
+
+		if (DivineBenisonPvE.EnoughLevel &&
+			DivineBenisonPvE.Cooldown.CurrentCharges >= DivineBenisonPvE.Cooldown.MaxCharges &&
+			DivineBenisonPvE.Cooldown.MaxCharges >= 2 &&
+			(EnemyAggroTank ?? FindLowest(SingleHealRange, static m => IsTankMember(m))) is { } capTank &&
+			!IsHealBlocked(capTank) &&
+			HealHp(capTank) < BenisonCapTankHp &&
+			SpotHealOk(capTank) &&
+			TryBenisonOn(capTank, out act))
+		{
+			return true;
+		}
+
+		var threshold = CurrentTetragrammatonThreshold;
+		return FindLowest(SingleHealRange, m => SpotHealWorthy(m) && SpotHealOk(m) && EffectiveHpRatio(m) < threshold) is { } tetraTarget &&
+			TryTetragrammatonOn(tetraTarget, out act);
 	}
+
+	public bool TankHelpAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		if (!CanRunHealEngine)
+		{
+			return false;
+		}
+
+		if (BeirutaIncoming.TankbusterWithin(TankbusterLeadSeconds) &&
+			TryTankMitigation(
+				FindLowest(SingleHealRange, static m => IsFreshMitigatingTank(m)) ??
+				EnemyAggroTank ??
+				FindLowest(SingleHealRange, static m => IsTankMember(m)), out act))
+		{
+			return true;
+		}
+
+		foreach (var member in PartyMembers)
+		{
+			if (IsFreshMitigatingTank(member) && TryTankMitigation(member, out act))
+			{
+				return true;
+			}
+		}
+
+		act = null;
+		return false;
+	}
+
+	public bool LowPriorityAbility(IAction nextGCD, out IAction? act)
+	{
+		act = null;
+		if (!CanRunHealEngine || !_raidwide.Coming)
+		{
+			return false;
+		}
+
+		if (DivineBenisonPvE.Cooldown.CurrentCharges >= 2 && TryRaidwideBenison(out act))
+		{
+			return true;
+		}
+
+		return FindLowest(SingleHealRange, static m => !IsTankMember(m)) is { } veilTarget &&
+			TryAquaveilOn(veilTarget, out act);
+	}
+
+	public bool PlanGCD(out IAction? act)
+	{
+		act = null;
+		return false;
+	}
+
+	public bool SpecialGCD(out IAction? act)
+	{
+		act = null;
+		if (!TetragrammatonReady &&
+			DoomTarget(SingleHealRange) is { } doomed &&
+			((LilyAvailable(true) && BeirutaTarget.TryUseOn(AfflatusSolacePvE, doomed, out act)) ||
+			 BeirutaTarget.TryUseOn(CureIiPvE, doomed, out act)))
+		{
+			return true;
+		}
+
+		return BeirutaAccretion.FindTarget(PartyMembers) is { } target &&
+			!HasSwift &&
+			!BenedictionAvailable &&
+			(BeirutaTarget.TryUseOn(AfflatusSolacePvE, target, out act) ||
+			 BeirutaTarget.TryUseOn(CureIiPvE, target, out act));
+	}
+
+	public bool WardGCD(out IAction? act)
+	{
+		act = null;
+		return WardActive && AoeHealGcdWanted(out var emergency) && TryAoeHealGCD(emergency, out act);
+	}
+
+	public bool AreaHealGCD(out IAction? act)
+	{
+		act = null;
+		return !WardActive && AoeHealGcdWanted(out var emergency) && TryAoeHealGCD(emergency, out act);
+	}
+
+	public bool SpotHealGCD(out IAction? act)
+	{
+		act = null;
+		if (!CanRunHealEngine)
+		{
+			return false;
+		}
+
+		var rescue =
+			FindLowest(SingleHealRange, static m => SpotHealWorthy(m) && BeirutaCritical.ForGcd(m, CriticalHp) && AccretionTargetSafe(m, SolaceHealHp)) ??
+			(TetragrammatonReady
+				? null
+				: FindLowest(SingleHealRange, m => IsTankMember(m) && SpotHealOk(m) && HealHp(m) < SolaceTankHealValue));
+
+		if (rescue != null &&
+			!HasSingleHealLockoutStatus(rescue) &&
+			LilyAvailable(true) &&
+			BeirutaTarget.TryUseOn(AfflatusSolacePvE, rescue, out act))
+		{
+			return true;
+		}
+
+		if (BurstLilyPrepWanted && PlanLilyAllowsSpend && RaptureSafe && AfflatusRapturePvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		return LilyCapping &&
+			PlanLilyAllowsSpend &&
+			(FindLowest(SingleHealRange, IsTankMember) ?? FindLowest(SingleHealRange, static m => AccretionTargetSafe(m, SolaceHealHp))) is { } capTarget &&
+			!HasSingleHealLockoutStatus(capTarget) &&
+			BeirutaTarget.TryUseOn(AfflatusSolacePvE, capTarget, out act);
+	}
+
+	#endregion
+
+	#region Hooks
+
+	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act) =>
+		BeirutaHealerFlow.Ability(this, nextGCD, out act) || base.EmergencyAbility(nextGCD, out act);
+
+	protected override bool GeneralAbility(IAction nextGCD, out IAction? act) =>
+		LowPriorityAbility(nextGCD, out act) || base.GeneralAbility(nextGCD, out act);
 
 	[RotationDesc(ActionID.PresenceOfMindPvE, ActionID.AssizePvE, ActionID.SwiftcastPvE)]
 	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
 	{
-		if (InCombat)
+		if (InCombat && BurstAbility(nextGCD, out act))
 		{
-			if (PresenceOfMindAllowed && PresenceOfMindPvE.CanUse(out act, skipTTKCheck: IsInHighEndDuty))
-			{
-				return true;
-			}
+			return true;
+		}
 
-			if (IsBurst && CombatTime > 6f && !AccretionGroupHealBlocked && AssizePvE.CanUse(out act, skipAoeCheck: true))
-			{
-				return true;
-			}
-
-			if (ShouldSwiftcastForMovement(nextGCD) &&
-				SwiftcastPvE.CanUse(out act))
-			{
-				return true;
-			}
+		if (InCombat && ShouldSwiftcastForMovement(nextGCD) && SwiftcastPvE.CanUse(out act))
+		{
+			return true;
 		}
 
 		return base.AttackAbility(nextGCD, out act);
 	}
+
+	protected override bool EmergencyGCD(IAction? nextGCD, out IAction? act) =>
+		BeirutaHealerFlow.UrgentGcd(this, out act) || base.EmergencyGCD(nextGCD, out act);
 
 	#endregion
 
@@ -1430,19 +1374,19 @@ public sealed class BeirutaWHM : WhiteMageRotation
 	{
 		act = null;
 
-		var target = AccretionTopUp ? BeirutaAccretion.FindTarget(PartyMembers) : null;
+		var target = BeirutaAccretion.FindTarget(PartyMembers);
 		if (target == null)
 		{
 			return false;
 		}
 
-		if (BeirutaAccretion.TryUseOn(BenedictionPvE, target, out act))
+		if (BeirutaTarget.TryUseOn(BenedictionPvE, target, out act))
 		{
 			return true;
 		}
 
 		if (!BenedictionAvailable &&
-			BeirutaAccretion.TryUseOn(TetragrammatonPvE, target, out act, usedUp: true))
+			BeirutaTarget.TryUseOn(TetragrammatonPvE, target, out act, usedUp: true))
 		{
 			return true;
 		}
@@ -1451,36 +1395,19 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		return false;
 	}
 
-	protected override bool EmergencyGCD(IAction? nextGCD, out IAction? act)
-	{
-		act = null;
-
-		var target = AccretionTopUp ? BeirutaAccretion.FindTarget(PartyMembers) : null;
-		if (target != null && !HasSwift && !BenedictionAvailable)
-		{
-			if (BeirutaAccretion.TryUseOn(AfflatusSolacePvE, target, out act) ||
-				BeirutaAccretion.TryUseOn(CureIiPvE, target, out act))
-			{
-				return true;
-			}
-		}
-
-		return base.EmergencyGCD(nextGCD, out act);
-	}
-
 	#endregion
 
 	#region GCD Logic
 
-	private bool CanCastHealSpell => !MovingPastGrace || HasSwift;
+	private bool CanCastHealSpell => !BeirutaMove.PastGrace || HasSwift;
 
 	private bool TryAoeHealGCD(bool emergency, out IAction? act)
 	{
 		act = null;
 
-		var lilyOk = LilyAvailable(emergency || WardMode || MovingPastGrace) && RaptureSafe;
-		var raptureNeeded = lilyOk && AoeNeeded(PartyHealRange, RaptureHp);
-		var preferLily = emergency || WardMode || MovingPastGrace || BurstLilyPrepWanted || LilyCapping || LilyRich;
+		var lilyOk = LilyAvailable(emergency || WardActive || BeirutaMove.PastGrace) && (emergency || PlanLilyAllowsSpend) && RaptureSafe;
+		var raptureNeeded = lilyOk && AoeGcdNeeded(PartyHealRange, RaptureHp);
+		var preferLily = emergency || WardActive || BeirutaMove.PastGrace || BurstLilyPrepWanted || LilyCapping || LilyRich;
 
 		if (preferLily && raptureNeeded && AfflatusRapturePvE.CanUse(out act))
 		{
@@ -1489,7 +1416,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 		if (CanCastHealSpell)
 		{
-			if (!PartyHasMedicaHot && MedicaSafe && AoeNeeded(PartyHealRange, MedicaHp))
+			if (!PartyHasMedicaHot && MedicaSafe && AoeGcdNeeded(PartyHealRange, MedicaHp))
 			{
 				if (MedicaIiiPvE.EnoughLevel ? MedicaIiiPvE.CanUse(out act) : MedicaIiPvE.CanUse(out act))
 				{
@@ -1499,7 +1426,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 
 			if (CureIiiPvE.EnoughLevel &&
 				FindCureIiiCenter(CureIiiHp) is { } center &&
-				BeirutaAccretion.TryUseOn(CureIiiPvE, center, out act))
+				BeirutaTarget.TryUseOn(CureIiiPvE, center, out act))
 			{
 				return true;
 			}
@@ -1519,7 +1446,7 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		emergency = false;
 
 		if (!CanRunHealEngine ||
-			(!WardMode && HoldAoeForCoHealer) ||
+			(!WardActive && HoldAoeForCoHealer) ||
 			AoeHealGcdPending)
 		{
 			return false;
@@ -1528,73 +1455,21 @@ public sealed class BeirutaWHM : WhiteMageRotation
 		emergency =
 			AoeNeeded(PartyHealRange, 0f) ||
 			(AnyCritical(PartyHealRange) && AoeNeeded(PartyHealRange, RaptureHp));
-		var highestHp = MathF.Max(RaptureHp, MathF.Max(CureIiiHp, PartyHasMedicaHot ? 0f : MedicaHp));
-
-		return emergency || (AoeNeeded(PartyHealRange, highestHp) && (WardMode || !HasPresenceOfMind));
-	}
-
-	private bool CastAoeHealWanted =>
-		AoeHealGcdWanted(out _) &&
-		!(LilyAvailable(true) && RaptureSafe && AoeNeeded(PartyHealRange, RaptureHp)) &&
-		((!PartyHasMedicaHot && MedicaSafe && AoeNeeded(PartyHealRange, MedicaHp)) ||
-		 (CureIiiPvE.EnoughLevel && FindCureIiiCenter(CureIiiHp) != null));
-
-	private IBattleChara? NonTankTopUp =>
-		WardMode && BeirutaWard.NonTanksShielded(PartyMembers, SingleHealRange)
-			? BeirutaHealModel.NonTankTopUpTarget(PartyMembers, SingleHealRange, EffectiveHpRatio, static m => IsHealBlocked(m) || HasSingleHealLockoutStatus(m), AoeInjuredCount)
-			: null;
-	private bool TryHealGCD(out IAction? act)
-	{
-		act = null;
-
-		if (!CanRunHealEngine)
+		if (!emergency && PlannedAoeHealNear)
 		{
 			return false;
 		}
 
-		var rescue =
-			FindLowest(SingleHealRange, static m => BeirutaCritical.ForGcd(m, CriticalHp) && AccretionTargetSafe(m, SolaceHealHp)) ??
-			(TetragrammatonReady
-				? null
-				: FindLowest(SingleHealRange, m => IsTankMember(m) && m.GetHealthRatio() < SolaceTankHealValue));
+		var highestHp = MathF.Max(RaptureHp, MathF.Max(CureIiiHp, PartyHasMedicaHot ? 0f : MedicaHp));
 
-		if (rescue != null &&
-			!HasSingleHealLockoutStatus(rescue) &&
-			LilyAvailable(true) &&
-			BeirutaAccretion.TryUseOn(AfflatusSolacePvE, rescue, out act))
-		{
-			return true;
-		}
-
-		if (AoeHealGcdWanted(out var aoeEmergency) && TryAoeHealGCD(aoeEmergency, out act))
-		{
-			return true;
-		}
-
-		if (NonTankTopUp is { } topUp &&
-			!TetragrammatonReady &&
-			CanCastHealSpell &&
-			BeirutaAccretion.TryUseOn(CureIiPvE, topUp, out act))
-		{
-			return true;
-		}
-
-		if (BurstLilyPrepWanted && RaptureSafe && AfflatusRapturePvE.CanUse(out act))
-		{
-			return true;
-		}
-
-		if (LilyCapping &&
-			MovementSolaceTarget() is { } capTarget &&
-			!HasSingleHealLockoutStatus(capTarget) &&
-			BeirutaAccretion.TryUseOn(AfflatusSolacePvE, capTarget, out act))
-		{
-			return true;
-		}
-
-		act = null;
-		return false;
+		return emergency || (AoeGcdNeeded(PartyHealRange, highestHp) && (WardActive || !HasPresenceOfMind));
 	}
+
+	private bool CastAoeHealWanted =>
+		AoeHealGcdWanted(out _) &&
+		!(LilyAvailable(true) && PlanLilyAllowsSpend && RaptureSafe && AoeGcdNeeded(PartyHealRange, RaptureHp)) &&
+		((!PartyHasMedicaHot && MedicaSafe && AoeGcdNeeded(PartyHealRange, MedicaHp)) ||
+		 (CureIiiPvE.EnoughLevel && FindCureIiiCenter(CureIiiHp) != null));
 
 	[RotationDesc(ActionID.RaisePvE)]
 	protected override bool RaiseGCD(out IAction? act)
@@ -1616,12 +1491,12 @@ public sealed class BeirutaWHM : WhiteMageRotation
 			return RaiseGCD(out act);
 		}
 
-		if (ShouldHoldRaiseSwift)
+		if (BeirutaMove.RaiseSwiftHeld)
 		{
 			return base.GeneralGCD(out act);
 		}
 
-		if (TryHealGCD(out act))
+		if (BeirutaHealerFlow.HealGcd(this, out act))
 		{
 			return true;
 		}

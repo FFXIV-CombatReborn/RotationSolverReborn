@@ -1,0 +1,22 @@
+# Duty: AACHeavyweightM4Savage
+Phase,Sync,Watch,Caster,OID,ActionIDs,Occurrence,PhaseTime
+P1,Combat starts (fight 2),CombatStart,Lindwurm,0x4B02,,1,0.0
+P1,Arcadia Aflame,CastStart,Lindwurm,0x4B02,46376,1,10.2
+P1,Replication,CastStart,Lindwurm,0x4B02,46296,1,24.7
+P1,Double Sobat,CastStart,Lindwurm,0x4B02,46368,1,64.3
+P1,Staging,CastStart,Lindwurm,0x4B02,46305,1,88.2
+P1,Reenactment,CastStart,Lindwurm,0x4B02,46316,1,148.2
+P1,Mutating Cells,CastStart,Lindwurm,0x4B02,46341,1,180.7
+P1,Blood Wakening,CastStart,Lindwurm,0x4B02,46336,1,214.1
+P1,Arcadia Aflame,CastStart,Lindwurm,0x4B02,46376,1,231.3
+P1,Double Sobat,CastStart,Lindwurm,0x4B02,46368,1,240.6
+P1,Idyllic Dream,CastStart,Lindwurm,0x4B02,46345,1,264.5
+P1,Lindwurm's Meteor,CastStart,Lindwurm,0x4B02,46322,1,338.7
+P1,Arcadian Arcanum,CastStart,Lindwurm,0x4B02,46377,1,353.0
+P1,Temporal Curtain,CastStart,Lindwurm,0x4B02,46364,1,415.1
+P1,Reenactment,CastStart,Lindwurm,0x4B02,46316,1,433.9
+P1,Idyllic Dream,CastStart,Lindwurm,0x4B02,46345,1,467.2
+P1,Double Sobat,CastStart,Lindwurm,0x4B02,46368,1,475.4
+P1,Replication (Arcadian Hell),CastStart,Lindwurm,0x4B02,46188,1,496.5
+P1,Arcadian Hell,CastStart,Lindwurm,0x4B02,46387,1,510.0
+P1,Arcadian Hell,CastStart,Lindwurm,0x4B02,46387,1,526.3

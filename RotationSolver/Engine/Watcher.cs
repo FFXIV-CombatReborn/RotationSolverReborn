@@ -1,4 +1,4 @@
-﻿using Dalamud.Hooking;
+using Dalamud.Hooking;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Hooks;
@@ -23,6 +23,7 @@ public static class Watcher
 	{
 		ActionEffect.ActionEffectEvent += ActionFromEnemy;
 		ActionEffect.ActionEffectEvent += ActionFromSelf;
+		ActionEffect.ActionEffectEvent += PendingHeals.OnActionEffect;
 
 		try
 		{
@@ -39,6 +40,7 @@ public static class Watcher
 	{
 		ActionEffect.ActionEffectEvent -= ActionFromEnemy;
 		ActionEffect.ActionEffectEvent -= ActionFromSelf;
+		ActionEffect.ActionEffectEvent -= PendingHeals.OnActionEffect;
 
 		_actorControlHook?.Dispose();
 		_actorControlHook = null;

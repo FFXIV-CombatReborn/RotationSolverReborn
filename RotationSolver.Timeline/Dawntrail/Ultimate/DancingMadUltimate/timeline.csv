@@ -1,0 +1,143 @@
+# Duty: DancingMadUltimate
+#  Sync rows   : Watch = CombatStart / CastStart / Targetable / Untargetable / Gone. They move the phase clock; keep them in fight order.
+#  Downtime    : the boss leaves. ActionIDs column = jobs (empty = everyone), or LockedOut = only players whose Decisive Battle 1 lock was on the other boss. DoTs are not refreshed past it.
+#  Damage      : party AoE as it lands (Light / Heavy in the ActionIDs column). Used for "next AoE in Xs" and heavy/light; tankbusters come from cast detection.
+Phase,Sync,Watch,Caster,OID,ActionIDs,Occurrence,PhaseTime
+
+# ===== P1 =====
+# sync
+P1,Combat starts,CombatStart,,,,1,0.0
+P1,Light of Judgment,CastStart,Kefka P1,0x4C30,50722,1,57.6
+P1,Tele-Trouncing,CastStart,Kefka P1,0x4C30,47801,1,146.3
+# downtime
+P1,Kefka P1 leaves (timed),Downtime,Kefka P1,0x4C30,,1,196.5
+# AoE damage
+P1,Flagrant Fire III,Damage,,,Light,1,38.2
+P1,Wave Cannon,Damage,,,Heavy,1,42.4
+P1,Explosion,Damage,,,Heavy,1,46.1
+P1,Double-trouble Trap,Damage,,,Light,1,49.7
+P1,Light of Judgment,Damage,,,Heavy,1,62.6
+P1,Gravitas,Damage,,,Light,1,87.5
+P1,Gravitas,Damage,,,Light,1,106.0
+P1,Double-trouble Trap,Damage,,,Light,1,118.3
+P1,Gravity III,Damage,,,Light,1,120.9
+P1,Light of Judgment,Damage,,,Heavy,1,132.4
+P1,Double-trouble Trap,Damage,,,Light,1,168.0
+P1,Indulgent Will,Damage,,,Light,1,173.6
+P1,Flagrant Fire III,Damage,,,Light,1,187.3
+
+# ===== P2 =====
+# sync
+P2,Kefka P1 disappears,Untargetable,Kefka P1,0x4C30,,1,0.0
+P2,Kefka P2 appears,Targetable,Kefka P2,0x4C32,,1,10.3
+P2,Forsaken,CastStart,Kefka P2,0x4C32,47804,1,30.8
+P2,Trine,CastStart,Kefka P2,0x4C32,47839,1,152.4
+# AoE damage
+P2,Forsaken,Damage,,,Heavy,1,37.8
+P2,Tower 1 + Spelldriver,Damage,,,Light,1,51.7
+P2,Tower 2 + Spellwave/Spellscatter,Damage,,,Light,1,60.6
+P2,Tower 3 + Spelldriver,Damage,,,Light,1,72.7
+P2,Tower 4 + Spellwave/Spellscatter,Damage,,,Light,1,81.7
+P2,Tower 5 + Spelldriver,Damage,,,Light,1,93.8
+P2,Tower 6 + Spellwave/Spellscatter,Damage,,,Light,1,102.6
+P2,Tower 7 + Spelldriver,Damage,,,Light,1,114.8
+P2,Tower 8 + Spellwave/Spellscatter,Damage,,,Light,1,123.5
+P2,Light of Judgment,Damage,,,Heavy,1,143.8
+
+# ===== P3 =====
+# sync
+P3,Kefka P2 gone,Gone,Kefka P2,0x4C32,,1,0.0
+P3,Exdeath + Chaos appear,Targetable,Exdeath,0x4C35,,1,46.2
+P3,The Decisive Battle (1st),CastStart,Exdeath,0x4C35,49891|49890,1,46.5
+P3,Umbra Smash,CastStart,Chaos,0x4C34,47872,1,125.3
+P3,The Decisive Battle (2nd),CastStart,Exdeath,0x4C35,49891|49890,1,160.9
+P3,Slap Happy,CastStart,Kefka P3,0x4C30,47846|47847,1,188.3
+P3,White Hole,CastStart,Exdeath,0x4C35,48486,1,285.8
+# downtime
+P3,Decisive Battle 2: Chaos leaves for whoever was locked to Exdeath at Decisive Battle 1,Downtime,Chaos,0x4C34,LockedOut,1,163.6
+P3,Decisive Battle 2: Exdeath leaves for whoever was locked to Chaos at Decisive Battle 1,Downtime,Exdeath,0x4C35,LockedOut,1,163.6
+# AoE damage
+P3,Bowels of Agony,Damage,,,Light,1,68.9
+P3,Stray Flames,Damage,,,Light,1,88.0
+P3,Tsunami,Damage,,,Light,1,116.0
+P3,Ultima Blaster,Damage,,,Light,1,126.3
+P3,Ultima Blaster,Damage,,,Light,1,128.3
+P3,Ultima Blaster,Damage,,,Light,1,130.3
+P3,Ultima Blaster,Damage,,,Light,1,132.3
+P3,Ultima Blaster,Damage,,,Light,1,134.3
+P3,Ultima Blaster,Damage,,,Heavy,1,136.4
+P3,Ultima Blaster,Damage,,,Light,1,140.4
+P3,Ultima Blaster,Damage,,,Light,1,148.4
+P3,Earthquake,Damage,,,Light,1,187.9
+P3,Earthquake,Damage,,,Light,1,192.1
+P3,Slap Happy (Shockwave),Damage,,,Light,1,197.2
+P3,Slap Happy (Shocking Impact),Damage,,,Light,1,227.6
+P3,Earthquake,Damage,,,Light,1,236.7
+P3,Nothingness,Damage,,,Light,1,240.1
+P3,Earthquake,Damage,,,Light,1,246.9
+P3,Earthquake,Damage,,,Light,1,271.0
+P3,Earthquake,Damage,,,Light,1,276.0
+P3,Earthquake,Damage,,,Light,1,281.2
+P3,Slap Happy (Shockwave),Damage,,,Light,1,295.7
+P3,Earthquake,Damage,,,Light,1,304.5
+P3,Earthquake,Damage,,,Light,1,311.5
+P3,Knock Down stack 1 (group A; then group B towers 1-2),Damage,,,Light,1,324.0
+P3,Knock Down stack 2 (group B; after group A towers 3-4),Damage,,,Light,1,329.7
+
+# ===== P4 =====
+# sync
+P4,Kefka P4 appears,Targetable,Kefka P4,0x482B,,1,4.4
+P4,Flood of Naught,CastStart,Neo Exdeath,0x4C36,50066|50067|50081|50082,1,65.7
+P4,Ultima Upsurge,CastStart,Kefka P4,0x482B,49738,1,93.2
+# downtime
+P4,Kefka P4 leaves (timed),Downtime,Kefka P4,0x482B,,1,127.5
+# AoE damage
+P4,Grand Cross,Damage,,,Heavy,1,28.6
+P4,Tsunami,Damage,,,Light,1,33.7
+P4,Grand Cross,Damage,,,Heavy,1,43.5
+P4,Inferno,Damage,,,Light,1,48.6
+P4,Grand Cross,Damage,,,Heavy,1,58.5
+P4,Antilight,Damage,,,Heavy,1,71.2
+P4,Death Surge,Damage,,,Light,1,75.0
+P4,Death Bolt,Damage,,,Light,1,79.7
+P4,Ultima Upsurge,Damage,,,Light,1,98.0
+P4,Death Bolt,Damage,,,Light,1,104.7
+
+# ===== P5 =====
+# sync
+P5,Kefka P4 gone,Gone,Kefka P4,0x482B,,1,0.0
+P5,Kefka P5 appears,Targetable,Kefka P5,0x4C37,,1,31.0
+P5,Celestriad,CastStart,Kefka P5,0x4C37,47938,1,85.5
+P5,Forsaken,CastStart,Kefka P5,0x4C37,47925,1,180.7
+# AoE damage
+P5,Ultima Upsurge,Damage,,,Light,1,0.0
+P5,Ultima Repeater,Damage,,,Heavy,1,39.2
+P5,Fell Force (role stack autos),Damage,,,Light,1,44.1
+P5,Fell Force (role stack autos),Damage,,,Light,1,47.3
+P5,Fell Force (role stack autos),Damage,,,Light,1,50.4
+P5,Chaotic Flood,Damage,,,Light,1,56.7
+P5,Chaotic Flood,Damage,,,Light,1,59.7
+P5,Holy,Damage,,,Light,1,69.7
+P5,Chaotic Flare,Damage,,,Heavy,1,72.9
+P5,Fell Force (role stack autos),Damage,,,Light,1,81.0
+P5,Fell Force (role stack autos),Damage,,,Light,1,84.2
+P5,Triad Thunder III,Damage,,,Light,1,99.7
+P5,Triad Thunder III,Damage,,,Light,1,105.8
+P5,Triad Thunder III,Damage,,,Light,1,111.8
+P5,Ultima Repeater,Damage,,,Heavy,1,121.2
+P5,Fell Force (role stack autos),Damage,,,Light,1,126.1
+P5,Fell Force (role stack autos),Damage,,,Light,1,129.2
+P5,Stray Entropy,Damage,,,Light,1,152.7
+P5,Holy,Damage,,,Light,1,161.9
+P5,Chaotic Flare,Damage,,,Heavy,1,165.1
+P5,Fell Force (role stack autos),Damage,,,Light,1,173.2
+P5,Fell Force (role stack autos),Damage,,,Light,1,176.3
+P5,Fell Force (role stack autos),Damage,,,Light,1,179.5
+P5,Forsaken,Damage,,,Heavy,1,190.8
+P5,Forsaken (P5),Damage,,,Heavy,1,195.9
+P5,Forsaken,Damage,,,Heavy,1,198.9
+P5,Forsaken (P5),Damage,,,Light,1,204.0
+P5,Forsaken,Damage,,,Heavy,1,207.1
+P5,Forsaken (P5),Damage,,,Light,1,212.1
+P5,Forsaken,Damage,,,Heavy,1,215.2
+P5,Forsaken (P5),Damage,,,Heavy,1,220.3

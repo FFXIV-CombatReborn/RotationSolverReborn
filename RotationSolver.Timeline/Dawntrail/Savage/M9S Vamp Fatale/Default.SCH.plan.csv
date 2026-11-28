@@ -1,0 +1,78 @@
+# Default SCH
+# AetherflowFirst: off
+# Set.WardMode: false
+# Set.CountdownOpener: Recitation - Adloquium - Deployment Tactics
+# Set.ChainStratagemOpener: 5s
+# Set.UsePotion: true
+# Set.PotionTiming: Opener (countdown)
+# Set.EnergyDrainUsage: Use all
+# Set.DelayBanefulImpaction: true
+# Set.EarlyDotRefreshWhenMoving: false
+# Set.UseCustomSwiftcast: true
+# Set.UseCustomHPThreshold: false
+Phase,Start,End,Action,Target
+P1,35.6,38.6,Whispering Dawn,
+P1,35.9,38.9,Fey Illumination,
+P1,43.2,46.2,Expedient,
+P1,44.7,49.8,Summon Seraph,
+P1,46.7,49.7,Fey Blessing,
+P1,49.8,53.8,Consolation,
+P1,117.0,120.0,Recitation,
+P1,117.2,120.2,Protraction,Self
+P1,119.5,123.0,Adloquium,Self
+P1,122.5,126.5,Deployment Tactics,Self
+P1,152.0,155.0,Whispering Dawn,
+P1,153.5,162.0,Concitation,
+P1,155.5,158.5,Fey Blessing,
+P1,169.9,173.9,Consolation,
+P1,168.4,171.4,Fey Illumination,
+P1,169.9,174.9,Summon Seraph,
+P1,174.9,178.9,Consolation,
+P1,211.4,214.4,Recitation,
+P1,213.4,216.9,Excogitation,TankWithAggro
+P1,219.4,222.4,Whispering Dawn,
+P1,232.1,235.1,Fey Blessing,
+P1,236.3,239.3,Sacred Soil,
+P1,248.9,257.4,Concitation,
+P1,253.4,256.4,Expedient,
+P1,276.3,284.8,Concitation,
+P1,283.3,286.3,Whispering Dawn,
+P1,284.9,292.0,Concitation,
+P1,291.5,296.5,Fey Blessing,
+P1,294.1,297.1,Fey Illumination,
+P1,299.1,302.1,Recitation,
+P1,299.3,302.3,Protraction,Self
+P1,301.6,305.1,Adloquium,Self
+P1,303.6,307.6,Summon Seraph,
+P1,304.6,308.6,Deployment Tactics,Self
+P1,306.7,310.7,Consolation,
+P1,309.7,313.7,Consolation,
+P1,309.7,313.7,Seraphism,
+P1,328.4,331.4,Sacred Soil,
+P1,335.5,338.5,Concitation,
+P1,337.0,348.0,Whispering Dawn,
+P1,338.5,341.5,Concitation,
+P1,340.9,343.9,Indomitability,
+P1,359.2,362.2,Recitation,
+P1,361.2,364.2,Fey Blessing,
+P1,362.3,365.4,Concitation,
+P1,393.1,401.6,Concitation,
+P1,400.1,403.1,Whispering Dawn,
+P1,401.7,407.0,Concitation,
+P1,403.0,406.0,Expedient,
+P1,406.6,409.6,Concitation,
+P1,409.7,413.0,Concitation,
+P1,413.0,416.0,Concitation,
+P1,416.1,424.0,Concitation,
+P1,423.5,426.5,Indomitability,
+P1,424.1,432.0,Concitation,
+P1,425.6,428.6,Sacred Soil,
+P1,432.1,438.5,Concitation,
+P1,454.0,457.0,Fey Blessing,
+P1,464.4,472.9,Concitation,
+P1,471.4,474.4,Whispering Dawn,
+P1,484.3,487.3,Recitation,
+P1,484.5,487.5,Protraction,Self
+P1,486.8,490.3,Adloquium,Self
+P1,487.3,490.3,Fey Illumination,
+P1,489.8,493.8,Deployment Tactics,Self

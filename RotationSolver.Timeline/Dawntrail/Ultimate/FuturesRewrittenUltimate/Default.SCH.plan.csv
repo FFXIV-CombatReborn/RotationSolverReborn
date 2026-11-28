@@ -1,0 +1,114 @@
+# Default SCH
+# AetherflowFirst: off
+# CountdownDeploymentAt: 11
+# Set.WardMode: false
+# Set.CountdownOpener: Recitation - Adloquium - Deployment Tactics
+# Set.ChainStratagemOpener: 5s
+# Set.UsePotion: true
+# Set.PotionTiming: Opener (countdown)
+# Set.EnergyDrainUsage: Use all
+# Set.DelayBanefulImpaction: false
+# Set.EarlyDotRefreshWhenMoving: false
+# Set.UseCustomSwiftcast: true
+# Set.UseCustomHPThreshold: false
+Phase,Start,End,Action,Target
+P1,31.6,40.1,Concitation,
+P1,41.2,49.7,Concitation,
+P1,49.8,56.0,Concitation,
+P1,55.5,58.5,Fey Blessing,
+P1,55.1,58.1,Concitation,
+P1,70.0,75.4,Concitation,
+P1,74.0,77.0,Recitation,
+P1,74.2,77.2,Protraction,Self
+P1,74.5,77.5,Expedient,
+P1,76.5,80.0,Adloquium,Self
+P1,79.5,83.5,Deployment Tactics,Self
+P1,84.6,87.6,Whispering Dawn,
+P1,86.5,90.5,Seraphism,
+P1,98.6,108.7,Summon Seraph,
+P1,101.8,104.8,Fey Illumination,
+P1,108.7,112.7,Consolation,
+P1,113.0,117.0,Consolation,
+P1,127.6,130.6,Fey Blessing,
+P1,127.6,130.6,Recitation,
+P1,132.0,135.0,Indomitability,
+P2,18.1,21.1,Whispering Dawn,
+P2,41.7,50.2,Concitation,
+P2,46.2,49.2,Expedient,
+P2,49.0,52.0,Recitation,
+P2,49.2,52.2,Protraction,Self
+P2,51.5,55.0,Adloquium,Self
+P2,54.5,58.5,Deployment Tactics,Self
+P2,55.1,60.1,Concitation,
+P2,74.2,82.7,Concitation,
+P2,87.0,90.0,Whispering Dawn,
+P2,90.2,93.2,Fey Blessing,
+P2,109.4,113.4,Summon Seraph,
+P2,112.4,116.4,Consolation,
+P2,114.0,117.0,Fey Illumination,
+P2,118.5,121.5,Recitation,
+P2,126.5,130.5,Consolation,
+P2,127.5,130.5,Indomitability,
+P2,142.9,146.9,Seraphism,
+P2,163.4,169.5,Concitation,
+P2,174.0,177.0,Whispering Dawn,
+P2,173.6,176.6,Expedient,
+P2,185.4,193.9,Concitation,
+P2,193.4,196.4,Fey Blessing,
+P3,9.2,17.7,Concitation,
+P3,41.8,50.3,Concitation,
+P3,45.4,48.4,Expedient,
+P3,48.8,51.8,Whispering Dawn,
+P3,49.8,52.8,Fey Blessing,
+P3,59.7,62.7,Recitation,
+P3,64.9,74.8,Summon Seraph,
+P3,79.8,82.8,Indomitability,
+P3,82.9,86.9,Consolation,
+P3,82.9,86.9,Seraphism,
+P3,87.8,91.8,Consolation,
+P3,92.5,95.5,Fey Illumination,
+P3,105.9,113.9,Fey Blessing,
+P3,143.2,146.2,Whispering Dawn,
+P3,153.3,156.3,Recitation,
+P3,163.3,166.3,Indomitability,
+P3,165.8,168.8,Expedient,
+P4,29.7,35.7,Summon Seraph,
+P4,35.7,39.7,Consolation,
+P4,52.3,56.3,Consolation,
+P4,57.6,60.6,Fey Blessing,
+P4,68.1,71.1,Whispering Dawn,
+P4,77.0,81.0,Seraphism,
+P4,101.3,104.3,Fey Illumination,
+P4,111.2,114.2,Recitation,
+P4,111.4,114.4,Protraction,Self
+P4,113.7,117.2,Adloquium,Self
+P4,116.7,120.7,Deployment Tactics,Self
+P4,115.2,118.2,Concitation,
+P4,134.4,142.9,Concitation,
+P4,136.7,139.7,Fey Blessing,
+P4,138.9,141.9,Expedient,
+P4,159.8,163.8,Consolation,
+P4,159.8,169.9,Summon Seraph,
+P4,166.9,169.9,Recitation,
+P4,168.9,171.9,Indomitability,
+P4,169.9,173.9,Consolation,
+P5,78.8,87.3,Concitation,
+P5,142.3,145.3,Whispering Dawn,
+P5,146.9,149.9,Fey Blessing,
+P5,148.0,152.0,Summon Seraph,
+P5,151.2,155.2,Consolation,
+P5,154.4,157.4,Expedient,
+P5,158.2,161.2,Fey Illumination,
+P5,168.9,172.9,Consolation,
+P5,193.3,196.3,Recitation,
+P5,207.6,210.6,Indomitability,
+P5,237.4,240.4,Whispering Dawn,
+P5,241.6,244.6,Fey Blessing,
+P5,271.8,275.8,Consolation,
+P5,271.8,275.8,Seraphism,
+P5,271.8,281.1,Summon Seraph,
+P5,274.9,277.9,Expedient,
+P5,281.1,285.1,Consolation,
+P5,287.9,290.9,Recitation,
+P5,289.9,292.9,Indomitability,
+P5,294.8,297.8,Fey Illumination,

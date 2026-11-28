@@ -718,18 +718,23 @@ public partial class NinjaRotation
 		return ShukuchiPvE.CanUse(out act) || base.MoveForwardAbility(nextGCD, out act);
 	}
 
+	/// <summary>
+	/// Whether Feint and Shade Shift respond to the defense signals.
+	/// </summary>
+	protected virtual bool AutoDefense => true;
+
 	/// <inheritdoc/>
 	[RotationDesc(ActionID.FeintPvE)]
 	protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
-		return (FeintPvE.CanUse(out act) && !StatusHelper.PlayerHasStatus(true, StatusID.Mudra)) || base.DefenseAreaAbility(nextGCD, out act);
+		return (AutoDefense && FeintPvE.CanUse(out act) && !StatusHelper.PlayerHasStatus(true, StatusID.Mudra)) || base.DefenseAreaAbility(nextGCD, out act);
 	}
 
 	/// <inheritdoc/>
 	[RotationDesc(ActionID.ShadeShiftPvE)]
 	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
 	{
-		return ShadeShiftPvE.CanUse(out act) || base.DefenseSingleAbility(nextGCD, out act);
+		return (AutoDefense && ShadeShiftPvE.CanUse(out act)) || base.DefenseSingleAbility(nextGCD, out act);
 	}
 
 	public override bool IsBursting()

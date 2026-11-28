@@ -1,0 +1,54 @@
+# OT GNB
+Phase,Start,End,Action,Target
+P1,9.5,134.0,Tank Stance,On
+P1,11.1,13.7,Reprisal,
+P1,19.7,22.7,Provoke,
+P1,20.7,23.5,Heart of Corundum,OtherTank
+P1,22.9,25.9,Rampart,
+P1,46.1,49.1,Heart of Light,
+P1,107.6,110.4,Reprisal,
+P1,125.7,128.7,Superbolide,
+P1,131.1,134.1,Rampart,
+P1,135.0,138.0,Great Nebula,
+P1,135.8,138.8,Camouflage,
+P1,141.6,144.6,Heart of Corundum,Self
+P2,14.4,15.0,Heart of Corundum,OtherTank
+P2,40.6,43.6,Heart of Light,
+P2,79.1,82.1,Reprisal,
+P2,80.7,177.2,Tank Stance,Off
+P2,147.8,150.8,Heart of Light,
+P2,165.7,168.7,Reprisal,
+P2,253.9,256.9,Heart of Light,
+P3,53.3,56.3,Reprisal,
+P3,91.4,93.4,Heart of Light,
+P3,97.6,115.1,Tank Stance,On
+P3,105.5,108.5,Heart of Corundum,OtherTank
+P3,147.0,150.0,Rampart,
+P3,148.7,151.3,Great Nebula,
+P3,155.1,157.1,Heart of Corundum,Self
+P3,169.1,171.3,Reprisal,
+P4,1.7,172.9,Tank Stance,On
+P4,28.5,31.5,Heart of Light,
+P4,31.9,34.9,Provoke,
+P4,72.1,74.3,Reprisal,
+P4,135.9,138.9,Heart of Light,
+P4,138.6,141.6,Great Nebula,
+P4,140.4,143.4,Rampart,
+P4,153.8,156.8,Heart of Corundum,OtherTank
+P4,156.5,158.5,Reprisal,
+P5,0.0,211.8,Tank Stance,On
+P5,98.7,101.0,Heart of Light,
+P5,108.6,111.6,Reprisal,
+P5,127.8,130.8,Provoke,
+P5,129.6,132.6,Superbolide,
+P5,131.1,133.4,Heart of Corundum,OtherTank
+P5,186.0,188.7,Reprisal,
+P5,210.8,213.8,Heart of Light,
+P5,213.8,400.0,Tank Stance,On
+P5,240.7,243.7,Rampart,
+P5,242.5,245.5,Great Nebula,
+P5,245.3,248.3,Camouflage,
+P5,245.4,248.4,Provoke,
+P5,247.8,250.8,Heart of Corundum,Self
+P5,263.7,266.7,Reprisal,
+P5,300.8,303.6,Heart of Light,
