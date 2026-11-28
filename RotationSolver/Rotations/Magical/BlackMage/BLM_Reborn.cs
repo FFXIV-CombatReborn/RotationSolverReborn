@@ -2,8 +2,73 @@
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/Rotations/Magical/BlackMage/BLM_Reborn.cs")]
-public sealed class BLM_Reborn : BlackMageRotation
+public sealed class BLM_Reborn : BlackMageRotation, Updaters.ICdPlanRotation
 {
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Auto: Addle and Manaward respond to RSR's defense signals (raidwide detection, Boss Mod or the commands).\n" +
+		"Use built-in CD plan: they follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press them.\n" +
+		"With the built-in plan or BMR / VBM / Manual, the defense signals do not use them.")]
+	public CdPlanSource CdPlanFrom { get; set; } = CdPlanSource.Auto;
+
+	public bool UseTimelinePlan => CdPlanFrom == CdPlanSource.BuiltIn;
+
+	private bool AutoDefense => CdPlanFrom == CdPlanSource.Auto;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Addle from", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Where planned Addle comes from. R2 / Fake melee profile: the duty's shared Addle plan for that slot (Fake melee = the second caster of a double caster comp, using Addle like a melee's Feint); the job plan's own Addle rows are then not used (everything else still comes from the job plan).\n" +
+		"Auto: R2, and once an R2 Addle turns out to be another caster's, Fake melee for the rest of the duty.\n" +
+		"Job plan: Addle from the picked job plan. Also used when the duty has no profile.")]
+	public AddleProfile AddleFrom { get; set; } = AddleProfile.Auto;
+
+	string Updaters.ICdPlanRotation.MitProfileAction => "Addle";
+
+	MitProfileChoice Updaters.ICdPlanRotation.MitProfile => (MitProfileChoice)AddleFrom;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Ley Lines", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Ley Lines are used in their window.\nOff: they are skipped.")]
+	public bool UsePlannedLeyLines { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Triplecast", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Triplecast are used in their window.\nOff: they are skipped.")]
+	public bool UsePlannedTriplecast { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Manaward", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Manaward are used in their window.\nOff: they are skipped.")]
+	public bool UsePlannedManaward { get; set; } = true;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
+	[
+		((uint)ActionID.LeyLinesPvE, nameof(UsePlannedLeyLines)),
+		((uint)ActionID.TriplecastPvE, nameof(UsePlannedTriplecast)),
+		((uint)ActionID.ManawardPvE, nameof(UsePlannedManaward)),
+	];
+
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
+		(UsePlannedLeyLines || actionId != (uint)ActionID.LeyLinesPvE) &&
+		(UsePlannedTriplecast || actionId != (uint)ActionID.TriplecastPvE) &&
+		(UsePlannedManaward || actionId != (uint)ActionID.ManawardPvE);
+
+	// The plan places Ley Lines, so the rotation doesn't.
+	private bool PlanOwnsLeyLines => Updaters.TimelineUpdater.PlanContains(LeyLinesPvE.ID);
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => CdPlanHelper.Wait(actionId);
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		CdPlanHelper.HoldCommand(action, UseTimelinePlan);
+
+	#endregion
+
 	public enum OpenerChoice : byte
 	{
 		[Description("Standard 5+7 Opener")]
@@ -466,6 +531,11 @@ public sealed class BLM_Reborn : BlackMageRotation
 	[RotationDesc]
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
 	{
+		if (CdPlanHelper.TryPlanned(out act))
+		{
+			return true;
+		}
+
 		if (InAstralFire && HasHostilesInRange && NeedManafont)
 		{
 			if (ManafontPvE.CanUse(out act, skipStatusProvideCheck: true))
@@ -619,7 +689,7 @@ public sealed class BLM_Reborn : BlackMageRotation
 	[RotationDesc(ActionID.ManawardPvE)]
 	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
 	{
-		if (ManawardPvE.CanUse(out act))
+		if (AutoDefense && ManawardPvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -629,11 +699,11 @@ public sealed class BLM_Reborn : BlackMageRotation
 	[RotationDesc(ActionID.AddlePvE, ActionID.ManawardPvE)]
 	protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
-		if (AddlePvE.CanUse(out act))
+		if (AutoDefense && AddlePvE.CanUse(out act))
 		{
 			return true;
 		}
-		if (ManawardPvE.CanUse(out act))
+		if (AutoDefense && ManawardPvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -648,7 +718,7 @@ public sealed class BLM_Reborn : BlackMageRotation
 			return true;
 		}
 
-		if (UseLeyLines && InCombat && !HasLeyLines)
+		if (UseLeyLines && InCombat && !HasLeyLines && !PlanOwnsLeyLines)
 		{
 			var useCharge = UseBothLeyLinesCharges || HasBuffs || IsBurst || CombatElapsedLess(15);
 			if (LeyLinesPvE.CanUse(out act, usedUp: useCharge))

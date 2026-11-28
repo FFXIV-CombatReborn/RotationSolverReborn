@@ -1,0 +1,12 @@
+# Fake Melee
+Phase,Start,End,Action,Target
+P1,7.3,13.3,Addle,
+P1,115.0,121.0,Addle,
+P2,77.2,83.2,Addle,
+P2,183.5,189.5,Addle,
+P3,87.7,93.0,Addle,
+P4,32.5,38.5,Addle,
+P4,154.8,158.1,Addle,
+P5,81.3,87.3,Addle,
+P5,186.7,188.7,Addle,
+P5,285.2,291.2,Addle,

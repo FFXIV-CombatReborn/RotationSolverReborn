@@ -382,8 +382,8 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		_interceptedActionWindow!.IsOpen = isValid && Service.Config.ShowInterceptedActionWindow;
 		UpdateActionTimeline(isValid);
 		_planTimelineWindow!.IsOpen = isValid
-			&& DataCenter.CurrentRotation is Updaters.IBeirutaTimelineOption { UseTimelinePlan: true, ShowPlanTimeline: true }
-			&& Updaters.BeirutaTimelineUpdater.HasPlan;
+			&& DataCenter.CurrentRotation is Updaters.ICdPlanRotation { UseTimelinePlan: true, ShowPlanTimeline: true }
+			&& Updaters.TimelineUpdater.HasPlan;
 		_overlayWindow!.IsOpen = isValid && Service.Config.TeachingMode;
 	}
 

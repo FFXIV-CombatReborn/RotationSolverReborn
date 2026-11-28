@@ -7,7 +7,7 @@ namespace RotationSolver.Rotations.Healer.WhiteMage;
 [SourceCode(Path = "main/Rotations/Healer/WhiteMage/BeirutaWHM.cs")]
 [ExtraRotation]
 
-public sealed class BeirutaWHM : WhiteMageRotation, Updaters.IBeirutaTimelineOption, IBeirutaHealContext, IBeirutaHealer
+public sealed class BeirutaWHM : WhiteMageRotation, Updaters.ICdPlanRotation, IBeirutaHealContext, IBeirutaHealer
 {
 	#region Config Options
 
@@ -20,43 +20,43 @@ public sealed class BeirutaWHM : WhiteMageRotation, Updaters.IBeirutaTimelineOpt
 
 	public bool UseTimelinePlan => CdPlanFrom == BeirutaPlanSource.BuiltIn;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
 	public bool ShowPlanTimeline { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
 	public bool ShowTimelineMessages { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Use recommended settings for the plan", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Use recommended settings for the plan", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"When a built-in plan loads, the settings it recommends are applied, like a preset. Changing a setting afterwards (e.g. your Ward Mode macro) works as usual.\n" +
 		"Your saved settings are not changed by the plan: they show as you set them and come back once the plan unloads or this is off.")]
 	public bool UsePlanSettings { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Use planned Cure III", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Cure III", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"On: the plan's Cure III is cast in its window once 2+ party members are below 95%, and no automatic AoE heal GCD within 5s of it.\n" +
 		"Off: planned Cure III is skipped; AoE heal GCDs go by party HP.")]
 	public bool UsePlannedCureIii { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Use planned Medica III", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Medica III", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"On: the plan's Medica III is cast in its window once 2+ party members are below 95%, and no automatic AoE heal GCD within 5s of it.\n" +
 		"Off: planned Medica III is skipped; AoE heal GCDs go by party HP.")]
 	public bool UsePlannedMedicaIii { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Use planned Afflatus Rapture", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Afflatus Rapture", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"On: the plan's Afflatus Rapture is cast in its window once 2+ party members are below 95%, and no automatic AoE heal GCD within 5s of it.\n" +
 		"Lilies are kept for it, and Afflatus Misery is used before a planned Rapture would overcap Blood Lilies.\n" +
 		"Off: planned Afflatus Rapture is skipped; lilies go by party HP.")]
 	public bool UsePlannedAfflatusRapture { get; set; } = false;
 
-	IEnumerable<(uint ActionId, string Config)> Updaters.IBeirutaTimelineOption.OptionalPlannedActions =>
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
 	[
 		((uint)ActionID.CureIiiPvE, nameof(UsePlannedCureIii)),
 		((uint)ActionID.MedicaIiiPvE, nameof(UsePlannedMedicaIii)),
 		((uint)ActionID.AfflatusRapturePvE, nameof(UsePlannedAfflatusRapture)),
 	];
 
-	bool Updaters.IBeirutaTimelineOption.AllowPlannedAction(uint actionId) => actionId switch
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) => actionId switch
 	{
 		(uint)ActionID.CureIiiPvE => UsePlannedCureIii,
 		(uint)ActionID.MedicaIiiPvE => UsePlannedMedicaIii,
@@ -65,9 +65,9 @@ public sealed class BeirutaWHM : WhiteMageRotation, Updaters.IBeirutaTimelineOpt
 	};
 
 	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
-		Updaters.BeirutaTimelineUpdater.HoldQueuedPlannedAction(action.ID);
+		Updaters.TimelineUpdater.HoldQueuedPlannedAction(action.ID);
 
-	string? Updaters.IBeirutaTimelineOption.PlannedActionWait(uint actionId) => actionId switch
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => actionId switch
 	{
 		(uint)ActionID.CureIiiPvE or (uint)ActionID.MedicaIiiPvE or (uint)ActionID.MedicaIiPvE or (uint)ActionID.MedicaPvE or (uint)ActionID.AfflatusRapturePvE
 			=> CountInjured(PartyHealRange, PlannedHealHp) >= PlannedAoeHealCount ? null : "nobody needed healing",
@@ -91,7 +91,7 @@ public sealed class BeirutaWHM : WhiteMageRotation, Updaters.IBeirutaTimelineOpt
 		"Pick a page to show its detailed settings. This only changes what is shown.")]
 	public BeirutaSettingsPage MoreSettings { get; set; } = BeirutaSettingsPage.Hide;
 
-	private bool WardActive => WardMode || Updaters.BeirutaTimelineUpdater.PlannedWardMode;
+	private bool WardActive => WardMode || Updaters.TimelineUpdater.PlannedWardMode;
 
 	bool IBeirutaHealContext.WardMode => WardActive;
 
@@ -560,7 +560,7 @@ public sealed class BeirutaWHM : WhiteMageRotation, Updaters.IBeirutaTimelineOpt
 	{
 		get
 		{
-			Updaters.BeirutaTimelineUpdater.UpcomingStarts(PlannedLilyLookahead, _plannedLilyStarts,
+			Updaters.TimelineUpdater.UpcomingStarts(PlannedLilyLookahead, _plannedLilyStarts,
 				AfflatusRapturePvE.ID, AfflatusSolacePvE.ID);
 			return _plannedLilyStarts.Count == 0 || PlannedLiliesServed(Lily - 1) >= PlannedLiliesServed(Lily);
 		}
@@ -589,10 +589,10 @@ public sealed class BeirutaWHM : WhiteMageRotation, Updaters.IBeirutaTimelineOpt
 	}
 
 	private bool PlannedLilySoon =>
-		Updaters.BeirutaTimelineUpdater.PlannedWithin(PlannedMiseryLeadSeconds, AfflatusRapturePvE.ID, AfflatusSolacePvE.ID);
+		Updaters.TimelineUpdater.PlannedWithin(PlannedMiseryLeadSeconds, AfflatusRapturePvE.ID, AfflatusSolacePvE.ID);
 
 	private bool PlannedAoeHealNear =>
-		Updaters.BeirutaTimelineUpdater.PlannedAround(PlannedAoeHealGapSeconds, CureIiiPvE.ID, MedicaIiiPvE.ID, AfflatusRapturePvE.ID);
+		Updaters.TimelineUpdater.PlannedAround(PlannedAoeHealGapSeconds, CureIiiPvE.ID, MedicaIiiPvE.ID, AfflatusRapturePvE.ID);
 
 	private const float LilyCapSoonSeconds = 5f;
 
@@ -855,7 +855,7 @@ public sealed class BeirutaWHM : WhiteMageRotation, Updaters.IBeirutaTimelineOpt
 		SwiftcastPvE.IsEnabled &&
 		!SwiftcastPvE.Cooldown.IsCoolingDown &&
 		!BeirutaMove.RaiseSwiftHeld &&
-		!Updaters.BeirutaTimelineUpdater.PlannedWithin(40f, SwiftcastPvE.ID);
+		!Updaters.TimelineUpdater.PlannedWithin(40f, SwiftcastPvE.ID);
 
 	private bool SwiftcastReadyForMovement =>
 		SwiftcastAvailableForMovement &&

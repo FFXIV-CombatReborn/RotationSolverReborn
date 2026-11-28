@@ -3,8 +3,52 @@
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/Rotations/Ranged/Machinist/MCH_Reborn.cs")]
 
-public sealed class MCH_Reborn : MachinistRotation
+public sealed class MCH_Reborn : MachinistRotation, Updaters.ICdPlanRotation
 {
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Auto: Tactician and Dismantle respond to RSR's defense / heal signals (raidwide detection, Boss Mod or the commands).\n" +
+		"Use built-in CD plan: they follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press them.\n" +
+		"With the built-in plan or BMR / VBM / Manual, the defense / heal signals do not use them.")]
+	public CdPlanSource CdPlanFrom { get; set; } = CdPlanSource.Auto;
+
+	public bool UseTimelinePlan => CdPlanFrom == CdPlanSource.BuiltIn;
+
+	private bool AutoDefense => CdPlanFrom == CdPlanSource.Auto;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Automaton Queen", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan decides when Automaton Queen goes out, and its Queen Overdrive (e.g. before the boss leaves); the rotation then only uses Queen to avoid overcapping Battery.\nOff: they are skipped and the rotation times Queen itself.")]
+	public bool UsePlannedQueen { get; set; } = true;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
+	[
+		((uint)ActionID.AutomatonQueenPvE, nameof(UsePlannedQueen)),
+		((uint)ActionID.QueenOverdrivePvE, nameof(UsePlannedQueen)),
+	];
+
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
+		UsePlannedQueen || (actionId != (uint)ActionID.AutomatonQueenPvE && actionId != (uint)ActionID.QueenOverdrivePvE);
+
+	// The plan times Automaton Queen; the rotation then only uses it against overcapping Battery.
+	private bool PlanOwnsQueen => Updaters.TimelineUpdater.PlanContains(AutomatonQueenPvE.ID);
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => CdPlanHelper.Wait(actionId);
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		CdPlanHelper.HoldCommand(action, UseTimelinePlan);
+
+	#endregion
+
 	#region Config Options
 	[RotationConfig(CombatType.PvE, Name = "Use burst medicine in countdown (requires auto burst option on)")]
 	private bool OpenerBurstMeds { get; set; } = false;
@@ -80,6 +124,11 @@ public sealed class MCH_Reborn : MachinistRotation
 			ResetQueenStep();
 		}
 
+		if (CdPlanHelper.TryPlanned(out act))
+		{
+			return true;
+		}
+
 		if (HyperchargePvE.EnoughLevel)
 		{
 			if (!WildfirePvE.EnoughLevel)
@@ -133,7 +182,7 @@ public sealed class MCH_Reborn : MachinistRotation
 
 		if (!MultiTact || (MultiTact && NumberOfAllHostilesInMaxRange > 1))
 		{
-			if (TacticianPvE.CanUse(out act))
+			if (AutoDefense && TacticianPvE.CanUse(out act))
 			{
 				return true;
 			}
@@ -141,7 +190,7 @@ public sealed class MCH_Reborn : MachinistRotation
 
 		if (!MitOverlap || (MitOverlap && !StatusHelper.PlayerHasStatus(true, StatusID.Tactician_1951)))
 		{
-			if (DismantlePvE.CanUse(out act))
+			if (AutoDefense && DismantlePvE.CanUse(out act))
 			{
 				return true;
 			}
@@ -578,7 +627,7 @@ public sealed class MCH_Reborn : MachinistRotation
 		}
 
 		// Opener
-		if (Battery == 60 && IsLastGCD(false, ExcavatorPvE) && CombatTime < 15)
+		if (!PlanOwnsQueen && Battery == 60 && IsLastGCD(false, ExcavatorPvE) && CombatTime < 15)
 		{
 			if (AutomatonQueenPvE.EnoughLevel && AutomatonQueenPvE.CanUse(out act, skipTTKCheck: true))
 			{
@@ -592,7 +641,7 @@ public sealed class MCH_Reborn : MachinistRotation
 		}
 
 		// Only allow battery usage if the current transition matches the expected step
-		if (foundStepPair)
+		if (foundStepPair && !PlanOwnsQueen)
 		{
 			if (AutomatonQueenPvE.EnoughLevel && AutomatonQueenPvE.CanUse(out act, skipTTKCheck: true))
 			{

@@ -1,0 +1,18 @@
+# Default MNK
+Phase,Start,End,Action,Target
+P1,32.0,35.0,Mantra,
+P1,39.0,42.0,Riddle of Earth,
+P1,150.6,153.6,Mantra,
+P2,33.2,38.7,Riddle of Earth,
+P2,68.8,71.8,Mantra,
+P3,54.7,57.7,Mantra,
+P3,138.1,141.1,Riddle of Earth,
+P3,185.3,192.6,Mantra,
+P3,279.8,282.8,Mantra,
+P3,317.2,320.2,Riddle of Earth,
+P4,36.7,39.7,Mantra,
+P5,12.3,15.3,Mantra,
+P5,40.5,43.9,Riddle of Earth,
+P5,110.1,114.3,Mantra,
+P5,159.8,165.6,Riddle of Earth,
+P5,200.6,204.8,Mantra,

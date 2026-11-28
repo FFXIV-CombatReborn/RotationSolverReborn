@@ -25,7 +25,7 @@ internal interface IBeirutaHealer
 internal static class BeirutaHealerFlow
 {
 	public static bool Ability(IBeirutaHealer job, IAction nextGCD, out IAction? act) =>
-		Updaters.BeirutaTimelineUpdater.TryPlannedAction(false, out act) ||
+		Updaters.TimelineUpdater.TryPlannedAction(false, out act) ||
 		job.PlanAbility(nextGCD, out act) ||
 		job.SpecialAbility(nextGCD, out act) ||
 		job.BurstAbility(nextGCD, out act) ||
@@ -37,10 +37,10 @@ internal static class BeirutaHealerFlow
 		  job.TankHelpAbility(nextGCD, out act)));
 
 	public static bool WeaveRoomWanted(int pendingAbilities) =>
-		DataCenter.InCombat && Updaters.BeirutaTimelineUpdater.PendingPlannedAbilities() >= pendingAbilities;
+		DataCenter.InCombat && Updaters.TimelineUpdater.PendingPlannedAbilities() >= pendingAbilities;
 
 	public static bool UrgentGcd(IBeirutaHealer job, out IAction? act) =>
-		Updaters.BeirutaTimelineUpdater.TryPlannedAction(true, out act) ||
+		Updaters.TimelineUpdater.TryPlannedAction(true, out act) ||
 		job.PlanGCD(out act) ||
 		job.SpecialGCD(out act);
 
@@ -134,9 +134,6 @@ internal static class BeirutaMove
 
 public static class BeirutaSettingNames
 {
-	public const string BuiltInPlan = "Use built-in CD plan";
-	public const string ManualPlan = "BMR / VBM / Manual";
-
 	public const string HidePage = "Hide";
 	public const string OpenerPage = "Opener / Potion";
 	public const string DamagePage = "Damage";
@@ -146,10 +143,10 @@ public static class BeirutaSettingNames
 
 public enum BeirutaPlanSource : byte
 {
-	[Description(BeirutaSettingNames.BuiltInPlan)]
+	[Description(CdPlanNames.BuiltInPlan)]
 	BuiltIn,
 
-	[Description(BeirutaSettingNames.ManualPlan)]
+	[Description(CdPlanNames.ManualPlan)]
 	Manual,
 }
 
@@ -220,14 +217,14 @@ internal static class BeirutaIncoming
 	public static bool RaidwideWithin(float seconds, out bool heavy)
 	{
 		heavy = false;
-		if (Updaters.BeirutaTimelineUpdater.HasDamageRows)
+		if (Updaters.TimelineUpdater.HasDamageRows)
 		{
-			if (!Updaters.BeirutaTimelineUpdater.NextDamage(seconds, false, out _, out var kind))
+			if (!Updaters.TimelineUpdater.NextDamage(seconds, false, out _, out var kind))
 			{
 				return false;
 			}
 
-			heavy = kind == Updaters.BeirutaDamageKind.Heavy;
+			heavy = kind == Updaters.TimelineDamageKind.Heavy;
 			return true;
 		}
 
@@ -237,8 +234,8 @@ internal static class BeirutaIncoming
 	public const float TankbusterLeadSeconds = 5f;
 
 	public static bool TankbusterWithin(float seconds) =>
-		Updaters.BeirutaTimelineUpdater.HasTankbusterRows
-			? Updaters.BeirutaTimelineUpdater.NextDamage(seconds, true, out _, out _)
+		Updaters.TimelineUpdater.HasTankbusterRows
+			? Updaters.TimelineUpdater.NextDamage(seconds, true, out _, out _)
 			: DataCenter.IsHostileCastingToTank;
 }
 
@@ -481,7 +478,7 @@ internal static class BeirutaParty
 
 	public static bool SpotHealWorthy(IBattleChara member) => IsTankMember(member) || IsJustRaised(member) || TopUpAll;
 
-	public static bool TopUpAll => Updaters.BeirutaTimelineUpdater.PlannedTopUpAll;
+	public static bool TopUpAll => Updaters.TimelineUpdater.PlannedTopUpAll;
 
 	public static IBattleChara? TopUpAllTarget(float range) =>
 		TopUpAll ? FindLowest(range, static m => HealHp(m) < 1f) : null;

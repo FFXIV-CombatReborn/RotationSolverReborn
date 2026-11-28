@@ -1,0 +1,18 @@
+# Default MCH
+Phase,Start,End,Action,Target
+P1,82.5,85.5,Dismantle,
+P1,103.6,105.6,Tactician,
+P2,48.7,51.7,Tactician,
+P2,80.2,83.2,Dismantle,
+P2,142.2,145.2,Tactician,
+P3,41.9,44.9,Dismantle,
+P3,54.1,57.1,Tactician,
+P4,35.5,38.5,Tactician,
+P4,35.5,38.5,Dismantle,
+P4,135.3,138.3,Tactician,
+P4,156.5,158.5,Dismantle,
+P5,84.2,87.2,Tactician,
+P5,111.3,114.3,Dismantle,
+P5,187.1,189.2,Tactician,
+P5,287.0,290.0,Tactician,
+P5,315.2,318.2,Dismantle,

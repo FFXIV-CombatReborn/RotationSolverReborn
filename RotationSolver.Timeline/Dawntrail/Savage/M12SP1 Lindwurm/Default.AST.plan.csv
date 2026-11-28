@@ -1,0 +1,46 @@
+# Default AST
+# CountdownEarthlyStar: 10
+# Set.WardMode: false
+# Set.CountdownShield: Aspected Benefic + Celestial Intersection on stance tank (5s)
+# Set.UseEarthlyStarTime: 10
+# Set.DivinationOpener: 7s (3 GCD)
+# Set.UsePotion: true
+# Set.PotionTiming: Opener (countdown)
+# Set.DelayOracleForAlignment: true
+# Set.EarthlyStarMode: On cooldown (and countdown)
+# Set.LightspeedOtherCharge: Movement, and before capping
+# Set.EarlyDotRefreshWhenMoving: false
+# Set.UseSwiftcastForMovement: true
+# Set.SwiftcastMovement: Raise and AoE heal GCDs only
+# Set.UseCustomHPThreshold: false
+Phase,Start,End,Action,Target
+P1,11.7,14.7,Collective Unconscious,
+P1,13.2,16.2,Horoscope,
+P1,19.2,22.2,Celestial Opposition,
+P1,53.6,56.6,Earthly Star,
+P1,85.1,87.6,Macrocosmos,
+P1,82.6,85.6,Neutral Sect,
+P1,84.6,87.6,Sun Sign,
+P1,95.3,98.3,Horoscope,
+P1,103.9,106.9,Collective Unconscious,
+P1,106.4,109.4,Celestial Opposition,
+P1,112.5,115.5,Earthly Star,
+P1,161.6,170.6,Celestial Opposition,
+P1,180.7,183.7,Earthly Star,
+P1,184.8,187.8,Collective Unconscious,
+P1,210.8,219.3,Helios Conjunction,
+P1,216.8,219.8,Horoscope,
+P1,223.5,226.5,Neutral Sect,
+P1,225.5,228.5,Sun Sign,
+P1,239.7,242.7,Celestial Opposition,
+P1,239.5,242.5,Earthly Star,
+P1,264.2,267.2,Collective Unconscious,
+P1,273.3,281.3,Horoscope,
+P1,301.0,305.7,Earthly Star,
+P1,328.8,337.8,Horoscope,
+P1,330.3,333.3,Collective Unconscious,
+P1,348.1,350.6,Macrocosmos,
+P1,345.6,348.6,Neutral Sect,
+P1,350.1,353.1,Celestial Opposition,
+P1,361.0,370.0,Earthly Star,
+P1,367.8,370.8,Sun Sign,

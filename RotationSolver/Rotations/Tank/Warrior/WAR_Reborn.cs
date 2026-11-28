@@ -3,8 +3,77 @@ namespace RotationSolver.Rotations.Tank.Warrior;
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/Rotations/Tank/Warrior/WAR_Reborn.cs")]
 
-public sealed class WAR_Reborn : WarriorRotation
+public sealed class WAR_Reborn : WarriorRotation, Updaters.ICdPlanRotation
 {
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Auto: Shake It Off, Damnation, Thrill of Battle, Bloodwhetting, Nascent Flash, Rampart and Reprisal respond to RSR's defense / heal signals (raidwide detection, Boss Mod or the commands).\n" +
+		"Use built-in CD plan: they follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press them.\n" +
+		"With the built-in plan or BMR / VBM / Manual, the defense / heal signals do not use them.")]
+	public CdPlanSource CdPlanFrom { get; set; } = CdPlanSource.Auto;
+
+	public bool UseTimelinePlan => CdPlanFrom == CdPlanSource.BuiltIn;
+
+	private bool AutoDefense => CdPlanFrom == CdPlanSource.Auto;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned invuln (Holmgang)", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan\'s invuln (Holmgang) are used in their window.\nOff: they are skipped.")]
+	public bool UsePlannedInvuln { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Provoke / Shirk", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan\'s Provoke / Shirk are used in their window.\nOff: they are skipped.")]
+	public bool UsePlannedProvokeShirk { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned tank stance", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan\'s Tank Stance rows say when your stance should be on or off; it is turned on / off only if it isn\'t already, and RSR\'s auto tank stance doesn\'t turn it on during an Off row.\nOff: stance is left to you and RSR\'s auto tank stance.")]
+	public bool UsePlannedTankStance { get; set; } = true;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
+	[
+		((uint)ActionID.HolmgangPvE, nameof(UsePlannedInvuln)),
+		((uint)ActionID.ProvokePvE, nameof(UsePlannedProvokeShirk)),
+		((uint)ActionID.ShirkPvE, nameof(UsePlannedProvokeShirk)),
+		((uint)ActionID.DefiancePvE, nameof(UsePlannedTankStance)),
+		((uint)ActionID.ReleaseDefiancePvE, nameof(UsePlannedTankStance)),
+	];
+
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
+		(UsePlannedInvuln || actionId != (uint)ActionID.HolmgangPvE) &&
+		(UsePlannedProvokeShirk || (actionId != (uint)ActionID.ProvokePvE && actionId != (uint)ActionID.ShirkPvE)) &&
+		(UsePlannedTankStance || (actionId != (uint)ActionID.DefiancePvE && actionId != (uint)ActionID.ReleaseDefiancePvE));
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => CdPlanHelper.Wait(actionId);
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		CdPlanHelper.HoldCommand(action, UseTimelinePlan);
+
+	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+	{
+		if (CdPlanHelper.TryPlanned(out act))
+		{
+			return true;
+		}
+
+		if (CdPlanHelper.TryPlannedStance(DefiancePvE, ReleaseDefiancePvE, out act))
+		{
+			return true;
+		}
+
+		return base.EmergencyAbility(nextGCD, out act);
+	}
+
+	#endregion
+
 	#region Config Options
 	[RotationConfig(CombatType.PvE, Name = "Only use Nascent Flash if Tank Stance is off")]
 	public bool NeverscentFlash { get; set; } = false;
@@ -209,6 +278,11 @@ public sealed class WAR_Reborn : WarriorRotation
 	[RotationDesc(ActionID.ShakeItOffPvE, ActionID.NascentFlashPvE)]
 	protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
 	{
+		if (!AutoDefense)
+		{
+			return base.HealSingleAbility(nextGCD, out act);
+		}
+
 		if (ShakeItOffPvE.CanUse(out act, skipAoeCheck: true))
 		{
 			return true;
@@ -233,6 +307,11 @@ public sealed class WAR_Reborn : WarriorRotation
 	[RotationDesc(ActionID.RawIntuitionPvE, ActionID.VengeancePvE, ActionID.RampartPvE, ActionID.RawIntuitionPvE, ActionID.ReprisalPvE)]
 	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
 	{
+		if (!AutoDefense)
+		{
+			return base.DefenseSingleAbility(nextGCD, out act);
+		}
+
 		var RawSingleTargets = SoloIntuition;
 		act = null;
 
@@ -296,6 +375,11 @@ public sealed class WAR_Reborn : WarriorRotation
 	[RotationDesc(ActionID.ShakeItOffPvE, ActionID.ReprisalPvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
+		if (!AutoDefense)
+		{
+			return base.DefenseAreaAbility(nextGCD, out act);
+		}
+
 		if (ShakeItOffPvE.CanUse(out act, skipAoeCheck: true))
 		{
 			return true;

@@ -3,8 +3,67 @@ namespace RotationSolver.Rotations.Tank.DarkKnight;
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn)]
 [SourceCode(Path = "main/Rotations/Tank/DarkKnight/DRK_Reborn.cs")]
 
-public sealed class DRK_Reborn : DarkKnightRotation
+public sealed class DRK_Reborn : DarkKnightRotation, Updaters.ICdPlanRotation
 {
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Auto: Dark Missionary, Shadowed Vigil, Dark Mind, The Blackest Night, Oblation, Rampart and Reprisal respond to RSR's defense / heal signals (raidwide detection, Boss Mod or the commands).\n" +
+		"Use built-in CD plan: they follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press them.\n" +
+		"With the built-in plan or BMR / VBM / Manual, the defense / heal signals do not use them.")]
+	public CdPlanSource CdPlanFrom { get; set; } = CdPlanSource.Auto;
+
+	public bool UseTimelinePlan => CdPlanFrom == CdPlanSource.BuiltIn;
+
+	private bool AutoDefense => CdPlanFrom == CdPlanSource.Auto;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned invuln (Living Dead)", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan\'s invuln (Living Dead) are used in their window.\nOff: they are skipped.")]
+	public bool UsePlannedInvuln { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Provoke / Shirk", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan\'s Provoke / Shirk are used in their window.\nOff: they are skipped.")]
+	public bool UsePlannedProvokeShirk { get; set; } = true;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned tank stance", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan\'s Tank Stance rows say when your stance should be on or off; it is turned on / off only if it isn\'t already, and RSR\'s auto tank stance doesn\'t turn it on during an Off row.\nOff: stance is left to you and RSR\'s auto tank stance.")]
+	public bool UsePlannedTankStance { get; set; } = true;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
+	[
+		((uint)ActionID.LivingDeadPvE, nameof(UsePlannedInvuln)),
+		((uint)ActionID.ProvokePvE, nameof(UsePlannedProvokeShirk)),
+		((uint)ActionID.ShirkPvE, nameof(UsePlannedProvokeShirk)),
+		((uint)ActionID.GritPvE, nameof(UsePlannedTankStance)),
+		((uint)ActionID.ReleaseGritPvE, nameof(UsePlannedTankStance)),
+	];
+
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
+		(UsePlannedInvuln || actionId != (uint)ActionID.LivingDeadPvE) &&
+		(UsePlannedProvokeShirk || (actionId != (uint)ActionID.ProvokePvE && actionId != (uint)ActionID.ShirkPvE)) &&
+		(UsePlannedTankStance || (actionId != (uint)ActionID.GritPvE && actionId != (uint)ActionID.ReleaseGritPvE));
+
+	private const float PlannedBlackestNightReserveSeconds = 20f;
+
+	private bool PlannedBlackestNightSoon =>
+		Updaters.TimelineUpdater.PlannedWithin(PlannedBlackestNightReserveSeconds, TheBlackestNightPvE.ID);
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => CdPlanHelper.Wait(actionId);
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		CdPlanHelper.HoldCommand(action, UseTimelinePlan);
+
+	#endregion
+
 	#region Config Options
 	[RotationConfig(CombatType.PvE, Name = "Use provoke in opening if tank stance is on")]
 	public bool UseProvokeInOpening { get; set; } = true;
@@ -101,6 +160,16 @@ public sealed class DRK_Reborn : DarkKnightRotation
 			}
 		}
 
+		if (CdPlanHelper.TryPlanned(out act))
+		{
+			return true;
+		}
+
+		if (CdPlanHelper.TryPlannedStance(GritPvE, ReleaseGritPvE, out act))
+		{
+			return true;
+		}
+
 		return base.EmergencyAbility(nextGCD, out act);
 	}
 
@@ -123,6 +192,11 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	[RotationDesc(ActionID.DarkMissionaryPvE, ActionID.ReprisalPvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
+		if (!AutoDefense)
+		{
+			return base.DefenseAreaAbility(nextGCD, out act);
+		}
+
 		if (!InTwoMIsBurst && BlackLantern && TheBlackestNightPvE.CanUse(out act, targetOverride: TargetType.LowHP) && !TheBlackestNightPvE.Target.Target.HasStatus(false, StatusID.Transcendent) && TheBlackestNightPvE.Target.Target.GetHealthRatio() <= BlackLanternRatio)
 		{
 			return true;
@@ -160,6 +234,11 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	[RotationDesc(ActionID.OblationPvE, ActionID.TheBlackestNightPvE, ActionID.DarkMindPvE, ActionID.ShadowWallPvE, ActionID.ShadowedVigilPvE, ActionID.RampartPvE, ActionID.ReprisalPvE)]
 	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
 	{
+		if (!AutoDefense)
+		{
+			return base.DefenseSingleAbility(nextGCD, out act);
+		}
+
 		//10
 		if (!IsLastAbility(false, OblationPvE))
 		{
@@ -423,6 +502,12 @@ public sealed class DRK_Reborn : DarkKnightRotation
 	{
 		get
 		{
+			// A planned The Blackest Night is coming: keep its 3000 MP (Dark Arts makes Edge / Flood free).
+			if (PlannedBlackestNightSoon && !HasDarkArts && CurrentMp < 6000)
+			{
+				return false;
+			}
+
 			if (DarkSideEndAfterGCD(3))
 			{
 				return true;

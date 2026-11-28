@@ -8,8 +8,60 @@ namespace RotationSolver.Rotations.Magical.Pictomancer;
 [SourceCode(Path = "main/Rotations/Magical/Pictomancer/BeirutaPCT.cs")]
 [ExtraRotation]
 
-public sealed class BeirutaPCT : PictomancerRotation
+public sealed class BeirutaPCT : PictomancerRotation, Updaters.ICdPlanRotation
 {
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Auto: Addle, Tempera Coat and Tempera Grassa respond to RSR's defense signals (raidwide detection, Boss Mod or the commands).\n" +
+		"Use built-in CD plan: they follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press them.\n" +
+		"With the built-in plan or BMR / VBM / Manual, the defense signals do not use them.")]
+	public CdPlanSource CdPlanFrom { get; set; } = CdPlanSource.Auto;
+
+	public bool UseTimelinePlan => CdPlanFrom == CdPlanSource.BuiltIn;
+
+	private bool AutoDefense => CdPlanFrom == CdPlanSource.Auto;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Addle from", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Where planned Addle comes from. R2 / Fake melee profile: the duty's shared Addle plan for that slot (Fake melee = the second caster of a double caster comp, using Addle like a melee's Feint); the job plan's own Addle rows are then not used (everything else still comes from the job plan).\n" +
+		"Auto: R2, and once an R2 Addle turns out to be another caster's, Fake melee for the rest of the duty.\n" +
+		"Job plan: Addle from the picked job plan. Also used when the duty has no profile.")]
+	public AddleProfile AddleFrom { get; set; } = AddleProfile.Auto;
+
+	string Updaters.ICdPlanRotation.MitProfileAction => "Addle";
+
+	MitProfileChoice Updaters.ICdPlanRotation.MitProfile => (MitProfileChoice)AddleFrom;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Tempera Grassa", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"On: the plan's Tempera Grassa are used in their window.\nOff: they are skipped.")]
+	public bool UsePlannedTemperaGrassa { get; set; } = true;
+
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
+	[
+		((uint)ActionID.TemperaGrassaPvE, nameof(UsePlannedTemperaGrassa)),
+	];
+
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
+		UsePlannedTemperaGrassa || actionId != (uint)ActionID.TemperaGrassaPvE;
+
+	// A planned Tempera Grassa needs Tempera Coat up first.
+	private bool PlannedGrassaNeedsCoat =>
+		UseTimelinePlan && UsePlannedTemperaGrassa && !StatusHelper.PlayerHasStatus(true, StatusID.TemperaCoat) &&
+		Updaters.TimelineUpdater.PlannedOpenByName(TemperaGrassaPvE.Name);
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => CdPlanHelper.Wait(actionId);
+
+	#endregion
+
 	#region Config Options
 
 	#region Prepull
@@ -314,7 +366,8 @@ public sealed class BeirutaPCT : PictomancerRotation
 		IsQueuedByUser(motif);
 
 	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
-		action.ID == RainbowDripPvE.ID && !RainbowDripCastAllowed;
+		(action.ID == RainbowDripPvE.ID && !RainbowDripCastAllowed) ||
+		CdPlanHelper.HoldCommand(action, UseTimelinePlan);
 
 	private bool TryCometInBlack(out IAction? act, bool skipCastingCheck = false)
 	{
@@ -894,6 +947,16 @@ public sealed class BeirutaPCT : PictomancerRotation
 		nextGCD = _heldGCD ?? nextGCD;
 		act = null;
 
+		if (PlannedGrassaNeedsCoat && TemperaCoatPvE.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (CdPlanHelper.TryPlanned(out act))
+		{
+			return true;
+		}
+
 		if (RainbowDripSwiftPending && SwiftcastPvE.CanUse(out act))
 		{
 			return true;
@@ -936,7 +999,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 	[RotationDesc(ActionID.TemperaCoatPvE, ActionID.TemperaGrassaPvE, ActionID.AddlePvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
-		if (WeaveBlocked || AutoDefenseBlockedForBurst)
+		if (WeaveBlocked || AutoDefenseBlockedForBurst || !AutoDefense)
 		{
 			act = null;
 			return false;
@@ -951,7 +1014,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 	[RotationDesc(ActionID.TemperaCoatPvE)]
 	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
 	{
-		if (WeaveBlocked || AutoDefenseBlockedForBurst)
+		if (WeaveBlocked || AutoDefenseBlockedForBurst || !AutoDefense)
 		{
 			act = null;
 			return false;
@@ -1024,7 +1087,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 			return true;
 		}
 
-		if (TemperaWithHealerMit && InCombat && !InOrNearBurst && HasHealerGroundMit)
+		if (AutoDefense && TemperaWithHealerMit && InCombat && !InOrNearBurst && HasHealerGroundMit)
 		{
 			if (TemperaCoatPvE.CanUse(out act))
 			{
@@ -1038,7 +1101,7 @@ public sealed class BeirutaPCT : PictomancerRotation
 		}
 
 		if (!AutoDefenseBlockedForBurst &&
-			(MergedStatus.HasFlag(AutoStatus.DefenseArea) ||
+			((AutoDefense && MergedStatus.HasFlag(AutoStatus.DefenseArea)) ||
 				StatusHelper.PlayerWillStatusEndGCD(2, 0, true, StatusID.TemperaCoat)) &&
 			TemperaGrassaPvE.CanUse(out act))
 		{

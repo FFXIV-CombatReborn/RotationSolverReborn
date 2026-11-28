@@ -1,0 +1,95 @@
+# Default WHM
+# Set.WardMode: false
+# Set.CountdownShield: None
+# Set.PresenceOfMindOpener: 6s
+# Set.UsePotion: true
+# Set.PotionTiming: Opener (countdown)
+# Set.HoldMiseryForBurst: false
+# Set.UseSwiftcastForMovement: true
+# Set.SwiftcastMovement: Raise and AoE heal GCDs only
+# Set.UseCustomHPThreshold: false
+Phase,Start,End,Action,Target
+P1,4.1,7.1,Asylum,
+P1,53.8,56.8,Plenary Indulgence,
+P1,55.8,60.8,Afflatus Rapture,
+P1,54.5,60.8,Medica III,Precast
+P1,57.9,62.9,Afflatus Rapture,
+P1,78.2,83.2,Afflatus Rapture,
+P1,79.5,85.7,Medica III,Precast
+P1,91.7,96.2,Liturgy of the Bell,
+P1,101.8,104.8,Temperance,
+P1,106.4,109.4,Asylum,
+P1,113.0,118.0,Plenary Indulgence,
+P1,117.6,120.6,Divine Caress,
+P1,145.3,150.3,Afflatus Rapture,
+P2,15.5,20.5,Afflatus Rapture,
+P2,34.3,37.3,Plenary Indulgence,
+P2,44.5,51.0,Medica III,Precast
+P2,50.5,56.8,Medica III,Precast
+P2,57.4,62.4,Afflatus Rapture,
+P2,60.6,65.6,Afflatus Rapture,
+P2,64.3,69.3,Afflatus Rapture,
+P2,77.5,83.5,Medica III,Precast
+P2,82.1,85.1,Asylum,
+P2,104.3,107.3,Temperance,
+P2,110.3,113.3,Divine Caress,
+P2,122.9,125.9,Plenary Indulgence,
+P2,131.1,135.6,Liturgy of the Bell,
+P2,141.0,146.0,Afflatus Rapture,
+P2,140.5,146.0,Medica III,Precast
+P2,150.0,155.0,Afflatus Rapture,
+P2,158.5,164.0,Medica III,Precast
+P2,169.2,176.2,Asylum,
+P2,171.2,176.2,Afflatus Rapture,
+P2,187.6,190.6,Plenary Indulgence,
+P2,189.6,194.6,Afflatus Rapture,
+P2,194.9,199.9,Afflatus Rapture,
+P2,231.7,236.7,Afflatus Rapture,
+P3,11.3,14.3,Plenary Indulgence,
+P3,13.3,18.3,Afflatus Rapture,
+P3,43.9,46.9,Asylum,
+P3,45.9,50.9,Afflatus Rapture,
+P3,44.5,50.9,Medica III,Precast
+P3,54.2,57.2,Temperance,
+P3,59.4,62.4,Divine Caress,
+P3,80.9,85.4,Liturgy of the Bell,
+P3,100.0,103.0,Plenary Indulgence,
+P3,149.4,152.4,Asylum,
+P3,163.5,166.5,Plenary Indulgence,
+P4,24.3,27.3,Temperance,
+P4,27.8,32.8,Afflatus Rapture,
+P4,47.2,50.2,Divine Caress,
+P4,54.1,59.1,Afflatus Rapture,
+P4,60.1,63.1,Asylum,
+P4,73.4,76.4,Plenary Indulgence,
+P4,76.5,81.5,Afflatus Rapture,
+P4,101.2,106.2,Afflatus Rapture,
+P4,102.3,106.8,Liturgy of the Bell,
+P4,106.5,112.3,Medica III,Precast
+P4,114.1,119.1,Afflatus Rapture,
+P4,119.2,124.2,Afflatus Rapture,
+P4,138.9,143.9,Afflatus Rapture,
+P4,143.5,149.3,Medica III,Precast
+P4,156.2,159.2,Asylum,
+P4,156.2,159.2,Plenary Indulgence,
+P4,154.7,157.7,Temperance,
+P4,164.8,167.8,Divine Caress,
+P4,168.3,173.3,Afflatus Rapture,
+P5,79.0,82.0,Asylum,
+P5,81.0,86.0,Afflatus Rapture,
+P5,86.3,89.3,Plenary Indulgence,
+P5,92.2,97.2,Afflatus Rapture,
+P5,140.4,143.4,Temperance,
+P5,156.7,159.7,Divine Caress,
+P5,160.2,165.2,Afflatus Rapture,
+P5,169.7,172.7,Asylum,
+P5,174.9,179.9,Afflatus Rapture,
+P5,199.5,202.5,Plenary Indulgence,
+P5,201.5,206.5,Afflatus Rapture,
+P5,262.6,267.1,Liturgy of the Bell,
+P5,265.6,268.6,Asylum,
+P5,264.1,267.1,Temperance,
+P5,272.2,277.2,Afflatus Rapture,
+P5,276.8,281.8,Afflatus Rapture,
+P5,288.6,291.6,Divine Caress,
+P5,317.1,320.1,Plenary Indulgence,

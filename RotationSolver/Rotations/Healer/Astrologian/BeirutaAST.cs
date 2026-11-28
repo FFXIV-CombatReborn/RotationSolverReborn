@@ -7,7 +7,7 @@ namespace RotationSolver.Rotations.Healer.Astrologian;
 [SourceCode(Path = "main/Rotations/Healer/Astrologian/BeirutaAST.cs")]
 [ExtraRotation]
 
-public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineOption, IBeirutaHealContext, IBeirutaHealer
+public sealed class BeirutaAST : AstrologianRotation, Updaters.ICdPlanRotation, IBeirutaHealContext, IBeirutaHealer
 {
 	#region Config Options
 
@@ -20,41 +20,41 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 
 	public bool UseTimelinePlan => CdPlanFrom == BeirutaPlanSource.BuiltIn;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
 	public bool ShowPlanTimeline { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
 	public bool ShowTimelineMessages { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Use recommended settings for the plan", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Use recommended settings for the plan", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"When a built-in plan loads, the settings it recommends are applied, like a preset. Changing a setting afterwards (e.g. your Ward Mode macro) works as usual.\n" +
 		"Your saved settings are not changed by the plan: they show as you set them and come back once the plan unloads or this is off.")]
 	public bool UsePlanSettings { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Use planned Helios Conjunction", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Helios Conjunction", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"On: the plan's Helios Conjunctions are cast in their window, and no automatic Helios GCD 15s around them.\n" +
 		"Off: they are skipped; Helios Conjunction goes by party HP and after Neutral Sect / Horoscope.")]
 	public bool UsePlannedHeliosConjunction { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Use planned Earthly Star", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Earthly Star", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"On: Earthly Star follows the plan, including the countdown one, and goes where RSR places ground heals (Beneficial positions list); [Damage] Earthly Star and [Prepull] Earthly Star at are ignored.\n" +
 		"Off: it is placed whenever it is ready.\n" +
 		"Stellar Detonation always goes by party HP under Giant Dominance.")]
 	public bool UsePlannedEarthlyStar { get; set; } = true;
 
-	IEnumerable<(uint ActionId, string Config)> Updaters.IBeirutaTimelineOption.OptionalPlannedActions =>
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
 	[
 		((uint)ActionID.HeliosConjunctionPvE, nameof(UsePlannedHeliosConjunction)),
 		((uint)ActionID.EarthlyStarPvE, nameof(UsePlannedEarthlyStar)),
 	];
 
-	bool Updaters.IBeirutaTimelineOption.AllowPlannedAction(uint actionId) =>
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
 		(UsePlannedHeliosConjunction || actionId != (uint)ActionID.HeliosConjunctionPvE) &&
 		(UsePlannedEarthlyStar || actionId != (uint)ActionID.EarthlyStarPvE);
 
-	string? Updaters.IBeirutaTimelineOption.PlannedActionWait(uint actionId) =>
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) =>
 		actionId != (uint)ActionID.HeliosConjunctionPvE ? null
 		: PlannedPartnerPending(NeutralSectPvE, HasNeutralSect) ? "waiting for the planned Neutral Sect"
 		: PlannedPartnerPending(HoroscopePvE, HasHoroscope || HasHoroscopeHelios) ? "waiting for the planned Horoscope"
@@ -64,17 +64,17 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 		!active &&
 		partner.EnoughLevel &&
 		!partner.Cooldown.IsCoolingDown &&
-		Updaters.BeirutaTimelineUpdater.PlannedWithin(PairedHeliosWaitSeconds, partner.ID);
+		Updaters.TimelineUpdater.PlannedWithin(PairedHeliosWaitSeconds, partner.ID);
 
 	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
-		Updaters.BeirutaTimelineUpdater.HoldQueuedPlannedAction(action.ID);
+		Updaters.TimelineUpdater.HoldQueuedPlannedAction(action.ID);
 
 	private float? CountdownEarthlyStarAt
 	{
 		get
 		{
 			if (UsePlannedEarthlyStar &&
-				Updaters.BeirutaTimelineUpdater.PlanOption("CountdownEarthlyStar") is { } v &&
+				Updaters.TimelineUpdater.PlanOption("CountdownEarthlyStar") is { } v &&
 				float.TryParse(v, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var seconds))
 			{
 				return seconds > 0 ? seconds : null;
@@ -86,13 +86,13 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 
 	private bool EarthlyStarOnCooldown =>
 		EarthlyStarMode == EarthlyStarUsage.OnCooldown ||
-		(!UsePlannedEarthlyStar && Updaters.BeirutaTimelineUpdater.HasPlan);
+		(!UsePlannedEarthlyStar && Updaters.TimelineUpdater.HasPlan);
 
 	#endregion
 
 	#region Manual / BMR / VBM Triggers
 
-	[RotationConfig(CombatType.PvE, Name = "    > [Macrocosmos] Custom triggers (off = CD planner / manual)", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.ManualPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > [Macrocosmos] Custom triggers (off = CD planner / manual)", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.ManualPlan, Tooltip =
 		"A trigger is something you do that makes AST cast Macrocosmos.\n" +
 		"In DMU, triggers are blocked while 2+ players have Accretion, or while Earth Resistance Down II is up with one left.\n" +
 		"Only used with BMR / VBM / Manual; the built-in CD plan presses Macrocosmos itself.")]
@@ -133,7 +133,7 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 		"Pick a page to show its detailed settings. This only changes what is shown.")]
 	public BeirutaSettingsPage MoreSettings { get; set; } = BeirutaSettingsPage.Hide;
 
-	private bool WardActive => WardMode || Updaters.BeirutaTimelineUpdater.PlannedWardMode;
+	private bool WardActive => WardMode || Updaters.TimelineUpdater.PlannedWardMode;
 
 	bool IBeirutaHealContext.WardMode => WardActive;
 
@@ -487,7 +487,7 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 		}
 	}
 
-	private bool PlanOwnsLightspeed => Updaters.BeirutaTimelineUpdater.PlanContains(LightspeedPvE.ID);
+	private bool PlanOwnsLightspeed => Updaters.TimelineUpdater.PlanContains(LightspeedPvE.ID);
 
 	private bool LightspeedReadyForMovement =>
 		!PlanOwnsLightspeed &&
@@ -1012,7 +1012,7 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 
 	private bool SaveDignityForAccretion =>
 		BeirutaAccretion.GuardActive(PartyMembers) ||
-		EssentialDignityPvE.Cooldown.CurrentCharges <= Updaters.BeirutaTimelineUpdater.KeepCharges(EssentialDignityPvE.ID);
+		EssentialDignityPvE.Cooldown.CurrentCharges <= Updaters.TimelineUpdater.KeepCharges(EssentialDignityPvE.ID);
 
 	private bool TryEssentialDignityOn(IBattleChara target, out IAction? act) =>
 		BeirutaTarget.TryUseOn(EssentialDignityPvE, target, out act, usedUp: true);
@@ -1345,7 +1345,7 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 			}
 
 			if (AoeNeeded(PartyHealRange, OppositionHp) &&
-				!Updaters.BeirutaTimelineUpdater.PlanContains(CelestialOppositionPvE.ID) &&
+				!Updaters.TimelineUpdater.PlanContains(CelestialOppositionPvE.ID) &&
 				CelestialOppositionPvE.CanUse(out act, skipAoeCheck: true))
 			{
 				return true;
@@ -1570,7 +1570,7 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 				!OpenerWeaveHold &&
 				!HasGiantDominance &&
 				!HasEarthlyDominance &&
-				!Updaters.BeirutaTimelineUpdater.PlanContains(EarthlyStarPvE.ID) &&
+				!Updaters.TimelineUpdater.PlanContains(EarthlyStarPvE.ID) &&
 				EarthlyStarPvE.CanUse(out act))
 			{
 				return true;
@@ -1643,7 +1643,7 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 	private const float PlannedConjunctionGapSeconds = 15f;
 
 	private bool PlannedConjunctionNear =>
-		Updaters.BeirutaTimelineUpdater.PlannedAround(PlannedConjunctionGapSeconds, HeliosConjunctionPvE.ID);
+		Updaters.TimelineUpdater.PlannedAround(PlannedConjunctionGapSeconds, HeliosConjunctionPvE.ID);
 
 	private bool TryHeliosGCD(bool withHot, out IAction? act)
 	{
@@ -1696,14 +1696,14 @@ public sealed class BeirutaAST : AstrologianRotation, Updaters.IBeirutaTimelineO
 		NeutralSectPvE.EnoughLevel &&
 		!NeutralSectPvE.Cooldown.IsCoolingDown &&
 		StatusHelper.PlayerStatusTime(true, StatusID.Horoscope) > HoroscopeKeepSeconds &&
-		Updaters.BeirutaTimelineUpdater.PlannedWithin(PairedHeliosWaitSeconds, NeutralSectPvE.ID);
+		Updaters.TimelineUpdater.PlannedWithin(PairedHeliosWaitSeconds, NeutralSectPvE.ID);
 
 	private bool WaitForPlannedHoroscope =>
 		!HasHoroscope &&
 		!HasHoroscopeHelios &&
 		HoroscopePvE.EnoughLevel &&
 		!HoroscopePvE.Cooldown.IsCoolingDown &&
-		Updaters.BeirutaTimelineUpdater.PlannedWithin(PairedHeliosWaitSeconds, HoroscopePvE.ID);
+		Updaters.TimelineUpdater.PlannedWithin(PairedHeliosWaitSeconds, HoroscopePvE.ID);
 
 	private bool TryNeutralSectHeliosGCD(out IAction? act)
 	{

@@ -3,8 +3,46 @@ namespace RotationSolver.Rotations.Melee.Monk;
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.58", RotationType = RotationType.Reborn, Description = "Uses Lunar Solar Opener from The Balance")]
 [SourceCode(Path = "main/Rotations/Melee/Monk/MNK_Reborn.cs")]
 
-public sealed class MNK_Reborn : MonkRotation
+public sealed class MNK_Reborn : MonkRotation, Updaters.ICdPlanRotation
 {
+	#region CD Plan
+
+	[RotationConfig(CombatType.PvE, Name = "[CD Plan] Planned cooldowns", Tooltip =
+		"Auto: Feint, Mantra and Riddle of Earth respond to RSR's defense / heal signals (raidwide detection, Boss Mod or the commands).\n" +
+		"Use built-in CD plan: they follow the plan picked below for the duty you're in.\n" +
+		"BMR / VBM / Manual: you or your Boss Mod / BMR CD planner press them.\n" +
+		"With the built-in plan or BMR / VBM / Manual, the defense / heal signals do not use them.")]
+	public CdPlanSource CdPlanFrom { get; set; } = CdPlanSource.Auto;
+
+	public bool UseTimelinePlan => CdPlanFrom == CdPlanSource.BuiltIn;
+
+	private bool AutoDefense => CdPlanFrom == CdPlanSource.Auto;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
+	public bool ShowPlanTimeline { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
+	public bool ShowTimelineMessages { get; set; } = false;
+
+	[RotationConfig(CombatType.PvE, Name = "    > Feint from", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
+		"Where planned Feint comes from. M1 / M2 profile: the duty's shared Feint plan for that melee slot; the job plan's own Feint rows are then not used (everything else still comes from the job plan).\n" +
+		"Auto: M1, and once an M1 Feint turns out to be another melee's, M2 for the rest of the duty.\n" +
+		"Job plan: Feint from the picked job plan, e.g. for double caster or your own agreement. Also used when the duty has no profile.")]
+	public FeintProfile FeintFrom { get; set; } = FeintProfile.Auto;
+
+	string Updaters.ICdPlanRotation.MitProfileAction => "Feint";
+
+	MitProfileChoice Updaters.ICdPlanRotation.MitProfile => (MitProfileChoice)FeintFrom;
+
+	string? Updaters.ICdPlanRotation.PlannedActionWait(uint actionId) => CdPlanHelper.Wait(actionId);
+
+	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
+		CdPlanHelper.HoldCommand(action, UseTimelinePlan);
+
+	#endregion
+
 	#region Config Options
 
 	public enum RiddleOfFireFirst : byte
@@ -140,6 +178,11 @@ public sealed class MNK_Reborn : MonkRotation
 		}
 		//if (CombatElapsedLessGCD(1) && TheForbiddenChakraPvE.CanUse(out act)) return true; // if it weaves one day in the future...
 
+		if (CdPlanHelper.TryPlanned(out act))
+		{
+			return true;
+		}
+
 		if (HasBrotherhood && InCombat && UseBurstMedicine(out act))
 		{
 			return true;
@@ -181,7 +224,7 @@ public sealed class MNK_Reborn : MonkRotation
 	[RotationDesc(ActionID.FeintPvE)]
 	protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
 	{
-		if (FeintPvE.CanUse(out act))
+		if (AutoDefense && FeintPvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -196,7 +239,7 @@ public sealed class MNK_Reborn : MonkRotation
 			return true;
 		}
 
-		if (MantraPvE.CanUse(out act))
+		if (AutoDefense && MantraPvE.CanUse(out act))
 		{
 			return true;
 		}
@@ -207,7 +250,7 @@ public sealed class MNK_Reborn : MonkRotation
 	[RotationDesc(ActionID.RiddleOfEarthPvE)]
 	protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
 	{
-		if (RiddleOfEarthPvE.CanUse(out act, usedUp: true))
+		if (AutoDefense && RiddleOfEarthPvE.CanUse(out act, usedUp: true))
 		{
 			return true;
 		}

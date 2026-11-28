@@ -7,7 +7,7 @@ namespace RotationSolver.Rotations.Healer.Scholar;
 [SourceCode(Path = "main/Rotations/Healer/Scholar/BeirutaSCH.cs")]
 [ExtraRotation]
 
-public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOption, IBeirutaHealer, IBeirutaHealContext
+public sealed class BeirutaSCH : ScholarRotation, Updaters.ICdPlanRotation, IBeirutaHealer, IBeirutaHealContext
 {
 	#region Config Options
 
@@ -20,52 +20,52 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 
 	public bool UseTimelinePlan => CdPlanFrom == BeirutaPlanSource.BuiltIn;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
 	public bool ShowPlanTimeline { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
 	public bool ShowTimelineMessages { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Use recommended settings for the plan", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Use recommended settings for the plan", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"When a built-in plan loads, the settings it recommends are applied, like a preset. Changing a setting afterwards (e.g. your Ward Mode macro) works as usual.\n" +
 		"Your saved settings are not changed by the plan: they show as you set them and come back once the plan unloads or this is off.")]
 	public bool UsePlanSettings { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Use planned Succor / Concitation", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Succor / Concitation", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"On: the plan's party shields are cast in their window, unless the party is already shielded.\n" +
 		"Off: they are skipped; the rotation shields as usual.\n" +
 		"Under Seraphism the rotation keeps non-tanks shielded with Accession by itself (as in Ward Mode).")]
 	public bool UsePlannedShields { get; set; } = true;
 
-	IEnumerable<(uint ActionId, string Config)> Updaters.IBeirutaTimelineOption.OptionalPlannedActions =>
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
 	[
 		((uint)ActionID.ConcitationPvE, nameof(UsePlannedShields)),
 		((uint)ActionID.AccessionPvE, nameof(UsePlannedShields)),
 	];
 
-	bool Updaters.IBeirutaTimelineOption.AllowPlannedAction(uint actionId) =>
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
 		UsePlannedShields ||
 		actionId is not ((uint)ActionID.SuccorPvE or (uint)ActionID.ConcitationPvE or (uint)ActionID.AccessionPvE);
 
 	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
-		Updaters.BeirutaTimelineUpdater.HoldQueuedPlannedAction(action.ID);
+		Updaters.TimelineUpdater.HoldQueuedPlannedAction(action.ID);
 
-	bool Updaters.IBeirutaTimelineOption.RotationRunsPlannedAction(uint actionId) =>
+	bool Updaters.ICdPlanRotation.RotationRunsPlannedAction(uint actionId) =>
 		actionId is (uint)ActionID.AdloquiumPvE or (uint)ActionID.ManifestationPvE or (uint)ActionID.DeploymentTacticsPvE;
 
 	#endregion
 
 	#region Manual / BMR / VBM Triggers
 
-	[RotationConfig(CombatType.PvE, Name = "    > [Deployment Tactics] Restrict Recitation", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.ManualPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > [Deployment Tactics] Restrict Recitation", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.ManualPlan, Tooltip =
 		"On: the rotation only uses Recitation for Deployment Tactics, and pressing Recitation yourself is a trigger.\n" +
 		"Off: Recitation also goes on Indomitability, Excogitation or Succor whenever possible.\n" +
 		"Either way, preparing Deployment Tactics uses Recitation if it is ready, otherwise goes straight to Adloquium - Deployment Tactics.")]
 	public bool RestrictRecitation { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > [Deployment Tactics] Custom triggers (off = your Protraction on yourself)", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.ManualPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > [Deployment Tactics] Custom triggers (off = your Protraction on yourself)", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.ManualPlan, Tooltip =
 		"A trigger is something you do that tells the rotation to prepare Deployment Tactics: Adloquium on the right target, then Deployment Tactics, within 15s.\n" +
 		"A toast shows Preparing Deployment Tactics, or the cooldown left if it is not ready.\n" +
 		"Only used with BMR / VBM / Manual; the built-in CD plan runs the Deployment chain itself.")]
@@ -218,7 +218,7 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 	public bool PrioritizeAetherflowOverDissipation { get; set; } = false;
 
 	private bool AetherflowFirstValue =>
-		Updaters.BeirutaTimelineUpdater.PlanOption("AetherflowFirst") is { } v
+		Updaters.TimelineUpdater.PlanOption("AetherflowFirst") is { } v
 			? v.Equals("on", StringComparison.OrdinalIgnoreCase)
 			: PrioritizeAetherflowOverDissipation;
 
@@ -364,7 +364,7 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 	private bool HasProtraction => StatusHelper.PlayerHasStatus(true, StatusID.Protraction);
 	private bool HasSeraphism => StatusHelper.PlayerHasStatus(true, StatusID.Seraphism);
 
-	private bool WardActive => WardMode || HasSeraphism || Updaters.BeirutaTimelineUpdater.PlannedWardMode;
+	private bool WardActive => WardMode || HasSeraphism || Updaters.TimelineUpdater.PlannedWardMode;
 
 	bool IBeirutaHealContext.WardMode => WardActive;
 
@@ -396,7 +396,7 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 		!IsLastAction(ActionID.SwiftcastPvE) &&
 		!BeirutaMove.RaiseSwiftHeld &&
 		!(SwiftKeepForRaiseValue && AnyPartyMemberDead) &&
-		!Updaters.BeirutaTimelineUpdater.PlannedWithin(PlannedSwiftcastReserveSeconds, SwiftcastPvE.ID);
+		!Updaters.TimelineUpdater.PlannedWithin(PlannedSwiftcastReserveSeconds, SwiftcastPvE.ID);
 
 	private const float PlannedSwiftcastReserveSeconds = 40f;
 
@@ -868,15 +868,15 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 	];
 
 	private bool DissipationBlockedByPlan =>
-		Updaters.BeirutaTimelineUpdater.PlanContains(DissipationPvE.ID) ||
-		Updaters.BeirutaTimelineUpdater.PlannedWindowClosesWithin(DissipationFairyAwaySeconds, PlannedFairyActions);
+		Updaters.TimelineUpdater.PlanContains(DissipationPvE.ID) ||
+		Updaters.TimelineUpdater.PlannedWindowClosesWithin(DissipationFairyAwaySeconds, PlannedFairyActions);
 
 	private static float AetherflowSpendSeconds => SCHAetherFlowStacks * DataCenter.DefaultGCDTotal;
 
 	private bool DissipationCountsAsRefill =>
 		DissipationUsable &&
-		!(Updaters.BeirutaTimelineUpdater.HasPlan &&
-		  Updaters.BeirutaTimelineUpdater.PlannedWindowClosesWithin(DissipationFairyAwaySeconds + AetherflowSpendSeconds, PlannedFairyActions));
+		!(Updaters.TimelineUpdater.HasPlan &&
+		  Updaters.TimelineUpdater.PlannedWindowClosesWithin(DissipationFairyAwaySeconds + AetherflowSpendSeconds, PlannedFairyActions));
 
 	private bool DissipationUsable =>
 		IsBurst &&
@@ -921,9 +921,9 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 				return 0;
 			}
 
-			Updaters.BeirutaTimelineUpdater.UpcomingStarts(window, _plannedAetherflowSpends, SacredSoilPvE.ID, LustratePvE.ID);
-			Updaters.BeirutaTimelineUpdater.UpcomingStarts(window, _plannedRecitationFree, IndomitabilityPvE.ID, ExcogitationPvE.ID);
-			Updaters.BeirutaTimelineUpdater.UpcomingStarts(window, _plannedRecitations, RecitationPvE.ID);
+			Updaters.TimelineUpdater.UpcomingStarts(window, _plannedAetherflowSpends, SacredSoilPvE.ID, LustratePvE.ID);
+			Updaters.TimelineUpdater.UpcomingStarts(window, _plannedRecitationFree, IndomitabilityPvE.ID, ExcogitationPvE.ID);
+			Updaters.TimelineUpdater.UpcomingStarts(window, _plannedRecitations, RecitationPvE.ID);
 
 			var need = _plannedAetherflowSpends.Count;
 			var recitationUp = HasRecitation;
@@ -982,7 +982,7 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 		!SignalRecitation &&
 		!DeploymentChainActive;
 
-	private bool PlanOwnsRecitation => Updaters.BeirutaTimelineUpdater.PlanContains(RecitationPvE.ID);
+	private bool PlanOwnsRecitation => Updaters.TimelineUpdater.PlanContains(RecitationPvE.ID);
 
 	private bool RecitationReservedForPlan => HasRecitation && PlanOwnsRecitation;
 
@@ -1778,14 +1778,14 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 		Environment.TickCount64 - _deploymentChainStartedAtMs < (_deploymentChainFromPlan ? PlannedDeploymentChainWindowMs : DeploymentChainWindowMs);
 
 	private bool PlannedDeploymentDue =>
-		Updaters.BeirutaTimelineUpdater.HasPlan &&
-		Updaters.BeirutaTimelineUpdater.PlannedWithin(0f, AdloquiumPvE.ID, ManifestationPvE.ID) &&
-		Updaters.BeirutaTimelineUpdater.PlannedWithin(PlannedDeploymentChainLeadSeconds, DeploymentTacticsPvE.ID);
+		Updaters.TimelineUpdater.HasPlan &&
+		Updaters.TimelineUpdater.PlannedWithin(0f, AdloquiumPvE.ID, ManifestationPvE.ID) &&
+		Updaters.TimelineUpdater.PlannedWithin(PlannedDeploymentChainLeadSeconds, DeploymentTacticsPvE.ID);
 
 	private static bool HasDefenseAreaSignal => MergedStatus.HasFlag(AutoStatus.DefenseArea);
 
 	private bool DeploymentSignalActive =>
-		!Updaters.BeirutaTimelineUpdater.HasPlan &&
+		!Updaters.TimelineUpdater.HasPlan &&
 		DeploymentSignalSeen;
 
 	private bool DeploymentSignalSeen =>
@@ -1843,7 +1843,7 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 			_deploymentTarget = null;
 			_deploymentChainFromPlan = true;
 			_deploymentChainUsesRecitation = DeploymentChainWantsRecitation &&
-				(HasRecitation || Updaters.BeirutaTimelineUpdater.PlannedWithin(PlannedDeploymentChainLeadSeconds, RecitationPvE.ID));
+				(HasRecitation || Updaters.TimelineUpdater.PlannedWithin(PlannedDeploymentChainLeadSeconds, RecitationPvE.ID));
 		}
 		else if (signal && CanStartDeploymentChain())
 		{
@@ -2211,7 +2211,7 @@ public sealed class BeirutaSCH : ScholarRotation, Updaters.IBeirutaTimelineOptio
 	private const float DefaultCountdownDeploymentAt = 3.5f;
 
 	private static float CountdownDeploymentAt =>
-		Updaters.BeirutaTimelineUpdater.PlanOption("CountdownDeploymentAt") is { } v &&
+		Updaters.TimelineUpdater.PlanOption("CountdownDeploymentAt") is { } v &&
 		float.TryParse(v, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var seconds) &&
 		seconds > 0
 			? seconds

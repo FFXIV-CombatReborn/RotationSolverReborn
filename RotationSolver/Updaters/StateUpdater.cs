@@ -428,7 +428,8 @@ internal static class StateUpdater
 
 	private static bool ShouldAddTankStance()
 	{
-		return Service.Config.AutoTankStance && DataCenter.Role == JobRole.Tank && !CustomRotation.HasTankStance && !AnyOtherPartyTankWithStance();
+		return Service.Config.AutoTankStance && DataCenter.Role == JobRole.Tank && !CustomRotation.HasTankStance && !AnyOtherPartyTankWithStance()
+			&& TimelineUpdater.PlannedTankStance != false;
 	}
 
 	private static bool ShouldAddSpeed()

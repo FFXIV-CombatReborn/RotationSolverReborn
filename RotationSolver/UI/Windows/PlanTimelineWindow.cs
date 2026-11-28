@@ -1,4 +1,4 @@
-// CD Plan timeline (Beiruta rotations): the plan's actions coming up in the next few seconds, like the action timeline but looking ahead.
+// CD Plan timeline: the plan's actions coming up in the next few seconds, like the action timeline but looking ahead.
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
@@ -49,7 +49,7 @@ internal class PlanTimelineWindow : Window
 		public float X(float time) => NowX + ((time - Now) * SecondWidth);
 	}
 
-	private readonly List<BeirutaPlanPreview> _items = new(32);
+	private readonly List<CdPlanPreview> _items = new(32);
 	private readonly List<int> _tracks = new(32);
 	private readonly List<float> _iconX = new(32);
 
@@ -81,7 +81,7 @@ internal class PlanTimelineWindow : Window
 		ImGui.PushStyleColor(ImGuiCol.WindowBg, Service.Config.InfoWindowBg);
 
 		Flags = BaseFlags;
-		if (Service.Config.BeirutaPlanTimelineLock)
+		if (Service.Config.CdPlanTimelineLock)
 		{
 			Flags |= ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize;
 		}
@@ -138,7 +138,7 @@ internal class PlanTimelineWindow : Window
 
 		var right = origin.X + width;
 		var nowX = origin.X + (NowCapRadius * scale) + (1f * scale);
-		var hasPlan = BeirutaTimelineUpdater.PreviewPlan(AheadSeconds, _items, out var now, out var pulled);
+		var hasPlan = TimelineUpdater.PreviewPlan(AheadSeconds, _items, out var now, out var pulled);
 		var axis = new Axis(now, nowX, (right - nowX) / AheadSeconds, origin.X, right);
 
 		var windowPos = ImGui.GetWindowPos();
@@ -149,7 +149,7 @@ internal class PlanTimelineWindow : Window
 
 		var mouse = ImGui.GetMousePos();
 		var canHover = ImGui.IsWindowHovered() && !ImGui.IsAnyItemActive() && !(showPill && Contains(pillMin, pillMax, mouse));
-		BeirutaPlanPreview? hovered = null;
+		CdPlanPreview? hovered = null;
 		var hoveredMin = Vector2.Zero;
 		var hoveredMax = Vector2.Zero;
 
@@ -159,7 +159,7 @@ internal class PlanTimelineWindow : Window
 		DrawLaneTrack(drawList, axis, ogcdLane.Top, ogcdLane.Bottom);
 
 		var status = !hasPlan ? "No plan loaded"
-			: pulled ? $"{BeirutaTimelineUpdater.Status}"
+			: pulled ? $"{TimelineUpdater.Status}"
 			: Service.CountDownTime > 0f ? $"Pull in {Service.CountDownTime:F0}s"
 			: "Waiting for pull";
 		DrawAxis(drawList, axis, gcdTop, ogcdBottom, axisTop, status);
@@ -243,14 +243,14 @@ internal class PlanTimelineWindow : Window
 	private void DrawPill(Vector2 topRight)
 	{
 		var config = Service.Config;
-		var locked = config.BeirutaPlanTimelineLock;
+		var locked = config.CdPlanTimelineLock;
 
 		var pressed = M3Widgets.WindowActions("##plan_timeline_actions", topRight, locked ? LockedActions : UnlockedActions,
 			out var closed, M3.Scheme.SurfaceContainerHigh, "Hide the CD Plan timeline. Turn it back on in the rotation's CD Plan section.");
 
 		if (pressed == 0)
 		{
-			config.BeirutaPlanTimelineLock = !locked;
+			config.CdPlanTimelineLock = !locked;
 			config.Save();
 		}
 		else if (pressed == 1)
@@ -288,23 +288,23 @@ internal class PlanTimelineWindow : Window
 		public float Bottom => TrackY(WindowTracks) + (Inset * 0.5f);
 	}
 
-	private static (Vector4 Line, Vector4? Outline, float Alpha) StateLook(BeirutaPlanPreviewState state)
+	private static (Vector4 Line, Vector4? Outline, float Alpha) StateLook(CdPlanPreviewState state)
 	{
 		var s = M3.Scheme;
 		return state switch
 		{
-			BeirutaPlanPreviewState.Queued => (s.Primary, s.Primary, 1f),
-			BeirutaPlanPreviewState.Waiting => (s.Tertiary, s.Tertiary, 1f),
-			BeirutaPlanPreviewState.Done => (M3.Alpha(s.OnSurfaceVariant, 0.4f), null, 0.45f),
-			BeirutaPlanPreviewState.Skipped => (M3.Alpha(s.Error, 0.7f), s.Error, M3.DisabledContent),
-			BeirutaPlanPreviewState.Off => (M3.Alpha(s.OnSurfaceVariant, 0.25f), null, 0.35f),
-			BeirutaPlanPreviewState.RotationRuns => (M3.Alpha(s.OnSurfaceVariant, 0.4f), s.OutlineVariant, 0.6f),
+			CdPlanPreviewState.Queued => (s.Primary, s.Primary, 1f),
+			CdPlanPreviewState.Waiting => (s.Tertiary, s.Tertiary, 1f),
+			CdPlanPreviewState.Done => (M3.Alpha(s.OnSurfaceVariant, 0.4f), null, 0.45f),
+			CdPlanPreviewState.Skipped => (M3.Alpha(s.Error, 0.7f), s.Error, M3.DisabledContent),
+			CdPlanPreviewState.Off => (M3.Alpha(s.OnSurfaceVariant, 0.25f), null, 0.35f),
+			CdPlanPreviewState.RotationRuns => (M3.Alpha(s.OnSurfaceVariant, 0.4f), s.OutlineVariant, 0.6f),
 			_ => (M3.Alpha(s.Secondary, 0.85f), null, 1f),
 		};
 	}
 
 	// Window line x range: from the window start (or "now" once open) to its end.
-	private static (float X0, float X1) WindowSpan(BeirutaPlanPreview item, in Axis axis)
+	private static (float X0, float X1) WindowSpan(CdPlanPreview item, in Axis axis)
 	{
 		var x0 = MathF.Max(axis.X(item.Start), axis.NowX);
 		return (x0, MathF.Max(axis.X(item.End), x0 + (2f * M3.Scale)));
@@ -363,7 +363,7 @@ internal class PlanTimelineWindow : Window
 		}
 	}
 
-	private static (Vector2 Min, Vector2 Max) WindowLineRect(BeirutaPlanPreview item, in Axis axis, in Lane lane, int track)
+	private static (Vector2 Min, Vector2 Max) WindowLineRect(CdPlanPreview item, in Axis axis, in Lane lane, int track)
 	{
 		var (x0, x1) = WindowSpan(item, axis);
 		var y = lane.TrackY(track);
@@ -371,7 +371,7 @@ internal class PlanTimelineWindow : Window
 	}
 
 	// The action's window as a thin line on its track, with a tick up to the icon row at the start.
-	private static void DrawWindowLine(ImDrawListPtr drawList, BeirutaPlanPreview item, in Axis axis, in Lane lane, int track)
+	private static void DrawWindowLine(ImDrawListPtr drawList, CdPlanPreview item, in Axis axis, in Lane lane, int track)
 	{
 		var (min, max) = WindowLineRect(item, axis, lane, track);
 		if (min.X > axis.Right)
@@ -386,7 +386,7 @@ internal class PlanTimelineWindow : Window
 	}
 
 	// The icon at the window start (or "now" once open), with the seconds until it opens in the corner.
-	private static bool DrawItemIcon(ImDrawListPtr drawList, BeirutaPlanPreview item, in Axis axis, in Lane lane, float iconX, out Vector2 min, out Vector2 max)
+	private static bool DrawItemIcon(ImDrawListPtr drawList, CdPlanPreview item, in Axis axis, in Lane lane, float iconX, out Vector2 min, out Vector2 max)
 	{
 		var s = M3.Scheme;
 		min = new Vector2(iconX, lane.IconTop);
@@ -499,7 +499,7 @@ internal class PlanTimelineWindow : Window
 
 	#region Tooltip
 
-	private static void DrawTooltip(BeirutaPlanPreview item, float now, bool pulled)
+	private static void DrawTooltip(CdPlanPreview item, float now, bool pulled)
 	{
 		ImGui.TextUnformatted(item.Action.Name);
 
@@ -514,12 +514,12 @@ internal class PlanTimelineWindow : Window
 
 		var state = item.State switch
 		{
-			BeirutaPlanPreviewState.Queued => "Queued",
-			BeirutaPlanPreviewState.Waiting => $"Waiting: {item.Note}",
-			BeirutaPlanPreviewState.Done => "Used",
-			BeirutaPlanPreviewState.Skipped => "Skipped or missed",
-			BeirutaPlanPreviewState.Off => "Off in your settings",
-			BeirutaPlanPreviewState.RotationRuns => "The rotation decides when to use this",
+			CdPlanPreviewState.Queued => "Queued",
+			CdPlanPreviewState.Waiting => $"Waiting: {item.Note}",
+			CdPlanPreviewState.Done => "Used",
+			CdPlanPreviewState.Skipped => "Skipped or missed",
+			CdPlanPreviewState.Off => "Off in your settings",
+			CdPlanPreviewState.RotationRuns => "The rotation decides when to use this",
 			_ => null,
 		};
 

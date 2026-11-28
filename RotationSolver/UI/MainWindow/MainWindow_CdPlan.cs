@@ -1,4 +1,4 @@
-// CD Plan section of the rotation page (Beiruta rotations): the plan's actions, the [CD Plan] settings and the plan picker.
+// CD Plan section of the rotation page: the plan's actions, the [CD Plan] settings and the plan picker.
 using Dalamud.Interface.Utility.Raii;
 using ECommons.GameHelpers;
 using RebornMaterial;
@@ -19,7 +19,7 @@ public partial class MainWindow
 	private static readonly Dictionary<string, (long Stamp, List<string> Actions)> _planActionCache = [];
 
 	private static string GetCdPlanHead() =>
-		DataCenter.CurrentRotation is IBeirutaTimelineOption
+		DataCenter.CurrentRotation is ICdPlanRotation
 			? UiString.ConfigWindow_Rotation_CdPlan.GetDescription()
 			: string.Empty;
 
@@ -53,13 +53,13 @@ public partial class MainWindow
 	private static void DrawRotationCdPlan()
 	{
 		var rotation = DataCenter.CurrentRotation;
-		if (rotation is not IBeirutaTimelineOption option || !Player.Available)
+		if (rotation is not ICdPlanRotation option || !Player.Available)
 		{
 			return;
 		}
 
 		var job = Player.Job.ToString();
-		var here = BeirutaPlanCatalog.CurrentDutyFolders(job);
+		var here = CdPlanCatalog.CurrentDutyFolders(job);
 		var shownFolders = here.Count > 0 ? here : BrowsedFolders(job);
 
 		// Planned / optional actions and the picker only matter for the built-in plan.
@@ -77,36 +77,55 @@ public partial class MainWindow
 		}
 
 		M3Widgets.Divider(6f);
-		DrawPlanPicker(job, here);
+		DrawPlanPicker(rotation, job, here, option);
 	}
+
+	private const string FeintFromConfig = "FeintFrom";
+	private const string AddleFromConfig = "AddleFrom";
 
 	#region Actions
 
-	private static void DrawCdPlanActions(ICustomRotation rotation, IBeirutaTimelineOption option, string job,
-		List<BeirutaPlanFolder> here, List<BeirutaPlanFolder> shown)
+	private static void DrawCdPlanActions(ICustomRotation rotation, ICdPlanRotation option, string job,
+		List<CdPlanFolder> here, List<CdPlanFolder> shown)
 	{
 		// The loaded plan in the duty; otherwise the picked plan of the browsed duty.
-		var planPath = here.Count > 0 && !string.IsNullOrEmpty(BeirutaTimelineUpdater.LoadedPlanPath)
-			? BeirutaTimelineUpdater.LoadedPlanPath
+		var planPath = here.Count > 0 && !string.IsNullOrEmpty(TimelineUpdater.LoadedPlanPath)
+			? TimelineUpdater.LoadedPlanPath
 			: FirstChosenPlanPath(shown, job);
 
-		var optional = new List<(uint ActionId, string Config)>(option.OptionalPlannedActions);
-		var optionalIds = new HashSet<uint>();
-		foreach (var (id, _) in optional)
+		var planNames = new HashSet<string>(PlanActionNames(planPath), StringComparer.OrdinalIgnoreCase);
+		var optional = OptionalActionsToShow(rotation, option, planNames);
+		var optionalNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		foreach (var (id, _) in option.OptionalPlannedActions)
 		{
-			_ = optionalIds.Add(id);
+			foreach (var a in rotation.AllBaseActions)
+			{
+				if (a.ID == id)
+				{
+					_ = optionalNames.Add(a.Name);
+					break;
+				}
+			}
 		}
 
 		List<IAction> planned = [];
 		var seen = new HashSet<uint>();
 		foreach (var name in PlanActionNames(planPath))
 		{
-			if (BeirutaTimelineUpdater.FindAction(name) is { } action &&
-				!optionalIds.Contains(action.ID) &&
+			if (TimelineUpdater.FindAction(name) is { } action &&
+				!optionalNames.Contains(action.Name) &&
 				seen.Add(action.ID))
 			{
 				planned.Add(action);
 			}
+		}
+
+		// Feint / Addle from a shared profile (M1 / M2, R2 / Fake Melee) counts as planned even without a job plan.
+		if (!string.IsNullOrEmpty(option.MitProfileAction) && option.MitProfile != MitProfileChoice.JobPlan &&
+			shown.Count > 0 && TimelineUpdater.ProfileNames(shown[0].Path, option.MitProfileAction).Count > 0 &&
+			TimelineUpdater.FindAction(option.MitProfileAction) is { } profileAction && seen.Add(profileAction.ID))
+		{
+			planned.Add(profileAction);
 		}
 
 		using var table = ImRaii.Table("CD Plan Actions", 2, ImGuiTableFlags.Borders
@@ -158,20 +177,11 @@ public partial class MainWindow
 
 		var optionalY = ImGui.GetCursorPosY();
 		var firstOptional = true;
-		foreach (var (id, configName) in optional)
+		foreach (var (action, configName) in optional)
 		{
+			var id = action.ID;
 			var config = FindRotationConfig(rotation, configName);
-			IAction? action = null;
-			foreach (var a in rotation.AllBaseActions)
-			{
-				if (a.ID == id)
-				{
-					action = a;
-					break;
-				}
-			}
-
-			if (action == null || !action.GetTexture(out var texture))
+			if (!action.GetTexture(out var texture))
 			{
 				continue;
 			}
@@ -198,6 +208,51 @@ public partial class MainWindow
 			ImguiTooltips.HoveredTooltip($"{action.Name}: {(on ? "on" : "off")}. Click to turn it {(on ? "off" : "on")}.\n" +
 				(on ? "Cast in its planned window." : "Planned casts are skipped; the rotation decides."));
 		}
+	}
+
+	// Optional actions with their setting. When several share one setting (e.g. NIN's downtime ninjutsu), only the ones
+	// the plan has are shown, or just the first when the plan has none of them.
+	private static List<(IAction Action, string Config)> OptionalActionsToShow(ICustomRotation rotation, ICdPlanRotation option,
+		HashSet<string> planNames)
+	{
+		List<(IAction Action, string Config)> all = [];
+		foreach (var (id, config) in option.OptionalPlannedActions)
+		{
+			foreach (var a in rotation.AllBaseActions)
+			{
+				if (a.ID == id)
+				{
+					all.Add((a, config));
+					break;
+				}
+			}
+		}
+
+		var count = new Dictionary<string, int>();
+		var inPlan = new HashSet<string>();
+		foreach (var (action, config) in all)
+		{
+			count[config] = count.GetValueOrDefault(config) + 1;
+			if (planNames.Contains(action.Name))
+			{
+				_ = inPlan.Add(config);
+			}
+		}
+
+		List<(IAction Action, string Config)> shown = [];
+		var firstShown = new HashSet<string>();
+		foreach (var (action, config) in all)
+		{
+			if (count[config] > 1 &&
+				(inPlan.Contains(config) ? !planNames.Contains(action.Name) : !firstShown.Add(config)))
+			{
+				continue;
+			}
+
+			shown.Add((action, config));
+		}
+
+		return shown;
 	}
 
 	private const float CdPlanRowPad = 4f;
@@ -257,10 +312,10 @@ public partial class MainWindow
 		var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 		try
 		{
-			foreach (var cols in BeirutaTimelineUpdater.ReadCsv(path))
+			foreach (var cols in TimelineUpdater.ReadCsv(path))
 			{
 				if (cols.Length >= 4 && !string.IsNullOrEmpty(cols[3]) &&
-					!BeirutaTimelineUpdater.IsPlanMetaAction(cols[3]) && seen.Add(cols[3]))
+					!TimelineUpdater.IsPlanMetaAction(cols[3]) && seen.Add(cols[3]))
 				{
 					names.Add(cols[3]);
 				}
@@ -275,11 +330,11 @@ public partial class MainWindow
 		return names;
 	}
 
-	private static string FirstChosenPlanPath(List<BeirutaPlanFolder> folders, string job)
+	private static string FirstChosenPlanPath(List<CdPlanFolder> folders, string job)
 	{
 		foreach (var f in folders)
 		{
-			var file = BeirutaTimelineUpdater.ChosenPlanFile(f.Path, job);
+			var file = TimelineUpdater.ChosenPlanFile(f.Path, job);
 			if (!string.IsNullOrEmpty(file))
 			{
 				return Path.Combine(f.Path, file);
@@ -304,6 +359,12 @@ public partial class MainWindow
 				continue;
 			}
 
+			// Feint / Addle from is picked in the plan picker below, next to the job plan.
+			if (config.Name is FeintFromConfig or AddleFromConfig)
+			{
+				continue;
+			}
+
 			// The section is already called CD Plan, so "[CD Plan] Mitigation" shows as "Mitigation".
 			var title = config.DisplayName;
 			var tag = title.IndexOf(CdPlanConfigTag, StringComparison.OrdinalIgnoreCase);
@@ -320,23 +381,23 @@ public partial class MainWindow
 
 	#region Plan picker
 
-	private static void DrawPlanPicker(string job, List<BeirutaPlanFolder> here)
+	private static void DrawPlanPicker(ICustomRotation rotation, string job, List<CdPlanFolder> here, ICdPlanRotation option)
 	{
 		if (here.Count > 0)
 		{
 			var f = here[0];
 			DrawPickerInfoRow("Current duty", $"{f.Expansion} > {f.Category} > {f.DutyName}",
 				"You are in this duty, so its plan is shown here. Leave the duty to browse other fights.");
-			DrawPlanRows(job, here);
+			DrawPlanRows(rotation, job, here, option, inDuty: true);
 			DrawOpenFolderRow(here);
 			return;
 		}
 
-		var all = BeirutaPlanCatalog.Folders(job);
+		var all = CdPlanCatalog.Folders(job);
 		if (all.Count == 0)
 		{
 			DrawPickerInfoRow("Plans", "No timelines found",
-				$"Put timeline folders in {BeirutaTimelineUpdater.TimelineRoot}.");
+				$"Put timeline folders in {TimelineUpdater.TimelineRoot}.");
 			DrawOpenFolderRow([]);
 			return;
 		}
@@ -351,14 +412,14 @@ public partial class MainWindow
 		_pickDuty = PickerCombo("Duty", "cdplan_duty", duties, _pickDuty);
 
 		var browsed = BrowsedFolders(job);
-		DrawPlanRows(job, browsed);
+		DrawPlanRows(rotation, job, browsed, option, inDuty: false);
 		DrawOpenFolderRow(browsed);
 	}
 
 	// Opens the shown duty's timeline folder, or the Timelines root when there isn't exactly one.
-	private static void DrawOpenFolderRow(List<BeirutaPlanFolder> folders)
+	private static void DrawOpenFolderRow(List<CdPlanFolder> folders)
 	{
-		var path = folders.Count == 1 ? folders[0].Path : BeirutaTimelineUpdater.TimelineRoot;
+		var path = folders.Count == 1 ? folders[0].Path : TimelineUpdater.TimelineRoot;
 		ImGui.Dummy(new Vector2(0f, M3.Space2));
 		if (M3Widgets.Button("##cdplan_open_folder", "Open Plan folder", M3ButtonStyle.Tonal, FontAwesomeIcon.FolderOpen))
 		{
@@ -375,10 +436,10 @@ public partial class MainWindow
 	}
 
 	// The folders of the duty picked in the browser (outside the duty).
-	private static List<BeirutaPlanFolder> BrowsedFolders(string job)
+	private static List<CdPlanFolder> BrowsedFolders(string job)
 	{
-		List<BeirutaPlanFolder> result = [];
-		foreach (var f in BeirutaPlanCatalog.Folders(job))
+		List<CdPlanFolder> result = [];
+		foreach (var f in CdPlanCatalog.Folders(job))
 		{
 			if (f.Expansion == _pickExpansion && f.Category == _pickCategory && f.DutyName == _pickDuty)
 			{
@@ -390,20 +451,66 @@ public partial class MainWindow
 	}
 
 	// One plan combo per timeline folder (a duty can have several, e.g. M12S part 1 and part 2).
-	private static void DrawPlanRows(string job, List<BeirutaPlanFolder> folders)
+	// Melee / casters: which shared Feint / Addle plan (M1 / M2, R2 / Fake Melee), or the job plan's own. Same setting as
+	// "Feint from" / "Addle from", shown here so it sits next to the job plan.
+	private static void DrawProfileRow(ICustomRotation rotation, string job, CdPlanFolder f, ICdPlanRotation option, bool inDuty)
 	{
-		var locked = BeirutaTimelineUpdater.PlanLocked;
+		var action = option.MitProfileAction;
+		var profiles = string.IsNullOrEmpty(action) ? [] : TimelineUpdater.ProfileNames(f.Path, action);
+		if (profiles.Count == 0 ||
+			FindRotationConfig(rotation, action == "Feint" ? FeintFromConfig : AddleFromConfig) is not RotationConfigCombo config)
+		{
+			return;
+		}
+
+		var labels = new string[config.EnumNames.Length];
+		var index = 0;
+		for (var i = 0; i < labels.Length; i++)
+		{
+			labels[i] = config.EnumNames[i] switch
+			{
+				"Auto" => profiles.Count > 1 ? $"Auto ({profiles[0]}, then {profiles[1]})" : $"Auto ({profiles[0]})",
+				"JobPlan" => $"{job} plan",
+				"FakeMelee" => "Fake Melee",
+				var n => n,
+			};
+			if (config.EnumNames[i].Equals(config.Value, StringComparison.OrdinalIgnoreCase))
+			{
+				index = i;
+			}
+		}
+
+		var usingNow = inDuty && TimelineUpdater.ActiveProfileName is { } active ? $" Now using {active}." : string.Empty;
+		var supporting = option.MitProfile == MitProfileChoice.JobPlan
+			? $"{action} comes from the {job} plan below."
+			: $"{action} comes from this shared plan; everything else from the {job} plan below. Auto starts on {profiles[0]} and moves on if another {(action == "Feint" ? "melee" : "caster")} already covered it.{usingNow}";
+		var width = ComboWidthFor(labels);
+		var row = M3SettingRow.Begin($"{action} plan", supporting, new Vector2(width, M3Widgets.ComboHeight));
+		ImGui.SetCursorScreenPos(row.ControlPosition);
+		if (M3Widgets.Combo($"##cdplan_profile_{f.Folder}", ref index, labels, width) && index < config.EnumNames.Length)
+		{
+			config.Value = config.EnumNames[index];
+		}
+
+		M3SettingRow.End(row);
+	}
+
+	private static void DrawPlanRows(ICustomRotation rotation, string job, List<CdPlanFolder> folders, ICdPlanRotation option, bool inDuty)
+	{
+		var locked = TimelineUpdater.PlanLocked;
 		foreach (var f in folders)
 		{
-			var title = folders.Count > 1 ? $"Plan ({f.Folder})" : "Plan";
+			var title = folders.Count > 1 ? $"{job} plan ({f.Folder})" : $"{job} plan";
+			DrawProfileRow(rotation, job, f, option, inDuty);
+
 			if (f.Plans.Count == 0)
 			{
-				DrawPickerInfoRow(title, $"No {job} plan", $"No *.{job}.plan.csv in {f.Folder}.");
+				DrawPickerInfoRow(title, "None", $"No *.{job}.plan.csv in {f.Folder}.");
 				continue;
 			}
 
 			var names = new string[f.Plans.Count];
-			var chosen = BeirutaTimelineUpdater.ChosenPlanFile(f.Path, job);
+			var chosen = TimelineUpdater.ChosenPlanFile(f.Path, job);
 			var index = 0;
 			for (var i = 0; i < f.Plans.Count; i++)
 			{
@@ -424,7 +531,7 @@ public partial class MainWindow
 			{
 				if (M3Widgets.Combo($"##cdplan_plan_{f.Folder}", ref index, names, width) && index < f.Plans.Count)
 				{
-					BeirutaTimelineUpdater.ChoosePlan(f.Path, job, f.Plans[index].FileName);
+					TimelineUpdater.ChoosePlan(f.Path, job, f.Plans[index].FileName);
 				}
 			}
 
@@ -469,7 +576,7 @@ public partial class MainWindow
 		return MathF.Min(width, M3SettingRow.MaxControlWidth());
 	}
 
-	private static List<string> Distinct(List<BeirutaPlanFolder> folders, Func<BeirutaPlanFolder, bool> where, Func<BeirutaPlanFolder, string> select)
+	private static List<string> Distinct(List<CdPlanFolder> folders, Func<CdPlanFolder, bool> where, Func<CdPlanFolder, string> select)
 	{
 		List<string> result = [];
 		foreach (var f in folders)

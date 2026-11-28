@@ -765,7 +765,7 @@ internal static class BeirutaDotValue
 	public static bool WorthBeforeDowntime(IBattleChara? target, float initial, float tick, float filler, float gcdCost = 1f)
 	{
 		if (target == null ||
-			Updaters.BeirutaTimelineUpdater.SecondsUntilDowntime(target.BaseId) is not { } left)
+			Updaters.TimelineUpdater.SecondsUntilDowntime(target.BaseId) is not { } left)
 		{
 			return true;
 		}

@@ -1,0 +1,16 @@
+# Default NIN
+Phase,Start,End,Action,Target
+P1,46.4,49.4,Shade Shift,
+P1,75.3,82.3,Hyosho Ranryu,
+P1,151.2,158.2,Suiton,
+P2,57.9,60.9,Shade Shift,
+P2,71.3,78.3,Suiton,
+P2,160.2,167.2,Hyosho Ranryu,
+P2,181.5,184.5,Shade Shift,
+P2,277.1,284.1,Suiton,
+P3,93.7,96.7,Shade Shift,
+P3,189.6,196.6,Raiton,
+P4,140.1,143.1,Shade Shift,
+P4,149.1,156.1,Suiton,
+P5,176.7,179.7,Shade Shift,
+P5,315.4,318.4,Shade Shift,

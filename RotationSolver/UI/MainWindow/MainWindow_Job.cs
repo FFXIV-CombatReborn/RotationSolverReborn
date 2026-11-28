@@ -493,7 +493,7 @@ public partial class MainWindow
 			}
 
 			// [CD Plan] settings live in their own section.
-			if (rotation is Updaters.IBeirutaTimelineOption && IsCdPlanConfig(config, set))
+			if (rotation is Updaters.ICdPlanRotation && IsCdPlanConfig(config, set))
 			{
 				continue;
 			}

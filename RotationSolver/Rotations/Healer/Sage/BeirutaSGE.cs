@@ -7,7 +7,7 @@ namespace RotationSolver.Rotations.Healer.Sage;
 [SourceCode(Path = "main/Rotations/Healer/Sage/BeirutaSGE.cs")]
 [ExtraRotation]
 
-public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, IBeirutaHealContext, IBeirutaHealer
+public sealed class BeirutaSGE : SageRotation, Updaters.ICdPlanRotation, IBeirutaHealContext, IBeirutaHealer
 {
 	#region Config Options
 
@@ -20,37 +20,37 @@ public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, 
 
 	public bool UseTimelinePlan => CdPlanFrom == BeirutaPlanSource.BuiltIn;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Show CD Plan timeline", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"A small window like the action timeline, showing the plan's actions coming up in the next 10s. It shows in a duty that has a CD plan; hover the window for lock / close.")]
 	public bool ShowPlanTimeline { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Show timeline messages in chat", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"Syncs and queued / skipped planned actions. Loading messages are always shown.")]
 	public bool ShowTimelineMessages { get; set; } = false;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Use recommended settings for the plan", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Use recommended settings for the plan", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"When a built-in plan loads, the settings it recommends are applied, like a preset. Changing a setting afterwards (e.g. your Ward Mode macro) works as usual.\n" +
 		"Your saved settings are not changed by the plan: they show as you set them and come back once the plan unloads or this is off.")]
 	public bool UsePlanSettings { get; set; } = true;
 
-	[RotationConfig(CombatType.PvE, Name = "    > Use planned Eukrasian Prognosis", Parent = nameof(CdPlanFrom), ParentValue = BeirutaSettingNames.BuiltInPlan, Tooltip =
+	[RotationConfig(CombatType.PvE, Name = "    > Use planned Eukrasian Prognosis", Parent = nameof(CdPlanFrom), ParentValue = CdPlanNames.BuiltInPlan, Tooltip =
 		"On: the plan's Eukrasian Prognosis are cast in their window, unless the party is already shielded.\n" +
 		"Off: they are skipped; the rotation shields as usual (still after a planned Zoe).")]
 	public bool UsePlannedShields { get; set; } = true;
 
-	IEnumerable<(uint ActionId, string Config)> Updaters.IBeirutaTimelineOption.OptionalPlannedActions =>
+	IEnumerable<(uint ActionId, string Config)> Updaters.ICdPlanRotation.OptionalPlannedActions =>
 	[
 		((uint)ActionID.EukrasianPrognosisIiPvE, nameof(UsePlannedShields)),
 	];
 
-	bool Updaters.IBeirutaTimelineOption.AllowPlannedAction(uint actionId) =>
+	bool Updaters.ICdPlanRotation.AllowPlannedAction(uint actionId) =>
 		UsePlannedShields ||
 		actionId is not ((uint)ActionID.EukrasianPrognosisPvE or (uint)ActionID.EukrasianPrognosisIiPvE);
 
 	protected override bool ShouldDelayCommandAction(IBaseAction action) =>
-		Updaters.BeirutaTimelineUpdater.HoldQueuedPlannedAction(action.ID);
+		Updaters.TimelineUpdater.HoldQueuedPlannedAction(action.ID);
 
-	bool Updaters.IBeirutaTimelineOption.RotationRunsPlannedAction(uint actionId) =>
+	bool Updaters.ICdPlanRotation.RotationRunsPlannedAction(uint actionId) =>
 		actionId is (uint)ActionID.EukrasianPrognosisPvE or (uint)ActionID.EukrasianPrognosisIiPvE;
 
 	#endregion
@@ -68,7 +68,7 @@ public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, 
 		"Pick a page to show its detailed settings. This only changes what is shown.")]
 	public BeirutaSettingsPage MoreSettings { get; set; } = BeirutaSettingsPage.Hide;
 
-	private bool WardActive => WardMode || Updaters.BeirutaTimelineUpdater.PlannedWardMode;
+	private bool WardActive => WardMode || Updaters.TimelineUpdater.PlannedWardMode;
 
 	bool IBeirutaHealContext.WardMode => WardActive;
 
@@ -345,9 +345,9 @@ public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, 
 	private bool HasKerachole => StatusHelper.PlayerHasStatus(true, StatusID.Kerachole);
 	private bool HasZoe => StatusHelper.PlayerHasStatus(true, StatusID.Zoe);
 
-	private bool PlannedZoe => Updaters.BeirutaTimelineUpdater.PlanContains(ZoePvE.ID);
+	private bool PlannedZoe => Updaters.TimelineUpdater.PlanContains(ZoePvE.ID);
 
-	private bool PlanOwnsPhysis => Updaters.BeirutaTimelineUpdater.PlanContains(PhysisIiPvE.ID);
+	private bool PlanOwnsPhysis => Updaters.TimelineUpdater.PlanContains(PhysisIiPvE.ID);
 
 	private const float PlannedZoeHoldSeconds = 8f;
 
@@ -355,7 +355,7 @@ public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, 
 		!HasZoe &&
 		ZoePvE.EnoughLevel &&
 		!ZoePvE.Cooldown.IsCoolingDown &&
-		Updaters.BeirutaTimelineUpdater.PlannedWithin(PlannedZoeHoldSeconds, ZoePvE.ID);
+		Updaters.TimelineUpdater.PlannedWithin(PlannedZoeHoldSeconds, ZoePvE.ID);
 
 	private bool ZoeReservedForPlan => HasZoe && PlannedZoe;
 
@@ -1209,7 +1209,7 @@ public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, 
 		KeracholePvE.EnoughLevel &&
 		((!(RhizomataPvE.EnoughLevel && !RhizomataPvE.Cooldown.IsCoolingDown) &&
 		  KeracholePvE.Cooldown.WillHaveOneCharge(AddersgallTime)) ||
-		 Updaters.BeirutaTimelineUpdater.PlannedWithin(PlannedKeracholeReserveSeconds, KeracholePvE.ID));
+		 Updaters.TimelineUpdater.PlannedWithin(PlannedKeracholeReserveSeconds, KeracholePvE.ID));
 
 	private const uint AddersgallDumpMaxMp = 9000;
 
@@ -1531,9 +1531,9 @@ public sealed class BeirutaSGE : SageRotation, Updaters.IBeirutaTimelineOption, 
 	private bool PlannedShieldDue =>
 		UsePlannedShields &&
 		!ShieldHeldForPlannedZoe &&
-		Updaters.BeirutaTimelineUpdater.PlannedWithin(0f, (uint)ActionID.EukrasianPrognosisIiPvE, (uint)ActionID.EukrasianPrognosisPvE) &&
+		Updaters.TimelineUpdater.PlannedWithin(0f, (uint)ActionID.EukrasianPrognosisIiPvE, (uint)ActionID.EukrasianPrognosisPvE) &&
 		(MostPartyLacksEukrasianShield() ||
-		 Updaters.BeirutaTimelineUpdater.PlannedForcedNow((uint)ActionID.EukrasianPrognosisIiPvE, (uint)ActionID.EukrasianPrognosisPvE));
+		 Updaters.TimelineUpdater.PlannedForcedNow((uint)ActionID.EukrasianPrognosisIiPvE, (uint)ActionID.EukrasianPrognosisPvE));
 
 	private IBaseAction? PlannedPrognosis =>
 		EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisIiPvE.IsEnabled ? EukrasianPrognosisIiPvE :
