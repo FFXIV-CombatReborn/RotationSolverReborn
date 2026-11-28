@@ -26,6 +26,12 @@ internal static class RotationUpdater
 
 	private static RotationType _lookupRotationType = RotationType.Reborn;
 
+	private sealed record FailedRotation(Job Job, CombatType CombatType, Type RotationType, Type[] GroupOrder);
+
+	private static readonly List<FailedRotation> _failedRotations = [];
+	private static long _failedRotationsRetryTick;
+	private const long FailedRotationRetryMs = 5000;
+
 	public static void LoadBuiltInRotations()
 	{
 		List<Assembly> assemblies = [typeof(RotationUpdater).Assembly];
@@ -139,6 +145,7 @@ internal static class RotationUpdater
 		}
 
 		CustomRotationsLookup = [];
+		_failedRotations.Clear();
 		return [.. result];
 	}
 
@@ -411,12 +418,16 @@ internal static class RotationUpdater
 		var curCombatType = DataCenter.IsPvP ? CombatType.PvP : CombatType.PvE;
 
 		var playerRotationType = DataCenter.PlayerRotationType;
-		if (playerRotationType != _lookupRotationType)
+		var lookupReset = playerRotationType != _lookupRotationType;
+		if (lookupReset)
 		{
 			_lookupRotationType = playerRotationType;
 			CustomRotationsLookup = [];
+			_failedRotations.Clear();
 		}
-		else if (DataCenter.CurrentRotation?.Job == nowJob && DataCenter.CurrentRotation?.GetAttributes()?.Type == curCombatType)
+
+		var recovered = RetryFailedRotations();
+		if (!lookupReset && !recovered && DataCenter.CurrentRotation?.Job == nowJob && DataCenter.CurrentRotation?.GetAttributes()?.Type == curCombatType)
 		{
 			return;
 		}
@@ -426,61 +437,42 @@ internal static class RotationUpdater
 			InitReferenceDict(nowJob);
 		}
 
-		if (CustomRotationsLookup.TryGetValue(nowJob, out var validCustomRotations))
+		if (CustomRotationsLookup.TryGetValue(nowJob, out var validCustomRotations)
+			&& validCustomRotations.TryGetValue(curCombatType, out var validCustomRotationsList)
+			&& validCustomRotationsList.Count > 0)
 		{
-			if (validCustomRotations.Count == 0)
+			var desiredRotationName = DataCenter.IsPvP ? Service.Config.PvPRotationChoice : Service.Config.RotationChoice;
+
+			var rotation = validCustomRotationsList[0];
+			foreach (var possibleRotation in validCustomRotationsList)
 			{
-				return;
-			}
-
-			if (validCustomRotations.TryGetValue(curCombatType, out var validCustomRotationsList))
-			{
-				if (validCustomRotationsList.Count == 0)
+				if (!possibleRotation.IsExtra())
 				{
-					if (DataCenter.CurrentRotation != null)
-					{
-						PluginLog.Verbose($"No valid {curCombatType} rotations found for {nowJob}");
-					}
-				}
-				else
-				{
-					var desiredRotationName = DataCenter.IsPvP ? Service.Config.PvPRotationChoice : Service.Config.RotationChoice;
-
-					var rotation = validCustomRotationsList[0];
-					foreach (var possibleRotation in validCustomRotationsList)
-					{
-						if (!possibleRotation.IsExtra())
-						{
-							rotation = possibleRotation;
-							break;
-						}
-					}
-
-					foreach (var possibleRotation in validCustomRotationsList)
-					{
-						if (MatchesRotationName(possibleRotation.GetType(), desiredRotationName))
-						{
-							rotation = possibleRotation;
-							break;
-						}
-					}
-
-					if (rotation != DataCenter.CurrentRotation)
-					{
-						ChangeRotation(rotation);
-					}
-
-					return;
+					rotation = possibleRotation;
+					break;
 				}
 			}
-			else
-			{
 
+			foreach (var possibleRotation in validCustomRotationsList)
+			{
+				if (MatchesRotationName(possibleRotation.GetType(), desiredRotationName))
+				{
+					rotation = possibleRotation;
+					break;
+				}
 			}
+
+			if (rotation != DataCenter.CurrentRotation)
+			{
+				ChangeRotation(rotation);
+			}
+
+			return;
 		}
-		else
-		{
 
+		if (DataCenter.CurrentRotation != null)
+		{
+			PluginLog.Verbose($"No valid {curCombatType} rotations found for {nowJob}");
 		}
 
 		DataCenter.CurrentRotation = null;
@@ -489,9 +481,70 @@ internal static class RotationUpdater
 
 	public static void ChangeRotation(ICustomRotation rotation)
 	{
-		rotation.OnTerritoryChanged();
 		DataCenter.CurrentRotation = rotation;
-		CurrentRotationActions = DataCenter.CurrentRotation?.AllActions ?? [];
+
+		try
+		{
+			rotation.OnTerritoryChanged();
+		}
+		catch (Exception ex)
+		{
+			PluginLog.Warning($"Failed on territory changed for {rotation.GetType().Name}: {ex.Message}");
+		}
+
+		CurrentRotationActions = rotation.AllActions;
+	}
+
+	private static bool RetryFailedRotations()
+	{
+		if (_failedRotations.Count == 0)
+		{
+			return false;
+		}
+
+		var now = Environment.TickCount64;
+		if (now < _failedRotationsRetryTick)
+		{
+			return false;
+		}
+
+		_failedRotationsRetryTick = now + FailedRotationRetryMs;
+
+		var recovered = false;
+		for (var i = _failedRotations.Count - 1; i >= 0; i--)
+		{
+			var failed = _failedRotations[i];
+			if (!CustomRotationsLookup.TryGetValue(failed.Job, out var rotationsByType)
+				|| !rotationsByType.TryGetValue(failed.CombatType, out var rotations))
+			{
+				_failedRotations.RemoveAt(i);
+				continue;
+			}
+
+			var rotation = GetRotation(failed.RotationType, reportFailure: false);
+			if (rotation == null)
+			{
+				continue;
+			}
+
+			var order = Array.IndexOf(failed.GroupOrder, failed.RotationType);
+			var index = rotations.Count;
+			for (var j = 0; j < rotations.Count; j++)
+			{
+				if (Array.IndexOf(failed.GroupOrder, rotations[j].GetType()) > order)
+				{
+					index = j;
+					break;
+				}
+			}
+
+			rotations.Insert(index, rotation);
+			_failedRotations.RemoveAt(i);
+			PluginLog.Verbose($"Created the rotation {failed.RotationType.Name} after an earlier failure.");
+			recovered = true;
+		}
+
+		return recovered;
 	}
 
 	internal static void UpdateRotationFrame()
@@ -504,20 +557,20 @@ internal static class RotationUpdater
 		DataCenter.CurrentRotation?.ProcessFrame();
 	}
 
-	private static ICustomRotation? GetRotation(Type? t)
+	private static ICustomRotation? GetRotation(Type t, bool reportFailure)
 	{
-		if (t == null)
-		{
-			return null;
-		}
-
 		try
 		{
 			return (ICustomRotation?)Activator.CreateInstance(t);
 		}
 		catch (Exception ex)
 		{
-			PluginLog.Error($"Failed to create the rotation: {t.Name}: {ex.Message}\n{ex.InnerException?.Message}");
+			if (reportFailure)
+			{
+				_ = BasicWarningHelper.AddSystemWarning($"Failed to create the rotation: {t.Name}");
+				PluginLog.Error($"Failed to create the rotation: {t.Name}: {ex.Message}\n{ex.InnerException?.Message}");
+			}
+
 			return null;
 		}
 	}
@@ -577,9 +630,11 @@ internal static class RotationUpdater
 						continue;
 					}
 
-					var possibleRotation = GetRotation(rotationType);
+					var possibleRotation = GetRotation(rotationType, reportFailure: true);
 					if (possibleRotation == null)
 					{
+						_failedRotations.Add(new FailedRotation(job, (CombatType)comType, rotationType, customRotationGroup.Rotations));
+						_failedRotationsRetryTick = Environment.TickCount64 + FailedRotationRetryMs;
 						continue;
 					}
 

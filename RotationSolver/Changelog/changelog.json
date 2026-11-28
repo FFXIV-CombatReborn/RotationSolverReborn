@@ -2,6 +2,22 @@
   "tagline": "Just minor updates til Evercold",
   "entries": [
     {
+      "version": "7.5.8.14",
+      "title": "Various fixes",
+      "date": "November 28, 2026",
+      "sections": [
+        {
+          "title": "Fixes",
+          "icon": "Bug",
+          "items": [
+            "Fixed rotations not loading properly.",
+            "The notice for crafters/gatherers actually shows now lol.",
+            "Fixed RSR's positional feedback system."
+          ]
+        }
+      ]
+    },
+    {
       "version": "7.5.8.11",
       "title": "Ground heal fixes",
       "date": "November 24, 2026",

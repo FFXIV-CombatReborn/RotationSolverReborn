@@ -13,8 +13,12 @@ internal static class ActionUpdater
 {
 	internal static DateTime AutoCancelTime { get; set; } = DateTime.MinValue;
 
-	private static readonly EzIPCDisposalToken[] _disposalTokens =
-		EzIPC.Init(typeof(ActionUpdater), "RotationSolverReborn.ActionUpdater");
+	private static readonly EzIPCDisposalToken[] _disposalTokens;
+
+	static ActionUpdater()
+	{
+		_disposalTokens = EzIPC.Init(typeof(ActionUpdater), "RotationSolverReborn.ActionUpdater");
+	}
 
 	internal static void Dispose() => IPCSubscriber_Common.DisposeAll(_disposalTokens);
 
