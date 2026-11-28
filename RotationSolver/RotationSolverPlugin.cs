@@ -98,13 +98,13 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 		var textureWarmupTask = Svc.Framework.Run(() =>
 		{
 			_ = ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
-		}, cancellationToken);
+		});
 
 		try
 		{
 			if (File.Exists(Svc.PluginInterface.ConfigFile.FullName))
 			{
-				var json = await File.ReadAllTextAsync(Svc.PluginInterface.ConfigFile.FullName, cancellationToken);
+				var json = await File.ReadAllTextAsync(Svc.PluginInterface.ConfigFile.FullName);
 				var oldConfigs = JsonConvert.DeserializeObject<Configs>(json) ?? new Configs();
 
 				var newConfigs = Configs.Migrate(oldConfigs);
@@ -126,47 +126,34 @@ public sealed class RotationSolverPlugin : IAsyncDalamudPlugin
 			Service.Config = new Configs();
 		}
 
-		await OtherConfiguration.InitAsync(cancellationToken);
+		await OtherConfiguration.InitAsync();
 
-		try
-		{
-			await textureWarmupTask;
-		}
-		catch (OperationCanceledException)
-		{
-			PluginLog.Warning("Texture warmup was canceled; continuing plugin load.");
-		}
+		await textureWarmupTask;
 
-		try
+		await Svc.Framework.Run(() =>
 		{
-			await Svc.Framework.Run(() =>
+			if (_disposed)
 			{
-				if (cancellationToken.IsCancellationRequested || _disposed)
-				{
-					return;
-				}
+				return;
+			}
 
-				MajorUpdater.Enable();
-				AutoAttackUpdater.Enable();
-				Watcher.Enable();
-				ActionQueueManager.Enable();
-				ActionManagerEx.Enable();
-				BMRPlanUpdater.Enable();
-				ActionContextMenu.Init();
-				HotbarHighlightManager.Init();
+			MajorUpdater.Enable();
+			AutoAttackUpdater.Enable();
+			Watcher.Enable();
+			ActionQueueManager.Enable();
+			ActionManagerEx.Enable();
+			BMRPlanUpdater.Enable();
+			ActionContextMenu.Init();
+			HotbarHighlightManager.Init();
 
-				Svc.DutyState.DutyStarted += DutyState_DutyStarted;
-				Svc.DutyState.DutyWiped += DutyState_DutyWiped;
-				Svc.DutyState.DutyCompleted += DutyState_DutyCompleted;
-				Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
-				ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
+			Svc.DutyState.DutyStarted += DutyState_DutyStarted;
+			Svc.DutyState.DutyWiped += DutyState_DutyWiped;
+			Svc.DutyState.DutyCompleted += DutyState_DutyCompleted;
+			Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
+			ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
 
-				ChangeUITranslation();
-			}, cancellationToken);
-		}
-		catch (OperationCanceledException)
-		{
-		}
+			ChangeUITranslation();
+		});
 	}
 
 	private static void BackupUnreadableConfig()

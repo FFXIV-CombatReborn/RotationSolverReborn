@@ -28,7 +28,7 @@ namespace RotationSolver.Engine.Data
 		[Description("Territory Condition")]
 		ConfigWindow_Territoryset,
 
-		[Description("No rotations loaded! Please check the rotations tab!")]
+		[Description("No rotations loaded.")]
 		ConfigWindow_NoRotation,
 
 		[Description("Current duty logic.")]
