@@ -430,7 +430,6 @@ internal static class RotationUpdater
 		{
 			if (validCustomRotations.Count == 0)
 			{
-				PluginLog.Warning($"No valid rotations found for {nowJob}");
 				return;
 			}
 
@@ -440,7 +439,7 @@ internal static class RotationUpdater
 				{
 					if (DataCenter.CurrentRotation != null)
 					{
-						PluginLog.Information($"No valid {curCombatType} rotations found for {nowJob}");
+						PluginLog.Verbose($"No valid {curCombatType} rotations found for {nowJob}");
 					}
 				}
 				else
